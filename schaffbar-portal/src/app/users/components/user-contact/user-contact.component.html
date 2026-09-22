@@ -1,0 +1,50 @@
+<h3 class="contact-header">
+  {{ 'users.pages.userDetails.headers.contactInformation' | translate }}
+  <button mat-icon-button type="button" aria-label="Edit contact" (click)="updateContact()" [disabled]="!readonly()">
+    <mat-icon>edit</mat-icon>
+  </button>
+</h3>
+
+<form [formGroup]="userContactForm">
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
+        <input
+          id="email"
+          matInput
+          [placeholder]="'users.shared.userProperties.email' | translate"
+          formControlName="email"
+          [readonly]="readonly()" />
+        @if (userContactForm.controls['email'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.email' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        @if (userContactForm.controls['email'].hasError('email')) {
+          <mat-error>{{ 'users.dialogs.addNewUser.errors.validEmail' | translate }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.phone' | translate }}</mat-label>
+        <input id="phone" matInput formControlName="phone" [readonly]="readonly()" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (!this.readonly()) {
+    <div class="actions">
+      <button mat-stroked-button mat-dialog-close (click)="onCancel()">
+        {{ 'shared.dialogs.actions.edit.cancel' | translate }}
+      </button>
+      <button mat-flat-button color="primary" type="submit" (click)="onSave()">
+        {{ 'shared.dialogs.actions.edit.confirm' | translate }}
+      </button>
+    </div>
+  }
+</form>

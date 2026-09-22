@@ -1,0 +1,46 @@
+.tool-rfid-reader-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tool-rfid-reader-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.col {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.tool-rfid-reader-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.option-content {
+  display: flex;
+  gap: 1rem;
+}
+
+.option-content-already-assigned {
+  font-style: italic;
+  opacity: 0.6;
+}

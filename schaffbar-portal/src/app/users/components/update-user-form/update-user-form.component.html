@@ -1,0 +1,78 @@
+<h2 mat-dialog-title>{{ 'users.dialogs.editUser.title' | translate }}</h2>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content [formGroup]="userForm">
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
+        <input
+          id="firstName"
+          matInput
+          [placeholder]="'users.shared.userProperties.firstName' | translate"
+          formControlName="firstName" />
+        @if (userForm.controls['firstName'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.firstName' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
+        <input
+          id="lastName"
+          matInput
+          [placeholder]="'users.shared.userProperties.lastName' | translate"
+          formControlName="lastName" />
+        @if (userForm.controls['lastName'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.lastName' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
+        <input
+          id="dateOfBirth"
+          matInput
+          readonly
+          [placeholder]="'users.shared.userProperties.dateOfBirth' | translate"
+          formControlName="dateOfBirth"
+          [min]="minDate"
+          [max]="maxDate"
+          [matDatepicker]="picker" />
+        @if (userForm.controls['dateOfBirth'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.dateOfBirth' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker startView="multi-year" disabled="false"></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-checkbox formControlName="clubMember">
+        {{ 'users.shared.userProperties.clubMember' | translate }}
+      </mat-checkbox>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-stroked-button mat-dialog-close>
+    {{ 'users.dialogs.editUser.actions.cancel' | translate }}
+  </button>
+  <button mat-flat-button color="primary" type="submit" (click)="save()">
+    {{ 'users.dialogs.editUser.actions.confirm' | translate }}
+  </button>
+</mat-dialog-actions>

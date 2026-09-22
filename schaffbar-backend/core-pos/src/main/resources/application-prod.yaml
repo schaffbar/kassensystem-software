@@ -1,0 +1,5 @@
+application:
+  cors:
+    allowed-origins: http://odoo:8080
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"

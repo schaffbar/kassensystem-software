@@ -1,0 +1,53 @@
+@if (selectedTool(); as tool) {
+  <div class="tool-detail-header">
+    <div class="tool-detail-header__title">
+      <h1>{{ tool.name }}</h1>
+      <button matIconButton color="primary" (click)="reloadTool()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center" dynamicHeight>
+    <mat-tab [label]="'tools.tabGroups.toolDetails.detailsTab' | translate">
+      <div class="tab-content--details">
+        <div class="tab-content--details__left">
+          <schbar-tool-detail-info [tool]="tool" (toolUpdated)="onToolUpdated($event)" />
+        </div>
+        <div class="tab-content--details__right">
+          <schbar-tool-instructors
+            [toolId]="tool.id"
+            [instructorIds]="tool.instructors ?? []"
+            [allUsers]="allUsers()"
+            (instructorsAdded)="onInstructorsAdded($event)"
+            (instructorsRemoved)="onInstructorsRemoved($event)" />
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab [label]="'tools.tabGroups.toolDetails.certificationsTab' | translate">
+      <div class="tab-content--wide">
+        <schbar-tool-certifications
+          [toolId]="tool.id"
+          [certifications]="toolCertifications()"
+          [allUsers]="allUsers()"
+          [instructorIds]="tool.instructors ?? []"
+          (batchCreate)="onBatchCreateCertifications($event)"
+          (deleteCertification)="onDeleteCertification($event)" />
+      </div>
+    </mat-tab>
+    <mat-tab [label]="'tools.tabGroups.toolDetails.configurationTab' | translate">
+      <div class="tab-content--configuration">
+        <schbar-tool-rfid-reader-assignment
+          [tool]="tool"
+          [rfidReaders]="allRfidReaders()"
+          [assignedRfidReaderIds]="assignedRfidReaderIds()"
+          (rfidReaderChanged)="onRfidReaderChanged($event)"
+          (rfidReaderCleared)="onRfidReaderCleared($event)" />
+        <schbar-tool-wlan-relais
+          [tool]="tool"
+          (wlanRelaisUpdated)="onWlanRelaisUpdated($event)"
+          (wlanRelaisCleared)="onWlanRelaisCleared($event)" />
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+}

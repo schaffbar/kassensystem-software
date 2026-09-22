@@ -1,0 +1,48 @@
+.user-detail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.user-detail-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-detail-header-title-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-detail-header-title-chips {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-detail-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tab-content {
+  padding: 1rem;
+}
+
+.tab-content--split {
+  padding: 1rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+
+  > * {
+    flex: 1;
+    min-width: 0;
+  }
+}

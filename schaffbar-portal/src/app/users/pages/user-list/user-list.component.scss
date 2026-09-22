@@ -1,0 +1,50 @@
+.user-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.user-list-header__title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-list-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-list-filter {
+  display: flex;
+  max-width: 500px;
+}
+
+// styling columns using their auto-generated column names
+.mat-column-actions {
+  width: 100px;
+  text-align: center;
+}
+
+// needed for selecting current row
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  border-color: currentColor;
+}
+
+// TODO: check if this is needed
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+.full-width-table {
+  width: 100%;
+}

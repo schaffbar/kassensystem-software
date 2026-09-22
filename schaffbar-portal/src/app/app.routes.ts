@@ -1,0 +1,64 @@
+import { Routes } from '@angular/router';
+
+import { NotFoundComponent } from './core/not-found/not-found.component';
+import { DashboardComponent } from './dashboard/pages/dashboard/dashboard.component';
+import { RfidReaderDetailComponent } from './rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.component';
+import { RfidReaderListComponent } from './rfid-readers/pages/rfid-reader-list/rfid-reader-list.component';
+import { RfidTagListComponent } from './rfid-tags/pages/rfid-tag-list/rfid-tag-list.component';
+import { ToolDetailComponent } from './tools/pages/tool-detail/tool-detail.component';
+import { ToolListComponent } from './tools/pages/tool-list/tool-list.component';
+import { UserDetailComponent } from './users/pages/user-detail/user-detail.component';
+import { UserListComponent } from './users/pages/user-list/user-list.component';
+
+export const ROUTE = {
+  DASHBOARD: 'dashboard',
+  ABOUT: 'about',
+  USERS: 'users',
+  TOOLS: 'tools',
+  RFID_READERS: 'rfid-readers',
+  RFID_TAGS: 'rfid-tags',
+};
+
+export const routes: Routes = [
+  {
+    path: ROUTE.DASHBOARD,
+    component: DashboardComponent,
+  },
+  {
+    path: ROUTE.USERS,
+    component: UserListComponent,
+  },
+  {
+    path: `${ROUTE.USERS}/:id`,
+    component: UserDetailComponent,
+  },
+  {
+    path: ROUTE.TOOLS,
+    component: ToolListComponent,
+  },
+  {
+    path: `${ROUTE.TOOLS}/:id`,
+    component: ToolDetailComponent,
+  },
+  {
+    path: ROUTE.RFID_READERS,
+    component: RfidReaderListComponent,
+  },
+  {
+    path: `${ROUTE.RFID_READERS}/:id`,
+    component: RfidReaderDetailComponent,
+  },
+  {
+    path: ROUTE.RFID_TAGS,
+    component: RfidTagListComponent,
+  },
+  {
+    path: '',
+    redirectTo: ROUTE.DASHBOARD,
+    pathMatch: 'full',
+  },
+  {
+    path: '**',
+    component: NotFoundComponent,
+  },
+];

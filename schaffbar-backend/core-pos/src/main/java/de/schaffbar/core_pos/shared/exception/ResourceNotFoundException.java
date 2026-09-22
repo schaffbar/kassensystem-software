@@ -1,0 +1,82 @@
+package de.schaffbar.core_pos.shared.exception;
+
+import java.io.Serial;
+
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.MacAddress;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.id.ToolCertificationId;
+import de.schaffbar.core_pos.shared.id.ToolId;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+public class ResourceNotFoundException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private static final String MESSAGE = "Resource %s [id: %s] does not exist!";
+
+    @Getter
+    private final Resource resource;
+
+    private ResourceNotFoundException(Resource resource, String id) {
+        super(buildExceptionMessage(resource, id), null);
+        this.resource = resource;
+    }
+
+    // ------------------------------------------------------------------------
+    // static factories
+
+    public static ResourceNotFoundException customer(CustomerId id) {
+        return new ResourceNotFoundException(Resource.CUSTOMER, id.getValue().toString());
+    }
+
+    public static ResourceNotFoundException tool(ToolId id) {
+        return new ResourceNotFoundException(Resource.TOOL, id.getValue().toString());
+    }
+
+    public static ResourceNotFoundException rfidReader(RfidReaderId id) {
+        return new ResourceNotFoundException(Resource.RFID_READER, id.getValue().toString());
+    }
+
+    // TODO: Consider using a more specific exception for RFID reader MAC address not found
+    public static ResourceNotFoundException rfidReader(MacAddress macAddress) {
+        return new ResourceNotFoundException(Resource.RFID_READER, macAddress.getValue());
+    }
+
+    public static ResourceNotFoundException rfidTag(RfidTagId id) {
+        return new ResourceNotFoundException(Resource.RFID_TAG, id.getValue());
+    }
+
+    public static ResourceNotFoundException toolCertification(ToolCertificationId id) {
+        return new ResourceNotFoundException(Resource.TOOL_CERTIFICATION, id.getValue().toString());
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static String buildExceptionMessage(Resource resource, String id) {
+        return String.format(MESSAGE, resource.getValue(), id);
+    }
+
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public enum Resource {
+
+        CUSTOMER("customer"), //
+        TOOL("tool"), //
+        TOOL_USAGE("tool usage"), //
+        TOOL_CERTIFICATION("tool certification"), //
+        RFID_READER("RFID reader"), //
+        RFID_TAG("RFID tag"), //
+        WORKSHOP_SESSION("Workshop session"), //
+        WORKSHOP_USAGE("Workshop usage");
+
+        private final String value;
+
+    }
+
+}

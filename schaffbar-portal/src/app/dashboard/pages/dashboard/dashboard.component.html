@@ -1,0 +1,12 @@
+<h1>{{ 'dashboard.title' | translate }}</h1>
+
+<div class="dashboard-widgets">
+  <schbar-active-users-widget
+    [activeUsers]="store.entities()"
+    (reload)="reloadActiveUsers()"
+    (userSelected)="openUserSession($event)" />
+  <schbar-active-tools-widget
+    [tools]="toolsStore.entities()"
+    [activeTools]="store.activeTools()"
+    (reload)="reloadActiveTools()" />
+</div>

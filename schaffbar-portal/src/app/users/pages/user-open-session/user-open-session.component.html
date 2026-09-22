@@ -1,0 +1,27 @@
+@if (detailsStore.openSession(); as openSession) {
+  @if (detailsStore.slots().length > 0) {
+    <schbar-workshop-usage-summary
+      class="workshop-usage-container"
+      [usages]="detailsStore.slots()"
+      [totalTimeInMinutes]="detailsStore.totalWorkshopTimeInMinutes()"
+      [totalUnitsUsed]="detailsStore.totalWorkshopUnitsUsed()" />
+
+    @if (detailsStore.toolUsageSummaries().length > 0) {
+      <div class="tool-usage-container">
+        <h2>{{ 'users.pages.openSession.headers.toolUsage' | translate }}</h2>
+
+        @for (summary of detailsStore.toolUsageSummaries(); track summary.toolId) {
+          <schbar-tool-usage-summary [summary]="summary" />
+        }
+      </div>
+    }
+
+    <button class="close-button" mat-flat-button color="primary" (click)="closeSession()">
+      {{ 'users.actions.closeSession' | translate }}
+    </button>
+  } @else {
+    <p>{{ 'users.pages.openSession.messages.noSlots' | translate }}</p>
+  }
+} @else {
+  <p>{{ 'users.pages.openSession.messages.noOpenSession' | translate }}</p>
+}

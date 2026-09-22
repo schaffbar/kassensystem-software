@@ -1,0 +1,114 @@
+<h3 class="address-header">
+  {{ 'users.pages.userDetails.headers.address' | translate }}
+  <button mat-icon-button type="button" aria-label="Edit address" (click)="updateAddress()" [disabled]="!readonly()">
+    <mat-icon>edit</mat-icon>
+  </button>
+</h3>
+
+<form [formGroup]="userAddressForm">
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.addressLine1' | translate }}</mat-label>
+        <input
+          id="addressLine1"
+          matInput
+          [placeholder]="'users.shared.userProperties.addressLine1' | translate"
+          formControlName="addressLine1"
+          [readonly]="readonly()" />
+        @if (userAddressForm.controls['addressLine1'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.addressLine1' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.addressLine2' | translate }}</mat-label>
+        <input id="addressLine2" matInput formControlName="addressLine2" [readonly]="readonly()" />
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.postalCode' | translate }}</mat-label>
+        <input
+          id="postalCode"
+          matInput
+          #postalCode
+          maxlength="5"
+          [placeholder]="'users.shared.userProperties.postalCode' | translate"
+          formControlName="postalCode"
+          [readonly]="readonly()" />
+        <mat-hint [align]="'end'">{{ postalCode.value.length }} / 5</mat-hint>
+        @if (userAddressForm.controls['postalCode'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.postalCode' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        @if (
+          userAddressForm.controls['postalCode'].hasError('minlength') ||
+          userAddressForm.controls['postalCode'].hasError('maxlength')
+        ) {
+          <mat-error>
+            {{ 'users.shared.userProperties.postalCode' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.exactLength' | translate: { length: 5 } }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.city' | translate }}</mat-label>
+        <input
+          id="city"
+          matInput
+          [placeholder]="'users.shared.userProperties.city' | translate"
+          formControlName="city"
+          [readonly]="readonly()" />
+        @if (userAddressForm.controls['city'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.city' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'users.shared.userProperties.country' | translate }}</mat-label>
+        <input
+          id="country"
+          matInput
+          [placeholder]="'users.shared.userProperties.country' | translate"
+          formControlName="country"
+          [readonly]="readonly()" />
+        @if (userAddressForm.controls['country'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.country' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (!this.readonly()) {
+    <div class="actions">
+      <button mat-stroked-button mat-dialog-close (click)="onCancel()">
+        {{ 'shared.dialogs.actions.edit.cancel' | translate }}
+      </button>
+      <button mat-flat-button color="primary" type="submit" (click)="onSave()">
+        {{ 'shared.dialogs.actions.edit.confirm' | translate }}
+      </button>
+    </div>
+  }
+</form>

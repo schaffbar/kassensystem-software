@@ -1,0 +1,53 @@
+<h3 class="tool-rfid-reader-header">
+  {{ 'tools.pages.toolDetails.headers.rfidReaderAssignment' | translate }}
+  @if (tool().rfidReaderId) {
+    <button
+      mat-icon-button
+      color="warn"
+      (click)="onClear()"
+      [matTooltip]="'tools.tooltips.clearRfidReader' | translate">
+      <mat-icon>link_off</mat-icon>
+    </button>
+  }
+</h3>
+
+<div class="tool-rfid-reader-content">
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-label>{{ 'tools.shared.toolProperties.rfidReader' | translate }}</mat-label>
+        <mat-select
+          id="rfidReaderId"
+          [ngModel]="selectedRfidReaderId()"
+          (ngModelChange)="selectedRfidReaderId.set($event)">
+          @for (rfidReader of filteredRfidReaders(); track rfidReader.id) {
+            <mat-option [value]="rfidReader.id">
+              <div class="option-content">
+                <span>{{ rfidReader.name }}</span>
+                @if (isAssigned(rfidReader.id)) {
+                  <span class="option-content-already-assigned">
+                    ({{ 'tools.pages.toolDetails.messages.alreadyAssigned' | translate }})
+                  </span>
+                }
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (isSelectedAssigned()) {
+        <mat-error>{{ 'tools.pages.toolDetails.messages.alreadyAssignedError' | translate }}</mat-error>
+      }
+    </div>
+  </div>
+
+  @if (isDirty() && !isSelectedAssigned()) {
+    <div class="tool-rfid-reader-actions">
+      <button mat-stroked-button (click)="onCancel()">
+        {{ 'shared.dialogs.actions.edit.cancel' | translate }}
+      </button>
+      <button mat-flat-button color="primary" (click)="onSave()">
+        {{ 'shared.dialogs.actions.edit.confirm' | translate }}
+      </button>
+    </div>
+  }
+</div>

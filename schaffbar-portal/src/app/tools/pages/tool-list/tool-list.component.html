@@ -1,0 +1,88 @@
+<div class="tool-list-header">
+  <div class="tool-list-header__title">
+    <h1>{{ 'tools.title' | translate }} ({{ toolsCount() }})</h1>
+    <button matIconButton color="primary" (click)="reloadTools()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+  <div class="tool-list-header__actions">
+    <button mat-flat-button color="primary" (click)="newToolDialog()">{{ 'tools.actions.addTool' | translate }}</button>
+  </div>
+</div>
+
+<div class="mat-elevation-z2">
+  <table mat-table class="full-width-table" [dataSource]="dataSource()" matSort>
+    <!-- Columns -->
+    <ng-container matColumnDef="certificationRequirement">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
+      <td mat-cell *matCellDef="let row">
+        <span class="certification-dot certification-dot--{{ row.certificationRequirement | lowercase }}"></span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'tools.shared.toolProperties.name' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="area">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'tools.shared.toolProperties.area' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ 'tools.areas.' + row.area | translate }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ 'tools.shared.toolProperties.description' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="rfidReader">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ 'tools.shared.toolProperties.rfidReader' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let row">
+        @if (row.rfidReaderId) {
+          <mat-icon>check</mat-icon>
+        } @else {
+          {{ '-' }}
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="wlanRelaisType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ 'tools.shared.toolProperties.wlanRelaisType' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let row">
+        @if (row.wlanRelaisType) {
+          {{ 'tools.wlanRelaisTypes.' + row.wlanRelaisType | translate }}
+        } @else {
+          {{ '-' }}
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'shared.table.actionsColumn' | translate }}</th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button type="button" color="warn" (click)="deleteToolDialog($event, row)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Header and Row Declarations -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row (click)="toolDetails(row)" *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator
+    #paginator
+    [length]="toolsCount()"
+    [pageIndex]="0"
+    [pageSize]="10"
+    [pageSizeOptions]="[5, 10, 20]"
+    aria-label="Select page">
+  </mat-paginator>
+</div>

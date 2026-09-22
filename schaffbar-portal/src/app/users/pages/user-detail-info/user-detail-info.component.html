@@ -1,0 +1,7 @@
+<div class="user-contact">
+  <schbar-user-contact [user]="user()" (contactChanged)="onContactChanged($event)" />
+</div>
+
+<div class="user-address">
+  <schbar-user-address [userAddress]="user().address" (addressChanged)="onAddressChanged($event)" />
+</div>

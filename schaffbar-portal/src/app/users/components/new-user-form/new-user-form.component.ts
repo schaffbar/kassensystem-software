@@ -1,0 +1,62 @@
+import { Component, inject } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatInputModule } from '@angular/material/input';
+
+import { TranslatePipe } from '@ngx-translate/core';
+
+@Component({
+  selector: 'schbar-new-user-form',
+  templateUrl: './new-user-form.component.html',
+  styleUrl: './new-user-form.component.scss',
+  imports: [
+    ReactiveFormsModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatDatepickerModule,
+    TranslatePipe,
+  ],
+  providers: [provideNativeDateAdapter()],
+})
+export class NewUserFormComponent {
+  private fb = inject(NonNullableFormBuilder);
+  private dialogRef = inject(MatDialogRef<NewUserFormComponent>);
+
+  // TODO: add validators for email, phone, postal code, ...
+  protected userForm = this.fb.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    dateOfBirth: [null, Validators.required],
+    clubMember: [false],
+    email: ['', [Validators.required, Validators.email]],
+    phone: [null],
+    addressLine1: ['', Validators.required],
+    addressLine2: [null],
+    postalCode: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(5)]],
+    city: ['', Validators.required],
+    country: ['Deutschland', Validators.required],
+  });
+
+  // TODO: replace with a moment.js implementation
+  private readonly _currentYear = new Date().getFullYear();
+  readonly minDate = new Date(this._currentYear - 100, 0, 1);
+  readonly maxDate = new Date(this._currentYear - 1, 11, 31);
+
+  protected save() {
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      return;
+    }
+
+    this.dialogRef.close(this.userForm.value);
+  }
+}

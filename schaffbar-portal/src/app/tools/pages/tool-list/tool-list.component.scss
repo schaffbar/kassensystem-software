@@ -1,0 +1,56 @@
+.tool-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 1rem;
+}
+
+.tool-list-header__title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tool-list-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+// styling columns using their auto-generated column names
+.mat-column-certificationRequirement {
+  width: 40px;
+  text-align: center;
+}
+
+.mat-column-actions {
+  width: 100px;
+  text-align: center;
+}
+
+.certification-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
+  &--yellow {
+    background-color: #fbc02d;
+  }
+
+  &--red {
+    background-color: #d32f2f;
+  }
+}
+
+// needed for selecting current row
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  border-color: currentColor;
+}

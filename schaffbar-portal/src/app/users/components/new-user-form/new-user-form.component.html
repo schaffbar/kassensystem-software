@@ -1,0 +1,202 @@
+<h2 mat-dialog-title>{{ 'users.dialogs.addNewUser.title' | translate }}</h2>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content [formGroup]="userForm">
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
+        <input
+          id="firstName"
+          matInput
+          [placeholder]="'users.shared.userProperties.firstName' | translate"
+          formControlName="firstName" />
+        @if (userForm.controls['firstName'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.firstName' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
+        <input
+          id="lastName"
+          matInput
+          [placeholder]="'users.shared.userProperties.lastName' | translate"
+          formControlName="lastName" />
+        @if (userForm.controls['lastName'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.lastName' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
+        <input
+          id="dateOfBirth"
+          matInput
+          readonly
+          [placeholder]="'users.shared.userProperties.dateOfBirth' | translate"
+          formControlName="dateOfBirth"
+          [min]="minDate"
+          [max]="maxDate"
+          [matDatepicker]="picker" />
+        @if (userForm.controls['dateOfBirth'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.dateOfBirth' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker startView="multi-year" disabled="false"></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-checkbox formControlName="clubMember">
+        {{ 'users.shared.userProperties.clubMember' | translate }}
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <h3>{{ 'users.dialogs.addNewUser.headers.contactInformation' | translate }}</h3>
+
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
+        <input
+          id="email"
+          matInput
+          [placeholder]="'users.shared.userProperties.email' | translate"
+          formControlName="email" />
+        @if (userForm.controls['email'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.email' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        @if (userForm.controls['email'].hasError('email')) {
+          <mat-error>{{ 'users.dialogs.addNewUser.errors.validEmail' | translate }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.phone' | translate }}</mat-label>
+        <input id="phone" matInput formControlName="phone" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <h3>{{ 'users.dialogs.addNewUser.headers.billingInformation' | translate }}</h3>
+
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.addressLine1' | translate }}</mat-label>
+        <input
+          id="addressLine1"
+          matInput
+          [placeholder]="'users.shared.userProperties.addressLine1' | translate"
+          formControlName="addressLine1" />
+        @if (userForm.controls['addressLine1'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.addressLine1' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.addressLine2' | translate }}</mat-label>
+        <input id="addressLine2" matInput formControlName="addressLine2" />
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.postalCode' | translate }}</mat-label>
+        <input
+          id="postalCode"
+          matInput
+          #postalCode
+          maxlength="5"
+          [placeholder]="'users.shared.userProperties.postalCode' | translate"
+          formControlName="postalCode" />
+        <mat-hint [align]="'end'">{{ postalCode.value.length }} / 5</mat-hint>
+        @if (userForm.controls['postalCode'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.postalCode' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+        @if (
+          userForm.controls['postalCode'].hasError('minlength') || userForm.controls['postalCode'].hasError('maxlength')
+        ) {
+          <mat-error>
+            {{ 'users.shared.userProperties.postalCode' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.exactLength' | translate: { length: 5 } }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.city' | translate }}</mat-label>
+        <input
+          id="city"
+          matInput
+          [placeholder]="'users.shared.userProperties.city' | translate"
+          formControlName="city" />
+        @if (userForm.controls['city'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.city' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'users.shared.userProperties.country' | translate }}</mat-label>
+        <input
+          id="country"
+          matInput
+          [placeholder]="'users.shared.userProperties.country' | translate"
+          formControlName="country" />
+        @if (userForm.controls['country'].hasError('required')) {
+          <mat-error>
+            {{ 'users.shared.userProperties.country' | translate }}
+            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-stroked-button mat-dialog-close>
+    {{ 'users.dialogs.addNewUser.actions.cancel' | translate }}
+  </button>
+  <button mat-flat-button color="primary" type="submit" (click)="save()">
+    {{ 'users.dialogs.addNewUser.actions.confirm' | translate }}
+  </button>
+</mat-dialog-actions>

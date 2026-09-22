@@ -1,0 +1,367 @@
+{
+  "shared": {
+    "table": {
+      "actionsColumn": "Actions"
+    },
+    "dialogs": {
+      "actions": {
+        "delete": {
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        },
+        "edit": {
+          "confirm": "Save",
+          "cancel": "Cancel"
+        }
+      },
+      "errors": {
+        "required": "is required"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "tools": "Tools",
+    "rfidTags": "RFID Tags",
+    "rfidReaders": "RFID Readers"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "widgets": {
+      "activeUsers": {
+        "title": "Active Users in Workshop",
+        "table": {
+          "name": "Name",
+          "entryTime": "Entry Time",
+          "duration": "Duration"
+        }
+      },
+      "activeTools": {
+        "title": "Tool Status",
+        "table": {
+          "name": "Name",
+          "user": "User"
+        }
+      }
+    }
+  },
+  "users": {
+    "title": "Users",
+    "actions": {
+      "addUser": "Add User",
+      "search": "Search",
+      "assignTempRfidTag": "Assign Temporary RFID Tag",
+      "assignFixedRfidTag": "Assign Fixed RFID Tag",
+      "unassignRfidTag": "Unassign RFID Tag",
+      "closeSession": "Close Session",
+      "toolCertifications": {
+        "pause": "Pause Certification",
+        "reactivate": "Reactivate Certification",
+        "revoke": "Revoke Certification",
+        "delete": "Delete Certification"
+      }
+    },
+    "dialogs": {
+      "addNewUser": {
+        "title": "Add New User",
+        "headers": {
+          "contactInformation": "Contact Information",
+          "billingInformation": "Billing Information"
+        },
+        "actions": {
+          "confirm": "Add User",
+          "cancel": "Cancel"
+        },
+        "errors": {
+          "required": "is required",
+          "validEmail": "Please enter a valid email address",
+          "exactLength": "must be exactly {{length}} characters long"
+        }
+      },
+      "editUser": {
+        "title": "Edit User",
+        "actions": {
+          "confirm": "Edit",
+          "cancel": "Cancel"
+        }
+      },
+      "deleteUser": {
+        "title": "Delete User",
+        "message": "Are you sure you want to delete this user?",
+        "actions": {
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "certifications": {
+        "pauseCertification": {
+          "title": "Pause Certification",
+          "message": "Are you sure you want to pause this certification?",
+          "confirm": "Pause"
+        },
+        "reactivateCertification": {
+          "title": "Reactivate Certification",
+          "message": "Are you sure you want to reactivate this certification?",
+          "confirm": "Reactivate"
+        },
+        "revokeCertification": {
+          "title": "Revoke Certification",
+          "message": "Are you sure you want to revoke this certification?",
+          "confirm": "Revoke"
+        },
+        "deleteCertification": {
+          "title": "Delete Certification",
+          "message": "Are you sure you want to delete this certification?"
+        }
+      }
+    },
+    "tables": {
+      "openSession": {
+        "durationColumn": "Duration (min)",
+        "unitsUsedColumn": "Units",
+        "workshopUsage": {
+          "entryTimeColumn": "Entry Time",
+          "exitTimeColumn": "Exit Time"
+        },
+        "toolUsage": {
+          "startTimeColumn": "Start Time",
+          "endTimeColumn": "End Time"
+        }
+      },
+      "toolCertifications": {
+        "toolNameColumn": "Tool",
+        "statusColumn": "Status",
+        "certifiedAtColumn": "Certified At",
+        "statuses": {
+          "ACTIVE": "Active",
+          "PAUSED": "Paused",
+          "REVOKED": "Revoked"
+        }
+      }
+    },
+    "tabGroups": {
+      "userDetails": {
+        "detailsTab": "Details",
+        "openSessionTab": "Open Session"
+      }
+    },
+    "chips": {
+      "userDetails": {
+        "clubMember": "Club Member",
+        "rfidTags": {
+          "fixed": "Fixed",
+          "temporary": "Temporary",
+          "waiting": "Waiting",
+          "noRfidTag": "No RFID Tag"
+        },
+        "ageGroup": {
+          "under_16": "Under 16",
+          "under_18": "Under 18",
+          "adult": "Adult"
+        }
+      },
+      "openSession": {
+        "toolUsage": {
+          "active": "Active"
+        }
+      }
+    },
+    "pages": {
+      "userDetails": {
+        "headers": {
+          "contactInformation": "Contact Information",
+          "address": "Address",
+          "toolCertifications": "Tool Certifications"
+        },
+        "messages": {
+          "noCertifications": "No certifications for this user."
+        }
+      },
+      "openSession": {
+        "headers": {
+          "workshopTime": "Workshop Time",
+          "toolUsage": "Tool Usage",
+          "toolUsageTotal": "Tool Usage Total",
+          "total": "Workshop Time Total",
+          "totalDurationSuffix": "Minutes",
+          "totalUnitsSuffix": "Units"
+        },
+        "messages": {
+          "noSlots": "No slots available for this session.",
+          "noOpenSession": "No open session for this user ."
+        }
+      }
+    },
+    "shared": {
+      "userProperties": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "dateOfBirth": "Date of Birth",
+        "clubMember": "Club Member",
+        "email": "Email",
+        "phone": "Phone",
+        "addressLine1": "Address",
+        "addressLine2": "Address Line 2",
+        "postalCode": "Postal Code",
+        "city": "City",
+        "country": "Country"
+      }
+    }
+  },
+  "tools": {
+    "title": "Tools",
+    "actions": {
+      "addTool": "Add Tool"
+    },
+    "dialogs": {
+      "addTool": {
+        "title": "Add New Tool",
+        "errors": {
+          "nameExists": "A tool with this name already exists."
+        }
+      },
+      "deleteTool": {
+        "title": "Delete Tool",
+        "message": "Are you sure you want to delete this tool?"
+      },
+      "clearRfidReader": {
+        "title": "Clear RFID Reader Assignment",
+        "message": "Are you sure you want to clear the RFID reader assignment?"
+      }
+    },
+    "tooltips": {
+      "clearRfidReader": "Clear RFID Reader Assignment"
+    },
+    "tables": {
+      "toolCertifications": {
+        "userNameColumn": "User",
+        "statusColumn": "Status",
+        "certifiedAtColumn": "Certified At"
+      }
+    },
+    "wlanRelaisTypes": {
+      "SHELLY_1": "Shelly 1",
+      "SHELLY_2": "Shelly 2",
+      "SHELLY_PRO": "Shelly Pro"
+    },
+    "areas": {
+      "HOLZ": "Wood",
+      "METALL": "Metal",
+      "KREATIV": "Creative",
+      "FABLAB": "FabLab"
+    },
+    "certificationRequirements": {
+      "YELLOW": "Advisory (Yellow)",
+      "RED": "Required (Red)"
+    },
+    "tabGroups": {
+      "toolDetails": {
+        "detailsTab": "Details",
+        "certificationsTab": "Certifications",
+        "configurationTab": "Configuration"
+      }
+    },
+    "pages": {
+      "toolDetails": {
+        "headers": {
+          "toolInformation": "Tool Information",
+          "rfidReaderAssignment": "RFID Reader",
+          "wlanRelais": "WLAN Relais",
+          "certifications": "Certifications",
+          "instructors": "Instructors"
+        },
+        "certifications": {
+          "batchCreate": {
+            "title": "Add New Certifications",
+            "searchUsers": "Search Users",
+            "certifiedBy": "Certified By",
+            "submit": "Add Certifications"
+          },
+          "noCertifications": "No certifications for this tool.",
+          "listTitle": "Certified Users"
+        },
+        "messages": {
+          "alreadyAssigned": "already assigned",
+          "alreadyAssignedError": "This RFID reader is already assigned to another tool."
+        },
+        "errors": {
+          "invalidIpAddress": "Please enter a valid IP address (e.g. 192.168.1.1)."
+        },
+        "instructors": {
+          "noInstructors": "No instructors assigned to this tool.",
+          "addTitle": "Add Instructors",
+          "searchUsers": "Search Users",
+          "add": "Add Instructors",
+          "remove": "Remove Selected"
+        }
+      }
+    },
+    "shared": {
+      "toolProperties": {
+        "name": "Name",
+        "description": "Description",
+        "area": "Area",
+        "certificationRequirement": "Certification Requirement",
+        "rfidReader": "RFID Reader",
+        "wlanRelaisType": "WLAN Relais Type",
+        "ipAddress": "IP Address",
+        "httpStartCommand": "HTTP Start Command",
+        "onCommand": "On Command",
+        "offCommand": "Off Command"
+      }
+    }
+  },
+  "rfidTags": {
+    "title": "RFID Tags",
+    "dialogs": {
+      "deleteRfidTag": {
+        "title": "Delete RFID Tag",
+        "message": "Are you sure you want to delete this RFID tag?"
+      }
+    },
+    "shared": {
+      "rfidTagProperties": {
+        "id": "ID",
+        "active": "Active"
+      }
+    }
+  },
+  "rfidReaders": {
+    "title": "RFID Readers",
+    "dialogs": {
+      "deleteRfidReader": {
+        "title": "Delete RFID Reader",
+        "message": "Are you sure you want to delete this RFID reader?"
+      },
+      "changeRfidReaderType": {
+        "title": "Change Type",
+        "errors": {
+          "switchBoxHasAssignedTool": "A tool is assigned to this reader. Please remove the assignment first."
+        }
+      }
+    },
+    "types": {
+      "rfid_tag_register": "RFID Tag Register",
+      "rfid_tag_assigner": "RFID Tag Assigner",
+      "gate_keeper_in": "Gate Keeper In",
+      "gate_keeper_out": "Gate Keeper Out",
+      "switch_box": "Switch Box"
+    },
+    "pages": {
+      "rfidReaderDetails": {
+        "headers": {
+          "rfidReaderInformation": "RFID Reader Information"
+        }
+      }
+    },
+    "shared": {
+      "rfidReaderProperties": {
+        "macAddress": "MAC Address",
+        "type": "Type",
+        "name": "Name",
+        "socketName": "Socket-Name"
+      }
+    }
+  }
+}

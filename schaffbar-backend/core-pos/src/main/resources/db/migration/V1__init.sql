@@ -1,0 +1,150 @@
+
+CREATE TABLE schaffbar.outbox_event
+(
+    id UUID NOT NULL,
+    event_type VARCHAR(255) NOT NULL,
+    version VARCHAR(255) NOT NULL,
+    aggregate_type VARCHAR(255) NOT NULL,
+    aggregate_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    payload TEXT NOT NULL,
+    owner VARCHAR(255),
+    processed BOOLEAN NOT NULL DEFAULT FALSE,
+    processed_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_outbox_event PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_outbox_event_processed ON schaffbar.outbox_event (processed, created_at);
+GRANT ALL ON TABLE schaffbar.outbox_event TO schadmin;
+
+CREATE TABLE schaffbar.customer
+(
+    id UUID NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    club_member BOOLEAN NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(255),
+    address_line1 VARCHAR(255) NOT NULL,
+    address_line2 VARCHAR(255),
+    postal_code VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_customer PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.customer TO schadmin;
+
+CREATE TABLE schaffbar.tool
+(
+    id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    rfid_reader_id UUID,
+    wlan_relais_type VARCHAR(255),
+    ip_address VARCHAR(255),
+    http_start_command VARCHAR(255),
+    on_command VARCHAR(255),
+    off_command VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_tool PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.tool TO schadmin;
+
+CREATE TABLE schaffbar.rfid_reader
+(
+    id UUID NOT NULL,
+    mac_address VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255),
+    socket_name VARCHAR(255),
+    type VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_rfid_reader PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.rfid_reader TO schadmin;
+
+CREATE TABLE schaffbar.rfid_tag
+(
+    id VARCHAR(255) NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_rfid_tag PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.rfid_tag TO schadmin;
+
+CREATE TABLE schaffbar.rfid_tag_assignment
+(
+    id UUID NOT NULL,
+    customer_id UUID NOT NULL UNIQUE,
+    rfid_tag_id VARCHAR(255) UNIQUE,
+    assignment_type VARCHAR(255) NOT NULL,
+    assignment_date TIMESTAMP WITHOUT TIME ZONE,
+    status VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_rfid_tag_assignment PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.rfid_tag_assignment TO schadmin;
+
+CREATE TABLE schaffbar.rfid_tag_assignment_history
+(
+    id UUID NOT NULL,
+    customer_id UUID NOT NULL,
+    rfid_tag_id VARCHAR(255) NOT NULL,
+    assignment_type VARCHAR(255) NOT NULL,
+    assignment_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    unassignment_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_rfid_tag_assignment_history PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.rfid_tag_assignment_history TO schadmin;
+
+CREATE TABLE schaffbar.workshop_session
+(
+    id UUID NOT NULL,
+    customer_id UUID NOT NULL,
+    start_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    close_time TIMESTAMP WITHOUT TIME ZONE,
+    status VARCHAR(255),
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_workshop_session PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.workshop_session TO schadmin;
+
+CREATE TABLE schaffbar.workshop_usage
+(
+    id UUID NOT NULL,
+    customer_id UUID NOT NULL,
+    workshop_session_id UUID NOT NULL,
+    entry_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    exit_time TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_workshop_usage PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.workshop_usage TO schadmin;
+
+CREATE TABLE schaffbar.tool_usage
+(
+    id UUID NOT NULL,
+    customer_id UUID NOT NULL,
+    tool_id UUID NOT NULL,
+    workshop_session_id UUID NOT NULL,
+    start_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_tool_usage PRIMARY KEY (id)
+);
+
+GRANT ALL ON TABLE schaffbar.tool_usage TO schadmin;
