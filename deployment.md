@@ -49,7 +49,14 @@ docker compose up -d --build
 6. Check that 3 containers run
 ```bash
 docker ps -a 
-```  
+```
+```bash
+CONTAINER ID   IMAGE                        COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
+992d0c80e35f   schaffbar-backend-backend    "java -jar app.jar"      7 minutes ago   Up 6 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp   schaffbar-backend-backend-1
+b85717c40832   postgres:16.3                "docker-entrypoint.s…"   7 minutes ago   Up 7 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   schaffbar-backend-postgres-1
+df03d27f1e27   schaffbar-backend-frontend   "nginx -c /etc/nginx…"   7 minutes ago   Up 7 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   schaffbar-backend-frontend-1
+```
+
 
 7. Got to your browser and type:
 ```bash
