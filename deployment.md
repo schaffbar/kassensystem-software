@@ -46,6 +46,16 @@ POSTGRES_DB=<dbname>
 docker compose up -d --build
 ```
 
+6. Check that 3 containers run
+```bash
+docker ps -a 
+```  
+
+7. Got to your browser and type:
+```bash
+<your servername>:8080 
+``` 
+
 ## Local (only Docker required)
 
 Before proceeding, ensure that Docker and Docker Compose are installed on your system. These tools are required to build and run the application in isolated containers. You can download Docker from [https://www.docker.com/get-started](https://www.docker.com/get-started). Verify installation by running:
