@@ -21,16 +21,20 @@ git pull
 4. Create `.env` file
 
 ```
-# Database configuration
-POSTGRES_USER=<>
-POSTGRES_PASSWORD=<>
-POSTGRES_DB=<>
+cd schaffbar-backend
+```
 
-# Backend configuration
+```
+# Database configuration
+POSTGRES_USER=<user>
+POSTGRES_PASSWORD=<user-password>
+POSTGRES_DB=<dbname>
+
+# Backend configuration (choose environment)
 # BACKEND_ENV=dev
 # BACKEND_ENV=prod
 
-# Frontend configuration
+# Frontend configuration (choose environment)
 # FRONTEND_ENV=development
 # FRONTEND_ENV=production
 ```
@@ -38,9 +42,6 @@ POSTGRES_DB=<>
 5. Run docker compose
 
 ```bash
-sudo su -
-(enter password)
-cd /home/schaffbar/kassensystem/schaffbar-backend
 docker compose up -d --build
 ```
 
