@@ -7,13 +7,14 @@
 2. Connect with server
 
 ```bash
-ssh <odoo_server>
+ssh <server>
 (enter password)
 ```
 
-3. Pull updates
+3. Pull updates or clone git repo
 
 ```bash
+git clone ...
 cd kassensystem/
 git pull
 ```
