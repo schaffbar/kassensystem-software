@@ -1,3 +1,8 @@
+- [Infra] Fetch server name from .env file
+- [Doc] adapt docu regarding server name
+
+- [Backend] close all tool sessions when restarting server/backend
+
 - [Frontend] Validate Session before closing it
 - [Backend] Scheduler to clean up waiting for assignment
 
