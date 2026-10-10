@@ -7,40 +7,52 @@
 2. Connect with server
 
 ```bash
-ssh <user>@<server>
+ssh <user>@<server_name>
 (enter password)
 ```
 
-3. Pull updates or clone git repo
+3. Get the source code
+
+- First installation: clone the repository
 
 ```bash
-git clone ...
-cd kassensystem/
+git clone https://github.com/schaffbar/kassensystem-software.git
+cd kassensystem-software/
+```
+
+- Update: pull the latest changes
+
+```bash
+cd kassensystem-software/
 git pull
 ```
 
-4. Create `.env` file
+4. Create `.env` file (only on first installation)
 
-```
+```bash
 cd schaffbar-backend
+cp .env.example .env
+nano .env
 ```
 
-```
+- Set the credentials and choose the **production** environment on the server:
+
+```dotenv
 # Database configuration
 POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<user-password>
 POSTGRES_DB=<dbname>
 
-# Backend configuration (choose environment)
-# BACKEND_ENV=dev
-# BACKEND_ENV=prod
+# Backend configuration: dev | prod (default: dev)
+BACKEND_ENV=prod
 
-# Frontend configuration (choose environment)
-# FRONTEND_ENV=development
-# FRONTEND_ENV=production
+# Frontend configuration: development | production (default: development)
+FRONTEND_ENV=production
 ```
 
-5. Run docker compose
+- If `BACKEND_ENV` / `FRONTEND_ENV` are missing, the `dev` / `development` configuration is used.
+
+5. Run docker compose (in `schaffbar-backend` folder)
 
 ```bash
 docker compose up -d --build
@@ -49,7 +61,7 @@ docker compose up -d --build
 6. Check that 3 containers run
 
 ```bash
-docker ps -a 
+docker ps -a
 ```
 
 ```bash
@@ -59,11 +71,45 @@ b85717c40832   postgres:16.3                "docker-entrypoint.s…"   7 minutes
 df03d27f1e27   schaffbar-backend-frontend   "nginx -c /etc/nginx…"   7 minutes ago   Up 7 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   schaffbar-backend-frontend-1
 ```
 
-7. Got to your browser and type:
+7. Go to your browser and open:
+
+```text
+http://<server_name>:8080
+```
+
+### Operation
+
+All commands are run in the `schaffbar-backend` folder.
+
+- Show logs (e.g. of the backend)
 
 ```bash
-<your servername>:8080 
-``` 
+docker compose logs -f backend
+```
+
+- After a server reboot the containers start automatically (`restart: unless-stopped`), as long as the Docker service is enabled:
+
+```bash
+sudo systemctl enable docker
+```
+
+### Database backup and restore
+
+> **Warning:** `docker compose down -v` deletes the volume `postgres_data` and with it **all data**. Use `docker compose down` (without `-v`) to stop the containers.
+
+The data is stored in the Docker volume `postgres_data`. Create a backup regularly and before every update.
+
+- Backup
+
+```bash
+docker compose exec -T postgres pg_dump -U <user> <dbname> > backup_$(date +%F).sql
+```
+
+- Restore (into an empty database)
+
+```bash
+docker compose exec -T postgres psql -U <user> -d <dbname> < backup_<date>.sql
+```
 
 ## Local (only Docker required)
 
@@ -76,31 +122,25 @@ docker compose --version
 
 ### 1. Clone the repository or download the source code
 
-You can obtain the code by cloning the repository and switching to the desired branch, or by downloading it directly from the GitHub page.
+You can obtain the code by cloning the repository or by downloading it directly from the GitHub page.
 
-- To clone and switch branch:
+- To clone:
 
 ```bash
-git clone https://github.com/schaffbar/kassensystem.git
-cd kassensystem
-git checkout piotr
+git clone https://github.com/schaffbar/kassensystem-software.git
+cd kassensystem-software
 ```
 
-- Alternatively, visit [https://github.com/schaffbar/kassensystem](https://github.com/schaffbar/kassensystem) and use the "Download ZIP" option if you prefer not to use Git.
+- Alternatively, visit [https://github.com/schaffbar/kassensystem-software](https://github.com/schaffbar/kassensystem-software) and use the "Download ZIP" option if you prefer not to use Git.
 
 ### 2. Create `.env` file (in `schaffbar-backend` folder) with postgres credentials
 
 ```bash
 cd schaffbar-backend
+cp .env.example .env
 ```
 
-- `.env` file content
-
-```bash
-POSTGRES_USER=your_postgres_user
-POSTGRES_PASSWORD=your_postgres_password
-POSTGRES_DB=schaffbardb
-```
+- Adjust the values in `.env` if needed. For local use keep `BACKEND_ENV=dev` and `FRONTEND_ENV=development`.
 
 ### 3. Start all services with Docker Compose
 
@@ -123,3 +163,5 @@ docker compose up -d postgres backend
 ```bash
 docker compose down
 ```
+
+- Do **not** add `-v` unless you want to delete the database volume.
