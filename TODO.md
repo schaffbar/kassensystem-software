@@ -1,5 +1,5 @@
 - [Infra] Fetch server name from .env file and use it in backend and frontend
-- [Doc] adapt docu regarding server name
+- [Docu-Deployment] adapt docu regarding server name
 
 - [Backend] close all tool sessions when restarting server/backend
 
