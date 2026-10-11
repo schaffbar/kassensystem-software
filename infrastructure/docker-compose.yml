@@ -1,3 +1,5 @@
+name: schaffbar
+
 services:
   postgres:
     image: postgres:16.3
@@ -9,18 +11,18 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 20s
+      interval: 5s
       timeout: 3s
       retries: 3
-      start_period: 5s
+      start_period: 3s
 
   backend:
     build:
-      context: ./core-pos
+      context: ../schaffbar-backend/core-pos
     depends_on:
       postgres:
         condition: service_healthy

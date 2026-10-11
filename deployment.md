@@ -30,7 +30,7 @@ git pull
 4. Create `.env` file (only on first installation)
 
 ```bash
-cd schaffbar-backend
+cd infrastructure
 cp .env.example .env
 nano .env
 ```
@@ -52,7 +52,7 @@ FRONTEND_ENV=production
 
 - If `BACKEND_ENV` / `FRONTEND_ENV` are missing, the `dev` / `development` configuration is used.
 
-5. Run docker compose (in `schaffbar-backend` folder)
+5. Run docker compose (in `infrastructure` folder)
 
 ```bash
 docker compose up -d --build
@@ -65,10 +65,10 @@ docker ps -a
 ```
 
 ```bash
-CONTAINER ID   IMAGE                        COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
-992d0c80e35f   schaffbar-backend-backend    "java -jar app.jar"      7 minutes ago   Up 6 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp   schaffbar-backend-backend-1
-b85717c40832   postgres:16.3                "docker-entrypoint.s…"   7 minutes ago   Up 7 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   schaffbar-backend-postgres-1
-df03d27f1e27   schaffbar-backend-frontend   "nginx -c /etc/nginx…"   7 minutes ago   Up 7 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   schaffbar-backend-frontend-1
+CONTAINER ID   IMAGE                COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
+992d0c80e35f   schaffbar-backend    "java -jar app.jar"      7 minutes ago   Up 6 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp   schaffbar-backend-1
+b85717c40832   postgres:16.3        "docker-entrypoint.s…"   7 minutes ago   Up 7 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   schaffbar-postgres-1
+df03d27f1e27   schaffbar-frontend   "nginx -c /etc/nginx…"   7 minutes ago   Up 7 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   schaffbar-frontend-1
 ```
 
 7. Go to your browser and open:
@@ -79,7 +79,7 @@ http://<server_name>:8080
 
 ### Operation
 
-All commands are run in the `schaffbar-backend` folder.
+All commands are run in the `infrastructure` folder.
 
 - Show logs (e.g. of the backend)
 
@@ -133,10 +133,10 @@ cd kassensystem-software
 
 - Alternatively, visit [https://github.com/schaffbar/kassensystem-software](https://github.com/schaffbar/kassensystem-software) and use the "Download ZIP" option if you prefer not to use Git.
 
-### 2. Create `.env` file (in `schaffbar-backend` folder) with postgres credentials
+### 2. Create `.env` file (in `infrastructure` folder) with postgres credentials
 
 ```bash
-cd schaffbar-backend
+cd infrastructure
 cp .env.example .env
 ```
 
