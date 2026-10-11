@@ -2,16 +2,14 @@
 
 ## Schaffbar
 
-1. Join `Schaffbar` WLAN
-
-2. Connect with server
+### 1. Join `Schaffbar` WLAN and connect with server
 
 ```bash
 ssh <user>@<server_name>
 (enter password)
 ```
 
-3. Get the source code
+### 2. Get the source code
 
 - First installation: clone the repository
 
@@ -27,7 +25,7 @@ cd kassensystem-software/
 git pull
 ```
 
-4. Create `.env` file (only on first installation)
+### 3. Create `.env` file (only on first installation)
 
 ```bash
 cd infrastructure
@@ -35,13 +33,13 @@ cp .env.example .env
 nano .env
 ```
 
-- Set the credentials and choose the **production** environment on the server:
+Set the credentials and choose the **production** environment on the server:
 
 ```dotenv
 # Database configuration
-POSTGRES_USER=<user>
+POSTGRES_USER=schadmin
 POSTGRES_PASSWORD=<user-password>
-POSTGRES_DB=<dbname>
+POSTGRES_DB=schaffbar
 
 # Backend configuration: dev | prod (default: dev)
 BACKEND_ENV=prod
@@ -50,15 +48,37 @@ BACKEND_ENV=prod
 FRONTEND_ENV=production
 ```
 
-- If `BACKEND_ENV` / `FRONTEND_ENV` are missing, the `dev` / `development` configuration is used.
+**Info:** If `BACKEND_ENV` / `FRONTEND_ENV` are missing, the `dev` / `development` configuration is used..
 
-5. Run docker compose (in `infrastructure` folder)
+### 4. Adjust the server name
+
+Adapt the host name under which the server is reachable (currently `ubuntu`) in these two files, if it differs:
+
+- Backend CORS allowed origins (all hosts from which the frontend is opened, comma separated) in [application-prod.yaml](schaffbar-backend/core-pos/src/main/resources/application-prod.yaml):
+
+  ```yaml
+  application:
+    cors:
+      allowed-origins: http://<server_name>:8080
+  ```
+
+- Backend URL used by the frontend in [environment.production.ts](schaffbar-portal/src/environments/environment.production.ts):
+
+  ```ts
+  apiBaseUrl: 'http://<server_name>:5000',
+  ```
+
+The server name is part of the built images, so rebuild them after a change.
+
+### 5. Deploy application
+
+Run docker compose (in `infrastructure` folder)
 
 ```bash
 docker compose up -d --build
 ```
 
-6. Check that 3 containers run
+Check that 3 containers run
 
 ```bash
 docker ps -a
@@ -71,44 +91,10 @@ b85717c40832   postgres:16.3        "docker-entrypoint.s…"   7 minutes ago   U
 df03d27f1e27   schaffbar-frontend   "nginx -c /etc/nginx…"   7 minutes ago   Up 7 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   schaffbar-frontend-1
 ```
 
-7. Go to your browser and open:
+Go to your browser and open:
 
 ```text
 http://<server_name>:8080
-```
-
-### Operation
-
-All commands are run in the `infrastructure` folder.
-
-- Show logs (e.g. of the backend)
-
-```bash
-docker compose logs -f backend
-```
-
-- After a server reboot the containers start automatically (`restart: unless-stopped`), as long as the Docker service is enabled:
-
-```bash
-sudo systemctl enable docker
-```
-
-### Database backup and restore
-
-> **Warning:** `docker compose down -v` deletes the volume `postgres_data` and with it **all data**. Use `docker compose down` (without `-v`) to stop the containers.
-
-The data is stored in the Docker volume `postgres_data`. Create a backup regularly and before every update.
-
-- Backup
-
-```bash
-docker compose exec -T postgres pg_dump -U <user> <dbname> > backup_$(date +%F).sql
-```
-
-- Restore (into an empty database)
-
-```bash
-docker compose exec -T postgres psql -U <user> -d <dbname> < backup_<date>.sql
 ```
 
 ## Local (only Docker required)
@@ -133,7 +119,7 @@ cd kassensystem-software
 
 - Alternatively, visit [https://github.com/schaffbar/kassensystem-software](https://github.com/schaffbar/kassensystem-software) and use the "Download ZIP" option if you prefer not to use Git.
 
-### 2. Create `.env` file (in `infrastructure` folder) with postgres credentials
+### 2. Create `.env` file
 
 ```bash
 cd infrastructure
@@ -142,7 +128,7 @@ cp .env.example .env
 
 - Adjust the values in `.env` if needed. For local use keep `BACKEND_ENV=dev` and `FRONTEND_ENV=development`.
 
-### 3. Start all services with Docker Compose
+### 3. Start all services
 
 ```bash
 docker compose up --build -d
