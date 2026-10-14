@@ -1,5 +1,8 @@
 # TODO
 
+- [Frontend] remove changeDetection: ChangeDetectionStrategy.Eager
+- [Frontend] switch to zoneless
+
 - [Backend] close all tool sessions when restarting server/backend
 
 - [Frontend] Validate Session before closing it
