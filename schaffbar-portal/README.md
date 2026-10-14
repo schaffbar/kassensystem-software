@@ -283,10 +283,19 @@ ng generate --help
 
 ## Upgrade project dependencies
 
+Prerequisite: check the Node.js version required by the target Angular version (`npm view @angular/core@latest engines`) and upgrade Node first (e.g. `nvm install 24`).
+
+Start with a clean git working tree and commit after each step. Replace `<major>` with the target version (e.g. `22`):
+
 ```bash
-ng update @angular/core@21 @angular/cli@21
-ng update @angular/material@21
-ng update @ngrx/signals@21
-ng update
-...
+ng update                                  # list available updates
+npm install -D angular-eslint@latest typescript-eslint@latest   # eslint peer deps must match the new Angular/TypeScript
+ng update @angular/core@<major> @angular/cli@<major>
+ng update @angular/material@<major>
+ng update @ngrx/signals@<major>
+npm install @ngrx/operators@^<major>
+ng update                                  # should report "everything seems to be in order"
+npm run lint && npm run build:production && npm test
 ```
+
+Then read the release notes / [update guide](https://angular.dev/update-guide) for breaking changes.
