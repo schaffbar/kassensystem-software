@@ -24,8 +24,8 @@
           @if (detailsStore.isRfidTagAssigned() || detailsStore.waitingForAssignment()) {
             <mat-chip>
               {{
-                'users.chips.userDetails.rfidTags.' +
-                  ($safeNavigationMigration(detailsStore.rfidTagAssignment()?.assignmentType) | lowercase) | translate
+                'users.chips.userDetails.rfidTags.' + (detailsStore.rfidTagAssignment()?.assignmentType | lowercase)
+                  | translate
               }}
             </mat-chip>
             @if (detailsStore.isRfidTagAssigned()) {
