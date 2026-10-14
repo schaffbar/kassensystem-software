@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { CertificationRequirement, Tool, ToolArea, UpdateToolCommand } from '../
   selector: 'schbar-tool-detail-info',
   templateUrl: './tool-detail-info.component.html',
   styleUrl: './tool-detail-info.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LowerCasePipe,
     MatInputModule,

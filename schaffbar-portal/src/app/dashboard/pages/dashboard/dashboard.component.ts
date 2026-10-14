@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { DashboardStore } from '../../dashboard.store';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   imports: [ActiveUsersWidgetComponent, ActiveToolsWidgetComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [DashboardStore],
 })
 export class DashboardComponent {

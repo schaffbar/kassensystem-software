@@ -1,4 +1,4 @@
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +29,7 @@ import { RfidTagStore } from '../../rfid-tags.store';
     MatInputModule,
     TranslatePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [RfidTagStore],
 })
 export class RfidTagListComponent {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ export interface ConfirmDeleteDialogData {
   selector: 'schbar-confirm-delete',
   templateUrl: './confirm-delete.component.html',
   styleUrl: './confirm-delete.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDialogModule, MatDialogTitle, MatDialogContent, MatButtonModule, TranslatePipe],
 })
 export class ConfirmDeleteComponent {

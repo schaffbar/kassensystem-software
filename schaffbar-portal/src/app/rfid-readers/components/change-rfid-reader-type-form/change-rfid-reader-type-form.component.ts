@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +20,7 @@ export interface ChangeRfidReaderTypeDialogData {
   selector: 'schbar-change-rfid-reader-type-form',
   templateUrl: './change-rfid-reader-type-form.component.html',
   styleUrl: './change-rfid-reader-type-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LowerCasePipe,
     ReactiveFormsModule,

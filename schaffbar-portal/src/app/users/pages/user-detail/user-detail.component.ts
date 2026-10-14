@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -34,6 +34,7 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
     TranslatePipe,
     LowerCasePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [UserDetailStore, RfidTagAssignmentService],
 })
 export class UserDetailComponent implements OnInit {

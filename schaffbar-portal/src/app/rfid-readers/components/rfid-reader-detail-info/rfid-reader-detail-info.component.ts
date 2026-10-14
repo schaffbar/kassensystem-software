@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
   selector: 'schbar-rfid-reader-detail-info',
   templateUrl: './rfid-reader-detail-info.component.html',
   styleUrl: './rfid-reader-detail-info.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe, LowerCasePipe],
 })
 export class RfidReaderDetailInfoComponent {

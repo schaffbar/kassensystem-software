@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
@@ -10,6 +10,7 @@ import { User, UserAddress } from '../../shared/models/user.model';
   selector: 'schbar-user-detail-info',
   templateUrl: './user-detail-info.component.html',
   styleUrl: './user-detail-info.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [UserAddressComponent, UserContactComponent, MatSlideToggleModule],
 })
 export class UserDetailInfoComponent {

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -18,6 +18,7 @@ import { ChangeRfidReaderCommand, Tool } from '../../tool.model';
   selector: 'schbar-tool-rfid-reader-assignment',
   templateUrl: './tool-rfid-reader-assignment.component.html',
   styleUrl: './tool-rfid-reader-assignment.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatSelectModule,

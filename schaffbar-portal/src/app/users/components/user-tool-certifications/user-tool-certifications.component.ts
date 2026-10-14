@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -17,6 +17,7 @@ import { ToolCertification, ToolCertificationStatus } from '../../shared/models/
   selector: 'schbar-user-tool-certifications',
   templateUrl: './user-tool-certifications.component.html',
   styleUrl: './user-tool-certifications.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTableModule, MatButtonModule, MatIconModule, MatChipsModule, DatePipe, TranslatePipe],
 })
 export class UserToolCertificationsComponent {

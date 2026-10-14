@@ -1,4 +1,4 @@
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -33,6 +33,7 @@ import { UsersStore } from '../../shared/stores/users.store';
     ReactiveFormsModule,
     TranslatePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [UsersStore, TranslateService],
 })
 export class UserListComponent {

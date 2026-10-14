@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,7 @@ import { UserAddress } from '../../shared/models/user.model';
   selector: 'schbar-user-address',
   templateUrl: './user-address.component.html',
   styleUrl: './user-address.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatInputModule,
     MatButtonModule,

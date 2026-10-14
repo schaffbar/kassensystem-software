@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatDatepickerModule,
     TranslatePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideNativeDateAdapter()],
 })
 export class NewUserFormComponent {
