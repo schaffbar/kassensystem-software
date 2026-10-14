@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidTag } from '../../rfid-tag.model';
 import { RfidTagStore } from '../../rfid-tags.store';
