@@ -1,5 +1,7 @@
 # TODO
 
+- [Frontend] RFID reader after init shows type.null in the list and detail page
+
 - [Frontend] remove changeDetection: ChangeDetectionStrategy.Eager
 - [Frontend] switch to zoneless
 
