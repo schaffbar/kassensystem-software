@@ -73,6 +73,11 @@ Wenn du den Ausdruck jedoch in seine einzelnen Bestandteile zerlegst, haben die 
 
 #####################
 
+- [PROD] docker compose - change postgres port from "5432:5432" to "127.0.0.1:5432:5432"
+- [PROD]
+
+#####################
+
 **Steps**
 
 ### Phase 1: Temporären Clone vorbereiten
