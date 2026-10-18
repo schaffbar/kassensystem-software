@@ -33,6 +33,7 @@
 
 ## Feature
 
+- [Frontend] Tool Detail page - refactor tool instructor
 - [Backend] Implement new interfaces for device
 - [Feature] Assignment und Unassignment von fixen RFID tags
 - [Feature] Problems API
