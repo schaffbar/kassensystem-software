@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -33,7 +33,6 @@ import { ToolsStore } from '../../tools.store';
     MatInputModule,
     TranslatePipe,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ToolsStore],
 })
 export class ToolListComponent {

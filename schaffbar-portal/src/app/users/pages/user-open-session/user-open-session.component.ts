@@ -1,4 +1,4 @@
-import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 
@@ -12,7 +12,6 @@ import { UserDetailStore } from '../../shared/stores/user-detail.store';
   selector: 'schbar-user-open-session',
   templateUrl: './user-open-session.component.html',
   styleUrl: './user-open-session.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButtonModule, TranslatePipe, ToolUsageSummaryComponent, WorkshopUsageSummaryComponent],
 })
 export class UserOpenSessionComponent {

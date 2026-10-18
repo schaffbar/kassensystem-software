@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   NonNullableFormBuilder,
@@ -24,7 +24,6 @@ import { ToolsStore } from '../../tools.store';
   selector: 'schbar-new-tool-form',
   templateUrl: './new-tool-form.component.html',
   styleUrl: './new-tool-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ReactiveFormsModule,
     LowerCasePipe,

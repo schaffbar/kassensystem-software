@@ -1,4 +1,4 @@
-import { Component, computed, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -22,7 +22,6 @@ interface ToolStatusRow {
   selector: 'schbar-active-tools-widget',
   templateUrl: './active-tools-widget.component.html',
   styleUrl: './active-tools-widget.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButtonModule, MatCardModule, MatTableModule, MatIconModule, TranslatePipe],
 })
 export class ActiveToolsWidgetComponent {

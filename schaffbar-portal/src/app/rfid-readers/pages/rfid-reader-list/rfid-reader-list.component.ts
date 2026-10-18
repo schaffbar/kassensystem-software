@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +31,6 @@ import { RfidReaderStore } from '../../rfid-readers.store';
     TranslatePipe,
     LowerCasePipe,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [RfidReaderStore],
 })
 export class RfidReaderListComponent {

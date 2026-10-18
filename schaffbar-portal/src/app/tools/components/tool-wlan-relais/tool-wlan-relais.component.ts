@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -18,7 +18,6 @@ const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?
   selector: 'schbar-tool-wlan-relais',
   templateUrl: './tool-wlan-relais.component.html',
   styleUrl: './tool-wlan-relais.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatSelectModule,

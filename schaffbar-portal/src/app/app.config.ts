@@ -1,7 +1,12 @@
 import { DatePipe, registerLocaleData } from '@angular/common';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import localeDe from '@angular/common/locales/de';
-import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  LOCALE_ID,
+  provideCheckNoChangesConfig,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
@@ -15,7 +20,7 @@ registerLocaleData(localeDe);
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withXhr()),
     provideTranslateService({
@@ -26,6 +31,7 @@ export const appConfig: ApplicationConfig = {
       fallbackLang: 'de',
       lang: 'de',
     }),
+    provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 }),
     DatePipe,
     TranslatePipe,
     { provide: LOCALE_ID, useValue: 'de-DE' },

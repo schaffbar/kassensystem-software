@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
@@ -12,7 +12,6 @@ import { ToolUsageSummary } from '../../shared/models/workshop-session.model';
   selector: 'schbar-tool-usage-summary',
   templateUrl: './tool-usage-summary.component.html',
   styleUrl: './tool-usage-summary.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe],
 })
 export class ToolUsageSummaryComponent {

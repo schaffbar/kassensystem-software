@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,7 +33,6 @@ import { ToolDetailStore } from './tool-detail.store';
     ToolWlanRelaisComponent,
     ToolCertificationsComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ToolDetailStore],
 })
 export class ToolDetailComponent {

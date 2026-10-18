@@ -1,4 +1,4 @@
-import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -26,7 +26,6 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
   templateUrl: './rfid-reader-detail.component.html',
   styleUrl: './rfid-reader-detail.component.scss',
   imports: [RfidReaderDetailInfoComponent, MatTabsModule, MatButtonModule, MatChipsModule, MatIconModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [RfidReaderDetailStore],
 })
 export class RfidReaderDetailComponent {

@@ -1,15 +1,5 @@
 import { DatePipe } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +24,6 @@ import { User } from '../../../users/shared/models/user.model';
   selector: 'schbar-tool-certifications',
   templateUrl: './tool-certifications.component.html',
   styleUrl: './tool-certifications.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     DatePipe,
     MatAutocompleteModule,

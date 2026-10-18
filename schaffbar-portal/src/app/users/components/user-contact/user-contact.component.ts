@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,6 @@ import { User } from '../../shared/models/user.model';
   selector: 'schbar-user-contact',
   templateUrl: './user-contact.component.html',
   styleUrl: './user-contact.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe],
 })
 export class UserContactComponent {

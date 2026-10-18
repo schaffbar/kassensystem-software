@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  input,
-  output,
-  signal,
-  viewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +17,6 @@ import { User } from '../../../users/shared/models/user.model';
   selector: 'schbar-tool-instructors',
   templateUrl: './tool-instructors.component.html',
   styleUrl: './tool-instructors.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatAutocompleteModule,
     MatButtonModule,

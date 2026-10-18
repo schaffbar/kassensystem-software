@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -8,7 +8,6 @@ import { NavigationComponent } from './core/navigation/navigation.component';
   selector: 'schbar-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NavigationComponent],
 })
 export class AppComponent {

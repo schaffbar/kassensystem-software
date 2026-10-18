@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
@@ -34,13 +34,12 @@ describe('RfidTagListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [RfidTagListComponent],
-      providers: [provideRouter([]), provideTranslateService()],
+      providers: [provideZonelessChangeDetection(), provideRouter([]), provideTranslateService()],
     })
       .overrideComponent(RfidTagListComponent, { set: { providers: [{ provide: RfidTagStore, useValue: storeMock }] } })
       .compileComponents();
 
     fixture = TestBed.createComponent(RfidTagListComponent);
-    fixture.detectChanges();
     await fixture.whenStable();
   });
 
