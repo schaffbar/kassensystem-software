@@ -1,11 +1,10 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { form, FormField, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -16,14 +15,18 @@ export interface ChangeRfidReaderTypeDialogData {
   rfidReader: RfidReader;
 }
 
+interface ChangeRfidReaderTypeModel {
+  // '' = nothing selected (a new reader comes with `type: null` from the backend)
+  type: RfidReaderType | '';
+}
+
 @Component({
   selector: 'schbar-change-rfid-reader-type-form',
   templateUrl: './change-rfid-reader-type-form.component.html',
   styleUrl: './change-rfid-reader-type-form.component.scss',
   imports: [
     LowerCasePipe,
-    ReactiveFormsModule,
-    MatInputModule,
+    FormField,
     MatSelectModule,
     MatButtonModule,
     MatDialogModule,
@@ -33,26 +36,23 @@ export interface ChangeRfidReaderTypeDialogData {
 })
 export class ChangeRfidReaderTypeFormComponent {
   protected readonly data: ChangeRfidReaderTypeDialogData = inject(MAT_DIALOG_DATA);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly dialogRef = inject(MatDialogRef<ChangeRfidReaderTypeFormComponent>);
 
   protected readonly rfidReaderTypes = Object.values(RfidReaderType);
 
-  protected readonly typeForm = this.fb.group({
-    type: [this.data.rfidReader.type, Validators.required],
+  private readonly model = signal<ChangeRfidReaderTypeModel>({ type: this.data.rfidReader.type ?? '' });
+
+  protected readonly typeForm = form(this.model, (schema) => {
+    required(schema.type);
   });
 
   protected save(): void {
-    if (this.typeForm.invalid) {
-      this.typeForm.markAllAsTouched();
-      return;
-    }
+    submit(this.typeForm, async () => {
+      const { type } = this.model();
+      if (!type) return;
 
-    const command: ChangeRfidReaderTypeCommand = {
-      id: this.data.rfidReader.id,
-      type: this.typeForm.controls.type.value,
-    };
-
-    this.dialogRef.close(command);
+      const command: ChangeRfidReaderTypeCommand = { id: this.data.rfidReader.id, type };
+      this.dialogRef.close(command);
+    });
   }
 }

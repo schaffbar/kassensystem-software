@@ -2,19 +2,19 @@
 
 <mat-divider />
 
-<mat-dialog-content [formGroup]="typeForm">
+<mat-dialog-content>
   <div class="row">
     <div class="col">
       <mat-form-field class="full-width">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
-        <mat-select id="type" formControlName="type">
+        <mat-select id="type" [formField]="typeForm.type">
           @for (type of rfidReaderTypes; track type) {
             <mat-option [value]="type">
               {{ 'rfidReaders.types.' + (type | lowercase) | translate }}
             </mat-option>
           }
         </mat-select>
-        @if (typeForm.controls['type'].hasError('required')) {
+        @if (typeForm.type().getError('required')) {
           <mat-error>
             {{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}
             {{ 'shared.dialogs.errors.required' | translate }}

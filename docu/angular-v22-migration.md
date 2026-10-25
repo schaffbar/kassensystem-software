@@ -156,8 +156,24 @@ Muster: `form()`, `[formField]`, `submit()`, Fehler über `field().errors()`. `[
 neben `[formField]` stehen – dafür `readonly()` / `disabled()` im Schema verwenden. `submit()` ersetzt das 8×
 duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 
-- [ ] **Pilot:** [change-rfid-reader-type-form](../schaffbar-portal/src/app/rfid-readers/components/change-rfid-reader-type-form/change-rfid-reader-type-form.component.ts)
-      – 1 Select, `required`. Hier das Muster festlegen (Anhang A).
+- [x] **Pilot:** [change-rfid-reader-type-form](../schaffbar-portal/src/app/rfid-readers/components/change-rfid-reader-type-form/change-rfid-reader-type-form.component.ts)
+      – 1 Select, `required`. Test: [change-rfid-reader-type-form.component.spec.ts](../schaffbar-portal/src/app/rfid-readers/components/change-rfid-reader-type-form/change-rfid-reader-type-form.component.spec.ts)
+
+  **Festgelegtes Muster (gilt für alle weiteren Formulare):**
+  - Model als eigenes `interface …Model` + `private readonly model = signal<…Model>(…)`;
+    `protected readonly xyzForm = form(this.model, (s) => { required(s.type); … })`
+  - Kein `null` im Model: „nichts ausgewählt“ ist `''` (Typ z. B. `RfidReaderType | ''`), `required()` wertet `''`
+    als leer
+  - Template: `[formField]="xyzForm.type"` statt `formControlName`; kein `[formGroup]`, kein `<form>` nötig
+  - Fehler: `@if (xyzForm.type().getError('required')) { <mat-error>…</mat-error> }` – `getError` ist pro `kind`
+    typisiert
+  - Speichern: `submit(this.xyzForm, async () => { … })` – markiert alles als touched und ruft die Action nur bei
+    gültigem Formular auf. Im Callback per Narrowing statt Cast auf den fachlichen Typ kommen
+    (`const { type } = this.model(); if (!type) return;`)
+  - Material 22.2 bindet `mat-select`/`matInput` und `<mat-error>` direkt an `[formField]` (Fehlerzustand,
+    touched) – kein Zusatzcode nötig
+  - Tests mit Harnesses: `MatSelectHarness`, `MatButtonHarness`, `MatFormFieldHarness.getTextErrors()`
+
 - [ ] [new-tool-form](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.ts) –
       `nameExistsValidator` → `validate(s.name, ...)` (reagiert auf `toolsStore.entities()`); Casts
       `'' as ToolArea | ''` und `formValue.name!` entfallen
