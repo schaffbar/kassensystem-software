@@ -36,6 +36,9 @@ module.exports = tseslint.config(
           style: 'kebab-case',
         },
       ],
+      // modern angular rules
+      '@angular-eslint/prefer-signals': 'warn',
+      '@angular-eslint/prefer-output-readonly': 'warn',
       // import rules
       'import/no-unresolved': 'error',
       'import/order': [
@@ -86,6 +89,9 @@ module.exports = tseslint.config(
   {
     files: ['**/*.html'],
     extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
-    rules: {},
+    rules: {
+      '@angular-eslint/template/prefer-self-closing-tags': 'warn',
+      '@angular-eslint/template/prefer-control-flow': 'warn',
+    },
   },
 );
