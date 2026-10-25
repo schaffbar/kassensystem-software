@@ -17,7 +17,7 @@ import { exhaustMap, filter, pipe, tap } from 'rxjs';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
 import { RfidTagAssignment } from '../../shared/models/rfid-tag-assignment.model';
 import { ToolCertification } from '../../shared/models/tool-certification.model';
-import { User, UserAddress } from '../../shared/models/user.model';
+import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../shared/models/user.model';
 import { WorkshopSession } from '../../shared/models/workshop-session.model';
 import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
 import { ToolCertificationService } from '../../shared/services/tool-certification.service';
@@ -101,11 +101,11 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    updateUserContact: rxMethod<{ id: string; email: string; phone: string }>(
+    updateUserContact: rxMethod<UpdateUserContactCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap(({ id, email, phone }) => {
-          return store._usersService.updateUserContact(id, { email, phone }).pipe(
+        exhaustMap((command: UpdateUserContactCommand) => {
+          return store._usersService.updateUserContact(command).pipe(
             tapResponse({
               next: () => {
                 patchState(store, setFulfilled(), setDirty());
@@ -116,11 +116,11 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    updateUserAddress: rxMethod<{ id: string; address: UserAddress }>(
+    updateUserAddress: rxMethod<UpdateUserAddressCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap(({ id, address }) => {
-          return store._usersService.updateUserAddress(id, address).pipe(
+        exhaustMap((command: UpdateUserAddressCommand) => {
+          return store._usersService.updateUserAddress(command).pipe(
             tapResponse({
               next: () => {
                 patchState(store, setFulfilled(), setDirty());

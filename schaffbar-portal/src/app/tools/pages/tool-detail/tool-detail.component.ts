@@ -14,7 +14,12 @@ import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-
 import { ToolInstructorsComponent } from '../../components/tool-instructors/tool-instructors.component';
 import { ToolRfidReaderAssignmentComponent } from '../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
 import { ToolWlanRelaisComponent } from '../../components/tool-wlan-relais/tool-wlan-relais.component';
-import { ChangeRfidReaderCommand, SetWlanRelaisCommand, UpdateToolCommand } from '../../tool.model';
+import {
+  ChangeRfidReaderCommand,
+  ClearWlanRelaisCommand,
+  SetWlanRelaisCommand,
+  UpdateToolCommand,
+} from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 import { ToolDetailStore } from './tool-detail.store';
 
@@ -85,8 +90,8 @@ export class ToolDetailComponent {
     this.detailsStore.setWlanRelais(command);
   }
 
-  protected onWlanRelaisCleared(toolId: string): void {
-    this.detailsStore.clearWlanRelais(toolId);
+  protected onWlanRelaisCleared(command: ClearWlanRelaisCommand): void {
+    this.detailsStore.clearWlanRelais(command);
   }
 
   protected onBatchCreateCertifications(command: BatchCreateToolCertificationCommand): void {

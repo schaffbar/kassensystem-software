@@ -13,6 +13,19 @@ Why: an unexported function is private to the file (stronger than TypeScript's `
 has no state, and can be used anywhere without caring about `this`. The class itself only contains what belongs to the
 component (inputs, outputs, signals, handlers).
 
+## Commands
+
+- Every action a component triggers for a change in the backend is passed on as a **command** – via `output.emit()`
+  or when a dialog closes.
+- Commands are defined in the feature's `*.model.ts`, section `// commands`, named verb + entity + `Command`
+  (`UpdateToolCommand`, `UpdateUserContactCommand`, `ClearWlanRelaisCommand`).
+- **The command contains the id(s)** of the affected entity. The component knows them from its input
+  (e.g. `this.user().id`); parent components only pass the command on and never assemble one.
+- Component output, store method and service method take the same command type.
+- Also for a single id: `ClearWlanRelaisCommand { toolId }`, not `string`.
+- Form models (`ToolInfoModel`, `ContactModel`, …) stay local in the component – they describe what is edited, the
+  command describes what is sent to the backend.
+
 ## Forms
 
 - Every form has a `<form [formRoot]="xyzForm" (submit)="onSave()">`; `onSave()` calls

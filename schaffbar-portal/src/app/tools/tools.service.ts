@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   ChangeRfidReaderCommand,
+  ClearWlanRelaisCommand,
   CreateToolCommand,
   SetWlanRelaisCommand,
   Tool,
@@ -66,8 +67,8 @@ export class ToolsService {
     return this.http.put<void>(url, command, this.httpOptions);
   }
 
-  clearWlanRelais(toolId: string): Observable<void> {
-    const url = `${TOOLS_API_URL}/${toolId}/wlan-relais`;
+  clearWlanRelais(command: ClearWlanRelaisCommand): Observable<void> {
+    const url = `${TOOLS_API_URL}/${command.toolId}/wlan-relais`;
     return this.http.delete<void>(url);
   }
 

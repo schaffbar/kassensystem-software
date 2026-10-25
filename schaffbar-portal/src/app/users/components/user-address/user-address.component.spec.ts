@@ -10,7 +10,7 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { UserAddress } from '../../shared/models/user.model';
+import { User, UserAddress } from '../../shared/models/user.model';
 import { UserAddressComponent } from './user-address.component';
 
 describe('UserAddressComponent', () => {
@@ -33,7 +33,7 @@ describe('UserAddressComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserAddressComponent);
-    fixture.componentRef.setInput('userAddress', address);
+    fixture.componentRef.setInput('user', { id: 'user-1', address } as User);
     addressChanged = vi.fn();
     fixture.componentInstance.addressChanged.subscribe(addressChanged);
     loader = TestbedHarnessEnvironment.loader(fixture);
@@ -84,7 +84,12 @@ describe('UserAddressComponent', () => {
 
     await click(saveButton);
 
-    expect(addressChanged).toHaveBeenCalledExactlyOnceWith({ ...address, city: 'Potsdam', postalCode: '14467' });
+    expect(addressChanged).toHaveBeenCalledExactlyOnceWith({
+      id: 'user-1',
+      ...address,
+      city: 'Potsdam',
+      postalCode: '14467',
+    });
     expect(await (await input('city')).isReadonly()).toBe(true);
   });
 

@@ -8,7 +8,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { SetWlanRelaisCommand, Tool, WLAN_RELAIS_TEMPLATES, WlanRelaisType } from '../../tool.model';
+import {
+  ClearWlanRelaisCommand,
+  SetWlanRelaisCommand,
+  Tool,
+  WLAN_RELAIS_TEMPLATES,
+  WlanRelaisType,
+} from '../../tool.model';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
@@ -28,7 +34,7 @@ export class ToolWlanRelaisComponent {
   readonly tool = input.required<Tool>();
 
   readonly wlanRelaisUpdated = output<SetWlanRelaisCommand>();
-  readonly wlanRelaisCleared = output<string>();
+  readonly wlanRelaisCleared = output<ClearWlanRelaisCommand>();
 
   protected readonly wlanRelaisTypes = Object.values(WlanRelaisType);
 
@@ -72,7 +78,8 @@ export class ToolWlanRelaisComponent {
         const command: SetWlanRelaisCommand = { toolId: this.tool().id, wlanRelaisType, ipAddress };
         this.wlanRelaisUpdated.emit(command);
       } else {
-        this.wlanRelaisCleared.emit(this.tool().id);
+        const command: ClearWlanRelaisCommand = { toolId: this.tool().id };
+        this.wlanRelaisCleared.emit(command);
       }
     });
   }

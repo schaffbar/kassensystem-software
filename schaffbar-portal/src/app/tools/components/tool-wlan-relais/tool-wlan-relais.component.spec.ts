@@ -153,7 +153,7 @@ describe('ToolWlanRelaisComponent', () => {
       expect(await ipInput()).toBeNull();
       await click('shared.dialogs.actions.edit.confirm');
 
-      expect(cleared).toHaveBeenCalledWith('tool-1');
+      expect(cleared).toHaveBeenCalledWith({ toolId: 'tool-1' });
       expect(updated).not.toHaveBeenCalled();
     });
 

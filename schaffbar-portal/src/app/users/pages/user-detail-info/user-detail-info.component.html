@@ -3,5 +3,5 @@
 </div>
 
 <div class="user-address">
-  <schbar-user-address [userAddress]="user().address" (addressChanged)="onAddressChanged($event)" />
+  <schbar-user-address [user]="user()" (addressChanged)="onAddressChanged($event)" />
 </div>

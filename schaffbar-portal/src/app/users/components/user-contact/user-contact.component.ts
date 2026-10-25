@@ -8,7 +8,12 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { User, UserContact } from '../../shared/models/user.model';
+import { UpdateUserContactCommand, User } from '../../shared/models/user.model';
+
+interface ContactModel {
+  email: string;
+  phone: string;
+}
 
 @Component({
   selector: 'schbar-user-contact',
@@ -19,7 +24,7 @@ import { User, UserContact } from '../../shared/models/user.model';
 export class UserContactComponent {
   readonly user = input.required<User>();
 
-  readonly contactChanged = output<UserContact>();
+  readonly contactChanged = output<UpdateUserContactCommand>();
 
   protected readonly isEditing = signal(false);
 
@@ -48,13 +53,13 @@ export class UserContactComponent {
   protected onSave(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
-      const contact: UserContact = { email, phone };
-      this.contactChanged.emit(contact);
+      const command: UpdateUserContactCommand = { id: this.user().id, email, phone };
+      this.contactChanged.emit(command);
       this.isEditing.set(false);
     });
   }
 }
 
-function toModel(user: User): UserContact {
+function toModel(user: User): ContactModel {
   return { email: user.email, phone: user.phone ?? '' };
 }

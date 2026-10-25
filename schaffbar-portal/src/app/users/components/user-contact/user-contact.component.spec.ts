@@ -75,7 +75,11 @@ describe('UserContactComponent', () => {
 
     await click(saveButton);
 
-    expect(contactChanged).toHaveBeenCalledExactlyOnceWith({ email: 'max@example.com', phone: '0987 654' });
+    expect(contactChanged).toHaveBeenCalledExactlyOnceWith({
+      id: 'user-1',
+      email: 'max@example.com',
+      phone: '0987 654',
+    });
     expect(await (await input('email')).isReadonly()).toBe(true);
   });
 

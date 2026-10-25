@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 
 import { UserAddressComponent } from '../../components/user-address/user-address.component';
 import { UserContactComponent } from '../../components/user-contact/user-contact.component';
-import { User, UserAddress, UserContact } from '../../shared/models/user.model';
+import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../shared/models/user.model';
 
 @Component({
   selector: 'schbar-user-detail-info',
@@ -13,14 +13,14 @@ import { User, UserAddress, UserContact } from '../../shared/models/user.model';
 export class UserDetailInfoComponent {
   readonly user = input.required<User>();
 
-  readonly addressChanged = output<UserAddress>();
-  readonly contactChanged = output<UserContact>();
+  readonly addressChanged = output<UpdateUserAddressCommand>();
+  readonly contactChanged = output<UpdateUserContactCommand>();
 
-  protected onAddressChanged(address: UserAddress) {
-    this.addressChanged.emit(address);
+  protected onAddressChanged(command: UpdateUserAddressCommand) {
+    this.addressChanged.emit(command);
   }
 
-  protected onContactChanged(contact: UserContact) {
-    this.contactChanged.emit(contact);
+  protected onContactChanged(command: UpdateUserContactCommand) {
+    this.contactChanged.emit(command);
   }
 }

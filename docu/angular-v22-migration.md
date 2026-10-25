@@ -244,6 +244,14 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [ ] [tool-rfid-reader-assignment](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
       `ngModel` → Signal Form mit einem Feld (oder beim `linkedSignal` aus Schritt 3 bleiben)
 - [ ] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
+- [ ] Commands nach der Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md) („Commands“) für die
+      noch nicht migrierten Komponenten (bisher Inline-Typen bzw. `string`); Command im `*.model.ts`, Store- und
+      Service-Methode nehmen denselben Typ:
+  - [ ] `tool-instructors`: `AddToolInstructorsCommand`, `RemoveToolInstructorsCommand`
+  - [ ] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
+        `PauseToolCertificationCommand`, `ReactivateToolCertificationCommand`, `RevokeToolCertificationCommand`
+  - [ ] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
+  - [ ] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
 - [ ] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
       jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
       `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →

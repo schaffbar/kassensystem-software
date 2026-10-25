@@ -5,7 +5,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { User, UserAddress, UserContact } from '../models/user.model';
+import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../models/user.model';
 
 const USERS_API_URL = `${environment.apiBaseUrl}/api/v1/customers`;
 
@@ -60,12 +60,12 @@ export class UsersService {
     return this.http.put<void>(`${USERS_API_URL}/${id}`, requestBody, this.httpOptions);
   }
 
-  updateUserContact(id: string, contact: UserContact): Observable<void> {
-    return this.http.put<void>(`${USERS_API_URL}/${id}/contact`, contact, this.httpOptions);
+  updateUserContact(command: UpdateUserContactCommand): Observable<void> {
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}/contact`, command, this.httpOptions);
   }
 
-  updateUserAddress(id: string, address: UserAddress): Observable<void> {
-    return this.http.put<void>(`${USERS_API_URL}/${id}/address`, address, this.httpOptions);
+  updateUserAddress(command: UpdateUserAddressCommand): Observable<void> {
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}/address`, command, this.httpOptions);
   }
 
   deleteUser(id: string): Observable<void> {

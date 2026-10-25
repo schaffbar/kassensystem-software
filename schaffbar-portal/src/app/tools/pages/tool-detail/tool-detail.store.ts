@@ -11,7 +11,13 @@ import {
   ToolCertification,
 } from '../../../users/shared/models/tool-certification.model';
 import { ToolCertificationService } from '../../../users/shared/services/tool-certification.service';
-import { ChangeRfidReaderCommand, SetWlanRelaisCommand, Tool, UpdateToolCommand } from '../../tool.model';
+import {
+  ChangeRfidReaderCommand,
+  ClearWlanRelaisCommand,
+  SetWlanRelaisCommand,
+  Tool,
+  UpdateToolCommand,
+} from '../../tool.model';
 import { ToolsService } from '../../tools.service';
 
 interface ToolDetailState {
@@ -119,11 +125,11 @@ export const ToolDetailStore = signalStore(
         }),
       ),
     ),
-    clearWlanRelais: rxMethod<string>(
+    clearWlanRelais: rxMethod<ClearWlanRelaisCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap((toolId: string) => {
-          return store._toolsService.clearWlanRelais(toolId).pipe(
+        exhaustMap((command: ClearWlanRelaisCommand) => {
+          return store._toolsService.clearWlanRelais(command).pipe(
             tapResponse({
               next: () => {
                 patchState(store, setFulfilled(), setDirty());
