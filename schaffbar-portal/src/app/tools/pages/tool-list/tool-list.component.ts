@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -33,7 +33,6 @@ import { ToolsStore } from '../../tools.store';
     MatInputModule,
     TranslatePipe,
   ],
-  providers: [ToolsStore],
 })
 export class ToolListComponent {
   readonly store = inject(ToolsStore);
@@ -41,9 +40,8 @@ export class ToolListComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  // TODO: replace with signal version
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  private readonly paginator = viewChild(MatPaginator);
+  private readonly sort = viewChild(MatSort);
 
   protected displayedColumns = [
     'certificationRequirement',
@@ -57,10 +55,14 @@ export class ToolListComponent {
   protected toolsCount = computed(() => this.store.entities().length);
   protected dataSource = computed(() => {
     const result = new MatTableDataSource<Tool>(this.store.entities());
-    result.sort = this.sort;
-    result.paginator = this.paginator;
+    result.sort = this.sort() ?? null;
+    result.paginator = this.paginator() ?? null;
     return result;
   });
+
+  constructor() {
+    this.store.loadAllTools();
+  }
 
   protected toolDetails(tool: Tool): void {
     this.router.navigate([ROUTE.TOOLS, tool.id]);

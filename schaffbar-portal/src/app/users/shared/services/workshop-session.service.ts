@@ -30,6 +30,6 @@ export class WorkshopSessionService {
   // commands
 
   closeWorkshopSession(userId: string): Observable<void> {
-    return this.http.put<void>(`${WORKSHOP_SESSION_API_URL}/${userId}/close`, this.httpOptions);
+    return this.http.put<void>(`${WORKSHOP_SESSION_API_URL}/${userId}/close`, {}, this.httpOptions);
   }
 }

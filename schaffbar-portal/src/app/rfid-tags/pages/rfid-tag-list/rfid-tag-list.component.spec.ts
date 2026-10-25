@@ -34,13 +34,20 @@ describe('RfidTagListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [RfidTagListComponent],
-      providers: [provideZonelessChangeDetection(), provideRouter([]), provideTranslateService()],
-    })
-      .overrideComponent(RfidTagListComponent, { set: { providers: [{ provide: RfidTagStore, useValue: storeMock }] } })
-      .compileComponents();
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: RfidTagStore, useValue: storeMock },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RfidTagListComponent);
     await fixture.whenStable();
+  });
+
+  it('should load RFID tags on init', () => {
+    expect(storeMock.loadAllRfidTags).toHaveBeenCalledTimes(1);
   });
 
   it('should show the number of RFID tags in the header', () => {
@@ -56,6 +63,7 @@ describe('RfidTagListComponent', () => {
   });
 
   it('should reload RFID tags when the refresh button is clicked', () => {
+    storeMock.loadAllRfidTags.mockClear();
     fixture.nativeElement.querySelector('.rfid-tag-list-header button').click();
 
     expect(storeMock.loadAllRfidTags).toHaveBeenCalledTimes(1);

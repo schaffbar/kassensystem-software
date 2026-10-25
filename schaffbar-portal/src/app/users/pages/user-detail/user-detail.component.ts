@@ -14,7 +14,6 @@ import { ToolsStore } from '../../../tools/tools.store';
 import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { User, UserAddress } from '../../shared/models/user.model';
-import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
@@ -34,7 +33,7 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
     TranslatePipe,
     LowerCasePipe,
   ],
-  providers: [UserDetailStore, RfidTagAssignmentService],
+  providers: [UserDetailStore],
 })
 export class UserDetailComponent implements OnInit {
   private readonly dialog = inject(MatDialog);

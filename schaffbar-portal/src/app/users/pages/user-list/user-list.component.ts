@@ -1,4 +1,4 @@
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -33,7 +33,6 @@ import { UsersStore } from '../../shared/stores/users.store';
     ReactiveFormsModule,
     TranslatePipe,
   ],
-  providers: [UsersStore, TranslateService],
 })
 export class UserListComponent {
   readonly store = inject(UsersStore);
@@ -41,17 +40,21 @@ export class UserListComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  private readonly paginator = viewChild(MatPaginator);
+  private readonly sort = viewChild(MatSort);
 
   protected displayedColumns = ['lastName', 'firstName', 'actions'];
   protected usersCount = computed(() => this.store.entities().length);
   protected dataSource = computed(() => {
     const result = new MatTableDataSource<User>(this.store.entities());
-    result.sort = this.sort;
-    result.paginator = this.paginator;
+    result.sort = this.sort() ?? null;
+    result.paginator = this.paginator() ?? null;
     return result;
   });
+
+  constructor() {
+    this.store.loadAllUsers();
+  }
 
   protected reloadUsers(): void {
     this.store.loadAllUsers();

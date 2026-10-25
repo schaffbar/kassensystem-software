@@ -29,35 +29,40 @@ Wichtig zu wissen:
 
 ## Schritt 0 – Baseline
 
-- [ ] `ng build`, `ng lint`, `ng test` grün
+- [x] `ng build`, `ng lint`, `ng test` grün
 - [ ] Eigenen Branch anlegen
 
 ## Schritt 1 – Bugs und Provider aufräumen
 
 Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
 
-- [ ] **Doppelte Store-Instanzen entfernen.** `ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore` sind
+- [x] **Doppelte Store-Instanzen entfernen.** `ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore` sind
       `providedIn: 'root'` _und_ zusätzlich in den `providers` der Listen-Komponenten eingetragen. Folge: zwei
       Instanzen, doppelte Requests, ein in der Liste angelegter User fehlt im Root-`UsersStore` (den das Tool-Detail
       nutzt). Beantwortet auch den Punkt in `TODO.md` („tools store … Is it the same instance?" – nein).
-  - [ ] [tool-list.component.ts](../schaffbar-portal/src/app/tools/pages/tool-list/tool-list.component.ts)
-  - [ ] [user-list.component.ts](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.ts) – dort
+  - [x] [tool-list.component.ts](../schaffbar-portal/src/app/tools/pages/tool-list/tool-list.component.ts)
+  - [x] [user-list.component.ts](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.ts) – dort
         zusätzlich `TranslateService` aus `providers` entfernen
-  - [ ] [rfid-reader-list.component.ts](../schaffbar-portal/src/app/rfid-readers/pages/rfid-reader-list/rfid-reader-list.component.ts)
-  - [ ] [rfid-tag-list.component.ts](../schaffbar-portal/src/app/rfid-tags/pages/rfid-tag-list/rfid-tag-list.component.ts)
+  - [x] [rfid-reader-list.component.ts](../schaffbar-portal/src/app/rfid-readers/pages/rfid-reader-list/rfid-reader-list.component.ts)
+  - [x] [rfid-tag-list.component.ts](../schaffbar-portal/src/app/rfid-tags/pages/rfid-tag-list/rfid-tag-list.component.ts)
         (Spec anpassen: Mock dann über `TestBed`-`providers` statt `overrideComponent`)
-  - [ ] [user-detail.component.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.ts) –
+  - [x] [user-detail.component.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.ts) –
         `RfidTagAssignmentService` aus `providers` entfernen (ist schon `providedIn: 'root'`)
-- [ ] **Im selben Schritt: `@ViewChild` → `viewChild.required()`** in den 4 Listen (`MatPaginator`, `MatSort`).
+      Hinweis: Die Listen rufen jetzt im Konstruktor `load…()` auf, damit sie beim Öffnen weiterhin frische Daten
+      zeigen (vorher passierte das implizit über die neue Store-Instanz). Wegen `exhaustMap` bleibt es beim ersten
+      Besuch bei einem Request.
+- [x] **Im selben Schritt: `@ViewChild` → `viewChild()`** in den 4 Listen (`MatPaginator`, `MatSort`).
+      Bewusst nicht `.required()`: das `computed` wird schon vor dem ersten Rendern der Tabelle gelesen und würde
+      dann werfen. Mit `viewChild()` rechnet es einfach neu, sobald Paginator/Sort da sind.
       Das `dataSource`-`computed` liest heute nicht-reaktive `@ViewChild`-Werte; beim ersten Durchlauf sind
       `sort`/`paginator` `undefined`. Das funktioniert nur, weil die Entities später nochmal emittieren. Sobald die
       Store-Duplikate weg sind (Daten bereits gecacht), kann Sortierung/Paging sonst kaputtgehen.
       Migration: `ng generate @angular/core:signal-queries-migration`
-- [ ] [workshop-session.service.ts](../schaffbar-portal/src/app/users/shared/services/workshop-session.service.ts)
+- [x] [workshop-session.service.ts](../schaffbar-portal/src/app/users/shared/services/workshop-session.service.ts)
       `closeWorkshopSession`: `this.httpOptions` wird als **Body** gesendet → `put(url, {}, this.httpOptions)`
-- [ ] [app.config.ts](../schaffbar-portal/src/app/app.config.ts): `provideCheckNoChangesConfig(...)` nur im
+- [x] [app.config.ts](../schaffbar-portal/src/app/app.config.ts): `provideCheckNoChangesConfig(...)` nur im
       Dev-Build (z. B. über `environment.production` oder `isDevMode()`)
-- [ ] [app.config.ts](../schaffbar-portal/src/app/app.config.ts): `withXhr()` entfernen – wird nur für
+- [x] [app.config.ts](../schaffbar-portal/src/app/app.config.ts): `withXhr()` entfernen – wird nur für
       Upload-Progress gebraucht, sonst gilt der Fetch-Default
 - [ ] Test: Liste → Detail → zurück; Sortieren + Paging funktionieren; nur ein Request pro Store
 

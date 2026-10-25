@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +31,6 @@ import { RfidReaderStore } from '../../rfid-readers.store';
     TranslatePipe,
     LowerCasePipe,
   ],
-  providers: [RfidReaderStore],
 })
 export class RfidReaderListComponent {
   readonly store = inject(RfidReaderStore);
@@ -39,17 +38,21 @@ export class RfidReaderListComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  private readonly paginator = viewChild(MatPaginator);
+  private readonly sort = viewChild(MatSort);
 
   protected displayedColumns = ['macAddress', 'name', 'type', 'actions'];
   protected rfidReadersCount = computed(() => this.store.entities().length);
   protected dataSource = computed(() => {
     const result = new MatTableDataSource<RfidReader>(this.store.entities());
-    result.sort = this.sort;
-    result.paginator = this.paginator;
+    result.sort = this.sort() ?? null;
+    result.paginator = this.paginator() ?? null;
     return result;
   });
+
+  constructor() {
+    this.store.loadAllRfidReaders();
+  }
 
   protected reloadRfidReaders(): void {
     this.store.loadAllRfidReaders();

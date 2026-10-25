@@ -1,8 +1,9 @@
 import { DatePipe, registerLocaleData } from '@angular/common';
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import localeDe from '@angular/common/locales/de';
 import {
   ApplicationConfig,
+  isDevMode,
   LOCALE_ID,
   provideCheckNoChangesConfig,
   provideZonelessChangeDetection,
@@ -22,7 +23,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withXhr()),
+    provideHttpClient(),
     provideTranslateService({
       loader: provideTranslateHttpLoader({
         prefix: '/i18n/',
@@ -31,7 +32,7 @@ export const appConfig: ApplicationConfig = {
       fallbackLang: 'de',
       lang: 'de',
     }),
-    provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 }),
+    ...(isDevMode() ? [provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 })] : []),
     DatePipe,
     TranslatePipe,
     { provide: LOCALE_ID, useValue: 'de-DE' },
