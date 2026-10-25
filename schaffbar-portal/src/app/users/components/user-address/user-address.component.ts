@@ -2,11 +2,8 @@ import { Component, effect, inject, input, output, signal } from '@angular/core'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -16,27 +13,18 @@ import { UserAddress } from '../../shared/models/user.model';
   selector: 'schbar-user-address',
   templateUrl: './user-address.component.html',
   styleUrl: './user-address.component.scss',
-  imports: [
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatCardModule,
-    MatIconModule,
-    ReactiveFormsModule,
-    TranslatePipe,
-  ],
+  imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe],
 })
 export class UserAddressComponent {
-  userAddress = input.required<UserAddress>();
+  readonly userAddress = input.required<UserAddress>();
 
-  addressChanged = output<UserAddress>();
+  readonly addressChanged = output<UserAddress>();
 
-  private fb = inject(NonNullableFormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  readonly = signal(true);
+  protected readonly readonly = signal(true);
 
-  userAddressForm = this.fb.group({
+  protected readonly userAddressForm = this.fb.group({
     addressLine1: ['', Validators.required],
     addressLine2: [''],
     postalCode: ['', Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(5)])],
@@ -44,18 +32,18 @@ export class UserAddressComponent {
     country: ['', Validators.required],
   });
 
-  initialValues = effect(() => this.setInitialFormValues());
+  private readonly initialValues = effect(() => this.setInitialFormValues());
 
-  updateAddress() {
+  protected updateAddress() {
     this.readonly.set(false);
   }
 
-  onCancel() {
+  protected onCancel() {
     this.setInitialFormValues();
     this.readonly.set(true);
   }
 
-  onSave() {
+  protected onSave() {
     if (this.userAddressForm.valid) {
       const formValues = this.userAddressForm.value;
       // TODO: check if address really changed

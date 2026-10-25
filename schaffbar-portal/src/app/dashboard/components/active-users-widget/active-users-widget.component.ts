@@ -22,9 +22,9 @@ export class ActiveUsersWidgetComponent {
   readonly reload = output<void>();
   readonly userSelected = output<ActiveUser>();
 
-  protected displayedColumns = ['name', 'entryTime', 'duration'];
-  protected activeUsersCount = computed(() => this.activeUsers().length);
-  protected dataSource = computed(() => {
+  protected readonly displayedColumns = ['name', 'entryTime', 'duration'];
+  protected readonly activeUsersCount = computed(() => this.activeUsers().length);
+  protected readonly dataSource = computed(() => {
     return new MatTableDataSource<ActiveUser>(this.activeUsers());
   });
 

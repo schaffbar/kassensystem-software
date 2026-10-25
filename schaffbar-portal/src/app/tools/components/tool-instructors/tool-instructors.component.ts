@@ -30,25 +30,25 @@ import { User } from '../../../users/shared/models/user.model';
   ],
 })
 export class ToolInstructorsComponent {
-  toolId = input.required<string>();
-  instructorIds = input.required<string[]>();
-  allUsers = input.required<User[]>();
+  readonly toolId = input.required<string>();
+  readonly instructorIds = input.required<string[]>();
+  readonly allUsers = input.required<User[]>();
 
-  instructorsAdded = output<{ toolId: string; instructorIds: string[] }>();
-  instructorsRemoved = output<{ toolId: string; instructorIds: string[] }>();
+  readonly instructorsAdded = output<{ toolId: string; instructorIds: string[] }>();
+  readonly instructorsRemoved = output<{ toolId: string; instructorIds: string[] }>();
 
-  searchText = signal('');
-  selectedUsersToAdd = signal<User[]>([]);
-  selectedInstructorIdsToRemove = signal<Set<string>>(new Set());
+  protected readonly searchText = signal('');
+  protected readonly selectedUsersToAdd = signal<User[]>([]);
+  protected readonly selectedInstructorIdsToRemove = signal<Set<string>>(new Set());
 
-  private searchInput = viewChild<ElementRef>('searchInput');
+  private readonly searchInput = viewChild<ElementRef>('searchInput');
 
-  instructors = computed(() => {
+  protected readonly instructors = computed(() => {
     const ids = this.instructorIds();
     return this.allUsers().filter((user) => ids.includes(user.id));
   });
 
-  filteredUsers = computed(() => {
+  protected readonly filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase();
     const currentIds = this.instructorIds();
     const selectedIds = this.selectedUsersToAdd().map((u) => u.id);
@@ -62,7 +62,7 @@ export class ToolInstructorsComponent {
       );
   });
 
-  selectUser(user: User): void {
+  protected selectUser(user: User): void {
     this.selectedUsersToAdd.update((users) => [...users, user]);
     this.searchText.set('');
     const input = this.searchInput();
@@ -71,11 +71,11 @@ export class ToolInstructorsComponent {
     }
   }
 
-  removeSelectedUser(user: User): void {
+  protected removeSelectedUser(user: User): void {
     this.selectedUsersToAdd.update((users) => users.filter((u) => u.id !== user.id));
   }
 
-  addInstructors(): void {
+  protected addInstructors(): void {
     const ids = this.selectedUsersToAdd().map((u) => u.id);
     if (ids.length > 0) {
       this.instructorsAdded.emit({ toolId: this.toolId(), instructorIds: ids });
@@ -83,7 +83,7 @@ export class ToolInstructorsComponent {
     }
   }
 
-  toggleInstructorSelection(instructorId: string): void {
+  protected toggleInstructorSelection(instructorId: string): void {
     this.selectedInstructorIdsToRemove.update((set) => {
       const newSet = new Set(set);
       if (newSet.has(instructorId)) {
@@ -95,7 +95,7 @@ export class ToolInstructorsComponent {
     });
   }
 
-  removeInstructors(): void {
+  protected removeInstructors(): void {
     const ids = Array.from(this.selectedInstructorIdsToRemove());
     if (ids.length > 0) {
       this.instructorsRemoved.emit({ toolId: this.toolId(), instructorIds: ids });

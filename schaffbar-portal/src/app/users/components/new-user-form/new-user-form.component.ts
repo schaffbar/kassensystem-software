@@ -28,11 +28,11 @@ import { TranslatePipe } from '@ngx-translate/core';
   providers: [provideNativeDateAdapter()],
 })
 export class NewUserFormComponent {
-  private fb = inject(NonNullableFormBuilder);
-  private dialogRef = inject(MatDialogRef<NewUserFormComponent>);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<NewUserFormComponent>);
 
   // TODO: add validators for email, phone, postal code, ...
-  protected userForm = this.fb.group({
+  protected readonly userForm = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     dateOfBirth: [null, Validators.required],
@@ -48,8 +48,8 @@ export class NewUserFormComponent {
 
   // TODO: replace with a moment.js implementation
   private readonly _currentYear = new Date().getFullYear();
-  readonly minDate = new Date(this._currentYear - 100, 0, 1);
-  readonly maxDate = new Date(this._currentYear - 1, 11, 31);
+  protected readonly minDate = new Date(this._currentYear - 100, 0, 1);
+  protected readonly maxDate = new Date(this._currentYear - 1, 11, 31);
 
   protected save() {
     if (this.userForm.invalid) {

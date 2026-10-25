@@ -49,12 +49,8 @@ export const DashboardStore = signalStore(
   })),
   withHooks((store) => ({
     onInit() {
-      console.log('[DashboardStore - onInit] Loading active users and tools');
       store.loadActiveUsers();
       store.loadActiveTools();
-    },
-    onDestroy() {
-      console.log('[DashboardStore - onDestroy] Store destroyed');
     },
   })),
 );

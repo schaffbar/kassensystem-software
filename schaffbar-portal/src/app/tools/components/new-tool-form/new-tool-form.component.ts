@@ -44,7 +44,7 @@ export class NewToolFormComponent {
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  protected toolForm = this.fb.group({
+  protected readonly toolForm = this.fb.group({
     name: ['', [Validators.required, this.nameExistsValidator()]],
     description: [''],
     area: ['' as ToolArea | '', [Validators.required]],

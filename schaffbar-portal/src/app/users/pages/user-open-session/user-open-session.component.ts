@@ -17,7 +17,7 @@ import { UserDetailStore } from '../../shared/stores/user-detail.store';
 export class UserOpenSessionComponent {
   protected readonly detailsStore = inject(UserDetailStore);
 
-  userId = input.required<string>();
+  readonly userId = input.required<string>();
 
   protected closeSession(): void {
     this.detailsStore.closeSession(this.userId);

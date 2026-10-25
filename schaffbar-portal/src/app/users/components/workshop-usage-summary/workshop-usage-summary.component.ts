@@ -14,9 +14,9 @@ import { WorkshopUsage } from '../../shared/models/workshop-session.model';
   imports: [MatTableModule, DatePipe, TranslatePipe],
 })
 export class WorkshopUsageSummaryComponent {
-  usages = input.required<WorkshopUsage[]>();
-  totalTimeInMinutes = input.required<number>();
-  totalUnitsUsed = input.required<number>();
+  readonly usages = input.required<WorkshopUsage[]>();
+  readonly totalTimeInMinutes = input.required<number>();
+  readonly totalUnitsUsed = input.required<number>();
 
-  readonly displayedColumns: string[] = ['entryTime', 'exitTime', 'durationInMinutes', 'unitsUsed'];
+  protected readonly displayedColumns: string[] = ['entryTime', 'exitTime', 'durationInMinutes', 'unitsUsed'];
 }

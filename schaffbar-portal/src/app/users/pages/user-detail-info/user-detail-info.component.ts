@@ -1,7 +1,5 @@
 import { Component, input, output } from '@angular/core';
 
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-
 import { UserAddressComponent } from '../../components/user-address/user-address.component';
 import { UserContactComponent } from '../../components/user-contact/user-contact.component';
 import { User, UserAddress } from '../../shared/models/user.model';
@@ -10,19 +8,19 @@ import { User, UserAddress } from '../../shared/models/user.model';
   selector: 'schbar-user-detail-info',
   templateUrl: './user-detail-info.component.html',
   styleUrl: './user-detail-info.component.scss',
-  imports: [UserAddressComponent, UserContactComponent, MatSlideToggleModule],
+  imports: [UserAddressComponent, UserContactComponent],
 })
 export class UserDetailInfoComponent {
-  user = input.required<User>();
+  readonly user = input.required<User>();
 
-  addressChanged = output<UserAddress>();
-  contactChanged = output<{ email: string; phone: string }>();
+  readonly addressChanged = output<UserAddress>();
+  readonly contactChanged = output<{ email: string; phone: string }>();
 
-  onAddressChanged(address: UserAddress) {
+  protected onAddressChanged(address: UserAddress) {
     this.addressChanged.emit(address);
   }
 
-  onContactChanged(contact: { email: string; phone: string }) {
+  protected onContactChanged(contact: { email: string; phone: string }) {
     this.contactChanged.emit(contact);
   }
 }

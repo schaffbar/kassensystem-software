@@ -3,9 +3,8 @@ import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -25,25 +24,23 @@ import { RfidReaderStore } from '../../rfid-readers.store';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatDialogModule,
     MatIconModule,
-    MatInputModule,
     TranslatePipe,
     LowerCasePipe,
   ],
 })
 export class RfidReaderListComponent {
-  readonly store = inject(RfidReaderStore);
-  readonly router = inject(Router);
+  private readonly store = inject(RfidReaderStore);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
 
-  protected displayedColumns = ['macAddress', 'name', 'type', 'actions'];
-  protected rfidReadersCount = computed(() => this.store.entities().length);
-  protected dataSource = computed(() => {
+  protected readonly displayedColumns = ['macAddress', 'name', 'type', 'actions'];
+  protected readonly rfidReadersCount = computed(() => this.store.entities().length);
+  protected readonly dataSource = computed(() => {
     const result = new MatTableDataSource<RfidReader>(this.store.entities());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;

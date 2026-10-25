@@ -32,26 +32,26 @@ export class ToolRfidReaderAssignmentComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  tool = input.required<Tool>();
-  rfidReaders = input.required<RfidReader[]>();
-  assignedRfidReaderIds = input<Set<string>>(new Set());
+  readonly tool = input.required<Tool>();
+  readonly rfidReaders = input.required<RfidReader[]>();
+  readonly assignedRfidReaderIds = input<Set<string>>(new Set());
 
-  rfidReaderChanged = output<ChangeRfidReaderCommand>();
-  rfidReaderCleared = output<string>();
+  readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
+  readonly rfidReaderCleared = output<string>();
 
-  protected selectedRfidReaderId = signal('');
+  protected readonly selectedRfidReaderId = signal('');
 
-  protected isDirty = computed(() => {
+  protected readonly isDirty = computed(() => {
     const current = this.tool().rfidReaderId || '';
     return this.selectedRfidReaderId() !== current;
   });
 
-  protected isSelectedAssigned = computed(() => {
+  protected readonly isSelectedAssigned = computed(() => {
     const selectedId = this.selectedRfidReaderId();
     return !!selectedId && this.assignedRfidReaderIds().has(selectedId);
   });
 
-  protected filteredRfidReaders = computed(() => {
+  protected readonly filteredRfidReaders = computed(() => {
     return this.rfidReaders().filter((reader) => reader.type === RfidReaderType.SwitchBox);
   });
 
@@ -59,15 +59,15 @@ export class ToolRfidReaderAssignmentComponent {
     return this.assignedRfidReaderIds().has(readerId);
   }
 
-  syncSelection = effect(() => {
+  private readonly syncSelection = effect(() => {
     this.selectedRfidReaderId.set(this.tool().rfidReaderId || '');
   });
 
-  onCancel() {
+  protected onCancel() {
     this.selectedRfidReaderId.set(this.tool().rfidReaderId || '');
   }
 
-  onSave() {
+  protected onSave() {
     const command: ChangeRfidReaderCommand = {
       toolId: this.tool().id,
       rfidReaderId: this.selectedRfidReaderId() || undefined,
@@ -76,7 +76,7 @@ export class ToolRfidReaderAssignmentComponent {
     this.rfidReaderChanged.emit(command);
   }
 
-  onClear() {
+  protected onClear() {
     const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
       data: {
         title: this.translate.instant('tools.dialogs.clearRfidReader.title'),

@@ -26,36 +26,36 @@ import { CertificationRequirement, Tool, ToolArea, UpdateToolCommand } from '../
   ],
 })
 export class ToolDetailInfoComponent {
-  private fb = inject(NonNullableFormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  tool = input.required<Tool>();
+  readonly tool = input.required<Tool>();
 
-  toolUpdated = output<UpdateToolCommand>();
+  readonly toolUpdated = output<UpdateToolCommand>();
 
-  protected readonly = signal(true);
+  protected readonly readonly = signal(true);
 
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  toolForm = this.fb.group({
+  protected readonly toolForm = this.fb.group({
     name: [''],
     description: [''],
     area: ['' as ToolArea, [Validators.required]],
     certificationRequirement: ['' as CertificationRequirement, [Validators.required]],
   });
 
-  initialValues = effect(() => this.setInitialFormValues());
+  private readonly initialValues = effect(() => this.setInitialFormValues());
 
-  updateTool() {
+  protected updateTool() {
     this.readonly.set(false);
   }
 
-  onCancel() {
+  protected onCancel() {
     this.setInitialFormValues();
     this.readonly.set(true);
   }
 
-  onSave() {
+  protected onSave() {
     if (this.toolForm.valid) {
       const formValues = this.toolForm.value;
       const command: UpdateToolCommand = {

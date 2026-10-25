@@ -52,11 +52,7 @@ export const RfidReaderStore = signalStore(
   })),
   withHooks((store) => ({
     onInit() {
-      console.log('[Store - onInit] Loading all RFID readers');
       store.loadAllRfidReaders();
-    },
-    onDestroy() {
-      console.log('[Store - onDestroy] Store destroyed, resetting state');
     },
   })),
 );

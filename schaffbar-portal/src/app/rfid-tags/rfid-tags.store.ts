@@ -52,11 +52,7 @@ export const RfidTagStore = signalStore(
   })),
   withHooks((store) => ({
     onInit() {
-      console.log('[Store - onInit] Loading all RFID tags');
       store.loadAllRfidTags();
-    },
-    onDestroy() {
-      console.log('[Store - onDestroy] Store destroyed, resetting state');
     },
   })),
 );

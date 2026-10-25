@@ -30,12 +30,12 @@ import { User } from '../../shared/models/user.model';
   providers: [provideNativeDateAdapter()],
 })
 export class UpdateUserFormComponent {
-  user: User = inject(MAT_DIALOG_DATA);
+  private readonly user: User = inject(MAT_DIALOG_DATA);
 
-  private fb = inject(NonNullableFormBuilder);
-  private dialogRef = inject(MatDialogRef<UpdateUserFormComponent>);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<UpdateUserFormComponent>);
 
-  protected userForm = this.fb.group({
+  protected readonly userForm = this.fb.group({
     firstName: [this.user.firstName, Validators.required],
     lastName: [this.user.lastName, Validators.required],
     dateOfBirth: [this.user.dateOfBirth, Validators.required],
@@ -44,8 +44,8 @@ export class UpdateUserFormComponent {
 
   // TODO: replace with a moment.js implementation
   private readonly _currentYear = new Date().getFullYear();
-  readonly minDate = new Date(this._currentYear - 100, 0, 1);
-  readonly maxDate = new Date(this._currentYear - 1, 11, 31);
+  protected readonly minDate = new Date(this._currentYear - 100, 0, 1);
+  protected readonly maxDate = new Date(this._currentYear - 1, 11, 31);
 
   protected save() {
     if (this.userForm.invalid) {

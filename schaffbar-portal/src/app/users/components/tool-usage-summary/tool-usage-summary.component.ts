@@ -15,7 +15,7 @@ import { ToolUsageSummary } from '../../shared/models/workshop-session.model';
   imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe],
 })
 export class ToolUsageSummaryComponent {
-  summary = input.required<ToolUsageSummary>();
+  readonly summary = input.required<ToolUsageSummary>();
 
-  readonly toolUsageColumns: string[] = ['startTime', 'endTime', 'durationInMinutes', 'unitsUsed'];
+  protected readonly toolUsageColumns: string[] = ['startTime', 'endTime', 'durationInMinutes', 'unitsUsed'];
 }

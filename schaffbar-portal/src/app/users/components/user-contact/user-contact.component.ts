@@ -16,31 +16,31 @@ import { User } from '../../shared/models/user.model';
   imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe],
 })
 export class UserContactComponent {
-  user = input.required<User>();
+  readonly user = input.required<User>();
 
-  contactChanged = output<{ email: string; phone: string }>();
+  readonly contactChanged = output<{ email: string; phone: string }>();
 
-  private fb = inject(NonNullableFormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  readonly = signal(true);
+  protected readonly readonly = signal(true);
 
-  userContactForm = this.fb.group({
+  protected readonly userContactForm = this.fb.group({
     email: ['', Validators.required],
     phone: [''],
   });
 
-  initialValues = effect(() => this.setInitialFormValues());
+  private readonly initialValues = effect(() => this.setInitialFormValues());
 
-  updateContact() {
+  protected updateContact() {
     this.readonly.set(false);
   }
 
-  onCancel() {
+  protected onCancel() {
     this.setInitialFormValues();
     this.readonly.set(true);
   }
 
-  onSave() {
+  protected onSave() {
     if (this.userContactForm.valid) {
       const formValues = this.userContactForm.value;
       // TODO: check if contact really changed

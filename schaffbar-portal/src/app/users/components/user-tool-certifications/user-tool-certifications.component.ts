@@ -23,17 +23,17 @@ export class UserToolCertificationsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  certifications = input.required<ToolCertification[]>();
-  allTools = input.required<Tool[]>();
+  readonly certifications = input.required<ToolCertification[]>();
+  readonly allTools = input.required<Tool[]>();
 
-  pauseCertification = output<{ customerId: string; toolId: string }>();
-  reactivateCertification = output<{ customerId: string; toolId: string }>();
-  revokeCertification = output<{ customerId: string; toolId: string }>();
+  readonly pauseCertification = output<{ customerId: string; toolId: string }>();
+  readonly reactivateCertification = output<{ customerId: string; toolId: string }>();
+  readonly revokeCertification = output<{ customerId: string; toolId: string }>();
 
-  readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
-  readonly CertificationStatus = ToolCertificationStatus;
+  protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
+  protected readonly CertificationStatus = ToolCertificationStatus;
 
-  toolNameMap = computed(() => {
+  protected readonly toolNameMap = computed(() => {
     const map = new Map<string, string>();
     for (const t of this.allTools()) {
       map.set(t.id, t.name);
@@ -41,7 +41,7 @@ export class UserToolCertificationsComponent {
     return map;
   });
 
-  onPause(cert: ToolCertification): void {
+  protected onPause(cert: ToolCertification): void {
     const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
       data: {
         title: this.translate.instant('users.dialogs.certifications.pauseCertification.title'),
@@ -60,7 +60,7 @@ export class UserToolCertificationsComponent {
     });
   }
 
-  onReactivate(cert: ToolCertification): void {
+  protected onReactivate(cert: ToolCertification): void {
     const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
       data: {
         title: this.translate.instant('users.dialogs.certifications.reactivateCertification.title'),
@@ -79,7 +79,7 @@ export class UserToolCertificationsComponent {
     });
   }
 
-  onRevoke(cert: ToolCertification): void {
+  protected onRevoke(cert: ToolCertification): void {
     const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
       data: {
         title: this.translate.instant('users.dialogs.certifications.revokeCertification.title'),

@@ -69,11 +69,7 @@ export const UsersStore = signalStore(
   })),
   withHooks((store) => ({
     onInit() {
-      console.log('[Store - onInit] Loading all users');
       store.loadAllUsers();
-    },
-    onDestroy() {
-      console.log('[Store - onDestroy] Store destroyed');
     },
   })),
 );

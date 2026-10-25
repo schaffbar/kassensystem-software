@@ -219,7 +219,6 @@ export const ToolDetailStore = signalStore(
         const toolId = store.toolId();
         const dirty = store.dirty();
         if (dirty && toolId) {
-          console.log('[Store - onInit] Loading tool details for toolId:', toolId, 'Dirty:', dirty);
           store.loadSelectedTool(toolId);
           store.loadToolCertifications(toolId);
         }

@@ -1,9 +1,8 @@
 import { Component, computed, inject, viewChild } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -27,15 +26,13 @@ import { UsersStore } from '../../shared/stores/users.store';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatDialogModule,
     MatIconModule,
     MatInputModule,
-    ReactiveFormsModule,
     TranslatePipe,
   ],
 })
 export class UserListComponent {
-  readonly store = inject(UsersStore);
+  private readonly store = inject(UsersStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -43,9 +40,9 @@ export class UserListComponent {
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
 
-  protected displayedColumns = ['lastName', 'firstName', 'actions'];
-  protected usersCount = computed(() => this.store.entities().length);
-  protected dataSource = computed(() => {
+  protected readonly displayedColumns = ['lastName', 'firstName', 'actions'];
+  protected readonly usersCount = computed(() => this.store.entities().length);
+  protected readonly dataSource = computed(() => {
     const result = new MatTableDataSource<User>(this.store.entities());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;

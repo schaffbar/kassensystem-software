@@ -18,8 +18,8 @@ import { DashboardStore } from '../../dashboard.store';
   providers: [DashboardStore],
 })
 export class DashboardComponent {
-  readonly store = inject(DashboardStore);
-  readonly toolsStore = inject(ToolsStore);
+  protected readonly store = inject(DashboardStore);
+  protected readonly toolsStore = inject(ToolsStore);
   private readonly router = inject(Router);
 
   protected reloadActiveUsers(): void {

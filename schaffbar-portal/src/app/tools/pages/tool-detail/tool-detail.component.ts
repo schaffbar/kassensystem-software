@@ -41,13 +41,13 @@ export class ToolDetailComponent {
   private readonly toolsStore = inject(ToolsStore);
   private readonly usersStore = inject(UsersStore);
 
-  id = input.required<string>();
+  readonly id = input.required<string>();
 
-  selectedTool = computed(() => this.detailsStore.tool());
-  toolCertifications = computed(() => this.detailsStore.toolCertifications());
-  allUsers = computed(() => this.usersStore.entities());
-  allRfidReaders = computed(() => this.rfidReaderStore.entities());
-  assignedRfidReaderIds = computed(() => {
+  protected readonly selectedTool = computed(() => this.detailsStore.tool());
+  protected readonly toolCertifications = computed(() => this.detailsStore.toolCertifications());
+  protected readonly allUsers = computed(() => this.usersStore.entities());
+  protected readonly allRfidReaders = computed(() => this.rfidReaderStore.entities());
+  protected readonly assignedRfidReaderIds = computed(() => {
     const currentToolId = this.selectedTool()?.id;
     const ids = this.toolsStore
       .entities()

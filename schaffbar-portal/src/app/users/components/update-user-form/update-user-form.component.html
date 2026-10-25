@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>{{ 'users.dialogs.editUser.title' | translate }}</h2>
 
-<mat-divider></mat-divider>
+<mat-divider />
 
 <mat-dialog-content [formGroup]="userForm">
   <div class="row">
@@ -56,8 +56,8 @@
             {{ 'users.dialogs.addNewUser.errors.required' | translate }}
           </mat-error>
         }
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker startView="multi-year" disabled="false"></mat-datepicker>
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-datepicker #picker startView="multi-year" disabled="false" />
       </mat-form-field>
     </div>
     <div class="col">

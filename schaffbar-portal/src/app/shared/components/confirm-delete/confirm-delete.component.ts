@@ -19,5 +19,5 @@ export interface ConfirmDeleteDialogData {
   imports: [MatDialogModule, MatDialogTitle, MatDialogContent, MatButtonModule, TranslatePipe],
 })
 export class ConfirmDeleteComponent {
-  data: ConfirmDeleteDialogData = inject(MAT_DIALOG_DATA);
+  protected readonly data: ConfirmDeleteDialogData = inject(MAT_DIALOG_DATA);
 }

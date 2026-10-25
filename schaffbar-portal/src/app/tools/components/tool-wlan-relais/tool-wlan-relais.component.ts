@@ -31,21 +31,21 @@ const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?
 export class ToolWlanRelaisComponent {
   private readonly fb = inject(NonNullableFormBuilder);
 
-  tool = input.required<Tool>();
+  readonly tool = input.required<Tool>();
 
-  wlanRelaisUpdated = output<SetWlanRelaisCommand>();
-  wlanRelaisCleared = output<string>();
+  readonly wlanRelaisUpdated = output<SetWlanRelaisCommand>();
+  readonly wlanRelaisCleared = output<string>();
 
   protected readonly wlanRelaisTypes = Object.values(WlanRelaisType);
 
-  protected form = this.fb.group({
+  protected readonly form = this.fb.group({
     wlanRelaisType: [''],
     ipAddress: ['', [Validators.required, Validators.pattern(IP_PATTERN)]],
   });
 
-  private formValues = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  private readonly formValues = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
-  protected derivedCommands = computed(() => {
+  protected readonly derivedCommands = computed(() => {
     const values = this.formValues();
     const type = (values.wlanRelaisType || '') as WlanRelaisType | '';
     const ip = values.ipAddress || '';
@@ -60,7 +60,7 @@ export class ToolWlanRelaisComponent {
     };
   });
 
-  syncValues = effect(() => {
+  private readonly syncValues = effect(() => {
     this.resetFormFromTool();
   });
 

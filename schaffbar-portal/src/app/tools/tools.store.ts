@@ -66,17 +66,7 @@ export const ToolsStore = signalStore(
   })),
   withHooks((store) => ({
     onInit() {
-      console.log('[Store - onInit] Loading all tools');
       store.loadAllTools();
-    },
-    onDestroy() {
-      console.log('[Store - onDestroy] Store destroyed, resetting state');
-      // patchState(store, {
-      //   isLoading: false,
-      //   currentPage: 1,
-      //   pageCount: 1,
-      // });
-      // patchState(store, removeAllEntities({ collection: 'task' }));
     },
   })),
 );

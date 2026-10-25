@@ -2,7 +2,7 @@
 
 <mat-dialog-content>
   {{ data.message }}
-  @if (!!data.entity) {
+  @if (data.entity) {
     <span>({{ data.entity }})</span>
   }
 </mat-dialog-content>

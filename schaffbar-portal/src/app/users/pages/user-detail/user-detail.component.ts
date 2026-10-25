@@ -41,10 +41,10 @@ export class UserDetailComponent implements OnInit {
   protected readonly detailsStore = inject(UserDetailStore);
   private readonly toolsStore = inject(ToolsStore);
 
-  id = input.required<string>();
+  readonly id = input.required<string>();
 
-  protected selectedTabIndex = signal(0);
-  protected allTools = computed(() => this.toolsStore.entities());
+  protected readonly selectedTabIndex = signal(0);
+  protected readonly allTools = computed(() => this.toolsStore.entities());
 
   constructor() {
     this.detailsStore.setUserId(this.id);

@@ -30,9 +30,9 @@ export class ActiveToolsWidgetComponent {
 
   readonly reload = output<void>();
 
-  protected displayedColumns = ['status', 'name', 'user'];
-  protected activeToolsCount = computed(() => this.activeTools().length);
-  protected dataSource = computed(() => {
+  protected readonly displayedColumns = ['status', 'name', 'user'];
+  protected readonly activeToolsCount = computed(() => this.activeTools().length);
+  protected readonly dataSource = computed(() => {
     const activeToolMap = new Map(this.activeTools().map((at) => [at.toolId, at]));
     const rows: ToolStatusRow[] = this.tools()
       .map((tool) => {

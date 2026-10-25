@@ -38,7 +38,7 @@ export class ChangeRfidReaderTypeFormComponent {
 
   protected readonly rfidReaderTypes = Object.values(RfidReaderType);
 
-  protected typeForm = this.fb.group({
+  protected readonly typeForm = this.fb.group({
     type: [this.data.rfidReader.type, Validators.required],
   });
 

@@ -310,7 +310,6 @@ export const UserDetailStore = signalStore(
         const userId = store.userId();
         const dirty = store.dirty();
         if (dirty && userId) {
-          console.log('[Store - onInit] Loading user details for userId:', userId, ', dirty:', dirty);
           store.loadSelectedUser(userId);
           store.loadRfidTagAssignments(userId);
           store.loadOpenSession(userId);

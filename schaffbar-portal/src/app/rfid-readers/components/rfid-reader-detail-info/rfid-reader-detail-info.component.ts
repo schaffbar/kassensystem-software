@@ -17,33 +17,34 @@ import { RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
   imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe, LowerCasePipe],
 })
 export class RfidReaderDetailInfoComponent {
-  rfidReader = input.required<RfidReader>();
+  readonly rfidReader = input.required<RfidReader>();
 
-  readerChanged = output<UpdateRfidReaderCommand>();
+  readonly readerChanged = output<UpdateRfidReaderCommand>();
 
-  private fb = inject(NonNullableFormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  protected readonly = signal(true);
+  // TODO: change readonly name to ...
+  protected readonly readonly = signal(true);
 
   // TODO: make type read only initially
-  rfidReaderForm = this.fb.group({
+  protected readonly rfidReaderForm = this.fb.group({
     macAddress: ['', Validators.required],
     name: [''],
     socketName: [''],
   });
 
-  initialValues = effect(() => this.setInitialFormValues());
+  private readonly initialValues = effect(() => this.setInitialFormValues());
 
-  updateReader() {
+  protected updateReader() {
     this.readonly.set(false);
   }
 
-  onCancel() {
+  protected onCancel() {
     this.setInitialFormValues();
     this.readonly.set(true);
   }
 
-  onSave() {
+  protected onSave() {
     if (this.rfidReaderForm.valid) {
       const formValues = this.rfidReaderForm.value;
       const command: UpdateRfidReaderCommand = {

@@ -1,11 +1,9 @@
 import { Component, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslateService } from '@ngx-translate/core';
 import { take } from 'rxjs';
@@ -25,7 +23,7 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
   selector: 'schbar-rfid-reader-detail',
   templateUrl: './rfid-reader-detail.component.html',
   styleUrl: './rfid-reader-detail.component.scss',
-  imports: [RfidReaderDetailInfoComponent, MatTabsModule, MatButtonModule, MatChipsModule, MatIconModule],
+  imports: [RfidReaderDetailInfoComponent, MatButtonModule, MatIconModule],
   providers: [RfidReaderDetailStore],
 })
 export class RfidReaderDetailComponent {
@@ -35,7 +33,7 @@ export class RfidReaderDetailComponent {
   private readonly toolsService = inject(ToolsService);
   private readonly translate = inject(TranslateService);
 
-  id = input.required<string>();
+  readonly id = input.required<string>();
 
   constructor() {
     this.detailsStore.setRfidReaderId(this.id);

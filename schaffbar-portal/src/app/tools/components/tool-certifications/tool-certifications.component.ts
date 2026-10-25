@@ -40,26 +40,26 @@ export class ToolCertificationsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
-  toolId = input.required<string>();
-  certifications = input.required<ToolCertification[]>();
-  allUsers = input.required<User[]>();
-  instructorIds = input.required<string[]>();
+  readonly toolId = input.required<string>();
+  readonly certifications = input.required<ToolCertification[]>();
+  readonly allUsers = input.required<User[]>();
+  readonly instructorIds = input.required<string[]>();
 
-  batchCreate = output<BatchCreateToolCertificationCommand>();
-  deleteCertification = output<{ customerId: string; toolId: string }>();
+  readonly batchCreate = output<BatchCreateToolCertificationCommand>();
+  readonly deleteCertification = output<{ customerId: string; toolId: string }>();
 
-  readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
-  readonly CertificationStatus = ToolCertificationStatus;
+  protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
+  protected readonly CertificationStatus = ToolCertificationStatus;
 
-  searchText = signal('');
-  selectedUsers = signal<User[]>([]);
-  selectedCertifier = signal<User | null>(null);
-  certifierSearchText = signal('');
+  protected readonly searchText = signal('');
+  protected readonly selectedUsers = signal<User[]>([]);
+  protected readonly selectedCertifier = signal<User | null>(null);
+  protected readonly certifierSearchText = signal('');
 
-  private userSearchInput = viewChild<ElementRef>('userSearchInput');
-  private certifierSearchInput = viewChild<ElementRef>('certifierSearchInput');
+  private readonly userSearchInput = viewChild<ElementRef>('userSearchInput');
+  private readonly certifierSearchInput = viewChild<ElementRef>('certifierSearchInput');
 
-  userNameMap = computed(() => {
+  protected readonly userNameMap = computed(() => {
     const map = new Map<string, string>();
     for (const u of this.allUsers()) {
       map.set(u.id, `${u.firstName} ${u.lastName}`);
@@ -67,7 +67,7 @@ export class ToolCertificationsComponent {
     return map;
   });
 
-  filteredUsers = () => {
+  protected readonly filteredUsers = () => {
     const search = this.searchText().toLowerCase();
     const selectedIds = new Set(this.selectedUsers().map((u) => u.id));
     const certifiedUserIds = new Set(this.certifications().map((c) => c.customerId));
@@ -81,7 +81,7 @@ export class ToolCertificationsComponent {
     );
   };
 
-  filteredCertifiers = () => {
+  protected readonly filteredCertifiers = () => {
     const search = this.certifierSearchText().toLowerCase();
     const ids = new Set(this.instructorIds());
     return this.allUsers().filter(
@@ -89,30 +89,30 @@ export class ToolCertificationsComponent {
     );
   };
 
-  onUserSelected(user: User): void {
+  protected onUserSelected(user: User): void {
     this.selectedUsers.update((users) => [...users, user]);
     this.searchText.set('');
     this.userSearchInput()?.nativeElement.blur();
   }
 
-  removeSelectedUser(user: User): void {
+  protected removeSelectedUser(user: User): void {
     this.selectedUsers.update((users) => users.filter((u) => u.id !== user.id));
   }
 
-  onCertifierInput(value: string): void {
+  protected onCertifierInput(value: string): void {
     this.certifierSearchText.set(value);
     if (this.selectedCertifier()) {
       this.selectedCertifier.set(null);
     }
   }
 
-  onCertifierSelected(user: User): void {
+  protected onCertifierSelected(user: User): void {
     this.selectedCertifier.set(user);
     this.certifierSearchText.set(`${user.firstName} ${user.lastName}`);
     this.certifierSearchInput()?.nativeElement.blur();
   }
 
-  onSubmitBatch(): void {
+  protected onSubmitBatch(): void {
     const certifier = this.selectedCertifier();
     if (this.selectedUsers().length === 0 || !certifier) return;
 
@@ -127,7 +127,7 @@ export class ToolCertificationsComponent {
     this.certifierSearchText.set('');
   }
 
-  onDelete(cert: ToolCertification): void {
+  protected onDelete(cert: ToolCertification): void {
     const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
       data: {
         title: this.translate.instant('users.dialogs.certifications.deleteCertification.title'),
