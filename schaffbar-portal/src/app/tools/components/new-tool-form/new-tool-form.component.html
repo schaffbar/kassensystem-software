@@ -12,17 +12,9 @@
           matInput
           [placeholder]="'tools.shared.toolProperties.name' | translate"
           [formField]="toolForm.name" />
-        @if (toolForm.name().getError('required')) {
-          <mat-error>
-            {{ 'tools.shared.toolProperties.name' | translate }}
-            {{ 'shared.dialogs.errors.required' | translate }}
-          </mat-error>
-        }
-        @if (toolForm.name().getError('nameExists')) {
-          <mat-error>
-            {{ 'tools.dialogs.addTool.errors.nameExists' | translate }}
-          </mat-error>
-        }
+        <mat-error>
+          <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
+        </mat-error>
       </mat-form-field>
     </div>
   </div>
@@ -51,12 +43,9 @@
             <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
           }
         </mat-select>
-        @if (toolForm.area().getError('required')) {
-          <mat-error>
-            {{ 'tools.shared.toolProperties.area' | translate }}
-            {{ 'shared.dialogs.errors.required' | translate }}
-          </mat-error>
-        }
+        <mat-error>
+          <schbar-field-error [field]="toolForm.area" label="tools.shared.toolProperties.area" />
+        </mat-error>
       </mat-form-field>
     </div>
   </div>
@@ -73,12 +62,11 @@
             </mat-option>
           }
         </mat-select>
-        @if (toolForm.certificationRequirement().getError('required')) {
-          <mat-error>
-            {{ 'tools.shared.toolProperties.certificationRequirement' | translate }}
-            {{ 'shared.dialogs.errors.required' | translate }}
-          </mat-error>
-        }
+        <mat-error>
+          <schbar-field-error
+            [field]="toolForm.certificationRequirement"
+            label="tools.shared.toolProperties.certificationRequirement" />
+        </mat-error>
       </mat-form-field>
     </div>
   </div>

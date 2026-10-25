@@ -1,5 +1,14 @@
 {
   "shared": {
+    "errors": {
+      "required": "{{field}} is required",
+      "email": "Please enter a valid email address",
+      "minLength": "{{field}} must be at least {{value}} characters long",
+      "maxLength": "{{field}} must be at most {{value}} characters long",
+      "min": "{{field}} must be at least {{value}}",
+      "max": "{{field}} must be at most {{value}}",
+      "invalid": "{{field}} is invalid"
+    },
     "table": {
       "actionsColumn": "Actions"
     },

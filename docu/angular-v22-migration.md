@@ -166,8 +166,14 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - Kein `null` im Model: „nichts ausgewählt“ ist `''` (Typ z. B. `RfidReaderType | ''`), `required()` wertet `''`
     als leer
   - Template: `[formField]="xyzForm.type"` statt `formControlName`; kein `[formGroup]`, kein `<form>` nötig
-  - Fehler: `@if (xyzForm.type().getError('required')) { <mat-error>…</mat-error> }` – `getError` ist pro `kind`
-    typisiert
+  - Fehler: pro Feld **eine Zeile**, kein `@if` pro Prüfung:
+    `<mat-error><schbar-field-error [field]="xyzForm.type" label="<label-key>" /></mat-error>`
+    ([FieldErrorComponent](../schaffbar-portal/src/app/shared/components/field-error/field-error.component.ts)).
+    Zeigt den ersten Fehler; Standard-Validatoren werden per `kind` über `shared.errors.*` übersetzt
+    (`{{field}}` = Label, `{{value}}` = z. B. Mindestlänge). Material zeigt `<mat-error>` nur bei invalid + touched.
+  - Fachliche Fehler bringen ihren Übersetzungsschlüssel per `message` mit – im Schema, nicht im Template:
+    `validate(...)` → `{ kind: 'nameExists', message: 'tools.dialogs.addTool.errors.nameExists' }`,
+    `pattern(schema.ip, IP_PATTERN, { message: '...' })`
   - Speichern: `submit(this.xyzForm, async () => { … })` – markiert alles als touched und ruft die Action nur bei
     gültigem Formular auf. Im Callback per Narrowing statt Cast auf den fachlichen Typ kommen
     (`const { type } = this.model(); if (!type) return;`)
@@ -202,6 +208,9 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [ ] [tool-rfid-reader-assignment](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
       `ngModel` → Signal Form mit einem Feld (oder beim `linkedSignal` aus Schritt 3 bleiben)
 - [ ] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
+- [ ] Alte Fehler-Übersetzungen entfernen, sobald kein Template sie mehr nutzt: `shared.dialogs.errors.*`,
+      `users.dialogs.addNewUser.errors.*` (in `de.json` und `en.json`); `tools.pages.toolDetails.errors.invalidIpAddress`
+      und `tools.dialogs.addTool.errors.nameExists` bleiben (werden per `message` genutzt)
 
 ## Schritt 6 – `httpResource` statt Dirty-Flag-Muster
 

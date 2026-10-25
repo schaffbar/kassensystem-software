@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ChangeRfidReaderTypeCommand, RfidReader, RfidReaderType } from '../../rfid-reader.model';
 
 export interface ChangeRfidReaderTypeDialogData {
@@ -27,6 +28,7 @@ interface ChangeRfidReaderTypeModel {
   imports: [
     LowerCasePipe,
     FormField,
+    FieldErrorComponent,
     MatSelectModule,
     MatButtonModule,
     MatDialogModule,

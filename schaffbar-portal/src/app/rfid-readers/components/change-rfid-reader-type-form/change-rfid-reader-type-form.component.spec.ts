@@ -68,9 +68,7 @@ describe('ChangeRfidReaderTypeFormComponent', () => {
     await clickSave();
 
     const formField = await loader.getHarness(MatFormFieldHarness);
-    expect(await formField.getTextErrors()).toEqual([
-      'rfidReaders.shared.rfidReaderProperties.type shared.dialogs.errors.required',
-    ]);
+    expect(await formField.getTextErrors()).toEqual(['shared.errors.required']);
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 });

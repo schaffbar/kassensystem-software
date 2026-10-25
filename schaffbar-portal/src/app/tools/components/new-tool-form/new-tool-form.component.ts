@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement, CreateToolCommand, ToolArea } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 
@@ -26,6 +27,7 @@ interface NewToolModel {
   styleUrl: './new-tool-form.component.scss',
   imports: [
     FormField,
+    FieldErrorComponent,
     LowerCasePipe,
     MatInputModule,
     MatButtonModule,
@@ -57,7 +59,7 @@ export class NewToolFormComponent {
 
       // reads the store signal, so the check re-runs when the tool list changes
       const exists = this.toolsStore.entities().some((tool) => tool.name.toLowerCase() === name);
-      return exists ? { kind: 'nameExists' } : undefined;
+      return exists ? { kind: 'nameExists', message: 'tools.dialogs.addTool.errors.nameExists' } : undefined;
     });
     required(schema.area);
     required(schema.certificationRequirement);

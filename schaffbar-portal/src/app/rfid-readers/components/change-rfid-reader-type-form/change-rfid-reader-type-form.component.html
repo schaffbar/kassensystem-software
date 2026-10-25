@@ -14,12 +14,9 @@
             </mat-option>
           }
         </mat-select>
-        @if (typeForm.type().getError('required')) {
-          <mat-error>
-            {{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}
-            {{ 'shared.dialogs.errors.required' | translate }}
-          </mat-error>
-        }
+        <mat-error>
+          <schbar-field-error [field]="typeForm.type" label="rfidReaders.shared.rfidReaderProperties.type" />
+        </mat-error>
       </mat-form-field>
     </div>
   </div>

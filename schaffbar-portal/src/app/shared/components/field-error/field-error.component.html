@@ -1,0 +1,3 @@
+@if (message(); as message) {
+  {{ message.key | translate: { field: (label() | translate), value: message.value } }}
+}

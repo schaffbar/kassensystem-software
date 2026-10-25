@@ -68,7 +68,7 @@ describe('NewToolFormComponent', () => {
 
     const formFields = await loader.getAllHarnesses(MatFormFieldHarness);
     const errors = await Promise.all(formFields.map((field) => field.getTextErrors()));
-    expect(errors.flat().filter((error) => error.includes('shared.dialogs.errors.required')).length).toBe(3);
+    expect(errors.flat().filter((error) => error === 'shared.errors.required').length).toBe(3);
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
