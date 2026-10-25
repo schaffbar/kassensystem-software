@@ -2,7 +2,6 @@ import { Component, computed, input, linkedSignal, output } from '@angular/core'
 import { form, FormField, FormRoot, hidden, pattern, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -23,16 +22,7 @@ interface WlanRelaisModel {
   selector: 'schbar-tool-wlan-relais',
   templateUrl: './tool-wlan-relais.component.html',
   styleUrl: './tool-wlan-relais.component.scss',
-  imports: [
-    FormField,
-    FormRoot,
-    FieldErrorComponent,
-    MatSelectModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    TranslatePipe,
-  ],
+  imports: [FormField, FormRoot, FieldErrorComponent, MatSelectModule, MatInputModule, MatButtonModule, TranslatePipe],
 })
 export class ToolWlanRelaisComponent {
   readonly tool = input.required<Tool>();
@@ -79,7 +69,8 @@ export class ToolWlanRelaisComponent {
     submit(this.wlanRelaisForm, async () => {
       const { wlanRelaisType, ipAddress } = this.model();
       if (wlanRelaisType) {
-        this.wlanRelaisUpdated.emit({ toolId: this.tool().id, wlanRelaisType, ipAddress });
+        const command: SetWlanRelaisCommand = { toolId: this.tool().id, wlanRelaisType, ipAddress };
+        this.wlanRelaisUpdated.emit(command);
       } else {
         this.wlanRelaisCleared.emit(this.tool().id);
       }

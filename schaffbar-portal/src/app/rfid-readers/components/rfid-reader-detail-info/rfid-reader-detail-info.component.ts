@@ -48,15 +48,15 @@ export class RfidReaderDetailInfoComponent {
     this.isEditing.set(false);
   }
 
-  // called by (submit) of <form [formRoot]>: save button and Enter in a field
   protected onSave(): void {
     submit(this.readerForm, async () => {
       const { name, socketName } = this.model();
-      this.readerChanged.emit({
+      const command: UpdateRfidReaderCommand = {
         id: this.rfidReader().id,
         name: name || undefined,
         socketName: socketName || undefined,
-      });
+      };
+      this.readerChanged.emit(command);
       this.isEditing.set(false);
     });
   }

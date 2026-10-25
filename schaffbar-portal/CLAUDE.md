@@ -13,6 +13,18 @@ Why: an unexported function is private to the file (stronger than TypeScript's `
 has no state, and can be used anywhere without caring about `this`. The class itself only contains what belongs to the
 component (inputs, outputs, signals, handlers).
 
+## Forms
+
+- Every form has a `<form [formRoot]="xyzForm" (submit)="onSave()">`; `onSave()` calls
+  `submit(this.xyzForm, async () => …)`.
+- Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
+  without `type` submits the form, so e.g. "cancel" would save.
+- The result of `onSave()` is built as an explicitly typed variable before it is passed on – for readability, even
+  where `dialogRef.close()` / `output.emit()` would infer the type:
+  `const command: CreateToolCommand = { … }; this.dialogRef.close(command);`
+- Form fields that only display a value and are never editable get the global class `readonly-field`
+  (`src/styles.scss`).
+
 ## Dialogs
 
 - **Cancel closes without a result** (`undefined`), like Escape or a backdrop click:

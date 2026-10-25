@@ -197,6 +197,9 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
     `[mat-dialog-close]="undefined"`, Speichern `this.dialogRef.close(result)` mit
     `inject(MatDialogRef<Comp, Result>)`; der Aufrufer öffnet typisiert `dialog.open<Comp, Data, Result>(…)` – keine
     handannotierten Typen im `subscribe`
+  - Reine Anzeigefelder (nie bearbeitbar, z. B. MAC-Adresse, abgeleitete Befehle) bekommen die globale Klasse
+    `readonly-field` (`src/styles.scss`). `[hideRequiredMarker]="true"` nur bei Formularen mit Lesemodus, nicht bei
+    immer bearbeitbaren (sonst fehlt das Pflichtfeld-Sternchen)
   - Kein `[placeholder]`, der nur das `<mat-label>` wiederholt; `floatLabel="always"` statt `[floatLabel]="'always'"`
   - Inline-Bearbeitung: `isEditing = signal(false)` + `readonly(schema.x, { when: () => !this.isEditing() })` pro
     Feld (`readonly()` auf einem Elternpfad vererbt sich laut Doku nicht garantiert); kein `[readonly]` im Template
@@ -233,6 +236,10 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [ ] [tool-rfid-reader-assignment](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
       `ngModel` → Signal Form mit einem Feld (oder beim `linkedSignal` aus Schritt 3 bleiben)
 - [ ] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
+- [ ] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
+      jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
+      `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →
+      doppelter Abstand). Nach der Migration aller Formulare einmal in die globalen Styles ziehen
 - [ ] Alte Fehler-Übersetzungen entfernen, sobald kein Template sie mehr nutzt: `shared.dialogs.errors.*`,
       `users.dialogs.addNewUser.errors.*` (in `de.json` und `en.json`); `tools.pages.toolDetails.errors.invalidIpAddress`
       und `tools.dialogs.addTool.errors.nameExists` bleiben (werden per `message` genutzt)

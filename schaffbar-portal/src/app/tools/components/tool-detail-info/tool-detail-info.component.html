@@ -43,7 +43,10 @@
       <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
         @if (readonly()) {
-          <input matInput [value]="'tools.certificationRequirements.' + tool().certificationRequirement | translate" [readonly]="true" />
+          <input
+            matInput
+            [value]="'tools.certificationRequirements.' + tool().certificationRequirement | translate"
+            [readonly]="true" />
         } @else {
           <mat-select formControlName="certificationRequirement">
             @for (req of certificationRequirements; track req) {

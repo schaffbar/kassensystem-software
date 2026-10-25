@@ -8,7 +8,7 @@
 <form class="reader-content" [formRoot]="readerForm" (submit)="onSave()">
   <div class="row">
     <div class="col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
+      <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</mat-label>
         <input id="macAddress" matInput [value]="rfidReader().macAddress" readonly />
       </mat-form-field>
@@ -16,7 +16,7 @@
   </div>
   <div class="row">
     <div class="col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
+      <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
         <input matInput [value]="'rfidReaders.types.' + (rfidReader().type | lowercase) | translate" readonly />
       </mat-form-field>
@@ -41,7 +41,6 @@
 
   @if (isEditing()) {
     <div class="actions">
-      <!-- type="button" is required: inside <form [formRoot]> a button without type would submit (= save) -->
       <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>

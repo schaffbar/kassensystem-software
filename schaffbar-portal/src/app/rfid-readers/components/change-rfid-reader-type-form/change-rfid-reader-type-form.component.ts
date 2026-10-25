@@ -38,7 +38,7 @@ interface ChangeRfidReaderTypeModel {
   ],
 })
 export class ChangeRfidReaderTypeFormComponent {
-  protected readonly data: ChangeRfidReaderTypeDialogData = inject(MAT_DIALOG_DATA);
+  private readonly data: ChangeRfidReaderTypeDialogData = inject(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<ChangeRfidReaderTypeFormComponent, ChangeRfidReaderTypeCommand>);
 
   protected readonly rfidReaderTypes = Object.values(RfidReaderType);

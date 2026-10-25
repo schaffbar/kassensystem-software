@@ -35,11 +35,7 @@
 
   <mat-form-field class="full-width">
     <mat-label>{{ 'tools.pages.toolDetails.instructors.searchUsers' | translate }}</mat-label>
-    <input
-      matInput
-      #searchInput
-      [matAutocomplete]="auto"
-      (input)="searchText.set(searchInput.value)" />
+    <input matInput #searchInput [matAutocomplete]="auto" (input)="searchText.set(searchInput.value)" />
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectUser($event.option.value)">
       @for (user of filteredUsers(); track user.id) {
         <mat-option [value]="user">{{ user.firstName }} {{ user.lastName }}</mat-option>
