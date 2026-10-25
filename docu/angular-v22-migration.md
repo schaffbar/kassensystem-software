@@ -185,6 +185,16 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - Formular, das einem Input folgt: `model = linkedSignal(() => toModel(this.input()))` statt `effect` + `reset()`.
     Abbrechen: `this.model.set(toModel(this.input())); this.xyzForm().reset();` – `reset()` setzt nur
     touched/dirty zurück, nicht die Werte. „Geändert?“ als `computed` (Model vs. `toModel(input)`)
+  - Formular mit `<form>`-Element: `<form [formRoot]="xyzForm" (submit)="onSave()">`, `onSave()` wie überall mit
+    `submit(this.xyzForm, async () => …)` – keine `submission`-Option in `form()`. `FormRoot` verhindert das native
+    Absenden (sonst Seiten-Reload, sobald `[formGroup]` wegfällt); Speichern-Button `type="submit"`, Enter im Feld
+    speichert ebenfalls. **Alle anderen Buttons im `<form>` brauchen `type="button"`**, sonst speichert z. B.
+    „Abbrechen“
+  - Inline-Bearbeitung: `isEditing = signal(false)` + `readonly(schema.x, { when: () => !this.isEditing() })` pro
+    Feld (`readonly()` auf einem Elternpfad vererbt sich laut Doku nicht garantiert); kein `[readonly]` im Template
+  - Beim Wechsel in den Bearbeiten-Modus den Fokus ins erste Feld setzen:
+    `this.xyzForm.firstField().focusBoundControl()` – der Bearbeiten-Button wird deaktiviert und verliert den Fokus,
+    ohne Fokus im Formular funktioniert Enter nicht
   - Tests mit Harnesses: `MatSelectHarness`, `MatButtonHarness`, `MatFormFieldHarness.getTextErrors()`
 
 - [x] [new-tool-form](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.ts) –
@@ -199,7 +209,8 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [ ] Inline-Edit-Formulare – gleiches Muster 4× (`linkedSignal`-Model + `readonly(when)` + `isEditing`,
       Anhang A). Signal `readonly` dabei in `isEditing` umbenennen (invertiert), damit es nicht mit `readonly()` aus
       Signal Forms kollidiert.
-  - [ ] [rfid-reader-detail-info](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.ts)
+  - [x] [rfid-reader-detail-info](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.ts)
+        – MAC-Adresse nicht mehr im Formular (nur Anzeige). Test: [rfid-reader-detail-info.component.spec.ts](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.spec.ts)
   - [ ] [tool-detail-info](../schaffbar-portal/src/app/tools/components/tool-detail-info/tool-detail-info.component.ts)
   - [ ] [user-contact](../schaffbar-portal/src/app/users/components/user-contact/user-contact.component.ts)
         (dabei `email()`-Validator ergänzen – fehlt heute, das Template prüft aber `hasError('email')`)

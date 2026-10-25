@@ -1,16 +1,16 @@
 <h3 class="reader-header">
   {{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderInformation' | translate }}
-  <button mat-icon-button type="button" aria-label="Edit reader" (click)="updateReader()" [disabled]="!readonly()">
+  <button mat-icon-button type="button" aria-label="Edit reader" (click)="onEdit()" [disabled]="isEditing()">
     <mat-icon>edit</mat-icon>
   </button>
 </h3>
 
-<form [formGroup]="rfidReaderForm" class="reader-content">
+<form class="reader-content" [formRoot]="readerForm" (submit)="onSave()">
   <div class="row">
     <div class="col">
       <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</mat-label>
-        <input id="macAddress" matInput formControlName="macAddress" readonly />
+        <input id="macAddress" matInput [value]="rfidReader().macAddress" readonly />
       </mat-form-field>
     </div>
   </div>
@@ -26,7 +26,7 @@
     <div class="col">
       <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</mat-label>
-        <input id="name" matInput formControlName="name" [readonly]="readonly()" />
+        <input id="name" matInput [formField]="readerForm.name" />
       </mat-form-field>
     </div>
   </div>
@@ -34,17 +34,18 @@
     <div class="col">
       <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.socketName' | translate }}</mat-label>
-        <input id="socketName" matInput formControlName="socketName" [readonly]="readonly()" />
+        <input id="socketName" matInput [formField]="readerForm.socketName" />
       </mat-form-field>
     </div>
   </div>
 
-  @if (!readonly()) {
+  @if (isEditing()) {
     <div class="actions">
-      <button mat-stroked-button mat-dialog-close (click)="onCancel()">
+      <!-- type="button" is required: inside <form [formRoot]> a button without type would submit (= save) -->
+      <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
-      <button mat-flat-button color="primary" type="submit" (click)="onSave()">
+      <button mat-flat-button color="primary" type="submit">
         {{ 'shared.dialogs.actions.edit.confirm' | translate }}
       </button>
     </div>
