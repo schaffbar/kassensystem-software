@@ -2,81 +2,73 @@
 
 <mat-divider />
 
-<mat-dialog-content>
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
-        <input
-          id="name"
-          matInput
-          [placeholder]="'tools.shared.toolProperties.name' | translate"
-          [formField]="toolForm.name" />
-        <mat-error>
-          <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
-        </mat-error>
-      </mat-form-field>
+<form [formRoot]="toolForm" (submit)="onSave()">
+  <mat-dialog-content>
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
+          <input id="name" matInput [formField]="toolForm.name" />
+          <mat-error>
+            <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
+          </mat-error>
+        </mat-form-field>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
-        <textarea
-          id="description"
-          matInput
-          [placeholder]="'tools.shared.toolProperties.description' | translate"
-          [formField]="toolForm.description"
-          rows="2">
-        </textarea>
-      </mat-form-field>
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
+          <textarea id="description" matInput [formField]="toolForm.description" rows="2"></textarea>
+        </mat-form-field>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
-        <mat-select [formField]="toolForm.area">
-          @for (area of toolAreas; track area) {
-            <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
-          }
-        </mat-select>
-        <mat-error>
-          <schbar-field-error [field]="toolForm.area" label="tools.shared.toolProperties.area" />
-        </mat-error>
-      </mat-form-field>
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
+          <mat-select [formField]="toolForm.area">
+            @for (area of toolAreas; track area) {
+              <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>
+            <schbar-field-error [field]="toolForm.area" label="tools.shared.toolProperties.area" />
+          </mat-error>
+        </mat-form-field>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
-        <mat-select [formField]="toolForm.certificationRequirement">
-          @for (req of certificationRequirements; track req) {
-            <mat-option [value]="req">
-              <span class="certification-indicator certification-indicator--{{ req | lowercase }}"></span>
-              {{ 'tools.certificationRequirements.' + req | translate }}
-            </mat-option>
-          }
-        </mat-select>
-        <mat-error>
-          <schbar-field-error
-            [field]="toolForm.certificationRequirement"
-            label="tools.shared.toolProperties.certificationRequirement" />
-        </mat-error>
-      </mat-form-field>
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
+          <mat-select [formField]="toolForm.certificationRequirement">
+            @for (req of certificationRequirements; track req) {
+              <mat-option [value]="req">
+                <span class="certification-indicator certification-indicator--{{ req | lowercase }}"></span>
+                {{ 'tools.certificationRequirements.' + req | translate }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-error>
+            <schbar-field-error
+              [field]="toolForm.certificationRequirement"
+              label="tools.shared.toolProperties.certificationRequirement" />
+          </mat-error>
+        </mat-form-field>
+      </div>
     </div>
-  </div>
-</mat-dialog-content>
+  </mat-dialog-content>
 
-<mat-dialog-actions>
-  <button mat-flat-button color="primary" (click)="save()">
-    {{ 'shared.dialogs.actions.edit.confirm' | translate }}
-  </button>
-  <button mat-stroked-button [mat-dialog-close]="null" cdkFocusInitial>
-    {{ 'shared.dialogs.actions.edit.cancel' | translate }}
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions>
+    <button mat-stroked-button type="button" [mat-dialog-close]="undefined">
+      {{ 'shared.dialogs.actions.edit.cancel' | translate }}
+    </button>
+    <button mat-flat-button color="primary" type="submit">
+      {{ 'shared.dialogs.actions.edit.confirm' | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

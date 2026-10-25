@@ -1,5 +1,5 @@
 import { Component, computed, input, linkedSignal, output } from '@angular/core';
-import { form, FormField, hidden, pattern, required, submit } from '@angular/forms/signals';
+import { form, FormField, FormRoot, hidden, pattern, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,6 +25,7 @@ interface WlanRelaisModel {
   styleUrl: './tool-wlan-relais.component.scss',
   imports: [
     FormField,
+    FormRoot,
     FieldErrorComponent,
     MatSelectModule,
     MatInputModule,

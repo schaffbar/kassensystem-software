@@ -1,6 +1,6 @@
 import { LowerCasePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField, required, submit } from '@angular/forms/signals';
+import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -28,6 +28,7 @@ interface ChangeRfidReaderTypeModel {
   imports: [
     LowerCasePipe,
     FormField,
+    FormRoot,
     FieldErrorComponent,
     MatSelectModule,
     MatButtonModule,
@@ -38,7 +39,7 @@ interface ChangeRfidReaderTypeModel {
 })
 export class ChangeRfidReaderTypeFormComponent {
   protected readonly data: ChangeRfidReaderTypeDialogData = inject(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject(MatDialogRef<ChangeRfidReaderTypeFormComponent>);
+  private readonly dialogRef = inject(MatDialogRef<ChangeRfidReaderTypeFormComponent, ChangeRfidReaderTypeCommand>);
 
   protected readonly rfidReaderTypes = Object.values(RfidReaderType);
 
@@ -48,7 +49,7 @@ export class ChangeRfidReaderTypeFormComponent {
     required(schema.type);
   });
 
-  protected save(): void {
+  protected onSave(): void {
     submit(this.typeForm, async () => {
       const { type } = this.model();
       if (!type) return;

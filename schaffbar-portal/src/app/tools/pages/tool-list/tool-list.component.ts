@@ -70,14 +70,14 @@ export class ToolListComponent {
   }
 
   protected newToolDialog(): void {
-    const dialogRef = this.dialog.open(NewToolFormComponent, {
+    const dialogRef = this.dialog.open<NewToolFormComponent, void, CreateToolCommand>(NewToolFormComponent, {
       minWidth: '600px',
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result: CreateToolCommand | null) => {
-      if (result) {
-        this.store.createTool(result);
+    dialogRef.afterClosed().subscribe((command) => {
+      if (command) {
+        this.store.createTool(command);
       }
     });
   }

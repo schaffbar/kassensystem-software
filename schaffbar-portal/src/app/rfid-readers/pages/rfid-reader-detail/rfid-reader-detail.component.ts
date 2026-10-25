@@ -9,7 +9,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { take } from 'rxjs';
 
 import { ToolsService } from '../../../tools/tools.service';
-import { ChangeRfidReaderTypeFormComponent } from '../../components/change-rfid-reader-type-form/change-rfid-reader-type-form.component';
+import {
+  ChangeRfidReaderTypeDialogData,
+  ChangeRfidReaderTypeFormComponent,
+} from '../../components/change-rfid-reader-type-form/change-rfid-reader-type-form.component';
 import { RfidReaderDetailInfoComponent } from '../../components/rfid-reader-detail-info/rfid-reader-detail-info.component';
 import {
   ChangeRfidReaderTypeCommand,
@@ -73,7 +76,11 @@ export class RfidReaderDetailComponent {
   }
 
   private openChangeTypeDialog(rfidReader: RfidReader): void {
-    const dialogRef = this.dialog.open(ChangeRfidReaderTypeFormComponent, {
+    const dialogRef = this.dialog.open<
+      ChangeRfidReaderTypeFormComponent,
+      ChangeRfidReaderTypeDialogData,
+      ChangeRfidReaderTypeCommand
+    >(ChangeRfidReaderTypeFormComponent, {
       minWidth: '400px',
       disableClose: true,
       data: { rfidReader },
@@ -82,9 +89,9 @@ export class RfidReaderDetailComponent {
     dialogRef
       .afterClosed()
       .pipe(take(1))
-      .subscribe((result: ChangeRfidReaderTypeCommand | false) => {
-        if (result) {
-          this.detailsStore.changeRfidReaderType(result);
+      .subscribe((command) => {
+        if (command) {
+          this.detailsStore.changeRfidReaderType(command);
         }
       });
   }

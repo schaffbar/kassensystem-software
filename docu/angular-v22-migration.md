@@ -185,11 +185,19 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - Formular, das einem Input folgt: `model = linkedSignal(() => toModel(this.input()))` statt `effect` + `reset()`.
     Abbrechen: `this.model.set(toModel(this.input())); this.xyzForm().reset();` – `reset()` setzt nur
     touched/dirty zurück, nicht die Werte. „Geändert?“ als `computed` (Model vs. `toModel(input)`)
-  - Formular mit `<form>`-Element: `<form [formRoot]="xyzForm" (submit)="onSave()">`, `onSave()` wie überall mit
+  - **Jedes Formular** hat ein `<form [formRoot]="xyzForm" (submit)="onSave()">`; `onSave()` mit
     `submit(this.xyzForm, async () => …)` – keine `submission`-Option in `form()`. `FormRoot` verhindert das native
-    Absenden (sonst Seiten-Reload, sobald `[formGroup]` wegfällt); Speichern-Button `type="submit"`, Enter im Feld
-    speichert ebenfalls. **Alle anderen Buttons im `<form>` brauchen `type="button"`**, sonst speichert z. B.
-    „Abbrechen“
+    Absenden (sonst Seiten-Reload) und Enter im Feld speichert.
+    - Speichern-Button `type="submit"`, **alle anderen Buttons im `<form>` `type="button"`** (sonst speichert z. B.
+      „Abbrechen“)
+    - Button-Reihenfolge: Abbrechen, dann Speichern (bestätigende Aktion rechts)
+    - Dialog: `<form>` umschließt `mat-dialog-content` und `mat-dialog-actions`, im SCSS `form { display: contents; }`
+      (sonst bricht das Dialog-Layout); kein `cdkFocusInitial` auf Abbrechen – der Dialog fokussiert das erste Feld
+  - Dialog-Ergebnis (Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md)): Abbrechen
+    `[mat-dialog-close]="undefined"`, Speichern `this.dialogRef.close(result)` mit
+    `inject(MatDialogRef<Comp, Result>)`; der Aufrufer öffnet typisiert `dialog.open<Comp, Data, Result>(…)` – keine
+    handannotierten Typen im `subscribe`
+  - Kein `[placeholder]`, der nur das `<mat-label>` wiederholt; `floatLabel="always"` statt `[floatLabel]="'always'"`
   - Inline-Bearbeitung: `isEditing = signal(false)` + `readonly(schema.x, { when: () => !this.isEditing() })` pro
     Feld (`readonly()` auf einem Elternpfad vererbt sich laut Doku nicht garantiert); kein `[readonly]` im Template
   - Beim Wechsel in den Bearbeiten-Modus den Fokus ins erste Feld setzen:
@@ -269,8 +277,9 @@ Detail-Store ganz auflösen und die Resources in der Page-Komponente halten (bei
       den Root-Providern in `app.config.ts` entfernen
 - [ ] `RfidTagAssignmentService`: Tippfehler `getRfidTagAssignmetByUser`; Rückgabetyp
       `Observable<RfidTagAssignment | null>`
-- [ ] Optional: doppelten `ConfirmDelete`-Dialogcode (8×) in einen Helper/Service ziehen
-      (`confirm(data): Observable<boolean>`)
+- [ ] doppelten `ConfirmDelete`-Dialogcode (8×) in einen Helper/Service ziehen
+      (`confirm(data): Observable<boolean>`) und dabei typisiert öffnen:
+      `dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>`
 - [ ] Optional: Material-Buttons vereinheitlichen (`mat-icon-button` vs. `matIconButton`; `color="primary|warn"`
       hat im M3-Theme `azure-blue` kaum Wirkung)
 

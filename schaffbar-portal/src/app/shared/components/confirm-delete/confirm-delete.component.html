@@ -8,10 +8,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions>
+  <!-- cdkFocusInitial on cancel: an accidental Enter must not confirm a destructive action -->
+  <button mat-stroked-button [mat-dialog-close]="undefined" cdkFocusInitial>
+    {{ 'shared.dialogs.actions.delete.cancel' | translate }}
+  </button>
   <button mat-stroked-button [mat-dialog-close]="true">
     {{ data.confirmLabel ?? ('shared.dialogs.actions.delete.confirm' | translate) }}
-  </button>
-  <button mat-stroked-button [mat-dialog-close]="false" cdkFocusInitial>
-    {{ 'shared.dialogs.actions.delete.cancel' | translate }}
   </button>
 </mat-dialog-actions>

@@ -1,6 +1,6 @@
 import { LowerCasePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField, required, submit, validate } from '@angular/forms/signals';
+import { form, FormField, FormRoot, required, submit, validate } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -27,6 +27,7 @@ interface NewToolModel {
   styleUrl: './new-tool-form.component.scss',
   imports: [
     FormField,
+    FormRoot,
     FieldErrorComponent,
     LowerCasePipe,
     MatInputModule,
@@ -38,7 +39,7 @@ interface NewToolModel {
   ],
 })
 export class NewToolFormComponent {
-  private readonly dialogRef = inject(MatDialogRef<NewToolFormComponent>);
+  private readonly dialogRef = inject(MatDialogRef<NewToolFormComponent, CreateToolCommand>);
   private readonly toolsStore = inject(ToolsStore);
 
   protected readonly toolAreas = Object.values(ToolArea);
@@ -65,7 +66,7 @@ export class NewToolFormComponent {
     required(schema.certificationRequirement);
   });
 
-  protected save(): void {
+  protected onSave(): void {
     submit(this.toolForm, async () => {
       const { name, description, area, certificationRequirement } = this.model();
       if (!area || !certificationRequirement) return;

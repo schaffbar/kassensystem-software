@@ -2,10 +2,10 @@
   {{ 'tools.pages.toolDetails.headers.wlanRelais' | translate }}
 </h3>
 
-<div class="wlan-relais-content">
+<form class="wlan-relais-content" [formRoot]="wlanRelaisForm" (submit)="onSave()">
   <div class="row">
     <div class="col">
-      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.wlanRelaisType' | translate }}</mat-label>
         <mat-select id="wlanRelaisType" [formField]="wlanRelaisForm.wlanRelaisType">
           <mat-option value="">--</mat-option>
@@ -22,7 +22,7 @@
   @if (!wlanRelaisForm.ipAddress().hidden()) {
     <div class="row">
       <div class="col">
-        <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
           <mat-label>{{ 'tools.shared.toolProperties.ipAddress' | translate }}</mat-label>
           <input id="ipAddress" matInput [formField]="wlanRelaisForm.ipAddress" />
           <mat-error>
@@ -34,7 +34,7 @@
 
     <div class="row">
       <div class="col">
-        <mat-form-field class="full-width readonly-field" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
           <mat-label>{{ 'tools.shared.toolProperties.httpStartCommand' | translate }}</mat-label>
           <input matInput [value]="derivedCommands().httpStartCommand" readonly />
         </mat-form-field>
@@ -43,13 +43,13 @@
 
     <div class="row">
       <div class="col">
-        <mat-form-field class="full-width readonly-field" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
           <mat-label>{{ 'tools.shared.toolProperties.onCommand' | translate }}</mat-label>
           <input matInput [value]="derivedCommands().onCommand" readonly />
         </mat-form-field>
       </div>
       <div class="col">
-        <mat-form-field class="full-width readonly-field" [floatLabel]="'always'" [hideRequiredMarker]="true">
+        <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
           <mat-label>{{ 'tools.shared.toolProperties.offCommand' | translate }}</mat-label>
           <input matInput [value]="derivedCommands().offCommand" readonly />
         </mat-form-field>
@@ -59,12 +59,13 @@
 
   @if (isDirty()) {
     <div class="wlan-relais-actions">
-      <button mat-stroked-button (click)="onCancel()">
+      <!-- type="button" is required: inside <form [formRoot]> a button without type would submit (= save) -->
+      <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
-      <button mat-flat-button color="primary" (click)="onSave()">
+      <button mat-flat-button color="primary" type="submit">
         {{ 'shared.dialogs.actions.edit.confirm' | translate }}
       </button>
     </div>
   }
-</div>
+</form>

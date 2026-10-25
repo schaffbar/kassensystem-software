@@ -105,4 +105,14 @@ describe('NewToolFormComponent', () => {
       certificationRequirement: CertificationRequirement.Red,
     });
   });
+
+  it('should only close the dialog on cancel without saving', async () => {
+    await setName('Drechselbank');
+
+    const cancel = await loader.getHarness(MatButtonHarness.with({ text: 'shared.dialogs.actions.edit.cancel' }));
+    await cancel.click();
+    await fixture.whenStable();
+
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(undefined);
+  });
 });

@@ -71,4 +71,23 @@ describe('ChangeRfidReaderTypeFormComponent', () => {
     expect(await formField.getTextErrors()).toEqual(['shared.errors.required']);
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
+
+  it('should save when the form is submitted (e.g. Enter)', async () => {
+    await setup(RfidReaderType.SwitchBox);
+
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
+
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({ id: 'reader-1', type: RfidReaderType.SwitchBox });
+  });
+
+  it('should only close the dialog on cancel without saving', async () => {
+    await setup(RfidReaderType.SwitchBox);
+
+    const cancel = await loader.getHarness(MatButtonHarness.with({ text: 'shared.dialogs.actions.edit.cancel' }));
+    await cancel.click();
+    await fixture.whenStable();
+
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(undefined);
+  });
 });
