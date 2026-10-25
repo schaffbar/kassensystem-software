@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -10,8 +10,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 export interface MenuItem {
   icon: string;
@@ -31,14 +30,13 @@ export interface MenuItem {
     MatSidenavModule,
     MatListModule,
     MatIconModule,
-    AsyncPipe,
     TranslatePipe,
   ],
 })
 export class NavigationComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
-  menuItems = signal<MenuItem[]>([
+  protected readonly menuItems = signal<MenuItem[]>([
     { icon: 'home', name: 'sidebar.dashboard', route: 'dashboard' },
     { icon: 'people', name: 'sidebar.users', route: 'users' },
     { icon: 'construction', name: 'sidebar.tools', route: 'tools' },
@@ -46,8 +44,8 @@ export class NavigationComponent {
     { icon: 'developer_board', name: 'sidebar.rfidReaders', route: 'rfid-readers' },
   ]);
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-    map((result) => result.matches),
-    shareReplay(),
+  protected readonly isHandset = toSignal(
+    this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
+    { initialValue: false },
   );
 }

@@ -3,13 +3,13 @@
     #drawer
     class="sidenav"
     fixedInViewport
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false">
+    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="!isHandset()">
     <mat-toolbar>Menu</mat-toolbar>
     <mat-nav-list>
       @for (item of menuItems(); track item.route) {
-        <a mat-list-item routerLink="{{ item.route }}">
+        <a mat-list-item [routerLink]="item.route">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.name | translate }}</span>
         </a>
@@ -19,7 +19,7 @@
 
   <mat-sidenav-content>
     <mat-toolbar color="primary">
-      @if (isHandset$ | async) {
+      @if (isHandset()) {
         <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
           <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
         </button>
