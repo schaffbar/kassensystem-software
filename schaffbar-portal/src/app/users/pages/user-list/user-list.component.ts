@@ -14,7 +14,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
-import { User } from '../../shared/models/user.model';
+import { CreateUserCommand, User } from '../../shared/models/user.model';
 import { UsersStore } from '../../shared/stores/users.store';
 
 @Component({
@@ -71,15 +71,14 @@ export class UserListComponent {
   }
 
   protected newUserDialog(): void {
-    const dialogRef = this.dialog.open(NewUserFormComponent, {
+    const dialogRef = this.dialog.open<NewUserFormComponent, void, CreateUserCommand>(NewUserFormComponent, {
       minWidth: '800px',
       disableClose: true,
-      autoFocus: true,
     });
 
-    dialogRef.afterClosed().subscribe((user: User) => {
-      if (user) {
-        this.store.createUser(user);
+    dialogRef.afterClosed().subscribe((command) => {
+      if (command) {
+        this.store.createUser(command);
       }
     });
   }

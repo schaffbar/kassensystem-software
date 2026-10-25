@@ -22,9 +22,6 @@
           "confirm": "Save",
           "cancel": "Cancel"
         }
-      },
-      "errors": {
-        "required": "is required"
       }
     }
   },
@@ -81,11 +78,6 @@
         "actions": {
           "confirm": "Add User",
           "cancel": "Cancel"
-        },
-        "errors": {
-          "required": "is required",
-          "validEmail": "Please enter a valid email address",
-          "exactLength": "must be exactly {{length}} characters long"
         }
       },
       "editUser": {

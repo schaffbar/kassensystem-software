@@ -2,77 +2,60 @@
 
 <mat-divider />
 
-<mat-dialog-content [formGroup]="userForm">
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
-        <input
-          id="firstName"
-          matInput
-          [placeholder]="'users.shared.userProperties.firstName' | translate"
-          formControlName="firstName" />
-        @if (userForm.controls['firstName'].hasError('required')) {
+<form [formRoot]="userForm" (submit)="onSave()">
+  <mat-dialog-content>
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
+          <input id="firstName" matInput [formField]="userForm.firstName" />
           <mat-error>
-            {{ 'users.shared.userProperties.firstName' | translate }}
-            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+            <schbar-field-error [field]="userForm.firstName" label="users.shared.userProperties.firstName" />
           </mat-error>
-        }
-      </mat-form-field>
-    </div>
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
-        <input
-          id="lastName"
-          matInput
-          [placeholder]="'users.shared.userProperties.lastName' | translate"
-          formControlName="lastName" />
-        @if (userForm.controls['lastName'].hasError('required')) {
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
+          <input id="lastName" matInput [formField]="userForm.lastName" />
           <mat-error>
-            {{ 'users.shared.userProperties.lastName' | translate }}
-            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+            <schbar-field-error [field]="userForm.lastName" label="users.shared.userProperties.lastName" />
           </mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width">
-        <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
-        <input
-          id="dateOfBirth"
-          matInput
-          readonly
-          [placeholder]="'users.shared.userProperties.dateOfBirth' | translate"
-          formControlName="dateOfBirth"
-          [min]="minDate"
-          [max]="maxDate"
-          [matDatepicker]="picker" />
-        @if (userForm.controls['dateOfBirth'].hasError('required')) {
+    <div class="row">
+      <div class="col">
+        <mat-form-field class="full-width">
+          <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
+          <input
+            id="dateOfBirth"
+            matInput
+            [formField]="userForm.dateOfBirth"
+            [min]="minDate"
+            [max]="maxDate"
+            [matDatepicker]="picker" />
           <mat-error>
-            {{ 'users.shared.userProperties.dateOfBirth' | translate }}
-            {{ 'users.dialogs.addNewUser.errors.required' | translate }}
+            <schbar-field-error [field]="userForm.dateOfBirth" label="users.shared.userProperties.dateOfBirth" />
           </mat-error>
-        }
-        <mat-datepicker-toggle matIconSuffix [for]="picker" />
-        <mat-datepicker #picker startView="multi-year" disabled="false" />
-      </mat-form-field>
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker startView="multi-year" />
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-checkbox [formField]="userForm.clubMember">
+          {{ 'users.shared.userProperties.clubMember' | translate }}
+        </mat-checkbox>
+      </div>
     </div>
-    <div class="col">
-      <mat-checkbox formControlName="clubMember">
-        {{ 'users.shared.userProperties.clubMember' | translate }}
-      </mat-checkbox>
-    </div>
-  </div>
-</mat-dialog-content>
+  </mat-dialog-content>
 
-<mat-dialog-actions>
-  <button mat-stroked-button mat-dialog-close>
-    {{ 'users.dialogs.editUser.actions.cancel' | translate }}
-  </button>
-  <button mat-flat-button color="primary" type="submit" (click)="save()">
-    {{ 'users.dialogs.editUser.actions.confirm' | translate }}
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions>
+    <button mat-stroked-button type="button" [mat-dialog-close]="undefined">
+      {{ 'users.dialogs.editUser.actions.cancel' | translate }}
+    </button>
+    <button mat-flat-button color="primary" type="submit">
+      {{ 'users.dialogs.editUser.actions.confirm' | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

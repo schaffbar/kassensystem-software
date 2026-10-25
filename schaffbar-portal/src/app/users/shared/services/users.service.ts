@@ -5,7 +5,13 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../models/user.model';
+import {
+  CreateUserCommand,
+  UpdateUserAddressCommand,
+  UpdateUserCommand,
+  UpdateUserContactCommand,
+  User,
+} from '../models/user.model';
 
 const USERS_API_URL = `${environment.apiBaseUrl}/api/v1/customers`;
 
@@ -39,25 +45,22 @@ export class UsersService {
   // --------------------------------------------------------------------------
   // commands
 
-  createUser(user: User): Observable<User> {
+  createUser(command: CreateUserCommand): Observable<User> {
     const requestBody = {
-      ...user,
-      dateOfBirth: this.datePipe.transform(user.dateOfBirth, 'yyyy-MM-dd') as string,
+      ...command,
+      dateOfBirth: this.datePipe.transform(command.dateOfBirth, 'yyyy-MM-dd') as string,
     };
 
     return this.http.post<User>(USERS_API_URL, requestBody, this.httpOptions);
   }
 
-  updateUser(
-    id: string,
-    user: { firstName: string; lastName: string; dateOfBirth: Date; clubMember: boolean },
-  ): Observable<void> {
+  updateUser(command: UpdateUserCommand): Observable<void> {
     const requestBody = {
-      ...user,
-      dateOfBirth: this.datePipe.transform(user.dateOfBirth, 'yyyy-MM-dd') as string,
+      ...command,
+      dateOfBirth: this.datePipe.transform(command.dateOfBirth, 'yyyy-MM-dd') as string,
     };
 
-    return this.http.put<void>(`${USERS_API_URL}/${id}`, requestBody, this.httpOptions);
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}`, requestBody, this.httpOptions);
   }
 
   updateUserContact(command: UpdateUserContactCommand): Observable<void> {

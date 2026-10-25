@@ -29,6 +29,28 @@ export enum AgeGroup {
 // ----------------------------------------------------------------------------
 // commands
 
+export interface CreateUserCommand {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  clubMember: boolean;
+  email: string;
+  phone?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
+export interface UpdateUserCommand {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  clubMember: boolean;
+}
+
 export interface UpdateUserContactCommand {
   id: string;
   email: string;

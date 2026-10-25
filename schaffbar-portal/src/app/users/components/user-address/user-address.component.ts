@@ -1,5 +1,5 @@
 import { Component, input, linkedSignal, output, signal } from '@angular/core';
-import { form, FormField, FormRoot, maxLength, minLength, readonly, required, submit } from '@angular/forms/signals';
+import { form, FormField, FormRoot, readonly, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,8 +9,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { UpdateUserAddressCommand, User, UserAddress } from '../../shared/models/user.model';
-
-const POSTAL_CODE_LENGTH = 5;
+import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../shared/validators/user.validators';
 
 @Component({
   selector: 'schbar-user-address',
@@ -34,9 +33,7 @@ export class UserAddressComponent {
     // readonly is inherited by all fields
     readonly(schema, { when: () => !this.isEditing() });
     required(schema.addressLine1);
-    required(schema.postalCode);
-    minLength(schema.postalCode, POSTAL_CODE_LENGTH);
-    maxLength(schema.postalCode, POSTAL_CODE_LENGTH);
+    validatePostalCode(schema.postalCode);
     required(schema.city);
     required(schema.country);
   });

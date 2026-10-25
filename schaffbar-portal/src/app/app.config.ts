@@ -16,6 +16,7 @@ import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
+import { provideDateAdapter } from './shared/date/provide-date-adapter';
 
 registerLocaleData(localeDe);
 
@@ -24,6 +25,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
+    provideDateAdapter(),
     provideTranslateService({
       loader: provideTranslateHttpLoader({
         prefix: '/i18n/',

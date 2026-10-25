@@ -17,7 +17,12 @@ import { exhaustMap, filter, pipe, tap } from 'rxjs';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
 import { RfidTagAssignment } from '../../shared/models/rfid-tag-assignment.model';
 import { ToolCertification } from '../../shared/models/tool-certification.model';
-import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../shared/models/user.model';
+import {
+  UpdateUserAddressCommand,
+  UpdateUserCommand,
+  UpdateUserContactCommand,
+  User,
+} from '../../shared/models/user.model';
 import { WorkshopSession } from '../../shared/models/workshop-session.model';
 import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
 import { ToolCertificationService } from '../../shared/services/tool-certification.service';
@@ -86,11 +91,11 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    updateUser: rxMethod<{ id: string; firstName: string; lastName: string; dateOfBirth: Date; clubMember: boolean }>(
+    updateUser: rxMethod<UpdateUserCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap(({ id, firstName, lastName, dateOfBirth, clubMember }) => {
-          return store._usersService.updateUser(id, { firstName, lastName, dateOfBirth, clubMember }).pipe(
+        exhaustMap((command: UpdateUserCommand) => {
+          return store._usersService.updateUser(command).pipe(
             tapResponse({
               next: () => {
                 patchState(store, setFulfilled(), setDirty());

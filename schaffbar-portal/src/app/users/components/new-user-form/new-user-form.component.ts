@@ -1,9 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { email, form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
@@ -11,12 +10,39 @@ import { MatInputModule } from '@angular/material/input';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { CreateUserCommand } from '../../shared/models/user.model';
+import {
+  DATE_OF_BIRTH_MAX,
+  DATE_OF_BIRTH_MIN,
+  POSTAL_CODE_LENGTH,
+  validateDateOfBirth,
+  validatePostalCode,
+} from '../../shared/validators/user.validators';
+
+interface NewUserModel {
+  firstName: string;
+  lastName: string;
+  // null = no date selected (the datepicker has no "empty" value other than null)
+  dateOfBirth: Date | null;
+  clubMember: boolean;
+  email: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
 @Component({
   selector: 'schbar-new-user-form',
   templateUrl: './new-user-form.component.html',
   styleUrl: './new-user-form.component.scss',
   imports: [
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
+    FieldErrorComponent,
     MatInputModule,
     MatCheckboxModule,
     MatButtonModule,
@@ -25,38 +51,52 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatDatepickerModule,
     TranslatePipe,
   ],
-  providers: [provideNativeDateAdapter()],
 })
 export class NewUserFormComponent {
-  private readonly fb = inject(NonNullableFormBuilder);
-  private readonly dialogRef = inject(MatDialogRef<NewUserFormComponent>);
+  private readonly dialogRef = inject(MatDialogRef<NewUserFormComponent, CreateUserCommand>);
 
-  // TODO: add validators for email, phone, postal code, ...
-  protected readonly userForm = this.fb.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    dateOfBirth: [null, Validators.required],
-    clubMember: [false],
-    email: ['', [Validators.required, Validators.email]],
-    phone: [null],
-    addressLine1: ['', Validators.required],
-    addressLine2: [null],
-    postalCode: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(5)]],
-    city: ['', Validators.required],
-    country: ['Deutschland', Validators.required],
+  protected readonly minDate = DATE_OF_BIRTH_MIN;
+  protected readonly maxDate = DATE_OF_BIRTH_MAX;
+  protected readonly postalCodeLength = POSTAL_CODE_LENGTH;
+
+  private readonly model = signal<NewUserModel>({
+    firstName: '',
+    lastName: '',
+    dateOfBirth: null,
+    clubMember: false,
+    email: '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    postalCode: '',
+    city: '',
+    country: 'Deutschland',
   });
 
-  // TODO: replace with a moment.js implementation
-  private readonly _currentYear = new Date().getFullYear();
-  protected readonly minDate = new Date(this._currentYear - 100, 0, 1);
-  protected readonly maxDate = new Date(this._currentYear - 1, 11, 31);
+  protected readonly userForm = form(this.model, (schema) => {
+    required(schema.firstName);
+    required(schema.lastName);
+    validateDateOfBirth(schema.dateOfBirth);
+    required(schema.email);
+    email(schema.email);
+    required(schema.addressLine1);
+    validatePostalCode(schema.postalCode);
+    required(schema.city);
+    required(schema.country);
+  });
 
-  protected save() {
-    if (this.userForm.invalid) {
-      this.userForm.markAllAsTouched();
-      return;
-    }
+  protected onSave(): void {
+    submit(this.userForm, async () => {
+      const { dateOfBirth, phone, addressLine2, ...rest } = this.model();
+      if (!dateOfBirth) return;
 
-    this.dialogRef.close(this.userForm.value);
+      const command: CreateUserCommand = {
+        ...rest,
+        dateOfBirth,
+        phone: phone || undefined,
+        addressLine2: addressLine2 || undefined,
+      };
+      this.dialogRef.close(command);
+    });
   }
 }

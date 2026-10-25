@@ -10,10 +10,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ToolsStore } from '../../../tools/tools.store';
-import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
+import {
+  UpdateUserDialogData,
+  UpdateUserFormComponent,
+} from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { RfidTagAssignmentStatus } from '../../shared/models/rfid-tag-assignment.model';
-import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../shared/models/user.model';
+import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
@@ -57,24 +60,21 @@ export class UserDetailComponent {
   }
 
   protected updateUser(): void {
-    const dialogRef = this.dialog.open(UpdateUserFormComponent, {
-      data: {
-        ...this.detailsStore.user(),
-      },
-      minWidth: '800px',
-      disableClose: true,
-      autoFocus: true,
-    });
+    const user = this.detailsStore.user();
+    if (!user) return;
 
-    dialogRef.afterClosed().subscribe((user: User) => {
-      if (user) {
-        this.detailsStore.updateUser({
-          id: this.id(),
-          firstName: user.firstName,
-          lastName: user.lastName,
-          dateOfBirth: user.dateOfBirth,
-          clubMember: user.clubMember,
-        });
+    const dialogRef = this.dialog.open<UpdateUserFormComponent, UpdateUserDialogData, UpdateUserCommand>(
+      UpdateUserFormComponent,
+      {
+        data: { user },
+        minWidth: '800px',
+        disableClose: true,
+      },
+    );
+
+    dialogRef.afterClosed().subscribe((command) => {
+      if (command) {
+        this.detailsStore.updateUser(command);
       }
     });
   }

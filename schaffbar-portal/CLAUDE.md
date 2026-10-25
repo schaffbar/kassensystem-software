@@ -37,6 +37,10 @@ component (inputs, outputs, signals, handlers).
   `const command: CreateToolCommand = { … }; this.dialogRef.close(command);`
 - Form fields that only display a value and are never editable get the global class `readonly-field`
   (`src/styles.scss`).
+- Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in
+  `app.config.ts`; tests of components with a datepicker add `provideDateAdapter()` to their providers). Typing
+  (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
+  anyway. A date field in a form model is `Date | null`; ISO strings from the backend are converted with `parseISO`.
 
 ## Dialogs
 

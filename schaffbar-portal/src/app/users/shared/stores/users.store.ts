@@ -7,7 +7,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
 
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
-import { User } from '../models/user.model';
+import { CreateUserCommand, User } from '../models/user.model';
 import { UsersService } from '../services/users.service';
 
 export const UsersStore = signalStore(
@@ -38,11 +38,11 @@ export const UsersStore = signalStore(
     ),
   })),
   withMethods((store) => ({
-    createUser: rxMethod<User>(
+    createUser: rxMethod<CreateUserCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap((user: User) => {
-          return store._usersService.createUser(user).pipe(
+        exhaustMap((command: CreateUserCommand) => {
+          return store._usersService.createUser(command).pipe(
             tapResponse({
               next: () => patchState(store, setFulfilled()),
               error: (error: { message: string }) => patchState(store, setError(error.message)),

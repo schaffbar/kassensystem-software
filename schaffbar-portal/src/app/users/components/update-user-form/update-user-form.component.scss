@@ -26,3 +26,9 @@
 .col:last-child {
   margin-right: 0;
 }
+
+// the <form> wraps mat-dialog-content and mat-dialog-actions; without display: contents it would break the dialog
+// layout (scrollable content, actions at the bottom)
+form {
+  display: contents;
+}

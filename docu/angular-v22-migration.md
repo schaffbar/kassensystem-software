@@ -234,9 +234,14 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - [x] [user-address](../schaffbar-portal/src/app/users/components/user-address/user-address.component.ts)
         – PLZ: `minLength`/`maxLength` im Schema setzen über `[formField]` auch das native `maxlength`; das statische
         `maxlength="5"` und die Template-Referenz für den Zähler entfallen. Neuer Typ `UserContact` im User-Model
-- [ ] [update-user-form](../schaffbar-portal/src/app/users/components/update-user-form/update-user-form.component.ts)
+- [x] [update-user-form](../schaffbar-portal/src/app/users/components/update-user-form/update-user-form.component.ts)
       (Datepicker, Checkbox)
-- [ ] [new-user-form](../schaffbar-portal/src/app/users/components/new-user-form/new-user-form.component.ts) –
+- [x] Datepicker: `@angular/material-date-fns-adapter` + `date-fns` statt `provideNativeDateAdapter()`
+      ([provideDateAdapter](../schaffbar-portal/src/app/shared/date/provide-date-adapter.ts), global in `app.config.ts`).
+      Grund: `[formField]` überschreibt das statische `readonly` am Datumsfeld, getippte deutsche Daten konnte der
+      native Adapter nicht parsen. Jetzt geht Tippen („31.1.1990“) und Picker. Gemeinsame Regeln
+      `validateDateOfBirth` / `validatePostalCode` in [user.validators.ts](../schaffbar-portal/src/app/users/shared/validators/user.validators.ts)
+- [x] [new-user-form](../schaffbar-portal/src/app/users/components/new-user-form/new-user-form.component.ts) –
       typisiertes Ergebnis statt `form.value` als `User`; `minLength`/`maxLength` für PLZ, `email()`
 - [ ] Suchfeld in [user-list](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.html):
       `filter = signal('')`, im `dataSource`-`computed` setzen. Behebt nebenbei, dass `applyFilter` das
@@ -251,12 +256,12 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - [ ] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
         `PauseToolCertificationCommand`, `ReactivateToolCertificationCommand`, `RevokeToolCertificationCommand`
   - [ ] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
-  - [ ] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
+  - [x] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
 - [ ] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
       jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
       `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →
       doppelter Abstand). Nach der Migration aller Formulare einmal in die globalen Styles ziehen
-- [ ] Alte Fehler-Übersetzungen entfernen, sobald kein Template sie mehr nutzt: `shared.dialogs.errors.*`,
+- [x] Alte Fehler-Übersetzungen entfernen, sobald kein Template sie mehr nutzt: `shared.dialogs.errors.*`,
       `users.dialogs.addNewUser.errors.*` (in `de.json` und `en.json`); `tools.pages.toolDetails.errors.invalidIpAddress`
       und `tools.dialogs.addTool.errors.nameExists` bleiben (werden per `message` genutzt)
 
