@@ -68,22 +68,24 @@ Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
 
 ## Schritt 2 – Automatische Migrationen und Cleanup
 
-- [ ] `ng generate @angular/core:self-closing-tag` (`<mat-divider />`, `<schbar-navigation />`, …)
-- [ ] [navigation.component.ts](../schaffbar-portal/src/app/core/navigation/navigation.component.ts):
+- [x] `ng generate @angular/core:self-closing-tag` (`<mat-divider />`, `<schbar-navigation />`, …)
+- [x] [navigation.component.ts](../schaffbar-portal/src/app/core/navigation/navigation.component.ts):
       `isHandset$` + `AsyncPipe` → `isHandset = toSignal(...)`; `routerLink="{{ item.route }}"` →
       `[routerLink]="item.route"`
-- [ ] Ungenutzte Imports entfernen:
-  - [ ] `MatChipsModule`, `MatTabsModule` in `rfid-reader-detail.component.ts`
-  - [ ] `MatSlideToggleModule` in `user-detail-info.component.ts`
-  - [ ] `MatRadioModule`, `MatSelectModule`, `MatCardModule` in `user-address.component.ts`
-  - [ ] `ReactiveFormsModule` in `user-list.component.ts`
-  - [ ] `MatInputModule`, `MatDialogModule` in den Listen (sofern kein Eingabefeld / nur `MatDialog`-Service)
-  - [ ] `router` in `rfid-tag-list.component.ts`, `title` in `app.component.ts`
-- [ ] Templates: `this.readonly()` → `readonly()`, `@if (!!data.entity)` → `@if (data.entity)`, `{{ '-' }}` → `-`
-- [ ] `AppComponent`: doppeltes `addLangs/setFallbackLang/use` prüfen – steht schon in `provideTranslateService`
-- [ ] `console.log` in den Stores entfernen
-- [ ] `protected` / `readonly` konsequent setzen (z. B. `ToolCertificationsComponent` ist komplett public)
-- [ ] ESLint-Regeln ergänzen (erst `warn`, in Schritt 8 auf `error`):
+- [x] Ungenutzte Imports entfernen:
+  - [x] `MatChipsModule`, `MatTabsModule` in `rfid-reader-detail.component.ts`
+  - [x] `MatSlideToggleModule` in `user-detail-info.component.ts`
+  - [x] `MatRadioModule`, `MatSelectModule`, `MatCardModule` in `user-address.component.ts`
+  - [x] `ReactiveFormsModule` in `user-list.component.ts`
+  - [x] `MatInputModule`, `MatDialogModule` in den Listen (sofern kein Eingabefeld / nur `MatDialog`-Service)
+  - [x] `router` in `rfid-tag-list.component.ts`, `title` in `app.component.ts`
+- [x] Templates: `this.readonly()` → `readonly()`, `@if (!!data.entity)` → `@if (data.entity)`, `{{ '-' }}` → `-`
+- [x] `AppComponent`: doppeltes `addLangs/setFallbackLang/use` prüfen – steht schon in `provideTranslateService`
+- [x] `console.log` in den Stores entfernen
+- [x] `protected` / `readonly` konsequent setzen (z. B. `ToolCertificationsComponent` ist komplett public).
+      Regel: Inputs/Outputs `public readonly`, vom eigenen Template gelesen → `protected`, sonst `private`;
+      nicht neu zugewiesene Felder `readonly`
+- [x] ESLint-Regeln ergänzen (erst `warn`, in Schritt 8 auf `error`) – aktuell 0 Warnungen:
   - `@angular-eslint/prefer-signals`
   - `@angular-eslint/prefer-output-readonly`
   - `@angular-eslint/template/prefer-self-closing-tags`
