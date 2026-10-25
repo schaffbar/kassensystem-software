@@ -1,5 +1,5 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, input, linkedSignal, output, signal } from '@angular/core';
+import { email, form, FormField, FormRoot, readonly, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,62 +7,54 @@ import { MatInputModule } from '@angular/material/input';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { User } from '../../shared/models/user.model';
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { User, UserContact } from '../../shared/models/user.model';
 
 @Component({
   selector: 'schbar-user-contact',
   templateUrl: './user-contact.component.html',
   styleUrl: './user-contact.component.scss',
-  imports: [MatInputModule, MatButtonModule, MatIconModule, ReactiveFormsModule, TranslatePipe],
+  imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
 })
 export class UserContactComponent {
   readonly user = input.required<User>();
 
-  readonly contactChanged = output<{ email: string; phone: string }>();
+  readonly contactChanged = output<UserContact>();
 
-  private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly isEditing = signal(false);
 
-  protected readonly readonly = signal(true);
+  // follows the user input
+  private readonly model = linkedSignal(() => toModel(this.user()));
 
-  protected readonly userContactForm = this.fb.group({
-    email: ['', Validators.required],
-    phone: [''],
+  protected readonly contactForm = form(this.model, (schema) => {
+    // readonly is inherited by all fields
+    readonly(schema, { when: () => !this.isEditing() });
+    required(schema.email);
+    email(schema.email);
   });
 
-  private readonly initialValues = effect(() => this.setInitialFormValues());
-
-  protected updateContact() {
-    this.readonly.set(false);
+  protected onEdit(): void {
+    this.isEditing.set(true);
+    // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
+    this.contactForm.email().focusBoundControl();
   }
 
-  protected onCancel() {
-    this.setInitialFormValues();
-    this.readonly.set(true);
+  protected onCancel(): void {
+    this.model.set(toModel(this.user()));
+    this.contactForm().reset();
+    this.isEditing.set(false);
   }
 
-  protected onSave() {
-    if (this.userContactForm.valid) {
-      const formValues = this.userContactForm.value;
-      // TODO: check if contact really changed
-      // TODO: try to solve it in another way
-      const newContact = {
-        email: formValues.email ?? '',
-        phone: formValues.phone ?? '',
-      };
-
-      this.contactChanged.emit(newContact);
-      this.readonly.set(true);
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // helper
-
-  private setInitialFormValues() {
-    const user = this.user();
-    this.userContactForm.setValue({
-      email: user.email,
-      phone: user.phone,
+  protected onSave(): void {
+    submit(this.contactForm, async () => {
+      const { email, phone } = this.model();
+      const contact: UserContact = { email, phone };
+      this.contactChanged.emit(contact);
+      this.isEditing.set(false);
     });
   }
+}
+
+function toModel(user: User): UserContact {
+  return { email: user.email, phone: user.phone ?? '' };
 }

@@ -201,8 +201,9 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
     `readonly-field` (`src/styles.scss`). `[hideRequiredMarker]="true"` nur bei Formularen mit Lesemodus, nicht bei
     immer bearbeitbaren (sonst fehlt das Pflichtfeld-Sternchen)
   - Kein `[placeholder]`, der nur das `<mat-label>` wiederholt; `floatLabel="always"` statt `[floatLabel]="'always'"`
-  - Inline-Bearbeitung: `isEditing = signal(false)` + `readonly(schema.x, { when: () => !this.isEditing() })` pro
-    Feld (`readonly()` auf einem Elternpfad vererbt sich laut Doku nicht garantiert); kein `[readonly]` im Template
+  - Inline-Bearbeitung: `isEditing = signal(false)` + **ein** `readonly(schema, { when: () => !this.isEditing() })`
+    auf der Wurzel – `readonly` vererbt sich auf alle Felder (`parent.readonly() || eigene Regel`, durch die Tests
+    der Inline-Formulare abgesichert); kein `[readonly]` im Template
   - Beim Wechsel in den Bearbeiten-Modus den Fokus ins erste Feld setzen:
     `this.xyzForm.firstField().focusBoundControl()` – der Bearbeiten-Button wird deaktiviert und verliert den Fokus,
     ohne Fokus im Formular funktioniert Enter nicht
@@ -228,9 +229,11 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
         Regel [validateUniqueToolName](../schaffbar-portal/src/app/tools/tool.validators.ts) für Anlegen und Bearbeiten,
         das eigene Tool ist ausgenommen.
         Test: [tool-detail-info.component.spec.ts](../schaffbar-portal/src/app/tools/components/tool-detail-info/tool-detail-info.component.spec.ts)
-  - [ ] [user-contact](../schaffbar-portal/src/app/users/components/user-contact/user-contact.component.ts)
+  - [x] [user-contact](../schaffbar-portal/src/app/users/components/user-contact/user-contact.component.ts)
         (dabei `email()`-Validator ergänzen – fehlt heute, das Template prüft aber `hasError('email')`)
-  - [ ] [user-address](../schaffbar-portal/src/app/users/components/user-address/user-address.component.ts)
+  - [x] [user-address](../schaffbar-portal/src/app/users/components/user-address/user-address.component.ts)
+        – PLZ: `minLength`/`maxLength` im Schema setzen über `[formField]` auch das native `maxlength`; das statische
+        `maxlength="5"` und die Template-Referenz für den Zähler entfallen. Neuer Typ `UserContact` im User-Model
 - [ ] [update-user-form](../schaffbar-portal/src/app/users/components/update-user-form/update-user-form.component.ts)
       (Datepicker, Checkbox)
 - [ ] [new-user-form](../schaffbar-portal/src/app/users/components/new-user-form/new-user-form.component.ts) –

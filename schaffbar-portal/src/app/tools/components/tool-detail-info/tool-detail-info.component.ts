@@ -52,12 +52,11 @@ export class ToolDetailInfoComponent {
   // follows the tool input
   private readonly model = linkedSignal(() => toModel(this.tool()));
 
-  // area and certification requirement are selects that are only shown while editing, so they need no readonly rule
   protected readonly toolForm = form(this.model, (schema) => {
+    // readonly is inherited by all fields
+    readonly(schema, { when: () => !this.isEditing() });
     required(schema.name);
     validateUniqueToolName(schema.name, this.toolsStore.entities, () => this.tool().id);
-    readonly(schema.name, { when: () => !this.isEditing() });
-    readonly(schema.description, { when: () => !this.isEditing() });
   });
 
   protected onEdit(): void {

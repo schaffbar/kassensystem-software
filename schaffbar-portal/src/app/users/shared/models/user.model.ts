@@ -12,6 +12,11 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface UserContact {
+  email: string;
+  phone: string;
+}
+
 export interface UserAddress {
   addressLine1: string;
   addressLine2: string;

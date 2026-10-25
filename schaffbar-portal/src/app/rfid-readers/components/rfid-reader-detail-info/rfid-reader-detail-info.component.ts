@@ -32,8 +32,8 @@ export class RfidReaderDetailInfoComponent {
   private readonly model = linkedSignal(() => toModel(this.rfidReader()));
 
   protected readonly readerForm = form(this.model, (schema) => {
-    readonly(schema.name, { when: () => !this.isEditing() });
-    readonly(schema.socketName, { when: () => !this.isEditing() });
+    // readonly is inherited by all fields
+    readonly(schema, { when: () => !this.isEditing() });
   });
 
   protected onEdit(): void {

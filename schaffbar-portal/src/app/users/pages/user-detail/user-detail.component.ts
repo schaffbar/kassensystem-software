@@ -13,7 +13,7 @@ import { ToolsStore } from '../../../tools/tools.store';
 import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { RfidTagAssignmentStatus } from '../../shared/models/rfid-tag-assignment.model';
-import { User, UserAddress } from '../../shared/models/user.model';
+import { User, UserAddress, UserContact } from '../../shared/models/user.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
@@ -95,7 +95,7 @@ export class UserDetailComponent {
     this.detailsStore.updateUserAddress({ id: this.id(), address });
   }
 
-  protected onContactChanged(contact: { email: string; phone: string }) {
+  protected onContactChanged(contact: UserContact) {
     this.detailsStore.updateUserContact({ id: this.id(), ...contact });
   }
 
