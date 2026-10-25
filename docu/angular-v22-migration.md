@@ -179,6 +179,12 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
     (`const { type } = this.model(); if (!type) return;`)
   - Material 22.2 bindet `mat-select`/`matInput` und `<mat-error>` direkt an `[formField]` (Fehlerzustand,
     touched) – kein Zusatzcode nötig
+  - Bedingte Felder: `hidden(schema.x, { when: ({ valueOf }) => … })` – ein ausgeblendetes Feld zählt **nicht** zur
+    Gültigkeit des Formulars, Validatoren am Feld brauchen also kein eigenes `when`. Im Template
+    `@if (!xyzForm.x().hidden())`
+  - Formular, das einem Input folgt: `model = linkedSignal(() => toModel(this.input()))` statt `effect` + `reset()`.
+    Abbrechen: `this.model.set(toModel(this.input())); this.xyzForm().reset();` – `reset()` setzt nur
+    touched/dirty zurück, nicht die Werte. „Geändert?“ als `computed` (Model vs. `toModel(input)`)
   - Tests mit Harnesses: `MatSelectHarness`, `MatButtonHarness`, `MatFormFieldHarness.getTextErrors()`
 
 - [x] [new-tool-form](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.ts) –
@@ -187,9 +193,9 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
       Custom-Fehler: `return exists ? { kind: 'nameExists' } : undefined;` (nie `null`), im Template
       `getError('nameExists')`. Test: [new-tool-form.component.spec.ts](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.spec.ts)
       (u. a. Re-Validierung, wenn sich die Tool-Liste ändert)
-- [ ] [tool-wlan-relais](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.ts)
-      – `required(s.ipAddress, { when: ... })` + `hidden()` statt manueller Logik in `onSave`; `toSignal(valueChanges)`
-      entfällt; `isDirty()` wird ein echtes `computed`
+- [x] [tool-wlan-relais](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.ts)
+      – `hidden(schema.ipAddress, { when: … })` + `required` + `pattern(…, { message })`; `toSignal(valueChanges)`
+      und `effect` entfallen, `isDirty` ist ein `computed`. Test: [tool-wlan-relais.component.spec.ts](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.spec.ts)
 - [ ] Inline-Edit-Formulare – gleiches Muster 4× (`linkedSignal`-Model + `readonly(when)` + `isEditing`,
       Anhang A). Signal `readonly` dabei in `isEditing` umbenennen (invertiert), damit es nicht mit `readonly()` aus
       Signal Forms kollidiert.
@@ -277,10 +283,6 @@ interface ContactModel {
   phone: string;
 }
 
-function toModel(user: User): ContactModel {
-  return { email: user.email, phone: user.phone ?? '' };
-}
-
 @Component({
   selector: 'schbar-user-contact',
   imports: [FormField, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
@@ -314,6 +316,11 @@ export class UserContactComponent {
       this.isEditing.set(false);
     });
   }
+}
+
+// pure helper functions: module level, not exported, after the class (see schaffbar-portal/CLAUDE.md)
+function toModel(user: User): ContactModel {
+  return { email: user.email, phone: user.phone ?? '' };
 }
 ```
 

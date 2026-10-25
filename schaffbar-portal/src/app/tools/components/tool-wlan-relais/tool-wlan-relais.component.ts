@@ -1,36 +1,39 @@
-import { Component, computed, effect, inject, input, output } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, input, linkedSignal, output } from '@angular/core';
+import { form, FormField, hidden, pattern, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { SetWlanRelaisCommand, Tool, WLAN_RELAIS_TEMPLATES, WlanRelaisType } from '../../tool.model';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+
+interface WlanRelaisModel {
+  // '' = no WLAN relais
+  wlanRelaisType: WlanRelaisType | '';
+  ipAddress: string;
+}
 
 @Component({
   selector: 'schbar-tool-wlan-relais',
   templateUrl: './tool-wlan-relais.component.html',
   styleUrl: './tool-wlan-relais.component.scss',
   imports: [
-    MatFormFieldModule,
+    FormField,
+    FieldErrorComponent,
     MatSelectModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    ReactiveFormsModule,
     TranslatePipe,
   ],
 })
 export class ToolWlanRelaisComponent {
-  private readonly fb = inject(NonNullableFormBuilder);
-
   readonly tool = input.required<Tool>();
 
   readonly wlanRelaisUpdated = output<SetWlanRelaisCommand>();
@@ -38,71 +41,57 @@ export class ToolWlanRelaisComponent {
 
   protected readonly wlanRelaisTypes = Object.values(WlanRelaisType);
 
-  protected readonly form = this.fb.group({
-    wlanRelaisType: [''],
-    ipAddress: ['', [Validators.required, Validators.pattern(IP_PATTERN)]],
+  private readonly model = linkedSignal(() => toModel(this.tool()));
+
+  protected readonly wlanRelaisForm = form(this.model, (schema) => {
+    // a hidden field does not count for the validity of the form, so the IP rules only apply with a relais type
+    hidden(schema.ipAddress, { when: ({ valueOf }) => !valueOf(schema.wlanRelaisType) });
+    required(schema.ipAddress);
+    pattern(schema.ipAddress, IP_PATTERN, { message: 'tools.pages.toolDetails.errors.invalidIpAddress' });
   });
 
-  private readonly formValues = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
-
   protected readonly derivedCommands = computed(() => {
-    const values = this.formValues();
-    const type = (values.wlanRelaisType || '') as WlanRelaisType | '';
-    const ip = values.ipAddress || '';
-    if (!type) {
+    const { wlanRelaisType, ipAddress } = this.model();
+    if (!wlanRelaisType) {
       return { httpStartCommand: '', onCommand: '', offCommand: '' };
     }
-    const template = WLAN_RELAIS_TEMPLATES[type];
+    const template = WLAN_RELAIS_TEMPLATES[wlanRelaisType];
     return {
-      httpStartCommand: template.httpStartCommand.replace('{{ipAddress}}', ip),
+      httpStartCommand: template.httpStartCommand.replace('{{ipAddress}}', ipAddress),
       onCommand: template.onCommand,
       offCommand: template.offCommand,
     };
   });
 
-  private readonly syncValues = effect(() => {
-    this.resetFormFromTool();
+  protected readonly isDirty = computed(() => {
+    const current = relevantValues(this.model());
+    const saved = relevantValues(toModel(this.tool()));
+    return current.wlanRelaisType !== saved.wlanRelaisType || current.ipAddress !== saved.ipAddress;
   });
 
-  protected isDirty(): boolean {
-    const tool = this.tool();
-    return (
-      this.form.controls.wlanRelaisType.value !== (tool.wlanRelaisType || '') ||
-      this.form.controls.ipAddress.value !== (tool.ipAddress || '')
-    );
-  }
-
   protected onCancel(): void {
-    this.resetFormFromTool();
+    this.model.set(toModel(this.tool()));
+    this.wlanRelaisForm().reset();
   }
 
   protected onSave(): void {
-    const type = this.form.controls.wlanRelaisType.value;
-    if (type) {
-      this.form.controls.ipAddress.markAsTouched();
-      if (this.form.controls.ipAddress.invalid) {
-        return;
+    submit(this.wlanRelaisForm, async () => {
+      const { wlanRelaisType, ipAddress } = this.model();
+      if (wlanRelaisType) {
+        this.wlanRelaisUpdated.emit({ toolId: this.tool().id, wlanRelaisType, ipAddress });
+      } else {
+        this.wlanRelaisCleared.emit(this.tool().id);
       }
-
-      const command: SetWlanRelaisCommand = {
-        toolId: this.tool().id,
-        wlanRelaisType: type as WlanRelaisType,
-        ipAddress: this.form.controls.ipAddress.value,
-      };
-      this.wlanRelaisUpdated.emit(command);
-    } else {
-      this.wlanRelaisCleared.emit(this.tool().id);
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // helper
-
-  private resetFormFromTool(): void {
-    const tool = this.tool();
-    this.form.reset({
-      wlanRelaisType: tool.wlanRelaisType || '',
-      ipAddress: tool.ipAddress || '',
     });
   }
+}
+
+function toModel(tool: Tool): WlanRelaisModel {
+  return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
+}
+
+// Without a relais type the (hidden) IP address is irrelevant – it is neither saved nor should it count as a change.
+// It stays in the model, so switching to '--' and back does not lose the entered IP address.
+function relevantValues({ wlanRelaisType, ipAddress }: WlanRelaisModel): WlanRelaisModel {
+  return wlanRelaisType ? { wlanRelaisType, ipAddress } : { wlanRelaisType: '', ipAddress: '' };
 }
