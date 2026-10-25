@@ -1,17 +1,10 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import {
-  AbstractControl,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { form, FormField, required, submit, validate } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -20,62 +13,68 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CertificationRequirement, CreateToolCommand, ToolArea } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 
+interface NewToolModel {
+  name: string;
+  description: string;
+  area: ToolArea | '';
+  certificationRequirement: CertificationRequirement | '';
+}
+
 @Component({
   selector: 'schbar-new-tool-form',
   templateUrl: './new-tool-form.component.html',
   styleUrl: './new-tool-form.component.scss',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     LowerCasePipe,
     MatInputModule,
     MatButtonModule,
     MatDialogModule,
     MatDividerModule,
-    MatFormFieldModule,
     MatSelectModule,
     TranslatePipe,
   ],
 })
 export class NewToolFormComponent {
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly dialogRef = inject(MatDialogRef<NewToolFormComponent>);
   private readonly toolsStore = inject(ToolsStore);
 
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  protected readonly toolForm = this.fb.group({
-    name: ['', [Validators.required, this.nameExistsValidator()]],
-    description: [''],
-    area: ['' as ToolArea | '', [Validators.required]],
-    certificationRequirement: ['' as CertificationRequirement | '', [Validators.required]],
+  private readonly model = signal<NewToolModel>({
+    name: '',
+    description: '',
+    area: '',
+    certificationRequirement: '',
+  });
+
+  protected readonly toolForm = form(this.model, (schema) => {
+    required(schema.name);
+    validate(schema.name, ({ value }) => {
+      const name = value().toLowerCase();
+      if (!name) return undefined;
+
+      // reads the store signal, so the check re-runs when the tool list changes
+      const exists = this.toolsStore.entities().some((tool) => tool.name.toLowerCase() === name);
+      return exists ? { kind: 'nameExists' } : undefined;
+    });
+    required(schema.area);
+    required(schema.certificationRequirement);
   });
 
   protected save(): void {
-    if (this.toolForm.invalid) {
-      this.toolForm.markAllAsTouched();
-      return;
-    }
+    submit(this.toolForm, async () => {
+      const { name, description, area, certificationRequirement } = this.model();
+      if (!area || !certificationRequirement) return;
 
-    const formValue = this.toolForm.value;
-
-    const command: CreateToolCommand = {
-      name: formValue.name!,
-      description: formValue.description || undefined,
-      area: formValue.area as ToolArea,
-      certificationRequirement: formValue.certificationRequirement as CertificationRequirement,
-    };
-
-    this.dialogRef.close(command);
-  }
-
-  private nameExistsValidator(): (control: AbstractControl) => ValidationErrors | null {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) {
-        return null;
-      }
-      const exists = this.toolsStore.entities().some((tool) => tool.name.toLowerCase() === control.value.toLowerCase());
-      return exists ? { nameExists: true } : null;
-    };
+      const command: CreateToolCommand = {
+        name,
+        description: description || undefined,
+        area,
+        certificationRequirement,
+      };
+      this.dialogRef.close(command);
+    });
   }
 }

@@ -161,7 +161,8 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 
   **Festgelegtes Muster (gilt für alle weiteren Formulare):**
   - Model als eigenes `interface …Model` + `private readonly model = signal<…Model>(…)`;
-    `protected readonly xyzForm = form(this.model, (s) => { required(s.type); … })`
+    `protected readonly xyzForm = form(this.model, (schema) => { required(schema.type); … })` – Parameter heißt
+    `schema`, nicht `s`
   - Kein `null` im Model: „nichts ausgewählt“ ist `''` (Typ z. B. `RfidReaderType | ''`), `required()` wertet `''`
     als leer
   - Template: `[formField]="xyzForm.type"` statt `formControlName`; kein `[formGroup]`, kein `<form>` nötig
@@ -174,9 +175,12 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
     touched) – kein Zusatzcode nötig
   - Tests mit Harnesses: `MatSelectHarness`, `MatButtonHarness`, `MatFormFieldHarness.getTextErrors()`
 
-- [ ] [new-tool-form](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.ts) –
+- [x] [new-tool-form](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.ts) –
       `nameExistsValidator` → `validate(s.name, ...)` (reagiert auf `toolsStore.entities()`); Casts
       `'' as ToolArea | ''` und `formValue.name!` entfallen
+      Custom-Fehler: `return exists ? { kind: 'nameExists' } : undefined;` (nie `null`), im Template
+      `getError('nameExists')`. Test: [new-tool-form.component.spec.ts](../schaffbar-portal/src/app/tools/components/new-tool-form/new-tool-form.component.spec.ts)
+      (u. a. Re-Validierung, wenn sich die Tool-Liste ändert)
 - [ ] [tool-wlan-relais](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.ts)
       – `required(s.ipAddress, { when: ... })` + `hidden()` statt manueller Logik in `onSave`; `toSignal(valueChanges)`
       entfällt; `isDirty()` wird ein echtes `computed`

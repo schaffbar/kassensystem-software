@@ -2,7 +2,7 @@
 
 <mat-divider />
 
-<mat-dialog-content [formGroup]="toolForm">
+<mat-dialog-content>
   <div class="row">
     <div class="col">
       <mat-form-field class="full-width">
@@ -11,14 +11,14 @@
           id="name"
           matInput
           [placeholder]="'tools.shared.toolProperties.name' | translate"
-          formControlName="name" />
-        @if (toolForm.controls['name'].hasError('required')) {
+          [formField]="toolForm.name" />
+        @if (toolForm.name().getError('required')) {
           <mat-error>
             {{ 'tools.shared.toolProperties.name' | translate }}
             {{ 'shared.dialogs.errors.required' | translate }}
           </mat-error>
         }
-        @if (toolForm.controls['name'].hasError('nameExists')) {
+        @if (toolForm.name().getError('nameExists')) {
           <mat-error>
             {{ 'tools.dialogs.addTool.errors.nameExists' | translate }}
           </mat-error>
@@ -35,7 +35,7 @@
           id="description"
           matInput
           [placeholder]="'tools.shared.toolProperties.description' | translate"
-          formControlName="description"
+          [formField]="toolForm.description"
           rows="2">
         </textarea>
       </mat-form-field>
@@ -46,12 +46,12 @@
     <div class="col">
       <mat-form-field class="full-width">
         <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
-        <mat-select formControlName="area">
+        <mat-select [formField]="toolForm.area">
           @for (area of toolAreas; track area) {
             <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
           }
         </mat-select>
-        @if (toolForm.controls['area'].hasError('required')) {
+        @if (toolForm.area().getError('required')) {
           <mat-error>
             {{ 'tools.shared.toolProperties.area' | translate }}
             {{ 'shared.dialogs.errors.required' | translate }}
@@ -65,7 +65,7 @@
     <div class="col">
       <mat-form-field class="full-width">
         <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
-        <mat-select formControlName="certificationRequirement">
+        <mat-select [formField]="toolForm.certificationRequirement">
           @for (req of certificationRequirements; track req) {
             <mat-option [value]="req">
               <span class="certification-indicator certification-indicator--{{ req | lowercase }}"></span>
@@ -73,7 +73,7 @@
             </mat-option>
           }
         </mat-select>
-        @if (toolForm.controls['certificationRequirement'].hasError('required')) {
+        @if (toolForm.certificationRequirement().getError('required')) {
           <mat-error>
             {{ 'tools.shared.toolProperties.certificationRequirement' | translate }}
             {{ 'shared.dialogs.errors.required' | translate }}
