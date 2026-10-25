@@ -21,6 +21,8 @@ Wichtig zu wissen:
 
 - Jeder Schritt ist für sich lauffähig.
 - Nach jedem Schritt: `ng build`, `ng lint`, `ng test` und kurz manuell durchklicken.
+  `ng build` ist Pflicht: die `testing`-Konfiguration läuft mit `aot: false`, Template-Typfehler fallen nur im
+  Build auf.
 - Schritte 1–2 sind risikoarm und machen 3–6 einfacher. 5 und 6 bringen am meisten.
 - Bei Signal Forms und `httpResource` immer mit dem kleinsten Feature (RFID-Reader) anfangen, damit das Muster
   steht, bevor es an Users geht.
@@ -95,15 +97,21 @@ Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
 
 Angular rät davon ab, mit `effect()` Werte in anderen State zu kopieren. Erst ohne Forms-Umbau üben:
 
-- [ ] [tool-rfid-reader-assignment.component.ts](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
+- [x] [tool-rfid-reader-assignment.component.ts](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
       `syncSelection = effect(...)` → `selectedRfidReaderId = linkedSignal(() => this.tool().rfidReaderId ?? '')`
-- [ ] [user-detail.component.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.ts):
+- [x] [user-detail.component.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.ts):
       `ngOnInit` + `route.queryParams.subscribe` (ohne Cleanup) ersetzen durch
       `tab = input<string>()` (kommt über `withComponentInputBinding`) und
       `selectedTabIndex = linkedSignal(() => (this.tab() === 'open-session' ? 1 : 0))`.
       `OnInit` und `ActivatedRoute` entfallen.
-- [ ] [tool-certifications.component.ts](../schaffbar-portal/src/app/tools/components/tool-certifications/tool-certifications.component.ts):
+- [x] [tool-certifications.component.ts](../schaffbar-portal/src/app/tools/components/tool-certifications/tool-certifications.component.ts):
       `filteredUsers` / `filteredCertifiers` sind einfache Arrow-Functions → `computed`
+
+- [x] Test: [tool-rfid-reader-assignment.component.spec.ts](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.spec.ts)
+      (Vorauswahl, Reset bei neuem `tool`-Input, Abbrechen) – mit `MatSelectHarness`
+
+Hinweis: `selectedTabIndex` braucht `linkedSignal<number>(...)`, sonst wird der Typ als `0 | 1` abgeleitet und
+`(selectedIndexChange)` passt nicht.
 
 Die übrigen 5 `effect`-Syncs (Formulare) verschwinden in Schritt 5.
 

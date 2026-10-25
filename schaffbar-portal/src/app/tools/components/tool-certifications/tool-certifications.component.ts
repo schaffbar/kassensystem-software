@@ -67,7 +67,7 @@ export class ToolCertificationsComponent {
     return map;
   });
 
-  protected readonly filteredUsers = () => {
+  protected readonly filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase();
     const selectedIds = new Set(this.selectedUsers().map((u) => u.id));
     const certifiedUserIds = new Set(this.certifications().map((c) => c.customerId));
@@ -79,15 +79,15 @@ export class ToolCertificationsComponent {
         !instructorIdSet.has(u.id) &&
         (u.firstName + ' ' + u.lastName).toLowerCase().includes(search),
     );
-  };
+  });
 
-  protected readonly filteredCertifiers = () => {
+  protected readonly filteredCertifiers = computed(() => {
     const search = this.certifierSearchText().toLowerCase();
     const ids = new Set(this.instructorIds());
     return this.allUsers().filter(
       (u) => ids.has(u.id) && (u.firstName + ' ' + u.lastName).toLowerCase().includes(search),
     );
-  };
+  });
 
   protected onUserSelected(user: User): void {
     this.selectedUsers.update((users) => [...users, user]);

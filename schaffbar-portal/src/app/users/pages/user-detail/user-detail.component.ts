@@ -1,6 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, computed, inject, input, linkedSignal } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -35,27 +34,20 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
   ],
   providers: [UserDetailStore],
 })
-export class UserDetailComponent implements OnInit {
+export class UserDetailComponent {
   private readonly dialog = inject(MatDialog);
-  private readonly route = inject(ActivatedRoute);
   protected readonly detailsStore = inject(UserDetailStore);
   private readonly toolsStore = inject(ToolsStore);
 
+  // Info: id and tab inputs are coming from the route parameters.
   readonly id = input.required<string>();
+  readonly tab = input<string>();
 
-  protected readonly selectedTabIndex = signal(0);
+  protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
   protected readonly allTools = computed(() => this.toolsStore.entities());
 
   constructor() {
     this.detailsStore.setUserId(this.id);
-  }
-
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      if (params['tab'] === 'open-session') {
-        this.selectedTabIndex.set(1);
-      }
-    });
   }
 
   protected reloadUser(): void {

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -39,10 +39,10 @@ export class ToolRfidReaderAssignmentComponent {
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
   readonly rfidReaderCleared = output<string>();
 
-  protected readonly selectedRfidReaderId = signal('');
+  protected readonly selectedRfidReaderId = linkedSignal(() => this.tool().rfidReaderId ?? '');
 
   protected readonly isDirty = computed(() => {
-    const current = this.tool().rfidReaderId || '';
+    const current = this.tool().rfidReaderId ?? '';
     return this.selectedRfidReaderId() !== current;
   });
 
@@ -59,12 +59,8 @@ export class ToolRfidReaderAssignmentComponent {
     return this.assignedRfidReaderIds().has(readerId);
   }
 
-  private readonly syncSelection = effect(() => {
-    this.selectedRfidReaderId.set(this.tool().rfidReaderId || '');
-  });
-
   protected onCancel() {
-    this.selectedRfidReaderId.set(this.tool().rfidReaderId || '');
+    this.selectedRfidReaderId.set(this.tool().rfidReaderId ?? '');
   }
 
   protected onSave() {
