@@ -1,4 +1,7 @@
 @if (detailsStore.user(); as user) {
+  @let assignment = detailsStore.rfidTagAssignment();
+  @let rfidTagStatus = assignment?.status ?? RfidTagAssignmentStatus.Unassigned;
+
   <div class="user-detail-header">
     <div class="user-detail-header-title">
       <div class="user-detail-header-title-actions">
@@ -21,40 +24,51 @@
               {{ 'users.chips.userDetails.clubMember' | translate }}
             </mat-chip>
           }
-          @if (detailsStore.isRfidTagAssigned() || detailsStore.waitingForAssignment()) {
-            <mat-chip>
-              {{
-                'users.chips.userDetails.rfidTags.' + (detailsStore.rfidTagAssignment()?.assignmentType | lowercase)
-                  | translate
-              }}
-            </mat-chip>
-            @if (detailsStore.isRfidTagAssigned()) {
-              <mat-chip>{{ detailsStore.rfidTagAssignment()?.rfidTagId }}</mat-chip>
-            } @else if (detailsStore.waitingForAssignment()) {
-              <mat-chip> {{ 'users.chips.userDetails.rfidTags.waiting' | translate }} </mat-chip>
+          @switch (rfidTagStatus) {
+            @case (RfidTagAssignmentStatus.WaitingForAssignment) {
+              <mat-chip>
+                {{ 'users.chips.userDetails.rfidTags.' + (assignment?.assignmentType | lowercase) | translate }}
+              </mat-chip>
+              <mat-chip>{{ 'users.chips.userDetails.rfidTags.waiting' | translate }}</mat-chip>
             }
-          } @else {
-            <mat-chip> {{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }} </mat-chip>
+            @case (RfidTagAssignmentStatus.Assigned) {
+              <mat-chip>
+                {{ 'users.chips.userDetails.rfidTags.' + (assignment?.assignmentType | lowercase) | translate }}
+              </mat-chip>
+              <mat-chip>{{ assignment?.rfidTagId }}</mat-chip>
+            }
+            @case (RfidTagAssignmentStatus.WaitingForUnassignment) {
+              <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
+            }
+            @case (RfidTagAssignmentStatus.Unassigned) {
+              <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
+            }
+            @default never;
           }
         </mat-chip-set>
       </div>
     </div>
-    @if (detailsStore.showAssignActions()) {
-      <div class="user-detail-header-actions">
-        <button mat-flat-button color="primary" (click)="assignTemporaryRfidTag()">
-          {{ 'users.actions.assignTempRfidTag' | translate }}
-        </button>
-        <button mat-flat-button color="primary" (click)="assignFixedRfidTag()">
-          {{ 'users.actions.assignFixedRfidTag' | translate }}
-        </button>
-      </div>
-    }
-    @if (detailsStore.showUnassignAction()) {
-      <div class="user-detail-header-actions">
-        <button mat-flat-button color="warn" (click)="unassignRfidTag()">
-          {{ 'users.actions.unassignRfidTag' | translate }}
-        </button>
-      </div>
+    @switch (rfidTagStatus) {
+      @case (RfidTagAssignmentStatus.WaitingForAssignment) {}
+      @case (RfidTagAssignmentStatus.Assigned) {
+        <div class="user-detail-header-actions">
+          <button mat-flat-button color="warn" (click)="unassignRfidTag()">
+            {{ 'users.actions.unassignRfidTag' | translate }}
+          </button>
+        </div>
+      }
+      @case (RfidTagAssignmentStatus.WaitingForUnassignment) {}
+      @case (RfidTagAssignmentStatus.Unassigned) {
+        <div class="user-detail-header-actions">
+          <button mat-flat-button color="primary" (click)="assignTemporaryRfidTag()">
+            {{ 'users.actions.assignTempRfidTag' | translate }}
+          </button>
+          <button mat-flat-button color="primary" (click)="assignFixedRfidTag()">
+            {{ 'users.actions.assignFixedRfidTag' | translate }}
+          </button>
+        </div>
+      }
+      @default never;
     }
   </div>
 

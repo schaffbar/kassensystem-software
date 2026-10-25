@@ -80,14 +80,7 @@
                 {{ 'tools.tables.toolCertifications.statusColumn' | translate }}
               </th>
               <td mat-cell *matCellDef="let cert">
-                <mat-chip-set>
-                  <mat-chip
-                    [class.active]="cert.status === CertificationStatus.Active"
-                    [class.paused]="cert.status === CertificationStatus.Paused"
-                    [class.revoked]="cert.status === CertificationStatus.Revoked">
-                    {{ 'users.tables.toolCertifications.statuses.' + cert.status | translate }}
-                  </mat-chip>
-                </mat-chip-set>
+                <schbar-certification-status-chip [status]="cert.status" />
               </td>
             </ng-container>
 

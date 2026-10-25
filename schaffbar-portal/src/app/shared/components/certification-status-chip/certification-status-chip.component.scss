@@ -1,0 +1,27 @@
+@use '@angular/material' as mat;
+
+// Use the chip token overrides instead of `background-color`: a plain `.active { background-color }` has the same
+// specificity as Material's own chip rule, so the result would depend on the order of the stylesheets in <head>.
+.active {
+  @include mat.chips-overrides(
+    (
+      elevated-container-color: #c8e6c9,
+    )
+  );
+}
+
+.paused {
+  @include mat.chips-overrides(
+    (
+      elevated-container-color: #fff9c4,
+    )
+  );
+}
+
+.revoked {
+  @include mat.chips-overrides(
+    (
+      elevated-container-color: #ffcdd2,
+    )
+  );
+}

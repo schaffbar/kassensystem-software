@@ -12,11 +12,11 @@ import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import {
   BatchCreateToolCertificationCommand,
   ToolCertification,
-  ToolCertificationStatus,
 } from '../../../users/shared/models/tool-certification.model';
 import { User } from '../../../users/shared/models/user.model';
 
@@ -33,6 +33,7 @@ import { User } from '../../../users/shared/models/user.model';
     MatIconModule,
     MatInputModule,
     MatTableModule,
+    CertificationStatusChipComponent,
     TranslatePipe,
   ],
 })
@@ -49,7 +50,6 @@ export class ToolCertificationsComponent {
   readonly deleteCertification = output<{ customerId: string; toolId: string }>();
 
   protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
-  protected readonly CertificationStatus = ToolCertificationStatus;
 
   protected readonly searchText = signal('');
   protected readonly selectedUsers = signal<User[]>([]);

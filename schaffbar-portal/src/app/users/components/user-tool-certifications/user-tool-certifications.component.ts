@@ -2,13 +2,13 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import { Tool } from '../../../tools/tool.model';
 import { ToolCertification, ToolCertificationStatus } from '../../shared/models/tool-certification.model';
@@ -17,7 +17,7 @@ import { ToolCertification, ToolCertificationStatus } from '../../shared/models/
   selector: 'schbar-user-tool-certifications',
   templateUrl: './user-tool-certifications.component.html',
   styleUrl: './user-tool-certifications.component.scss',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatChipsModule, DatePipe, TranslatePipe],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, CertificationStatusChipComponent, DatePipe, TranslatePipe],
 })
 export class UserToolCertificationsComponent {
   private readonly dialog = inject(MatDialog);
@@ -32,6 +32,10 @@ export class UserToolCertificationsComponent {
 
   protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
   protected readonly CertificationStatus = ToolCertificationStatus;
+
+  // TOOD: new after migration - need to understand this
+  // mat-table rows are typed as `any`; restores the type so `@default never` can check the status
+  protected readonly asCertification = (row: ToolCertification): ToolCertification => row;
 
   protected readonly toolNameMap = computed(() => {
     const map = new Map<string, string>();

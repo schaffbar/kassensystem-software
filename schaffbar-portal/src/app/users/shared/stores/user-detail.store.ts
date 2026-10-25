@@ -15,7 +15,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, tap } from 'rxjs';
 
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
-import { RfidTagAssignment, RfidTagAssignmentStatus } from '../../shared/models/rfid-tag-assignment.model';
+import { RfidTagAssignment } from '../../shared/models/rfid-tag-assignment.model';
 import { ToolCertification } from '../../shared/models/tool-certification.model';
 import { User, UserAddress } from '../../shared/models/user.model';
 import { WorkshopSession } from '../../shared/models/workshop-session.model';
@@ -44,20 +44,8 @@ const initialState: UserDetailState = {
 
 export const UserDetailStore = signalStore(
   withState(initialState),
-  withComputed(({ user, rfidTagAssignment }) => ({
+  withComputed(({ user }) => ({
     userName: computed(() => (user() ? user()?.firstName + ' ' + user()?.lastName : 'N/A')),
-    isRfidTagAssigned: computed(
-      () => !!rfidTagAssignment() && rfidTagAssignment()?.status == RfidTagAssignmentStatus.Assigned,
-    ),
-    waitingForAssignment: computed(
-      () => !!rfidTagAssignment() && rfidTagAssignment()?.status == RfidTagAssignmentStatus.WaitingForAssignment,
-    ),
-    showAssignActions: computed(
-      () => !rfidTagAssignment() || rfidTagAssignment()?.status == RfidTagAssignmentStatus.Unassigned,
-    ),
-    showUnassignAction: computed(
-      () => !!rfidTagAssignment() && rfidTagAssignment()?.status == RfidTagAssignmentStatus.Assigned,
-    ),
   })),
   withComputed(({ openSession }) => ({
     slots: computed(() => openSession()?.workshopUsages ?? []),

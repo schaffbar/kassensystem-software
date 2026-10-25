@@ -12,6 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ToolsStore } from '../../../tools/tools.store';
 import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
+import { RfidTagAssignmentStatus } from '../../shared/models/rfid-tag-assignment.model';
 import { User, UserAddress } from '../../shared/models/user.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
@@ -45,6 +46,7 @@ export class UserDetailComponent {
 
   protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
   protected readonly allTools = computed(() => this.toolsStore.entities());
+  protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
 
   constructor() {
     this.detailsStore.setUserId(this.id);

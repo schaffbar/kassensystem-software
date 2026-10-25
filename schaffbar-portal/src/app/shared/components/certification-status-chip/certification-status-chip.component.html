@@ -1,0 +1,17 @@
+<!-- @let is required: TypeScript can narrow a variable, but not the result of the signal call status() -->
+@let currentStatus = status();
+
+<mat-chip-set>
+  @switch (currentStatus) {
+    @case (Status.Active) {
+      <mat-chip class="active">{{ 'users.tables.toolCertifications.statuses.ACTIVE' | translate }}</mat-chip>
+    }
+    @case (Status.Paused) {
+      <mat-chip class="paused">{{ 'users.tables.toolCertifications.statuses.PAUSED' | translate }}</mat-chip>
+    }
+    @case (Status.Revoked) {
+      <mat-chip class="revoked">{{ 'users.tables.toolCertifications.statuses.REVOKED' | translate }}</mat-chip>
+    }
+    @default never;
+  }
+</mat-chip-set>

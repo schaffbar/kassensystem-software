@@ -119,19 +119,36 @@ Die übrigen 5 `effect`-Syncs (Formulare) verschwinden in Schritt 5.
 
 `@default never;` lässt den Build fehlschlagen, wenn ein Enum-/Union-Wert nicht behandelt wird.
 
-- [ ] **RFID-Chips** in [user-detail.component.html](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.html):
+- [x] **RFID-Chips** in [user-detail.component.html](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.html):
       die 4 Booleans (`isRfidTagAssigned`, `waitingForAssignment`, `showAssignActions`, `showUnassignAction`) durch
       `@switch (assignment.status)` über alle 4 `RfidTagAssignmentStatus` ersetzen (Muster siehe Anhang C)
-- [ ] **`CertificationStatusChip`** anlegen (`ng g c shared/components/certification-status-chip`) mit
+- [x] **`CertificationStatusChip`** anlegen (`ng g c shared/components/certification-status-chip`) mit
       `status = input.required<ToolCertificationStatus>()` und `@switch` innen. Einsetzen in
       `tool-certifications.component.html` und `user-tool-certifications.component.html` (ersetzt 2× das Markup mit
       3× `[class.x]`)
   - Warum eine eigene Komponente: in `*matCellDef="let cert"` ist `cert` vom Typ `any` – darauf prüft
     `@default never` nichts.
-- [ ] Aktionen pro Status in `user-tool-certifications.component.html` (`@if Active` / `@if Paused`, `Revoked`
+- [x] Aktionen pro Status in `user-tool-certifications.component.html` (`@if Active` / `@if Paused`, `Revoked`
       fehlt implizit) → `@switch` mit `@case (Revoked) {}` + `@default never;` – ebenfalls in einer typisierten
       Kind-Komponente oder über das Chip-Muster
-- [ ] Test: vorübergehend einen Enum-Wert ergänzen → Build muss fehlschlagen
+- [x] Test: vorübergehend einen Enum-Wert ergänzen → Build muss fehlschlagen
+
+Erkenntnisse:
+
+- **`@switch` nie direkt auf einen Signal-Aufruf** (`@switch (status())`): TypeScript grenzt das Ergebnis eines
+  Funktionsaufrufs nicht ein, `@default never` schlägt dann immer fehl. Erst `@let current = status();`, dann
+  `@switch (current)`. Property-Zugriff auf eine `@let`-Variable (`cert.status`) funktioniert.
+- **mat-table-Zeilen sind `any`:** in `user-tool-certifications` stellt
+  `asCertification = (row: ToolCertification) => row` + `@let cert = asCertification(row)` den Typ wieder her.
+- **Prettier ≥ 3.9 nötig:** ältere Versionen (bis 3.8) brechen bei `@default never;` ab. `prettier` wurde auf
+  `^3.9.10` angehoben; die neue Version formatiert sonst nichts um.
+- **Chip-Farben per `mat.chips-overrides(...)`**, nicht per `background-color`: `.active { background-color }` hat
+  dieselbe Spezifität wie Materials eigene Chip-Regel – das Ergebnis hing von der Reihenfolge der Stylesheets im
+  `<head>` ab (bei Tools grün, bei Users weiß). Das Override setzt die Token-Variable direkt am Chip.
+- Gegenprobe gemacht: neuer Enum-Wert in `ToolCertificationStatus` und `RfidTagAssignmentStatus` → Build schlägt
+  an allen 4 `@switch`-Stellen fehl.
+- [ ] **Offene Frage (fachlich):** Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine
+      Aktionen – unverändert vom alten Verhalten übernommen, jetzt aber explizit sichtbar. Gewollt?
 
 ## Schritt 5 – Signal Forms
 
