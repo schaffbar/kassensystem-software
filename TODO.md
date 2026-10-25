@@ -2,6 +2,8 @@
 
 ## Important
 
+- [Frontend] Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine Aktionen - gewollt?
+
 - [Frontend] RFID reader after init shows type.null in the list and detail page
 - [Frontend] RFID-Reader detail page trennen (mac + type / name + socket)
 
@@ -22,8 +24,6 @@
 - [Backend] Migrate to Spring Boot 4
 - [Backend] fix/implement/remove TODOs
 
-- [Frontend] users and tools store should be global?
-- [Frontend] tools store is used in tool list and tool details. Is it the same instance?
 - [Frontend] dashboard store - withEntities vs withState
 - [Backend] Enter and leave time as LocalDateTime instead of Instant?
 - [Backend] Beim Löschen immer überprüfen ob Entity nicht irgendwo referenziert wird
