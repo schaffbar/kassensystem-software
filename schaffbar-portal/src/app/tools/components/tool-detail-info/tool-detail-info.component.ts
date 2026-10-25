@@ -1,6 +1,6 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { form, FormField, FormRoot, readonly, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,78 +9,90 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement, Tool, ToolArea, UpdateToolCommand } from '../../tool.model';
+import { validateUniqueToolName } from '../../tool.validators';
+import { ToolsStore } from '../../tools.store';
+
+interface ToolInfoModel {
+  name: string;
+  description: string;
+  area: ToolArea;
+  certificationRequirement: CertificationRequirement;
+}
 
 @Component({
   selector: 'schbar-tool-detail-info',
   templateUrl: './tool-detail-info.component.html',
   styleUrl: './tool-detail-info.component.scss',
   imports: [
+    FormField,
+    FormRoot,
+    FieldErrorComponent,
     LowerCasePipe,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
-    ReactiveFormsModule,
     TranslatePipe,
   ],
 })
 export class ToolDetailInfoComponent {
-  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly toolsStore = inject(ToolsStore);
 
   readonly tool = input.required<Tool>();
 
   readonly toolUpdated = output<UpdateToolCommand>();
 
-  protected readonly readonly = signal(true);
+  protected readonly isEditing = signal(false);
 
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  protected readonly toolForm = this.fb.group({
-    name: [''],
-    description: [''],
-    area: ['' as ToolArea, [Validators.required]],
-    certificationRequirement: ['' as CertificationRequirement, [Validators.required]],
+  // follows the tool input
+  private readonly model = linkedSignal(() => toModel(this.tool()));
+
+  // area and certification requirement are selects that are only shown while editing, so they need no readonly rule
+  protected readonly toolForm = form(this.model, (schema) => {
+    required(schema.name);
+    validateUniqueToolName(schema.name, this.toolsStore.entities, () => this.tool().id);
+    readonly(schema.name, { when: () => !this.isEditing() });
+    readonly(schema.description, { when: () => !this.isEditing() });
   });
 
-  private readonly initialValues = effect(() => this.setInitialFormValues());
-
-  protected updateTool() {
-    this.readonly.set(false);
+  protected onEdit(): void {
+    this.isEditing.set(true);
+    // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
+    this.toolForm.name().focusBoundControl();
   }
 
-  protected onCancel() {
-    this.setInitialFormValues();
-    this.readonly.set(true);
+  protected onCancel(): void {
+    this.model.set(toModel(this.tool()));
+    this.toolForm().reset();
+    this.isEditing.set(false);
   }
 
-  protected onSave() {
-    if (this.toolForm.valid) {
-      const formValues = this.toolForm.value;
+  protected onSave(): void {
+    submit(this.toolForm, async () => {
+      const { name, description, area, certificationRequirement } = this.model();
       const command: UpdateToolCommand = {
         id: this.tool().id,
-        name: formValues.name,
-        description: formValues.description,
-        area: formValues.area as ToolArea,
-        certificationRequirement: formValues.certificationRequirement as CertificationRequirement,
+        name,
+        description,
+        area,
+        certificationRequirement,
       };
-
       this.toolUpdated.emit(command);
-      this.readonly.set(true);
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // helper
-
-  private setInitialFormValues() {
-    const tool = this.tool();
-    this.toolForm.setValue({
-      name: tool.name,
-      description: tool.description || '',
-      area: tool.area,
-      certificationRequirement: tool.certificationRequirement,
+      this.isEditing.set(false);
     });
   }
+}
+
+function toModel(tool: Tool): ToolInfoModel {
+  return {
+    name: tool.name,
+    description: tool.description ?? '',
+    area: tool.area,
+    certificationRequirement: tool.certificationRequirement,
+  };
 }

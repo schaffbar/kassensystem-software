@@ -1,6 +1,6 @@
 import { LowerCasePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField, FormRoot, required, submit, validate } from '@angular/forms/signals';
+import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -12,6 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement, CreateToolCommand, ToolArea } from '../../tool.model';
+import { validateUniqueToolName } from '../../tool.validators';
 import { ToolsStore } from '../../tools.store';
 
 interface NewToolModel {
@@ -54,14 +55,7 @@ export class NewToolFormComponent {
 
   protected readonly toolForm = form(this.model, (schema) => {
     required(schema.name);
-    validate(schema.name, ({ value }) => {
-      const name = value().toLowerCase();
-      if (!name) return undefined;
-
-      // reads the store signal, so the check re-runs when the tool list changes
-      const exists = this.toolsStore.entities().some((tool) => tool.name.toLowerCase() === name);
-      return exists ? { kind: 'nameExists', message: 'tools.dialogs.addTool.errors.nameExists' } : undefined;
-    });
+    validateUniqueToolName(schema.name, this.toolsStore.entities);
     required(schema.area);
     required(schema.certificationRequirement);
   });

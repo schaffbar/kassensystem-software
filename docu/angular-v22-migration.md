@@ -222,7 +222,12 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
       Signal Forms kollidiert.
   - [x] [rfid-reader-detail-info](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.ts)
         – MAC-Adresse nicht mehr im Formular (nur Anzeige). Test: [rfid-reader-detail-info.component.spec.ts](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.spec.ts)
-  - [ ] [tool-detail-info](../schaffbar-portal/src/app/tools/components/tool-detail-info/tool-detail-info.component.ts)
+  - [x] [tool-detail-info](../schaffbar-portal/src/app/tools/components/tool-detail-info/tool-detail-info.component.ts)
+        – neu `required(name)` (Backend verlangt `@NotBlank`, bisher scheiterte ein leerer Name still mit 400).
+        Neu auch Namens-Eindeutigkeit beim Umbenennen (Backend wirft `ToolNameAlreadyUsedException`): gemeinsame
+        Regel [validateUniqueToolName](../schaffbar-portal/src/app/tools/tool.validators.ts) für Anlegen und Bearbeiten,
+        das eigene Tool ist ausgenommen.
+        Test: [tool-detail-info.component.spec.ts](../schaffbar-portal/src/app/tools/components/tool-detail-info/tool-detail-info.component.spec.ts)
   - [ ] [user-contact](../schaffbar-portal/src/app/users/components/user-contact/user-contact.component.ts)
         (dabei `email()`-Validator ergänzen – fehlt heute, das Template prüft aber `hasError('email')`)
   - [ ] [user-address](../schaffbar-portal/src/app/users/components/user-address/user-address.component.ts)
