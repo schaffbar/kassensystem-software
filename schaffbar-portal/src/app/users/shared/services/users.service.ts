@@ -1,7 +1,7 @@
-import { DatePipe } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
+import { format } from 'date-fns';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -18,7 +18,6 @@ const USERS_API_URL = `${environment.apiBaseUrl}/api/v1/customers`;
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
-  private readonly datePipe = inject(DatePipe);
 
   private httpOptions = {
     headers: new HttpHeaders({
@@ -38,8 +37,15 @@ export class UsersService {
     return this.http.get<User[]>(`${USERS_API_URL}?filter=${filter}`);
   }
 
-  getUser(id: string): Observable<User> {
-    return this.http.get<User>(`${USERS_API_URL}/${id}`);
+  /**
+   * Loads the user whenever the id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  userResource(id: () => string | null): HttpResourceRef<User | undefined> {
+    return httpResource<User>(() => {
+      const userId = id();
+      return userId ? `${USERS_API_URL}/${userId}` : undefined;
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -48,7 +54,7 @@ export class UsersService {
   createUser(command: CreateUserCommand): Observable<User> {
     const requestBody = {
       ...command,
-      dateOfBirth: this.datePipe.transform(command.dateOfBirth, 'yyyy-MM-dd') as string,
+      dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
 
     return this.http.post<User>(USERS_API_URL, requestBody, this.httpOptions);
@@ -57,7 +63,7 @@ export class UsersService {
   updateUser(command: UpdateUserCommand): Observable<void> {
     const requestBody = {
       ...command,
-      dateOfBirth: this.datePipe.transform(command.dateOfBirth, 'yyyy-MM-dd') as string,
+      dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
 
     return this.http.put<void>(`${USERS_API_URL}/${command.id}`, requestBody, this.httpOptions);

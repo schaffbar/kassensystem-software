@@ -1,10 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { RfidTagAssignment } from '../models/rfid-tag-assignment.model';
+import { AssignRfidTagCommand, RfidTagAssignment, UnassignRfidTagCommand } from '../models/rfid-tag-assignment.model';
 
 const RFID_TAG_ASSIGNMENT_API_URL = `${environment.apiBaseUrl}/api/v1/rfid-tag-assignments`;
 
@@ -22,38 +22,29 @@ export class RfidTagAssignmentService {
   // --------------------------------------------------------------------------
   // queries
 
-  getRfidTagAssignmetByUser(userId: string): Observable<RfidTagAssignment> {
-    return this.http
-      .get<RfidTagAssignment[]>(`${RFID_TAG_ASSIGNMENT_API_URL}?customer-id=${userId}`)
-      .pipe(map((assignments) => assignments[0] || null));
+  /**
+   * Loads the current RFID tag assignment of a customer (`null` if there is none) whenever the id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  rfidTagAssignmentResource(customerId: () => string | null): HttpResourceRef<RfidTagAssignment | null | undefined> {
+    return httpResource(
+      () => {
+        const id = customerId();
+        return id ? { url: RFID_TAG_ASSIGNMENT_API_URL, params: { 'customer-id': id } } : undefined;
+      },
+      // the backend returns a list; the customer has at most one current assignment
+      { parse: (assignments) => (assignments as RfidTagAssignment[])[0] ?? null },
+    );
   }
 
   // --------------------------------------------------------------------------
   // commands
 
-  assignFixedRfidTag(userId: string): Observable<void> {
-    const body = {
-      customerId: userId,
-      assignmentType: 'FIXED',
-    };
-
-    return this.http.post<void>(RFID_TAG_ASSIGNMENT_API_URL, body, this.httpOptions);
+  assignRfidTag(command: AssignRfidTagCommand): Observable<void> {
+    return this.http.post<void>(RFID_TAG_ASSIGNMENT_API_URL, command, this.httpOptions);
   }
 
-  assignTemporaryRfidTag(userId: string): Observable<void> {
-    const body = {
-      customerId: userId,
-      assignmentType: 'TEMPORARY',
-    };
-
-    return this.http.post<void>(RFID_TAG_ASSIGNMENT_API_URL, body, this.httpOptions);
-  }
-
-  unassignRfidTag(userId: string): Observable<void> {
-    const body = {
-      customerId: userId,
-    };
-
-    return this.http.put<void>(`${RFID_TAG_ASSIGNMENT_API_URL}/unassign`, body, this.httpOptions);
+  unassignRfidTag(command: UnassignRfidTagCommand): Observable<void> {
+    return this.http.put<void>(`${RFID_TAG_ASSIGNMENT_API_URL}/unassign`, command, this.httpOptions);
   }
 }

@@ -37,3 +37,10 @@ export enum WorkshopSessionStatus {
   Open = 'OPEN',
   Paid = 'PAID',
 }
+
+// ----------------------------------------------------------------------------
+// commands
+
+export interface CloseWorkshopSessionCommand {
+  customerId: string;
+}

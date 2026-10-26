@@ -1,29 +1,19 @@
-import { computed, effect, inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
 import { tapResponse } from '@ngrx/operators';
-import {
-  patchState,
-  signalMethod,
-  signalStore,
-  withComputed,
-  withHooks,
-  withMethods,
-  withProps,
-  withState,
-} from '@ngrx/signals';
+import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, filter, pipe, tap } from 'rxjs';
+import { exhaustMap, pipe, tap } from 'rxjs';
 
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
-import { RfidTagAssignment } from '../../shared/models/rfid-tag-assignment.model';
-import { ToolCertification } from '../../shared/models/tool-certification.model';
+import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../shared/models/rfid-tag-assignment.model';
 import {
-  UpdateUserAddressCommand,
-  UpdateUserCommand,
-  UpdateUserContactCommand,
-  User,
-} from '../../shared/models/user.model';
-import { WorkshopSession } from '../../shared/models/workshop-session.model';
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
+} from '../../shared/models/tool-certification.model';
+import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
+import { CloseWorkshopSessionCommand } from '../../shared/models/workshop-session.model';
 import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
 import { ToolCertificationService } from '../../shared/services/tool-certification.service';
 import { UsersService } from '../../shared/services/users.service';
@@ -31,28 +21,43 @@ import { WorkshopSessionService } from '../../shared/services/workshop-session.s
 
 interface UserDetailState {
   userId: string | null;
-  user: User | null;
-  rfidTagAssignment: RfidTagAssignment | null;
-  openSession: WorkshopSession | null;
-  toolCertifications: ToolCertification[];
-  dirty: boolean;
 }
 
-const initialState: UserDetailState = {
-  userId: null,
-  user: null,
-  rfidTagAssignment: null,
-  openSession: null,
-  toolCertifications: [],
-  dirty: false,
-};
-
 export const UserDetailStore = signalStore(
-  withState(initialState),
-  withComputed(({ user }) => ({
+  withState<UserDetailState>({ userId: null }),
+  // request status of the mutations
+  withRequestStatus(),
+  withProps((store) => {
+    const usersService = inject(UsersService);
+    const assignmentService = inject(RfidTagAssignmentService);
+    const workshopSessionService = inject(WorkshopSessionService);
+    const toolCertificationService = inject(ToolCertificationService);
+    return {
+      _usersService: usersService,
+      _assignmentService: assignmentService,
+      _workshopSessionService: workshopSessionService,
+      _toolCertificationService: toolCertificationService,
+      // (re)load whenever the id changes – replaces the dirty flag + effect + rxMethods
+      _userResource: usersService.userResource(store.userId),
+      _assignmentResource: assignmentService.rfidTagAssignmentResource(store.userId),
+      _openSessionResource: workshopSessionService.openSessionResource(store.userId),
+      _certificationsResource: toolCertificationService.certificationsByUserResource(store.userId),
+    };
+  }),
+  withComputed(({ _userResource, _assignmentResource, _openSessionResource, _certificationsResource }) => {
+    const resources = [_userResource, _assignmentResource, _openSessionResource, _certificationsResource];
+    return {
+      // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
+      user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
+      rfidTagAssignment: computed(() => (_assignmentResource.hasValue() ? _assignmentResource.value() : null)),
+      openSession: computed(() => (_openSessionResource.hasValue() ? _openSessionResource.value() : null)),
+      toolCertifications: computed(() => (_certificationsResource.hasValue() ? _certificationsResource.value() : [])),
+      isLoading: computed(() => resources.some((resource) => resource.isLoading())),
+      hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
+    };
+  }),
+  withComputed(({ user, openSession }) => ({
     userName: computed(() => (user() ? user()?.firstName + ' ' + user()?.lastName : 'N/A')),
-  })),
-  withComputed(({ openSession }) => ({
     slots: computed(() => openSession()?.workshopUsages ?? []),
     toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
   })),
@@ -60,37 +65,19 @@ export const UserDetailStore = signalStore(
     totalWorkshopTimeInMinutes: computed(() => slots().reduce((sum, usage) => sum + usage.durationInMinutes, 0)),
     totalWorkshopUnitsUsed: computed(() => slots().reduce((sum, usage) => sum + usage.unitsUsed, 0)),
   })),
-  withRequestStatus(),
-  withProps(() => ({
-    _usersService: inject(UsersService),
-    _assignmentService: inject(RfidTagAssignmentService),
-    _workshopSessionService: inject(WorkshopSessionService),
-    _toolCertificationService: inject(ToolCertificationService),
-  })),
   withMethods((store) => ({
     setUserId: signalMethod<string>((userId) => {
-      patchState(store, { userId }, setDirty());
+      patchState(store, { userId });
     }),
-    reloadUser: signalMethod<void>(() => {
-      patchState(store, setDirty());
-    }),
-    loadSelectedUser: rxMethod<string>(
-      pipe(
-        filter((userId: string) => !!userId),
-        tap(() => patchState(store, setPending())),
-        // delay(200), // TODO: Simulate network latency
-        exhaustMap((userId: string) => {
-          return store._usersService.getUser(userId).pipe(
-            tapResponse({
-              next: (user) => {
-                patchState(store, { user }, setFulfilled());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    reloadUser(): void {
+      store._userResource.reload();
+      store._assignmentResource.reload();
+      store._openSessionResource.reload();
+      store._certificationsResource.reload();
+    },
+  })),
+  // mutations of the user – reload the user on success
+  withMethods((store) => ({
     updateUser: rxMethod<UpdateUserCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
@@ -98,7 +85,8 @@ export const UserDetailStore = signalStore(
           return store._usersService.updateUser(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._userResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -113,7 +101,8 @@ export const UserDetailStore = signalStore(
           return store._usersService.updateUserContact(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._userResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -128,7 +117,8 @@ export const UserDetailStore = signalStore(
           return store._usersService.updateUserAddress(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._userResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -137,16 +127,17 @@ export const UserDetailStore = signalStore(
       ),
     ),
   })),
+  // mutations of the RFID tag assignment – reload the assignment on success
   withMethods((store) => ({
-    loadRfidTagAssignments: rxMethod<string>(
+    assignRfidTag: rxMethod<AssignRfidTagCommand>(
       pipe(
-        filter((userId: string) => !!userId),
         tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._assignmentService.getRfidTagAssignmetByUser(userId).pipe(
+        exhaustMap((command: AssignRfidTagCommand) => {
+          return store._assignmentService.assignRfidTag(command).pipe(
             tapResponse({
-              next: (rfidTagAssignment) => {
-                patchState(store, { rfidTagAssignment }, setFulfilled());
+              next: () => {
+                patchState(store, setFulfilled());
+                store._assignmentResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -154,44 +145,15 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    assignFixedRfidTag: rxMethod<string>(
+    unassignRfidTag: rxMethod<UnassignRfidTagCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._assignmentService.assignFixedRfidTag(userId).pipe(
+        exhaustMap((command: UnassignRfidTagCommand) => {
+          return store._assignmentService.unassignRfidTag(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    assignTemporaryRfidTag: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._assignmentService.assignTemporaryRfidTag(userId).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled(), setDirty());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    unassignRfidTag: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._assignmentService.unassignRfidTag(userId).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._assignmentResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -200,32 +162,17 @@ export const UserDetailStore = signalStore(
       ),
     ),
   })),
+  // mutations of the open session – reload the session on success
   withMethods((store) => ({
-    loadOpenSession: rxMethod<string>(
+    closeSession: rxMethod<CloseWorkshopSessionCommand>(
       pipe(
-        filter((userId: string) => !!userId),
         tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._workshopSessionService.getActiveWorkshopSession(userId).pipe(
-            tapResponse({
-              next: (openSession) => {
-                patchState(store, { openSession }, setFulfilled());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    closeSession: rxMethod<string>(
-      pipe(
-        filter((userId: string) => !!userId),
-        tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._workshopSessionService.closeWorkshopSession(userId).pipe(
+        exhaustMap((command: CloseWorkshopSessionCommand) => {
+          return store._workshopSessionService.closeWorkshopSession(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setDirty(), setFulfilled());
+                patchState(store, setFulfilled());
+                store._openSessionResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -234,16 +181,17 @@ export const UserDetailStore = signalStore(
       ),
     ),
   })),
+  // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
-    loadToolCertifications: rxMethod<string>(
+    pauseCertification: rxMethod<PauseToolCertificationCommand>(
       pipe(
-        filter((userId: string) => !!userId),
         tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._toolCertificationService.getCertificationsByUser(userId).pipe(
+        exhaustMap((command: PauseToolCertificationCommand) => {
+          return store._toolCertificationService.pause(command).pipe(
             tapResponse({
-              next: (toolCertifications) => {
-                patchState(store, { toolCertifications }, setFulfilled());
+              next: () => {
+                patchState(store, setFulfilled());
+                store._certificationsResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -251,14 +199,15 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    pauseCertification: rxMethod<{ customerId: string; toolId: string }>(
+    reactivateCertification: rxMethod<ReactivateToolCertificationCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap(({ customerId, toolId }) => {
-          return store._toolCertificationService.pause(customerId, toolId).pipe(
+        exhaustMap((command: ReactivateToolCertificationCommand) => {
+          return store._toolCertificationService.reactivate(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._certificationsResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -266,29 +215,15 @@ export const UserDetailStore = signalStore(
         }),
       ),
     ),
-    reactivateCertification: rxMethod<{ customerId: string; toolId: string }>(
+    revokeCertification: rxMethod<RevokeToolCertificationCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap(({ customerId, toolId }) => {
-          return store._toolCertificationService.reactivate(customerId, toolId).pipe(
+        exhaustMap((command: RevokeToolCertificationCommand) => {
+          return store._toolCertificationService.revoke(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    revokeCertification: rxMethod<{ customerId: string; toolId: string }>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap(({ customerId, toolId }) => {
-          return store._toolCertificationService.revoke(customerId, toolId).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._certificationsResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -297,23 +232,4 @@ export const UserDetailStore = signalStore(
       ),
     ),
   })),
-  withHooks({
-    onInit(store) {
-      effect(() => {
-        const userId = store.userId();
-        const dirty = store.dirty();
-        if (dirty && userId) {
-          store.loadSelectedUser(userId);
-          store.loadRfidTagAssignments(userId);
-          store.loadOpenSession(userId);
-          store.loadToolCertifications(userId);
-          patchState(store, { dirty: false });
-        }
-      });
-    },
-  }),
 );
-
-export function setDirty(): { dirty: boolean } {
-  return { dirty: true };
-}

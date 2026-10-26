@@ -1,3 +1,10 @@
+@if (detailsStore.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (detailsStore.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 @if (detailsStore.user(); as user) {
   @let assignment = detailsStore.rfidTagAssignment();
   @let rfidTagStatus = assignment?.status ?? RfidTagAssignmentStatus.Unassigned;

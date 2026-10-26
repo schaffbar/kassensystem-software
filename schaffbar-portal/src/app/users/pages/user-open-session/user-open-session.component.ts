@@ -6,6 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ToolUsageSummaryComponent } from '../../components/tool-usage-summary/tool-usage-summary.component';
 import { WorkshopUsageSummaryComponent } from '../../components/workshop-usage-summary/workshop-usage-summary.component';
+import { CloseWorkshopSessionCommand } from '../../shared/models/workshop-session.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 
 @Component({
@@ -20,6 +21,7 @@ export class UserOpenSessionComponent {
   readonly userId = input.required<string>();
 
   protected closeSession(): void {
-    this.detailsStore.closeSession(this.userId);
+    const command: CloseWorkshopSessionCommand = { customerId: this.userId() };
+    this.detailsStore.closeSession(command);
   }
 }

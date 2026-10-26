@@ -28,3 +28,18 @@ export interface DeleteToolCertificationCommand {
   customerId: string;
   toolId: string;
 }
+
+export interface PauseToolCertificationCommand {
+  customerId: string;
+  toolId: string;
+}
+
+export interface ReactivateToolCertificationCommand {
+  customerId: string;
+  toolId: string;
+}
+
+export interface RevokeToolCertificationCommand {
+  customerId: string;
+  toolId: string;
+}

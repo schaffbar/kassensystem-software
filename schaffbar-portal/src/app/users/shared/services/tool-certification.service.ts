@@ -7,6 +7,9 @@ import { environment } from '../../../../environments/environment';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
   ToolCertification,
 } from '../models/tool-certification.model';
 
@@ -25,8 +28,15 @@ export class ToolCertificationService {
   // --------------------------------------------------------------------------
   // queries
 
-  getCertificationsByUser(customerId: string): Observable<ToolCertification[]> {
-    return this.http.get<ToolCertification[]>(`${TOOL_CERTIFICATIONS_API_URL}?customerId=${customerId}`);
+  /**
+   * Loads the certifications of a customer whenever the id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  certificationsByUserResource(customerId: () => string | null): HttpResourceRef<ToolCertification[] | undefined> {
+    return httpResource<ToolCertification[]>(() => {
+      const id = customerId();
+      return id ? { url: TOOL_CERTIFICATIONS_API_URL, params: { customerId: id } } : undefined;
+    });
   }
 
   /**
@@ -47,25 +57,25 @@ export class ToolCertificationService {
     return this.http.post<void>(`${TOOL_CERTIFICATIONS_API_URL}/batch`, command, this.httpOptions);
   }
 
-  pause(customerId: string, toolId: string): Observable<void> {
+  pause(command: PauseToolCertificationCommand): Observable<void> {
     return this.http.put<void>(
-      `${TOOL_CERTIFICATIONS_API_URL}/customers/${customerId}/tools/${toolId}/pause`,
+      `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/pause`,
       {},
       this.httpOptions,
     );
   }
 
-  reactivate(customerId: string, toolId: string): Observable<void> {
+  reactivate(command: ReactivateToolCertificationCommand): Observable<void> {
     return this.http.put<void>(
-      `${TOOL_CERTIFICATIONS_API_URL}/customers/${customerId}/tools/${toolId}/reactivate`,
+      `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/reactivate`,
       {},
       this.httpOptions,
     );
   }
 
-  revoke(customerId: string, toolId: string): Observable<void> {
+  revoke(command: RevokeToolCertificationCommand): Observable<void> {
     return this.http.put<void>(
-      `${TOOL_CERTIFICATIONS_API_URL}/customers/${customerId}/tools/${toolId}/revoke`,
+      `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/revoke`,
       {},
       this.httpOptions,
     );

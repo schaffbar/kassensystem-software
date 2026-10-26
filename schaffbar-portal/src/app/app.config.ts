@@ -1,4 +1,4 @@
-import { DatePipe, registerLocaleData } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import localeDe from '@angular/common/locales/de';
 import {
@@ -12,7 +12,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
-import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
@@ -35,8 +35,6 @@ export const appConfig: ApplicationConfig = {
       lang: 'de',
     }),
     ...(isDevMode() ? [provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 })] : []),
-    DatePipe,
-    TranslatePipe,
     { provide: LOCALE_ID, useValue: 'de-DE' },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
   ],

@@ -251,15 +251,15 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
       Umgesetzt: Signal Form statt `ngModel`; „bereits zugewiesen“ als `validate()` mit `message`;
       `ChangeRfidReaderCommand.rfidReaderId` jetzt Pflicht (sonst URL `…/rfid-reader/undefined`)
 - [x] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
-- [ ] Commands nach der Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md) („Commands“) für die
+- [x] Commands nach der Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md) („Commands“) für die
       noch nicht migrierten Komponenten (bisher Inline-Typen bzw. `string`); Command im `*.model.ts`, Store- und
       Service-Methode nehmen denselben Typ:
   - [x] `tool-instructors`: `AddToolInstructorsCommand`, `RemoveToolInstructorsCommand`
-  - [ ] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
+  - [x] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
         `PauseToolCertificationCommand`, `ReactivateToolCertificationCommand`, `RevokeToolCertificationCommand`
-        (`DeleteToolCertificationCommand` erledigt; Pause/Reactivate/Revoke folgen mit `user-detail.store`)
   - [x] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
   - [x] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
+  - [x] außerdem `user-detail`: `AssignRfidTagCommand`, `UnassignRfidTagCommand`, `CloseWorkshopSessionCommand`
 - [x] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
       jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
       `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →
@@ -304,8 +304,12 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
 - [x] [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts)
       (2 Resources: Tool, Zertifizierungen). Mutationen laden gezielt nur die betroffene Resource neu (vorher hat das
       Dirty-Flag immer beides geladen). Test: [tool-detail.store.spec.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.spec.ts)
-- [ ] [user-detail.store.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.ts)
-      (4 Resources: User, RFID-Assignment, Session, Zertifizierungen)
+- [x] [user-detail.store.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.ts)
+      (4 Resources: User, RFID-Assignment, Session, Zertifizierungen). RFID-Zuweisung per `parse` (erstes Element
+      der Liste oder `null`); offene Session: Backend antwortet ohne Session mit 200 + leerem Body → `null`, kein
+      Ladefehler. **Behobener Fehler:** `assignFixedRfidTag(this.id)`, `unassignRfidTag(this.id)`,
+      `closeSession(this.userId)` übergaben das *Signal* an eine `rxMethod` – die hätte bei jeder späteren Änderung
+      der id erneut ausgelöst. Jetzt Commands mit Werten. Test: [user-detail.store.spec.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.spec.ts)
 - [ ] Optional: Dashboard (2 Resources). Dazu `getDuration()` im Template durch ein `now`-Signal (Intervall) +
       `computed` ersetzen – die Dauer aktualisiert sich heute nie.
 - [ ] Optional/später: Listen-Stores. Sie werden geteilt (Dashboard, Tool-Detail, User-Detail) und können vorerst
@@ -325,10 +329,10 @@ Detail-Store ganz auflösen und die Resources in der Page-Komponente halten (bei
 - [ ] `Content-Type: application/json`-Header in den Services entfernen (setzt `HttpClient` selbst); Authorization
       später als Interceptor
 - [ ] `readonly http` → `private readonly http`
-- [ ] `UsersService`: `DatePipe` → `formatDate()` aus `@angular/common`; danach `DatePipe` und `TranslatePipe` aus
-      den Root-Providern in `app.config.ts` entfernen
-- [ ] `RfidTagAssignmentService`: Tippfehler `getRfidTagAssignmetByUser`; Rückgabetyp
-      `Observable<RfidTagAssignment | null>`
+- [x] `UsersService`: `DatePipe` → `format()` aus `date-fns` (vorgezogen: der injizierte `DatePipe` brach die
+      Store-Tests); `DatePipe` und `TranslatePipe` aus den Root-Providern in `app.config.ts` entfernt
+- [x] `RfidTagAssignmentService`: Tippfehler `getRfidTagAssignmetByUser`; Rückgabetyp
+      `Observable<RfidTagAssignment | null>` – erledigt durch `rfidTagAssignmentResource` (Schritt 6)
 - [ ] doppelten `ConfirmDelete`-Dialogcode (8×) in einen Helper/Service ziehen
       (`confirm(data): Observable<boolean>`) und dabei typisiert öffnen:
       `dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>`

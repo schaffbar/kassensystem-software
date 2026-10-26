@@ -19,3 +19,15 @@ export enum RfidTagAssignmentType {
   Fixed = 'FIXED',
   Temporary = 'TEMPORARY',
 }
+
+// ----------------------------------------------------------------------------
+// commands
+
+export interface AssignRfidTagCommand {
+  customerId: string;
+  assignmentType: RfidTagAssignmentType;
+}
+
+export interface UnassignRfidTagCommand {
+  customerId: string;
+}

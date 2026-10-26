@@ -11,7 +11,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import { Tool } from '../../../tools/tool.model';
-import { ToolCertification, ToolCertificationStatus } from '../../shared/models/tool-certification.model';
+import {
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
+  ToolCertification,
+  ToolCertificationStatus,
+} from '../../shared/models/tool-certification.model';
 
 @Component({
   selector: 'schbar-user-tool-certifications',
@@ -26,9 +32,9 @@ export class UserToolCertificationsComponent {
   readonly certifications = input.required<ToolCertification[]>();
   readonly allTools = input.required<Tool[]>();
 
-  readonly pauseCertification = output<{ customerId: string; toolId: string }>();
-  readonly reactivateCertification = output<{ customerId: string; toolId: string }>();
-  readonly revokeCertification = output<{ customerId: string; toolId: string }>();
+  readonly pauseCertification = output<PauseToolCertificationCommand>();
+  readonly reactivateCertification = output<ReactivateToolCertificationCommand>();
+  readonly revokeCertification = output<RevokeToolCertificationCommand>();
 
   protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
   protected readonly CertificationStatus = ToolCertificationStatus;
@@ -59,7 +65,8 @@ export class UserToolCertificationsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.pauseCertification.emit({ customerId: cert.customerId, toolId: cert.toolId });
+        const command: PauseToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+        this.pauseCertification.emit(command);
       }
     });
   }
@@ -78,7 +85,8 @@ export class UserToolCertificationsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.reactivateCertification.emit({ customerId: cert.customerId, toolId: cert.toolId });
+        const command: ReactivateToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+        this.reactivateCertification.emit(command);
       }
     });
   }
@@ -97,7 +105,8 @@ export class UserToolCertificationsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.revokeCertification.emit({ customerId: cert.customerId, toolId: cert.toolId });
+        const command: RevokeToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+        this.revokeCertification.emit(command);
       }
     });
   }

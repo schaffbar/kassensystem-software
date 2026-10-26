@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -15,7 +16,17 @@ import {
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
-import { RfidTagAssignmentStatus } from '../../shared/models/rfid-tag-assignment.model';
+import {
+  AssignRfidTagCommand,
+  RfidTagAssignmentStatus,
+  RfidTagAssignmentType,
+  UnassignRfidTagCommand,
+} from '../../shared/models/rfid-tag-assignment.model';
+import {
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
+} from '../../shared/models/tool-certification.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
@@ -33,6 +44,7 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
     MatButtonModule,
     MatChipsModule,
     MatIconModule,
+    MatProgressBarModule,
     TranslatePipe,
     LowerCasePipe,
   ],
@@ -80,15 +92,18 @@ export class UserDetailComponent {
   }
 
   protected assignFixedRfidTag(): void {
-    this.detailsStore.assignFixedRfidTag(this.id);
+    const command: AssignRfidTagCommand = { customerId: this.id(), assignmentType: RfidTagAssignmentType.Fixed };
+    this.detailsStore.assignRfidTag(command);
   }
 
   protected assignTemporaryRfidTag(): void {
-    this.detailsStore.assignTemporaryRfidTag(this.id);
+    const command: AssignRfidTagCommand = { customerId: this.id(), assignmentType: RfidTagAssignmentType.Temporary };
+    this.detailsStore.assignRfidTag(command);
   }
 
   protected unassignRfidTag(): void {
-    this.detailsStore.unassignRfidTag(this.id);
+    const command: UnassignRfidTagCommand = { customerId: this.id() };
+    this.detailsStore.unassignRfidTag(command);
   }
 
   protected onAddressChanged(command: UpdateUserAddressCommand) {
@@ -99,15 +114,15 @@ export class UserDetailComponent {
     this.detailsStore.updateUserContact(command);
   }
 
-  protected onPauseCertification(event: { customerId: string; toolId: string }): void {
-    this.detailsStore.pauseCertification(event);
+  protected onPauseCertification(command: PauseToolCertificationCommand): void {
+    this.detailsStore.pauseCertification(command);
   }
 
-  protected onReactivateCertification(event: { customerId: string; toolId: string }): void {
-    this.detailsStore.reactivateCertification(event);
+  protected onReactivateCertification(command: ReactivateToolCertificationCommand): void {
+    this.detailsStore.reactivateCertification(command);
   }
 
-  protected onRevokeCertification(event: { customerId: string; toolId: string }): void {
-    this.detailsStore.revokeCertification(event);
+  protected onRevokeCertification(command: RevokeToolCertificationCommand): void {
+    this.detailsStore.revokeCertification(command);
   }
 }
