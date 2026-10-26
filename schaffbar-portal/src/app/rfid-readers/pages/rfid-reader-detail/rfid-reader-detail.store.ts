@@ -1,71 +1,43 @@
-import { computed, effect, inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
 import { tapResponse } from '@ngrx/operators';
-import {
-  patchState,
-  signalMethod,
-  signalStore,
-  withComputed,
-  withHooks,
-  withMethods,
-  withProps,
-  withState,
-} from '@ngrx/signals';
+import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, filter, pipe, tap } from 'rxjs';
+import { exhaustMap, pipe, tap } from 'rxjs';
 
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
-import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { ChangeRfidReaderTypeCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderService } from '../../rfid-readers.service';
 
 interface RfidReaderDetailState {
   rfidReaderId: string | null;
-  rfidReader: RfidReader | null;
-  dirty: boolean;
-}
-
-const initialState: RfidReaderDetailState = {
-  rfidReaderId: null,
-  rfidReader: null,
-  dirty: false,
-};
-
-function setDirty() {
-  return { dirty: true };
 }
 
 export const RfidReaderDetailStore = signalStore(
-  withState(initialState),
-  withComputed(({ rfidReader }) => ({
-    readerName: computed(() => (rfidReader() ? rfidReader()?.name || rfidReader()?.macAddress : 'N/A')),
-  })),
+  withState<RfidReaderDetailState>({ rfidReaderId: null }),
+  // request status of the mutations (update, change type)
   withRequestStatus(),
-  withProps(() => ({
-    _rfidReaderService: inject(RfidReaderService),
+  withProps((store) => {
+    const rfidReaderService = inject(RfidReaderService);
+    return {
+      _rfidReaderService: rfidReaderService,
+      // (re)loads whenever the id changes – replaces the dirty flag + effect + rxMethod
+      _rfidReaderResource: rfidReaderService.rfidReaderResource(store.rfidReaderId),
+    };
+  }),
+  withComputed(({ _rfidReaderResource }) => ({
+    // hasValue() stays true while reloading, so the page keeps showing the reader instead of flickering
+    rfidReader: computed(() => (_rfidReaderResource.hasValue() ? _rfidReaderResource.value() : null)),
+    isLoading: computed(() => _rfidReaderResource.isLoading()),
+    hasLoadError: computed(() => !!_rfidReaderResource.error()),
   })),
   withMethods((store) => ({
     setRfidReaderId: signalMethod<string>((rfidReaderId) => {
-      patchState(store, { rfidReaderId }, setDirty());
+      patchState(store, { rfidReaderId });
     }),
-    reloadRfidReader: signalMethod<void>(() => {
-      patchState(store, setDirty());
-    }),
-    loadSelectedRfidReader: rxMethod<string>(
-      pipe(
-        filter((rfidReaderId: string) => !!rfidReaderId),
-        tap(() => patchState(store, setPending())),
-        exhaustMap((rfidReaderId: string) => {
-          return store._rfidReaderService.getRfidReader(rfidReaderId).pipe(
-            tapResponse({
-              next: (rfidReader) => {
-                patchState(store, { rfidReader }, setFulfilled());
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    reloadRfidReader(): void {
+      store._rfidReaderResource.reload();
+    },
     updateRfidReader: rxMethod<UpdateRfidReaderCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
@@ -73,7 +45,8 @@ export const RfidReaderDetailStore = signalStore(
           return store._rfidReaderService.updateRfidReader(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._rfidReaderResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -88,7 +61,8 @@ export const RfidReaderDetailStore = signalStore(
           return store._rfidReaderService.changeRfidReaderType(command).pipe(
             tapResponse({
               next: () => {
-                patchState(store, setFulfilled(), setDirty());
+                patchState(store, setFulfilled());
+                store._rfidReaderResource.reload();
               },
               error: (error: { message: string }) => patchState(store, setError(error.message)),
             }),
@@ -97,16 +71,4 @@ export const RfidReaderDetailStore = signalStore(
       ),
     ),
   })),
-  withHooks({
-    onInit(store) {
-      effect(() => {
-        const rfidReaderId = store.rfidReaderId();
-        const dirty = store.dirty();
-        if (dirty && rfidReaderId) {
-          store.loadSelectedRfidReader(rfidReaderId);
-          patchState(store, { dirty: false });
-        }
-      });
-    },
-  }),
 );

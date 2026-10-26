@@ -1,3 +1,10 @@
+@if (detailsStore.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (detailsStore.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 @if (detailsStore.rfidReader(); as rfidReader) {
   <div class="rfid-reader-detail-header">
     <div class="rfid-reader-detail-header-title">
@@ -13,5 +20,5 @@
     </div>
   </div>
 
-  <schbar-rfid-reader-detail-info [rfidReader]="rfidReader" (readerChanged)="onReaderChanged($event)" />
+  <schbar-rfid-reader-detail-info [rfidReader]="rfidReader" (readerChanged)="onRfidReaderChanged($event)" />
 }

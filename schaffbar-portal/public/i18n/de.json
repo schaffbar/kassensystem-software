@@ -7,7 +7,8 @@
       "maxLength": "{{field}} darf höchstens {{value}} Zeichen lang sein",
       "min": "{{field}} muss mindestens {{value}} sein",
       "max": "{{field}} darf höchstens {{value}} sein",
-      "invalid": "{{field}} ist ungültig"
+      "invalid": "{{field}} ist ungültig",
+      "loadFailed": "Die Daten konnten nicht geladen werden."
     },
     "table": {
       "actionsColumn": "Aktionen"

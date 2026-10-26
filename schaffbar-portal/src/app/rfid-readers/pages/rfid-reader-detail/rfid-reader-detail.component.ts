@@ -3,9 +3,10 @@ import { Component, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { take } from 'rxjs';
 
 import { ToolsService } from '../../../tools/tools.service';
@@ -26,7 +27,7 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
   selector: 'schbar-rfid-reader-detail',
   templateUrl: './rfid-reader-detail.component.html',
   styleUrl: './rfid-reader-detail.component.scss',
-  imports: [RfidReaderDetailInfoComponent, MatButtonModule, MatIconModule],
+  imports: [RfidReaderDetailInfoComponent, MatButtonModule, MatIconModule, MatProgressBarModule, TranslatePipe],
   providers: [RfidReaderDetailStore],
 })
 export class RfidReaderDetailComponent {
@@ -46,8 +47,7 @@ export class RfidReaderDetailComponent {
     this.detailsStore.reloadRfidReader();
   }
 
-  // TODO: rename to onRfidReaderChanged
-  protected onReaderChanged(command: UpdateRfidReaderCommand): void {
+  protected onRfidReaderChanged(command: UpdateRfidReaderCommand): void {
     this.detailsStore.updateRfidReader(command);
   }
 

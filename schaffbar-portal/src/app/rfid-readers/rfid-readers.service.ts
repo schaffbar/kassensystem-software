@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
@@ -26,8 +26,15 @@ export class RfidReaderService {
     return this.http.get<RfidReader[]>(RFID_READERS_API_URL);
   }
 
-  getRfidReader(id: string): Observable<RfidReader> {
-    return this.http.get<RfidReader>(`${RFID_READERS_API_URL}/${id}`);
+  /**
+   * Loads the RFID reader whenever the id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  rfidReaderResource(id: () => string | null): HttpResourceRef<RfidReader | undefined> {
+    return httpResource<RfidReader>(() => {
+      const rfidReaderId = id();
+      return rfidReaderId ? `${RFID_READERS_API_URL}/${rfidReaderId}` : undefined;
+    });
   }
 
   // --------------------------------------------------------------------------

@@ -278,10 +278,28 @@ Mit `httpResource` gibt es `value()`, `isLoading()`, `error()`, `hasValue()` und
 `dirty`, `setDirty`, `reloadX`, `loadSelectedX` und der `effect` fallen weg. Mutationen (PUT/POST/DELETE) bleiben
 Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
 
-- [ ] **Pilot:** [rfid-reader-detail.store.ts](../schaffbar-portal/src/app/rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.store.ts)
-- [ ] Lade-/Fehlerzustand im Template anzeigen (`isLoading()` → Spinner, `error()` → Meldung/Snackbar). Heute
+- [x] **Pilot:** [rfid-reader-detail.store.ts](../schaffbar-portal/src/app/rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.store.ts)
+
+  **Festgelegtes Muster (gilt für die weiteren Detail-Stores):**
+  - Entscheidung: Resource **im** SignalStore (nicht in der Page) – gleicher Aufbau für alle Detail-Stores,
+    `UserDetailStore` wird ohnehin von Page und Kind-Komponente geteilt; öffentliche Store-API bleibt gleich
+  - Service liefert die Resource: `xyzResource(id: () => string | null): HttpResourceRef<Xyz | undefined>` mit
+    `httpResource(() => id() ? url : undefined)` – kein Request ohne id. Ersetzt `getXyz(id)`
+  - Store: `withState({ xyzId })` + `withProps(store => ({ _xyzResource: service.xyzResource(store.xyzId) }))`;
+    `withComputed`: `xyz` (`hasValue() ? value() : null` – bleibt beim Reload stehen, kein Flackern), `isLoading`,
+    `hasLoadError`. `dirty`, `setDirty`, `loadSelectedXyz` und der `effect` in `onInit` entfallen
+  - Mutationen bleiben `rxMethod` mit `withRequestStatus()` und rufen bei Erfolg `_xyzResource.reload()` auf
+  - Page: `@if (store.isLoading()) <mat-progress-bar>` und `@if (store.hasLoadError())` →
+    `shared.errors.loadFailed`
+  - Tests mit `HttpTestingController`: vor `expectOne` nur `TestBed.tick()` (löst den Request aus), erst nach
+    `flush` `await appRef.whenStable()` – eine laufende Resource gilt als offene Aufgabe, `whenStable()` davor hängt
+    Test: [rfid-reader-detail.store.spec.ts](../schaffbar-portal/src/app/rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.store.spec.ts)
+
+- [x] Lade-/Fehlerzustand im Template anzeigen (`isLoading()` → Spinner, `error()` → Meldung/Snackbar). Heute
       werden `error`/`isPending` aus `withRequestStatus` nirgends angezeigt (vgl. `TODO.md`: „handle API errors",
       „Action feedback - Snackbar?")
+      Lade-/Ladefehler-Zustand: beim Piloten umgesetzt, weitere Stores folgen. **Offen:** Fehler bei Mutationen
+      (Speichern, Löschen …) werden weiterhin nicht angezeigt – Vorschlag: zentraler HTTP-Interceptor mit Snackbar
 - [ ] [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts)
       (2 Resources: Tool, Zertifizierungen)
 - [ ] [user-detail.store.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.ts)
