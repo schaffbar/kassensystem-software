@@ -6,8 +6,8 @@
 </h3>
 
 <form [formRoot]="addressForm" (submit)="onSave()">
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.addressLine1' | translate }}</mat-label>
         <input id="addressLine1" matInput [formField]="addressForm.addressLine1" />
@@ -17,16 +17,16 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.addressLine2' | translate }}</mat-label>
         <input id="addressLine2" matInput [formField]="addressForm.addressLine2" />
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.postalCode' | translate }}</mat-label>
         <input id="postalCode" matInput [formField]="addressForm.postalCode" />
@@ -36,7 +36,7 @@
         </mat-error>
       </mat-form-field>
     </div>
-    <div class="col">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.city' | translate }}</mat-label>
         <input id="city" matInput [formField]="addressForm.city" />
@@ -46,8 +46,8 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.country' | translate }}</mat-label>
         <input id="country" matInput [formField]="addressForm.country" />
@@ -59,7 +59,7 @@
   </div>
 
   @if (isEditing()) {
-    <div class="actions">
+    <div class="form-actions">
       <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>

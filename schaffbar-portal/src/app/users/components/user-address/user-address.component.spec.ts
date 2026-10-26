@@ -58,8 +58,8 @@ describe('UserAddressComponent', () => {
   }
 
   const editButton = '[aria-label="Edit address"]';
-  const cancelButton = '.actions button[type="button"]';
-  const saveButton = '.actions button[type="submit"]';
+  const cancelButton = '.form-actions button[type="button"]';
+  const saveButton = '.form-actions button[type="submit"]';
   const fields = ['addressLine1', 'addressLine2', 'postalCode', 'city', 'country'];
 
   it('should show all address fields read-only', async () => {

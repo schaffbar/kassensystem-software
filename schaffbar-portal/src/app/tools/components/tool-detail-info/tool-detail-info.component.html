@@ -6,8 +6,8 @@
 </h3>
 
 <form class="tool-info-content" [formRoot]="toolForm" (submit)="onSave()">
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
         <input id="name" matInput [formField]="toolForm.name" />
@@ -17,16 +17,16 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
         <input id="description" matInput [formField]="toolForm.description" />
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
         @if (isEditing()) {
@@ -41,8 +41,8 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
         @if (isEditing()) {
@@ -66,7 +66,7 @@
   </div>
 
   @if (isEditing()) {
-    <div class="tool-info-actions">
+    <div class="form-actions">
       <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>

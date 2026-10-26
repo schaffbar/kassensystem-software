@@ -3,6 +3,7 @@
   @if (tool().rfidReaderId) {
     <button
       mat-icon-button
+      type="button"
       color="warn"
       (click)="onClear()"
       [matTooltip]="'tools.tooltips.clearRfidReader' | translate">
@@ -11,15 +12,12 @@
   }
 </h3>
 
-<div class="tool-rfid-reader-content">
-  <div class="row">
-    <div class="col">
-      <mat-form-field class="full-width" [floatLabel]="'always'" [hideRequiredMarker]="true">
+<form class="tool-rfid-reader-content" [formRoot]="rfidReaderForm" (submit)="onSave()">
+  <div class="form-row">
+    <div class="form-col">
+      <mat-form-field class="full-width" floatLabel="always">
         <mat-label>{{ 'tools.shared.toolProperties.rfidReader' | translate }}</mat-label>
-        <mat-select
-          id="rfidReaderId"
-          [ngModel]="selectedRfidReaderId()"
-          (ngModelChange)="selectedRfidReaderId.set($event)">
+        <mat-select id="rfidReaderId" [formField]="rfidReaderForm.rfidReaderId">
           @for (rfidReader of filteredRfidReaders(); track rfidReader.id) {
             <mat-option [value]="rfidReader.id">
               <div class="option-content">
@@ -33,21 +31,21 @@
             </mat-option>
           }
         </mat-select>
+        <mat-error>
+          <schbar-field-error [field]="rfidReaderForm.rfidReaderId" label="tools.shared.toolProperties.rfidReader" />
+        </mat-error>
       </mat-form-field>
-      @if (isSelectedAssigned()) {
-        <mat-error>{{ 'tools.pages.toolDetails.messages.alreadyAssignedError' | translate }}</mat-error>
-      }
     </div>
   </div>
 
-  @if (isDirty() && !isSelectedAssigned()) {
-    <div class="tool-rfid-reader-actions">
-      <button mat-stroked-button (click)="onCancel()">
+  @if (isDirty() && rfidReaderForm().valid()) {
+    <div class="form-actions">
+      <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
-      <button mat-flat-button color="primary" (click)="onSave()">
+      <button mat-flat-button color="primary" type="submit">
         {{ 'shared.dialogs.actions.edit.confirm' | translate }}
       </button>
     </div>
   }
-</div>
+</form>

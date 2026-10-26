@@ -1,9 +1,8 @@
 import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { form, FormField, FormRoot, submit, validate } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -11,20 +10,30 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
-import { ChangeRfidReaderCommand, Tool } from '../../tool.model';
+import {
+  ConfirmDeleteComponent,
+  ConfirmDeleteDialogData,
+} from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';
+
+interface RfidReaderAssignmentModel {
+  // '' = no RFID reader assigned
+  rfidReaderId: string;
+}
 
 @Component({
   selector: 'schbar-tool-rfid-reader-assignment',
   templateUrl: './tool-rfid-reader-assignment.component.html',
   styleUrl: './tool-rfid-reader-assignment.component.scss',
   imports: [
-    MatFormFieldModule,
+    FormField,
+    FormRoot,
+    FieldErrorComponent,
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    FormsModule,
     TranslatePipe,
   ],
 })
@@ -37,19 +46,19 @@ export class ToolRfidReaderAssignmentComponent {
   readonly assignedRfidReaderIds = input<Set<string>>(new Set());
 
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
-  readonly rfidReaderCleared = output<string>();
+  readonly rfidReaderCleared = output<ClearRfidReaderCommand>();
 
-  protected readonly selectedRfidReaderId = linkedSignal(() => this.tool().rfidReaderId ?? '');
+  private readonly model = linkedSignal(() => toModel(this.tool()));
 
-  protected readonly isDirty = computed(() => {
-    const current = this.tool().rfidReaderId ?? '';
-    return this.selectedRfidReaderId() !== current;
+  protected readonly rfidReaderForm = form(this.model, (schema) => {
+    validate(schema.rfidReaderId, ({ value }) =>
+      this.isAssigned(value())
+        ? { kind: 'alreadyAssigned', message: 'tools.pages.toolDetails.messages.alreadyAssignedError' }
+        : undefined,
+    );
   });
 
-  protected readonly isSelectedAssigned = computed(() => {
-    const selectedId = this.selectedRfidReaderId();
-    return !!selectedId && this.assignedRfidReaderIds().has(selectedId);
-  });
+  protected readonly isDirty = computed(() => this.model().rfidReaderId !== toModel(this.tool()).rfidReaderId);
 
   protected readonly filteredRfidReaders = computed(() => {
     return this.rfidReaders().filter((reader) => reader.type === RfidReaderType.SwitchBox);
@@ -59,34 +68,44 @@ export class ToolRfidReaderAssignmentComponent {
     return this.assignedRfidReaderIds().has(readerId);
   }
 
-  protected onCancel() {
-    this.selectedRfidReaderId.set(this.tool().rfidReaderId ?? '');
+  protected onCancel(): void {
+    this.model.set(toModel(this.tool()));
+    this.rfidReaderForm().reset();
   }
 
-  protected onSave() {
-    const command: ChangeRfidReaderCommand = {
-      toolId: this.tool().id,
-      rfidReaderId: this.selectedRfidReaderId() || undefined,
-    };
+  protected onSave(): void {
+    submit(this.rfidReaderForm, async () => {
+      const { rfidReaderId } = this.model();
+      if (!rfidReaderId) return;
 
-    this.rfidReaderChanged.emit(command);
-  }
-
-  protected onClear() {
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('tools.dialogs.clearRfidReader.title'),
-        message: this.translate.instant('tools.dialogs.clearRfidReader.message'),
-        entity: this.tool().name,
-      },
-      minWidth: '600px',
-      disableClose: true,
+      const command: ChangeRfidReaderCommand = { toolId: this.tool().id, rfidReaderId };
+      this.rfidReaderChanged.emit(command);
     });
+  }
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (result) {
-        this.rfidReaderCleared.emit(this.tool().id);
+  protected onClear(): void {
+    const dialogRef = this.dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>(
+      ConfirmDeleteComponent,
+      {
+        data: {
+          title: this.translate.instant('tools.dialogs.clearRfidReader.title'),
+          message: this.translate.instant('tools.dialogs.clearRfidReader.message'),
+          entity: this.tool().name,
+        },
+        minWidth: '600px',
+        disableClose: true,
+      },
+    );
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const command: ClearRfidReaderCommand = { toolId: this.tool().id };
+        this.rfidReaderCleared.emit(command);
       }
     });
   }
+}
+
+function toModel(tool: Tool): RfidReaderAssignmentModel {
+  return { rfidReaderId: tool.rfidReaderId ?? '' };
 }

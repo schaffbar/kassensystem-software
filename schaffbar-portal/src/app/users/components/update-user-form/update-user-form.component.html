@@ -4,8 +4,8 @@
 
 <form [formRoot]="userForm" (submit)="onSave()">
   <mat-dialog-content>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
           <input id="firstName" matInput [formField]="userForm.firstName" />
@@ -14,7 +14,7 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="col">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
           <input id="lastName" matInput [formField]="userForm.lastName" />
@@ -24,8 +24,8 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
           <input
@@ -42,7 +42,7 @@
           <mat-datepicker #picker startView="multi-year" />
         </mat-form-field>
       </div>
-      <div class="col">
+      <div class="form-col">
         <mat-checkbox [formField]="userForm.clubMember">
           {{ 'users.shared.userProperties.clubMember' | translate }}
         </mat-checkbox>

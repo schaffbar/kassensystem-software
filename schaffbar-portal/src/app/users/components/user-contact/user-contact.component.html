@@ -6,8 +6,8 @@
 </h3>
 
 <form [formRoot]="contactForm" (submit)="onSave()">
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
         <input id="email" matInput [formField]="contactForm.email" />
@@ -17,8 +17,8 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'users.shared.userProperties.phone' | translate }}</mat-label>
         <input id="phone" matInput [formField]="contactForm.phone" />
@@ -27,7 +27,7 @@
   </div>
 
   @if (isEditing()) {
-    <div class="actions">
+    <div class="form-actions">
       <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>

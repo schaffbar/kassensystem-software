@@ -50,8 +50,8 @@ describe('RfidReaderDetailInfoComponent', () => {
   }
 
   const editButton = '[aria-label="Edit reader"]';
-  const cancelButton = '.actions button[type="button"]';
-  const saveButton = '.actions button[type="submit"]';
+  const cancelButton = '.form-actions button[type="button"]';
+  const saveButton = '.form-actions button[type="submit"]';
 
   it('should show the reader values read-only', async () => {
     expect(await (await input('macAddress')).getValue()).toBe('AA:BB:CC:DD:EE:FF');

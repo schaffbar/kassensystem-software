@@ -6,32 +6,32 @@
 </h3>
 
 <form class="reader-content" [formRoot]="readerForm" (submit)="onSave()">
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</mat-label>
         <input id="macAddress" matInput [value]="rfidReader().macAddress" readonly />
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
         <input matInput [value]="'rfidReaders.types.' + (rfidReader().type | lowercase) | translate" readonly />
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</mat-label>
         <input id="name" matInput [formField]="readerForm.name" />
       </mat-form-field>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
+  <div class="form-row">
+    <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.socketName' | translate }}</mat-label>
         <input id="socketName" matInput [formField]="readerForm.socketName" />
@@ -40,7 +40,7 @@
   </div>
 
   @if (isEditing()) {
-    <div class="actions">
+    <div class="form-actions">
       <button mat-stroked-button type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>

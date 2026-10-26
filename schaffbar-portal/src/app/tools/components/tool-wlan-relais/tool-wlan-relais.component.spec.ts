@@ -77,7 +77,7 @@ describe('ToolWlanRelaisComponent', () => {
   }
 
   function actionButtonCount(): number {
-    return fixture.nativeElement.querySelectorAll('.wlan-relais-actions button').length;
+    return fixture.nativeElement.querySelectorAll('.form-actions button').length;
   }
 
   describe('tool without WLAN relais', () => {

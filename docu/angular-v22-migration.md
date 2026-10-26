@@ -218,7 +218,7 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [x] [tool-wlan-relais](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.ts)
       – `hidden(schema.ipAddress, { when: … })` + `required` + `pattern(…, { message })`; `toSignal(valueChanges)`
       und `effect` entfallen, `isDirty` ist ein `computed`. Test: [tool-wlan-relais.component.spec.ts](../schaffbar-portal/src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.spec.ts)
-- [ ] Inline-Edit-Formulare – gleiches Muster 4× (`linkedSignal`-Model + `readonly(when)` + `isEditing`,
+- [x] Inline-Edit-Formulare – gleiches Muster 4× (`linkedSignal`-Model + `readonly(when)` + `isEditing`,
       Anhang A). Signal `readonly` dabei in `isEditing` umbenennen (invertiert), damit es nicht mit `readonly()` aus
       Signal Forms kollidiert.
   - [x] [rfid-reader-detail-info](../schaffbar-portal/src/app/rfid-readers/components/rfid-reader-detail-info/rfid-reader-detail-info.component.ts)
@@ -243,24 +243,28 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
       `validateDateOfBirth` / `validatePostalCode` in [user.validators.ts](../schaffbar-portal/src/app/users/shared/validators/user.validators.ts)
 - [x] [new-user-form](../schaffbar-portal/src/app/users/components/new-user-form/new-user-form.component.ts) –
       typisiertes Ergebnis statt `form.value` als `User`; `minLength`/`maxLength` für PLZ, `email()`
-- [ ] Suchfeld in [user-list](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.html):
+- [x] Suchfeld in [user-list](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.html):
       `filter = signal('')`, im `dataSource`-`computed` setzen. Behebt nebenbei, dass `applyFilter` das
       `computed`-Objekt mutiert und der Filter beim Reload verloren geht (TODO im Template)
-- [ ] [tool-rfid-reader-assignment](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
+- [x] [tool-rfid-reader-assignment](../schaffbar-portal/src/app/tools/components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component.ts):
       `ngModel` → Signal Form mit einem Feld (oder beim `linkedSignal` aus Schritt 3 bleiben)
-- [ ] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
+      Umgesetzt: Signal Form statt `ngModel`; „bereits zugewiesen“ als `validate()` mit `message`;
+      `ChangeRfidReaderCommand.rfidReaderId` jetzt Pflicht (sonst URL `…/rfid-reader/undefined`)
+- [x] Abschluss: `grep -r "ReactiveFormsModule\|FormsModule\|FormBuilder" src` → keine Treffer mehr
 - [ ] Commands nach der Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md) („Commands“) für die
       noch nicht migrierten Komponenten (bisher Inline-Typen bzw. `string`); Command im `*.model.ts`, Store- und
       Service-Methode nehmen denselben Typ:
   - [ ] `tool-instructors`: `AddToolInstructorsCommand`, `RemoveToolInstructorsCommand`
   - [ ] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
         `PauseToolCertificationCommand`, `ReactivateToolCertificationCommand`, `RevokeToolCertificationCommand`
-  - [ ] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
+  - [x] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
   - [x] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
-- [ ] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
+- [x] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
       jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
       `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →
       doppelter Abstand). Nach der Migration aller Formulare einmal in die globalen Styles ziehen
+      Umgesetzt: globale Klassen `form-row` / `form-col` / `form-actions` / `full-width` in `src/styles.scss`
+      (Spalten 20px, Zeilen 0.5rem, Buttonleiste 1rem); Kopien aus 12 Komponenten-SCSS entfernt
 - [x] Alte Fehler-Übersetzungen entfernen, sobald kein Template sie mehr nutzt: `shared.dialogs.errors.*`,
       `users.dialogs.addNewUser.errors.*` (in `de.json` und `en.json`); `tools.pages.toolDetails.errors.invalidIpAddress`
       und `tools.dialogs.addTool.errors.nameExists` bleiben (werden per `message` genutzt)

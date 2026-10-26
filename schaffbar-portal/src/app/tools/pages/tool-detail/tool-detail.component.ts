@@ -16,6 +16,7 @@ import { ToolRfidReaderAssignmentComponent } from '../../components/tool-rfid-re
 import { ToolWlanRelaisComponent } from '../../components/tool-wlan-relais/tool-wlan-relais.component';
 import {
   ChangeRfidReaderCommand,
+  ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
   SetWlanRelaisCommand,
   UpdateToolCommand,
@@ -82,8 +83,8 @@ export class ToolDetailComponent {
     this.detailsStore.changeRfidReader(command);
   }
 
-  protected onRfidReaderCleared(toolId: string): void {
-    this.detailsStore.clearRfidReader(toolId);
+  protected onRfidReaderCleared(command: ClearRfidReaderCommand): void {
+    this.detailsStore.clearRfidReader(command);
   }
 
   protected onWlanRelaisUpdated(command: SetWlanRelaisCommand): void {

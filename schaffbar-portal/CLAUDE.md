@@ -35,6 +35,9 @@ component (inputs, outputs, signals, handlers).
 - The result of `onSave()` is built as an explicitly typed variable before it is passed on – for readability, even
   where `dialogRef.close()` / `output.emit()` would infer the type:
   `const command: CreateToolCommand = { … }; this.dialogRef.close(command);`
+- Form layout uses the global classes from `src/styles.scss`: `form-row` (a row of fields), `form-col` (columns share
+  the width), `form-actions` (button bar, right-aligned), `full-width` – no copies of `.row`/`.col` in component
+  styles.
 - Form fields that only display a value and are never editable get the global class `readonly-field`
   (`src/styles.scss`).
 - Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in

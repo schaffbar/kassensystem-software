@@ -3,10 +3,14 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { MatButtonHarness } from '@angular/material/button/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldHarness } from '@angular/material/form-field/testing';
 import { MatSelectHarness } from '@angular/material/select/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { of } from 'rxjs';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
 import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
@@ -34,6 +38,8 @@ describe('ToolRfidReaderAssignmentComponent', () => {
 
   let fixture: ComponentFixture<ToolRfidReaderAssignmentComponent>;
   let loader: HarnessLoader;
+  let changed: Mock;
+  let cleared: Mock;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -44,12 +50,17 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     fixture = TestBed.createComponent(ToolRfidReaderAssignmentComponent);
     fixture.componentRef.setInput('tool', createTool('reader-1'));
     fixture.componentRef.setInput('rfidReaders', rfidReaders);
+    fixture.componentRef.setInput('assignedRfidReaderIds', new Set(['reader-3']));
+    changed = vi.fn();
+    cleared = vi.fn();
+    fixture.componentInstance.rfidReaderChanged.subscribe(changed);
+    fixture.componentInstance.rfidReaderCleared.subscribe(cleared);
     loader = TestbedHarnessEnvironment.loader(fixture);
     await fixture.whenStable();
   });
 
   function actionButtons(): NodeListOf<HTMLButtonElement> {
-    return fixture.nativeElement.querySelectorAll('.tool-rfid-reader-actions button');
+    return fixture.nativeElement.querySelectorAll('.form-actions button');
   }
 
   it('should preselect the RFID reader of the tool', async () => {
@@ -72,10 +83,10 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     await select.open();
     await select.clickOptions({ text: 'Reader 2' });
 
-    fixture.componentRef.setInput('tool', createTool('reader-3'));
+    fixture.componentRef.setInput('tool', createTool('reader-2'));
     await fixture.whenStable();
 
-    expect(await select.getValueText()).toBe('Reader 3');
+    expect(await select.getValueText()).toBe('Reader 2');
     expect(actionButtons().length).toBe(0);
   });
 
@@ -89,5 +100,37 @@ describe('ToolRfidReaderAssignmentComponent', () => {
 
     expect(await select.getValueText()).toBe('Reader 1');
     expect(actionButtons().length).toBe(0);
+  });
+
+  async function selectReader(text: string | RegExp): Promise<void> {
+    const select = await loader.getHarness(MatSelectHarness);
+    await select.open();
+    await select.clickOptions({ text });
+    await fixture.whenStable();
+  }
+
+  it('should emit the change command on save', async () => {
+    await selectReader('Reader 2');
+
+    await (await loader.getHarness(MatButtonHarness.with({ selector: '[type="submit"]' }))).click();
+
+    expect(changed).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', rfidReaderId: 'reader-2' });
+  });
+
+  it('should reject an RFID reader that is assigned to another tool', async () => {
+    await selectReader(/Reader 3/);
+
+    const field = await loader.getHarness(MatFormFieldHarness);
+    expect(await field.getTextErrors()).toEqual(['tools.pages.toolDetails.messages.alreadyAssignedError']);
+    expect(actionButtons().length).toBe(0);
+  });
+
+  it('should emit the clear command after confirmation', async () => {
+    const dialog = fixture.debugElement.injector.get(MatDialog);
+    vi.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(true) } as never);
+
+    await (await loader.getHarness(MatButtonHarness.with({ selector: '.tool-rfid-reader-header button' }))).click();
+
+    expect(cleared).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1' });
   });
 });

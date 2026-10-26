@@ -4,8 +4,8 @@
 
 <form [formRoot]="toolForm" (submit)="onSave()">
   <mat-dialog-content>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
           <input id="name" matInput [formField]="toolForm.name" />
@@ -16,8 +16,8 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
           <textarea id="description" matInput [formField]="toolForm.description" rows="2"></textarea>
@@ -25,8 +25,8 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
           <mat-select [formField]="toolForm.area">
@@ -41,8 +41,8 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
           <mat-select [formField]="toolForm.certificationRequirement">

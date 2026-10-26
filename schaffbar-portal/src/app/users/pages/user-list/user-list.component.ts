@@ -1,4 +1,5 @@
-import { Component, computed, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +23,7 @@ import { UsersStore } from '../../shared/stores/users.store';
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
   imports: [
+    FormField,
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -40,12 +42,18 @@ export class UserListComponent {
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
 
+  private readonly search = signal({ term: '' });
+  // TODO: do I need to use form here
+  protected readonly searchForm = form(this.search);
+
   protected readonly displayedColumns = ['lastName', 'firstName', 'actions'];
   protected readonly usersCount = computed(() => this.store.entities().length);
   protected readonly dataSource = computed(() => {
     const result = new MatTableDataSource<User>(this.store.entities());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
+    // part of the computed, so the filter survives reloading the users (MatTableDataSource default filter predicate)
+    result.filter = this.search().term.trim().toLowerCase();
     return result;
   });
 
@@ -57,13 +65,13 @@ export class UserListComponent {
     this.store.loadAllUsers();
   }
 
-  protected applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource().filter = filterValue.trim().toLowerCase();
+  protected onSearchInput(): void {
+    this.paginator()?.firstPage();
+  }
 
-    if (this.dataSource().paginator) {
-      this.dataSource().paginator?.firstPage();
-    }
+  protected clearSearch(): void {
+    this.search.set({ term: '' });
+    this.paginator()?.firstPage();
   }
 
   protected userDetails(user: User): void {

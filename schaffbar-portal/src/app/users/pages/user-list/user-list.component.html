@@ -12,18 +12,14 @@
 
 <mat-form-field class="user-list-filter">
   <mat-label>{{ 'users.actions.search' | translate }}</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Max" #input />
-  <mat-icon matSuffix>search</mat-icon>
-
-  <!-- TODO: try with two-way binding
-  <input matInput [(ngModel)]="filterValue" (keyup)="applyFilter($event)" placeholder="Ex. Max" #input />
-  <mat-icon matSuffix>search</mat-icon>
-  @if (filterValue()) {
-    <button matSuffix matIconButton aria-label="Clear" (click)="clearFilter($event)">
+  <input id="search" matInput placeholder="Ex. Max" [formField]="searchForm.term" (input)="onSearchInput()" />
+  @if (searchForm.term().value()) {
+    <button matSuffix matIconButton type="button" aria-label="Clear search" (click)="clearSearch()">
       <mat-icon>close</mat-icon>
     </button>
+  } @else {
+    <mat-icon matSuffix>search</mat-icon>
   }
-  -->
 </mat-form-field>
 
 <div class="mat-elevation-z2">

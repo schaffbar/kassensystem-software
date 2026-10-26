@@ -80,10 +80,10 @@ export interface UpdateToolCommand {
 
 export interface ChangeRfidReaderCommand {
   toolId: string;
-  rfidReaderId?: string;
+  rfidReaderId: string;
 }
 
-export interface ClearWlanRelaisCommand {
+export interface ClearRfidReaderCommand {
   toolId: string;
 }
 
@@ -91,4 +91,8 @@ export interface SetWlanRelaisCommand {
   toolId: string;
   wlanRelaisType: WlanRelaisType;
   ipAddress: string;
+}
+
+export interface ClearWlanRelaisCommand {
+  toolId: string;
 }

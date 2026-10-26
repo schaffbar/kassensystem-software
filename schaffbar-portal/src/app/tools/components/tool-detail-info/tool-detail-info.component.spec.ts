@@ -64,8 +64,8 @@ describe('ToolDetailInfoComponent', () => {
   }
 
   const editButton = '[aria-label="Edit tool"]';
-  const cancelButton = '.tool-info-actions button[type="button"]';
-  const saveButton = '.tool-info-actions button[type="submit"]';
+  const cancelButton = '.form-actions button[type="button"]';
+  const saveButton = '.form-actions button[type="submit"]';
 
   it('should show the tool values read-only', async () => {
     expect(await (await input('name')).getValue()).toBe('Bandsäge');

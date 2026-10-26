@@ -4,8 +4,8 @@
 
 <form [formRoot]="userForm" (submit)="onSave()">
   <mat-dialog-content>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
           <input id="firstName" matInput [formField]="userForm.firstName" />
@@ -14,7 +14,7 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="col">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
           <input id="lastName" matInput [formField]="userForm.lastName" />
@@ -24,8 +24,8 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
           <input
@@ -42,7 +42,7 @@
           <mat-datepicker #picker startView="multi-year" />
         </mat-form-field>
       </div>
-      <div class="col">
+      <div class="form-col">
         <mat-checkbox [formField]="userForm.clubMember">
           {{ 'users.shared.userProperties.clubMember' | translate }}
         </mat-checkbox>
@@ -51,8 +51,8 @@
 
     <h3>{{ 'users.dialogs.addNewUser.headers.contactInformation' | translate }}</h3>
 
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
           <input id="email" matInput [formField]="userForm.email" />
@@ -62,8 +62,8 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.phone' | translate }}</mat-label>
           <input id="phone" matInput [formField]="userForm.phone" />
@@ -73,8 +73,8 @@
 
     <h3>{{ 'users.dialogs.addNewUser.headers.billingInformation' | translate }}</h3>
 
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.addressLine1' | translate }}</mat-label>
           <input id="addressLine1" matInput [formField]="userForm.addressLine1" />
@@ -84,16 +84,16 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.addressLine2' | translate }}</mat-label>
           <input id="addressLine2" matInput [formField]="userForm.addressLine2" />
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.postalCode' | translate }}</mat-label>
           <input id="postalCode" matInput [formField]="userForm.postalCode" />
@@ -103,7 +103,7 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="col">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.city' | translate }}</mat-label>
           <input id="city" matInput [formField]="userForm.city" />
@@ -113,8 +113,8 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="form-row">
+      <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'users.shared.userProperties.country' | translate }}</mat-label>
           <input id="country" matInput [formField]="userForm.country" />

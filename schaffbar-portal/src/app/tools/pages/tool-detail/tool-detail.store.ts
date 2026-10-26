@@ -13,6 +13,7 @@ import {
 import { ToolCertificationService } from '../../../users/shared/services/tool-certification.service';
 import {
   ChangeRfidReaderCommand,
+  ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
   SetWlanRelaisCommand,
   Tool,
@@ -95,11 +96,11 @@ export const ToolDetailStore = signalStore(
         }),
       ),
     ),
-    clearRfidReader: rxMethod<string>(
+    clearRfidReader: rxMethod<ClearRfidReaderCommand>(
       pipe(
         tap(() => patchState(store, setPending())),
-        exhaustMap((toolId: string) => {
-          return store._toolsService.clearRfidReader(toolId).pipe(
+        exhaustMap((command: ClearRfidReaderCommand) => {
+          return store._toolsService.clearRfidReader(command).pipe(
             tapResponse({
               next: () => {
                 patchState(store, setFulfilled(), setDirty());

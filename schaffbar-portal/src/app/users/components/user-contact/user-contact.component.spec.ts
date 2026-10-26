@@ -52,8 +52,8 @@ describe('UserContactComponent', () => {
   }
 
   const editButton = '[aria-label="Edit contact"]';
-  const cancelButton = '.actions button[type="button"]';
-  const saveButton = '.actions button[type="submit"]';
+  const cancelButton = '.form-actions button[type="button"]';
+  const saveButton = '.form-actions button[type="submit"]';
 
   it('should show the contact read-only', async () => {
     expect(await (await input('email')).getValue()).toBe('max@example.com');
