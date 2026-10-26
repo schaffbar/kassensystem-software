@@ -2,12 +2,16 @@ import { Component, computed, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { RfidReaderStore } from '../../../rfid-readers/rfid-readers.store';
-import { BatchCreateToolCertificationCommand } from '../../../users/shared/models/tool-certification.model';
+import {
+  BatchCreateToolCertificationCommand,
+  DeleteToolCertificationCommand,
+} from '../../../users/shared/models/tool-certification.model';
 import { UsersStore } from '../../../users/shared/stores/users.store';
 import { ToolCertificationsComponent } from '../../components/tool-certifications/tool-certifications.component';
 import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-detail-info.component';
@@ -15,9 +19,11 @@ import { ToolInstructorsComponent } from '../../components/tool-instructors/tool
 import { ToolRfidReaderAssignmentComponent } from '../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
 import { ToolWlanRelaisComponent } from '../../components/tool-wlan-relais/tool-wlan-relais.component';
 import {
+  AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
   ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
+  RemoveToolInstructorsCommand,
   SetWlanRelaisCommand,
   UpdateToolCommand,
 } from '../../tool.model';
@@ -32,6 +38,7 @@ import { ToolDetailStore } from './tool-detail.store';
     MatTabsModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressBarModule,
     TranslatePipe,
     ToolDetailInfoComponent,
     ToolInstructorsComponent,
@@ -42,7 +49,7 @@ import { ToolDetailStore } from './tool-detail.store';
   providers: [ToolDetailStore],
 })
 export class ToolDetailComponent {
-  private readonly detailsStore = inject(ToolDetailStore);
+  protected readonly detailsStore = inject(ToolDetailStore);
   private readonly rfidReaderStore = inject(RfidReaderStore);
   private readonly toolsStore = inject(ToolsStore);
   private readonly usersStore = inject(UsersStore);
@@ -99,15 +106,15 @@ export class ToolDetailComponent {
     this.detailsStore.batchCreateCertifications(command);
   }
 
-  protected onDeleteCertification(event: { customerId: string; toolId: string }): void {
-    this.detailsStore.deleteCertification(event);
+  protected onDeleteCertification(command: DeleteToolCertificationCommand): void {
+    this.detailsStore.deleteCertification(command);
   }
 
-  protected onInstructorsAdded(event: { toolId: string; instructorIds: string[] }): void {
-    this.detailsStore.addInstructors(event);
+  protected onInstructorsAdded(command: AddToolInstructorsCommand): void {
+    this.detailsStore.addInstructors(command);
   }
 
-  protected onInstructorsRemoved(event: { toolId: string; instructorIds: string[] }): void {
-    this.detailsStore.removeInstructors(event);
+  protected onInstructorsRemoved(command: RemoveToolInstructorsCommand): void {
+    this.detailsStore.removeInstructors(command);
   }
 }

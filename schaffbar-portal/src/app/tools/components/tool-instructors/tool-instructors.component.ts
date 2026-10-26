@@ -12,6 +12,7 @@ import { MatListModule } from '@angular/material/list';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { User } from '../../../users/shared/models/user.model';
+import { AddToolInstructorsCommand, RemoveToolInstructorsCommand } from '../../tool.model';
 
 @Component({
   selector: 'schbar-tool-instructors',
@@ -34,8 +35,8 @@ export class ToolInstructorsComponent {
   readonly instructorIds = input.required<string[]>();
   readonly allUsers = input.required<User[]>();
 
-  readonly instructorsAdded = output<{ toolId: string; instructorIds: string[] }>();
-  readonly instructorsRemoved = output<{ toolId: string; instructorIds: string[] }>();
+  readonly instructorsAdded = output<AddToolInstructorsCommand>();
+  readonly instructorsRemoved = output<RemoveToolInstructorsCommand>();
 
   protected readonly searchText = signal('');
   protected readonly selectedUsersToAdd = signal<User[]>([]);
@@ -78,7 +79,8 @@ export class ToolInstructorsComponent {
   protected addInstructors(): void {
     const ids = this.selectedUsersToAdd().map((u) => u.id);
     if (ids.length > 0) {
-      this.instructorsAdded.emit({ toolId: this.toolId(), instructorIds: ids });
+      const command: AddToolInstructorsCommand = { toolId: this.toolId(), instructorIds: ids };
+      this.instructorsAdded.emit(command);
       this.selectedUsersToAdd.set([]);
     }
   }
@@ -98,7 +100,8 @@ export class ToolInstructorsComponent {
   protected removeInstructors(): void {
     const ids = Array.from(this.selectedInstructorIdsToRemove());
     if (ids.length > 0) {
-      this.instructorsRemoved.emit({ toolId: this.toolId(), instructorIds: ids });
+      const command: RemoveToolInstructorsCommand = { toolId: this.toolId(), instructorIds: ids };
+      this.instructorsRemoved.emit(command);
       this.selectedInstructorIdsToRemove.set(new Set());
     }
   }

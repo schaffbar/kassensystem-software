@@ -78,6 +78,16 @@ export interface UpdateToolCommand {
   certificationRequirement: CertificationRequirement;
 }
 
+export interface AddToolInstructorsCommand {
+  toolId: string;
+  instructorIds: string[];
+}
+
+export interface RemoveToolInstructorsCommand {
+  toolId: string;
+  instructorIds: string[];
+}
+
 export interface ChangeRfidReaderCommand {
   toolId: string;
   rfidReaderId: string;

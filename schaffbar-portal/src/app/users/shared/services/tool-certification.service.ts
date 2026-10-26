@@ -1,10 +1,14 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { BatchCreateToolCertificationCommand, ToolCertification } from '../models/tool-certification.model';
+import {
+  BatchCreateToolCertificationCommand,
+  DeleteToolCertificationCommand,
+  ToolCertification,
+} from '../models/tool-certification.model';
 
 const TOOL_CERTIFICATIONS_API_URL = `${environment.apiBaseUrl}/api/v1/tool-certifications`;
 
@@ -25,8 +29,15 @@ export class ToolCertificationService {
     return this.http.get<ToolCertification[]>(`${TOOL_CERTIFICATIONS_API_URL}?customerId=${customerId}`);
   }
 
-  getCertificationsByTool(toolId: string): Observable<ToolCertification[]> {
-    return this.http.get<ToolCertification[]>(`${TOOL_CERTIFICATIONS_API_URL}?toolId=${toolId}`);
+  /**
+   * Loads the certifications of a tool whenever the tool id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  certificationsByToolResource(toolId: () => string | null): HttpResourceRef<ToolCertification[] | undefined> {
+    return httpResource<ToolCertification[]>(() => {
+      const id = toolId();
+      return id ? { url: TOOL_CERTIFICATIONS_API_URL, params: { toolId: id } } : undefined;
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -60,7 +71,9 @@ export class ToolCertificationService {
     );
   }
 
-  delete(customerId: string, toolId: string): Observable<void> {
-    return this.http.delete<void>(`${TOOL_CERTIFICATIONS_API_URL}/customers/${customerId}/tools/${toolId}`);
+  delete(command: DeleteToolCertificationCommand): Observable<void> {
+    return this.http.delete<void>(
+      `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}`,
+    );
   }
 }

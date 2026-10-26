@@ -254,9 +254,10 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
 - [ ] Commands nach der Regel in [schaffbar-portal/CLAUDE.md](../schaffbar-portal/CLAUDE.md) („Commands“) für die
       noch nicht migrierten Komponenten (bisher Inline-Typen bzw. `string`); Command im `*.model.ts`, Store- und
       Service-Methode nehmen denselben Typ:
-  - [ ] `tool-instructors`: `AddToolInstructorsCommand`, `RemoveToolInstructorsCommand`
+  - [x] `tool-instructors`: `AddToolInstructorsCommand`, `RemoveToolInstructorsCommand`
   - [ ] `tool-certifications` / `user-tool-certifications`: `DeleteToolCertificationCommand`,
         `PauseToolCertificationCommand`, `ReactivateToolCertificationCommand`, `RevokeToolCertificationCommand`
+        (`DeleteToolCertificationCommand` erledigt; Pause/Reactivate/Revoke folgen mit `user-detail.store`)
   - [x] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
   - [x] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
 - [x] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
@@ -300,8 +301,9 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
       „Action feedback - Snackbar?")
       Lade-/Ladefehler-Zustand: beim Piloten umgesetzt, weitere Stores folgen. **Offen:** Fehler bei Mutationen
       (Speichern, Löschen …) werden weiterhin nicht angezeigt – Vorschlag: zentraler HTTP-Interceptor mit Snackbar
-- [ ] [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts)
-      (2 Resources: Tool, Zertifizierungen)
+- [x] [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts)
+      (2 Resources: Tool, Zertifizierungen). Mutationen laden gezielt nur die betroffene Resource neu (vorher hat das
+      Dirty-Flag immer beides geladen). Test: [tool-detail.store.spec.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.spec.ts)
 - [ ] [user-detail.store.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.ts)
       (4 Resources: User, RFID-Assignment, Session, Zertifizierungen)
 - [ ] Optional: Dashboard (2 Resources). Dazu `getDuration()` im Template durch ein `now`-Signal (Intervall) +

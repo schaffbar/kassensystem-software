@@ -16,6 +16,7 @@ import { CertificationStatusChipComponent } from '../../../shared/components/cer
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import {
   BatchCreateToolCertificationCommand,
+  DeleteToolCertificationCommand,
   ToolCertification,
 } from '../../../users/shared/models/tool-certification.model';
 import { User } from '../../../users/shared/models/user.model';
@@ -47,7 +48,7 @@ export class ToolCertificationsComponent {
   readonly instructorIds = input.required<string[]>();
 
   readonly batchCreate = output<BatchCreateToolCertificationCommand>();
-  readonly deleteCertification = output<{ customerId: string; toolId: string }>();
+  readonly deleteCertification = output<DeleteToolCertificationCommand>();
 
   protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
 
@@ -140,7 +141,8 @@ export class ToolCertificationsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.deleteCertification.emit({ customerId: cert.customerId, toolId: cert.toolId });
+        const command: DeleteToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+        this.deleteCertification.emit(command);
       }
     });
   }

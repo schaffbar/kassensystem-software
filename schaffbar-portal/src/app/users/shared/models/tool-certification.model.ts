@@ -15,8 +15,16 @@ export enum ToolCertificationStatus {
   Revoked = 'REVOKED',
 }
 
+// ----------------------------------------------------------------------------
+// commands
+
 export interface BatchCreateToolCertificationCommand {
   customerIds: string[];
   toolId: string;
   certifiedBy: string;
+}
+
+export interface DeleteToolCertificationCommand {
+  customerId: string;
+  toolId: string;
 }

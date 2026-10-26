@@ -1,3 +1,10 @@
+@if (detailsStore.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (detailsStore.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 @if (selectedTool(); as tool) {
   <div class="tool-detail-header">
     <div class="tool-detail-header__title">

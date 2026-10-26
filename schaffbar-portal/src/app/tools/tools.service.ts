@@ -1,14 +1,16 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import {
+  AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
   ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
   CreateToolCommand,
+  RemoveToolInstructorsCommand,
   SetWlanRelaisCommand,
   Tool,
   UpdateToolCommand,
@@ -34,8 +36,15 @@ export class ToolsService {
     return this.http.get<Tool[]>(TOOLS_API_URL);
   }
 
-  getTool(id: string): Observable<Tool> {
-    return this.http.get<Tool>(`${TOOLS_API_URL}/${id}`);
+  /**
+   * Loads the tool whenever the id changes; no request while the id is `null`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  toolResource(id: () => string | null): HttpResourceRef<Tool | undefined> {
+    return httpResource<Tool>(() => {
+      const toolId = id();
+      return toolId ? `${TOOLS_API_URL}/${toolId}` : undefined;
+    });
   }
 
   getToolsByRfidReader(rfidReaderId: string): Observable<Tool[]> {
@@ -73,14 +82,14 @@ export class ToolsService {
     return this.http.delete<void>(url);
   }
 
-  addInstructors(toolId: string, instructorIds: string[]): Observable<void> {
-    const url = `${TOOLS_API_URL}/${toolId}/instructors`;
-    return this.http.post<void>(url, { instructorIds }, this.httpOptions);
+  addInstructors(command: AddToolInstructorsCommand): Observable<void> {
+    const url = `${TOOLS_API_URL}/${command.toolId}/instructors`;
+    return this.http.post<void>(url, { instructorIds: command.instructorIds }, this.httpOptions);
   }
 
-  removeInstructors(toolId: string, instructorIds: string[]): Observable<void> {
-    const url = `${TOOLS_API_URL}/${toolId}/instructors`;
-    return this.http.delete<void>(url, { ...this.httpOptions, body: { instructorIds } });
+  removeInstructors(command: RemoveToolInstructorsCommand): Observable<void> {
+    const url = `${TOOLS_API_URL}/${command.toolId}/instructors`;
+    return this.http.delete<void>(url, { ...this.httpOptions, body: { instructorIds: command.instructorIds } });
   }
 
   deleteTool(id: string): Observable<void> {
