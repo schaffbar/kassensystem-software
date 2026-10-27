@@ -8,7 +8,12 @@
       "min": "{{field}} must be at least {{value}}",
       "max": "{{field}} must be at most {{value}}",
       "invalid": "{{field}} is invalid",
-      "loadFailed": "The data could not be loaded."
+      "loadFailed": "The data could not be loaded.",
+      "saveFailed": "The change could not be saved.",
+      "serverUnreachable": "The server cannot be reached."
+    },
+    "actions": {
+      "close": "Close"
     },
     "table": {
       "actionsColumn": "Actions"

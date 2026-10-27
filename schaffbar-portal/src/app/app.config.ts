@@ -1,5 +1,5 @@
 import { registerLocaleData } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeDe from '@angular/common/locales/de';
 import {
   ApplicationConfig,
@@ -16,6 +16,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
+import { errorInterceptor } from './core/http/error.interceptor';
 import { provideDateAdapter } from './shared/date/provide-date-adapter';
 
 registerLocaleData(localeDe);
@@ -24,7 +25,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([errorInterceptor])),
     provideDateAdapter(),
     provideTranslateService({
       loader: provideTranslateHttpLoader({

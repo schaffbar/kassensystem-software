@@ -63,7 +63,7 @@ export class RfidReaderDetailComponent {
           if (tools.length > 0) {
             this.snackBar.open(
               this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
-              this.translate.instant('shared.dialogs.actions.delete.cancel'),
+              this.translate.instant('shared.actions.close'),
               { duration: 6000 },
             );
           } else {

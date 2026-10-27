@@ -6,7 +6,9 @@
     </button>
   </div>
   <div class="tool-list-header__actions">
-    <button mat-flat-button color="primary" (click)="newToolDialog()">{{ 'tools.actions.addTool' | translate }}</button>
+    <button mat-flat-button color="primary" [disabled]="isCreatingTool()" (click)="newToolDialog()">
+      {{ 'tools.actions.addTool' | translate }}
+    </button>
   </div>
 </div>
 

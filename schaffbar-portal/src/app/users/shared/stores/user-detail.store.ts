@@ -25,7 +25,6 @@ interface UserDetailState {
 
 export const UserDetailStore = signalStore(
   withState<UserDetailState>({ userId: null }),
-  // request status of the mutations
   withRequestStatus(),
   withProps((store) => {
     const usersService = inject(UsersService);
@@ -33,11 +32,12 @@ export const UserDetailStore = signalStore(
     const workshopSessionService = inject(WorkshopSessionService);
     const toolCertificationService = inject(ToolCertificationService);
     return {
+      // services for the mutations
       _usersService: usersService,
       _assignmentService: assignmentService,
       _workshopSessionService: workshopSessionService,
       _toolCertificationService: toolCertificationService,
-      // (re)load whenever the id changes – replaces the dirty flag + effect + rxMethods
+      // resources for the queries
       _userResource: usersService.userResource(store.userId),
       _assignmentResource: assignmentService.rfidTagAssignmentResource(store.userId),
       _openSessionResource: workshopSessionService.openSessionResource(store.userId),
@@ -52,6 +52,7 @@ export const UserDetailStore = signalStore(
       rfidTagAssignment: computed(() => (_assignmentResource.hasValue() ? _assignmentResource.value() : null)),
       openSession: computed(() => (_openSessionResource.hasValue() ? _openSessionResource.value() : null)),
       toolCertifications: computed(() => (_certificationsResource.hasValue() ? _certificationsResource.value() : [])),
+      // loading and error states are combined from all resources
       isLoading: computed(() => resources.some((resource) => resource.isLoading())),
       hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
     };

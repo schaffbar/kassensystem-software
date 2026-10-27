@@ -6,6 +6,7 @@ import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
 
+import { mutation } from '../shared/state/mutation';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
 import { CreateToolCommand, Tool } from './tool.model';
 import { ToolsService } from './tools.service';
@@ -35,20 +36,10 @@ export const ToolsStore = signalStore(
     ),
   })),
   withMethods((store) => ({
-    createTool: rxMethod<CreateToolCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: CreateToolCommand) => {
-          return store._toolsService.createTool(command).pipe(
-            tapResponse({
-              next: () => patchState(store, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-            tap(() => store.loadAllTools()),
-          );
-        }),
-      ),
-    ),
+    createTool: mutation<CreateToolCommand>({
+      request: (command) => store._toolsService.createTool(command),
+      onSuccess: () => store.loadAllTools(),
+    }),
     deleteTool: rxMethod<string>(
       pipe(
         tap(() => patchState(store, setPending())),

@@ -49,6 +49,7 @@ export class ToolListComponent {
     'wlanRelaisType',
     'actions',
   ];
+
   protected readonly toolsCount = computed(() => this.store.entities().length);
   protected readonly dataSource = computed(() => {
     const result = new MatTableDataSource<Tool>(this.store.entities());
@@ -56,6 +57,8 @@ export class ToolListComponent {
     result.paginator = this.paginator() ?? null;
     return result;
   });
+
+  protected readonly isCreatingTool = this.store.createTool.isPending;
 
   constructor() {
     this.store.loadAllTools();
