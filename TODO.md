@@ -13,9 +13,18 @@
 - [Frontend] Validate Session before closing it
 - [Backend] Scheduler to clean up waiting for assignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
-- [Frontend] Action feedback - Snackbar?
-- [Frontend] handle API errors
 - [Frontend] check required properties in all entities and forms (update)
+
+- Fehlerbehandlung / Problems API:
+  - [Backend] Problems API: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions kommen heute
+    als `500` ohne lesbare Meldung an (z. B. `RfidReaderHasToolAssignedException`, `ToolNameAlreadyUsedException`) –
+    sollten `409`/`400` mit verständlichem `detail` liefern
+  - [Frontend] handle API errors – teilweise erledigt: Fehler-Interceptor zeigt eine Snackbar mit allgemeiner
+    Meldung (laden / speichern / Server nicht erreichbar). Mit Problems API stattdessen `detail` aus dem
+    `ProblemDetail` anzeigen
+  - [Frontend] Action feedback - Snackbar? – Fehler erledigt (Interceptor); Erfolgsmeldungen noch offen
+  - [Frontend] Mit Problems API werden reine Vorab-Prüfungen im Frontend optional, z. B. `getToolsByRfidReader`
+    vor dem Typwechsel eines RFID-Readers (das Backend prüft das bereits in `RfidReaderChangeType`)
 
 ## Maintenance
 
@@ -36,7 +45,6 @@
 - [Frontend] Tool Detail page - refactor tool instructor
 - [Backend] Implement new interfaces for device
 - [Feature] Assignment und Unassignment von fixen RFID tags
-- [Feature] Problems API
 - [Backend] Open Telemetry
 - [PostgreSql] init.sql Add indexes
 - [Backend/Frontend] Unit tests
