@@ -318,8 +318,8 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
       der Listen-Stores). Beispiel `isPending`: „Tool hinzufügen“ ist während des Anlegens deaktiviert
 - [x] Fehler-Interceptor mit Snackbar: [error.interceptor.ts](../schaffbar-portal/src/app/core/http/error.interceptor.ts)
 - [x] Dashboard (2 Resources: aktive User, aktive Tools); `activeUsers()` statt `entities()`
-- [ ] `getDuration()` im Dashboard-Template durch ein `now`-Signal (Intervall) + `computed` ersetzen – die Dauer
-      aktualisiert sich heute nie
+- [x] `getDuration()` im Dashboard-Template durch ein `now`-Signal (`toSignal(interval(60s))`) + `computed` ersetzt –
+      die Dauer zählt jetzt minütlich weiter. Test: [active-users-widget.component.spec.ts](../schaffbar-portal/src/app/dashboard/components/active-users-widget/active-users-widget.component.spec.ts)
 - [x] Listen-Stores (`ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore`): Resource statt `withEntities` +
       `rxMethod` + `onInit`; `loadAll…()` → `reload…()`; Listen mit Fortschrittsbalken und Ladefehler-Hinweis.
       `withRequestStatus` wird danach nirgends mehr benutzt (bleibt als Beispiel). Test: [tools.store.spec.ts](../schaffbar-portal/src/app/tools/tools.store.spec.ts)

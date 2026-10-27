@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,8 +8,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
+import { differenceInMinutes, parseISO } from 'date-fns';
+import { interval, map } from 'rxjs';
 
 import { ActiveUser } from '../../dashboard.model';
+
+const DURATION_REFRESH_MS = 60_000;
+
+interface ActiveUserRow extends ActiveUser {
+  duration: string;
+}
 
 @Component({
   selector: 'schbar-active-users-widget',
@@ -24,8 +33,19 @@ export class ActiveUsersWidgetComponent {
 
   protected readonly displayedColumns = ['name', 'entryTime', 'duration'];
   protected readonly activeUsersCount = computed(() => this.activeUsers().length);
+
+  // ticks every minute, so the duration column stays up to date (the interval ends with the component)
+  private readonly now = toSignal(interval(DURATION_REFRESH_MS).pipe(map(() => new Date())), {
+    initialValue: new Date(),
+  });
+
   protected readonly dataSource = computed(() => {
-    return new MatTableDataSource<ActiveUser>(this.activeUsers());
+    const now = this.now();
+    const rows: ActiveUserRow[] = this.activeUsers().map((user) => ({
+      ...user,
+      duration: formatDuration(user.entryTime, now),
+    }));
+    return new MatTableDataSource<ActiveUserRow>(rows);
   });
 
   protected reloadActiveUsers(): void {
@@ -35,14 +55,11 @@ export class ActiveUsersWidgetComponent {
   protected selectUser(user: ActiveUser): void {
     this.userSelected.emit(user);
   }
+}
 
-  protected getDuration(entryTime: string): string {
-    const entry = new Date(entryTime);
-    const now = new Date();
-    const diffMs = now.getTime() - entry.getTime();
-    const totalMinutes = Math.floor(diffMs / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  }
+function formatDuration(entryTime: string, now: Date): string {
+  const totalMinutes = differenceInMinutes(now, parseISO(entryTime));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
