@@ -1,49 +1,34 @@
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
-import { tapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withHooks, withMethods, withProps } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, pipe, tap } from 'rxjs';
+import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
 import { mutation } from '../shared/state/mutation';
-import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { DeleteRfidReaderCommand, RfidReader } from './rfid-reader.model';
+import { DeleteRfidReaderCommand } from './rfid-reader.model';
 import { RfidReaderService } from './rfid-readers.service';
 
 export const RfidReaderStore = signalStore(
   { providedIn: 'root' },
-  withEntities<RfidReader>(),
-  withRequestStatus(),
-  withProps(() => ({
-    _rfidReaderService: inject(RfidReaderService),
+  withProps(() => {
+    const rfidReaderService = inject(RfidReaderService);
+    return {
+      _rfidReaderService: rfidReaderService,
+      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      _rfidReadersResource: rfidReaderService.rfidReadersResource(),
+    };
+  }),
+  withComputed(({ _rfidReadersResource }) => ({
+    // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
+    entities: computed(() => (_rfidReadersResource.hasValue() ? _rfidReadersResource.value() : [])),
+    isLoading: computed(() => _rfidReadersResource.isLoading()),
+    hasLoadError: computed(() => !!_rfidReadersResource.error()),
   })),
   withMethods((store) => ({
-    loadAllRfidReaders: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        // delay(100), // TODO: Simulate network latency
-        exhaustMap(() => {
-          return store._rfidReaderService.getRfidReaders().pipe(
-            // delay(400),
-            tapResponse({
-              next: (rfidReaders) => patchState(store, setAllEntities(rfidReaders), setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-  })),
-  withMethods((store) => ({
+    reloadRfidReaders(): void {
+      store._rfidReadersResource.reload();
+    },
     deleteRfidReader: mutation<DeleteRfidReaderCommand>({
       request: (command) => store._rfidReaderService.deleteRfidReader(command),
-      onSuccess: () => store.loadAllRfidReaders(),
+      onSuccess: () => store._rfidReadersResource.reload(),
     }),
-  })),
-  withHooks((store) => ({
-    onInit() {
-      store.loadAllRfidReaders();
-    },
   })),
 );

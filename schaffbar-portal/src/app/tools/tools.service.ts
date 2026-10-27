@@ -33,8 +33,12 @@ export class ToolsService {
   // --------------------------------------------------------------------------
   // queries
 
-  getTools(): Observable<Tool[]> {
-    return this.http.get<Tool[]>(TOOLS_API_URL);
+  /**
+   * Loads all tools; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  toolsResource(): HttpResourceRef<Tool[] | undefined> {
+    return httpResource<Tool[]>(() => TOOLS_API_URL);
   }
 
   /**

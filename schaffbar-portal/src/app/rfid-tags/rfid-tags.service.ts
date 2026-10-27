@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
@@ -22,8 +22,12 @@ export class RfidTagService {
   // --------------------------------------------------------------------------
   // queries
 
-  getRfidTags(): Observable<RfidTag[]> {
-    return this.http.get<RfidTag[]>(RFID_TAGS_API_URL);
+  /**
+   * Loads all RFID tags; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  rfidTagsResource(): HttpResourceRef<RfidTag[] | undefined> {
+    return httpResource<RfidTag[]>(() => RFID_TAGS_API_URL);
   }
 
   getRfidTag(id: string): Observable<RfidTag> {

@@ -1,7 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-
-import { Observable } from 'rxjs';
+import { HttpResourceRef, httpResource } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 import { ActiveTool, ActiveUser } from './dashboard.model';
@@ -11,16 +9,22 @@ const DASHBOARD_TOOL_API_URL = `${environment.apiBaseUrl}/api/v1/tool-dashboard`
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private readonly http = inject(HttpClient);
-
   // --------------------------------------------------------------------------
   // queries
 
-  getActiveUsers(): Observable<ActiveUser[]> {
-    return this.http.get<ActiveUser[]>(`${DASHBOARD_API_URL}/active-users`);
+  /**
+   * Loads the users currently in the workshop; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  activeUsersResource(): HttpResourceRef<ActiveUser[] | undefined> {
+    return httpResource<ActiveUser[]>(() => `${DASHBOARD_API_URL}/active-users`);
   }
 
-  getActiveTools(): Observable<ActiveTool[]> {
-    return this.http.get<ActiveTool[]>(`${DASHBOARD_TOOL_API_URL}/active-tools`);
+  /**
+   * Loads the tools currently in use; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  activeToolsResource(): HttpResourceRef<ActiveTool[] | undefined> {
+    return httpResource<ActiveTool[]>(() => `${DASHBOARD_TOOL_API_URL}/active-tools`);
   }
 }

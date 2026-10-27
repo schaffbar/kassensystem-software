@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
@@ -27,6 +28,7 @@ import { UsersStore } from '../../shared/stores/users.store';
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSortModule,
     MatIconModule,
     MatInputModule,
@@ -34,7 +36,7 @@ import { UsersStore } from '../../shared/stores/users.store';
   ],
 })
 export class UserListComponent {
-  private readonly store = inject(UsersStore);
+  protected readonly store = inject(UsersStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -58,11 +60,11 @@ export class UserListComponent {
   });
 
   constructor() {
-    this.store.loadAllUsers();
+    this.store.reloadUsers();
   }
 
   protected reloadUsers(): void {
-    this.store.loadAllUsers();
+    this.store.reloadUsers();
   }
 
   protected onSearchInput(): void {

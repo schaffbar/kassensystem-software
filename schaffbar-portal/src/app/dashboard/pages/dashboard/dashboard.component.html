@@ -1,8 +1,15 @@
 <h1>{{ 'dashboard.title' | translate }}</h1>
 
+@if (store.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (store.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 <div class="dashboard-widgets">
   <schbar-active-users-widget
-    [activeUsers]="store.entities()"
+    [activeUsers]="store.activeUsers()"
     (reload)="reloadActiveUsers()"
     (userSelected)="openUserSession($event)" />
   <schbar-active-tools-widget

@@ -33,8 +33,11 @@ component (inputs, outputs, signals, handlers).
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
   `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not
   throw.
-- `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is kept as an example of a custom store
-  feature; it is only used by the `loadAll…` methods of the list stores.
+- List stores and detail stores are built the same way: resource(s) in `withProps`, `withComputed` for the data
+  (`hasValue() ? value() : …`), `isLoading`, `hasLoadError`, a `reload…()` method and the mutations. No
+  `withEntities`, no `rxMethod` for loading, no `onInit` hook.
+- `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is kept only as an example of a custom
+  store feature – it is not used anywhere.
 
 ## Forms
 

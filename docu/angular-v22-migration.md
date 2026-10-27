@@ -317,10 +317,12 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
       umgestellt (−300 Zeilen). `withRequestStatus` bleibt als Beispiel für ein Store-Feature (nur noch `loadAll…`
       der Listen-Stores). Beispiel `isPending`: „Tool hinzufügen“ ist während des Anlegens deaktiviert
 - [x] Fehler-Interceptor mit Snackbar: [error.interceptor.ts](../schaffbar-portal/src/app/core/http/error.interceptor.ts)
-- [ ] Optional: Dashboard (2 Resources). Dazu `getDuration()` im Template durch ein `now`-Signal (Intervall) +
-      `computed` ersetzen – die Dauer aktualisiert sich heute nie.
-- [ ] Optional/später: Listen-Stores. Sie werden geteilt (Dashboard, Tool-Detail, User-Detail) und können vorerst
-      NgRx mit `rxMethod` bleiben.
+- [x] Dashboard (2 Resources: aktive User, aktive Tools); `activeUsers()` statt `entities()`
+- [ ] `getDuration()` im Dashboard-Template durch ein `now`-Signal (Intervall) + `computed` ersetzen – die Dauer
+      aktualisiert sich heute nie
+- [x] Listen-Stores (`ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore`): Resource statt `withEntities` +
+      `rxMethod` + `onInit`; `loadAll…()` → `reload…()`; Listen mit Fortschrittsbalken und Ladefehler-Hinweis.
+      `withRequestStatus` wird danach nirgends mehr benutzt (bleibt als Beispiel). Test: [tools.store.spec.ts](../schaffbar-portal/src/app/tools/tools.store.spec.ts)
 
 Entscheidung offen: Resource im SignalStore halten (`withProps(() => ({ _reader: httpResource(...) }))`) oder den
 Detail-Store ganz auflösen und die Resources in der Page-Komponente halten (bei einem Store pro Seite einfacher).

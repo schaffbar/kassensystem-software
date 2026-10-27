@@ -71,15 +71,15 @@ export class ToolDetailComponent {
 
   constructor() {
     this.detailsStore.setToolId(this.id);
-    this.rfidReaderStore.loadAllRfidReaders();
-    this.toolsStore.loadAllTools();
-    this.usersStore.loadAllUsers();
+    this.rfidReaderStore.reloadRfidReaders();
+    this.toolsStore.reloadTools();
+    this.usersStore.reloadUsers();
   }
 
   protected reloadTool(): void {
     this.detailsStore.reloadTool();
-    this.rfidReaderStore.loadAllRfidReaders();
-    this.toolsStore.loadAllTools();
+    this.rfidReaderStore.reloadRfidReaders();
+    this.toolsStore.reloadTools();
   }
 
   protected onToolUpdated(command: UpdateToolCommand): void {

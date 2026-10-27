@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
@@ -17,10 +18,18 @@ import { RfidTagStore } from '../../rfid-tags.store';
   selector: 'schbar-rfid-tag-list',
   templateUrl: './rfid-tag-list.component.html',
   styleUrl: './rfid-tag-list.component.scss',
-  imports: [MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIconModule, TranslatePipe],
+  imports: [
+    MatButtonModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatSortModule,
+    MatIconModule,
+    TranslatePipe,
+  ],
 })
 export class RfidTagListComponent {
-  private readonly store = inject(RfidTagStore);
+  protected readonly store = inject(RfidTagStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
@@ -37,11 +46,11 @@ export class RfidTagListComponent {
   });
 
   constructor() {
-    this.store.loadAllRfidTags();
+    this.store.reloadRfidTags();
   }
 
   protected reloadRfidTags(): void {
-    this.store.loadAllRfidTags();
+    this.store.reloadRfidTags();
   }
 
   protected deleteRfidTagDialog(event: Event, rfidTag: RfidTag): void {

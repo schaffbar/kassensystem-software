@@ -21,14 +21,18 @@ describe('RfidTagListComponent', () => {
   let fixture: ComponentFixture<RfidTagListComponent>;
   let storeMock: {
     entities: WritableSignal<RfidTag[]>;
-    loadAllRfidTags: Mock;
+    isLoading: WritableSignal<boolean>;
+    hasLoadError: WritableSignal<boolean>;
+    reloadRfidTags: Mock;
     deleteRfidTag: Mock;
   };
 
   beforeEach(async () => {
     storeMock = {
       entities: signal(rfidTags),
-      loadAllRfidTags: vi.fn(),
+      isLoading: signal(false),
+      hasLoadError: signal(false),
+      reloadRfidTags: vi.fn(),
       deleteRfidTag: vi.fn(),
     };
 
@@ -47,7 +51,7 @@ describe('RfidTagListComponent', () => {
   });
 
   it('should load RFID tags on init', () => {
-    expect(storeMock.loadAllRfidTags).toHaveBeenCalledTimes(1);
+    expect(storeMock.reloadRfidTags).toHaveBeenCalledTimes(1);
   });
 
   it('should show the number of RFID tags in the header', () => {
@@ -63,10 +67,10 @@ describe('RfidTagListComponent', () => {
   });
 
   it('should reload RFID tags when the refresh button is clicked', () => {
-    storeMock.loadAllRfidTags.mockClear();
+    storeMock.reloadRfidTags.mockClear();
     fixture.nativeElement.querySelector('.rfid-tag-list-header button').click();
 
-    expect(storeMock.loadAllRfidTags).toHaveBeenCalledTimes(1);
+    expect(storeMock.reloadRfidTags).toHaveBeenCalledTimes(1);
   });
 
   describe('delete', () => {

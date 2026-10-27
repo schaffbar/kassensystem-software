@@ -5,6 +5,13 @@
   </button>
 </div>
 
+@if (store.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (store.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 <div class="mat-elevation-z2">
   <table mat-table class="full-width-table" [dataSource]="dataSource()" matSort>
     <!-- Columns -->

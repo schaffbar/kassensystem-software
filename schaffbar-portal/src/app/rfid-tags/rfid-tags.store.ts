@@ -1,49 +1,34 @@
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
-import { tapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withHooks, withMethods, withProps } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, pipe, tap } from 'rxjs';
+import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
 import { mutation } from '../shared/state/mutation';
-import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { DeleteRfidTagCommand, RfidTag } from './rfid-tag.model';
+import { DeleteRfidTagCommand } from './rfid-tag.model';
 import { RfidTagService } from './rfid-tags.service';
 
 export const RfidTagStore = signalStore(
   { providedIn: 'root' },
-  withEntities<RfidTag>(),
-  withRequestStatus(),
-  withProps(() => ({
-    _rfidTagService: inject(RfidTagService),
+  withProps(() => {
+    const rfidTagService = inject(RfidTagService);
+    return {
+      _rfidTagService: rfidTagService,
+      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      _rfidTagsResource: rfidTagService.rfidTagsResource(),
+    };
+  }),
+  withComputed(({ _rfidTagsResource }) => ({
+    // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
+    entities: computed(() => (_rfidTagsResource.hasValue() ? _rfidTagsResource.value() : [])),
+    isLoading: computed(() => _rfidTagsResource.isLoading()),
+    hasLoadError: computed(() => !!_rfidTagsResource.error()),
   })),
   withMethods((store) => ({
-    loadAllRfidTags: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        // delay(100), // TODO: Simulate network latency
-        exhaustMap(() => {
-          return store._rfidTagService.getRfidTags().pipe(
-            // delay(400),
-            tapResponse({
-              next: (rfidTags) => patchState(store, setAllEntities(rfidTags), setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-  })),
-  withMethods((store) => ({
+    reloadRfidTags(): void {
+      store._rfidTagsResource.reload();
+    },
     deleteRfidTag: mutation<DeleteRfidTagCommand>({
       request: (command) => store._rfidTagService.deleteRfidTag(command),
-      onSuccess: () => store.loadAllRfidTags(),
+      onSuccess: () => store._rfidTagsResource.reload(),
     }),
-  })),
-  withHooks((store) => ({
-    onInit() {
-      store.loadAllRfidTags();
-    },
   })),
 );

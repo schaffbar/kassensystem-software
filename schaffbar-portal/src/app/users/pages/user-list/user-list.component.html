@@ -10,6 +10,13 @@
   </div>
 </div>
 
+@if (store.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (store.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+
 <mat-form-field class="user-list-filter">
   <mat-label>{{ 'users.actions.search' | translate }}</mat-label>
   <input id="search" matInput placeholder="Ex. Max" [formField]="searchForm.term" (input)="onSearchInput()" />

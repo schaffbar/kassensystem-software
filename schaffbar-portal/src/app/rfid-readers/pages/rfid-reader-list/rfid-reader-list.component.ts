@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
@@ -23,6 +24,7 @@ import { RfidReaderStore } from '../../rfid-readers.store';
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSortModule,
     MatIconModule,
     TranslatePipe,
@@ -30,7 +32,7 @@ import { RfidReaderStore } from '../../rfid-readers.store';
   ],
 })
 export class RfidReaderListComponent {
-  private readonly store = inject(RfidReaderStore);
+  protected readonly store = inject(RfidReaderStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -48,11 +50,11 @@ export class RfidReaderListComponent {
   });
 
   constructor() {
-    this.store.loadAllRfidReaders();
+    this.store.reloadRfidReaders();
   }
 
   protected reloadRfidReaders(): void {
-    this.store.loadAllRfidReaders();
+    this.store.reloadRfidReaders();
   }
 
   protected navigateToDetail(rfidReader: RfidReader): void {

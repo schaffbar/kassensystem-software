@@ -1,53 +1,38 @@
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
-import { tapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withHooks, withMethods, withProps } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, pipe, tap } from 'rxjs';
+import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
 import { mutation } from '../shared/state/mutation';
-import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { CreateToolCommand, DeleteToolCommand, Tool } from './tool.model';
+import { CreateToolCommand, DeleteToolCommand } from './tool.model';
 import { ToolsService } from './tools.service';
 
 export const ToolsStore = signalStore(
   { providedIn: 'root' },
-  withEntities<Tool>(),
-  withRequestStatus(),
-  withProps(() => ({
-    _toolsService: inject(ToolsService),
+  withProps(() => {
+    const toolsService = inject(ToolsService);
+    return {
+      _toolsService: toolsService,
+      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      _toolsResource: toolsService.toolsResource(),
+    };
+  }),
+  withComputed(({ _toolsResource }) => ({
+    // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
+    entities: computed(() => (_toolsResource.hasValue() ? _toolsResource.value() : [])),
+    isLoading: computed(() => _toolsResource.isLoading()),
+    hasLoadError: computed(() => !!_toolsResource.error()),
   })),
   withMethods((store) => ({
-    loadAllTools: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        // delay(100), // TODO: Simulate network latency
-        exhaustMap(() => {
-          return store._toolsService.getTools().pipe(
-            // delay(400),
-            tapResponse({
-              next: (tools) => patchState(store, setAllEntities(tools), setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-  })),
-  withMethods((store) => ({
+    reloadTools(): void {
+      store._toolsResource.reload();
+    },
     createTool: mutation<CreateToolCommand>({
       request: (command) => store._toolsService.createTool(command),
-      onSuccess: () => store.loadAllTools(),
+      onSuccess: () => store._toolsResource.reload(),
     }),
     deleteTool: mutation<DeleteToolCommand>({
       request: (command) => store._toolsService.deleteTool(command),
-      onSuccess: () => store.loadAllTools(),
+      onSuccess: () => store._toolsResource.reload(),
     }),
-  })),
-  withHooks((store) => ({
-    onInit() {
-      store.loadAllTools();
-    },
   })),
 );

@@ -37,7 +37,14 @@ describe('UserListComponent', () => {
         provideTranslateService(),
         {
           provide: UsersStore,
-          useValue: { entities, loadAllUsers: vi.fn(), createUser: vi.fn(), deleteUser: vi.fn() },
+          useValue: {
+            entities,
+            isLoading: signal(false),
+            hasLoadError: signal(false),
+            reloadUsers: vi.fn(),
+            createUser: vi.fn(),
+            deleteUser: vi.fn(),
+          },
         },
       ],
     }).compileComponents();

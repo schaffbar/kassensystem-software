@@ -1,56 +1,30 @@
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 
-import { tapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withHooks, withMethods, withProps, withState } from '@ngrx/signals';
-import { SelectEntityId, setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, pipe, tap } from 'rxjs';
+import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
-import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { ActiveTool, ActiveUser } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 
-const selectId: SelectEntityId<ActiveUser> = (user) => user.customerId;
-
 export const DashboardStore = signalStore(
-  withEntities<ActiveUser>(),
-  withState({ activeTools: [] as ActiveTool[] }),
-  withRequestStatus(),
-  withProps(() => ({
-    _dashboardService: inject(DashboardService),
+  withProps(() => {
+    const dashboardService = inject(DashboardService);
+    return {
+      // load when the dashboard opens – replaces withEntities + rxMethods + onInit
+      _activeUsersResource: dashboardService.activeUsersResource(),
+      _activeToolsResource: dashboardService.activeToolsResource(),
+    };
+  }),
+  withComputed(({ _activeUsersResource, _activeToolsResource }) => ({
+    activeUsers: computed(() => (_activeUsersResource.hasValue() ? _activeUsersResource.value() : [])),
+    activeTools: computed(() => (_activeToolsResource.hasValue() ? _activeToolsResource.value() : [])),
+    isLoading: computed(() => _activeUsersResource.isLoading() || _activeToolsResource.isLoading()),
+    hasLoadError: computed(() => !!_activeUsersResource.error() || !!_activeToolsResource.error()),
   })),
   withMethods((store) => ({
-    loadActiveUsers: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap(() => {
-          return store._dashboardService.getActiveUsers().pipe(
-            tapResponse({
-              next: (activeUsers) => patchState(store, setAllEntities(activeUsers, { selectId }), setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    loadActiveTools: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap(() => {
-          return store._dashboardService.getActiveTools().pipe(
-            tapResponse({
-              next: (activeTools) => patchState(store, { activeTools }, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-  })),
-  withHooks((store) => ({
-    onInit() {
-      store.loadActiveUsers();
-      store.loadActiveTools();
+    reloadActiveUsers(): void {
+      store._activeUsersResource.reload();
+    },
+    reloadActiveTools(): void {
+      store._activeToolsResource.reload();
     },
   })),
 );

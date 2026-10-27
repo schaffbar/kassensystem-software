@@ -27,8 +27,12 @@ export class RfidReaderService {
   // --------------------------------------------------------------------------
   // queries
 
-  getRfidReaders(): Observable<RfidReader[]> {
-    return this.http.get<RfidReader[]>(RFID_READERS_API_URL);
+  /**
+   * Loads all RFID readers; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  rfidReadersResource(): HttpResourceRef<RfidReader[] | undefined> {
+    return httpResource<RfidReader[]>(() => RFID_READERS_API_URL);
   }
 
   /**

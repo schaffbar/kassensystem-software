@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
@@ -26,13 +27,14 @@ import { ToolsStore } from '../../tools.store';
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSortModule,
     MatIconModule,
     TranslatePipe,
   ],
 })
 export class ToolListComponent {
-  private readonly store = inject(ToolsStore);
+  protected readonly store = inject(ToolsStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -61,7 +63,7 @@ export class ToolListComponent {
   protected readonly isCreatingTool = this.store.createTool.isPending;
 
   constructor() {
-    this.store.loadAllTools();
+    this.store.reloadTools();
   }
 
   protected toolDetails(tool: Tool): void {
@@ -69,7 +71,7 @@ export class ToolListComponent {
   }
 
   protected reloadTools(): void {
-    this.store.loadAllTools();
+    this.store.reloadTools();
   }
 
   protected newToolDialog(): void {

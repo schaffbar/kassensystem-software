@@ -30,8 +30,12 @@ export class UsersService {
   // --------------------------------------------------------------------------
   // queries
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(USERS_API_URL);
+  /**
+   * Loads all users; reload with `reload()`.
+   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
+   */
+  usersResource(): HttpResourceRef<User[] | undefined> {
+    return httpResource<User[]>(() => USERS_API_URL);
   }
 
   getUsersByFilter(filter: string): Observable<User[]> {
