@@ -30,10 +30,6 @@ export class RfidTagService {
     return httpResource<RfidTag[]>(() => RFID_TAGS_API_URL);
   }
 
-  getRfidTag(id: string): Observable<RfidTag> {
-    return this.http.get<RfidTag>(`${RFID_TAGS_API_URL}/${id}`);
-  }
-
   // --------------------------------------------------------------------------
   // commands
 

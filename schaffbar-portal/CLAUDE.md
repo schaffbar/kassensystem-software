@@ -28,7 +28,9 @@ component (inputs, outputs, signals, handlers).
 
 ## Stores
 
-- Data is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the signal store.
+- Data that is displayed is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the
+  signal store. A one-off check at the time of an action (e.g. `getToolsByRfidReader` before changing the reader
+  type) stays a plain `HttpClient` observable – it is no state of the page.
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
   `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not

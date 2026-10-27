@@ -38,10 +38,6 @@ export class UsersService {
     return httpResource<User[]>(() => USERS_API_URL);
   }
 
-  getUsersByFilter(filter: string): Observable<User[]> {
-    return this.http.get<User[]>(`${USERS_API_URL}?filter=${filter}`);
-  }
-
   /**
    * Loads the user whenever the id changes; no request while the id is `null`.
    * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).

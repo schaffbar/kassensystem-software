@@ -7,7 +7,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { take } from 'rxjs';
 
 import { ToolsService } from '../../../tools/tools.service';
 import {
@@ -56,20 +55,17 @@ export class RfidReaderDetailComponent {
     if (!reader) return;
 
     if (reader.type === RfidReaderType.SwitchBox) {
-      this.toolsService
-        .getToolsByRfidReader(reader.id)
-        .pipe(take(1))
-        .subscribe((tools) => {
-          if (tools.length > 0) {
-            this.snackBar.open(
-              this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
-              this.translate.instant('shared.actions.close'),
-              { duration: 6000 },
-            );
-          } else {
-            this.openChangeTypeDialog(reader);
-          }
-        });
+      this.toolsService.getToolsByRfidReader(reader.id).subscribe((tools) => {
+        if (tools.length > 0) {
+          this.snackBar.open(
+            this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
+            this.translate.instant('shared.actions.close'),
+            { duration: 6000 },
+          );
+        } else {
+          this.openChangeTypeDialog(reader);
+        }
+      });
     } else {
       this.openChangeTypeDialog(reader);
     }
@@ -86,13 +82,10 @@ export class RfidReaderDetailComponent {
       data: { rfidReader },
     });
 
-    dialogRef
-      .afterClosed()
-      .pipe(take(1))
-      .subscribe((command) => {
-        if (command) {
-          this.detailsStore.changeRfidReaderType(command);
-        }
-      });
+    dialogRef.afterClosed().subscribe((command) => {
+      if (command) {
+        this.detailsStore.changeRfidReaderType(command);
+      }
+    });
   }
 }

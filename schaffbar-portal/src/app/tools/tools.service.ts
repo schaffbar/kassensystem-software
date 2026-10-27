@@ -52,8 +52,9 @@ export class ToolsService {
     });
   }
 
+  /** One-off check at the time of an action (no displayed state, so no resource). */
   getToolsByRfidReader(rfidReaderId: string): Observable<Tool[]> {
-    return this.http.get<Tool[]>(`${TOOLS_API_URL}?rfidReaderId=${rfidReaderId}`);
+    return this.http.get<Tool[]>(TOOLS_API_URL, { params: { rfidReaderId } });
   }
 
   // --------------------------------------------------------------------------
