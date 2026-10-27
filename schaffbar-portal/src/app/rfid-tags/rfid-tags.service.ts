@@ -4,7 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { RfidTag } from './rfid-tag.model';
+import { DeleteRfidTagCommand, RfidTag } from './rfid-tag.model';
 
 const RFID_TAGS_API_URL = `${environment.apiBaseUrl}/api/v1/rfid-tags`;
 
@@ -33,7 +33,7 @@ export class RfidTagService {
   // --------------------------------------------------------------------------
   // commands
 
-  deleteRfidTag(id: string): Observable<void> {
-    return this.http.delete<void>(`${RFID_TAGS_API_URL}/${id}`);
+  deleteRfidTag(command: DeleteRfidTagCommand): Observable<void> {
+    return this.http.delete<void>(`${RFID_TAGS_API_URL}/${command.id}`);
   }
 }

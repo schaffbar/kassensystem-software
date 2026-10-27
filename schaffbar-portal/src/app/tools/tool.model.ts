@@ -106,3 +106,7 @@ export interface SetWlanRelaisCommand {
 export interface ClearWlanRelaisCommand {
   toolId: string;
 }
+
+export interface DeleteToolCommand {
+  id: string;
+}

@@ -8,7 +8,7 @@ import { exhaustMap, pipe, tap } from 'rxjs';
 
 import { mutation } from '../shared/state/mutation';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { CreateToolCommand, Tool } from './tool.model';
+import { CreateToolCommand, DeleteToolCommand, Tool } from './tool.model';
 import { ToolsService } from './tools.service';
 
 export const ToolsStore = signalStore(
@@ -40,20 +40,10 @@ export const ToolsStore = signalStore(
       request: (command) => store._toolsService.createTool(command),
       onSuccess: () => store.loadAllTools(),
     }),
-    deleteTool: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((toolId: string) => {
-          return store._toolsService.deleteTool(toolId).pipe(
-            tapResponse({
-              next: () => patchState(store, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-            tap(() => store.loadAllTools()),
-          );
-        }),
-      ),
-    ),
+    deleteTool: mutation<DeleteToolCommand>({
+      request: (command) => store._toolsService.deleteTool(command),
+      onSuccess: () => store.loadAllTools(),
+    }),
   })),
   withHooks((store) => ({
     onInit() {

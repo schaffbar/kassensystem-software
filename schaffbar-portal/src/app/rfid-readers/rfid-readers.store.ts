@@ -6,8 +6,9 @@ import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
 
+import { mutation } from '../shared/state/mutation';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../shared/state/request-status.feature';
-import { RfidReader } from './rfid-reader.model';
+import { DeleteRfidReaderCommand, RfidReader } from './rfid-reader.model';
 import { RfidReaderService } from './rfid-readers.service';
 
 export const RfidReaderStore = signalStore(
@@ -35,20 +36,10 @@ export const RfidReaderStore = signalStore(
     ),
   })),
   withMethods((store) => ({
-    deleteRfidReader: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((rfidReaderId: string) => {
-          return store._rfidReaderService.deleteRfidReader(rfidReaderId).pipe(
-            tapResponse({
-              next: () => patchState(store, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-            tap(() => store.loadAllRfidReaders()),
-          );
-        }),
-      ),
-    ),
+    deleteRfidReader: mutation<DeleteRfidReaderCommand>({
+      request: (command) => store._rfidReaderService.deleteRfidReader(command),
+      onSuccess: () => store.loadAllRfidReaders(),
+    }),
   })),
   withHooks((store) => ({
     onInit() {

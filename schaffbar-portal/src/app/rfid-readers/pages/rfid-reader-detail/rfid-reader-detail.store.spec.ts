@@ -86,12 +86,13 @@ describe('RfidReaderDetailStore', () => {
     trigger();
     const update = httpMock.expectOne(`${url}/reader-1`);
     expect(update.request.method).toBe('PUT');
+    expect(store.updateRfidReader.isPending()).toBe(true);
     update.flush(null);
     trigger();
 
     httpMock.expectOne((req) => req.method === 'GET' && req.url === `${url}/reader-1`).flush(reader);
     await settle();
-    expect(store.isFulfilled()).toBe(true);
+    expect(store.updateRfidReader.isPending()).toBe(false);
   });
 
   it('should expose a load error', async () => {

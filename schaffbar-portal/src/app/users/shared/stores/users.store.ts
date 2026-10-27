@@ -6,8 +6,9 @@ import { setAllEntities, setEntity, withEntities } from '@ngrx/signals/entities'
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
 
+import { mutation } from '../../../shared/state/mutation';
 import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
-import { CreateUserCommand, User } from '../models/user.model';
+import { CreateUserCommand, DeleteUserCommand, User } from '../models/user.model';
 import { UsersService } from '../services/users.service';
 
 export const UsersStore = signalStore(
@@ -38,34 +39,14 @@ export const UsersStore = signalStore(
     ),
   })),
   withMethods((store) => ({
-    createUser: rxMethod<CreateUserCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: CreateUserCommand) => {
-          return store._usersService.createUser(command).pipe(
-            tapResponse({
-              next: () => patchState(store, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-            tap(() => store.loadAllUsers()),
-          );
-        }),
-      ),
-    ),
-    deleteUser: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((userId: string) => {
-          return store._usersService.deleteUser(userId).pipe(
-            tapResponse({
-              next: () => patchState(store, setFulfilled()),
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-            tap(() => store.loadAllUsers()),
-          );
-        }),
-      ),
-    ),
+    createUser: mutation<CreateUserCommand>({
+      request: (command) => store._usersService.createUser(command),
+      onSuccess: () => store.loadAllUsers(),
+    }),
+    deleteUser: mutation<DeleteUserCommand>({
+      request: (command) => store._usersService.deleteUser(command),
+      onSuccess: () => store.loadAllUsers(),
+    }),
   })),
   withHooks((store) => ({
     onInit() {

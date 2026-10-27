@@ -14,7 +14,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
-import { CreateToolCommand, Tool } from '../../tool.model';
+import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 
 @Component({
@@ -105,7 +105,8 @@ export class ToolListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.store.deleteTool(tool.id);
+        const command: DeleteToolCommand = { id: tool.id };
+        this.store.deleteTool(command);
       }
     });
   }

@@ -10,6 +10,7 @@ import {
   ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
   CreateToolCommand,
+  DeleteToolCommand,
   RemoveToolInstructorsCommand,
   SetWlanRelaisCommand,
   Tool,
@@ -92,7 +93,7 @@ export class ToolsService {
     return this.http.delete<void>(url, { ...this.httpOptions, body: { instructorIds: command.instructorIds } });
   }
 
-  deleteTool(id: string): Observable<void> {
-    return this.http.delete<void>(`${TOOLS_API_URL}/${id}`);
+  deleteTool(command: DeleteToolCommand): Observable<void> {
+    return this.http.delete<void>(`${TOOLS_API_URL}/${command.id}`);
   }
 }

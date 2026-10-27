@@ -62,6 +62,22 @@ describe('mutation', () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
 
+  it('should call onError with the error of a failed request', () => {
+    const onError = vi.fn();
+    const withOnError = TestBed.runInInjectionContext(() => mutation<string>({ request, onSuccess, onError }));
+    const error = new Error('500');
+
+    withOnError('A');
+    responses[0].error(error);
+
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(withOnError.isPending()).toBe(false);
+
+    withOnError('B');
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
   it('illustrates why the error has to be handled: without it the rxMethod stops after the first error', async () => {
     const withoutErrorHandling = TestBed.runInInjectionContext(() =>
       rxMethod<string>(pipe(exhaustMap((command) => request(command)))),

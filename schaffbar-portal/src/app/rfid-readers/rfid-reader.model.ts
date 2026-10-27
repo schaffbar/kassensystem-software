@@ -27,3 +27,7 @@ export interface ChangeRfidReaderTypeCommand {
   id: string;
   type: RfidReaderType;
 }
+
+export interface DeleteRfidReaderCommand {
+  id: string;
+}

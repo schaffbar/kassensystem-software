@@ -4,7 +4,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from './rfid-reader.model';
+import {
+  ChangeRfidReaderTypeCommand,
+  DeleteRfidReaderCommand,
+  RfidReader,
+  UpdateRfidReaderCommand,
+} from './rfid-reader.model';
 
 const RFID_READERS_API_URL = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
 
@@ -48,7 +53,7 @@ export class RfidReaderService {
     return this.http.patch<void>(`${RFID_READERS_API_URL}/${command.id}/type`, command, this.httpOptions);
   }
 
-  deleteRfidReader(id: string): Observable<void> {
-    return this.http.delete<void>(`${RFID_READERS_API_URL}/${id}`);
+  deleteRfidReader(command: DeleteRfidReaderCommand): Observable<void> {
+    return this.http.delete<void>(`${RFID_READERS_API_URL}/${command.id}`);
   }
 }

@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   CreateUserCommand,
+  DeleteUserCommand,
   UpdateUserAddressCommand,
   UpdateUserCommand,
   UpdateUserContactCommand,
@@ -77,7 +78,7 @@ export class UsersService {
     return this.http.put<void>(`${USERS_API_URL}/${command.id}/address`, command, this.httpOptions);
   }
 
-  deleteUser(id: string): Observable<void> {
-    return this.http.delete<void>(`${USERS_API_URL}/${id}`);
+  deleteUser(command: DeleteUserCommand): Observable<void> {
+    return this.http.delete<void>(`${USERS_API_URL}/${command.id}`);
   }
 }

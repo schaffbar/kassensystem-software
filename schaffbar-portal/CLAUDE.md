@@ -26,6 +26,16 @@ component (inputs, outputs, signals, handlers).
 - Form models (`ToolInfoModel`, `ContactModel`, …) stay local in the component – they describe what is edited, the
   command describes what is sent to the backend.
 
+## Stores
+
+- Data is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the signal store.
+- Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
+  (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
+  `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not
+  throw.
+- `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is kept as an example of a custom store
+  feature; it is only used by the `loadAll…` methods of the list stores.
+
 ## Forms
 
 - Every form has a `<form [formRoot]="xyzForm" (submit)="onSave()">`; `onSave()` calls

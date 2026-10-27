@@ -10,7 +10,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
-import { RfidTag } from '../../rfid-tag.model';
+import { DeleteRfidTagCommand, RfidTag } from '../../rfid-tag.model';
 import { RfidTagStore } from '../../rfid-tags.store';
 
 @Component({
@@ -64,7 +64,8 @@ export class RfidTagListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.store.deleteRfidTag(rfidTag.id);
+        const command: DeleteRfidTagCommand = { id: rfidTag.id };
+        this.store.deleteRfidTag(command);
       }
     });
   }

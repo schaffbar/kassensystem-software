@@ -1,11 +1,8 @@
 import { computed, inject } from '@angular/core';
 
-import { tapResponse } from '@ngrx/operators';
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, pipe, tap } from 'rxjs';
 
-import { setError, setFulfilled, setPending, withRequestStatus } from '../../../shared/state/request-status.feature';
+import { mutation } from '../../../shared/state/mutation';
 import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../shared/models/rfid-tag-assignment.model';
 import {
   PauseToolCertificationCommand,
@@ -25,7 +22,6 @@ interface UserDetailState {
 
 export const UserDetailStore = signalStore(
   withState<UserDetailState>({ userId: null }),
-  withRequestStatus(),
   withProps((store) => {
     const usersService = inject(UsersService);
     const assignmentService = inject(RfidTagAssignmentService);
@@ -79,158 +75,50 @@ export const UserDetailStore = signalStore(
   })),
   // mutations of the user – reload the user on success
   withMethods((store) => ({
-    updateUser: rxMethod<UpdateUserCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: UpdateUserCommand) => {
-          return store._usersService.updateUser(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._userResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    updateUserContact: rxMethod<UpdateUserContactCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: UpdateUserContactCommand) => {
-          return store._usersService.updateUserContact(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._userResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    updateUserAddress: rxMethod<UpdateUserAddressCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: UpdateUserAddressCommand) => {
-          return store._usersService.updateUserAddress(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._userResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    updateUser: mutation<UpdateUserCommand>({
+      request: (command) => store._usersService.updateUser(command),
+      onSuccess: () => store._userResource.reload(),
+    }),
+    updateUserContact: mutation<UpdateUserContactCommand>({
+      request: (command) => store._usersService.updateUserContact(command),
+      onSuccess: () => store._userResource.reload(),
+    }),
+    updateUserAddress: mutation<UpdateUserAddressCommand>({
+      request: (command) => store._usersService.updateUserAddress(command),
+      onSuccess: () => store._userResource.reload(),
+    }),
   })),
   // mutations of the RFID tag assignment – reload the assignment on success
   withMethods((store) => ({
-    assignRfidTag: rxMethod<AssignRfidTagCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: AssignRfidTagCommand) => {
-          return store._assignmentService.assignRfidTag(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._assignmentResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    unassignRfidTag: rxMethod<UnassignRfidTagCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: UnassignRfidTagCommand) => {
-          return store._assignmentService.unassignRfidTag(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._assignmentResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    assignRfidTag: mutation<AssignRfidTagCommand>({
+      request: (command) => store._assignmentService.assignRfidTag(command),
+      onSuccess: () => store._assignmentResource.reload(),
+    }),
+    unassignRfidTag: mutation<UnassignRfidTagCommand>({
+      request: (command) => store._assignmentService.unassignRfidTag(command),
+      onSuccess: () => store._assignmentResource.reload(),
+    }),
   })),
   // mutations of the open session – reload the session on success
   withMethods((store) => ({
-    closeSession: rxMethod<CloseWorkshopSessionCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: CloseWorkshopSessionCommand) => {
-          return store._workshopSessionService.closeWorkshopSession(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._openSessionResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    closeSession: mutation<CloseWorkshopSessionCommand>({
+      request: (command) => store._workshopSessionService.closeWorkshopSession(command),
+      onSuccess: () => store._openSessionResource.reload(),
+    }),
   })),
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
-    pauseCertification: rxMethod<PauseToolCertificationCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: PauseToolCertificationCommand) => {
-          return store._toolCertificationService.pause(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._certificationsResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    reactivateCertification: rxMethod<ReactivateToolCertificationCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: ReactivateToolCertificationCommand) => {
-          return store._toolCertificationService.reactivate(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._certificationsResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
-    revokeCertification: rxMethod<RevokeToolCertificationCommand>(
-      pipe(
-        tap(() => patchState(store, setPending())),
-        exhaustMap((command: RevokeToolCertificationCommand) => {
-          return store._toolCertificationService.revoke(command).pipe(
-            tapResponse({
-              next: () => {
-                patchState(store, setFulfilled());
-                store._certificationsResource.reload();
-              },
-              error: (error: { message: string }) => patchState(store, setError(error.message)),
-            }),
-          );
-        }),
-      ),
-    ),
+    pauseCertification: mutation<PauseToolCertificationCommand>({
+      request: (command) => store._toolCertificationService.pause(command),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
+    reactivateCertification: mutation<ReactivateToolCertificationCommand>({
+      request: (command) => store._toolCertificationService.reactivate(command),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
+    revokeCertification: mutation<RevokeToolCertificationCommand>({
+      request: (command) => store._toolCertificationService.revoke(command),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
   })),
 );

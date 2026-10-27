@@ -15,7 +15,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
 import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
-import { CreateUserCommand, User } from '../../shared/models/user.model';
+import { CreateUserCommand, DeleteUserCommand, User } from '../../shared/models/user.model';
 import { UsersStore } from '../../shared/stores/users.store';
 
 @Component({
@@ -111,7 +111,8 @@ export class UserListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.store.deleteUser(user.id);
+        const command: DeleteUserCommand = { id: user.id };
+        this.store.deleteUser(command);
       }
     });
   }

@@ -260,6 +260,8 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
   - [x] `tool-rfid-reader-assignment`: `ClearRfidReaderCommand` statt `string`
   - [x] `new-user-form` / `update-user-form`: `CreateUserCommand` / `UpdateUserCommand` statt Formularwert
   - [x] außerdem `user-detail`: `AssignRfidTagCommand`, `UnassignRfidTagCommand`, `CloseWorkshopSessionCommand`
+  - [x] Löschen in den Listen: `DeleteToolCommand`, `DeleteUserCommand`, `DeleteRfidReaderCommand`,
+        `DeleteRfidTagCommand` (statt `string`) – damit nehmen alle Mutationen einen Command
 - [x] Layout-Klassen vereinheitlichen: `.row`, `.col`, `.full-width` (und `.actions`/`.wlan-relais-actions`) sind in
       jedem Formular-SCSS kopiert, mit abweichenden Werten (`.row` mal `margin-top: 10px`, mal `gap: 1rem` +
       `margin-bottom`; `.col` mal mit, mal ohne `margin-right: 20px`; im WLAN-Relais `gap` **und** `margin-right` →
@@ -310,6 +312,11 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
       Ladefehler. **Behobener Fehler:** `assignFixedRfidTag(this.id)`, `unassignRfidTag(this.id)`,
       `closeSession(this.userId)` übergaben das *Signal* an eine `rxMethod` – die hätte bei jeder späteren Änderung
       der id erneut ausgelöst. Jetzt Commands mit Werten. Test: [user-detail.store.spec.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.spec.ts)
+- [x] Mutationen vereinheitlicht: [mutation()](../schaffbar-portal/src/app/shared/state/mutation.ts) –
+      `mutation<Command>({ request, onSuccess, onError? })` mit eigenem `isPending` je Aktion; 26 Methoden in 7 Stores
+      umgestellt (−300 Zeilen). `withRequestStatus` bleibt als Beispiel für ein Store-Feature (nur noch `loadAll…`
+      der Listen-Stores). Beispiel `isPending`: „Tool hinzufügen“ ist während des Anlegens deaktiviert
+- [x] Fehler-Interceptor mit Snackbar: [error.interceptor.ts](../schaffbar-portal/src/app/core/http/error.interceptor.ts)
 - [ ] Optional: Dashboard (2 Resources). Dazu `getDuration()` im Template durch ein `now`-Signal (Intervall) +
       `computed` ersetzen – die Dauer aktualisiert sich heute nie.
 - [ ] Optional/später: Listen-Stores. Sie werden geteilt (Dashboard, Tool-Detail, User-Detail) und können vorerst

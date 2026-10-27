@@ -60,3 +60,7 @@ export interface UpdateUserContactCommand {
 export interface UpdateUserAddressCommand extends UserAddress {
   id: string;
 }
+
+export interface DeleteUserCommand {
+  id: string;
+}
