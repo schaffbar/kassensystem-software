@@ -19,8 +19,8 @@
       }
     </mat-list>
     <button
-      mat-stroked-button
-      color="warn"
+      class="danger-button"
+      matButton="outlined"
       [disabled]="selectedInstructorIdsToRemove().size === 0"
       (click)="removeInstructors()">
       <mat-icon>person_remove</mat-icon>
@@ -53,7 +53,7 @@
       }
     </mat-chip-set>
 
-    <button mat-flat-button color="primary" (click)="addInstructors()">
+    <button matButton="filled" (click)="addInstructors()">
       <mat-icon>person_add</mat-icon>
       {{ 'tools.pages.toolDetails.instructors.add' | translate }}
     </button>

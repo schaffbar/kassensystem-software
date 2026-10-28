@@ -1,12 +1,12 @@
 <div class="user-list-header">
   <div class="user-list-header__title">
     <h1>{{ 'users.title' | translate }} ({{ usersCount() }})</h1>
-    <button matIconButton color="primary" (click)="reloadUsers()">
+    <button matIconButton (click)="reloadUsers()">
       <mat-icon>refresh</mat-icon>
     </button>
   </div>
   <div class="user-list-header__actions">
-    <button mat-flat-button color="primary" (click)="newUserDialog()">{{ 'users.actions.addUser' | translate }}</button>
+    <button matButton="filled" (click)="newUserDialog()">{{ 'users.actions.addUser' | translate }}</button>
   </div>
 </div>
 
@@ -49,7 +49,7 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'shared.table.actionsColumn' | translate }}</th>
       <td mat-cell *matCellDef="let row">
-        <button mat-icon-button type="button" color="warn" (click)="deleteUserDialog($event, row)">
+        <button class="danger-button" matIconButton type="button" (click)="deleteUserDialog($event, row)">
           <mat-icon>delete</mat-icon>
         </button>
       </td>

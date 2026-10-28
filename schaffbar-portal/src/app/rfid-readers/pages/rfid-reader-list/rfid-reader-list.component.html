@@ -1,6 +1,6 @@
 <div class="rfid-reader-list-header">
   <h1>{{ 'rfidReaders.title' | translate }} ({{ rfidReadersCount() }})</h1>
-  <button matIconButton color="primary" (click)="reloadRfidReaders()">
+  <button matIconButton (click)="reloadRfidReaders()">
     <mat-icon>refresh</mat-icon>
   </button>
 </div>
@@ -39,7 +39,7 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'shared.table.actionsColumn' | translate }}</th>
       <td mat-cell *matCellDef="let row">
-        <button mat-icon-button type="button" color="warn" (click)="deleteRfidReaderDialog($event, row)">
+        <button class="danger-button" matIconButton type="button" (click)="deleteRfidReaderDialog($event, row)">
           <mat-icon>delete</mat-icon>
         </button>
       </td>

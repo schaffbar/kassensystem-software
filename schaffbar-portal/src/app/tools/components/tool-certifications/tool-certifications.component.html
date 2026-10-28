@@ -54,8 +54,7 @@
       }
 
       <button
-        mat-flat-button
-        color="primary"
+        matButton="filled"
         [disabled]="selectedUsers().length === 0 || !selectedCertifier()"
         (click)="onSubmitBatch()">
         {{ 'tools.pages.toolDetails.certifications.batchCreate.submit' | translate }}
@@ -95,8 +94,8 @@
               <th mat-header-cell *matHeaderCellDef>{{ 'shared.table.actionsColumn' | translate }}</th>
               <td mat-cell *matCellDef="let cert">
                 <button
-                  mat-icon-button
-                  color="warn"
+                  class="danger-button"
+                  matIconButton
                   [title]="'users.actions.toolCertifications.delete' | translate"
                   (click)="onDelete(cert)">
                   <mat-icon>delete</mat-icon>

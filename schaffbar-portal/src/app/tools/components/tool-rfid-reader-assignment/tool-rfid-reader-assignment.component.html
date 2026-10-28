@@ -2,9 +2,9 @@
   {{ 'tools.pages.toolDetails.headers.rfidReaderAssignment' | translate }}
   @if (tool().rfidReaderId) {
     <button
-      mat-icon-button
+      class="danger-button"
+      matIconButton
       type="button"
-      color="warn"
       (click)="onClear()"
       [matTooltip]="'tools.tooltips.clearRfidReader' | translate">
       <mat-icon>link_off</mat-icon>
@@ -40,10 +40,10 @@
 
   @if (isDirty() && rfidReaderForm().valid()) {
     <div class="form-actions">
-      <button mat-stroked-button type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="onCancel()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
-      <button mat-flat-button color="primary" type="submit">
+      <button matButton="filled" type="submit">
         {{ 'shared.dialogs.actions.edit.confirm' | translate }}
       </button>
     </div>

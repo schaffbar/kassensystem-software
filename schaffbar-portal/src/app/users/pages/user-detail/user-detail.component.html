@@ -13,10 +13,10 @@
     <div class="user-detail-header-title">
       <div class="user-detail-header-title-actions">
         <h1>{{ detailsStore.userName() }}</h1>
-        <button mat-icon-button (click)="updateUser()">
+        <button matIconButton (click)="updateUser()">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button (click)="reloadUser()">
+        <button matIconButton (click)="reloadUser()">
           <mat-icon>refresh</mat-icon>
         </button>
       </div>
@@ -59,7 +59,7 @@
       @case (RfidTagAssignmentStatus.WaitingForAssignment) {}
       @case (RfidTagAssignmentStatus.Assigned) {
         <div class="user-detail-header-actions">
-          <button mat-flat-button color="warn" (click)="unassignRfidTag()">
+          <button class="danger-button" matButton="filled" (click)="unassignRfidTag()">
             {{ 'users.actions.unassignRfidTag' | translate }}
           </button>
         </div>
@@ -67,10 +67,10 @@
       @case (RfidTagAssignmentStatus.WaitingForUnassignment) {}
       @case (RfidTagAssignmentStatus.Unassigned) {
         <div class="user-detail-header-actions">
-          <button mat-flat-button color="primary" (click)="assignTemporaryRfidTag()">
+          <button matButton="filled" (click)="assignTemporaryRfidTag()">
             {{ 'users.actions.assignTempRfidTag' | translate }}
           </button>
-          <button mat-flat-button color="primary" (click)="assignFixedRfidTag()">
+          <button matButton="filled" (click)="assignFixedRfidTag()">
             {{ 'users.actions.assignFixedRfidTag' | translate }}
           </button>
         </div>
