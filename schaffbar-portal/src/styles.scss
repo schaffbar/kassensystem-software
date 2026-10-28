@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 /* You can add global styles to this file, and also import other style files */
 
 html,
@@ -10,13 +12,36 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
-.mat-mdc-raised-button,
-.mat-mdc-button,
-.mat-mdc-unelevated-button,
-.mat-mdc-outlined-button,
-.mat-mdc-fab,
-.mat-mdc-mini-fab {
-  border-radius: 5px !important; // or 0 for sharp corners
+html {
+  // buttons with slightly rounded corners instead of the M3 pill shape
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 5px,
+      outlined-container-shape: 5px,
+      protected-container-shape: 5px,
+      text-container-shape: 5px,
+      tonal-container-shape: 5px,
+    )
+  );
+}
+
+// destructive actions (delete, revoke, pause, unassign): error color instead of primary – `color="warn"` has no
+// effect in the M3 theme
+.danger-button {
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--mat-sys-error),
+      filled-label-text-color: var(--mat-sys-on-error),
+      outlined-label-text-color: var(--mat-sys-error),
+      outlined-outline-color: var(--mat-sys-error),
+      text-label-text-color: var(--mat-sys-error),
+    )
+  );
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--mat-sys-error),
+    )
+  );
 }
 
 // form layout: a row of fields, the columns share the width equally

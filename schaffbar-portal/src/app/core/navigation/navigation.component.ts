@@ -12,6 +12,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { TranslatePipe } from '@ngx-translate/core';
 import { map } from 'rxjs';
 
+import { ROUTE } from '../../app.routes';
+
 export interface MenuItem {
   icon: string;
   name: string;
@@ -37,11 +39,11 @@ export class NavigationComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   protected readonly menuItems = signal<MenuItem[]>([
-    { icon: 'home', name: 'sidebar.dashboard', route: 'dashboard' },
-    { icon: 'people', name: 'sidebar.users', route: 'users' },
-    { icon: 'construction', name: 'sidebar.tools', route: 'tools' },
-    { icon: 'memory', name: 'sidebar.rfidTags', route: 'rfid-tags' },
-    { icon: 'developer_board', name: 'sidebar.rfidReaders', route: 'rfid-readers' },
+    { icon: 'home', name: 'sidebar.dashboard', route: ROUTE.DASHBOARD },
+    { icon: 'people', name: 'sidebar.users', route: ROUTE.USERS },
+    { icon: 'construction', name: 'sidebar.tools', route: ROUTE.TOOLS },
+    { icon: 'memory', name: 'sidebar.rfidTags', route: ROUTE.RFID_TAGS },
+    { icon: 'developer_board', name: 'sidebar.rfidReaders', route: ROUTE.RFID_READERS },
   ]);
 
   protected readonly isHandset = toSignal(

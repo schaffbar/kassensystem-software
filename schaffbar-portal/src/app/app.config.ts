@@ -8,7 +8,7 @@ import {
   provideCheckNoChangesConfig,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
@@ -17,6 +17,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { errorInterceptor } from './core/http/error.interceptor';
+import { TranslatedTitleStrategy } from './core/routing/translated-title.strategy';
 import { provideDateAdapter } from './shared/date/provide-date-adapter';
 
 registerLocaleData(localeDe);
@@ -25,6 +26,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
+    { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
     provideHttpClient(withInterceptors([errorInterceptor])),
     provideDateAdapter(),
     provideTranslateService({

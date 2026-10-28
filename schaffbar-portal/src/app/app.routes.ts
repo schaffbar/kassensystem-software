@@ -1,56 +1,60 @@
 import { Routes } from '@angular/router';
 
-import { NotFoundComponent } from './core/not-found/not-found.component';
-import { DashboardComponent } from './dashboard/pages/dashboard/dashboard.component';
-import { RfidReaderDetailComponent } from './rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.component';
-import { RfidReaderListComponent } from './rfid-readers/pages/rfid-reader-list/rfid-reader-list.component';
-import { RfidTagListComponent } from './rfid-tags/pages/rfid-tag-list/rfid-tag-list.component';
-import { ToolDetailComponent } from './tools/pages/tool-detail/tool-detail.component';
-import { ToolListComponent } from './tools/pages/tool-list/tool-list.component';
-import { UserDetailComponent } from './users/pages/user-detail/user-detail.component';
-import { UserListComponent } from './users/pages/user-list/user-list.component';
-
 export const ROUTE = {
   DASHBOARD: 'dashboard',
-  ABOUT: 'about',
   USERS: 'users',
   TOOLS: 'tools',
   RFID_READERS: 'rfid-readers',
   RFID_TAGS: 'rfid-tags',
-};
+} as const;
+
+// route titles are translation keys, translated by TranslatedTitleStrategy
 
 export const routes: Routes = [
   {
     path: ROUTE.DASHBOARD,
-    component: DashboardComponent,
+    title: 'sidebar.dashboard',
+    loadComponent: () => import('./dashboard/pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: ROUTE.USERS,
-    component: UserListComponent,
+    title: 'sidebar.users',
+    loadComponent: () => import('./users/pages/user-list/user-list.component').then((m) => m.UserListComponent),
   },
   {
     path: `${ROUTE.USERS}/:id`,
-    component: UserDetailComponent,
+    title: 'sidebar.users',
+    loadComponent: () => import('./users/pages/user-detail/user-detail.component').then((m) => m.UserDetailComponent),
   },
   {
     path: ROUTE.TOOLS,
-    component: ToolListComponent,
+    title: 'sidebar.tools',
+    loadComponent: () => import('./tools/pages/tool-list/tool-list.component').then((m) => m.ToolListComponent),
   },
   {
     path: `${ROUTE.TOOLS}/:id`,
-    component: ToolDetailComponent,
+    title: 'sidebar.tools',
+    loadComponent: () => import('./tools/pages/tool-detail/tool-detail.component').then((m) => m.ToolDetailComponent),
   },
   {
     path: ROUTE.RFID_READERS,
-    component: RfidReaderListComponent,
+    title: 'sidebar.rfidReaders',
+    loadComponent: () =>
+      import('./rfid-readers/pages/rfid-reader-list/rfid-reader-list.component').then((m) => m.RfidReaderListComponent),
   },
   {
     path: `${ROUTE.RFID_READERS}/:id`,
-    component: RfidReaderDetailComponent,
+    title: 'sidebar.rfidReaders',
+    loadComponent: () =>
+      import('./rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.component').then(
+        (m) => m.RfidReaderDetailComponent,
+      ),
   },
   {
     path: ROUTE.RFID_TAGS,
-    component: RfidTagListComponent,
+    title: 'sidebar.rfidTags',
+    loadComponent: () =>
+      import('./rfid-tags/pages/rfid-tag-list/rfid-tag-list.component').then((m) => m.RfidTagListComponent),
   },
   {
     path: '',
@@ -59,6 +63,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    component: NotFoundComponent,
+    title: 'notFound.title',
+    loadComponent: () => import('./core/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 ];

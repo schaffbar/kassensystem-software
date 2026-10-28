@@ -370,5 +370,8 @@
         "socketName": "Socket-Name"
       }
     }
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden"
   }
 }
