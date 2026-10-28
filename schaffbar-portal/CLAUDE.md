@@ -1,5 +1,13 @@
 # Code conventions
 
+## Services
+
+- App-wide services are declared with `@Service()` (Angular 22), not `@Injectable({ providedIn: 'root' })`.
+  Dependencies come from `inject()` – `@Service` classes cannot use constructor injection.
+- A service that must not be provided automatically (only via a `providers` list) uses
+  `@Service({ autoProvided: false })`.
+- Signal stores keep `signalStore({ providedIn: 'root' }, …)` – that is NgRx, not a decorator.
+
 ## Helper functions vs. private methods
 
 - **Pure functions** (no `this`, no signals, no injected services – the result depends only on the parameters) are
@@ -60,6 +68,16 @@ component (inputs, outputs, signals, handlers).
   (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
   anyway. A date field in a form model is `Date | null`; ISO strings from the backend are converted with `parseISO`.
 
+## Buttons
+
+- Material buttons use the attribute syntax of the current API: `matButton="filled"` (main action, e.g. save),
+  `matButton="outlined"` (secondary action, e.g. cancel), `matIconButton` – not `mat-flat-button`,
+  `mat-stroked-button`, `mat-icon-button`.
+- No `color="primary|warn"` – it has no effect in the M3 theme. Destructive actions (delete, revoke, pause, unassign)
+  get the global class `danger-button` (`src/styles.scss`), which works for filled, outlined, text and icon buttons.
+- Look and feel is changed with `mat.button-overrides(...)` / `mat.icon-button-overrides(...)`, not with
+  `.mat-mdc-*` selectors and `!important`.
+
 ## Dialogs
 
 - **Cancel closes without a result** (`undefined`), like Escape or a backdrop click:
@@ -79,6 +97,9 @@ component (inputs, outputs, signals, handlers).
     });
   ```
 
+- **Delete confirmations** go through `ConfirmDialogService.confirm({ title, entity?, message })` – it opens
+  `ConfirmDeleteComponent` with the common options and emits `true`/`false`. `title`, `message` (and `confirmLabel`)
+  are translation keys, `entity` is plain text. Don't open `ConfirmDeleteComponent` directly.
 - **Button order**: cancel first, then save/confirm (confirming action on the right).
 - **Focus**: form dialogs have no `cdkFocusInitial` – the dialog focuses the first field, so Enter saves.
   Exception: destructive confirmations (delete) keep `cdkFocusInitial` on cancel, so an accidental Enter does nothing.

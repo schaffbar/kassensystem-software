@@ -6,7 +6,7 @@ import { mutation } from '../shared/state/mutation';
 import { DeleteRfidTagCommand } from './rfid-tag.model';
 import { RfidTagService } from './rfid-tags.service';
 
-export const RfidTagStore = signalStore(
+export const RfidTagsStore = signalStore(
   { providedIn: 'root' },
   withProps(() => {
     const rfidTagService = inject(RfidTagService);

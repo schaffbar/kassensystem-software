@@ -11,7 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { DeleteRfidTagCommand, RfidTag } from '../../rfid-tag.model';
-import { RfidTagStore } from '../../rfid-tags.store';
+import { RfidTagsStore } from '../../rfid-tags.store';
 
 @Component({
   selector: 'schbar-rfid-tag-list',
@@ -28,7 +28,7 @@ import { RfidTagStore } from '../../rfid-tags.store';
   ],
 })
 export class RfidTagListComponent {
-  protected readonly store = inject(RfidTagStore);
+  protected readonly store = inject(RfidTagsStore);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   private readonly paginator = viewChild(MatPaginator);

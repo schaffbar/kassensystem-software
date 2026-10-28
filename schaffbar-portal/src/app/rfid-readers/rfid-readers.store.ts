@@ -6,7 +6,7 @@ import { mutation } from '../shared/state/mutation';
 import { DeleteRfidReaderCommand } from './rfid-reader.model';
 import { RfidReaderService } from './rfid-readers.service';
 
-export const RfidReaderStore = signalStore(
+export const RfidReadersStore = signalStore(
   { providedIn: 'root' },
   withProps(() => {
     const rfidReaderService = inject(RfidReaderService);

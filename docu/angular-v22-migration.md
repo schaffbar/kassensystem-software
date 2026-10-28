@@ -38,7 +38,7 @@ Wichtig zu wissen:
 
 Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
 
-- [x] **Doppelte Store-Instanzen entfernen.** `ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore` sind
+- [x] **Doppelte Store-Instanzen entfernen.** `ToolsStore`, `UsersStore`, `RfidReadersStore`, `RfidTagsStore` sind
       `providedIn: 'root'` _und_ zusätzlich in den `providers` der Listen-Komponenten eingetragen. Folge: zwei
       Instanzen, doppelte Requests, ein in der Liste angelegter User fehlt im Root-`UsersStore` (den das Tool-Detail
       nutzt). Beantwortet auch den Punkt in `TODO.md` („tools store … Is it the same instance?" – nein).
@@ -50,9 +50,9 @@ Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
         (Spec anpassen: Mock dann über `TestBed`-`providers` statt `overrideComponent`)
   - [x] [user-detail.component.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.component.ts) –
         `RfidTagAssignmentService` aus `providers` entfernen (ist schon `providedIn: 'root'`)
-      Hinweis: Die Listen rufen jetzt im Konstruktor `load…()` auf, damit sie beim Öffnen weiterhin frische Daten
-      zeigen (vorher passierte das implizit über die neue Store-Instanz). Wegen `exhaustMap` bleibt es beim ersten
-      Besuch bei einem Request.
+        Hinweis: Die Listen rufen jetzt im Konstruktor `load…()` auf, damit sie beim Öffnen weiterhin frische Daten
+        zeigen (vorher passierte das implizit über die neue Store-Instanz). Wegen `exhaustMap` bleibt es beim ersten
+        Besuch bei einem Request.
 - [x] **Im selben Schritt: `@ViewChild` → `viewChild()`** in den 4 Listen (`MatPaginator`, `MatSort`).
       Bewusst nicht `.required()`: das `computed` wird schon vor dem ersten Rendern der Tabelle gelesen und würde
       dann werfen. Mit `viewChild()` rechnet es einfach neu, sobald Paginator/Sort da sind.
@@ -310,7 +310,7 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
       (4 Resources: User, RFID-Assignment, Session, Zertifizierungen). RFID-Zuweisung per `parse` (erstes Element
       der Liste oder `null`); offene Session: Backend antwortet ohne Session mit 200 + leerem Body → `null`, kein
       Ladefehler. **Behobener Fehler:** `assignFixedRfidTag(this.id)`, `unassignRfidTag(this.id)`,
-      `closeSession(this.userId)` übergaben das *Signal* an eine `rxMethod` – die hätte bei jeder späteren Änderung
+      `closeSession(this.userId)` übergaben das _Signal_ an eine `rxMethod` – die hätte bei jeder späteren Änderung
       der id erneut ausgelöst. Jetzt Commands mit Werten. Test: [user-detail.store.spec.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.spec.ts)
 - [x] Mutationen vereinheitlicht: [mutation()](../schaffbar-portal/src/app/shared/state/mutation.ts) –
       `mutation<Command>({ request, onSuccess, onError? })` mit eigenem `isPending` je Aktion; 26 Methoden in 7 Stores
@@ -320,7 +320,7 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
 - [x] Dashboard (2 Resources: aktive User, aktive Tools); `activeUsers()` statt `entities()`
 - [x] `getDuration()` im Dashboard-Template durch ein `now`-Signal (`toSignal(interval(60s))`) + `computed` ersetzt –
       die Dauer zählt jetzt minütlich weiter. Test: [active-users-widget.component.spec.ts](../schaffbar-portal/src/app/dashboard/components/active-users-widget/active-users-widget.component.spec.ts)
-- [x] Listen-Stores (`ToolsStore`, `UsersStore`, `RfidReaderStore`, `RfidTagStore`): Resource statt `withEntities` +
+- [x] Listen-Stores (`ToolsStore`, `UsersStore`, `RfidReadersStore`, `RfidTagsStore`): Resource statt `withEntities` +
       `rxMethod` + `onInit`; `loadAll…()` → `reload…()`; Listen mit Fortschrittsbalken und Ladefehler-Hinweis.
       `withRequestStatus` wird danach nirgends mehr benutzt (bleibt als Beispiel). Test: [tools.store.spec.ts](../schaffbar-portal/src/app/tools/tools.store.spec.ts)
 
@@ -329,139 +329,201 @@ Detail-Store ganz auflösen und die Resources in der Page-Komponente halten (bei
 
 ## Schritt 7 – Routing und HTTP
 
-- [ ] [app.routes.ts](../schaffbar-portal/src/app/app.routes.ts): Lazy Loading per `loadComponent` bzw.
-      `loadChildren` pro Feature
-- [ ] `title` pro Route setzen
-- [ ] Menü in `navigation.component.ts` nutzt `ROUTE`-Konstanten statt Strings; ungenutztes `ROUTE.ABOUT` entfernen
-- [ ] Query-Strings per `{ params: { ... } }` statt String-Verkettung (`?toolId=${id}`, `?filter=${filter}`,
-      `?customer-id=${userId}`, `?rfidReaderId=...`)
-- [ ] `Content-Type: application/json`-Header in den Services entfernen (setzt `HttpClient` selbst); Authorization
+- [x] [app.routes.ts](../schaffbar-portal/src/app/app.routes.ts): Lazy Loading per `loadComponent` bzw.
+      `loadChildren` pro Feature – alle Routen per `loadComponent` (Migration `route-lazy-loading`); Initial-Bundle
+      1,29 MB → 824 kB
+- [x] `title` pro Route setzen – Übersetzungsschlüssel, `TranslatedTitleStrategy` zeigt „Werkzeuge · Schaffbar“
+- [x] Menü in `navigation.component.ts` nutzt `ROUTE`-Konstanten statt Strings; ungenutztes `ROUTE.ABOUT` entfernen
+- [x] Query-Strings per `{ params: { ... } }` statt String-Verkettung (`?toolId=${id}`, `?filter=${filter}`,
+      `?customer-id=${userId}`, `?rfidReaderId=...`) – größtenteils schon durch die Resources (Schritt 6),
+      `getToolsByRfidReader` per `params`, `getUsersByFilter` gelöscht
+- [x] `Content-Type: application/json`-Header in den Services entfernen (setzt `HttpClient` selbst); Authorization
       später als Interceptor
-- [ ] `readonly http` → `private readonly http`
+- [x] `readonly http` → `private readonly http`
 - [x] `UsersService`: `DatePipe` → `format()` aus `date-fns` (vorgezogen: der injizierte `DatePipe` brach die
       Store-Tests); `DatePipe` und `TranslatePipe` aus den Root-Providern in `app.config.ts` entfernt
 - [x] `RfidTagAssignmentService`: Tippfehler `getRfidTagAssignmetByUser`; Rückgabetyp
       `Observable<RfidTagAssignment | null>` – erledigt durch `rfidTagAssignmentResource` (Schritt 6)
-- [ ] doppelten `ConfirmDelete`-Dialogcode (8×) in einen Helper/Service ziehen
+- [x] doppelten `ConfirmDelete`-Dialogcode (8×) in einen Helper/Service ziehen
       (`confirm(data): Observable<boolean>`) und dabei typisiert öffnen:
-      `dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>`
-- [ ] Optional: Material-Buttons vereinheitlichen (`mat-icon-button` vs. `matIconButton`; `color="primary|warn"`
-      hat im M3-Theme `azure-blue` kaum Wirkung)
+      `dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>` – `ConfirmDialogService`, 9 Aufrufer;
+      Titel/Text sind jetzt Übersetzungsschlüssel, der Dialog übersetzt selbst
+- [x] Optional: Material-Buttons vereinheitlichen (`mat-icon-button` vs. `matIconButton`; `color="primary|warn"`
+      hat im M3-Theme `azure-blue` kaum Wirkung) – überall `matButton="filled|outlined"` / `matIconButton`; `color`
+      entfernt, `warn` → globale Klasse `danger-button`; Eckenradius per `mat.button-overrides` statt `!important`
+- [x] `@Injectable({ providedIn: 'root' })` → `@Service()` (neu in Angular 22) für alle 10 Services inkl.
+      `ConfirmDialogService` und `TranslatedTitleStrategy`
 
 ## Schritt 8 – Abschluss
 
-- [ ] `ng build --configuration production`, Bundle-Größe vor/nach Lazy Loading vergleichen
-- [ ] ESLint-Regeln aus Schritt 2 auf `error`
-- [ ] Specs für die umgebauten Teile (heute gibt es nur `rfid-tag-list.component.spec.ts`)
-- [ ] `TODO.md`: „angular 22 - migrate to new forms" und Store-Instanz-Fragen abhaken
+- [x] `ng build --configuration production`, Bundle-Größe vor/nach Lazy Loading vergleichen:
+
+  |                       | vorher (raw / transfer) | nachher (raw / transfer)                   |
+  | --------------------- | ----------------------- | ------------------------------------------ |
+  | Initial-Bundle        | 1,29 MB / 235 kB        | 824 kB / 183 kB                            |
+  | Lazy Chunks pro Seite | –                       | z. B. Tool-Detail 57 kB, User-Detail 39 kB |
+
+- [x] ESLint-Regeln aus Schritt 2 auf `error` (`prefer-signals`, `prefer-output-readonly`,
+      `template/prefer-self-closing-tags`, `template/prefer-control-flow`) – Lint ist sauber
+- [x] Specs für die umgebauten Teile: alle Formulare, alle Stores (Listen, Details, Dashboard), `mutation()`,
+      Fehler-Interceptor, `TranslatedTitleStrategy`, `ConfirmDialogService` + Dialog, `FieldError`, Status-Chip,
+      Dashboard-Dauer – 145 Tests (vorher 1 Spec-Datei).
+      Ohne Spec bleiben reine Darstellungs- und Seitenkomponenten (Navigation, Listen-/Detailseiten,
+      Zertifizierungs- und Ausbilder-Tabellen, Usage-Summaries) – Kandidaten für später
+- [x] `TODO.md`: „angular 22 - migrate to new forms“ und „dashboard store - withEntities vs withState“ entfernt
+      (erledigt bzw. durch `httpResource` überholt)
+
+Offene Punkte, die bei der Migration aufgefallen sind (stehen in `TODO.md` bzw. hier):
+
+- `WaitingForUnassignment` zeigt im User-Header „Kein RFID-Tag“ – gewollt? (TODO.md)
+- Fachliche Backend-Fehler kommen als `500` – Problems API (TODO.md, Gruppe „Fehlerbehandlung“)
+- Erfolgsmeldungen (Snackbar nach dem Speichern) fehlen noch (TODO.md)
+- ~~Benennung: `RfidReaderStore` / `RfidTagStore` (Singular) vs. `ToolsStore` / `UsersStore` (Plural)~~ – umbenannt in
+  `RfidReadersStore` / `RfidTagsStore`
 
 ---
 
 ## Anhang A – Muster: Inline-Edit-Formular mit Signal Forms
 
+Vollständig: [user-contact.component.ts](../schaffbar-portal/src/app/users/components/user-contact/user-contact.component.ts)
+
 ```ts
-import { Component, input, linkedSignal, output, signal } from '@angular/core';
-import { email, form, FormField, readonly, required, submit } from '@angular/forms/signals';
-
-interface ContactModel {
-  email: string;
-  phone: string;
-}
-
-@Component({
-  selector: 'schbar-user-contact',
-  imports: [FormField, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
-  // ...
-})
 export class UserContactComponent {
   readonly user = input.required<User>();
-  readonly contactChanged = output<ContactModel>();
+  readonly contactChanged = output<UpdateUserContactCommand>();
 
   protected readonly isEditing = signal(false);
 
-  // folgt automatisch dem Input – ersetzt effect() + setValue()
-  protected readonly model = linkedSignal(() => toModel(this.user()));
+  // follows the user input
+  private readonly model = linkedSignal(() => toModel(this.user()));
 
-  protected readonly contactForm = form(this.model, (s) => {
-    required(s.email);
-    email(s.email);
-    readonly(s.email, { when: () => !this.isEditing() });
-    readonly(s.phone, { when: () => !this.isEditing() });
+  protected readonly contactForm = form(this.model, (schema) => {
+    // readonly is inherited by all fields
+    readonly(schema, { when: () => !this.isEditing() });
+    required(schema.email);
+    email(schema.email);
   });
 
-  protected cancel(): void {
+  protected onEdit(): void {
+    this.isEditing.set(true);
+    // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
+    this.contactForm.email().focusBoundControl();
+  }
+
+  protected onCancel(): void {
     this.model.set(toModel(this.user()));
     this.contactForm().reset();
     this.isEditing.set(false);
   }
 
-  protected save(): void {
+  protected onSave(): void {
     submit(this.contactForm, async () => {
-      this.contactChanged.emit(this.model());
+      const { email, phone } = this.model();
+      const command: UpdateUserContactCommand = {
+        id: this.user().id,
+        email,
+        phone,
+      };
+      this.contactChanged.emit(command);
       this.isEditing.set(false);
     });
   }
 }
 
-// pure helper functions: module level, not exported, after the class (see schaffbar-portal/CLAUDE.md)
 function toModel(user: User): ContactModel {
-  return { email: user.email, phone: user.phone ?? '' };
+  return { email: user.email, phone: user.phone ?? "" };
 }
 ```
 
 ```html
-<mat-form-field>
-  <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
-  <input matInput [formField]="contactForm.email" />
-  @for (error of contactForm.email().errors(); track error.kind) {
-    <mat-error>{{ 'users.errors.' + error.kind | translate }}</mat-error>
+<form [formRoot]="contactForm" (submit)="onSave()">
+  <mat-form-field class="full-width">
+    <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
+    <input matInput [formField]="contactForm.email" />
+    <mat-error>
+      <schbar-field-error
+        [field]="contactForm.email"
+        label="users.shared.userProperties.email"
+      />
+    </mat-error>
+  </mat-form-field>
+
+  @if (isEditing()) {
+  <div class="form-actions">
+    <button matButton="outlined" type="button" (click)="onCancel()">…</button>
+    <button matButton="filled" type="submit">…</button>
+  </div>
   }
-</mat-form-field>
+</form>
 ```
 
-## Anhang B – Muster: Detailseite mit `httpResource`
+## Anhang B – Muster: Detailseite mit `httpResource` im Store
+
+Vollständig: [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts),
+Service-Regeln im Skill [api-service](../schaffbar-portal/.claude/skills/api-service/SKILL.md)
 
 ```ts
 // Service
-rfidReaderResource(id: () => string) {
-  return httpResource<RfidReader>(() => `${RFID_READERS_API_URL}/${id()}`);
+toolResource(id: () => string | null): HttpResourceRef<Tool | undefined> {
+  return httpResource<Tool>(() => {
+    const toolId = id();
+    return toolId ? `${TOOLS_API_URL}/${toolId}` : undefined;
+  });
 }
 
-// Page-Komponente (Injection Context: Feld-Initializer)
-readonly id = input.required<string>();
-protected readonly rfidReader = this.rfidReaderService.rfidReaderResource(this.id);
+// Store (in den providers der Seite)
+export const ToolDetailStore = signalStore(
+  withState<ToolDetailState>({ toolId: null }),
+  withProps((store) => {
+    const toolsService = inject(ToolsService);
+    return {
+      _toolsService: toolsService,
+      // (re)load whenever the id changes
+      _toolResource: toolsService.toolResource(store.toolId),
+    };
+  }),
+  withComputed(({ _toolResource }) => ({
+    tool: computed(() => (_toolResource.hasValue() ? _toolResource.value() : null)),
+    isLoading: computed(() => _toolResource.isLoading()),
+    hasLoadError: computed(() => !!_toolResource.error()),
+  })),
+  withMethods((store) => ({
+    setToolId: signalMethod<string>((toolId) => patchState(store, { toolId })),
+    updateTool: mutation<UpdateToolCommand>({
+      request: (command) => store._toolsService.updateTool(command),
+      onSuccess: () => store._toolResource.reload(),
+    }),
+  })),
+);
 
-protected onRfidReaderChanged(command: UpdateRfidReaderCommand): void {
-  this.rfidReaderService.updateRfidReader(command).subscribe(() => this.rfidReader.reload());
+// Seite
+readonly id = input.required<string>();
+constructor() {
+  this.detailsStore.setToolId(this.id);
 }
 ```
 
 ```html
-@if (rfidReader.isLoading()) {
-  <mat-progress-bar mode="indeterminate" />
-}
-@if (rfidReader.error()) {
-  <p>{{ 'shared.errors.loadFailed' | translate }}</p>
-}
-@if (rfidReader.hasValue()) {
-  <schbar-rfid-reader-detail-info [rfidReader]="rfidReader.value()" (readerChanged)="onRfidReaderChanged($event)" />
+@if (detailsStore.isLoading()) {
+<mat-progress-bar mode="indeterminate" />
+} @if (detailsStore.hasLoadError()) {
+<p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+} @if (detailsStore.tool(); as tool) {
+<schbar-tool-detail-info [tool]="tool" (toolUpdated)="onToolUpdated($event)" />
 }
 ```
 
 ## Anhang C – Muster: exhaustiver `@switch`
 
 ```html
-@let assignment = detailsStore.rfidTagAssignment();
-@if (assignment) {
-  @switch (assignment.status) {
-    @case (RfidTagAssignmentStatus.WaitingForAssignment) { ... }
-    @case (RfidTagAssignmentStatus.Assigned) { ... }
-    @case (RfidTagAssignmentStatus.WaitingForUnassignment) { ... }
-    @case (RfidTagAssignmentStatus.Unassigned) { ... }
-    @default never;
-  }
-} @else {
-  <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
+@let assignment = detailsStore.rfidTagAssignment(); @if (assignment) { @switch
+(assignment.status) { @case (RfidTagAssignmentStatus.WaitingForAssignment) { ...
+} @case (RfidTagAssignmentStatus.Assigned) { ... } @case
+(RfidTagAssignmentStatus.WaitingForUnassignment) { ... } @case
+(RfidTagAssignmentStatus.Unassigned) { ... } @default never; } } @else {
+<mat-chip
+  >{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip
+>
 }
 ```
 

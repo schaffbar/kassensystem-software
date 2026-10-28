@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidTag } from '../../rfid-tag.model';
-import { RfidTagStore } from '../../rfid-tags.store';
+import { RfidTagsStore } from '../../rfid-tags.store';
 import { RfidTagListComponent } from './rfid-tag-list.component';
 
 describe('RfidTagListComponent', () => {
@@ -42,7 +42,7 @@ describe('RfidTagListComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideTranslateService(),
-        { provide: RfidTagStore, useValue: storeMock },
+        { provide: RfidTagsStore, useValue: storeMock },
       ],
     }).compileComponents();
 

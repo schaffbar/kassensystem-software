@@ -7,7 +7,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { RfidReaderStore } from '../../../rfid-readers/rfid-readers.store';
+import { RfidReadersStore } from '../../../rfid-readers/rfid-readers.store';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
@@ -50,7 +50,7 @@ import { ToolDetailStore } from './tool-detail.store';
 })
 export class ToolDetailComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
-  private readonly rfidReaderStore = inject(RfidReaderStore);
+  private readonly rfidReadersStore = inject(RfidReadersStore);
   private readonly toolsStore = inject(ToolsStore);
   private readonly usersStore = inject(UsersStore);
 
@@ -59,7 +59,7 @@ export class ToolDetailComponent {
   protected readonly selectedTool = computed(() => this.detailsStore.tool());
   protected readonly toolCertifications = computed(() => this.detailsStore.toolCertifications());
   protected readonly allUsers = computed(() => this.usersStore.entities());
-  protected readonly allRfidReaders = computed(() => this.rfidReaderStore.entities());
+  protected readonly allRfidReaders = computed(() => this.rfidReadersStore.entities());
   protected readonly assignedRfidReaderIds = computed(() => {
     const currentToolId = this.selectedTool()?.id;
     const ids = this.toolsStore
@@ -71,14 +71,14 @@ export class ToolDetailComponent {
 
   constructor() {
     this.detailsStore.setToolId(this.id);
-    this.rfidReaderStore.reloadRfidReaders();
+    this.rfidReadersStore.reloadRfidReaders();
     this.toolsStore.reloadTools();
     this.usersStore.reloadUsers();
   }
 
   protected reloadTool(): void {
     this.detailsStore.reloadTool();
-    this.rfidReaderStore.reloadRfidReaders();
+    this.rfidReadersStore.reloadRfidReaders();
     this.toolsStore.reloadTools();
   }
 

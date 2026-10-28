@@ -14,7 +14,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { DeleteRfidReaderCommand, RfidReader } from '../../rfid-reader.model';
-import { RfidReaderStore } from '../../rfid-readers.store';
+import { RfidReadersStore } from '../../rfid-readers.store';
 
 @Component({
   selector: 'schbar-rfid-reader-list',
@@ -32,7 +32,7 @@ import { RfidReaderStore } from '../../rfid-readers.store';
   ],
 })
 export class RfidReaderListComponent {
-  protected readonly store = inject(RfidReaderStore);
+  protected readonly store = inject(RfidReadersStore);
   private readonly router = inject(Router);
   private readonly confirmDialog = inject(ConfirmDialogService);
 

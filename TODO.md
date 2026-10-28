@@ -2,47 +2,47 @@
 
 ## Important
 
-- [Frontend] Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine Aktionen - gewollt?
-
 - [Frontend] RFID reader after init shows type.null in the list and detail page
-- [Frontend] RFID-Reader detail page trennen (mac + type / name + socket)
-
+- [Frontend] Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine Aktionen - gewollt?
 - [Backend] close all tool sessions when restarting server/backend
-- [Frontend] Fix Geburtsdatum
 - [PostgreSql] init.sql Add NOT NULL constraints to customer
 - [Frontend] Validate Session before closing it
 - [Backend] Scheduler to clean up waiting for assignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
 - [Frontend] check required properties in all entities and forms (update)
 
-- Fehlerbehandlung / Problems API:
-  - [Backend] Problems API: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions kommen heute
-    als `500` ohne lesbare Meldung an (z. B. `RfidReaderHasToolAssignedException`, `ToolNameAlreadyUsedException`) –
-    sollten `409`/`400` mit verständlichem `detail` liefern
-  - [Frontend] handle API errors – teilweise erledigt: Fehler-Interceptor zeigt eine Snackbar mit allgemeiner
-    Meldung (laden / speichern / Server nicht erreichbar). Mit Problems API stattdessen `detail` aus dem
-    `ProblemDetail` anzeigen
-  - [Frontend] Action feedback - Snackbar? – Fehler erledigt (Interceptor); Erfolgsmeldungen noch offen
-  - [Frontend] Mit Problems API werden reine Vorab-Prüfungen im Frontend optional, z. B. `getToolsByRfidReader`
-    vor dem Typwechsel eines RFID-Readers (das Backend prüft das bereits in `RfidReaderChangeType`)
+## UX / UI
+
+- [Frontend] RFID-Reader detail page trennen (mac + type / name + socket)
+- [Frontend] Fix Geburtsdatum
+- [Frontend] Tool Detail page - refactor tool instructor
+
+## Fehlerbehandlung / Problems API
+
+- [Backend] Problems API: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions kommen heute als `500` ohne lesbare Meldung an (z. B. `RfidReaderHasToolAssignedException`, `ToolNameAlreadyUsedException`) sollten `409`/`400` mit verständlichem `detail` liefern
+- [Frontend] handle API errors – teilweise erledigt: Fehler-Interceptor zeigt eine Snackbar mit allgemeiner Meldung (laden / speichern / Server nicht erreichbar). Mit Problems API stattdessen `detail` aus dem `ProblemDetail` anzeigen
+- [Frontend] Action feedback - Snackbar? – Fehler erledigt (Interceptor); Erfolgsmeldungen noch offen
+- [Frontend] Mit Problems API werden reine Vorab-Prüfungen im Frontend optional, z. B. `getToolsByRfidReader` vor dem Typwechsel eines RFID-Readers (das Backend prüft das bereits in `RfidReaderChangeType`)
 
 ## Maintenance
 
 - [Backend] put bruno collection to backend
-- [Frontend] angular 22 - migrate to new forms
 - [Backend] Migrate to Spring Boot 4
 - [Backend] fix/implement/remove TODOs
 
-- [Frontend] dashboard store - withEntities vs withState
 - [Backend] Enter and leave time as LocalDateTime instead of Instant?
 - [Backend] Beim Löschen immer überprüfen ob Entity nicht irgendwo referenziert wird
-- [Backend] Facade vs Use Case and move all mutations to use cases
 - [Backend] Transactional annotation in all services
 - [Backend] jakarta.transaction.Transactional vs org.springframework.transaction.annotation.Transactional
 
+## Architecture
+
+- [Backend] Facade vs Use Case and move all mutations to use cases
+- [Backend] Arch unit
+
 ## Feature
 
-- [Frontend] Tool Detail page - refactor tool instructor
+- [Feature] Test connection to shelly
 - [Backend] Implement new interfaces for device
 - [Feature] Assignment und Unassignment von fixen RFID tags
 - [Backend] Open Telemetry
