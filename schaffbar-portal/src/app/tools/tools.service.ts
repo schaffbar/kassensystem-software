@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -19,16 +19,9 @@ import {
 
 const TOOLS_API_URL = `${environment.apiBaseUrl}/api/v1/tools`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ToolsService {
-  readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json', //
-      // Authorization: 'Bearer my-bearer', //
-    }),
-  };
+  private readonly http = inject(HttpClient);
 
   // --------------------------------------------------------------------------
   // queries
@@ -61,16 +54,16 @@ export class ToolsService {
   // commands
 
   createTool(command: CreateToolCommand): Observable<Tool> {
-    return this.http.post<Tool>(TOOLS_API_URL, command, this.httpOptions);
+    return this.http.post<Tool>(TOOLS_API_URL, command);
   }
 
   updateTool(command: UpdateToolCommand): Observable<void> {
-    return this.http.put<void>(`${TOOLS_API_URL}/${command.id}`, command, this.httpOptions);
+    return this.http.put<void>(`${TOOLS_API_URL}/${command.id}`, command);
   }
 
   changeRfidReader(command: ChangeRfidReaderCommand): Observable<void> {
     const url = `${TOOLS_API_URL}/${command.toolId}/rfid-reader/${command.rfidReaderId}`;
-    return this.http.put<void>(url, {}, this.httpOptions);
+    return this.http.put<void>(url, {});
   }
 
   clearRfidReader(command: ClearRfidReaderCommand): Observable<void> {
@@ -80,7 +73,7 @@ export class ToolsService {
 
   setWlanRelais(command: SetWlanRelaisCommand): Observable<void> {
     const url = `${TOOLS_API_URL}/${command.toolId}/wlan-relais`;
-    return this.http.put<void>(url, command, this.httpOptions);
+    return this.http.put<void>(url, command);
   }
 
   clearWlanRelais(command: ClearWlanRelaisCommand): Observable<void> {
@@ -90,12 +83,12 @@ export class ToolsService {
 
   addInstructors(command: AddToolInstructorsCommand): Observable<void> {
     const url = `${TOOLS_API_URL}/${command.toolId}/instructors`;
-    return this.http.post<void>(url, { instructorIds: command.instructorIds }, this.httpOptions);
+    return this.http.post<void>(url, { instructorIds: command.instructorIds });
   }
 
   removeInstructors(command: RemoveToolInstructorsCommand): Observable<void> {
     const url = `${TOOLS_API_URL}/${command.toolId}/instructors`;
-    return this.http.delete<void>(url, { ...this.httpOptions, body: { instructorIds: command.instructorIds } });
+    return this.http.delete<void>(url, { body: { instructorIds: command.instructorIds } });
   }
 
   deleteTool(command: DeleteToolCommand): Observable<void> {

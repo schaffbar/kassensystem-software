@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -8,16 +8,9 @@ import { CloseWorkshopSessionCommand, WorkshopSession } from '../models/workshop
 
 const WORKSHOP_SESSION_API_URL = `${environment.apiBaseUrl}/api/v1/workshop-sessions`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class WorkshopSessionService {
-  readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json', //
-      // Authorization: 'Bearer my-bearer', //
-    }),
-  };
+  private readonly http = inject(HttpClient);
 
   // --------------------------------------------------------------------------
   // queries
@@ -38,6 +31,6 @@ export class WorkshopSessionService {
   // commands
 
   closeWorkshopSession(command: CloseWorkshopSessionCommand): Observable<void> {
-    return this.http.put<void>(`${WORKSHOP_SESSION_API_URL}/${command.customerId}/close`, {}, this.httpOptions);
+    return this.http.put<void>(`${WORKSHOP_SESSION_API_URL}/${command.customerId}/close`, {});
   }
 }

@@ -1,5 +1,5 @@
 import { HttpResourceRef, httpResource } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 import { ActiveTool, ActiveUser } from './dashboard.model';
@@ -7,7 +7,7 @@ import { ActiveTool, ActiveUser } from './dashboard.model';
 const DASHBOARD_API_URL = `${environment.apiBaseUrl}/api/v1/workshop-dashboard`;
 const DASHBOARD_TOOL_API_URL = `${environment.apiBaseUrl}/api/v1/tool-dashboard`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class DashboardService {
   // --------------------------------------------------------------------------
   // queries

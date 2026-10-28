@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -8,16 +8,9 @@ import { AssignRfidTagCommand, RfidTagAssignment, UnassignRfidTagCommand } from 
 
 const RFID_TAG_ASSIGNMENT_API_URL = `${environment.apiBaseUrl}/api/v1/rfid-tag-assignments`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class RfidTagAssignmentService {
-  readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json', //
-      // Authorization: 'Bearer my-bearer', //
-    }),
-  };
+  private readonly http = inject(HttpClient);
 
   // --------------------------------------------------------------------------
   // queries
@@ -41,10 +34,10 @@ export class RfidTagAssignmentService {
   // commands
 
   assignRfidTag(command: AssignRfidTagCommand): Observable<void> {
-    return this.http.post<void>(RFID_TAG_ASSIGNMENT_API_URL, command, this.httpOptions);
+    return this.http.post<void>(RFID_TAG_ASSIGNMENT_API_URL, command);
   }
 
   unassignRfidTag(command: UnassignRfidTagCommand): Observable<void> {
-    return this.http.put<void>(`${RFID_TAG_ASSIGNMENT_API_URL}/unassign`, command, this.httpOptions);
+    return this.http.put<void>(`${RFID_TAG_ASSIGNMENT_API_URL}/unassign`, command);
   }
 }

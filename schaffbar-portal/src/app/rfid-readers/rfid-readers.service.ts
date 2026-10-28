@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -13,16 +13,9 @@ import {
 
 const RFID_READERS_API_URL = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class RfidReaderService {
-  readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json', //
-      // Authorization: 'Bearer my-bearer', //
-    }),
-  };
+  private readonly http = inject(HttpClient);
 
   // --------------------------------------------------------------------------
   // queries
@@ -50,11 +43,11 @@ export class RfidReaderService {
   // commands
 
   updateRfidReader(command: UpdateRfidReaderCommand): Observable<void> {
-    return this.http.put<void>(`${RFID_READERS_API_URL}/${command.id}`, command, this.httpOptions);
+    return this.http.put<void>(`${RFID_READERS_API_URL}/${command.id}`, command);
   }
 
   changeRfidReaderType(command: ChangeRfidReaderTypeCommand): Observable<void> {
-    return this.http.patch<void>(`${RFID_READERS_API_URL}/${command.id}/type`, command, this.httpOptions);
+    return this.http.patch<void>(`${RFID_READERS_API_URL}/${command.id}/type`, command);
   }
 
   deleteRfidReader(command: DeleteRfidReaderCommand): Observable<void> {

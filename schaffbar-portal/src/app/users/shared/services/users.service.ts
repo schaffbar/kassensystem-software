@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { format } from 'date-fns';
 import { Observable } from 'rxjs';
@@ -16,16 +16,9 @@ import {
 
 const USERS_API_URL = `${environment.apiBaseUrl}/api/v1/customers`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class UsersService {
   private readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json', //
-      // Authorization: 'Bearer my-bearer', //
-    }),
-  };
 
   // --------------------------------------------------------------------------
   // queries
@@ -58,7 +51,7 @@ export class UsersService {
       dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
 
-    return this.http.post<User>(USERS_API_URL, requestBody, this.httpOptions);
+    return this.http.post<User>(USERS_API_URL, requestBody);
   }
 
   updateUser(command: UpdateUserCommand): Observable<void> {
@@ -67,15 +60,15 @@ export class UsersService {
       dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
 
-    return this.http.put<void>(`${USERS_API_URL}/${command.id}`, requestBody, this.httpOptions);
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}`, requestBody);
   }
 
   updateUserContact(command: UpdateUserContactCommand): Observable<void> {
-    return this.http.put<void>(`${USERS_API_URL}/${command.id}/contact`, command, this.httpOptions);
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}/contact`, command);
   }
 
   updateUserAddress(command: UpdateUserAddressCommand): Observable<void> {
-    return this.http.put<void>(`${USERS_API_URL}/${command.id}/address`, command, this.httpOptions);
+    return this.http.put<void>(`${USERS_API_URL}/${command.id}/address`, command);
   }
 
   deleteUser(command: DeleteUserCommand): Observable<void> {

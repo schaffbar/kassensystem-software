@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpResourceRef, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -15,15 +15,9 @@ import {
 
 const TOOL_CERTIFICATIONS_API_URL = `${environment.apiBaseUrl}/api/v1/tool-certifications`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ToolCertificationService {
   private readonly http = inject(HttpClient);
-
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-    }),
-  };
 
   // --------------------------------------------------------------------------
   // queries
@@ -54,14 +48,13 @@ export class ToolCertificationService {
   // commands
 
   batchCreate(command: BatchCreateToolCertificationCommand): Observable<void> {
-    return this.http.post<void>(`${TOOL_CERTIFICATIONS_API_URL}/batch`, command, this.httpOptions);
+    return this.http.post<void>(`${TOOL_CERTIFICATIONS_API_URL}/batch`, command);
   }
 
   pause(command: PauseToolCertificationCommand): Observable<void> {
     return this.http.put<void>(
       `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/pause`,
       {},
-      this.httpOptions,
     );
   }
 
@@ -69,7 +62,6 @@ export class ToolCertificationService {
     return this.http.put<void>(
       `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/reactivate`,
       {},
-      this.httpOptions,
     );
   }
 
@@ -77,7 +69,6 @@ export class ToolCertificationService {
     return this.http.put<void>(
       `${TOOL_CERTIFICATIONS_API_URL}/customers/${command.customerId}/tools/${command.toolId}/revoke`,
       {},
-      this.httpOptions,
     );
   }
 
