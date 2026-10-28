@@ -2,13 +2,15 @@
 
 ## Important
 
-- [Frontend] RFID reader after init shows type.null in the list and detail page
-- [Frontend] Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine Aktionen - gewollt?
-- [Backend] close all tool sessions when restarting server/backend
-- [PostgreSql] init.sql Add NOT NULL constraints to customer
-- [Frontend] Validate Session before closing it
-- [Backend] Scheduler to clean up waiting for assignment
+- [Feature] WaitingForAssignment auch im Portal stoppen
+- [Backend] Scheduler to clean up WaitingForAssignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
+
+- [Frontend] RFID reader after init shows type.null in the list and detail page
+- [Frontend] Validate Session before closing it
+- [PostgreSql] init.sql Add NOT NULL constraints to customer
+
+- [Backend] close all tool sessions when restarting server/backend
 - [Frontend] check required properties in all entities and forms (update)
 
 ## UX / UI

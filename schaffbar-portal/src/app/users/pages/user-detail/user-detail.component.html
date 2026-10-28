@@ -6,8 +6,8 @@
 }
 
 @if (detailsStore.user(); as user) {
+  <!-- null = no RFID tag (the backend deletes the assignment on unassign) -->
   @let assignment = detailsStore.rfidTagAssignment();
-  @let rfidTagStatus = assignment?.status ?? RfidTagAssignmentStatus.Unassigned;
 
   <div class="user-detail-header">
     <div class="user-detail-header-title">
@@ -31,51 +31,48 @@
               {{ 'users.chips.userDetails.clubMember' | translate }}
             </mat-chip>
           }
-          @switch (rfidTagStatus) {
-            @case (RfidTagAssignmentStatus.WaitingForAssignment) {
-              <mat-chip>
-                {{ 'users.chips.userDetails.rfidTags.' + (assignment?.assignmentType | lowercase) | translate }}
-              </mat-chip>
-              <mat-chip>{{ 'users.chips.userDetails.rfidTags.waiting' | translate }}</mat-chip>
+          @if (assignment) {
+            <mat-chip>
+              {{ 'users.chips.userDetails.rfidTags.' + (assignment.assignmentType | lowercase) | translate }}
+            </mat-chip>
+            @switch (assignment.status) {
+              @case (RfidTagAssignmentStatus.WaitingForAssignment) {
+                <mat-chip>{{ 'users.chips.userDetails.rfidTags.waiting' | translate }}</mat-chip>
+              }
+              @case (RfidTagAssignmentStatus.Assigned) {
+                <mat-chip>{{ assignment.rfidTagId }}</mat-chip>
+              }
+              @default never;
             }
-            @case (RfidTagAssignmentStatus.Assigned) {
-              <mat-chip>
-                {{ 'users.chips.userDetails.rfidTags.' + (assignment?.assignmentType | lowercase) | translate }}
-              </mat-chip>
-              <mat-chip>{{ assignment?.rfidTagId }}</mat-chip>
-            }
-            @case (RfidTagAssignmentStatus.WaitingForUnassignment) {
-              <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
-            }
-            @case (RfidTagAssignmentStatus.Unassigned) {
-              <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
-            }
-            @default never;
+          } @else {
+            <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
           }
         </mat-chip-set>
       </div>
     </div>
-    @switch (rfidTagStatus) {
-      @case (RfidTagAssignmentStatus.WaitingForAssignment) {}
-      @case (RfidTagAssignmentStatus.Assigned) {
-        <div class="user-detail-header-actions">
-          <button class="danger-button" matButton="filled" (click)="unassignRfidTag()">
-            {{ 'users.actions.unassignRfidTag' | translate }}
-          </button>
-        </div>
+    @if (assignment) {
+      @switch (assignment.status) {
+        @case (RfidTagAssignmentStatus.WaitingForAssignment) {
+          <!-- no action until the tag is scanned – cancelling a request needs a backend endpoint (TODO.md) -->
+        }
+        @case (RfidTagAssignmentStatus.Assigned) {
+          <div class="user-detail-header-actions">
+            <button class="danger-button" matButton="filled" (click)="unassignRfidTag()">
+              {{ 'users.actions.unassignRfidTag' | translate }}
+            </button>
+          </div>
+        }
+        @default never;
       }
-      @case (RfidTagAssignmentStatus.WaitingForUnassignment) {}
-      @case (RfidTagAssignmentStatus.Unassigned) {
-        <div class="user-detail-header-actions">
-          <button matButton="filled" (click)="assignTemporaryRfidTag()">
-            {{ 'users.actions.assignTempRfidTag' | translate }}
-          </button>
-          <button matButton="filled" (click)="assignFixedRfidTag()">
-            {{ 'users.actions.assignFixedRfidTag' | translate }}
-          </button>
-        </div>
-      }
-      @default never;
+    } @else {
+      <div class="user-detail-header-actions">
+        <button matButton="filled" (click)="assignTemporaryRfidTag()">
+          {{ 'users.actions.assignTempRfidTag' | translate }}
+        </button>
+        <button matButton="filled" (click)="assignFixedRfidTag()">
+          {{ 'users.actions.assignFixedRfidTag' | translate }}
+        </button>
+      </div>
     }
   </div>
 

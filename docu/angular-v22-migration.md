@@ -147,8 +147,11 @@ Erkenntnisse:
   `<head>` ab (bei Tools grün, bei Users weiß). Das Override setzt die Token-Variable direkt am Chip.
 - Gegenprobe gemacht: neuer Enum-Wert in `ToolCertificationStatus` und `RfidTagAssignmentStatus` → Build schlägt
   an allen 4 `@switch`-Stellen fehl.
-- [ ] **Offene Frage (fachlich):** Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine
-      Aktionen – unverändert vom alten Verhalten übernommen, jetzt aber explizit sichtbar. Gewollt?
+- [x] ~~**Offene Frage (fachlich):** Bei `WaitingForUnassignment` zeigt der User-Header „Kein RFID-Tag“ und keine
+      Aktionen – gewollt?~~ Geklärt: das Backend kennt nur `WAITING_FOR_ASSIGNMENT` und `ASSIGNED` und löscht die
+      Zuordnung beim Entziehen. `WaitingForUnassignment` und `Unassigned` aus dem Frontend-Enum entfernt; „keine
+      Zuordnung“ ist `null` (`@if (assignment) { @switch … @default never } @else { … }`). Dabei auch das
+      Frontend-Modell angeglichen (`rfidTagId` / `assignmentDate` nullable, `unassignmentDate` gibt es nicht)
 
 ## Schritt 5 – Signal Forms
 
@@ -375,7 +378,7 @@ Detail-Store ganz auflösen und die Resources in der Page-Komponente halten (bei
 
 Offene Punkte, die bei der Migration aufgefallen sind (stehen in `TODO.md` bzw. hier):
 
-- `WaitingForUnassignment` zeigt im User-Header „Kein RFID-Tag“ – gewollt? (TODO.md)
+- ~~`WaitingForUnassignment` zeigt im User-Header „Kein RFID-Tag“ – gewollt?~~ – geklärt, siehe Schritt 4
 - Fachliche Backend-Fehler kommen als `500` – Problems API (TODO.md, Gruppe „Fehlerbehandlung“)
 - Erfolgsmeldungen (Snackbar nach dem Speichern) fehlen noch (TODO.md)
 - ~~Benennung: `RfidReaderStore` / `RfidTagStore` (Singular) vs. `ToolsStore` / `UsersStore` (Plural)~~ – umbenannt in
@@ -435,24 +438,22 @@ function toModel(user: User): ContactModel {
 }
 ```
 
+<!-- prettier-ignore -->
 ```html
 <form [formRoot]="contactForm" (submit)="onSave()">
   <mat-form-field class="full-width">
     <mat-label>{{ 'users.shared.userProperties.email' | translate }}</mat-label>
     <input matInput [formField]="contactForm.email" />
     <mat-error>
-      <schbar-field-error
-        [field]="contactForm.email"
-        label="users.shared.userProperties.email"
-      />
+      <schbar-field-error [field]="contactForm.email" label="users.shared.userProperties.email" />
     </mat-error>
   </mat-form-field>
 
   @if (isEditing()) {
-  <div class="form-actions">
-    <button matButton="outlined" type="button" (click)="onCancel()">…</button>
-    <button matButton="filled" type="submit">…</button>
-  </div>
+    <div class="form-actions">
+      <button matButton="outlined" type="button" (click)="onCancel()">…</button>
+      <button matButton="filled" type="submit">…</button>
+    </div>
   }
 </form>
 ```
@@ -503,27 +504,33 @@ constructor() {
 }
 ```
 
+<!-- prettier-ignore -->
 ```html
 @if (detailsStore.isLoading()) {
-<mat-progress-bar mode="indeterminate" />
-} @if (detailsStore.hasLoadError()) {
-<p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
-} @if (detailsStore.tool(); as tool) {
-<schbar-tool-detail-info [tool]="tool" (toolUpdated)="onToolUpdated($event)" />
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (detailsStore.hasLoadError()) {
+  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+}
+@if (detailsStore.tool(); as tool) {
+  <schbar-tool-detail-info [tool]="tool" (toolUpdated)="onToolUpdated($event)" />
 }
 ```
 
 ## Anhang C – Muster: exhaustiver `@switch`
 
+<!-- prettier-ignore -->
 ```html
-@let assignment = detailsStore.rfidTagAssignment(); @if (assignment) { @switch
-(assignment.status) { @case (RfidTagAssignmentStatus.WaitingForAssignment) { ...
-} @case (RfidTagAssignmentStatus.Assigned) { ... } @case
-(RfidTagAssignmentStatus.WaitingForUnassignment) { ... } @case
-(RfidTagAssignmentStatus.Unassigned) { ... } @default never; } } @else {
-<mat-chip
-  >{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip
->
+<!-- null = no RFID tag (the backend deletes the assignment on unassign) -->
+@let assignment = detailsStore.rfidTagAssignment();
+@if (assignment) {
+  @switch (assignment.status) {
+    @case (RfidTagAssignmentStatus.WaitingForAssignment) { ... }
+    @case (RfidTagAssignmentStatus.Assigned) { ... }
+    @default never;
+  }
+} @else {
+  <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
 }
 ```
 

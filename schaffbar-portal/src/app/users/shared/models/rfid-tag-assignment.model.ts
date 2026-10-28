@@ -1,18 +1,15 @@
 export interface RfidTagAssignment {
   id: string;
   customerId: string;
-  rfidTagId: string;
+  rfidTagId: string | null;
   assignmentType: RfidTagAssignmentType;
   status: RfidTagAssignmentStatus;
-  assignmentDate: Date;
-  unassignmentDate: Date;
+  assignmentDate: string | null;
 }
 
 export enum RfidTagAssignmentStatus {
   WaitingForAssignment = 'WAITING_FOR_ASSIGNMENT',
   Assigned = 'ASSIGNED',
-  WaitingForUnassignment = 'WAITING_FOR_UNASSIGNMENT',
-  Unassigned = 'UNASSIGNED',
 }
 
 export enum RfidTagAssignmentType {
