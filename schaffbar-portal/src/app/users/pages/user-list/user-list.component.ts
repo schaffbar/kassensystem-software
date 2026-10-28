@@ -11,10 +11,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
 import { CreateUserCommand, DeleteUserCommand, User } from '../../shared/models/user.model';
 import { UsersStore } from '../../shared/stores/users.store';
@@ -39,7 +39,7 @@ export class UserListComponent {
   protected readonly store = inject(UsersStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -101,21 +101,17 @@ export class UserListComponent {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('users.dialogs.deleteUser.title'),
+    this.confirmDialog
+      .confirm({
+        title: 'users.dialogs.deleteUser.title',
         entity: user.firstName + ' ' + user.lastName,
-        message: this.translate.instant('users.dialogs.deleteUser.message'),
-      },
-      minWidth: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const command: DeleteUserCommand = { id: user.id };
-        this.store.deleteUser(command);
-      }
-    });
+        message: 'users.dialogs.deleteUser.message',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: DeleteUserCommand = { id: user.id };
+          this.store.deleteUser(command);
+        }
+      });
   }
 }

@@ -4,16 +4,15 @@ import { Component, ElementRef, computed, inject, input, output, signal, viewChi
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
@@ -39,8 +38,7 @@ import { User } from '../../../users/shared/models/user.model';
   ],
 })
 export class ToolCertificationsComponent {
-  private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly toolId = input.required<string>();
   readonly certifications = input.required<ToolCertification[]>();
@@ -129,21 +127,17 @@ export class ToolCertificationsComponent {
   }
 
   protected onDelete(cert: ToolCertification): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('users.dialogs.certifications.deleteCertification.title'),
-        message: this.translate.instant('users.dialogs.certifications.deleteCertification.message'),
+    this.confirmDialog
+      .confirm({
+        title: 'users.dialogs.certifications.deleteCertification.title',
+        message: 'users.dialogs.certifications.deleteCertification.message',
         entity: this.userNameMap().get(cert.customerId),
-      },
-      minWidth: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const command: DeleteToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
-        this.deleteCertification.emit(command);
-      }
-    });
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: DeleteToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+          this.deleteCertification.emit(command);
+        }
+      });
   }
 }

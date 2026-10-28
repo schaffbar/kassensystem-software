@@ -10,10 +10,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
@@ -37,7 +37,7 @@ export class ToolListComponent {
   protected readonly store = inject(ToolsStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -95,21 +95,17 @@ export class ToolListComponent {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('tools.dialogs.deleteTool.title'),
+    this.confirmDialog
+      .confirm({
+        title: 'tools.dialogs.deleteTool.title',
         entity: tool.name,
-        message: this.translate.instant('tools.dialogs.deleteTool.message'),
-      },
-      minWidth: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const command: DeleteToolCommand = { id: tool.id };
-        this.store.deleteTool(command);
-      }
-    });
+        message: 'tools.dialogs.deleteTool.message',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: DeleteToolCommand = { id: tool.id };
+          this.store.deleteTool(command);
+        }
+      });
   }
 }

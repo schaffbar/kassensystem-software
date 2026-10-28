@@ -1,16 +1,15 @@
 import { Component, computed, inject, viewChild } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { DeleteRfidTagCommand, RfidTag } from '../../rfid-tag.model';
 import { RfidTagStore } from '../../rfid-tags.store';
 
@@ -30,8 +29,7 @@ import { RfidTagStore } from '../../rfid-tags.store';
 })
 export class RfidTagListComponent {
   protected readonly store = inject(RfidTagStore);
-  private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -61,21 +59,17 @@ export class RfidTagListComponent {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('rfidTags.dialogs.deleteRfidTag.title'),
+    this.confirmDialog
+      .confirm({
+        title: 'rfidTags.dialogs.deleteRfidTag.title',
         entity: rfidTag.id,
-        message: this.translate.instant('rfidTags.dialogs.deleteRfidTag.message'),
-      },
-      minWidth: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const command: DeleteRfidTagCommand = { id: rfidTag.id };
-        this.store.deleteRfidTag(command);
-      }
-    });
+        message: 'rfidTags.dialogs.deleteRfidTag.message',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: DeleteRfidTagCommand = { id: rfidTag.id };
+          this.store.deleteRfidTag(command);
+        }
+      });
   }
 }

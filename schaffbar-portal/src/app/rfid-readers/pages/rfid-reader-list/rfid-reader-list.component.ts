@@ -3,16 +3,16 @@ import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
-import { ConfirmDeleteComponent } from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ROUTE } from '../../../app.routes';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { DeleteRfidReaderCommand, RfidReader } from '../../rfid-reader.model';
 import { RfidReaderStore } from '../../rfid-readers.store';
 
@@ -34,8 +34,7 @@ import { RfidReaderStore } from '../../rfid-readers.store';
 export class RfidReaderListComponent {
   protected readonly store = inject(RfidReaderStore);
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -58,7 +57,7 @@ export class RfidReaderListComponent {
   }
 
   protected navigateToDetail(rfidReader: RfidReader): void {
-    this.router.navigate(['/rfid-readers', rfidReader.id]);
+    this.router.navigate([ROUTE.RFID_READERS, rfidReader.id]);
   }
 
   protected deleteRfidReaderDialog(event: Event, rfidReader: RfidReader): void {
@@ -69,21 +68,17 @@ export class RfidReaderListComponent {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDeleteComponent, {
-      data: {
-        title: this.translate.instant('rfidReaders.dialogs.deleteRfidReader.title'),
+    this.confirmDialog
+      .confirm({
+        title: 'rfidReaders.dialogs.deleteRfidReader.title',
         entity: rfidReader.name || rfidReader.macAddress,
-        message: this.translate.instant('rfidReaders.dialogs.deleteRfidReader.message'),
-      },
-      minWidth: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const command: DeleteRfidReaderCommand = { id: rfidReader.id };
-        this.store.deleteRfidReader(command);
-      }
-    });
+        message: 'rfidReaders.dialogs.deleteRfidReader.message',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: DeleteRfidReaderCommand = { id: rfidReader.id };
+          this.store.deleteRfidReader(command);
+        }
+      });
   }
 }

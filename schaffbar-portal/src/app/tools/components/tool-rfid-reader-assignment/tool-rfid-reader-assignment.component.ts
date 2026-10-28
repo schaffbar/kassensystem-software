@@ -2,18 +2,14 @@ import { Component, computed, inject, input, linkedSignal, output } from '@angul
 import { form, FormField, FormRoot, submit, validate } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
-import {
-  ConfirmDeleteComponent,
-  ConfirmDeleteDialogData,
-} from '../../../shared/components/confirm-delete/confirm-delete.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';
 
@@ -38,8 +34,7 @@ interface RfidReaderAssignmentModel {
   ],
 })
 export class ToolRfidReaderAssignmentComponent {
-  private readonly dialog = inject(MatDialog);
-  private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly tool = input.required<Tool>();
   readonly rfidReaders = input.required<RfidReader[]>();
@@ -84,25 +79,18 @@ export class ToolRfidReaderAssignmentComponent {
   }
 
   protected onClear(): void {
-    const dialogRef = this.dialog.open<ConfirmDeleteComponent, ConfirmDeleteDialogData, boolean>(
-      ConfirmDeleteComponent,
-      {
-        data: {
-          title: this.translate.instant('tools.dialogs.clearRfidReader.title'),
-          message: this.translate.instant('tools.dialogs.clearRfidReader.message'),
-          entity: this.tool().name,
-        },
-        minWidth: '600px',
-        disableClose: true,
-      },
-    );
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        const command: ClearRfidReaderCommand = { toolId: this.tool().id };
-        this.rfidReaderCleared.emit(command);
-      }
-    });
+    this.confirmDialog
+      .confirm({
+        title: 'tools.dialogs.clearRfidReader.title',
+        message: 'tools.dialogs.clearRfidReader.message',
+        entity: this.tool().name,
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: ClearRfidReaderCommand = { toolId: this.tool().id };
+          this.rfidReaderCleared.emit(command);
+        }
+      });
   }
 }
 

@@ -1,7 +1,7 @@
-<h2 mat-dialog-title>{{ data.title }}</h2>
+<h2 mat-dialog-title>{{ data.title | translate }}</h2>
 
 <mat-dialog-content>
-  {{ data.message }}
+  {{ data.message | translate }}
   @if (data.entity) {
     <span>({{ data.entity }})</span>
   }
@@ -9,10 +9,10 @@
 
 <mat-dialog-actions>
   <!-- cdkFocusInitial on cancel: an accidental Enter must not confirm a destructive action -->
-  <button mat-stroked-button [mat-dialog-close]="undefined" cdkFocusInitial>
+  <button matButton="outlined" [mat-dialog-close]="undefined" cdkFocusInitial>
     {{ 'shared.dialogs.actions.delete.cancel' | translate }}
   </button>
-  <button mat-stroked-button [mat-dialog-close]="true">
-    {{ data.confirmLabel ?? ('shared.dialogs.actions.delete.confirm' | translate) }}
+  <button class="danger-button" matButton="filled" [mat-dialog-close]="true">
+    {{ data.confirmLabel ?? 'shared.dialogs.actions.delete.confirm' | translate }}
   </button>
 </mat-dialog-actions>
