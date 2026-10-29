@@ -83,6 +83,19 @@ describe('UserContactComponent', () => {
     expect(await (await input('email')).isReadonly()).toBe(true);
   });
 
+  it('should send an empty phone as missing, so the backend stores null', async () => {
+    await click(editButton);
+    await (await input('phone')).setValue('');
+
+    await click(saveButton);
+
+    expect(contactChanged).toHaveBeenCalledExactlyOnceWith({
+      id: 'user-1',
+      email: 'max@example.com',
+      phone: undefined,
+    });
+  });
+
   it('should require an email address', async () => {
     await click(editButton);
     await (await input('email')).setValue('');

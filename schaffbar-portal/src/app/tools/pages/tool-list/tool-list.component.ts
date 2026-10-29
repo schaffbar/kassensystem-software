@@ -14,6 +14,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
@@ -31,6 +32,7 @@ import { ToolsStore } from '../../tools.store';
     MatSortModule,
     MatIconModule,
     TranslatePipe,
+    OrDashPipe,
   ],
 })
 export class ToolListComponent {

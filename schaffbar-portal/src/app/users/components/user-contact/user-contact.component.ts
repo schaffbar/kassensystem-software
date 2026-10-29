@@ -53,7 +53,7 @@ export class UserContactComponent {
   protected onSave(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
-      const command: UpdateUserContactCommand = { id: this.user().id, email, phone };
+      const command: UpdateUserContactCommand = { id: this.user().id, email, phone: phone || undefined };
       this.contactChanged.emit(command);
       this.isEditing.set(false);
     });

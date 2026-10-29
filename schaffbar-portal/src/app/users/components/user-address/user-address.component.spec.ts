@@ -87,6 +87,8 @@ describe('UserAddressComponent', () => {
     expect(addressChanged).toHaveBeenCalledExactlyOnceWith({
       id: 'user-1',
       ...address,
+      // an empty field is sent as missing, so the backend stores null
+      addressLine2: undefined,
       city: 'Potsdam',
       postalCode: '14467',
     });

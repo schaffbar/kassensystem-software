@@ -64,7 +64,7 @@ export class UserAddressComponent {
       const command: UpdateUserAddressCommand = {
         id: this.user().id,
         addressLine1,
-        addressLine2,
+        addressLine2: addressLine2 || undefined,
         postalCode,
         city,
         country,

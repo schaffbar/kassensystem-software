@@ -55,13 +55,13 @@ export interface UpdateUserCommand {
 export interface UpdateUserContactCommand {
   id: string;
   email: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface UpdateUserAddressCommand {
   id: string;
   addressLine1: string;
-  addressLine2: string;
+  addressLine2?: string;
   postalCode: string;
   city: string;
   country: string;
