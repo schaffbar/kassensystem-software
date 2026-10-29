@@ -11,7 +11,7 @@
           <mat-select id="type" [formField]="typeForm.type">
             @for (type of rfidReaderTypes; track type) {
               <mat-option [value]="type">
-                {{ 'rfidReaders.types.' + (type | lowercase) | translate }}
+                {{ type | rfidReaderTypeKey | translate }}
               </mat-option>
             }
           </mat-select>

@@ -26,6 +26,19 @@
   cursor: pointer;
 }
 
+.type-missing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mat-sys-error);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .load-error {
   color: var(--mat-sys-error);
 }

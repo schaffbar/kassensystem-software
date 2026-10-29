@@ -349,6 +349,7 @@
       }
     },
     "types": {
+      "none": "Nicht festgelegt",
       "rfid_tag_register": "RFID-Tag-Register",
       "rfid_tag_assigner": "RFID-Tag-Zuweiser",
       "gate_keeper_in": "Türwächter Eingang",
@@ -359,6 +360,9 @@
       "rfidReaderDetails": {
         "headers": {
           "rfidReaderInformation": "Lesegerät-Informationen"
+        },
+        "hints": {
+          "typeMissing": "Das Lesegerät ist erst einsatzbereit, wenn ein Typ festgelegt ist."
         }
       }
     },

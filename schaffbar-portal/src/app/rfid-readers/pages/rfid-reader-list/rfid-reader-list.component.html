@@ -33,7 +33,14 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}
       </th>
-      <td mat-cell *matCellDef="let row">{{ 'rfidReaders.types.' + (row.type | lowercase) | translate }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span [class.type-missing]="!row.type">
+          @if (!row.type) {
+            <mat-icon>warning</mat-icon>
+          }
+          {{ row.type | rfidReaderTypeKey | translate }}
+        </span>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">

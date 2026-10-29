@@ -61,6 +61,26 @@ describe('RfidReaderDetailInfoComponent', () => {
     expect(await loader.getHarnessOrNull(MatButtonHarness.with({ selector: saveButton }))).toBeNull();
   });
 
+  it('should show the translation key of the reader type', async () => {
+    expect(await (await input('type')).getValue()).toBe('rfidReaders.types.switch_box');
+  });
+
+  it('should show "none" for a reader without a type (newly registered)', async () => {
+    fixture.componentRef.setInput('rfidReader', { ...rfidReader, type: null });
+    await fixture.whenStable();
+
+    expect(await (await input('type')).getValue()).toBe('rfidReaders.types.none');
+    // the hint must be projected into the subscript below the field, not into the field itself
+    const hint: HTMLElement | null = fixture.nativeElement.querySelector(
+      '.mat-mdc-form-field-subscript-wrapper mat-hint',
+    );
+    expect(hint?.textContent).toContain('rfidReaders.pages.rfidReaderDetails.hints.typeMissing');
+  });
+
+  it('should show no hint for a reader with a type', () => {
+    expect(fixture.nativeElement.querySelector('mat-hint')).toBeNull();
+  });
+
   it('should make name and socket name editable after clicking edit', async () => {
     await click(editButton);
 

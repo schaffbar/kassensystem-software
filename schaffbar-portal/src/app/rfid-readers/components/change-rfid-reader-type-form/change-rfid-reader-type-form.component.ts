@@ -1,4 +1,3 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
@@ -11,6 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ChangeRfidReaderTypeCommand, RfidReader, RfidReaderType } from '../../rfid-reader.model';
+import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 
 export interface ChangeRfidReaderTypeDialogData {
   rfidReader: RfidReader;
@@ -26,7 +26,7 @@ interface ChangeRfidReaderTypeModel {
   templateUrl: './change-rfid-reader-type-form.component.html',
   styleUrl: './change-rfid-reader-type-form.component.scss',
   imports: [
-    LowerCasePipe,
+    RfidReaderTypeKeyPipe,
     FormField,
     FormRoot,
     FieldErrorComponent,

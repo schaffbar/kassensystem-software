@@ -1,4 +1,3 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -14,6 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
 import { DeleteRfidReaderCommand, RfidReader } from '../../rfid-reader.model';
+import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReadersStore } from '../../rfid-readers.store';
 
 @Component({
@@ -28,7 +28,7 @@ import { RfidReadersStore } from '../../rfid-readers.store';
     MatSortModule,
     MatIconModule,
     TranslatePipe,
-    LowerCasePipe,
+    RfidReaderTypeKeyPipe,
   ],
 })
 export class RfidReaderListComponent {

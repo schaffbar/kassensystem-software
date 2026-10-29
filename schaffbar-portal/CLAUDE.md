@@ -68,6 +68,22 @@ component (inputs, outputs, signals, handlers).
   (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
   anyway. A date field in a form model is `Date | null`; ISO strings from the backend are converted with `parseISO`.
 
+## Missing values
+
+- Fields the backend can send as `null` are typed `| null` in the model (`type: RfidReaderType | null`), so the
+  compiler forces the template to handle the case.
+- A missing value is displayed with the `orDash` pipe (`src/app/shared/pipes/or-dash.pipe.ts`), not with `?? '-'` or
+  `x ? … : '-'` in the template: `{{ usage.unitsUsed | orDash }}`, `{{ usage.endTime | date: 'medium' | orDash }}`.
+  Only for display (tables, `readonly-field`) – editable form fields stay empty, otherwise the dash ends up in the
+  command.
+- The translation key of an enum value is built by a small pure pipe of the feature, not in the template – including
+  the `null` case: `{{ reader.type | rfidReaderTypeKey | translate }}` (`rfidReaders.types.switch_box`,
+  `rfidReaders.types.none` for `null`). One place for the mapping, testable, and the UI never shows
+  `rfidReaders.types.null`. Not migrated yet: `'users.chips.userDetails.…' + (… | lowercase)` in `user-detail`.
+- Dash or text: a dash when a value simply does not exist (yet), e.g. the end time of a running tool usage. When the
+  missing value means someone has to act, show a translated text and highlight it – e.g. a new RFID reader without
+  type: `rfidReaders.types.none` with a warning icon in error color, plus a hint in the detail view.
+
 ## Buttons
 
 - Material buttons use the attribute syntax of the current API: `matButton="filled"` (main action, e.g. save),

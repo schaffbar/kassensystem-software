@@ -349,6 +349,7 @@
       }
     },
     "types": {
+      "none": "Not set",
       "rfid_tag_register": "RFID Tag Register",
       "rfid_tag_assigner": "RFID Tag Assigner",
       "gate_keeper_in": "Gate Keeper In",
@@ -359,6 +360,9 @@
       "rfidReaderDetails": {
         "headers": {
           "rfidReaderInformation": "RFID Reader Information"
+        },
+        "hints": {
+          "typeMissing": "The reader can't be used until a type is set."
         }
       }
     },

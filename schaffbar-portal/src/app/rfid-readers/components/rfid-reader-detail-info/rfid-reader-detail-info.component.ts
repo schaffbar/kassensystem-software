@@ -1,4 +1,3 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, input, linkedSignal, output, signal } from '@angular/core';
 import { form, FormField, FormRoot, readonly, submit } from '@angular/forms/signals';
 
@@ -9,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 
 interface RfidReaderInfoModel {
   name: string;
@@ -19,7 +19,7 @@ interface RfidReaderInfoModel {
   selector: 'schbar-rfid-reader-detail-info',
   templateUrl: './rfid-reader-detail-info.component.html',
   styleUrl: './rfid-reader-detail-info.component.scss',
-  imports: [FormField, FormRoot, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe, LowerCasePipe],
+  imports: [FormField, FormRoot, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe, RfidReaderTypeKeyPipe],
 })
 export class RfidReaderDetailInfoComponent {
   readonly rfidReader = input.required<RfidReader>();

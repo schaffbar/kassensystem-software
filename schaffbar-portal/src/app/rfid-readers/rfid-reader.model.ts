@@ -1,7 +1,7 @@
 export interface RfidReader {
   id: string;
   macAddress: string;
-  type: RfidReaderType;
+  type: RfidReaderType | null;
   name: string;
   socketName: string;
 }

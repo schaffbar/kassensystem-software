@@ -18,7 +18,22 @@
     <div class="form-col">
       <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
-        <input matInput [value]="'rfidReaders.types.' + (rfidReader().type | lowercase) | translate" readonly />
+        <input
+          id="type"
+          matInput
+          [class.type-missing]="!rfidReader().type"
+          [value]="rfidReader().type | rfidReaderTypeKey | translate"
+          readonly />
+        <!-- a reader without type does not work yet, so the missing type is highlighted;
+             one @if per node, otherwise mat-form-field does not project them into the suffix and hint slots -->
+        @if (!rfidReader().type) {
+          <mat-icon matSuffix class="type-missing">warning</mat-icon>
+        }
+        @if (!rfidReader().type) {
+          <mat-hint class="type-missing">
+            {{ 'rfidReaders.pages.rfidReaderDetails.hints.typeMissing' | translate }}
+          </mat-hint>
+        }
       </mat-form-field>
     </div>
   </div>
