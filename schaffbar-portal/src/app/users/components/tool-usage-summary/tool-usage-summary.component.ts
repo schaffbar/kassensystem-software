@@ -6,13 +6,14 @@ import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { ToolUsageSummary } from '../../shared/models/workshop-session.model';
 
 @Component({
   selector: 'schbar-tool-usage-summary',
   templateUrl: './tool-usage-summary.component.html',
   styleUrl: './tool-usage-summary.component.scss',
-  imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe],
+  imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe, OrDashPipe],
 })
 export class ToolUsageSummaryComponent {
   readonly summary = input.required<ToolUsageSummary>();

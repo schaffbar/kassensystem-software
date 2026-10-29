@@ -25,19 +25,19 @@
           <th mat-header-cell *matHeaderCellDef>
             {{ 'users.tables.openSession.toolUsage.endTimeColumn' | translate }}
           </th>
-          <td mat-cell *matCellDef="let usage">{{ usage.endTime ? (usage.endTime | date: 'medium') : '-' }}</td>
+          <td mat-cell *matCellDef="let usage">{{ usage.endTime | date: 'medium' | orDash }}</td>
         </ng-container>
 
         <ng-container matColumnDef="durationInMinutes">
           <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.durationColumn' | translate }}</th>
-          <td mat-cell *matCellDef="let usage">{{ usage.durationInMinutes ?? '-' }}</td>
+          <td mat-cell *matCellDef="let usage">{{ usage.durationInMinutes | orDash }}</td>
         </ng-container>
 
         <ng-container matColumnDef="unitsUsed">
           <th mat-header-cell *matHeaderCellDef>
             {{ 'users.tables.openSession.unitsUsedColumn' | translate }}
           </th>
-          <td mat-cell *matCellDef="let usage">{{ usage.unitsUsed ?? '-' }}</td>
+          <td mat-cell *matCellDef="let usage">{{ usage.unitsUsed | orDash }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="toolUsageColumns"></tr>

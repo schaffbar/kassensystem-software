@@ -12,17 +12,17 @@
       <th mat-header-cell *matHeaderCellDef>
         {{ 'users.tables.openSession.workshopUsage.exitTimeColumn' | translate }}
       </th>
-      <td mat-cell *matCellDef="let slot">{{ slot.exitTime ? (slot.exitTime | date: 'medium') : '-' }}</td>
+      <td mat-cell *matCellDef="let slot">{{ slot.exitTime | date: 'medium' | orDash }}</td>
     </ng-container>
 
     <ng-container matColumnDef="durationInMinutes">
       <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.durationColumn' | translate }}</th>
-      <td mat-cell *matCellDef="let slot">{{ slot.durationInMinutes ?? '-' }}</td>
+      <td mat-cell *matCellDef="let slot">{{ slot.durationInMinutes | orDash }}</td>
     </ng-container>
 
     <ng-container matColumnDef="unitsUsed">
       <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.unitsUsedColumn' | translate }}</th>
-      <td mat-cell *matCellDef="let slot">{{ slot.unitsUsed ?? '-' }}</td>
+      <td mat-cell *matCellDef="let slot">{{ slot.unitsUsed | orDash }}</td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
