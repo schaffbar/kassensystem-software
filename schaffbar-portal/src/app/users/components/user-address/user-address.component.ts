@@ -11,6 +11,14 @@ import { FieldErrorComponent } from '../../../shared/components/field-error/fiel
 import { UpdateUserAddressCommand, User, UserAddress } from '../../shared/models/user.model';
 import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../shared/validators/user.validators';
 
+interface AddressModel {
+  addressLine1: string;
+  addressLine2: string;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
 @Component({
   selector: 'schbar-user-address',
   templateUrl: './user-address.component.html',
@@ -67,6 +75,6 @@ export class UserAddressComponent {
   }
 }
 
-function toModel(address: UserAddress): UserAddress {
+function toModel(address: UserAddress): AddressModel {
   return { ...address, addressLine2: address.addressLine2 ?? '' };
 }

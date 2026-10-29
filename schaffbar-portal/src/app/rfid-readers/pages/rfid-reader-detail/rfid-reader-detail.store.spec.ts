@@ -17,6 +17,7 @@ describe('RfidReaderDetailStore', () => {
     type: RfidReaderType.SwitchBox,
     name: 'Reader 1',
     socketName: '',
+    createdAt: '2026-01-01T10:00:00Z',
   };
 
   let store: InstanceType<typeof RfidReaderDetailStore>;

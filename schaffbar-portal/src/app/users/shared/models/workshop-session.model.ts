@@ -2,7 +2,7 @@ export interface WorkshopSession {
   id: string;
   customerId: string;
   startTime: string;
-  closeTime: string;
+  closeTime: string | null;
   status: WorkshopSessionStatus;
   workshopUsages: WorkshopUsage[];
   toolUsageSummaries: ToolUsageSummary[];
@@ -11,14 +11,15 @@ export interface WorkshopSession {
 export interface WorkshopUsage {
   id: string;
   entryTime: string;
-  exitTime: string;
-  durationInMinutes: number;
-  unitsUsed: number;
+  exitTime: string | null;
+  durationInMinutes: number | null;
+  unitsUsed: number | null;
 }
 
 export interface ToolUsageSummary {
   toolId: string;
-  toolName: string;
+  // null if the tool has been deleted
+  toolName: string | null;
   active: boolean;
   totalDurationInMinutes: number;
   totalUnits: number;
@@ -28,9 +29,9 @@ export interface ToolUsageSummary {
 export interface ToolUsage {
   id: string;
   startTime: string;
-  endTime: string;
-  durationInMinutes: number;
-  unitsUsed: number;
+  endTime: string | null;
+  durationInMinutes: number | null;
+  unitsUsed: number | null;
 }
 
 export enum WorkshopSessionStatus {

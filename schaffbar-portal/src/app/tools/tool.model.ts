@@ -1,18 +1,16 @@
 export interface Tool {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   area: ToolArea;
   certificationRequirement: CertificationRequirement;
-  rfidReaderId?: string;
-  ipAddress?: string;
-  wlanRelaisType?: WlanRelaisType;
-  httpStartCommand?: string;
-  onCommand?: string;
-  offCommand?: string;
-  instructors?: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  rfidReaderId: string | null;
+  ipAddress: string | null;
+  wlanRelaisType: WlanRelaisType | null;
+  httpStartCommand: string | null;
+  onCommand: string | null;
+  offCommand: string | null;
+  instructors: string[];
 }
 
 // ----------------------------------------------------------------------------
@@ -72,7 +70,7 @@ export interface CreateToolCommand {
 
 export interface UpdateToolCommand {
   id: string;
-  name?: string;
+  name: string;
   description?: string;
   area: ToolArea;
   certificationRequirement: CertificationRequirement;

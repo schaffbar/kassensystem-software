@@ -19,6 +19,7 @@ describe('RfidReaderDetailInfoComponent', () => {
     type: RfidReaderType.SwitchBox,
     name: 'Reader 1',
     socketName: 'Steckdose 1',
+    createdAt: '2026-01-01T10:00:00Z',
   };
 
   let fixture: ComponentFixture<RfidReaderDetailInfoComponent>;

@@ -53,8 +53,8 @@ export class ToolsService {
   // --------------------------------------------------------------------------
   // commands
 
-  createTool(command: CreateToolCommand): Observable<Tool> {
-    return this.http.post<Tool>(TOOLS_API_URL, command);
+  createTool(command: CreateToolCommand): Observable<void> {
+    return this.http.post<void>(TOOLS_API_URL, command);
   }
 
   updateTool(command: UpdateToolCommand): Observable<void> {

@@ -27,8 +27,13 @@ describe('ToolWlanRelaisComponent', () => {
       description: '',
       area: ToolArea.Holz,
       certificationRequirement: CertificationRequirement.Yellow,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      rfidReaderId: null,
+      wlanRelaisType: null,
+      ipAddress: null,
+      httpStartCommand: null,
+      onCommand: null,
+      offCommand: null,
+      instructors: [],
       ...relais,
     };
   }

@@ -45,13 +45,13 @@ export class UsersService {
   // --------------------------------------------------------------------------
   // commands
 
-  createUser(command: CreateUserCommand): Observable<User> {
+  createUser(command: CreateUserCommand): Observable<void> {
     const requestBody = {
       ...command,
       dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
 
-    return this.http.post<User>(USERS_API_URL, requestBody);
+    return this.http.post<void>(USERS_API_URL, requestBody);
   }
 
   updateUser(command: UpdateUserCommand): Observable<void> {

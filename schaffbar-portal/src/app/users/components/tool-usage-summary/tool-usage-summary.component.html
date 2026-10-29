@@ -1,6 +1,6 @@
 <div class="tool-summary">
   <h3 class="tool-summary-header">
-    {{ summary().toolName }}
+    {{ summary().toolName | orDash }}
     @if (summary().active) {
       <mat-chip>{{ 'users.chips.openSession.toolUsage.active' | translate }}</mat-chip>
     }

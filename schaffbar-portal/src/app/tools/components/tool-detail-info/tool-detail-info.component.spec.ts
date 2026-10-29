@@ -22,8 +22,13 @@ describe('ToolDetailInfoComponent', () => {
     description: 'Große Säge',
     area: ToolArea.Holz,
     certificationRequirement: CertificationRequirement.Yellow,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    rfidReaderId: null,
+    wlanRelaisType: null,
+    ipAddress: null,
+    httpStartCommand: null,
+    onCommand: null,
+    offCommand: null,
+    instructors: [],
   };
   const otherTool: Tool = { ...tool, id: 'tool-2', name: 'Drechselbank' };
 

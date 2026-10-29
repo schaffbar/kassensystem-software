@@ -8,7 +8,7 @@ export interface ActiveUser {
 export interface ActiveTool {
   toolId: string;
   toolName: string;
-  userId: string;
+  customerId: string;
   firstName: string;
   lastName: string;
 }

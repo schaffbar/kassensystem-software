@@ -23,7 +23,7 @@ describe('UpdateUserFormComponent', () => {
     id: 'user-1',
     firstName: 'Max',
     lastName: 'Mustermann',
-    dateOfBirth: '1990-01-31' as unknown as Date,
+    dateOfBirth: '1990-01-31',
     clubMember: false,
   } as User;
 

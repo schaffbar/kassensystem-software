@@ -24,7 +24,7 @@
         <div class="tab-content--details__right">
           <schbar-tool-instructors
             [toolId]="tool.id"
-            [instructorIds]="tool.instructors ?? []"
+            [instructorIds]="tool.instructors"
             [allUsers]="allUsers()"
             (instructorsAdded)="onInstructorsAdded($event)"
             (instructorsRemoved)="onInstructorsRemoved($event)" />
@@ -37,7 +37,7 @@
           [toolId]="tool.id"
           [certifications]="toolCertifications()"
           [allUsers]="allUsers()"
-          [instructorIds]="tool.instructors ?? []"
+          [instructorIds]="tool.instructors"
           (batchCreate)="onBatchCreateCertifications($event)"
           (deleteCertification)="onDeleteCertification($event)" />
       </div>

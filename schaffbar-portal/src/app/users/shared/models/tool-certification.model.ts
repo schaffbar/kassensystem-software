@@ -2,11 +2,9 @@ export interface ToolCertification {
   id: string;
   customerId: string;
   toolId: string;
-  toolName: string;
   status: ToolCertificationStatus;
   certifiedAt: string;
-  certifiedBy: string;
-  updatedAt: string;
+  certifiedBy: string | null;
 }
 
 export enum ToolCertificationStatus {

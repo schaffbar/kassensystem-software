@@ -18,12 +18,33 @@ import { ToolRfidReaderAssignmentComponent } from './tool-rfid-reader-assignment
 
 describe('ToolRfidReaderAssignmentComponent', () => {
   const rfidReaders: RfidReader[] = [
-    { id: 'reader-1', macAddress: 'aa', type: RfidReaderType.SwitchBox, name: 'Reader 1', socketName: '' },
-    { id: 'reader-2', macAddress: 'bb', type: RfidReaderType.SwitchBox, name: 'Reader 2', socketName: '' },
-    { id: 'reader-3', macAddress: 'cc', type: RfidReaderType.SwitchBox, name: 'Reader 3', socketName: '' },
+    {
+      id: 'reader-1',
+      macAddress: 'aa',
+      type: RfidReaderType.SwitchBox,
+      name: 'Reader 1',
+      socketName: '',
+      createdAt: '2026-01-01T10:00:00Z',
+    },
+    {
+      id: 'reader-2',
+      macAddress: 'bb',
+      type: RfidReaderType.SwitchBox,
+      name: 'Reader 2',
+      socketName: '',
+      createdAt: '2026-01-01T10:00:00Z',
+    },
+    {
+      id: 'reader-3',
+      macAddress: 'cc',
+      type: RfidReaderType.SwitchBox,
+      name: 'Reader 3',
+      socketName: '',
+      createdAt: '2026-01-01T10:00:00Z',
+    },
   ];
 
-  function createTool(rfidReaderId?: string): Tool {
+  function createTool(rfidReaderId: string | null = null): Tool {
     return {
       id: 'tool-1',
       name: 'Tool 1',
@@ -31,8 +52,12 @@ describe('ToolRfidReaderAssignmentComponent', () => {
       area: ToolArea.Holz,
       certificationRequirement: CertificationRequirement.Yellow,
       rfidReaderId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      wlanRelaisType: null,
+      ipAddress: null,
+      httpStartCommand: null,
+      onCommand: null,
+      offCommand: null,
+      instructors: [],
     };
   }
 

@@ -19,9 +19,13 @@ describe('ToolDetailStore', () => {
     description: '',
     area: ToolArea.Holz,
     certificationRequirement: CertificationRequirement.Yellow,
+    rfidReaderId: null,
+    wlanRelaisType: null,
+    ipAddress: null,
+    httpStartCommand: null,
+    onCommand: null,
+    offCommand: null,
     instructors: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
   };
   const certifications = [{ id: 'cert-1', customerId: 'user-1', toolId: 'tool-1' }] as ToolCertification[];
 

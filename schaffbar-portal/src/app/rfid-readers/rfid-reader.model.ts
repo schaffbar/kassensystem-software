@@ -2,8 +2,9 @@ export interface RfidReader {
   id: string;
   macAddress: string;
   type: RfidReaderType | null;
-  name: string;
-  socketName: string;
+  name: string | null;
+  socketName: string | null;
+  createdAt: string;
 }
 
 export enum RfidReaderType {

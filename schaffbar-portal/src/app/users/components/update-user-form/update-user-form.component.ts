@@ -76,7 +76,7 @@ function toModel(user: User): UpdateUserModel {
     lastName: user.lastName,
     // the backend sends the date as ISO string ("1990-01-31"), although the model declares a Date;
     // parseISO creates a local date (new Date("1990-01-31") would be midnight UTC)
-    dateOfBirth: user.dateOfBirth ? parseISO(String(user.dateOfBirth)) : null,
+    dateOfBirth: parseISO(user.dateOfBirth),
     clubMember: user.clubMember,
   };
 }

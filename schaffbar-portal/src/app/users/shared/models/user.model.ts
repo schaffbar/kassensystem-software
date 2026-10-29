@@ -2,19 +2,20 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: Date;
+  // ISO date without time (`1990-01-31`) – convert with `parseISO`
+  dateOfBirth: string;
   ageGroup: AgeGroup;
   clubMember: boolean;
   email: string;
-  phone: string;
+  phone: string | null;
   address: UserAddress;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserAddress {
   addressLine1: string;
-  addressLine2: string;
+  addressLine2: string | null;
   postalCode: string;
   city: string;
   country: string;
@@ -57,8 +58,13 @@ export interface UpdateUserContactCommand {
   phone: string;
 }
 
-export interface UpdateUserAddressCommand extends UserAddress {
+export interface UpdateUserAddressCommand {
   id: string;
+  addressLine1: string;
+  addressLine2: string;
+  postalCode: string;
+  city: string;
+  country: string;
 }
 
 export interface DeleteUserCommand {
