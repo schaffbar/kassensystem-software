@@ -3,8 +3,8 @@
     <schbar-workshop-usage-summary
       class="workshop-usage-container"
       [usages]="detailsStore.slots()"
-      [totalTimeInMinutes]="detailsStore.totalWorkshopTimeInMinutes()"
-      [totalUnitsUsed]="detailsStore.totalWorkshopUnitsUsed()" />
+      [totalTimeInMinutes]="detailsStore.totalWorkshopDurationInMinutes()"
+      [totalUnitsUsed]="detailsStore.totalWorkshopUnits()" />
 
     @if (detailsStore.toolUsageSummaries().length > 0) {
       <div class="tool-usage-container">

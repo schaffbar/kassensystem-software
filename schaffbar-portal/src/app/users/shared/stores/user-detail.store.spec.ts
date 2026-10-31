@@ -22,6 +22,9 @@ describe('UserDetailStore', () => {
       { durationInMinutes: 30, unitsUsed: 1 },
       { durationInMinutes: 45, unitsUsed: 2 },
     ],
+    // the totals come from the backend (incl. running usages) and are not summed up again
+    totalWorkshopDurationInMinutes: 80,
+    totalWorkshopUnits: 4,
     toolUsageSummaries: [],
   } as unknown as WorkshopSession;
   const certifications = [{ id: 'cert-1', customerId: 'user-1', toolId: 'tool-1' }] as ToolCertification[];
@@ -82,8 +85,8 @@ describe('UserDetailStore', () => {
     expect(store.userName()).toBe('Max Mustermann');
     expect(store.rfidTagAssignment()).toEqual(assignment);
     expect(store.openSession()).toEqual(session);
-    expect(store.totalWorkshopTimeInMinutes()).toBe(75);
-    expect(store.totalWorkshopUnitsUsed()).toBe(3);
+    expect(store.totalWorkshopDurationInMinutes()).toBe(80);
+    expect(store.totalWorkshopUnits()).toBe(4);
     expect(store.toolCertifications()).toEqual(certifications);
     expect(store.hasLoadError()).toBe(false);
   });

@@ -5,6 +5,8 @@ export interface WorkshopSession {
   closeTime: string | null;
   status: WorkshopSessionStatus;
   workshopUsages: WorkshopUsage[];
+  totalWorkshopDurationInMinutes: number;
+  totalWorkshopUnits: number;
   toolUsageSummaries: ToolUsageSummary[];
 }
 
@@ -18,8 +20,7 @@ export interface WorkshopUsage {
 
 export interface ToolUsageSummary {
   toolId: string;
-  // null if the tool has been deleted
-  toolName: string | null;
+  toolName: string | null; // null if the tool has been deleted
   active: boolean;
   totalDurationInMinutes: number;
   totalUnits: number;

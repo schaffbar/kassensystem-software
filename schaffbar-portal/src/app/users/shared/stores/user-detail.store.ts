@@ -57,11 +57,8 @@ export const UserDetailStore = signalStore(
     userName: computed(() => (user() ? user()?.firstName + ' ' + user()?.lastName : 'N/A')),
     slots: computed(() => openSession()?.workshopUsages ?? []),
     toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
-  })),
-  withComputed(({ slots }) => ({
-    // a running usage (no exit time yet) has no duration and is not counted
-    totalWorkshopTimeInMinutes: computed(() => slots().reduce((sum, usage) => sum + (usage.durationInMinutes ?? 0), 0)),
-    totalWorkshopUnitsUsed: computed(() => slots().reduce((sum, usage) => sum + (usage.unitsUsed ?? 0), 0)),
+    totalWorkshopDurationInMinutes: computed(() => openSession()?.totalWorkshopDurationInMinutes ?? 0),
+    totalWorkshopUnits: computed(() => openSession()?.totalWorkshopUnits ?? 0),
   })),
   withMethods((store) => ({
     setUserId: signalMethod<string>((userId) => {
