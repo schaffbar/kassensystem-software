@@ -4,9 +4,11 @@ import java.time.Instant;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -27,6 +29,8 @@ public interface ToolUsageViews {
     // ------------------------------------------------------------------------
     // views
 
+    @Builder
+    @Validated
     record ToolUsageView( //
             @NotNull ToolUsageId id, //
             @NotNull CustomerId customerId, //

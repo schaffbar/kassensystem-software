@@ -2,15 +2,18 @@ package de.schaffbar.core_pos.domain.tool;
 
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
+import org.springframework.validation.annotation.Validated;
+
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ToolViews {
@@ -25,6 +28,8 @@ public interface ToolViews {
     // ------------------------------------------------------------------------
     // views
 
+    @Builder
+    @Validated
     record ToolView( //
             @NotNull ToolId id, //
             @NotBlank String name, //

@@ -1,18 +1,23 @@
 package de.schaffbar.core_pos.domain.dashboard;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import org.springframework.validation.annotation.Validated;
+
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public interface ToolDashboardViews {
 
     // ------------------------------------------------------------------------
     // views
 
+    @Builder
+    @Validated
     record ToolDashboardEntryView( //
             @NotNull ToolId toolId, //
             @NotBlank String toolName, //
