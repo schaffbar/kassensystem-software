@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
@@ -54,14 +55,15 @@ public class WorkshopSessionService {
     }
 
     @Transactional
-    public void closeSession(@NotNull @Valid CustomerId customerId) {
+    public void closeSession(@NotNull @Valid CustomerId customerId, @NotNull BillingTotal workshopTotal, @NotNull BillingTotal toolTotal) {
         WorkshopSession session = fetchOpenWorkshopSession(customerId) //
                 .orElseThrow(() -> new RuntimeException("No workshop session found for customer [id: " + customerId + "]")); // TODO: use proper exception
 
-        List<SchaffbarEvent> events = session.close();
+        List<SchaffbarEvent> events = session.close(workshopTotal, toolTotal);
         saveOutboxEvents(events);
 
-        log.info("Closed workshop session for customer {} and published events {}", customerId, events);
+        log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal,
+                toolTotal, events);
     }
 
     // ------------------------------------------------------------------------

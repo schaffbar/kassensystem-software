@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.domain.workshop_usage;
+package de.schaffbar.core_pos.domain.tool_usage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,16 +7,18 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
-class WorkshopUsageTest {
+class ToolUsage_GetBillableDurationTest {
 
     @Test
     void hasNoFinalBillableDurationWhileRunning() {
         // given
-        WorkshopUsage usage = workshopUsage();
+        ToolUsage usage = toolUsage();
 
         // when / then
         assertThat(usage.getBillableDuration()).isNull();
@@ -25,28 +27,25 @@ class WorkshopUsageTest {
     @Test
     void countsARunningUsageUntilNow() {
         // given
-        WorkshopUsage usage = workshopUsage();
-        Instant now = usage.getEntryTime() //
-                .plus(Duration.ofMinutes(13).plusSeconds(1));
+        ToolUsage usage = toolUsage();
+        Instant now = usage.getStartTime() //
+                .plus(Duration.ofMinutes(6).plusSeconds(1));
 
         // when
         BillableDuration duration = usage.getBillableDurationUntil(now);
 
         // then
-        assertThat(duration.getMinutes()).isEqualTo(14);
-        assertThat(duration.getUnits()).isEqualTo(3);
+        assertThat(duration.getMinutes()).isEqualTo(7);
+        assertThat(duration.getUnits()).isEqualTo(2);
     }
 
     @Test
     void ignoresNowForAFinishedUsage() {
-        // given
-        WorkshopUsage usage = workshopUsage();
-        usage.exit();
+        ToolUsage usage = toolUsage();
+        usage.stop();
 
-        // when
         BillableDuration duration = usage.getBillableDurationUntil(Instant.now().plus(Duration.ofHours(1)));
 
-        // then
         assertThat(duration).isEqualTo(usage.getBillableDuration());
         assertThat(duration.getDuration()).isEqualTo(usage.getDuration());
     }
@@ -54,8 +53,11 @@ class WorkshopUsageTest {
     // ------------------------------------------------------------------------
     // helper
 
-    private WorkshopUsage workshopUsage() {
-        return WorkshopUsage.of(CustomerId.random(), WorkshopSessionId.random());
+    private ToolUsage toolUsage() {
+        return ToolUsage.of(new StartToolUsageCommand( //
+                CustomerId.random(), //
+                ToolId.random(), //
+                WorkshopSessionId.random()));
     }
 
 }

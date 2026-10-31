@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
@@ -69,6 +70,15 @@ public class ToolUsageService {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
                 .toList();
+    }
+
+    // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
+    public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
+        List<BillableDuration> durations = this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
+                .map(usage -> usage.getBillableDurationUntil(now)) //
+                .toList();
+
+        return BillingTotal.of(durations);
     }
 
     // TODO: merge getBillingTotalsByTool and getToolUsages and return something like getBillingSummary

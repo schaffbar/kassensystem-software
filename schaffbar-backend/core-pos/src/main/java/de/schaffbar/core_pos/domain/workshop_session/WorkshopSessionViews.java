@@ -2,13 +2,16 @@ package de.schaffbar.core_pos.domain.workshop_session;
 
 import java.time.Instant;
 
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface WorkshopSessionViews {
@@ -23,6 +26,8 @@ public interface WorkshopSessionViews {
     // ------------------------------------------------------------------------
     // views
 
+    @Builder
+    @Validated
     record WorkshopSessionView( //
             @NotNull WorkshopSessionId id, //
             @NotNull CustomerId customerId, //

@@ -2,11 +2,13 @@ package de.schaffbar.core_pos.shared.billing;
 
 import java.util.Collection;
 
+import jakarta.validation.constraints.PositiveOrZero;
+
 /**
  * Total of several usages. Every usage is rounded on its own, the total is the sum of the rounded values – so it can be
  * more than rounding the summed up duration once.
  */
-public record BillingTotal(long minutes, long units) {
+public record BillingTotal(@PositiveOrZero long minutes, @PositiveOrZero long units) {
 
     public static final BillingTotal ZERO = new BillingTotal(0, 0);
 

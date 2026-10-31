@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.shared.event.payload;
 
 import java.time.Instant;
 
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.EventPayload;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
@@ -20,7 +21,9 @@ public interface WorkshopSessionEventPayload extends EventPayload {
 			@Valid @NotNull WorkshopSessionId id, //
 			@Valid @NotNull CustomerId customerId, //
 			@NotNull Instant startTime, //
-			@NotNull Instant closeTime //
+			@NotNull Instant closeTime, //
+			@Valid @NotNull BillingTotal workshopTotal, //
+			@Valid @NotNull BillingTotal toolTotal //
 	) implements WorkshopSessionEventPayload {}
 
 }

@@ -53,6 +53,7 @@ public class WorkshopUsageService {
                 .toList();
     }
 
+    // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
     public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         List<BillableDuration> durationList = this.workshopUsageRepository.findWorkshopUsages(workshopSessionId).stream() //
                 .map(usage -> usage.getBillableDurationUntil(now)) //

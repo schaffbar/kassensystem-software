@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
+import java.time.Instant;
 import java.util.Objects;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
@@ -10,6 +11,7 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.exception.ActiveToolUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.ActiveWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopSessionFoundException;
@@ -49,7 +51,12 @@ public class CloseSession {
         ensureNoActiveToolUsages(sessionId);
         ensureNoActiveWorkshopUsages(sessionId);
 
-        this.workshopSessionService.closeSession(customer.id());
+        // no usage is running any more, so the totals are final – `now` has no effect
+        Instant now = Instant.now();
+        BillingTotal workshopTotal = this.workshopUsageService.getBillingTotal(sessionId, now);
+        BillingTotal toolTotal = this.toolUsageService.getBillingTotal(sessionId, now);
+
+        this.workshopSessionService.closeSession(customer.id(), workshopTotal, toolTotal);
     }
 
     private void ensureNoActiveWorkshopUsages(WorkshopSessionId sessionId) {
