@@ -9,13 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.exception.ToolAlreadyStoppedException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.shared.id.ToolUsageId;
-import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -26,6 +19,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.exception.ToolAlreadyStoppedException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.id.ToolUsageId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -95,6 +97,14 @@ class ToolUsage {
         }
 
         return Duration.between(this.startTime.truncatedTo(ChronoUnit.SECONDS), this.endTime.truncatedTo(ChronoUnit.SECONDS));
+    }
+
+    public BillableDuration getBillableDuration() {
+        return isNull(this.endTime) ? null : BillableDuration.between(this.startTime, this.endTime);
+    }
+
+    public BillableDuration getBillableDurationUntil(Instant now) {
+        return BillableDuration.between(this.startTime, nonNull(this.endTime) ? this.endTime : now);
     }
 
     // ------------------------------------------------------------------------

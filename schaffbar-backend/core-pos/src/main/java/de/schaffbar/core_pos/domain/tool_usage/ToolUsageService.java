@@ -1,10 +1,27 @@
 package de.schaffbar.core_pos.domain.tool_usage;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
@@ -15,14 +32,6 @@ import de.schaffbar.core_pos.shared.exception.ToolNotInUseByCustomerException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
@@ -60,6 +69,13 @@ public class ToolUsageService {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
                 .toList();
+    }
+
+    // TODO: merge getBillingTotalsByTool and getToolUsages and return something like getBillingSummary
+    public Map<ToolId, BillingTotal> getBillingTotalsByTool(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
+        return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
+                .collect(groupingBy(ToolUsage::getToolId, //
+                        mapping(usage -> usage.getBillableDurationUntil(now), collectingAndThen(toList(), BillingTotal::of))));
     }
 
     // ------------------------------------------------------------------------

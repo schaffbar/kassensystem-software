@@ -34,6 +34,7 @@ _Note: Code suggests considering renaming to `WorkshopSlot` or `UsageSlot`._
 | WU-4 | A workshop session must exist (OPEN) before entering                            | `EnterWorkshop` use case — creates session if not present                                     |
 | WU-5 | Active tool usages are stopped when leaving the workshop                        | `LeaveWorkshop` use case — calls `ToolUsageService.stopAllUsagesForCustomer()`                |
 | WU-6 | Customer must have a valid certificate to enter                                 | **TODO** — noted in `EnterWorkshop` use case                                                  |
+| WU-7 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now | `BillableDuration`, `WorkshopUsage.getBillableDurationUntil()`                                |
 
 ## Domain Events
 

@@ -36,6 +36,7 @@
 | TU-8  | Customer must have an open workshop session to start a tool usage                       | `StartToolUsage` use case — checks for active session                                                   |
 | TU-9  | A tool can only be used by one customer at a time                                       | `ToolUsageService.startUsage()` — checks via `findActiveByToolId()`, throws `ToolAlreadyInUseException` |
 | TU-10 | Customer must have an active ToolCertification for the tool                             | `StartToolUsage` use case — calls `ToolCertificationService.hasActiveCertification()`                   |
+| TU-11 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now | `BillableDuration`, `ToolUsage.getBillableDurationUntil()`                                              |
 
 ## Domain Events
 

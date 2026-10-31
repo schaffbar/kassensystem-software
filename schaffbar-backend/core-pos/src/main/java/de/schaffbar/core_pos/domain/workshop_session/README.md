@@ -32,7 +32,7 @@
 | WS-2 | Closing sets status to `PAID` and records `closeTime`    | `WorkshopSession.close()`                                                  |
 | WS-3 | Customer must exist before closing a session             | `CloseSession` use case                                                    |
 | WS-4 | Cannot close a session that doesn't exist                | `WorkshopSessionService.closeSession()`                                    |
-| WS-5 | Pending workshop usages should be checked before closing | **TODO** — noted in `CloseSession` use case                                |
+| WS-5 | Cannot close while a workshop or tool usage is running   | `CloseSession` use case                                                    |
 
 ## Domain Events
 

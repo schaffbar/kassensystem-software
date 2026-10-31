@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.domain.workshop_usage;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -8,10 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
-import de.schaffbar.core_pos.shared.id.WorkshopUsageId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -22,6 +19,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
+import de.schaffbar.core_pos.shared.id.WorkshopUsageId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -83,6 +86,14 @@ class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot f
         }
 
         return Duration.between(this.entryTime.truncatedTo(ChronoUnit.SECONDS), this.exitTime.truncatedTo(ChronoUnit.SECONDS));
+    }
+
+    public BillableDuration getBillableDuration() {
+        return isNull(this.exitTime) ? null : BillableDuration.between(this.entryTime, this.exitTime);
+    }
+
+    public BillableDuration getBillableDurationUntil(Instant now) {
+        return BillableDuration.between(this.entryTime, nonNull(this.exitTime) ? this.exitTime : now);
     }
 
     // ------------------------------------------------------------------------

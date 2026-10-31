@@ -8,6 +8,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import de.schaffbar.core_pos.device.DeviceApiModel.CounterResponse;
 import de.schaffbar.core_pos.device.DeviceApiModel.DeviceCardRequestBody;
 import de.schaffbar.core_pos.device.DeviceApiModel.DeviceCardResponse;
@@ -31,6 +44,7 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
@@ -48,18 +62,6 @@ import de.schaffbar.core_pos.use_case.EnterWorkshop;
 import de.schaffbar.core_pos.use_case.LeaveWorkshop;
 import de.schaffbar.core_pos.use_case.StartToolUsage;
 import de.schaffbar.core_pos.use_case.StopToolUsage;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @Validated
@@ -321,9 +323,10 @@ public class DeviceController {
 
         List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
         long totalUnits = workshopUsages.stream() //
-                .map(WorkshopUsageView::getUnitsUsed) //
+                .map(WorkshopUsageView::billableDuration) //
                 .filter(Objects::nonNull) //
-                .reduce(0L, Long::sum);
+                .mapToLong(BillableDuration::getUnits) //
+                .sum();
 
         WorkshopUsageView lastWorkshopUsage = workshopUsages.stream() //
                 .filter(usage -> isNull(usage.exitTime())) //
@@ -338,9 +341,10 @@ public class DeviceController {
 
         List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
         long totalUnits = workshopUsages.stream() //
-                .map(WorkshopUsageView::getUnitsUsed) //
+                .map(WorkshopUsageView::billableDuration) //
                 .filter(Objects::nonNull) //
-                .reduce(0L, Long::sum);
+                .mapToLong(BillableDuration::getUnits) //
+                .sum();
 
         WorkshopUsageView lastWorkshopUsage = workshopUsages.stream() //
                 .sorted(comparing(WorkshopUsageView::exitTime).reversed()) //

@@ -2,17 +2,10 @@ package de.schaffbar.core_pos.domain.workshop_usage;
 
 import static java.util.Comparator.comparing;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
-import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -21,6 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
+import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @Slf4j
 @Service
@@ -47,6 +51,14 @@ public class WorkshopUsageService {
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
                 .toList();
+    }
+
+    public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
+        List<BillableDuration> durationList = this.workshopUsageRepository.findWorkshopUsages(workshopSessionId).stream() //
+                .map(usage -> usage.getBillableDurationUntil(now)) //
+                .toList();
+
+        return BillingTotal.of(durationList);
     }
 
     // ------------------------------------------------------------------------

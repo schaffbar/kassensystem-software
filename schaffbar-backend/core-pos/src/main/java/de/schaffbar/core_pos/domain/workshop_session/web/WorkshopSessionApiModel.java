@@ -2,27 +2,28 @@ package de.schaffbar.core_pos.domain.workshop_session.web;
 
 import static java.util.Objects.isNull;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Positive;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface WorkshopSessionApiModel {
@@ -36,18 +37,26 @@ public interface WorkshopSessionApiModel {
     @Mapping(target = "customerId", source = "session.customerId.value")
     @Mapping(target = "workshopUsages", source = "workshopUsages")
     @Mapping(target = "toolUsageSummaries", source = "toolUsageSummaries")
-    WorkshopSessionApiDto toWorkshopSessionApiDto(WorkshopSessionView session, List<WorkshopUsageView> workshopUsages,
+    @Mapping(target = "totalWorkshopDurationInMinutes", source = "workshopTotal.minutes")
+    @Mapping(target = "totalWorkshopUnits", source = "workshopTotal.units")
+    WorkshopSessionApiDto toWorkshopSessionApiDto(WorkshopSessionView session, List<WorkshopUsageView> workshopUsages, BillingTotal workshopTotal,
             List<ToolUsageSummaryApiDto> toolUsageSummaries);
 
     @Mapping(target = "id", source = "id.value")
-    @Mapping(target = "durationInMinutes", source = "durationInMinutes")
-    @Mapping(target = "unitsUsed", source = "unitsUsed")
+    @Mapping(target = "durationInMinutes", source = "billableDuration.minutes")
+    @Mapping(target = "unitsUsed", source = "billableDuration.units")
     WorkshopUsageApiDto toWorkshopUsageApiDto(WorkshopUsageView workshopUsage);
 
-    // ------------------------------------------------------------------------
-    // tool usage grouping logic
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "durationInMinutes", source = "billableDuration.minutes")
+    @Mapping(target = "unitsUsed", source = "billableDuration.units")
+    ToolUsageDetailApiDto toToolUsageDetailApiDto(ToolUsageView usage);
 
-    default List<ToolUsageSummaryApiDto> toToolUsageSummaries(List<ToolUsageView> toolUsages, Map<ToolId, ToolView> toolMap) {
+    // ------------------------------------------------------------------------
+    // tool usage grouping – the totals per tool come from the ToolUsageService
+
+    default List<ToolUsageSummaryApiDto> toToolUsageSummaries(List<ToolUsageView> toolUsages, Map<ToolId, ToolView> toolMap,
+            Map<ToolId, BillingTotal> totalsByTool) {
         return toolUsages.stream() //
                 .collect(Collectors.groupingBy(ToolUsageView::toolId)) //
                 .entrySet().stream() //
@@ -62,48 +71,13 @@ public interface WorkshopSessionApiModel {
                             .map(this::toToolUsageDetailApiDto) //
                             .toList();
 
-                    long totalDurationMinutes = usagesForTool.stream() //
-                            .mapToLong(u -> {
-                                Long mins = u.getDurationInMinutes();
-                                if (mins != null) {
-                                    return mins;
-                                }
-                                // active usage: calculate from startTime until now
-                                long seconds = Duration.between(u.startTime().truncatedTo(ChronoUnit.SECONDS),
-                                        Instant.now().truncatedTo(ChronoUnit.SECONDS)).getSeconds();
-                                return (long) Math.ceil(seconds / 60.0);
-                            }) //
-                            .sum();
-
-                    long totalUnits = usagesForTool.stream() //
-                            .mapToLong(u -> {
-                                Long units = u.getUnitsUsed();
-                                if (units != null) {
-                                    return units;
-                                }
-                                // active usage: calculate from startTime until now
-                                long seconds = Duration.between(u.startTime().truncatedTo(ChronoUnit.SECONDS),
-                                        Instant.now().truncatedTo(ChronoUnit.SECONDS)).getSeconds();
-                                long totalMinutes = (long) Math.ceil(seconds / 60.0);
-                                return (long) Math.ceil(totalMinutes / 6.0);
-                            }) //
-                            .sum();
+                    BillingTotal total = totalsByTool.getOrDefault(toolId, BillingTotal.ZERO);
 
                     boolean active = usagesForTool.stream().anyMatch(u -> isNull(u.endTime()));
 
-                    return new ToolUsageSummaryApiDto(toolId.getValue().toString(), toolName, active, totalDurationMinutes, totalUnits, details);
+                    return new ToolUsageSummaryApiDto(toolId.getValue().toString(), toolName, active, total.minutes(), total.units(), details);
                 }) //
                 .toList();
-    }
-
-    default ToolUsageDetailApiDto toToolUsageDetailApiDto(ToolUsageView usage) {
-        return new ToolUsageDetailApiDto( //
-                usage.id().getValue().toString(), //
-                usage.startTime(), //
-                usage.endTime(), //
-                usage.getDurationInMinutes(), //
-                usage.getUnitsUsed() //
-        );
     }
 
     // ------------------------------------------------------------------------
@@ -117,7 +91,9 @@ public interface WorkshopSessionApiModel {
             @NotBlank String customerId, //
             @NotNull Instant startTime, //
             Instant closeTime, //
-            WorkshopSessionStatus status, //
+            @NotNull WorkshopSessionStatus status, //
+            @PositiveOrZero long totalWorkshopDurationInMinutes, //
+            @PositiveOrZero long totalWorkshopUnits, //
             List<WorkshopUsageApiDto> workshopUsages, //
             List<ToolUsageSummaryApiDto> toolUsageSummaries //
     ) {}
