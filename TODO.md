@@ -1,15 +1,16 @@
 # TODO
 
+- [Frontend]
+- [Backend]
+
 ## Important
 
 - [Feature] WaitingForAssignment auch im Portal stoppen
 - [Backend] Scheduler to clean up WaitingForAssignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
 
-- [Frontend] RFID reader after init shows type.null in the list and detail page
 - [Frontend] Validate Session before closing it
 - [PostgreSql] init.sql Add NOT NULL constraints to customer
-
 - [Backend] close all tool sessions when restarting server/backend
 - [Frontend] check required properties in all entities and forms (update)
 
@@ -39,6 +40,8 @@
 
 ## Architecture
 
+- [Backend] HTTP response - missing values as null or NON_NULL option
+- [Frontend] Shared API Services with its own API model and runtime validation (zod)
 - [Backend] Facade vs Use Case and move all mutations to use cases
 - [Backend] Arch unit
 
@@ -66,3 +69,8 @@ Der gesamte Ausdruck http://**IP-Adresse**/relay/0 ist eine URL (Uniform Resourc
 - http:// = Das Schema / Protokoll
 - IP-Adresse = Der Host (oder die Domain)
 - /relay/0 = Der Path (Pfad)
+
+## Fields
+
+Tool.createdAt and updatedAt - add
+ToolCertification.certifiedBy - mandatory
