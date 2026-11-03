@@ -1,0 +1,32 @@
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.load-error,
+.running-usage {
+  color: var(--mat-sys-error);
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.totals {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  .number {
+    text-align: right;
+  }
+}

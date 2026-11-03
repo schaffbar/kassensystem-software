@@ -16,9 +16,22 @@
       </div>
     }
 
-    <button class="close-button" matButton="filled" (click)="closeSession()">
-      {{ 'users.actions.closeSession' | translate }}
-    </button>
+    <div class="close-session">
+      <button
+        class="close-button"
+        matButton="filled"
+        type="button"
+        [disabled]="detailsStore.hasRunningUsage() || detailsStore.closeSession.isPending()"
+        (click)="closeSession()">
+        {{ 'users.actions.closeSession' | translate }}
+      </button>
+      @if (detailsStore.hasRunningUsage()) {
+        <p class="running-usage-hint">
+          <mat-icon>info</mat-icon>
+          {{ 'users.pages.openSession.messages.runningUsage' | translate }}
+        </p>
+      }
+    </div>
   } @else {
     <p>{{ 'users.pages.openSession.messages.noSlots' | translate }}</p>
   }

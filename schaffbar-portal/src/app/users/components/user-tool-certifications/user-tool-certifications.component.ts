@@ -8,7 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { Tool } from '../../../tools/tool.model';
 import {
   PauseToolCertificationCommand,
@@ -25,7 +25,7 @@ import {
   imports: [MatTableModule, MatButtonModule, MatIconModule, CertificationStatusChipComponent, DatePipe, TranslatePipe],
 })
 export class UserToolCertificationsComponent {
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   readonly certifications = input.required<ToolCertification[]>();
   readonly allTools = input.required<Tool[]>();
@@ -50,8 +50,8 @@ export class UserToolCertificationsComponent {
   });
 
   protected onPause(cert: ToolCertification): void {
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'users.dialogs.certifications.pauseCertification.title',
         message: 'users.dialogs.certifications.pauseCertification.message',
         entity: this.toolNameMap().get(cert.toolId),
@@ -66,8 +66,8 @@ export class UserToolCertificationsComponent {
   }
 
   protected onReactivate(cert: ToolCertification): void {
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'users.dialogs.certifications.reactivateCertification.title',
         message: 'users.dialogs.certifications.reactivateCertification.message',
         entity: this.toolNameMap().get(cert.toolId),
@@ -82,8 +82,8 @@ export class UserToolCertificationsComponent {
   }
 
   protected onRevoke(cert: ToolCertification): void {
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'users.dialogs.certifications.revokeCertification.title',
         message: 'users.dialogs.certifications.revokeCertification.message',
         entity: this.toolNameMap().get(cert.toolId),

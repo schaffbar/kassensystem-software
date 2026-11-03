@@ -121,6 +121,17 @@
           "title": "Einweisung löschen",
           "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?"
         }
+      },
+      "closeSession": {
+        "title": "Sitzung beenden",
+        "message": "Die Sitzung wird mit diesen Summen abgerechnet und als bezahlt abgeschlossen. Das kann nicht rückgängig gemacht werden.",
+        "workshopTime": "Werkstattzeit",
+        "minutes": "Minuten",
+        "units": "Einheiten",
+        "actions": {
+          "confirm": "Sitzung beenden",
+          "cancel": "Abbrechen"
+        }
       }
     },
     "tables": {
@@ -196,7 +207,8 @@
         },
         "messages": {
           "noSlots": "Keine Zeitslots für diese Sitzung verfügbar.",
-          "noOpenSession": "Keine offene Sitzung für diesen Benutzer."
+          "noOpenSession": "Keine offene Sitzung für diesen Benutzer.",
+          "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
         }
       }
     },

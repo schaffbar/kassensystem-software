@@ -11,7 +11,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DeleteRfidReaderCommand, RfidReader } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReadersStore } from '../../rfid-readers.store';
@@ -34,7 +34,7 @@ import { RfidReadersStore } from '../../rfid-readers.store';
 export class RfidReaderListComponent {
   protected readonly store = inject(RfidReadersStore);
   private readonly router = inject(Router);
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -68,8 +68,8 @@ export class RfidReaderListComponent {
       return;
     }
 
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'rfidReaders.dialogs.deleteRfidReader.title',
         entity: rfidReader.name || rfidReader.macAddress,
         message: 'rfidReaders.dialogs.deleteRfidReader.message',

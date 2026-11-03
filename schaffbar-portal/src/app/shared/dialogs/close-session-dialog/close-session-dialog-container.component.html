@@ -1,0 +1,6 @@
+<schbar-close-session-dialog-modal
+  [isLoading]="isLoading()"
+  [hasLoadError]="hasLoadError()"
+  [viewModel]="viewModel()"
+  (closeConfirmed)="onCloseConfirmed($event)"
+  (cancelled)="onCancelled()" />

@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';
 
@@ -34,7 +34,7 @@ interface RfidReaderAssignmentModel {
   ],
 })
 export class ToolRfidReaderAssignmentComponent {
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   readonly tool = input.required<Tool>();
   readonly rfidReaders = input.required<RfidReader[]>();
@@ -79,8 +79,8 @@ export class ToolRfidReaderAssignmentComponent {
   }
 
   protected onClear(): void {
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'tools.dialogs.clearRfidReader.title',
         message: 'tools.dialogs.clearRfidReader.message',
         entity: this.tool().name,

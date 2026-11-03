@@ -10,6 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { ToolsStore } from '../../../tools/tools.store';
 import {
   UpdateUserDialogData,
@@ -79,7 +80,7 @@ export class UserDetailComponent {
       UpdateUserFormComponent,
       {
         data: { user },
-        minWidth: '800px',
+        minWidth: DIALOG_WIDTH.large,
         disableClose: true,
       },
     );

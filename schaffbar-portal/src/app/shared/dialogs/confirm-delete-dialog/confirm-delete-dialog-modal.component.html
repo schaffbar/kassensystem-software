@@ -1,0 +1,21 @@
+@let currentViewModel = viewModel();
+
+<h2 mat-dialog-title>{{ currentViewModel.title | translate }}</h2>
+
+<mat-divider />
+
+<mat-dialog-content>
+  {{ currentViewModel.message | translate }}
+  @if (currentViewModel.entity) {
+    <span>({{ currentViewModel.entity }})</span>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
+    {{ 'shared.dialogs.actions.delete.cancel' | translate }}
+  </button>
+  <button class="danger-button" matButton="filled" type="button" (click)="confirmed.emit()">
+    {{ currentViewModel.confirmLabel ?? 'shared.dialogs.actions.delete.confirm' | translate }}
+  </button>
+</mat-dialog-actions>

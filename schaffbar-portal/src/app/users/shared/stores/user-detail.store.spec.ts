@@ -19,8 +19,8 @@ describe('UserDetailStore', () => {
   const session = {
     id: 's-1',
     workshopUsages: [
-      { durationInMinutes: 30, unitsUsed: 1 },
-      { durationInMinutes: 45, unitsUsed: 2 },
+      { exitTime: '2026-10-31T10:30:00Z', durationInMinutes: 30, unitsUsed: 1 },
+      { exitTime: '2026-10-31T11:45:00Z', durationInMinutes: 45, unitsUsed: 2 },
     ],
     // the totals come from the backend (incl. running usages) and are not summed up again
     totalWorkshopDurationInMinutes: 80,
@@ -87,6 +87,7 @@ describe('UserDetailStore', () => {
     expect(store.openSession()).toEqual(session);
     expect(store.totalWorkshopDurationInMinutes()).toBe(80);
     expect(store.totalWorkshopUnits()).toBe(4);
+    expect(store.hasRunningUsage()).toBe(false);
     expect(store.toolCertifications()).toEqual(certifications);
     expect(store.hasLoadError()).toBe(false);
   });
@@ -97,7 +98,24 @@ describe('UserDetailStore', () => {
     expect(store.rfidTagAssignment()).toBeNull();
     expect(store.openSession()).toBeNull();
     expect(store.slots()).toEqual([]);
+    expect(store.hasRunningUsage()).toBe(false);
     expect(store.hasLoadError()).toBe(false);
+  });
+
+  it('should detect a running workshop usage', async () => {
+    const running = { ...session, workshopUsages: [{ exitTime: null, durationInMinutes: null, unitsUsed: null }] };
+
+    await loadUser({ session: running as unknown as WorkshopSession });
+
+    expect(store.hasRunningUsage()).toBe(true);
+  });
+
+  it('should detect an active tool usage', async () => {
+    const running = { ...session, toolUsageSummaries: [{ toolId: 'tool-1', active: true }] };
+
+    await loadUser({ session: running as unknown as WorkshopSession });
+
+    expect(store.hasRunningUsage()).toBe(true);
   });
 
   it('should only reload the assignment after assigning an RFID tag', async () => {

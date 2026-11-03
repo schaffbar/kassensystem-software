@@ -10,7 +10,7 @@ import {
   RevokeToolCertificationCommand,
 } from '../../shared/models/tool-certification.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
-import { CloseWorkshopSessionCommand } from '../../shared/models/workshop-session.model';
+import { CloseWorkshopSessionCommand, hasRunningUsage } from '../../shared/models/workshop-session.model';
 import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
 import { ToolCertificationService } from '../../shared/services/tool-certification.service';
 import { UsersService } from '../../shared/services/users.service';
@@ -59,11 +59,18 @@ export const UserDetailStore = signalStore(
     toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
     totalWorkshopDurationInMinutes: computed(() => openSession()?.totalWorkshopDurationInMinutes ?? 0),
     totalWorkshopUnits: computed(() => openSession()?.totalWorkshopUnits ?? 0),
+    hasRunningUsage: computed(() => {
+      const session = openSession();
+      return session ? hasRunningUsage(session) : false;
+    }),
   })),
   withMethods((store) => ({
     setUserId: signalMethod<string>((userId) => {
       patchState(store, { userId });
     }),
+    reloadOpenSession(): void {
+      store._openSessionResource.reload();
+    },
     reloadUser(): void {
       store._userResource.reload();
       store._assignmentResource.reload();

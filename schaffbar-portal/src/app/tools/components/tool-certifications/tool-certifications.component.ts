@@ -12,7 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
@@ -38,7 +38,7 @@ import { User } from '../../../users/shared/models/user.model';
   ],
 })
 export class ToolCertificationsComponent {
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   readonly toolId = input.required<string>();
   readonly certifications = input.required<ToolCertification[]>();
@@ -127,8 +127,8 @@ export class ToolCertificationsComponent {
   }
 
   protected onDelete(cert: ToolCertification): void {
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'users.dialogs.certifications.deleteCertification.title',
         message: 'users.dialogs.certifications.deleteCertification.message',
         entity: this.userNameMap().get(cert.customerId),

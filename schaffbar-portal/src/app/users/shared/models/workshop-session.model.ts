@@ -40,6 +40,13 @@ export enum WorkshopSessionStatus {
   Paid = 'PAID',
 }
 
+export function hasRunningUsage(session: WorkshopSession): boolean {
+  return (
+    session.workshopUsages.some((usage) => usage.exitTime === null) ||
+    session.toolUsageSummaries.some((summary) => summary.active)
+  );
+}
+
 // ----------------------------------------------------------------------------
 // commands
 

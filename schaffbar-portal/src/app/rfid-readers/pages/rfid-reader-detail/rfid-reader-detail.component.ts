@@ -8,6 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { ToolsService } from '../../../tools/tools.service';
 import {
   ChangeRfidReaderTypeDialogData,
@@ -77,7 +78,7 @@ export class RfidReaderDetailComponent {
       ChangeRfidReaderTypeDialogData,
       ChangeRfidReaderTypeCommand
     >(ChangeRfidReaderTypeFormComponent, {
-      minWidth: '400px',
+      minWidth: DIALOG_WIDTH.small,
       disableClose: true,
       data: { rfidReader },
     });

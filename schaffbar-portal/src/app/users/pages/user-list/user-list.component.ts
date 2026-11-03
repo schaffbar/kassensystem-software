@@ -14,7 +14,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
 import { CreateUserCommand, DeleteUserCommand, User } from '../../shared/models/user.model';
 import { UsersStore } from '../../shared/stores/users.store';
@@ -39,7 +40,7 @@ export class UserListComponent {
   protected readonly store = inject(UsersStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -82,7 +83,7 @@ export class UserListComponent {
 
   protected newUserDialog(): void {
     const dialogRef = this.dialog.open<NewUserFormComponent, void, CreateUserCommand>(NewUserFormComponent, {
-      minWidth: '800px',
+      minWidth: DIALOG_WIDTH.large,
       disableClose: true,
     });
 
@@ -101,8 +102,8 @@ export class UserListComponent {
       return;
     }
 
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'users.dialogs.deleteUser.title',
         entity: user.firstName + ' ' + user.lastName,
         message: 'users.dialogs.deleteUser.message',

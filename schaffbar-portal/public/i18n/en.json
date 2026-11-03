@@ -121,6 +121,17 @@
           "title": "Delete Certification",
           "message": "Are you sure you want to delete this certification?"
         }
+      },
+      "closeSession": {
+        "title": "Close session",
+        "message": "The session will be billed with these totals and closed as paid. This cannot be undone.",
+        "workshopTime": "Workshop time",
+        "minutes": "Minutes",
+        "units": "Units",
+        "actions": {
+          "confirm": "Close session",
+          "cancel": "Cancel"
+        }
       }
     },
     "tables": {
@@ -196,7 +207,8 @@
         },
         "messages": {
           "noSlots": "No slots available for this session.",
-          "noOpenSession": "No open session for this user ."
+          "noOpenSession": "No open session for this user .",
+          "runningUsage": "The session can only be closed once all workshop and tool usages have ended."
         }
       }
     },

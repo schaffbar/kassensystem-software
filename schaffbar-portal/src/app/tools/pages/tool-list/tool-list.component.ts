@@ -13,7 +13,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ConfirmDialogService } from '../../../shared/components/confirm-delete/confirm-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
@@ -39,7 +40,7 @@ export class ToolListComponent {
   protected readonly store = inject(ToolsStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
@@ -78,7 +79,7 @@ export class ToolListComponent {
 
   protected newToolDialog(): void {
     const dialogRef = this.dialog.open<NewToolFormComponent, void, CreateToolCommand>(NewToolFormComponent, {
-      minWidth: '600px',
+      minWidth: DIALOG_WIDTH.medium,
       disableClose: true,
     });
 
@@ -97,8 +98,8 @@ export class ToolListComponent {
       return;
     }
 
-    this.confirmDialog
-      .confirm({
+    this.confirmDeleteDialog
+      .open({
         title: 'tools.dialogs.deleteTool.title',
         entity: tool.name,
         message: 'tools.dialogs.deleteTool.message',

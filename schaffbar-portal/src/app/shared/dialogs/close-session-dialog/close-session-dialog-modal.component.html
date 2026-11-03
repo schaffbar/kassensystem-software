@@ -1,0 +1,60 @@
+@let currentViewModel = viewModel();
+
+<h2 mat-dialog-title>{{ 'users.dialogs.closeSession.title' | translate }}</h2>
+
+<mat-divider />
+
+<mat-dialog-content>
+  @if (isLoading()) {
+    <div class="loading">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (hasLoadError()) {
+    <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
+  } @else if (!currentViewModel) {
+    <p class="hint">
+      <mat-icon>info</mat-icon>
+      {{ 'users.pages.openSession.messages.noOpenSession' | translate }}
+    </p>
+  } @else if (currentViewModel.hasRunningUsage) {
+    <p class="hint running-usage">
+      <mat-icon>warning</mat-icon>
+      {{ 'users.pages.openSession.messages.runningUsage' | translate }}
+    </p>
+  } @else {
+    <p>{{ 'users.dialogs.closeSession.message' | translate }}</p>
+
+    <table class="totals">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="number">{{ 'users.dialogs.closeSession.minutes' | translate }}</th>
+          <th class="number">{{ 'users.dialogs.closeSession.units' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="workshop-total">
+          <th scope="row">{{ 'users.dialogs.closeSession.workshopTime' | translate }}</th>
+          <td class="number">{{ currentViewModel.workshop.minutes }}</td>
+          <td class="number">{{ currentViewModel.workshop.units }}</td>
+        </tr>
+        @for (tool of currentViewModel.tools; track tool.toolId) {
+          <tr class="tool-total">
+            <th scope="row">{{ tool.name | orDash }}</th>
+            <td class="number">{{ tool.minutes }}</td>
+            <td class="number">{{ tool.units }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
+    {{ 'users.dialogs.closeSession.actions.cancel' | translate }}
+  </button>
+  <button matButton="filled" type="button" [disabled]="!canClose()" (click)="onConfirm()">
+    {{ 'users.dialogs.closeSession.actions.confirm' | translate }}
+  </button>
+</mat-dialog-actions>
