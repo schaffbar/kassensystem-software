@@ -20,8 +20,7 @@ describe('ConfirmDeleteDialogModalComponent', () => {
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('de', {
       tools: { dialogs: { deleteTool: { title: 'Werkzeug löschen', message: 'Wirklich löschen?' } } },
-      shared: { dialogs: { actions: { delete: { confirm: 'Löschen', cancel: 'Abbrechen' } } } },
-      custom: { confirm: 'Entfernen' },
+      shared: { dialogs: { confirmDelete: { actions: { confirm: 'Löschen', cancel: 'Abbrechen' } } } },
     });
     translate.use('de');
 
@@ -55,16 +54,10 @@ describe('ConfirmDeleteDialogModalComponent', () => {
     expect(texts('mat-dialog-content')[0]).toBe('Wirklich löschen? (Bandsäge)');
   });
 
-  it('should use the default confirm label', async () => {
+  it('should show cancel and delete buttons', async () => {
     await render(deleteTool);
 
     expect(texts('button')).toEqual(['Abbrechen', 'Löschen']);
-  });
-
-  it('should translate a custom confirm label', async () => {
-    await render({ ...deleteTool, confirmLabel: 'custom.confirm' });
-
-    expect(texts('button')).toEqual(['Abbrechen', 'Entfernen']);
   });
 
   it('should emit on confirm', async () => {

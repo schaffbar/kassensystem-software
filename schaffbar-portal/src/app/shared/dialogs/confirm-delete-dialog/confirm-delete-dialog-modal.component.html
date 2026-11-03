@@ -13,9 +13,9 @@
 
 <mat-dialog-actions>
   <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
-    {{ 'shared.dialogs.actions.delete.cancel' | translate }}
+    {{ 'shared.dialogs.confirmDelete.actions.cancel' | translate }}
   </button>
   <button class="danger-button" matButton="filled" type="button" (click)="confirmed.emit()">
-    {{ currentViewModel.confirmLabel ?? 'shared.dialogs.actions.delete.confirm' | translate }}
+    {{ 'shared.dialogs.confirmDelete.actions.confirm' | translate }}
   </button>
 </mat-dialog-actions>

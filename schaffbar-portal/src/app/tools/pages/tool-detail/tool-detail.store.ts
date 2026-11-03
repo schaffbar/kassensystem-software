@@ -5,9 +5,9 @@ import { patchState, signalMethod, signalStore, withComputed, withMethods, withP
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
-} from '../../../users/shared/models/tool-certification.model';
+} from '../../../tool-certifications/tool-certification.model';
 import { mutation } from '../../../shared/state/mutation';
-import { ToolCertificationService } from '../../../users/shared/services/tool-certification.service';
+import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,

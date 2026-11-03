@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { CloseWorkshopSessionCommand, WorkshopSession } from '../../shared/models/workshop-session.model';
+import { CloseWorkshopSessionCommand, WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserOpenSessionComponent } from './user-open-session.component';
 

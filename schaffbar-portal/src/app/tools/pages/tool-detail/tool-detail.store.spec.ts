@@ -6,7 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { ToolCertification } from '../../../users/shared/models/tool-certification.model';
+import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
 import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
 import { ToolDetailStore } from './tool-detail.store';
 

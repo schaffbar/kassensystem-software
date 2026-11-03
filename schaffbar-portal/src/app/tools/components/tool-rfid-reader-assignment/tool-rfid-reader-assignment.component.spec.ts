@@ -4,7 +4,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
 import { MatSelectHarness } from '@angular/material/select/testing';
 
@@ -13,6 +12,7 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
 import { ToolRfidReaderAssignmentComponent } from './tool-rfid-reader-assignment.component';
 
@@ -65,11 +65,17 @@ describe('ToolRfidReaderAssignmentComponent', () => {
   let loader: HarnessLoader;
   let changed: Mock;
   let cleared: Mock;
+  let openConfirmActionDialog: Mock;
 
   beforeEach(async () => {
+    openConfirmActionDialog = vi.fn();
     await TestBed.configureTestingModule({
       imports: [ToolRfidReaderAssignmentComponent],
-      providers: [provideZonelessChangeDetection(), provideTranslateService()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        { provide: ConfirmActionDialogService, useValue: { open: openConfirmActionDialog } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolRfidReaderAssignmentComponent);
@@ -150,12 +156,30 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     expect(actionButtons().length).toBe(0);
   });
 
-  it('should emit the clear command after confirmation', async () => {
-    const dialog = fixture.debugElement.injector.get(MatDialog);
-    vi.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(true) } as never);
-
+  async function clickClear(): Promise<void> {
     await (await loader.getHarness(MatButtonHarness.with({ selector: '.tool-rfid-reader-header button' }))).click();
+  }
 
+  it('should emit the clear command after confirmation', async () => {
+    openConfirmActionDialog.mockReturnValue(of(true));
+
+    await clickClear();
+
+    expect(openConfirmActionDialog).toHaveBeenCalledExactlyOnceWith({
+      title: 'tools.dialogs.clearRfidReader.title',
+      message: 'tools.dialogs.clearRfidReader.message',
+      entity: 'Tool 1',
+      confirmLabel: 'tools.dialogs.clearRfidReader.confirm',
+      destructive: true,
+    });
     expect(cleared).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1' });
+  });
+
+  it('should not emit the clear command when cancelled', async () => {
+    openConfirmActionDialog.mockReturnValue(of(false));
+
+    await clickClear();
+
+    expect(cleared).not.toHaveBeenCalled();
   });
 });

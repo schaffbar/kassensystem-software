@@ -1,5 +1,16 @@
 # Code conventions
 
+## Folders
+
+- `src/app/<topic>/` holds a topic's model (`<topic>.model.ts`: interfaces, enums, commands) and API service – e.g.
+  `tools/`, `rfid-readers/`, `workshop-sessions/`, `tool-certifications/`. A topic used by more than one feature
+  gets its own folder (`tool-certifications/` is used by `users` and `tools`), even without pages.
+- Nothing that belongs to a topic goes into `src/app/shared/` – also not an enum that is "the same everywhere".
+  `shared/` holds the building blocks used across features (pipes, dialogs, components, store helpers); they import
+  their domain types from topic folders.
+- A feature never imports from another feature's internals (`users/shared/…`, components, stores), only from topic
+  folders. Not migrated yet: `tools` imports `User` and `UsersStore` from `users/shared/`.
+
 ## Services
 
 - App-wide services are declared with `@Service()` (Angular 22), not `@Injectable({ providedIn: 'root' })`.
@@ -113,8 +124,9 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
   `Result | undefined` – no hand-written types in `subscribe`.
 - **The caller executes the result**: a command goes to its store's `mutation()`; if the dialog loaded data itself,
   the caller reloads also on cancel.
-- **Delete confirmations** go through `ConfirmDeleteDialogService.open(viewModel)` (`true`/`false`). Other actions
-  (pause, revoke, clear) still use it for now – they will get their own dialog.
+- **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (button
+  always "delete"), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
+  with its own `confirmLabel` and `destructive: true | false`.
 - **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
   form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it, Enter saves); destructive or
   irreversible confirmations put `cdkFocusInitial` on cancel.

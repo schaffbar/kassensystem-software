@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ToolCertificationStatus } from '../../../users/shared/models/tool-certification.model';
+import { ToolCertificationStatus } from '../../../tool-certifications/tool-certification.model';
 import { CertificationStatusChipComponent } from './certification-status-chip.component';
 
 describe('CertificationStatusChipComponent', () => {

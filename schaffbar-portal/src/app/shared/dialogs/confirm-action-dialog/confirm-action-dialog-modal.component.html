@@ -1,0 +1,31 @@
+@let currentViewModel = viewModel();
+@let destructive = currentViewModel.destructive;
+
+<h2 mat-dialog-title>{{ currentViewModel.title | translate }}</h2>
+
+<mat-divider />
+
+<mat-dialog-content>
+  {{ currentViewModel.message | translate }}
+  @if (currentViewModel.entity) {
+    <span>({{ currentViewModel.entity }})</span>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button
+    matButton="outlined"
+    type="button"
+    [attr.cdkFocusInitial]="destructive ? '' : null"
+    (click)="cancelled.emit()">
+    {{ 'shared.dialogs.confirmAction.actions.cancel' | translate }}
+  </button>
+  <button
+    matButton="filled"
+    type="button"
+    [class.danger-button]="destructive"
+    [attr.cdkFocusInitial]="destructive ? null : ''"
+    (click)="confirmed.emit()">
+    {{ currentViewModel.confirmLabel | translate }}
+  </button>
+</mat-dialog-actions>

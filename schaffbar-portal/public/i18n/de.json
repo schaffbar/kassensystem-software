@@ -20,13 +20,35 @@
     },
     "dialogs": {
       "actions": {
-        "delete": {
-          "confirm": "Löschen",
-          "cancel": "Abbrechen"
-        },
         "edit": {
           "confirm": "Speichern",
           "cancel": "Abbrechen"
+        }
+      },
+      "confirmDelete": {
+        "actions": {
+          "confirm": "Löschen",
+          "cancel": "Abbrechen"
+        }
+      },
+      "confirmAction": {
+        "actions": {
+          "cancel": "Abbrechen"
+        }
+      },
+      "closeSession": {
+        "title": "Sitzung beenden",
+        "message": "Die Sitzung wird mit diesen Summen abgerechnet und als bezahlt abgeschlossen. Das kann nicht rückgängig gemacht werden.",
+        "workshopTime": "Werkstattzeit",
+        "minutes": "Minuten",
+        "units": "Einheiten",
+        "actions": {
+          "confirm": "Sitzung beenden",
+          "cancel": "Abbrechen"
+        },
+        "messages": {
+          "noOpenSession": "Keine offene Sitzung für diesen Benutzer.",
+          "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
         }
       }
     }
@@ -120,17 +142,6 @@
         "deleteCertification": {
           "title": "Einweisung löschen",
           "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?"
-        }
-      },
-      "closeSession": {
-        "title": "Sitzung beenden",
-        "message": "Die Sitzung wird mit diesen Summen abgerechnet und als bezahlt abgeschlossen. Das kann nicht rückgängig gemacht werden.",
-        "workshopTime": "Werkstattzeit",
-        "minutes": "Minuten",
-        "units": "Einheiten",
-        "actions": {
-          "confirm": "Sitzung beenden",
-          "cancel": "Abbrechen"
         }
       }
     },
@@ -246,7 +257,8 @@
       },
       "clearRfidReader": {
         "title": "RFID-Lesegerät-Zuweisung aufheben",
-        "message": "Sind Sie sicher, dass Sie die RFID-Lesegerät-Zuweisung aufheben möchten?"
+        "message": "Sind Sie sicher, dass Sie die RFID-Lesegerät-Zuweisung aufheben möchten?",
+        "confirm": "Aufheben"
       }
     },
     "tooltips": {

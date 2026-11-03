@@ -3,8 +3,8 @@ import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
-import { CloseWorkshopSessionCommand, WorkshopSession } from '../models/workshop-session.model';
+import { environment } from '../../environments/environment';
+import { CloseWorkshopSessionCommand, WorkshopSession } from './workshop-session.model';
 
 const WORKSHOP_SESSION_API_URL = `${environment.apiBaseUrl}/api/v1/workshop-sessions`;
 

@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
 import { RfidTagAssignment, RfidTagAssignmentStatus, RfidTagAssignmentType } from '../models/rfid-tag-assignment.model';
-import { ToolCertification } from '../models/tool-certification.model';
+import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
 import { User } from '../models/user.model';
-import { WorkshopSession } from '../models/workshop-session.model';
+import { WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
 import { UserDetailStore } from './user-detail.store';
 
 describe('UserDetailStore', () => {

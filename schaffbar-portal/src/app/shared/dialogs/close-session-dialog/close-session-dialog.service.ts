@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { Observable } from 'rxjs';
 
-import { CloseWorkshopSessionCommand } from '../../../users/shared/models/workshop-session.model';
+import { CloseWorkshopSessionCommand } from '../../../workshop-sessions/workshop-session.model';
 import { DIALOG_WIDTH } from '../dialog-constants';
 import { CloseSessionDialogContainerComponent } from './close-session-dialog-container.component';
 

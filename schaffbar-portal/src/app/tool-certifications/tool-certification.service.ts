@@ -3,7 +3,7 @@ import { inject, Service } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../environments/environment';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
@@ -11,7 +11,7 @@ import {
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
   ToolCertification,
-} from '../models/tool-certification.model';
+} from './tool-certification.model';
 
 const TOOL_CERTIFICATIONS_API_URL = `${environment.apiBaseUrl}/api/v1/tool-certifications`;
 

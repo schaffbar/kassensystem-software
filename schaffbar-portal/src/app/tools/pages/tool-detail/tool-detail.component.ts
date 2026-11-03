@@ -11,7 +11,7 @@ import { RfidReadersStore } from '../../../rfid-readers/rfid-readers.store';
 import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
-} from '../../../users/shared/models/tool-certification.model';
+} from '../../../tool-certifications/tool-certification.model';
 import { UsersStore } from '../../../users/shared/stores/users.store';
 import { ToolCertificationsComponent } from '../../components/tool-certifications/tool-certifications.component';
 import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-detail-info.component';

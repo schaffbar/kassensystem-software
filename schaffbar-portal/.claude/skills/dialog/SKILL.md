@@ -20,6 +20,7 @@ only – it stays one component (see "Form dialogs" at the end).
 Reference implementations:
 
 - [confirm-delete-dialog/](../../../src/app/shared/dialogs/confirm-delete-dialog/) – nothing to load: modal + service
+- [confirm-action-dialog/](../../../src/app/shared/dialogs/confirm-action-dialog/) – same, with a `destructive` flag
 - [close-session-dialog/](../../../src/app/shared/dialogs/close-session-dialog/) – loads data: container + modal +
   service
 
@@ -43,6 +44,14 @@ src/app/shared/dialogs/
 Without loading the service plays the container's part: it opens the modal directly and connects its outputs to
 `dialogRef` with `outputBinding`.
 
+A shared dialog belongs to no feature, so it doesn't reach into one:
+
+- Models and API services come from a domain folder (`tools/`, `rfid-readers/`, `workshop-sessions/`), never from
+  the internals of a feature (`users/shared/…`, components, stores).
+- The dialog's own texts (title, labels, hints, buttons) live under `shared.dialogs.<name>.*` in `public/i18n/*.json`
+  (`shared.dialogs.closeSession.title`, `shared.dialogs.confirmDelete.actions.confirm`) – also when a page shows a
+  similar text. Texts the caller passes in the view model (confirmations) are the caller's keys.
+
 Decide first: **does the dialog need data the caller doesn't already have, or that must be current at the time of
 the action** (e.g. totals that change while the page is open)? → container. Otherwise → modal + service.
 
@@ -53,7 +62,6 @@ export interface ConfirmDeleteDialogViewModel {
   // translation keys
   title: string;
   message: string;
-  confirmLabel?: string;
   // plain text
   entity?: string;
 }
@@ -106,6 +114,19 @@ Rules:
 - A modal that receives loading state shows a `<mat-spinner diameter="40" />` while loading, an error text
   (`shared.errors.loadFailed`) on a load error, a hint instead of the data when the action is not possible
   (no data, a running usage, …) – and disables confirm in all these cases with a `computed` (`canClose`).
+
+## Confirmations
+
+A yes/no question before an action uses one of the two confirmation dialogs – no new dialog per action:
+
+| Action                                    | Service                                                             | Confirm button                                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| delete                                    | `ConfirmDeleteDialogService.open({ title, message, entity? })`      | always "delete", `danger-button`, focus on cancel                                                                   |
+| everything else (pause, revoke, clear, …) | `ConfirmActionDialogService.open({ …, confirmLabel, destructive })` | `confirmLabel`; `destructive: true` → `danger-button` + focus on cancel, `false` → normal button + focus on confirm |
+
+`destructive` follows the button on the page: an action whose page button has `danger-button` is destructive in the
+dialog too. Inside the modal a conditional focus is bound as an attribute:
+`[attr.cdkFocusInitial]="destructive ? '' : null"`.
 
 ## Container (only if the dialog loads data)
 
@@ -295,7 +316,8 @@ Once a form dialog is needed in a second place, it moves to `shared/dialogs/` an
 
 ## Checklist
 
-- [ ] Kind decided: shared dialog (modal + service, + container if it loads data) or form dialog
+- [ ] Kind decided: shared dialog (modal + service, + container if it loads data), confirmation (existing
+      `confirm-delete-dialog` / `confirm-action-dialog`) or form dialog
 - [ ] Folder `shared/dialogs/<name>-dialog/`, names `<name>-dialog-modal|container`, `<Name>DialogService.open`
 - [ ] Modal: inputs (`viewModel`, loading state) and outputs only, command built from ids in the view model
 - [ ] Container: ids as `input.required()`, `httpResource` directly, pure `to<Name>ViewModel`, closes `dialogRef`
@@ -303,5 +325,6 @@ Once a form dialog is needed in a second place, it moves to `shared/dialogs/` an
 - [ ] Caller executes the command via its store, reloads also on cancel if the dialog loaded data
 - [ ] Buttons: cancel first, `type="button"`, `danger-button` / `cdkFocusInitial` for destructive actions
 - [ ] Specs for modal, container and service (real `MatDialog`), caller spec with mocked service
+- [ ] Imports only from domain folders, own texts under `shared.dialogs.<name>.*` (de + en)
 - [ ] Comments only where the code can't say it
 - [ ] `npx ng build`, `npx ng lint`, `npx ng test --watch=false`, `npx prettier --check "src/**/*.{ts,html,scss}"`

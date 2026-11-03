@@ -1,6 +1,6 @@
 @let currentViewModel = viewModel();
 
-<h2 mat-dialog-title>{{ 'users.dialogs.closeSession.title' | translate }}</h2>
+<h2 mat-dialog-title>{{ 'shared.dialogs.closeSession.title' | translate }}</h2>
 
 <mat-divider />
 
@@ -14,27 +14,27 @@
   } @else if (!currentViewModel) {
     <p class="hint">
       <mat-icon>info</mat-icon>
-      {{ 'users.pages.openSession.messages.noOpenSession' | translate }}
+      {{ 'shared.dialogs.closeSession.messages.noOpenSession' | translate }}
     </p>
   } @else if (currentViewModel.hasRunningUsage) {
     <p class="hint running-usage">
       <mat-icon>warning</mat-icon>
-      {{ 'users.pages.openSession.messages.runningUsage' | translate }}
+      {{ 'shared.dialogs.closeSession.messages.runningUsage' | translate }}
     </p>
   } @else {
-    <p>{{ 'users.dialogs.closeSession.message' | translate }}</p>
+    <p>{{ 'shared.dialogs.closeSession.message' | translate }}</p>
 
     <table class="totals">
       <thead>
         <tr>
           <th></th>
-          <th class="number">{{ 'users.dialogs.closeSession.minutes' | translate }}</th>
-          <th class="number">{{ 'users.dialogs.closeSession.units' | translate }}</th>
+          <th class="number">{{ 'shared.dialogs.closeSession.minutes' | translate }}</th>
+          <th class="number">{{ 'shared.dialogs.closeSession.units' | translate }}</th>
         </tr>
       </thead>
       <tbody>
         <tr class="workshop-total">
-          <th scope="row">{{ 'users.dialogs.closeSession.workshopTime' | translate }}</th>
+          <th scope="row">{{ 'shared.dialogs.closeSession.workshopTime' | translate }}</th>
           <td class="number">{{ currentViewModel.workshop.minutes }}</td>
           <td class="number">{{ currentViewModel.workshop.units }}</td>
         </tr>
@@ -52,9 +52,9 @@
 
 <mat-dialog-actions>
   <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
-    {{ 'users.dialogs.closeSession.actions.cancel' | translate }}
+    {{ 'shared.dialogs.closeSession.actions.cancel' | translate }}
   </button>
   <button matButton="filled" type="button" [disabled]="!canClose()" (click)="onConfirm()">
-    {{ 'users.dialogs.closeSession.actions.confirm' | translate }}
+    {{ 'shared.dialogs.closeSession.actions.confirm' | translate }}
   </button>
 </mat-dialog-actions>

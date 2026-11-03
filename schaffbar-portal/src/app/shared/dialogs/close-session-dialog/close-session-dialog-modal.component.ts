@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { CloseWorkshopSessionCommand } from '../../../users/shared/models/workshop-session.model';
+import { CloseWorkshopSessionCommand } from '../../../workshop-sessions/workshop-session.model';
 import { OrDashPipe } from '../../pipes/or-dash.pipe';
 
 export interface CloseSessionViewModel {

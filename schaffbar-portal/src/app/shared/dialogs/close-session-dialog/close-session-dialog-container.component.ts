@@ -6,8 +6,8 @@ import {
   CloseWorkshopSessionCommand,
   hasRunningUsage,
   WorkshopSession,
-} from '../../../users/shared/models/workshop-session.model';
-import { WorkshopSessionService } from '../../../users/shared/services/workshop-session.service';
+} from '../../../workshop-sessions/workshop-session.model';
+import { WorkshopSessionService } from '../../../workshop-sessions/workshop-session.service';
 import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close-session-dialog-modal.component';
 
 @Component({

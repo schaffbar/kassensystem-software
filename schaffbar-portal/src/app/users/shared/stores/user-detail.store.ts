@@ -3,18 +3,18 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
 import { mutation } from '../../../shared/state/mutation';
-import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../shared/models/rfid-tag-assignment.model';
+import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../models/rfid-tag-assignment.model';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-} from '../../shared/models/tool-certification.model';
-import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
-import { CloseWorkshopSessionCommand, hasRunningUsage } from '../../shared/models/workshop-session.model';
-import { RfidTagAssignmentService } from '../../shared/services/rfid-tag-assignment.service';
-import { ToolCertificationService } from '../../shared/services/tool-certification.service';
-import { UsersService } from '../../shared/services/users.service';
-import { WorkshopSessionService } from '../../shared/services/workshop-session.service';
+} from '../../../tool-certifications/tool-certification.model';
+import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
+import { CloseWorkshopSessionCommand, hasRunningUsage } from '../../../workshop-sessions/workshop-session.model';
+import { RfidTagAssignmentService } from '../services/rfid-tag-assignment.service';
+import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
+import { UsersService } from '../services/users.service';
+import { WorkshopSessionService } from '../../../workshop-sessions/workshop-session.service';
 
 interface UserDetailState {
   userId: string | null;

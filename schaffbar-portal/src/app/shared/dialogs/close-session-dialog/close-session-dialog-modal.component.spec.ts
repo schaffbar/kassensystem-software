@@ -20,8 +20,8 @@ describe('CloseSessionDialogModalComponent', () => {
     ],
     hasRunningUsage: false,
   };
-  const confirmText = 'users.dialogs.closeSession.actions.confirm';
-  const cancelText = 'users.dialogs.closeSession.actions.cancel';
+  const confirmText = 'shared.dialogs.closeSession.actions.confirm';
+  const cancelText = 'shared.dialogs.closeSession.actions.cancel';
 
   let fixture: ComponentFixture<CloseSessionDialogModalComponent>;
   let loader: HarnessLoader;
@@ -71,7 +71,7 @@ describe('CloseSessionDialogModalComponent', () => {
   it('should show the workshop totals and the totals of each tool, with a dash for a deleted tool', async () => {
     await render({ viewModel });
 
-    expect(cells('tr.workshop-total')).toEqual([['users.dialogs.closeSession.workshopTime', '75', '13']]);
+    expect(cells('tr.workshop-total')).toEqual([['shared.dialogs.closeSession.workshopTime', '75', '13']]);
     expect(cells('tr.tool-total')).toEqual([
       ['Bandsäge', '31', '6'],
       ['–', '7', '2'],
@@ -82,7 +82,7 @@ describe('CloseSessionDialogModalComponent', () => {
   it('should show a hint instead of the totals while a usage is running', async () => {
     await render({ viewModel: { ...viewModel, hasRunningUsage: true } });
 
-    expect(query('.running-usage')?.textContent).toContain('users.pages.openSession.messages.runningUsage');
+    expect(query('.running-usage')?.textContent).toContain('shared.dialogs.closeSession.messages.runningUsage');
     expect(query('table')).toBeNull();
     expect(await isConfirmDisabled()).toBe(true);
   });
@@ -90,7 +90,7 @@ describe('CloseSessionDialogModalComponent', () => {
   it('should show a hint when there is no open session', async () => {
     await render({ viewModel: null });
 
-    expect(query('.hint')?.textContent).toContain('users.pages.openSession.messages.noOpenSession');
+    expect(query('.hint')?.textContent).toContain('shared.dialogs.closeSession.messages.noOpenSession');
     expect(await isConfirmDisabled()).toBe(true);
   });
 

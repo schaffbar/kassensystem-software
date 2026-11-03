@@ -10,7 +10,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { WorkshopSession } from '../../../users/shared/models/workshop-session.model';
+import { WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
 import { CloseSessionDialogModalComponent } from './close-session-dialog-modal.component';
 import { CloseSessionDialogContainerComponent } from './close-session-dialog-container.component';
 
