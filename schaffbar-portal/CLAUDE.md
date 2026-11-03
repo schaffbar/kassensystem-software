@@ -38,7 +38,8 @@ component (inputs, outputs, signals, handlers).
 
 - Data that is displayed is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the
   signal store. A one-off check at the time of an action (e.g. `getToolsByRfidReader` before changing the reader
-  type) stays a plain `HttpClient` observable – it is no state of the page.
+  type) stays a plain `HttpClient` observable – it is no state of the page. A dialog container loads its data with
+  `httpResource` directly, without a store (see "Dialogs").
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
   `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not
@@ -96,26 +97,24 @@ component (inputs, outputs, signals, handlers).
 
 ## Dialogs
 
-- **Cancel closes without a result** (`undefined`), like Escape or a backdrop click:
-  `<button mat-stroked-button type="button" [mat-dialog-close]="undefined">`.
-  Not `mat-dialog-close` without a value – that closes with `''`.
-- **Save / confirm closes with the result**: `this.dialogRef.close(command)` in `onSave()`, for confirmation dialogs
-  `[mat-dialog-close]="true"`. The dialog component types its ref: `inject(MatDialogRef<MyDialogComponent, Result>)`.
-- **The caller types the dialog when opening it**, so `afterClosed()` is checked by the compiler as `Result | undefined`
-  – no hand-written types in `subscribe`:
+Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 
-  ```ts
-  this.dialog
-    .open<NewToolFormComponent, void, CreateToolCommand>(NewToolFormComponent, { … })
-    .afterClosed()
-    .subscribe((command) => {
-      if (command) this.store.createTool(command);
-    });
-  ```
-
-- **Delete confirmations** go through `ConfirmDialogService.confirm({ title, entity?, message })` – it opens
-  `ConfirmDeleteComponent` with the common options and emits `true`/`false`. `title`, `message` (and `confirmLabel`)
-  are translation keys, `entity` is plain text. Don't open `ConfirmDeleteComponent` directly.
-- **Button order**: cancel first, then save/confirm (confirming action on the right).
-- **Focus**: form dialogs have no `cdkFocusInitial` – the dialog focuses the first field, so Enter saves.
-  Exception: destructive confirmations (delete) keep `cdkFocusInitial` on cancel, so an accidental Enter does nothing.
+- **Shared dialogs** (`src/app/shared/dialogs/<name>-dialog/`) consist of a **modal** (`<name>-dialog-modal`: the
+  whole dialog UI with inputs – a view model, loading state – and outputs only, no `MAT_DIALOG_DATA` /
+  `[mat-dialog-close]` / `dialogRef`) and a **service** with one method `open(…)`. If the dialog has to load data, a
+  **container** (`<name>-dialog-container`) gets the ids as `input.required()`, loads with `httpResource` directly and
+  closes `dialogRef` on the modal's outputs; otherwise the service connects the modal itself via
+  `bindings: [inputBinding(…), outputBinding(…)]`.
+- **Form dialogs** (`<feature>/components/<name>-form/`) are opened directly by one page and close themselves:
+  `dialogRef.close(command)` on save, `[mat-dialog-close]="undefined"` on cancel (not `mat-dialog-close` without a
+  value – that closes with `''`).
+- **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
+  `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is
+  `Result | undefined` – no hand-written types in `subscribe`.
+- **The caller executes the result**: a command goes to its store's `mutation()`; if the dialog loaded data itself,
+  the caller reloads also on cancel.
+- **Delete confirmations** go through `ConfirmDeleteDialogService.open(viewModel)` (`true`/`false`). Other actions
+  (pause, revoke, clear) still use it for now – they will get their own dialog.
+- **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
+  form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it, Enter saves); destructive or
+  irreversible confirmations put `cdkFocusInitial` on cancel.

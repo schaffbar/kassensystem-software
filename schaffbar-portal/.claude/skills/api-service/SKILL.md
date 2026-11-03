@@ -130,8 +130,8 @@ Prefix `get…`, plain value parameters, the JSDoc line above. If you are unsure
 ## Commands → `Observable`
 
 ```ts
-createTool(command: CreateToolCommand): Observable<Tool> {
-  return this.http.post<Tool>(TOOLS_API_URL, command);
+createTool(command: CreateToolCommand): Observable<void> {
+  return this.http.post<void>(TOOLS_API_URL, command);
 }
 
 changeRfidReader(command: ChangeRfidReaderCommand): Observable<void> {
@@ -155,8 +155,9 @@ Rules:
   (`UpdateUserContactCommand` → `updateUserContact`).
 - **Always exactly one parameter: the command** – also for a single id (`DeleteToolCommand { id }`, not `string`).
   Ids for the URL come from the command. Component output, store method and service method use the same command type.
-- Return type matches the backend response: `Observable<void>` for an empty body, `Observable<Entity>` when the
-  backend returns the entity.
+- Return type matches the backend response: `Observable<void>` for an empty body, `Observable<Entity>` only when the
+  backend really returns the entity. Check the controller: a create endpoint answering `201 Created` with only a
+  `Location` header (`ResponseEntity.created(location).build()`, e.g. tools, customers) has no body → `void`.
 - Body:
   - The backend takes the command as is → pass `command` directly.
   - The backend expects another shape → build a `requestBody` (or an inline object with the needed fields):
@@ -166,7 +167,7 @@ Rules:
       ...command,
       dateOfBirth: format(command.dateOfBirth, 'yyyy-MM-dd'),
     };
-    return this.http.post<User>(USERS_API_URL, requestBody);
+    return this.http.post<void>(USERS_API_URL, requestBody);
     ```
 
   - Dates: `format()` / `parseISO()` from `date-fns` – never inject `DatePipe` or other pipes into a service.
