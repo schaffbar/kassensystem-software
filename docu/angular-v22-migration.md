@@ -461,7 +461,7 @@ function toModel(user: User): ContactModel {
 ## Anhang B – Muster: Detailseite mit `httpResource` im Store
 
 Vollständig: [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts),
-Service-Regeln im Skill [api-service](../schaffbar-portal/.claude/skills/api-service/SKILL.md)
+Service-Regeln im Skill [api](../schaffbar-portal/.claude/skills/api/SKILL.md)
 
 ```ts
 // Service

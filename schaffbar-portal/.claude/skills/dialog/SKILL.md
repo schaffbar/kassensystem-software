@@ -177,7 +177,7 @@ Rules:
   else; no `styleUrl`.
 - Gets **only ids**, as `input.required()` – never whole entities (they could be outdated, which is why the dialog
   loads in the first place).
-- Loads with the `httpResource` of the feature service (see skill `api-service`) and passes the input signal itself
+- Loads with the `httpResource` of the API service (see skill `api`) and passes the input signal itself
   as the getter: `openSessionResource(this.customerId)`. The container holds the resource directly, **no store** –
   it is a single resource that lives exactly as long as the dialog. It loads on every open, so the data is current.
 - The mapping API model → view model is a pure, unexported function after the class (`to<Name>ViewModel`), see
