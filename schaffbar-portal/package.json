@@ -29,7 +29,8 @@
     "@ngx-translate/http-loader": "^17.0.0",
     "date-fns": "^4.4.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@angular/build": "^22.2.2",

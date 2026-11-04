@@ -2,14 +2,19 @@
 
 ## Folders
 
-- `src/app/<topic>/` holds a topic's model (`<topic>.model.ts`: interfaces, enums, commands) and API service – e.g.
-  `tools/`, `rfid-readers/`, `workshop-sessions/`, `tool-certifications/`. A topic used by more than one feature
-  gets its own folder (`tool-certifications/` is used by `users` and `tools`), even without pages.
-- Nothing that belongs to a topic goes into `src/app/shared/` – also not an enum that is "the same everywhere".
-  `shared/` holds the building blocks used across features (pipes, dialogs, components, store helpers); they import
-  their domain types from topic folders.
-- A feature never imports from another feature's internals (`users/shared/…`, components, stores), only from topic
-  folders. Not migrated yet: `tools` imports `User` and `UsersStore` from `users/shared/`.
+Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`); the rules below describe the target.
+
+- `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
+  `<entity>.api-model.ts` (zod schema, `…ApiModel`, `…Request`) and `<resource>.api-service.ts` (`…ApiService`).
+- `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
+  (`<entity>.mapper.ts`: API model → feature model, command → request) and stores, pages, components.
+- `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,
+  e.g. `rfid-reader-type.ts`). No entities, no commands.
+- Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
+  models (enforced by ESLint).
+- A feature never imports from another feature's internals (`users/shared/…`, components, stores). Not migrated yet:
+  `tools` imports `User` and `UsersStore` from `users/shared/`; the interim topic folders `workshop-sessions/` and
+  `tool-certifications/` move to `shared/api` + features.
 
 ## Services
 

@@ -9,7 +9,8 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { RfidReader, RfidReaderType } from '../../rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { RfidReader } from '../../rfid-reader.model';
 import { RfidReaderDetailInfoComponent } from './rfid-reader-detail-info.component';
 
 describe('RfidReaderDetailInfoComponent', () => {
@@ -19,7 +20,7 @@ describe('RfidReaderDetailInfoComponent', () => {
     type: RfidReaderType.SwitchBox,
     name: 'Reader 1',
     socketName: 'Steckdose 1',
-    createdAt: '2026-01-01T10:00:00Z',
+    createdAt: new Date('2026-01-01T10:00:00Z'),
   };
 
   let fixture: ComponentFixture<RfidReaderDetailInfoComponent>;

@@ -6,12 +6,24 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../environments/environment';
-import { RfidReader } from './rfid-reader.model';
+import { RfidReaderApiModel } from '../shared/api/rfid-readers/rfid-reader.api-model';
+import { RfidReaderType } from '../shared/models/rfid-reader-type';
+import { toRfidReader } from './rfid-reader.mapper';
 import { RfidReadersStore } from './rfid-readers.store';
 
 describe('RfidReadersStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
-  const entities = [{ id: 'id-1' }, { id: 'id-2' }] as RfidReader[];
+  const entities: RfidReaderApiModel[] = [
+    {
+      id: 'id-1',
+      macAddress: 'AA:BB',
+      type: RfidReaderType.SwitchBox,
+      name: 'Reader 1',
+      socketName: null,
+      createdAt: '2026-01-01T10:00:00Z',
+    },
+    { id: 'id-2', macAddress: 'CC:DD', type: null, name: null, socketName: null, createdAt: '2026-01-02T10:00:00Z' },
+  ];
 
   let store: InstanceType<typeof RfidReadersStore>;
   let httpMock: HttpTestingController;
@@ -47,7 +59,7 @@ describe('RfidReadersStore', () => {
   it('should load all entries on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(entities);
+    expect(store.entities()).toEqual(entities.map(toRfidReader));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -73,7 +85,7 @@ describe('RfidReadersStore', () => {
 
     expectLoad().flush([entities[1]]);
     await settle();
-    expect(store.entities()).toEqual([entities[1]]);
+    expect(store.entities()).toEqual([toRfidReader(entities[1])]);
     expect(store.deleteRfidReader.isPending()).toBe(false);
   });
 

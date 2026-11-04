@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { RfidReaderType } from './rfid-reader.model';
+import { RfidReaderType } from '../shared/models/rfid-reader-type';
 import { RfidReaderTypeKeyPipe } from './rfid-reader-type-key.pipe';
 
 describe('RfidReaderTypeKeyPipe', () => {

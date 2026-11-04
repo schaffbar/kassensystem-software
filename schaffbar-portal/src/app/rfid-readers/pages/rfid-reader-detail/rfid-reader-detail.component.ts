@@ -15,12 +15,8 @@ import {
   ChangeRfidReaderTypeFormComponent,
 } from '../../components/change-rfid-reader-type-form/change-rfid-reader-type-form.component';
 import { RfidReaderDetailInfoComponent } from '../../components/rfid-reader-detail-info/rfid-reader-detail-info.component';
-import {
-  ChangeRfidReaderTypeCommand,
-  RfidReader,
-  RfidReaderType,
-  UpdateRfidReaderCommand,
-} from '../../rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 @Component({

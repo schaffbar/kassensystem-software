@@ -9,7 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { ChangeRfidReaderTypeCommand, RfidReader, RfidReaderType } from '../../rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { ChangeRfidReaderTypeCommand, RfidReader } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 
 export interface ChangeRfidReaderTypeDialogData {

@@ -41,6 +41,14 @@ module.exports = tseslint.config(
       '@angular-eslint/prefer-output-readonly': 'error',
       // import rules
       'import/no-unresolved': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "ImportDeclaration[source.value='zod'] > :matches(ImportSpecifier[imported.name='z'], ImportDefaultSpecifier)",
+          message: "Use `import * as z from 'zod'` – `import { z }` pulls all of zod into the bundle.",
+        },
+      ],
       'import/order': [
         'error',
         {
@@ -84,6 +92,24 @@ module.exports = tseslint.config(
           extensions: ['.ts'],
         },
       },
+    },
+  },
+  {
+    // only stores, mappers and dialog containers talk to the API layer
+    files: ['src/app/**/*.component.ts', 'src/app/**/*.component.spec.ts', 'src/app/**/*.pipe.ts'],
+    ignores: ['src/app/shared/dialogs/**/*-dialog-container.component*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/shared/api/**'],
+              message: 'Components use feature models – only stores, mappers and dialog containers import shared/api.',
+            },
+          ],
+        },
+      ],
     },
   },
   {

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { RfidReaderType } from './rfid-reader.model';
+import { RfidReaderType } from '../shared/models/rfid-reader-type';
 
 /**
  * Translation key of a reader type – `rfidReaders.types.none` for a new reader without type.

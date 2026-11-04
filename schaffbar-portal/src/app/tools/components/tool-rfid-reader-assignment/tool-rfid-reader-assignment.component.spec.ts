@@ -11,7 +11,8 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { RfidReader, RfidReaderType } from '../../../rfid-readers/rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { RfidReader } from '../../../rfid-readers/rfid-reader.model';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
 import { ToolRfidReaderAssignmentComponent } from './tool-rfid-reader-assignment.component';
@@ -24,7 +25,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
       type: RfidReaderType.SwitchBox,
       name: 'Reader 1',
       socketName: '',
-      createdAt: '2026-01-01T10:00:00Z',
+      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
     {
       id: 'reader-2',
@@ -32,7 +33,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
       type: RfidReaderType.SwitchBox,
       name: 'Reader 2',
       socketName: '',
-      createdAt: '2026-01-01T10:00:00Z',
+      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
     {
       id: 'reader-3',
@@ -40,7 +41,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
       type: RfidReaderType.SwitchBox,
       name: 'Reader 3',
       socketName: '',
-      createdAt: '2026-01-01T10:00:00Z',
+      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
   ];
 

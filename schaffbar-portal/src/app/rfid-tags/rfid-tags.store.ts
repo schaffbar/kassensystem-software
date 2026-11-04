@@ -2,23 +2,24 @@ import { computed, inject } from '@angular/core';
 
 import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
+import { RfidTagsApiService } from '../shared/api/rfid-tags/rfid-tags.api-service';
 import { mutation } from '../shared/state/mutation';
+import { toRfidTag } from './rfid-tag.mapper';
 import { DeleteRfidTagCommand } from './rfid-tag.model';
-import { RfidTagService } from './rfid-tags.service';
 
 export const RfidTagsStore = signalStore(
   { providedIn: 'root' },
   withProps(() => {
-    const rfidTagService = inject(RfidTagService);
+    const rfidTagsApi = inject(RfidTagsApiService);
     return {
-      _rfidTagService: rfidTagService,
+      _rfidTagsApi: rfidTagsApi,
       // loads on first use of the store – replaces withEntities + rxMethod + onInit
-      _rfidTagsResource: rfidTagService.rfidTagsResource(),
+      _rfidTagsResource: rfidTagsApi.rfidTagsResource(),
     };
   }),
   withComputed(({ _rfidTagsResource }) => ({
     // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
-    entities: computed(() => (_rfidTagsResource.hasValue() ? _rfidTagsResource.value() : [])),
+    entities: computed(() => (_rfidTagsResource.hasValue() ? _rfidTagsResource.value().map(toRfidTag) : [])),
     isLoading: computed(() => _rfidTagsResource.isLoading()),
     hasLoadError: computed(() => !!_rfidTagsResource.error()),
   })),
@@ -27,7 +28,7 @@ export const RfidTagsStore = signalStore(
       store._rfidTagsResource.reload();
     },
     deleteRfidTag: mutation<DeleteRfidTagCommand>({
-      request: (command) => store._rfidTagService.deleteRfidTag(command),
+      request: (command) => store._rfidTagsApi.deleteRfidTag(command.id),
       onSuccess: () => store._rfidTagsResource.reload(),
     }),
   })),

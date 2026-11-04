@@ -11,7 +11,8 @@ import { MatSelectHarness } from '@angular/material/select/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { describe, expect, it, vi, type Mock } from 'vitest';
 
-import { RfidReader, RfidReaderType } from '../../rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { RfidReader } from '../../rfid-reader.model';
 import { ChangeRfidReaderTypeFormComponent } from './change-rfid-reader-type-form.component';
 
 describe('ChangeRfidReaderTypeFormComponent', () => {

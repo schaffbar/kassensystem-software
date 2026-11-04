@@ -6,12 +6,14 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { RfidReader, RfidReaderType } from '../../rfid-reader.model';
+import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { toRfidReader } from '../../rfid-reader.mapper';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 describe('RfidReaderDetailStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
-  const reader: RfidReader = {
+  const reader: RfidReaderApiModel = {
     id: 'reader-1',
     macAddress: 'AA:BB',
     type: RfidReaderType.SwitchBox,
@@ -65,7 +67,7 @@ describe('RfidReaderDetailStore', () => {
   it('should load the reader when the id is set', async () => {
     await loadReader();
 
-    expect(store.rfidReader()).toEqual(reader);
+    expect(store.rfidReader()).toEqual(toRfidReader(reader));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -87,6 +89,7 @@ describe('RfidReaderDetailStore', () => {
     trigger();
     const update = httpMock.expectOne(`${url}/reader-1`);
     expect(update.request.method).toBe('PUT');
+    expect(update.request.body).toEqual({ name: 'Neuer Name', socketName: null });
     expect(store.updateRfidReader.isPending()).toBe(true);
     update.flush(null);
     trigger();
@@ -94,6 +97,22 @@ describe('RfidReaderDetailStore', () => {
     httpMock.expectOne((req) => req.method === 'GET' && req.url === `${url}/reader-1`).flush(reader);
     await settle();
     expect(store.updateRfidReader.isPending()).toBe(false);
+  });
+
+  it('should send only the type when changing it', async () => {
+    await loadReader();
+
+    store.changeRfidReaderType({ id: 'reader-1', type: RfidReaderType.GateKeeperIn });
+    trigger();
+    const change = httpMock.expectOne(`${url}/reader-1/type`);
+    expect(change.request.method).toBe('PATCH');
+    expect(change.request.body).toEqual({ type: RfidReaderType.GateKeeperIn });
+    change.flush(null);
+    trigger();
+
+    httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, type: RfidReaderType.GateKeeperIn });
+    await settle();
+    expect(store.rfidReader()?.type).toBe(RfidReaderType.GateKeeperIn);
   });
 
   it('should expose a load error', async () => {

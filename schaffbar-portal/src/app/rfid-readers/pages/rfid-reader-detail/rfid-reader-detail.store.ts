@@ -2,9 +2,10 @@ import { computed, inject } from '@angular/core';
 
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
+import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
 import { mutation } from '../../../shared/state/mutation';
+import { toChangeRfidReaderTypeRequest, toRfidReader, toUpdateRfidReaderRequest } from '../../rfid-reader.mapper';
 import { ChangeRfidReaderTypeCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
-import { RfidReaderService } from '../../rfid-readers.service';
 
 interface RfidReaderDetailState {
   rfidReaderId: string | null;
@@ -13,16 +14,16 @@ interface RfidReaderDetailState {
 export const RfidReaderDetailStore = signalStore(
   withState<RfidReaderDetailState>({ rfidReaderId: null }),
   withProps((store) => {
-    const rfidReaderService = inject(RfidReaderService);
+    const rfidReadersApi = inject(RfidReadersApiService);
     return {
-      _rfidReaderService: rfidReaderService,
+      _rfidReadersApi: rfidReadersApi,
       // (re)loads whenever the id changes – replaces the dirty flag + effect + rxMethod
-      _rfidReaderResource: rfidReaderService.rfidReaderResource(store.rfidReaderId),
+      _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
     };
   }),
   withComputed(({ _rfidReaderResource }) => ({
     // hasValue() stays true while reloading, so the page keeps showing the reader instead of flickering
-    rfidReader: computed(() => (_rfidReaderResource.hasValue() ? _rfidReaderResource.value() : null)),
+    rfidReader: computed(() => (_rfidReaderResource.hasValue() ? toRfidReader(_rfidReaderResource.value()) : null)),
     isLoading: computed(() => _rfidReaderResource.isLoading()),
     hasLoadError: computed(() => !!_rfidReaderResource.error()),
   })),
@@ -34,11 +35,12 @@ export const RfidReaderDetailStore = signalStore(
       store._rfidReaderResource.reload();
     },
     updateRfidReader: mutation<UpdateRfidReaderCommand>({
-      request: (command) => store._rfidReaderService.updateRfidReader(command),
+      request: (command) => store._rfidReadersApi.updateRfidReader(command.id, toUpdateRfidReaderRequest(command)),
       onSuccess: () => store._rfidReaderResource.reload(),
     }),
     changeRfidReaderType: mutation<ChangeRfidReaderTypeCommand>({
-      request: (command) => store._rfidReaderService.changeRfidReaderType(command),
+      request: (command) =>
+        store._rfidReadersApi.changeRfidReaderType(command.id, toChangeRfidReaderTypeRequest(command)),
       onSuccess: () => store._rfidReaderResource.reload(),
     }),
   })),
