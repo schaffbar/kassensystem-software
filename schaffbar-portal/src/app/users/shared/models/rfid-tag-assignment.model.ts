@@ -1,20 +1,13 @@
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+
 export interface RfidTagAssignment {
   id: string;
   customerId: string;
   rfidTagId: string | null;
   assignmentType: RfidTagAssignmentType;
   status: RfidTagAssignmentStatus;
-  assignmentDate: string | null;
-}
-
-export enum RfidTagAssignmentStatus {
-  WaitingForAssignment = 'WAITING_FOR_ASSIGNMENT',
-  Assigned = 'ASSIGNED',
-}
-
-export enum RfidTagAssignmentType {
-  Fixed = 'FIXED',
-  Temporary = 'TEMPORARY',
+  assignmentDate: Date | null;
 }
 
 // ----------------------------------------------------------------------------

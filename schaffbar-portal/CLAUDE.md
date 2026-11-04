@@ -2,7 +2,7 @@
 
 ## Folders
 
-Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`); the rules below describe the target.
+Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`, `rfid-tag-assignments`); the rules below describe the target.
 
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
   `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and

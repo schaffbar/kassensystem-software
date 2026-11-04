@@ -6,7 +6,10 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { RfidTagAssignment, RfidTagAssignmentStatus, RfidTagAssignmentType } from '../models/rfid-tag-assignment.model';
+import { RfidTagAssignmentApiModel } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { toRfidTagAssignment } from '../models/rfid-tag-assignment.mapper';
 import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
 import { User } from '../models/user.model';
 import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
@@ -21,7 +24,14 @@ import { UserDetailStore } from './user-detail.store';
 describe('UserDetailStore', () => {
   const api = `${environment.apiBaseUrl}/api/v1`;
   const user = { id: 'user-1', firstName: 'Max', lastName: 'Mustermann' } as User;
-  const assignment = { id: 'a-1', customerId: 'user-1', status: RfidTagAssignmentStatus.Assigned } as RfidTagAssignment;
+  const assignment: RfidTagAssignmentApiModel = {
+    id: 'a-1',
+    customerId: 'user-1',
+    assignmentType: RfidTagAssignmentType.Fixed,
+    status: RfidTagAssignmentStatus.Assigned,
+    rfidTagId: 'tag-1',
+    assignmentDate: '2026-10-31T10:00:00Z',
+  };
   const session = workshopSessionFixture({
     workshopUsages: [
       workshopUsageFixture({ id: 'u-1', exitTime: '2026-10-31T10:30:00Z', durationInMinutes: 30, unitsUsed: 1 }),
@@ -70,7 +80,7 @@ describe('UserDetailStore', () => {
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
 
   async function loadUser(
-    options: { assignments?: RfidTagAssignment[]; session?: WorkshopSessionApiModel | null } = {},
+    options: { assignments?: RfidTagAssignmentApiModel[]; session?: WorkshopSessionApiModel | null } = {},
   ) {
     store.setUserId('user-1');
     trigger();
@@ -93,7 +103,7 @@ describe('UserDetailStore', () => {
 
     expect(store.user()).toEqual(user);
     expect(store.userName()).toBe('Max Mustermann');
-    expect(store.rfidTagAssignment()).toEqual(assignment);
+    expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
     expect(store.openSession()).toEqual(toWorkshopSession(session));
     expect(store.totalWorkshopDurationInMinutes()).toBe(80);
     expect(store.totalWorkshopUnits()).toBe(4);
@@ -143,7 +153,24 @@ describe('UserDetailStore', () => {
 
     expectAssignment().flush([assignment]);
     await settle();
-    expect(store.rfidTagAssignment()).toEqual(assignment);
+    expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
+  });
+
+  it('should only reload the assignment after unassigning the RFID tag', async () => {
+    await loadUser();
+
+    store.unassignRfidTag({ customerId: 'user-1' });
+    trigger();
+    const unassign = httpMock.expectOne(
+      (req) => req.method === 'PUT' && req.url === `${api}/rfid-tag-assignments/unassign`,
+    );
+    expect(unassign.request.body).toEqual({ customerId: 'user-1' });
+    unassign.flush(null);
+    trigger();
+
+    expectAssignment().flush([]);
+    await settle();
+    expect(store.rfidTagAssignment()).toBeNull();
   });
 
   it('should only reload the open session after closing it', async () => {

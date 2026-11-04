@@ -17,12 +17,9 @@ import {
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
-import {
-  AssignRfidTagCommand,
-  RfidTagAssignmentStatus,
-  RfidTagAssignmentType,
-  UnassignRfidTagCommand,
-} from '../../shared/models/rfid-tag-assignment.model';
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../shared/models/rfid-tag-assignment.model';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,

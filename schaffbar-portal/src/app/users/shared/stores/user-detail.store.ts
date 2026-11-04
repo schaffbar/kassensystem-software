@@ -5,6 +5,11 @@ import { patchState, signalMethod, signalStore, withComputed, withMethods, withP
 import { mutation } from '../../../shared/state/mutation';
 import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../models/rfid-tag-assignment.model';
 import {
+  toRequestRfidTagAssignmentRequest,
+  toRfidTagAssignment,
+  toUnassignRfidTagRequest,
+} from '../models/rfid-tag-assignment.mapper';
+import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
@@ -12,7 +17,7 @@ import {
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
 import { CloseWorkshopSessionCommand, hasRunningUsage } from '../models/workshop-session.model';
 import { toWorkshopSession } from '../models/workshop-session.mapper';
-import { RfidTagAssignmentService } from '../services/rfid-tag-assignment.service';
+import { RfidTagAssignmentsApiService } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
 import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
 import { UsersService } from '../services/users.service';
 import { WorkshopSessionsApiService } from '../../../shared/api/workshop-sessions/workshop-sessions.api-service';
@@ -25,18 +30,18 @@ export const UserDetailStore = signalStore(
   withState<UserDetailState>({ userId: null }),
   withProps((store) => {
     const usersService = inject(UsersService);
-    const assignmentService = inject(RfidTagAssignmentService);
+    const rfidTagAssignmentsApi = inject(RfidTagAssignmentsApiService);
     const workshopSessionsApi = inject(WorkshopSessionsApiService);
     const toolCertificationService = inject(ToolCertificationService);
     return {
       // services for the mutations
       _usersService: usersService,
-      _assignmentService: assignmentService,
+      _rfidTagAssignmentsApi: rfidTagAssignmentsApi,
       _workshopSessionsApi: workshopSessionsApi,
       _toolCertificationService: toolCertificationService,
       // resources for the queries
       _userResource: usersService.userResource(store.userId),
-      _assignmentResource: assignmentService.rfidTagAssignmentResource(store.userId),
+      _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
       _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
       _certificationsResource: toolCertificationService.certificationsByUserResource(store.userId),
     };
@@ -46,7 +51,10 @@ export const UserDetailStore = signalStore(
     return {
       // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
       user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
-      rfidTagAssignment: computed(() => (_assignmentResource.hasValue() ? _assignmentResource.value() : null)),
+      rfidTagAssignment: computed(() => {
+        const assignment = _assignmentResource.hasValue() ? _assignmentResource.value() : null;
+        return assignment ? toRfidTagAssignment(assignment) : null;
+      }),
       openSession: computed(() => {
         const session = _openSessionResource.hasValue() ? _openSessionResource.value() : null;
         return session ? toWorkshopSession(session) : null;
@@ -100,11 +108,12 @@ export const UserDetailStore = signalStore(
   // mutations of the RFID tag assignment – reload the assignment on success
   withMethods((store) => ({
     assignRfidTag: mutation<AssignRfidTagCommand>({
-      request: (command) => store._assignmentService.assignRfidTag(command),
+      request: (command) =>
+        store._rfidTagAssignmentsApi.requestRfidTagAssignment(toRequestRfidTagAssignmentRequest(command)),
       onSuccess: () => store._assignmentResource.reload(),
     }),
     unassignRfidTag: mutation<UnassignRfidTagCommand>({
-      request: (command) => store._assignmentService.unassignRfidTag(command),
+      request: (command) => store._rfidTagAssignmentsApi.unassignRfidTag(toUnassignRfidTagRequest(command)),
       onSuccess: () => store._assignmentResource.reload(),
     }),
   })),

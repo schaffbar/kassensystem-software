@@ -198,11 +198,17 @@ General:
   required id is missing. Query parameters go through `{ url, params }`, never string concatenation.
 - 200 with an empty body ("nothing there") → `parseWith(xSchema.nullable(), …)`, type
   `XApiModel | null | undefined` – the type says it, no comment needed.
-- The backend returns a list where the portal needs one value → validate the list, then pick, with a comment why:
+- The backend returns a list where the portal needs one value → validate the list, then pick, with a comment why;
+  the name says it (`current<Entity>Resource`):
   ```ts
-  // the backend returns a list; the customer has at most one current assignment
-  const parseAssignments = parseWith(z.array(assignmentSchema), 'GET /rfid-tag-assignments');
-  return httpResource(() => …, { parse: (response) => parseAssignments(response)[0] ?? null });
+  currentRfidTagAssignmentResource(customerId: () => string | null): HttpResourceRef<RfidTagAssignmentApiModel | null | undefined> {
+    const parseAssignments = parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments?customer-id');
+    return httpResource(
+      () => { … },
+      // the backend returns a list; the customer has at most one current assignment
+      { parse: (response) => parseAssignments(response)[0] ?? null },
+    );
+  }
   ```
 - A resource must be created in an injection context (field initializer, `withProps` of a store) – `httpResource`
   throws otherwise, so no reminder in the code is needed.
@@ -226,7 +232,9 @@ Prefix `get…`, plain value parameters. If you are unsure → it is displayed d
 
 - The signature mirrors the controller: **path variables as plain arguments, the body as `…Request`** –
   `updateRfidReader(rfidReaderId, request)`, `deleteRfidReader(rfidReaderId)`. No command types in `shared/api`.
-- Name like the backend action (`updateRfidReader`, `changeRfidReaderType`, `closeWorkshopSession`).
+- Name like the backend action (`updateRfidReader`, `changeRfidReaderType`, `closeWorkshopSession`) – also when
+  the feature calls it differently: `POST /rfid-tag-assignments` is `requestRfidTagAssignment(request)` in the API,
+  the feature's command stays `AssignRfidTagCommand`, the mapper is `toRequestRfidTagAssignmentRequest`.
 - `Observable<void>` unless the backend really returns a body (then validate it like a query). 201 with only a
   `Location` header is `void`.
 - **The second argument of `put` / `post` / `patch` is the body.** Without payload pass `{}` – otherwise the options
@@ -362,7 +370,7 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
 
 ## Migrating an old `*.service.ts`
 
-Not migrated yet: everything except `rfid-tags`, `rfid-readers`, `dashboard` and `workshop-sessions` (old pattern: `<feature>/*.service.ts` or
+Not migrated yet: `tool-certifications`, `customers`, `tools` (old pattern: `<feature>/*.service.ts` or
 `users/shared/services/`, one class with commands as parameters, no validation).
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).
