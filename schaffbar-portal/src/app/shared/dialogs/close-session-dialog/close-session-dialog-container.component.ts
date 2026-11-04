@@ -2,12 +2,8 @@ import { Component, computed, inject, input } from '@angular/core';
 
 import { MatDialogRef } from '@angular/material/dialog';
 
-import {
-  CloseWorkshopSessionCommand,
-  hasRunningUsage,
-  WorkshopSession,
-} from '../../../workshop-sessions/workshop-session.model';
-import { WorkshopSessionService } from '../../../workshop-sessions/workshop-session.service';
+import { WorkshopSessionApiModel } from '../../api/workshop-sessions/workshop-session.api-model';
+import { WorkshopSessionsApiService } from '../../api/workshop-sessions/workshop-sessions.api-service';
 import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close-session-dialog-modal.component';
 
 @Component({
@@ -16,11 +12,11 @@ import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close
   imports: [CloseSessionDialogModalComponent],
 })
 export class CloseSessionDialogContainerComponent {
-  private readonly dialogRef = inject(MatDialogRef<CloseSessionDialogContainerComponent, CloseWorkshopSessionCommand>);
+  private readonly dialogRef = inject(MatDialogRef<CloseSessionDialogContainerComponent, boolean>);
 
   readonly customerId = input.required<string>();
 
-  private readonly sessionResource = inject(WorkshopSessionService).openSessionResource(this.customerId);
+  private readonly sessionResource = inject(WorkshopSessionsApiService).openSessionResource(this.customerId);
 
   protected readonly isLoading = computed(() => this.sessionResource.isLoading());
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
@@ -29,18 +25,17 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionViewModel(session) : null;
   });
 
-  protected onCloseConfirmed(command: CloseWorkshopSessionCommand): void {
-    this.dialogRef.close(command);
+  protected onConfirmed(): void {
+    this.dialogRef.close(true);
   }
 
   protected onCancelled(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 }
 
-function toCloseSessionViewModel(session: WorkshopSession): CloseSessionViewModel {
+function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSessionViewModel {
   return {
-    customerId: session.customerId,
     workshop: { minutes: session.totalWorkshopDurationInMinutes, units: session.totalWorkshopUnits },
     tools: session.toolUsageSummaries.map((summary) => ({
       toolId: summary.toolId,
@@ -50,4 +45,11 @@ function toCloseSessionViewModel(session: WorkshopSession): CloseSessionViewMode
     })),
     hasRunningUsage: hasRunningUsage(session),
   };
+}
+
+function hasRunningUsage(session: WorkshopSessionApiModel): boolean {
+  return (
+    session.workshopUsages.some((usage) => usage.exitTime === null) ||
+    session.toolUsageSummaries.some((summary) => summary.active)
+  );
 }

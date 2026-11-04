@@ -44,13 +44,23 @@ describe('CloseSessionDialogService', () => {
     httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/active`).flush(null);
   });
 
-  it('should emit the result of the dialog', async () => {
+  it('should emit true when the dialog is confirmed', async () => {
     const result = firstValueFrom(service.open('user-1'));
     TestBed.tick();
     httpMock.expectOne(() => true).flush(null);
 
-    TestBed.inject(MatDialog).openDialogs[0].close({ customerId: 'user-1' });
+    TestBed.inject(MatDialog).openDialogs[0].close(true);
 
-    expect(await result).toEqual({ customerId: 'user-1' });
+    expect(await result).toBe(true);
+  });
+
+  it('should emit false when the dialog is closed otherwise', async () => {
+    const result = firstValueFrom(service.open('user-1'));
+    TestBed.tick();
+    httpMock.expectOne(() => true).flush(null);
+
+    TestBed.inject(MatDialog).openDialogs[0].close();
+
+    expect(await result).toBe(false);
   });
 });

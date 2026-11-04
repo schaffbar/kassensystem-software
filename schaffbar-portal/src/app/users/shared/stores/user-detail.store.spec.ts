@@ -3,30 +3,35 @@ import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@a
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
 import { RfidTagAssignment, RfidTagAssignmentStatus, RfidTagAssignmentType } from '../models/rfid-tag-assignment.model';
 import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
 import { User } from '../models/user.model';
-import { WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
+import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
+import {
+  toolUsageSummaryFixture,
+  workshopSessionFixture,
+  workshopUsageFixture,
+} from '../../../shared/api/workshop-sessions/workshop-session.api-fixtures';
+import { toWorkshopSession } from '../models/workshop-session.mapper';
 import { UserDetailStore } from './user-detail.store';
 
 describe('UserDetailStore', () => {
   const api = `${environment.apiBaseUrl}/api/v1`;
   const user = { id: 'user-1', firstName: 'Max', lastName: 'Mustermann' } as User;
   const assignment = { id: 'a-1', customerId: 'user-1', status: RfidTagAssignmentStatus.Assigned } as RfidTagAssignment;
-  const session = {
-    id: 's-1',
+  const session = workshopSessionFixture({
     workshopUsages: [
-      { exitTime: '2026-10-31T10:30:00Z', durationInMinutes: 30, unitsUsed: 1 },
-      { exitTime: '2026-10-31T11:45:00Z', durationInMinutes: 45, unitsUsed: 2 },
+      workshopUsageFixture({ id: 'u-1', exitTime: '2026-10-31T10:30:00Z', durationInMinutes: 30, unitsUsed: 1 }),
+      workshopUsageFixture({ id: 'u-2', exitTime: '2026-10-31T11:45:00Z', durationInMinutes: 45, unitsUsed: 2 }),
     ],
     // the totals come from the backend (incl. running usages) and are not summed up again
     totalWorkshopDurationInMinutes: 80,
     totalWorkshopUnits: 4,
     toolUsageSummaries: [],
-  } as unknown as WorkshopSession;
+  });
   const certifications = [{ id: 'cert-1', customerId: 'user-1', toolId: 'tool-1' }] as ToolCertification[];
 
   let store: InstanceType<typeof UserDetailStore>;
@@ -40,7 +45,10 @@ describe('UserDetailStore', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
 
   // lets the resources react to signal changes and send their requests
   function trigger(): void {
@@ -61,7 +69,9 @@ describe('UserDetailStore', () => {
   const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/active`);
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
 
-  async function loadUser(options: { assignments?: RfidTagAssignment[]; session?: WorkshopSession | null } = {}) {
+  async function loadUser(
+    options: { assignments?: RfidTagAssignment[]; session?: WorkshopSessionApiModel | null } = {},
+  ) {
     store.setUserId('user-1');
     trigger();
     expectUser().flush(user);
@@ -84,7 +94,7 @@ describe('UserDetailStore', () => {
     expect(store.user()).toEqual(user);
     expect(store.userName()).toBe('Max Mustermann');
     expect(store.rfidTagAssignment()).toEqual(assignment);
-    expect(store.openSession()).toEqual(session);
+    expect(store.openSession()).toEqual(toWorkshopSession(session));
     expect(store.totalWorkshopDurationInMinutes()).toBe(80);
     expect(store.totalWorkshopUnits()).toBe(4);
     expect(store.hasRunningUsage()).toBe(false);
@@ -103,17 +113,20 @@ describe('UserDetailStore', () => {
   });
 
   it('should detect a running workshop usage', async () => {
-    const running = { ...session, workshopUsages: [{ exitTime: null, durationInMinutes: null, unitsUsed: null }] };
+    const running = workshopSessionFixture({
+      workshopUsages: [workshopUsageFixture({ exitTime: null, durationInMinutes: null, unitsUsed: null })],
+      toolUsageSummaries: [],
+    });
 
-    await loadUser({ session: running as unknown as WorkshopSession });
+    await loadUser({ session: running });
 
     expect(store.hasRunningUsage()).toBe(true);
   });
 
   it('should detect an active tool usage', async () => {
-    const running = { ...session, toolUsageSummaries: [{ toolId: 'tool-1', active: true }] };
+    const running = workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ active: true })] });
 
-    await loadUser({ session: running as unknown as WorkshopSession });
+    await loadUser({ session: running });
 
     expect(store.hasRunningUsage()).toBe(true);
   });
@@ -163,6 +176,15 @@ describe('UserDetailStore', () => {
     expectCertifications().flush([]);
     await settle();
     expect(store.toolCertifications()).toEqual([]);
+  });
+
+  it('should expose a load error for a session that does not match the schema', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await loadUser({ session: { ...session, startTime: 'heute' } });
+
+    expect(store.hasLoadError()).toBe(true);
+    expect(store.openSession()).toBeNull();
   });
 
   it('should expose a load error', async () => {

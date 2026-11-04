@@ -8,6 +8,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
 import { ToolUsageSummaryComponent } from '../../components/tool-usage-summary/tool-usage-summary.component';
 import { WorkshopUsageSummaryComponent } from '../../components/workshop-usage-summary/workshop-usage-summary.component';
+import { CloseWorkshopSessionCommand } from '../../shared/models/workshop-session.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 
 @Component({
@@ -23,8 +24,9 @@ export class UserOpenSessionComponent {
   readonly userId = input.required<string>();
 
   protected closeSession(): void {
-    this.closeSessionDialog.open(this.userId()).subscribe((command) => {
-      if (command) {
+    this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {
+      if (confirmed) {
+        const command: CloseWorkshopSessionCommand = { customerId: this.userId() };
         this.detailsStore.closeSession(command);
       } else {
         // the dialog loaded the session itself and may have shown a newer state than the page

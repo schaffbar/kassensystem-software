@@ -8,11 +8,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { CloseWorkshopSessionCommand } from '../../../workshop-sessions/workshop-session.model';
 import { OrDashPipe } from '../../pipes/or-dash.pipe';
 
 export interface CloseSessionViewModel {
-  customerId: string;
   workshop: { minutes: number; units: number };
   tools: { toolId: string; name: string | null; minutes: number; units: number }[];
   hasRunningUsage: boolean;
@@ -38,19 +36,11 @@ export class CloseSessionDialogModalComponent {
   // null: there is no open session (any more)
   readonly viewModel = input.required<CloseSessionViewModel | null>();
 
-  readonly closeConfirmed = output<CloseWorkshopSessionCommand>();
+  readonly confirmed = output<void>();
   readonly cancelled = output<void>();
 
   protected readonly canClose = computed(() => {
     const viewModel = this.viewModel();
     return !this.isLoading() && !this.hasLoadError() && !!viewModel && !viewModel.hasRunningUsage;
   });
-
-  protected onConfirm(): void {
-    const viewModel = this.viewModel();
-    if (!viewModel) return;
-
-    const command: CloseWorkshopSessionCommand = { customerId: viewModel.customerId };
-    this.closeConfirmed.emit(command);
-  }
 }

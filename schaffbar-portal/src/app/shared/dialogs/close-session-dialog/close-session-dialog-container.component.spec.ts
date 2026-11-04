@@ -10,7 +10,12 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
+import { WorkshopSessionApiModel } from '../../api/workshop-sessions/workshop-session.api-model';
+import {
+  toolUsageSummaryFixture,
+  workshopSessionFixture,
+  workshopUsageFixture,
+} from '../../api/workshop-sessions/workshop-session.api-fixtures';
 import { CloseSessionDialogModalComponent } from './close-session-dialog-modal.component';
 import { CloseSessionDialogContainerComponent } from './close-session-dialog-container.component';
 
@@ -48,7 +53,7 @@ describe('CloseSessionDialogContainerComponent', () => {
     return fixture.debugElement.query(By.directive(CloseSessionDialogModalComponent)).componentInstance;
   }
 
-  async function respond(session: WorkshopSession | null): Promise<void> {
+  async function respond(session: WorkshopSessionApiModel | null): Promise<void> {
     httpMock.expectOne(sessionUrl).flush(session);
     await fixture.whenStable();
   }
@@ -65,7 +70,6 @@ describe('CloseSessionDialogContainerComponent', () => {
     await respond(session({ running: true }));
 
     expect(modal().viewModel()).toEqual({
-      customerId: 'user-1',
       workshop: { minutes: 60, units: 10 },
       tools: [{ toolId: 'tool-1', name: 'Bandsäge', minutes: 31, units: 6 }],
       hasRunningUsage: true,
@@ -85,32 +89,26 @@ describe('CloseSessionDialogContainerComponent', () => {
     expect(modal().hasLoadError()).toBe(true);
   });
 
-  it('should close the dialog with the command on confirm', async () => {
+  it('should close the dialog with true on confirm', async () => {
     await respond(session({ running: false }));
 
-    modal().closeConfirmed.emit({ customerId: 'user-1' });
+    modal().confirmed.emit();
 
-    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1' });
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(true);
   });
 
-  it('should close the dialog without a result on cancel', async () => {
+  it('should close the dialog with false on cancel', async () => {
     await respond(session({ running: false }));
 
     modal().cancelled.emit();
 
-    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith();
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(false);
   });
 });
 
-function session({ running }: { running: boolean }): WorkshopSession {
-  return {
-    id: 'session-1',
-    customerId: 'user-1',
-    workshopUsages: [{ id: 'usage-1', exitTime: running ? null : '2026-10-31T11:00:00Z' }],
-    totalWorkshopDurationInMinutes: 60,
-    totalWorkshopUnits: 10,
-    toolUsageSummaries: [
-      { toolId: 'tool-1', toolName: 'Bandsäge', active: false, totalDurationInMinutes: 31, totalUnits: 6, usages: [] },
-    ],
-  } as unknown as WorkshopSession;
+function session({ running }: { running: boolean }): WorkshopSessionApiModel {
+  return workshopSessionFixture({
+    workshopUsages: [workshopUsageFixture({ exitTime: running ? null : '2026-10-31T11:00:00Z' })],
+    toolUsageSummaries: [toolUsageSummaryFixture()],
+  });
 }

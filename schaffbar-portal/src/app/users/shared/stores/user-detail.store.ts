@@ -10,11 +10,12 @@ import {
   RevokeToolCertificationCommand,
 } from '../../../tool-certifications/tool-certification.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
-import { CloseWorkshopSessionCommand, hasRunningUsage } from '../../../workshop-sessions/workshop-session.model';
+import { CloseWorkshopSessionCommand, hasRunningUsage } from '../models/workshop-session.model';
+import { toWorkshopSession } from '../models/workshop-session.mapper';
 import { RfidTagAssignmentService } from '../services/rfid-tag-assignment.service';
 import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
 import { UsersService } from '../services/users.service';
-import { WorkshopSessionService } from '../../../workshop-sessions/workshop-session.service';
+import { WorkshopSessionsApiService } from '../../../shared/api/workshop-sessions/workshop-sessions.api-service';
 
 interface UserDetailState {
   userId: string | null;
@@ -25,18 +26,18 @@ export const UserDetailStore = signalStore(
   withProps((store) => {
     const usersService = inject(UsersService);
     const assignmentService = inject(RfidTagAssignmentService);
-    const workshopSessionService = inject(WorkshopSessionService);
+    const workshopSessionsApi = inject(WorkshopSessionsApiService);
     const toolCertificationService = inject(ToolCertificationService);
     return {
       // services for the mutations
       _usersService: usersService,
       _assignmentService: assignmentService,
-      _workshopSessionService: workshopSessionService,
+      _workshopSessionsApi: workshopSessionsApi,
       _toolCertificationService: toolCertificationService,
       // resources for the queries
       _userResource: usersService.userResource(store.userId),
       _assignmentResource: assignmentService.rfidTagAssignmentResource(store.userId),
-      _openSessionResource: workshopSessionService.openSessionResource(store.userId),
+      _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
       _certificationsResource: toolCertificationService.certificationsByUserResource(store.userId),
     };
   }),
@@ -46,7 +47,10 @@ export const UserDetailStore = signalStore(
       // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
       user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
       rfidTagAssignment: computed(() => (_assignmentResource.hasValue() ? _assignmentResource.value() : null)),
-      openSession: computed(() => (_openSessionResource.hasValue() ? _openSessionResource.value() : null)),
+      openSession: computed(() => {
+        const session = _openSessionResource.hasValue() ? _openSessionResource.value() : null;
+        return session ? toWorkshopSession(session) : null;
+      }),
       toolCertifications: computed(() => (_certificationsResource.hasValue() ? _certificationsResource.value() : [])),
       // loading and error states are combined from all resources
       isLoading: computed(() => resources.some((resource) => resource.isLoading())),
@@ -107,7 +111,7 @@ export const UserDetailStore = signalStore(
   // mutations of the open session – reload the session on success
   withMethods((store) => ({
     closeSession: mutation<CloseWorkshopSessionCommand>({
-      request: (command) => store._workshopSessionService.closeWorkshopSession(command),
+      request: (command) => store._workshopSessionsApi.closeWorkshopSession(command.customerId),
       onSuccess: () => store._openSessionResource.reload(),
     }),
   })),

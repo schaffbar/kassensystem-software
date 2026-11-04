@@ -290,7 +290,12 @@ export function toUpdateRfidReaderRequest(command: UpdateRfidReaderCommand): Upd
   feature, and ids end up in request bodies.
 - Every body gets a mapper, also a trivial one (`{ type: command.type }`) – one rule, no exceptions. Path variables
   don't need one: the store passes `command.id`.
-- Dates: `parseISO` / `format` from `date-fns`. Missing values: `?? null`.
+- Dates: `parseISO` / `format` from `date-fns`; a nullable date `apiModel.endTime ? parseISO(apiModel.endTime) : null`.
+  Missing values: `?? null`.
+- Nested API models (a session with usages) get one mapper each; only the top-level one is exported, the others are
+  unexported functions in the same file (`toWorkshopUsage`, `toToolUsage`).
+- A resource answering `null` ("nothing there") is mapped in the store like the container does it:
+  `const session = resource.hasValue() ? resource.value() : null; return session ? toWorkshopSession(session) : null;`
 - Enums pass through unchanged.
 
 ## Store
@@ -345,6 +350,11 @@ Store spec (`HttpTestingController`):
 - `TestBed.tick()` **before** `httpMock.expectOne(…)`; `await TestBed.inject(ApplicationRef).whenStable()` only
   **after** `flush(…)`.
 
+Fixtures: when several specs need the same complex API model (a session with usages), the resource folder gets
+`<x>.api-fixtures.ts` with complete, valid objects and overrides:
+`workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ active: true })] })`. Simple models are
+written inline in the spec.
+
 Mapper spec: one test per function – a `null` value, a date (`new Date('…Z')`), missing command fields → `null`, no
 id in the request.
 
@@ -352,7 +362,7 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
 
 ## Migrating an old `*.service.ts`
 
-Not migrated yet: everything except `rfid-tags`, `rfid-readers` and `dashboard` (old pattern: `<feature>/*.service.ts` or
+Not migrated yet: everything except `rfid-tags`, `rfid-readers`, `dashboard` and `workshop-sessions` (old pattern: `<feature>/*.service.ts` or
 `users/shared/services/`, one class with commands as parameters, no validation).
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).

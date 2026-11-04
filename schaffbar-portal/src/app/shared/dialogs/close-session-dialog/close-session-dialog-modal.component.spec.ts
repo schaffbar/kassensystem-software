@@ -12,7 +12,6 @@ import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close
 
 describe('CloseSessionDialogModalComponent', () => {
   const viewModel: CloseSessionViewModel = {
-    customerId: 'user-1',
     workshop: { minutes: 75, units: 13 },
     tools: [
       { toolId: 'tool-1', name: 'Bandsäge', minutes: 31, units: 6 },
@@ -101,14 +100,14 @@ describe('CloseSessionDialogModalComponent', () => {
     expect(await isConfirmDisabled()).toBe(true);
   });
 
-  it('should emit the command on confirm', async () => {
-    const closeConfirmed = vi.fn();
-    fixture.componentInstance.closeConfirmed.subscribe(closeConfirmed);
+  it('should emit on confirm', async () => {
+    const confirmed = vi.fn();
+    fixture.componentInstance.confirmed.subscribe(confirmed);
     await render({ viewModel });
 
     await (await loader.getHarness(MatButtonHarness.with({ text: confirmText }))).click();
 
-    expect(closeConfirmed).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1' });
+    expect(confirmed).toHaveBeenCalledOnce();
   });
 
   it('should emit on cancel', async () => {

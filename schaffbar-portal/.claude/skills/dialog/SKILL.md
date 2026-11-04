@@ -46,8 +46,11 @@ Without loading the service plays the container's part: it opens the modal direc
 
 A shared dialog belongs to no feature, so it doesn't reach into one:
 
-- Models and API services come from a domain folder (`tools/`, `rfid-readers/`, `workshop-sessions/`), never from
-  the internals of a feature (`users/shared/…`, components, stores).
+- It imports only from `shared/` – the container from `shared/api` (API service and API model, see skill `api`),
+  everything from `shared/models` (enums). **Nothing from a feature**: no feature model, no command, no store.
+- It therefore never builds or returns a command. It returns **yes/no** (`Observable<boolean>`) or, if the user
+  chooses something, a result type of its own exported from the modal file. The caller builds the command from what
+  it knows (its inputs) – see "Caller".
 - The dialog's own texts (title, labels, hints, buttons) live under `shared.dialogs.<name>.*` in `public/i18n/*.json`
   (`shared.dialogs.closeSession.title`, `shared.dialogs.confirmDelete.actions.confirm`) – also when a page shows a
   similar text. Texts the caller passes in the view model (confirmations) are the caller's keys.
@@ -103,9 +106,8 @@ Rules:
 - The view model is shaped for display, not the API model: only the fields the modal shows, already combined
   (e.g. `workshop: { minutes, units }`). Comment only what the type can't say (translation key vs. plain text,
   what `null` means).
-- An action that changes the backend emits a **command** (`closeConfirmed = output<CloseWorkshopSessionCommand>()`).
-  The modal builds it from ids in its view model, like every component (CLAUDE.md "Commands"). A plain yes/no emits
-  `output<void>()` (`confirmed`). Cancel is always `cancelled = output<void>()`.
+- Confirm is `confirmed = output<void>()` (or `output<…Result>()` for a choice of the user), cancel is always
+  `cancelled = output<void>()`. No commands – the view model contains only what is displayed, no ids for a command.
 - Layout: `mat-dialog-title`, `<mat-divider />`, `mat-dialog-content`, `mat-dialog-actions`. Buttons: cancel first
   (`matButton="outlined"`), then confirm (`matButton="filled"`, `danger-button` for destructive actions), every
   button `type="button"`.
@@ -137,11 +139,11 @@ dialog too. Inside the modal a conditional focus is bound as an attribute:
   imports: [CloseSessionDialogModalComponent],
 })
 export class CloseSessionDialogContainerComponent {
-  private readonly dialogRef = inject(MatDialogRef<CloseSessionDialogContainerComponent, CloseWorkshopSessionCommand>);
+  private readonly dialogRef = inject(MatDialogRef<CloseSessionDialogContainerComponent, boolean>);
 
   readonly customerId = input.required<string>();
 
-  private readonly sessionResource = inject(WorkshopSessionService).openSessionResource(this.customerId);
+  private readonly sessionResource = inject(WorkshopSessionsApiService).openSessionResource(this.customerId);
 
   protected readonly isLoading = computed(() => this.sessionResource.isLoading());
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
@@ -150,16 +152,18 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionViewModel(session) : null;
   });
 
-  protected onCloseConfirmed(command: CloseWorkshopSessionCommand): void {
-    this.dialogRef.close(command);
+  protected onConfirmed(): void {
+    this.dialogRef.close(true);
   }
 
   protected onCancelled(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 }
 
-function toCloseSessionViewModel(session: WorkshopSession): CloseSessionViewModel { … }
+function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSessionViewModel { … }
+
+function hasRunningUsage(session: WorkshopSessionApiModel): boolean { … }
 ```
 
 ```html
@@ -167,7 +171,7 @@ function toCloseSessionViewModel(session: WorkshopSession): CloseSessionViewMode
   [isLoading]="isLoading()"
   [hasLoadError]="hasLoadError()"
   [viewModel]="viewModel()"
-  (closeConfirmed)="onCloseConfirmed($event)"
+  (confirmed)="onConfirmed()"
   (cancelled)="onCancelled()" />
 ```
 
@@ -180,10 +184,12 @@ Rules:
 - Loads with the `httpResource` of the API service (see skill `api`) and passes the input signal itself
   as the getter: `openSessionResource(this.customerId)`. The container holds the resource directly, **no store** –
   it is a single resource that lives exactly as long as the dialog. It loads on every open, so the data is current.
-- The mapping API model → view model is a pure, unexported function after the class (`to<Name>ViewModel`), see
-  CLAUDE.md "Helper functions".
+- The resource holds the **API model**; the container maps it straight to the view model with a pure, unexported
+  function after the class (`to<Name>ViewModel`, see CLAUDE.md "Helper functions"). There is no feature model in
+  between – the dialog belongs to no feature. Logic the view model needs (`hasRunningUsage`) is computed there too,
+  even if a feature has the same function on its own model.
 - `hasValue() ? value() : null` – a load error must not throw in the template.
-- The container does **not** execute the command – it closes with it. The caller's store executes it.
+- The container closes with `true` / `false` (or the result type) – never with a command.
 
 ## Service
 
@@ -221,17 +227,15 @@ With loading – opens the container and passes the ids:
 export class CloseSessionDialogService {
   private readonly dialog = inject(MatDialog);
 
-  open(customerId: string): Observable<CloseWorkshopSessionCommand | undefined> {
+  open(customerId: string): Observable<boolean> {
     return this.dialog
-      .open<CloseSessionDialogContainerComponent, void, CloseWorkshopSessionCommand>(
-        CloseSessionDialogContainerComponent,
-        {
-          bindings: [inputBinding('customerId', () => customerId)],
-          minWidth: DIALOG_WIDTH.medium,
-          disableClose: true,
-        },
-      )
-      .afterClosed();
+      .open<CloseSessionDialogContainerComponent, void, boolean>(CloseSessionDialogContainerComponent, {
+        bindings: [inputBinding('customerId', () => customerId)],
+        minWidth: DIALOG_WIDTH.medium,
+        disableClose: true,
+      })
+      .afterClosed()
+      .pipe(map((confirmed) => confirmed === true));
   }
 }
 ```
@@ -245,7 +249,7 @@ Rules:
   the dialog is closed by its buttons only.
 - `open<Component, void, Result>` is typed, so `afterClosed()` is `Observable<Result | undefined>`. A yes/no dialog
   maps `undefined` to `false` (`map((confirmed) => confirmed === true))`).
-- The service only opens. It neither loads data nor executes the command.
+- The service only opens. It neither loads data nor builds or executes a command.
 
 ## Caller
 
@@ -253,8 +257,9 @@ Rules:
 private readonly closeSessionDialog = inject(CloseSessionDialogService);
 
 protected closeSession(): void {
-  this.closeSessionDialog.open(this.userId()).subscribe((command) => {
-    if (command) {
+  this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {
+    if (confirmed) {
+      const command: CloseWorkshopSessionCommand = { customerId: this.userId() };
       this.detailsStore.closeSession(command);
     } else {
       // the dialog loaded the session itself and may have shown a newer state than the page
@@ -264,8 +269,9 @@ protected closeSession(): void {
 }
 ```
 
-- The caller passes what it has (ids, texts), subscribes and hands the command to its store's `mutation()`, which
-  reloads on success.
+- The caller passes what it has (ids, texts), subscribes and – on `true` – **builds the command** from its own inputs
+  (CLAUDE.md "Commands": the component that knows the ids builds the command) and hands it to its store's
+  `mutation()`, which reloads on success.
 - If the dialog loaded data itself, the caller reloads its own data **also on cancel** – the dialog may have shown a
   newer state than the page.
 - A button that opens a dialog for an action that is not possible right now is disabled on the page already
@@ -285,8 +291,10 @@ Container – real `httpResource` with `HttpTestingController`, `MatDialogRef` a
   `whenStable()` (and every harness) waits for the pending request and hangs. After
   `httpMock.expectOne(url).flush(…)` `await fixture.whenStable()` works again.
 - Check what reaches the modal: `fixture.debugElement.query(By.directive(…Modal)).componentInstance.viewModel()`.
-- Close: emit the modal's outputs and expect `dialogRef.close` with the command / without arguments
-  (`toHaveBeenCalledExactlyOnceWith()`).
+- Test data is the **API model** (complete, it is validated – use the fixtures of the resource, e.g.
+  `workshopSessionFixture()` from `shared/api/workshop-sessions/workshop-session.api-fixtures.ts`).
+- Close: emit the modal's outputs and expect `dialogRef.close` with `true` / `false`
+  (`toHaveBeenCalledExactlyOnceWith(true)`).
 
 Service – with the **real** `MatDialog`, so the bindings are tested too:
 
@@ -298,7 +306,7 @@ Service – with the **real** `MatDialog`, so the bindings are tested too:
   `expect(await result)…`.
 
 Caller – mock the service: `{ provide: CloseSessionDialogService, useValue: { open: vi.fn() } }`,
-`open.mockReturnValue(of(command))` resp. `of(undefined)`.
+`open.mockReturnValue(of(true))` resp. `of(false)`; expect the command the caller built on its store.
 
 ## Form dialogs
 
@@ -319,12 +327,15 @@ Once a form dialog is needed in a second place, it moves to `shared/dialogs/` an
 - [ ] Kind decided: shared dialog (modal + service, + container if it loads data), confirmation (existing
       `confirm-delete-dialog` / `confirm-action-dialog`) or form dialog
 - [ ] Folder `shared/dialogs/<name>-dialog/`, names `<name>-dialog-modal|container`, `<Name>DialogService.open`
-- [ ] Modal: inputs (`viewModel`, loading state) and outputs only, command built from ids in the view model
-- [ ] Container: ids as `input.required()`, `httpResource` directly, pure `to<Name>ViewModel`, closes `dialogRef`
+- [ ] Modal: inputs (`viewModel`, loading state) and outputs only (`confirmed` / `cancelled`), no command
+- [ ] Container: ids as `input.required()`, API service resource directly, pure `to<Name>ViewModel` from the API
+      model, closes `dialogRef` with `true` / `false`
 - [ ] Service: `bindings` instead of `data`, `DIALOG_WIDTH`, `disableClose: true`, typed `open<…>`
-- [ ] Caller executes the command via its store, reloads also on cancel if the dialog loaded data
+- [ ] Caller builds the command on `true` and executes it via its store, reloads also on cancel if the dialog
+      loaded data
 - [ ] Buttons: cancel first, `type="button"`, `danger-button` / `cdkFocusInitial` for destructive actions
 - [ ] Specs for modal, container and service (real `MatDialog`), caller spec with mocked service
-- [ ] Imports only from domain folders, own texts under `shared.dialogs.<name>.*` (de + en)
+- [ ] Imports only from `shared/` (`shared/api` in the container), nothing from a feature; own texts under
+      `shared.dialogs.<name>.*` (de + en)
 - [ ] Comments only where the code can't say it
 - [ ] `npx ng build`, `npx ng lint`, `npx ng test --watch=false`, `npx prettier --check "src/**/*.{ts,html,scss}"`

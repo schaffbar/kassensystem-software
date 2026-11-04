@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { CloseWorkshopSessionCommand, WorkshopSession } from '../../../workshop-sessions/workshop-session.model';
+import { WorkshopSession } from '../../shared/models/workshop-session.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserOpenSessionComponent } from './user-open-session.component';
 
@@ -14,7 +14,9 @@ describe('UserOpenSessionComponent', () => {
   const session = {
     id: 'session-1',
     customerId: 'user-1',
-    workshopUsages: [{ id: 'usage-1', entryTime: '2026-10-31T10:00:00Z', exitTime: '2026-10-31T11:00:00Z' }],
+    workshopUsages: [
+      { id: 'usage-1', entryTime: new Date('2026-10-31T10:00:00Z'), exitTime: new Date('2026-10-31T11:00:00Z') },
+    ],
     totalWorkshopDurationInMinutes: 60,
     totalWorkshopUnits: 10,
     toolUsageSummaries: [],
@@ -59,8 +61,8 @@ describe('UserOpenSessionComponent', () => {
     return fixture.nativeElement.querySelector('.close-button');
   }
 
-  async function clickClose(dialogResult: CloseWorkshopSessionCommand | undefined): Promise<void> {
-    openDialog.mockReturnValue(of(dialogResult));
+  async function clickClose(confirmed: boolean): Promise<void> {
+    openDialog.mockReturnValue(of(confirmed));
     closeButton().click();
     await fixture.whenStable();
   }
@@ -76,20 +78,20 @@ describe('UserOpenSessionComponent', () => {
   });
 
   it('should open the dialog for the user', async () => {
-    await clickClose(undefined);
+    await clickClose(false);
 
     expect(openDialog).toHaveBeenCalledExactlyOnceWith('user-1');
   });
 
-  it('should close the session after confirmation', async () => {
-    await clickClose({ customerId: 'user-1' });
+  it('should close the session of the user after confirmation', async () => {
+    await clickClose(true);
 
     expect(storeMock.closeSession).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1' });
     expect(storeMock.reloadOpenSession).not.toHaveBeenCalled();
   });
 
   it('should reload the session when the dialog is cancelled, as the dialog may have shown a newer state', async () => {
-    await clickClose(undefined);
+    await clickClose(false);
 
     expect(storeMock.closeSession).not.toHaveBeenCalled();
     expect(storeMock.reloadOpenSession).toHaveBeenCalledOnce();

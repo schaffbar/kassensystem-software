@@ -1,8 +1,10 @@
+import { WorkshopSessionStatus } from '../../../shared/models/workshop-session-status';
+
 export interface WorkshopSession {
   id: string;
   customerId: string;
-  startTime: string;
-  closeTime: string | null;
+  startTime: Date;
+  closeTime: Date | null;
   status: WorkshopSessionStatus;
   workshopUsages: WorkshopUsage[];
   totalWorkshopDurationInMinutes: number;
@@ -12,8 +14,8 @@ export interface WorkshopSession {
 
 export interface WorkshopUsage {
   id: string;
-  entryTime: string;
-  exitTime: string | null;
+  entryTime: Date;
+  exitTime: Date | null;
   durationInMinutes: number | null;
   unitsUsed: number | null;
 }
@@ -29,15 +31,10 @@ export interface ToolUsageSummary {
 
 export interface ToolUsage {
   id: string;
-  startTime: string;
-  endTime: string | null;
+  startTime: Date;
+  endTime: Date | null;
   durationInMinutes: number | null;
   unitsUsed: number | null;
-}
-
-export enum WorkshopSessionStatus {
-  Open = 'OPEN',
-  Paid = 'PAID',
 }
 
 export function hasRunningUsage(session: WorkshopSession): boolean {

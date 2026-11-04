@@ -7,7 +7,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { ToolUsageSummary } from '../../../workshop-sessions/workshop-session.model';
+import { ToolUsageSummary } from '../../shared/models/workshop-session.model';
 
 @Component({
   selector: 'schbar-tool-usage-summary',

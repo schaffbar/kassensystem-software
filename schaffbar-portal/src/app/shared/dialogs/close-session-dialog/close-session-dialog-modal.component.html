@@ -54,7 +54,7 @@
   <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
     {{ 'shared.dialogs.closeSession.actions.cancel' | translate }}
   </button>
-  <button matButton="filled" type="button" [disabled]="!canClose()" (click)="onConfirm()">
+  <button matButton="filled" type="button" [disabled]="!canClose()" (click)="confirmed.emit()">
     {{ 'shared.dialogs.closeSession.actions.confirm' | translate }}
   </button>
 </mat-dialog-actions>

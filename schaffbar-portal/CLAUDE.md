@@ -2,7 +2,7 @@
 
 ## Folders
 
-Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`); the rules below describe the target.
+Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`); the rules below describe the target.
 
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
   `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
@@ -14,8 +14,8 @@ Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`);
 - Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
   models (enforced by ESLint).
 - A feature never imports from another feature's internals (`users/shared/…`, components, stores). Not migrated yet:
-  `tools` imports `User` and `UsersStore` from `users/shared/`; the interim topic folders `workshop-sessions/` and
-  `tool-certifications/` move to `shared/api` + features.
+  `tools` imports `User` and `UsersStore` from `users/shared/`; the interim topic folder `tool-certifications/` moves
+  to `shared/api` + features.
 
 ## Services
 
@@ -119,8 +119,8 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 - **Shared dialogs** (`src/app/shared/dialogs/<name>-dialog/`) consist of a **modal** (`<name>-dialog-modal`: the
   whole dialog UI with inputs – a view model, loading state – and outputs only, no `MAT_DIALOG_DATA` /
   `[mat-dialog-close]` / `dialogRef`) and a **service** with one method `open(…)`. If the dialog has to load data, a
-  **container** (`<name>-dialog-container`) gets the ids as `input.required()`, loads with `httpResource` directly and
-  closes `dialogRef` on the modal's outputs; otherwise the service connects the modal itself via
+  **container** (`<name>-dialog-container`) gets the ids as `input.required()`, loads with the resource of the API
+  service directly, maps the API model to the view model and closes `dialogRef` on the modal's outputs; otherwise the service connects the modal itself via
   `bindings: [inputBinding(…), outputBinding(…)]`.
 - **Form dialogs** (`<feature>/components/<name>-form/`) are opened directly by one page and close themselves:
   `dialogRef.close(command)` on save, `[mat-dialog-close]="undefined"` on cancel (not `mat-dialog-close` without a
@@ -128,8 +128,9 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 - **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
   `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is
   `Result | undefined` – no hand-written types in `subscribe`.
-- **The caller executes the result**: a command goes to its store's `mutation()`; if the dialog loaded data itself,
-  the caller reloads also on cancel.
+- **Shared dialogs return yes/no** (or a result type of their own) and import nothing from a feature – no feature
+  model, no command. The caller builds the command from its inputs and passes it to its store's `mutation()`; if the
+  dialog loaded data itself, the caller reloads also on cancel.
 - **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (button
   always "delete"), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
   with its own `confirmLabel` and `destructive: true | false`.
