@@ -58,7 +58,7 @@ src/app/shared/api/
   api-url.ts                            API_URL (`…/api/v1`)
   parse.ts                              parseWith(schema, endpoint)
   <resource>/                           one folder per backend controller (rfid-readers, customers, …)
-    <entity>.api-model.ts               schema, …ApiModel, …Request
+    <x>.api-model.ts                    like backend XApiModel.java: schemas, …ApiModel, …Request
     <resource>.api-service.ts           …ApiService
 src/app/<feature>/
   <entity>.model.ts                     feature model + commands
@@ -69,6 +69,17 @@ src/app/<feature>/
 Names: folder = the backend path (`rfid-readers`), files `rfid-reader.api-model.ts` / `rfid-readers.api-service.ts`,
 class `RfidReadersApiService`, schema `rfidReaderSchema`, type `RfidReaderApiModel`, request
 `UpdateRfidReaderRequest`.
+
+- API names follow the **backend**: the folder and the service are named after the controller path
+  (`/api/v1/workshop-dashboard` → `workshop-dashboard/`, `workshop-dashboard.api-service.ts`), the model file after
+  the backend `…ApiModel.java` (`WorkshopDashboardApiModel.java` → `workshop-dashboard.api-model.ts`), the types
+  inside after its records (`WorkshopDashboardEntryApiDto` → `WorkshopDashboardEntryApiModel`,
+  `UpdateRfidReaderRequestBody` → `UpdateRfidReaderRequest`). Feature names follow the **feature**: the dashboard
+  calls the same thing `ActiveUser`. The mapper connects them (`toActiveUser`).
+- One feature using two controllers gets two API folders and injects both services in its store
+  (`dashboard` → `shared/api/workshop-dashboard/` + `shared/api/tool-dashboard/`).
+- The mapper is named like the feature's model file: `rfid-reader.model.ts` → `rfid-reader.mapper.ts`,
+  `dashboard.model.ts` (several models) → `dashboard.mapper.ts`.
 
 ## API model
 
@@ -102,6 +113,7 @@ Java → zod:
 | Backend (`…ApiDto`)                   | Schema                                         |
 | ------------------------------------- | ---------------------------------------------- |
 | `@NotBlank String`, `@NotNull String` | `z.string()`                                   |
+| `@NotNull UUID`, ids                  | `z.string()` (ids are opaque)                  |
 | `String`                              | `z.string().nullable()`                        |
 | `boolean` / `@NotNull Boolean`        | `z.boolean()`                                  |
 | `long`, `int`, `@PositiveOrZero long` | `z.number()`                                   |
@@ -136,10 +148,6 @@ export class RfidReadersApiService {
   // --------------------------------------------------------------------------
   // queries
 
-  /**
-   * Loads the RFID reader whenever the id changes; no request while the id is `null`.
-   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
-   */
   rfidReaderResource(id: () => string | null): HttpResourceRef<RfidReaderApiModel | undefined> {
     return httpResource(
       () => {
@@ -170,6 +178,10 @@ General:
 - One constant `<RESOURCE>_API_URL` built from `API_URL` (`shared/api/api-url.ts`) – never from `environment`
   directly.
 - Sections `// queries` and `// commands`, separated by the `// ----` line.
+- **No JSDoc and no comments on the methods** – name and signature say what a method does
+  (`rfidReaderResource(id)`, `updateRfidReader(rfidReaderId, request)`, `getToolsByRfidReader(rfidReaderId)`). If a
+  method seems to need an explanation, find a better name. The only comment is one for what the code can't say (why
+  a list is reduced to one value, see below).
 - The service is stateless: no `subscribe`, no `tap`, no signals, no caching, no error handling (the
   `errorInterceptor` shows HTTP errors, `mutation()` keeps the store alive). No `HttpHeaders` / `Content-Type`.
 - No unused methods – an endpoint the portal doesn't call gets no method.
@@ -184,17 +196,16 @@ General:
   its error state and the page shows its load error. Watch the console when a page says "load failed".
 - Parameters are getter functions (`() => string | null`); return `undefined` from the request function while a
   required id is missing. Query parameters go through `{ url, params }`, never string concatenation.
-- 200 with an empty body ("nothing there") → `parseWith(xSchema.nullable(), …)`, type `XApiModel | null | undefined`,
-  and say so in the JSDoc.
+- 200 with an empty body ("nothing there") → `parseWith(xSchema.nullable(), …)`, type
+  `XApiModel | null | undefined` – the type says it, no comment needed.
 - The backend returns a list where the portal needs one value → validate the list, then pick, with a comment why:
   ```ts
   // the backend returns a list; the customer has at most one current assignment
-  {
-    parse: (response) => parseWith(z.array(assignmentSchema), 'GET /rfid-tag-assignments')(response)[0] ?? null;
-  }
+  const parseAssignments = parseWith(z.array(assignmentSchema), 'GET /rfid-tag-assignments');
+  return httpResource(() => …, { parse: (response) => parseAssignments(response)[0] ?? null });
   ```
-- The JSDoc always contains _"Must be called in an injection context (e.g. a field initializer or `withProps` of a
-  signal store)."_
+- A resource must be created in an injection context (field initializer, `withProps` of a store) – `httpResource`
+  throws otherwise, so no reminder in the code is needed.
 
 ### One-off checks → observable + `parseWith`
 
@@ -202,7 +213,6 @@ A read at the time of an action that is not shown on the page (e.g. "does a tool
 observable, validated the same way:
 
 ```ts
-/** One-off check at the time of an action (no displayed state, so no resource). */
 getToolsByRfidReader(rfidReaderId: string): Observable<ToolApiModel[]> {
   return this.http
     .get<unknown>(TOOLS_API_URL, { params: { rfidReaderId } })
@@ -342,7 +352,7 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
 
 ## Migrating an old `*.service.ts`
 
-Not migrated yet: everything except `rfid-tags` and `rfid-readers` (old pattern: `<feature>/*.service.ts` or
+Not migrated yet: everything except `rfid-tags`, `rfid-readers` and `dashboard` (old pattern: `<feature>/*.service.ts` or
 `users/shared/services/`, one class with commands as parameters, no validation).
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).
@@ -360,7 +370,8 @@ Not migrated yet: everything except `rfid-tags` and `rfid-readers` (old pattern:
 - [ ] Schema: `import * as z`, `.nullable()` for nullable fields, `z.iso.datetime()`, `z.enum(X)` from
       `shared/models`, no transforms; type via `z.infer`
 - [ ] Requests mirror `…RequestBody`, `| null` for missing values
-- [ ] Service: `API_URL`, every resource with `parseWith`, commands `(pathVariable, request)`, body as 2nd argument
+- [ ] Service: `API_URL`, every resource with `parseWith`, commands `(pathVariable, request)`, body as 2nd argument,
+      no JSDoc
 - [ ] Feature model + mapper (every field explicit, no spread) + mapper spec
 - [ ] Store maps in `withComputed` and `mutation()`; no component imports `shared/api`
 - [ ] Store spec: complete API-model test data, body checks, schema-error test

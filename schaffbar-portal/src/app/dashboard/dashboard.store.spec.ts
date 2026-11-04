@@ -3,17 +3,23 @@ import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@a
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
-import { ActiveTool, ActiveUser } from './dashboard.model';
+import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
+import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
+import { toActiveTool, toActiveUser } from './dashboard.mapper';
 import { DashboardStore } from './dashboard.store';
 
 describe('DashboardStore', () => {
   const activeUsersUrl = `${environment.apiBaseUrl}/api/v1/workshop-dashboard/active-users`;
   const activeToolsUrl = `${environment.apiBaseUrl}/api/v1/tool-dashboard/active-tools`;
-  const activeUsers = [{ customerId: 'user-1', firstName: 'Max' }] as ActiveUser[];
-  const activeTools = [{ toolId: 'tool-1' }] as unknown as ActiveTool[];
+  const activeUsers: WorkshopDashboardEntryApiModel[] = [
+    { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: '2026-10-27T08:30:00Z' },
+  ];
+  const activeTools: ToolDashboardEntryApiModel[] = [
+    { toolId: 'tool-1', toolName: 'Bandsäge', customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann' },
+  ];
 
   let store: InstanceType<typeof DashboardStore>;
   let httpMock: HttpTestingController;
@@ -26,7 +32,10 @@ describe('DashboardStore', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
 
   // lets the resources react and send their requests
   function trigger(): void {
@@ -51,8 +60,8 @@ describe('DashboardStore', () => {
   it('should load the active users and tools when the dashboard opens', async () => {
     await load();
 
-    expect(store.activeUsers()).toEqual(activeUsers);
-    expect(store.activeTools()).toEqual(activeTools);
+    expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
+    expect(store.activeTools()).toEqual(activeTools.map(toActiveTool));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -61,7 +70,7 @@ describe('DashboardStore', () => {
     expectUsers().flush(activeUsers);
     // not settle(): whenStable() would wait for the open tools request
     await new Promise((resolve) => setTimeout(resolve));
-    expect(store.activeUsers()).toEqual(activeUsers);
+    expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
     expect(store.isLoading()).toBe(true);
 
     expectTools().flush(activeTools);
@@ -78,7 +87,7 @@ describe('DashboardStore', () => {
     await settle();
 
     expect(store.activeUsers()).toEqual([]);
-    expect(store.activeTools()).toEqual(activeTools);
+    expect(store.activeTools()).toEqual(activeTools.map(toActiveTool));
   });
 
   it('should reload only the active tools', async () => {
@@ -90,7 +99,7 @@ describe('DashboardStore', () => {
     await settle();
 
     expect(store.activeTools()).toEqual([]);
-    expect(store.activeUsers()).toEqual(activeUsers);
+    expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
   });
 
   it('should expose a load error of either list', async () => {
@@ -100,7 +109,19 @@ describe('DashboardStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.activeUsers()).toEqual(activeUsers);
+    expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
     expect(store.activeTools()).toEqual([]);
+  });
+
+  it('should expose a load error for a response that does not match the schema', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    trigger();
+    expectUsers().flush([{ customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: 'gestern' }]);
+    expectTools().flush(activeTools);
+    await settle();
+
+    expect(store.hasLoadError()).toBe(true);
+    expect(store.activeUsers()).toEqual([]);
   });
 });

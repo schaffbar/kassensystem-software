@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
-import { differenceInMinutes, parseISO } from 'date-fns';
+import { differenceInMinutes } from 'date-fns';
 import { interval, map } from 'rxjs';
 
 import { ActiveUser } from '../../dashboard.model';
@@ -57,8 +57,8 @@ export class ActiveUsersWidgetComponent {
   }
 }
 
-function formatDuration(entryTime: string, now: Date): string {
-  const totalMinutes = differenceInMinutes(now, parseISO(entryTime));
+function formatDuration(entryTime: Date, now: Date): string {
+  const totalMinutes = differenceInMinutes(now, entryTime);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;

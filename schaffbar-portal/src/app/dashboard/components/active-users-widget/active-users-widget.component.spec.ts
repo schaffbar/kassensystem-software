@@ -9,8 +9,8 @@ import { ActiveUsersWidgetComponent } from './active-users-widget.component';
 
 describe('ActiveUsersWidgetComponent', () => {
   const activeUsers: ActiveUser[] = [
-    { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: '2026-10-27T08:30:00' },
-    { customerId: 'user-2', firstName: 'Erika', lastName: 'Musterfrau', entryTime: '2026-10-27T09:55:00' },
+    { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: new Date('2026-10-27T08:30:00') },
+    { customerId: 'user-2', firstName: 'Erika', lastName: 'Musterfrau', entryTime: new Date('2026-10-27T09:55:00') },
   ];
 
   let fixture: ComponentFixture<ActiveUsersWidgetComponent>;

@@ -2,10 +2,11 @@
 
 ## Folders
 
-Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`); the rules below describe the target.
+Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`); the rules below describe the target.
 
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
-  `<entity>.api-model.ts` (zod schema, `…ApiModel`, `…Request`) and `<resource>.api-service.ts` (`…ApiService`).
+  `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
+  `<resource>.api-service.ts` (`…ApiService`).
 - `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
   (`<entity>.mapper.ts`: API model → feature model, command → request) and stores, pages, components.
 - `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,

@@ -22,20 +22,12 @@ export class RfidReadersApiService {
   // --------------------------------------------------------------------------
   // queries
 
-  /**
-   * Loads all RFID readers; reload with `reload()`.
-   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
-   */
   rfidReadersResource(): HttpResourceRef<RfidReaderApiModel[] | undefined> {
     return httpResource(() => RFID_READERS_API_URL, {
       parse: parseWith(z.array(rfidReaderSchema), 'GET /rfid-readers'),
     });
   }
 
-  /**
-   * Loads the RFID reader whenever the id changes; no request while the id is `null`.
-   * Must be called in an injection context (e.g. a field initializer or `withProps` of a signal store).
-   */
   rfidReaderResource(id: () => string | null): HttpResourceRef<RfidReaderApiModel | undefined> {
     return httpResource(
       () => {
