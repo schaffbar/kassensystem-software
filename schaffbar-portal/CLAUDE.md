@@ -2,20 +2,23 @@
 
 ## Folders
 
-Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`, `rfid-tag-assignments`); the rules below describe the target.
+Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`,
+`rfid-tag-assignments`, `tool-certifications`); the rules below describe the target.
 
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
   `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
   `<resource>.api-service.ts` (`…ApiService`).
 - `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
   (`<entity>.mapper.ts`: API model → feature model, command → request) and stores, pages, components.
+- A backend resource used by several features gives each feature its **own** model and mapper (on purpose, not a
+  shared feature model): `tools/tool-certification.model.ts` and `users/shared/models/tool-certification.model.ts`,
+  each with the commands of its feature.
 - `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,
   e.g. `rfid-reader-type.ts`). No entities, no commands.
 - Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
   models (enforced by ESLint).
 - A feature never imports from another feature's internals (`users/shared/…`, components, stores). Not migrated yet:
-  `tools` imports `User` and `UsersStore` from `users/shared/`; the interim topic folder `tool-certifications/` moves
-  to `shared/api` + features.
+  `tools` imports `User` and `UsersStore` from `users/shared/`.
 
 ## Services
 

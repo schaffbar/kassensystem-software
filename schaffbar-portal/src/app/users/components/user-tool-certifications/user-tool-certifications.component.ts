@@ -10,13 +10,13 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { Tool } from '../../../tools/tool.model';
+import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
   ToolCertification,
-  ToolCertificationStatus,
-} from '../../../tool-certifications/tool-certification.model';
+} from '../../shared/models/tool-certification.model';
 
 @Component({
   selector: 'schbar-user-tool-certifications',

@@ -235,8 +235,11 @@ Prefix `get…`, plain value parameters. If you are unsure → it is displayed d
 - Name like the backend action (`updateRfidReader`, `changeRfidReaderType`, `closeWorkshopSession`) – also when
   the feature calls it differently: `POST /rfid-tag-assignments` is `requestRfidTagAssignment(request)` in the API,
   the feature's command stays `AssignRfidTagCommand`, the mapper is `toRequestRfidTagAssignmentRequest`.
-- `Observable<void>` unless the backend really returns a body (then validate it like a query). 201 with only a
-  `Location` header is `void`.
+- `Observable<void>` unless the backend really returns a body **the portal uses** (then validate it like a query).
+  201 with only a `Location` header is `void`; a body nobody reads is `void` too (`POST /tool-certifications/batch`
+  returns a `BatchCertificationResult`, the portal ignores it).
+- Several commands on the same sub-path → a pure, unexported URL helper after the class
+  (`certificationUrl(customerId, toolId)` in `tool-certifications.api-service.ts`).
 - **The second argument of `put` / `post` / `patch` is the body.** Without payload pass `{}` – otherwise the options
   end up as the body. DELETE with payload: `{ body: … }`.
 
@@ -266,6 +269,10 @@ export interface UpdateRfidReaderCommand {
 
 - Shaped for the feature: `Date` instead of ISO strings, only the fields the feature uses, combined values where it
   helps. It starts as a copy of the API model and drifts when the feature needs it to.
+- A resource used by several features: **each feature has its own model and mapper**, with only its own commands
+  (`tools/tool-certification.model.ts` has `BatchCreate…` / `Delete…`, `users/shared/models/tool-certification.model.ts`
+  has `Pause…` / `Reactivate…` / `Revoke…`). The duplicated interface is intended – a feature never imports another
+  feature's model, and `shared/models` holds enums only.
 - `| null` stays where the value can be missing (CLAUDE.md "Missing values").
 - Commands stay here, as described in CLAUDE.md "Commands" – components emit them, stores receive them. They never go
   to the API service directly.
@@ -370,7 +377,7 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
 
 ## Migrating an old `*.service.ts`
 
-Not migrated yet: `tool-certifications`, `customers`, `tools` (old pattern: `<feature>/*.service.ts` or
+Not migrated yet: `customers`, `tools` (old pattern: `<feature>/*.service.ts` or
 `users/shared/services/`, one class with commands as parameters, no validation).
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).

@@ -1,16 +1,12 @@
+import { ToolCertificationStatus } from '../shared/models/tool-certification-status';
+
 export interface ToolCertification {
   id: string;
   customerId: string;
   toolId: string;
   status: ToolCertificationStatus;
-  certifiedAt: string;
+  certifiedAt: Date;
   certifiedBy: string | null;
-}
-
-export enum ToolCertificationStatus {
-  Active = 'ACTIVE',
-  Paused = 'PAUSED',
-  Revoked = 'REVOKED',
 }
 
 // ----------------------------------------------------------------------------
@@ -23,21 +19,6 @@ export interface BatchCreateToolCertificationCommand {
 }
 
 export interface DeleteToolCertificationCommand {
-  customerId: string;
-  toolId: string;
-}
-
-export interface PauseToolCertificationCommand {
-  customerId: string;
-  toolId: string;
-}
-
-export interface ReactivateToolCertificationCommand {
-  customerId: string;
-  toolId: string;
-}
-
-export interface RevokeToolCertificationCommand {
   customerId: string;
   toolId: string;
 }

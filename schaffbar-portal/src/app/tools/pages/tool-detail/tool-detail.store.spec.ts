@@ -6,7 +6,9 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
+import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
+import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { toToolCertification } from '../../tool-certification.mapper';
 import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
 import { ToolDetailStore } from './tool-detail.store';
 
@@ -27,7 +29,16 @@ describe('ToolDetailStore', () => {
     offCommand: null,
     instructors: [],
   };
-  const certifications = [{ id: 'cert-1', customerId: 'user-1', toolId: 'tool-1' }] as ToolCertification[];
+  const certifications: ToolCertificationApiModel[] = [
+    {
+      id: 'cert-1',
+      customerId: 'user-1',
+      toolId: 'tool-1',
+      status: ToolCertificationStatus.Active,
+      certifiedAt: '2026-01-01T10:00:00Z',
+      certifiedBy: null,
+    },
+  ];
 
   let store: InstanceType<typeof ToolDetailStore>;
   let httpMock: HttpTestingController;
@@ -82,7 +93,7 @@ describe('ToolDetailStore', () => {
     await loadTool();
 
     expect(store.tool()).toEqual(tool);
-    expect(store.toolCertifications()).toEqual(certifications);
+    expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -112,6 +123,22 @@ describe('ToolDetailStore', () => {
     expectToolRequest().flush({ ...tool, instructors: ['user-1'] });
     await settle();
     expect(store.tool()?.instructors).toEqual(['user-1']);
+  });
+
+  it('should only reload the certifications after certifying several users', async () => {
+    await loadTool();
+
+    store.batchCreateCertifications({ customerIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
+    trigger();
+    const batch = httpMock.expectOne(`${certificationsUrl}/batch`);
+    expect(batch.request.method).toBe('POST');
+    expect(batch.request.body).toEqual({ customerIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
+    batch.flush({});
+    trigger();
+
+    expectCertificationsRequest().flush(certifications);
+    await settle();
+    expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
   });
 
   it('should only reload the certifications after deleting one', async () => {

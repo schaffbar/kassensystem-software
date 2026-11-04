@@ -7,7 +7,8 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { CertificationRequirement, Tool, ToolArea } from '../../../tools/tool.model';
-import { ToolCertification, ToolCertificationStatus } from '../../../tool-certifications/tool-certification.model';
+import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { ToolCertification } from '../../shared/models/tool-certification.model';
 import { UserToolCertificationsComponent } from './user-tool-certifications.component';
 
 describe('UserToolCertificationsComponent', () => {
@@ -32,7 +33,7 @@ describe('UserToolCertificationsComponent', () => {
       customerId: 'user-1',
       toolId: 'tool-1',
       status,
-      certifiedAt: '2026-01-01T10:00:00Z',
+      certifiedAt: new Date('2026-01-01T10:00:00Z'),
       certifiedBy: null,
     };
   }

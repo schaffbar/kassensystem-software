@@ -10,7 +10,9 @@ import { RfidTagAssignmentApiModel } from '../../../shared/api/rfid-tag-assignme
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { toRfidTagAssignment } from '../models/rfid-tag-assignment.mapper';
-import { ToolCertification } from '../../../tool-certifications/tool-certification.model';
+import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
+import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { toToolCertification } from '../models/tool-certification.mapper';
 import { User } from '../models/user.model';
 import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
 import {
@@ -42,7 +44,16 @@ describe('UserDetailStore', () => {
     totalWorkshopUnits: 4,
     toolUsageSummaries: [],
   });
-  const certifications = [{ id: 'cert-1', customerId: 'user-1', toolId: 'tool-1' }] as ToolCertification[];
+  const certifications: ToolCertificationApiModel[] = [
+    {
+      id: 'cert-1',
+      customerId: 'user-1',
+      toolId: 'tool-1',
+      status: ToolCertificationStatus.Active,
+      certifiedAt: '2026-01-01T10:00:00Z',
+      certifiedBy: null,
+    },
+  ];
 
   let store: InstanceType<typeof UserDetailStore>;
   let httpMock: HttpTestingController;
@@ -108,7 +119,7 @@ describe('UserDetailStore', () => {
     expect(store.totalWorkshopDurationInMinutes()).toBe(80);
     expect(store.totalWorkshopUnits()).toBe(4);
     expect(store.hasRunningUsage()).toBe(false);
-    expect(store.toolCertifications()).toEqual(certifications);
+    expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
     expect(store.hasLoadError()).toBe(false);
   });
 

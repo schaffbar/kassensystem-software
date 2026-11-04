@@ -2,12 +2,10 @@ import { computed, inject } from '@angular/core';
 
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
-import {
-  BatchCreateToolCertificationCommand,
-  DeleteToolCertificationCommand,
-} from '../../../tool-certifications/tool-certification.model';
+import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
 import { mutation } from '../../../shared/state/mutation';
-import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
+import { toBatchCertifyRequest, toToolCertification } from '../../tool-certification.mapper';
+import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
@@ -27,19 +25,21 @@ export const ToolDetailStore = signalStore(
   withState<ToolDetailState>({ toolId: null }),
   withProps((store) => {
     const toolsService = inject(ToolsService);
-    const toolCertificationService = inject(ToolCertificationService);
+    const toolCertificationsApi = inject(ToolCertificationsApiService);
     return {
       _toolsService: toolsService,
-      _toolCertificationService: toolCertificationService,
+      _toolCertificationsApi: toolCertificationsApi,
       // (re)load whenever the id changes – replaces the dirty flag + effect + rxMethods
       _toolResource: toolsService.toolResource(store.toolId),
-      _certificationsResource: toolCertificationService.certificationsByToolResource(store.toolId),
+      _certificationsResource: toolCertificationsApi.certificationsByToolResource(store.toolId),
     };
   }),
   withComputed(({ _toolResource, _certificationsResource }) => ({
     // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
     tool: computed(() => (_toolResource.hasValue() ? _toolResource.value() : null)),
-    toolCertifications: computed(() => (_certificationsResource.hasValue() ? _certificationsResource.value() : [])),
+    toolCertifications: computed(() =>
+      _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
+    ),
     isLoading: computed(() => _toolResource.isLoading() || _certificationsResource.isLoading()),
     hasLoadError: computed(() => !!_toolResource.error() || !!_certificationsResource.error()),
   })),
@@ -86,11 +86,11 @@ export const ToolDetailStore = signalStore(
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
     batchCreateCertifications: mutation<BatchCreateToolCertificationCommand>({
-      request: (command) => store._toolCertificationService.batchCreate(command),
+      request: (command) => store._toolCertificationsApi.batchCertify(toBatchCertifyRequest(command)),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     deleteCertification: mutation<DeleteToolCertificationCommand>({
-      request: (command) => store._toolCertificationService.delete(command),
+      request: (command) => store._toolCertificationsApi.delete(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

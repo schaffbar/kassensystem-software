@@ -4,7 +4,7 @@ import { MatChipsModule } from '@angular/material/chips';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { ToolCertificationStatus } from '../../../tool-certifications/tool-certification.model';
+import { ToolCertificationStatus } from '../../models/tool-certification-status';
 
 @Component({
   selector: 'schbar-certification-status-chip',

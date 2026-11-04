@@ -13,12 +13,13 @@ import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-} from '../../../tool-certifications/tool-certification.model';
+} from '../models/tool-certification.model';
+import { toToolCertification } from '../models/tool-certification.mapper';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
 import { CloseWorkshopSessionCommand, hasRunningUsage } from '../models/workshop-session.model';
 import { toWorkshopSession } from '../models/workshop-session.mapper';
 import { RfidTagAssignmentsApiService } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
-import { ToolCertificationService } from '../../../tool-certifications/tool-certification.service';
+import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
 import { UsersService } from '../services/users.service';
 import { WorkshopSessionsApiService } from '../../../shared/api/workshop-sessions/workshop-sessions.api-service';
 
@@ -32,18 +33,18 @@ export const UserDetailStore = signalStore(
     const usersService = inject(UsersService);
     const rfidTagAssignmentsApi = inject(RfidTagAssignmentsApiService);
     const workshopSessionsApi = inject(WorkshopSessionsApiService);
-    const toolCertificationService = inject(ToolCertificationService);
+    const toolCertificationsApi = inject(ToolCertificationsApiService);
     return {
       // services for the mutations
       _usersService: usersService,
       _rfidTagAssignmentsApi: rfidTagAssignmentsApi,
       _workshopSessionsApi: workshopSessionsApi,
-      _toolCertificationService: toolCertificationService,
+      _toolCertificationsApi: toolCertificationsApi,
       // resources for the queries
       _userResource: usersService.userResource(store.userId),
       _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
       _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
-      _certificationsResource: toolCertificationService.certificationsByUserResource(store.userId),
+      _certificationsResource: toolCertificationsApi.certificationsByCustomerResource(store.userId),
     };
   }),
   withComputed(({ _userResource, _assignmentResource, _openSessionResource, _certificationsResource }) => {
@@ -59,7 +60,9 @@ export const UserDetailStore = signalStore(
         const session = _openSessionResource.hasValue() ? _openSessionResource.value() : null;
         return session ? toWorkshopSession(session) : null;
       }),
-      toolCertifications: computed(() => (_certificationsResource.hasValue() ? _certificationsResource.value() : [])),
+      toolCertifications: computed(() =>
+        _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
+      ),
       // loading and error states are combined from all resources
       isLoading: computed(() => resources.some((resource) => resource.isLoading())),
       hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
@@ -127,15 +130,15 @@ export const UserDetailStore = signalStore(
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
     pauseCertification: mutation<PauseToolCertificationCommand>({
-      request: (command) => store._toolCertificationService.pause(command),
+      request: (command) => store._toolCertificationsApi.pause(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     reactivateCertification: mutation<ReactivateToolCertificationCommand>({
-      request: (command) => store._toolCertificationService.reactivate(command),
+      request: (command) => store._toolCertificationsApi.reactivate(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     revokeCertification: mutation<RevokeToolCertificationCommand>({
-      request: (command) => store._toolCertificationService.revoke(command),
+      request: (command) => store._toolCertificationsApi.revoke(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

@@ -17,7 +17,7 @@ import {
   BatchCreateToolCertificationCommand,
   DeleteToolCertificationCommand,
   ToolCertification,
-} from '../../../tool-certifications/tool-certification.model';
+} from '../../tool-certification.model';
 import { User } from '../../../users/shared/models/user.model';
 
 @Component({

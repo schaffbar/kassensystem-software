@@ -24,7 +24,7 @@ import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-} from '../../../tool-certifications/tool-certification.model';
+} from '../../shared/models/tool-certification.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
 import { UserDetailStore } from '../../shared/stores/user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
