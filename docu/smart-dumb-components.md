@@ -88,7 +88,7 @@ mappt mit `to<Name>ViewModel()`
 | ------------------------------ | ------------- | ----------- | ----------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- | ------ |
 | `rfid-reader-list`             | `pages/`      | Smart       | Smart, rendert die Tabelle selbst         | –                            | –                                                                                       | ✅     |
 | `rfid-reader-detail`           | `pages/`      | Smart       | Smart (Vorab-Prüfung + Snackbar + Dialog) | –                            | –                                                                                       | ✅     |
-| `rfid-reader-detail-info`      | `components/` | Dumb        | Dumb                                      | `RfidReader`                 | ohne Mapper: `RfidReaderInfoViewModel`                                                  | ⚠️     |
+| `rfid-reader-detail-info`      | `components/` | Dumb        | Dumb                                      | `RfidReader`                 | ohne Mapper: `RfidReaderDetailInfoViewModel`                                            | ⚠️     |
 | `change-rfid-reader-type-form` | `components/` | Form-Dialog | Form-Dialog                               | Dialog-Data `{ rfidReader }` | ohne Mapper: Dialog-Data `{ rfidReader: ChangeRfidReaderTypeViewModel }` (`id`, `type`) | ⚠️     |
 
 ### rfid-tags
@@ -110,32 +110,32 @@ mappt mit `to<Name>ViewModel()`
 
 ### tools
 
-| Komponente                    | Ordner        | Soll        | Ist                                 | Input heute                                                     | ViewModel (Soll)                                                                                                 | Status           |
-| ----------------------------- | ------------- | ----------- | ----------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst   | –                                                               | –                                                                                                                | ✅               |
-| `tool-detail`                 | `pages/`      | Smart       | Smart                               | –                                                               | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
-| `tool-detail-info`            | `components/` | Dumb        | Dumb                                | `ToolInfoViewModel` + `ExistingToolViewModel[]`                 | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
-| `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern             | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
-| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertificationRowViewModel[]` + 2 × `UserOptionViewModel[]` | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ✅ (V4 erledigt) |
-| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]`       | `ToolRfidReaderViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`)  | ✅ (V3 erledigt) |
-| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                          | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
-| `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                 | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                    | ✅ (V2 erledigt) |
+| Komponente                    | Ordner        | Soll        | Ist                                 | Input heute                                                         | ViewModel (Soll)                                                                                                          | Status           |
+| ----------------------------- | ------------- | ----------- | ----------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst   | –                                                                   | –                                                                                                                         | ✅               |
+| `tool-detail`                 | `pages/`      | Smart       | Smart                               | –                                                                   | – (füllt die ViewModels der Kinder)                                                                                       | ✅               |
+| `tool-detail-info`            | `components/` | Dumb        | Dumb                                | `ToolDetailInfoViewModel` + `ExistingToolViewModel[]`               | ohne Mapper: `ToolDetailInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                         | ✅ (V1 erledigt) |
+| `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern                 | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                               | ⚠️               |
+| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertificationRowViewModel[]` + 2 × `UserOptionViewModel[]`     | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store          | ✅ (V4 erledigt) |
+| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderAssignmentViewModel` + `RfidReaderOptionViewModel[]` | `ToolRfidReaderAssignmentViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`) | ✅ (V3 erledigt) |
+| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                              | ohne Mapper: `ToolWlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                              | ⚠️               |
+| `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                     | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                             | ✅ (V2 erledigt) |
 
 ### users
 
-| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                              | ViewModel (Soll)                                                    | Status           |
-| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------- | ---------------- |
-| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                        | –                                                                   | ✅               |
-| `user-detail`              | `pages/`      | Smart       | Smart, aber Header-Präsentation im Template                        | –                                                        | – (füllt die ViewModels der Kinder)                                 | ❌ V6            |
-| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                                        | –                                                                   | ✅ (V5 erledigt) |
-| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                 | –                                                                   | ✅               |
-| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `ContactViewModel` (`id`, `email`, `phone`)            | ⚠️               |
-| `user-address`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `AddressViewModel` (`id`, `address`)                   | ⚠️               |
-| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `ToolCertification[]` + `Tool[]`, joint zu `toolNameMap` | **Mapping**: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ⚠️               |
-| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummary`                                       | ohne Mapper: `ToolUsageSummaryViewModel`                            | ⚠️               |
-| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsage[]` + zwei Summen                          | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`    | ⚠️               |
-| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                        | – (keine Daten)                                                     | ✅               |
-| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user }`                                   | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`            | ⚠️               |
+| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                              | ViewModel (Soll)                                                        | Status           |
+| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------- |
+| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                        | –                                                                       | ✅               |
+| `user-detail`              | `pages/`      | Smart       | Smart, aber Header-Präsentation im Template                        | –                                                        | – (füllt die ViewModels der Kinder)                                     | ❌ V6            |
+| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                                        | –                                                                       | ✅ (V5 erledigt) |
+| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                 | –                                                                       | ✅               |
+| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `UserContactViewModel`                                   | ohne Mapper: `UserContactViewModel` (`id`, `email`, `phone`)            | ✅               |
+| `user-address`             | `components/` | Dumb        | Dumb                                                               | `UserAddressViewModel`                                   | ohne Mapper: `UserAddressViewModel` (`id`, `address: AddressViewModel`) | ✅               |
+| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `ToolCertification[]` + `Tool[]`, joint zu `toolNameMap` | **Mapping**: `UserToolCertificationRowViewModel[]` (mit `toolName`)     | ⚠️               |
+| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummaryViewModel`                              | ohne Mapper: `ToolUsageSummaryViewModel`                                | ✅               |
+| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsageViewModel[]` + zwei Summen                 | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`        | ✅               |
+| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                        | – (keine Daten)                                                         | ✅               |
+| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user: UpdateUserViewModel }`              | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`                | ✅               |
 
 ## Befunde im Detail
 
@@ -188,7 +188,7 @@ Templates (stattdessen `userName | orDash` für gelöschte Benutzer).
 
 Bei allen anderen dumb components passt die Form schon: Das ViewModel ist eine Teilmenge des Feature-Models, die
 Page übergibt es unverändert. Die Arbeit liegt ganz in der Komponente: Interface anlegen, Input umbenennen
-(`user` → `contact`), Specs auf vollständige ViewModel-Literale umstellen – die `{ … } as User`-Casts in den Specs
+(`user` → `userContact`), Specs auf vollständige ViewModel-Literale umstellen – die `{ … } as User`-Casts in den Specs
 fallen dabei weg.
 
 ### Pass-through-Komponente (V5)
@@ -220,6 +220,8 @@ Enum-Keys über Pipes (`ageGroupKey`, `rfidTagAssignmentTypeKey`).
 - Jede dumb component bekommt ein ViewModel, außer sie braucht nur ein, zwei Ids oder einfache Werte.
 - Das ViewModel steht **in der Komponente selbst** (exportiert aus ihrer Datei) und enthält genau die Felder, die
   sie liest – keine Typen aus dem Feature-Model, Enums aus `shared/models` sind erlaubt.
+- Namen: Das Haupt-ViewModel heißt wie die Komponente (`user-contact` → `UserContactViewModel`, Input
+  `userContact`), weitere ViewModels nach ihrem Inhalt (`ToolCertificationRowViewModel`, `UserOptionViewModel`).
 - Hat das Feature-Model alle Felder, übergibt die Page es direkt (kein Mapper). Weicht die Form ab, mappt die Page in
   einem `computed` mit einer reinen `to<Name>ViewModel()` nach der Klasse. Der Store kennt keine ViewModels.
 - Fachregeln bleiben im Store; die Page reicht das Ergebnis ins ViewModel.
@@ -285,7 +287,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 Pro Komponente: ViewModel in der Komponente, Input ggf. umbenennen, Spec auf ViewModel-Literale. Die Pages ändern
 sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein bleiben:
 
-- [ ] users: `user-contact`, `user-address`, `tool-usage-summary`, `workshop-usage-summary`, `update-user-form`
+- [x] users: `user-contact`, `user-address`, `tool-usage-summary`, `workshop-usage-summary`, `update-user-form`
 - [ ] tools: ~~`tool-detail-info`~~ (mit V1 erledigt), ~~`tool-rfid-reader-assignment`~~ (mit V3 erledigt),
       `tool-wlan-relais`, ~~`new-tool-form`~~ (mit V2 erledigt)
 - [ ] rfid-readers: `rfid-reader-detail-info`, `change-rfid-reader-type-form`

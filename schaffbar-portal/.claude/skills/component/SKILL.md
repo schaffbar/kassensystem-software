@@ -24,8 +24,8 @@ Reference implementations:
 
 - smart: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – store, child components, command handlers
 - dumb with a ViewModel: [close-session-dialog-modal](../../../src/app/shared/dialogs/close-session-dialog/close-session-dialog-modal.component.ts)
-- dumb with a form: [user-contact/](../../../src/app/users/components/user-contact/) – still takes the feature model
-  `User`; the example below shows it with its ViewModel
+- dumb with a form and a ViewModel: [user-contact/](../../../src/app/users/components/user-contact/)
+- dumb with a main and further ViewModels: [tool-certifications/](../../../src/app/tools/components/tool-certifications/)
 
 ## What goes where
 
@@ -60,16 +60,21 @@ Rules:
 
 - The ViewModel is defined **in the dumb component's file**: `export interface <Name>ViewModel` after the imports,
   before `@Component`. Not in the feature model, not in a file of its own, not in the store.
-- Several inputs → several ViewModels in the same file (`ToolCertificationRowViewModel`, `CertifierViewModel`). Name
-  each after what it describes, ending in `ViewModel`; name the input the same way (`contact`, `certifications`),
-  not after the entity it happens to come from.
+- **Names**:
+  - The **main ViewModel** is named after the component: `<ComponentName>ViewModel`, its input
+    `<componentName>` – `user-contact` → `UserContactViewModel`, `userContact`; `tool-detail-info` →
+    `ToolDetailInfoViewModel`, `toolDetailInfo`. Never after the entity it happens to come from (`tool`, `user`).
+  - **Further ViewModels** (rows, options, nested parts, a second input) are named after what they describe:
+    `ToolCertificationRowViewModel`, `UserOptionViewModel`, `AddressViewModel`; their inputs likewise
+    (`certifications`, `certifiers`).
+  - A form dialog's ViewModel is its `<Name>DialogData` (skill `dialog`).
 - Only the fields the template and the component read. A value the backend can send as `null` stays `| null`
   (CLAUDE.md "Missing values").
 - Plain data only: strings, numbers, booleans, `Date`, nested objects/arrays of these, and enums from
   `shared/models`. **No feature model type inside a ViewModel** – otherwise the coupling comes back through the
   back door.
 - No ids "for later" that the component doesn't use – but the ids the component needs for its commands are part of
-  the ViewModel (`ContactViewModel.id` for `UpdateUserContactCommand`).
+  the ViewModel (`UserContactViewModel.id` for `UpdateUserContactCommand`).
 - Not to be confused with the **form model** (`ContactFormModel`): local, not exported, describes what is edited
   (CLAUDE.md "Forms"). The ViewModel describes what comes in.
 - The store never imports a ViewModel – it doesn't know the components. Mapping happens in the page.
@@ -135,8 +140,8 @@ function toCertificationRowViewModels(
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 @if (detailsStore.tool(); as tool) {
-  <!-- Tool has all fields of ToolInfoViewModel, the tools all fields of ExistingToolViewModel -->
-  <schbar-tool-detail-info [tool]="tool" [existingTools]="toolsStore.entities()" (toolUpdated)="onToolUpdated($event)" />
+  <!-- Tool has all fields of ToolDetailInfoViewModel, the tools all fields of ExistingToolViewModel -->
+  <schbar-tool-detail-info [toolDetailInfo]="tool" [existingTools]="toolsStore.entities()" (toolUpdated)="onToolUpdated($event)" />
   <schbar-tool-certifications [certifications]="certificationRows()" … />
 }
 ```
@@ -163,7 +168,7 @@ Rules:
 ## Dumb component
 
 ```ts
-export interface ContactViewModel {
+export interface UserContactViewModel {
   id: string;
   email: string;
   phone: string | null;
@@ -181,34 +186,34 @@ interface ContactFormModel {
   imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, TranslatePipe],
 })
 export class UserContactComponent {
-  readonly contact = input.required<ContactViewModel>();
+  readonly userContact = input.required<UserContactViewModel>();
 
   readonly contactChanged = output<UpdateUserContactCommand>();
 
   protected readonly isEditing = signal(false);
 
-  // follows the contact input
-  private readonly model = linkedSignal(() => toModel(this.contact()));
+  // follows the userContact input
+  private readonly model = linkedSignal(() => toModel(this.userContact()));
 
   protected readonly contactForm = form(this.model, (schema) => { … });
 
   protected onSave(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
-      const command: UpdateUserContactCommand = { id: this.contact().id, email, phone: phone || undefined };
+      const command: UpdateUserContactCommand = { id: this.userContact().id, email, phone: phone || undefined };
       this.contactChanged.emit(command);
       this.isEditing.set(false);
     });
   }
 }
 
-function toModel(contact: ContactViewModel): ContactFormModel {
-  return { email: contact.email, phone: contact.phone ?? '' };
+function toModel(userContact: UserContactViewModel): ContactFormModel {
+  return { email: userContact.email, phone: userContact.phone ?? '' };
 }
 ```
 
-The page passes the `User` directly – it has all fields of `ContactViewModel`:
-`<schbar-user-contact [contact]="user" (contactChanged)="onContactChanged($event)" />`.
+The page passes the `User` directly – it has all fields of `UserContactViewModel`:
+`<schbar-user-contact [userContact]="user" (contactChanged)="onContactChanged($event)" />`.
 
 Rules:
 
@@ -239,8 +244,8 @@ Dumb component – ViewModel in, command out, no store:
   datepicker). Nothing to mock – except a confirmation service:
   `{ provide: ConfirmActionDialogService, useValue: { open: vi.fn(() => of(true)) } }`.
 - Test data is a **complete ViewModel literal** – no `as User` cast, no fields the component doesn't read:
-  `const contact: ContactViewModel = { id: 'user-1', email: 'max@example.com', phone: null };`
-- `fixture.componentRef.setInput('contact', contact)`, `await fixture.whenStable()`; subscribe a `vi.fn()` to each
+  `const userContact: UserContactViewModel = { id: 'user-1', email: 'max@example.com', phone: null };`
+- `fixture.componentRef.setInput('userContact', userContact)`, `await fixture.whenStable()`; subscribe a `vi.fn()` to each
   output and expect the command (`toHaveBeenCalledExactlyOnceWith({ id: 'user-1', … })`).
 - Material harnesses for fields and buttons (`MatInputHarness`, `MatButtonHarness`) –
   see [user-contact.component.spec.ts](../../../src/app/users/components/user-contact/user-contact.component.spec.ts).
@@ -261,6 +266,8 @@ Smart component – store mocked, children real:
 - [ ] Kind decided: page (smart) in `pages/`, component (dumb) in `components/`, form dialog, shared component
 - [ ] Dumb: ViewModel(s) exported from its own file, exactly the fields it reads, no feature model type inside;
       only ids / plain values → no ViewModel
+- [ ] Names: main ViewModel `<ComponentName>ViewModel` with input `<componentName>`, further ViewModels after their
+      content
 - [ ] Dumb: only `input()` / `output()`; injects nothing (form dialog: dialog data/ref; confirmation services)
 - [ ] Dumb gets data decided and combined: no business rule, no join of lists inside; validator data as input
 - [ ] Outputs for backend changes emit commands with the ids (feature); `void` / own result type (shared)

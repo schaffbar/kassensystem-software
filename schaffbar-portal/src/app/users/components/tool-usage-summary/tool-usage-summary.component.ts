@@ -7,7 +7,23 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { ToolUsageSummary } from '../../workshop-session.model';
+
+export interface ToolUsageViewModel {
+  startTime: Date;
+  // null while the tool is still in use
+  endTime: Date | null;
+  durationInMinutes: number | null;
+  unitsUsed: number | null;
+}
+
+export interface ToolUsageSummaryViewModel {
+  // null if the tool has been deleted
+  toolName: string | null;
+  active: boolean;
+  totalDurationInMinutes: number;
+  totalUnits: number;
+  usages: ToolUsageViewModel[];
+}
 
 @Component({
   selector: 'schbar-tool-usage-summary',
@@ -16,7 +32,7 @@ import { ToolUsageSummary } from '../../workshop-session.model';
   imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe, OrDashPipe],
 })
 export class ToolUsageSummaryComponent {
-  readonly summary = input.required<ToolUsageSummary>();
+  readonly summary = input.required<ToolUsageSummaryViewModel>();
 
   protected readonly toolUsageColumns: string[] = ['startTime', 'endTime', 'durationInMinutes', 'unitsUsed'];
 }

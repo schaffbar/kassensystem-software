@@ -15,7 +15,7 @@ import { ToolArea } from '../../../shared/models/tool-area';
 import { UpdateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
 
-export interface ToolInfoViewModel {
+export interface ToolDetailInfoViewModel {
   id: string;
   name: string;
   description: string | null;
@@ -53,7 +53,7 @@ interface ToolFormModel {
   ],
 })
 export class ToolDetailInfoComponent {
-  readonly tool = input.required<ToolInfoViewModel>();
+  readonly toolDetailInfo = input.required<ToolDetailInfoViewModel>();
   readonly existingTools = input.required<ExistingToolViewModel[]>();
 
   readonly toolUpdated = output<UpdateToolCommand>();
@@ -63,14 +63,14 @@ export class ToolDetailInfoComponent {
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  // follows the tool input
-  private readonly model = linkedSignal(() => toModel(this.tool()));
+  // follows the toolDetailInfo input
+  private readonly model = linkedSignal(() => toModel(this.toolDetailInfo()));
 
   protected readonly toolForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
     readonly(schema, { when: () => !this.isEditing() });
     required(schema.name);
-    validateUniqueToolName(schema.name, this.existingTools, () => this.tool().id);
+    validateUniqueToolName(schema.name, this.existingTools, () => this.toolDetailInfo().id);
   });
 
   protected onEdit(): void {
@@ -80,7 +80,7 @@ export class ToolDetailInfoComponent {
   }
 
   protected onCancel(): void {
-    this.model.set(toModel(this.tool()));
+    this.model.set(toModel(this.toolDetailInfo()));
     this.toolForm().reset();
     this.isEditing.set(false);
   }
@@ -89,7 +89,7 @@ export class ToolDetailInfoComponent {
     submit(this.toolForm, async () => {
       const { name, description, area, certificationRequirement } = this.model();
       const command: UpdateToolCommand = {
-        id: this.tool().id,
+        id: this.toolDetailInfo().id,
         name,
         description,
         area,
@@ -101,7 +101,7 @@ export class ToolDetailInfoComponent {
   }
 }
 
-function toModel(tool: ToolInfoViewModel): ToolFormModel {
+function toModel(tool: ToolDetailInfoViewModel): ToolFormModel {
   return {
     name: tool.name,
     description: tool.description ?? '',

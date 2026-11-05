@@ -36,7 +36,7 @@
             }
           </mat-select>
         } @else {
-          <input id="area" matInput [value]="'tools.areas.' + tool().area | translate" readonly />
+          <input id="area" matInput [value]="'tools.areas.' + toolDetailInfo().area | translate" readonly />
         }
       </mat-form-field>
     </div>
@@ -58,7 +58,7 @@
           <input
             id="certificationRequirement"
             matInput
-            [value]="'tools.certificationRequirements.' + tool().certificationRequirement | translate"
+            [value]="'tools.certificationRequirements.' + toolDetailInfo().certificationRequirement | translate"
             readonly />
         }
       </mat-form-field>

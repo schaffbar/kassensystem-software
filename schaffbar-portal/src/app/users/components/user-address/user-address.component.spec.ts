@@ -10,11 +10,10 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { User, UserAddress } from '../../user.model';
-import { UserAddressComponent } from './user-address.component';
+import { AddressViewModel, UserAddressComponent } from './user-address.component';
 
 describe('UserAddressComponent', () => {
-  const address: UserAddress = {
+  const address: AddressViewModel = {
     addressLine1: 'Hauptstraße 1',
     addressLine2: '',
     postalCode: '12345',
@@ -33,7 +32,7 @@ describe('UserAddressComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserAddressComponent);
-    fixture.componentRef.setInput('user', { id: 'user-1', address } as User);
+    fixture.componentRef.setInput('userAddress', { id: 'user-1', address });
     addressChanged = vi.fn();
     fixture.componentInstance.addressChanged.subscribe(addressChanged);
     loader = TestbedHarnessEnvironment.loader(fixture);

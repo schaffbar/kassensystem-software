@@ -10,11 +10,10 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { User } from '../../user.model';
-import { UserContactComponent } from './user-contact.component';
+import { UserContactViewModel, UserContactComponent } from './user-contact.component';
 
 describe('UserContactComponent', () => {
-  const user = { id: 'user-1', email: 'max@example.com', phone: '0123 456' } as User;
+  const userContact: UserContactViewModel = { id: 'user-1', email: 'max@example.com', phone: '0123 456' };
 
   let fixture: ComponentFixture<UserContactComponent>;
   let loader: HarnessLoader;
@@ -27,7 +26,7 @@ describe('UserContactComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserContactComponent);
-    fixture.componentRef.setInput('user', user);
+    fixture.componentRef.setInput('userContact', userContact);
     contactChanged = vi.fn();
     fixture.componentInstance.contactChanged.subscribe(contactChanged);
     loader = TestbedHarnessEnvironment.loader(fixture);

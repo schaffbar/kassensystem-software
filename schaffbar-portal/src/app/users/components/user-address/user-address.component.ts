@@ -8,8 +8,21 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserAddressCommand, User, UserAddress } from '../../user.model';
+import { UpdateUserAddressCommand } from '../../user.model';
 import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../user.validators';
+
+export interface AddressViewModel {
+  addressLine1: string;
+  addressLine2: string | null;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
+export interface UserAddressViewModel {
+  id: string;
+  address: AddressViewModel;
+}
 
 interface AddressFormModel {
   addressLine1: string;
@@ -26,7 +39,7 @@ interface AddressFormModel {
   imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
 })
 export class UserAddressComponent {
-  readonly user = input.required<User>();
+  readonly userAddress = input.required<UserAddressViewModel>();
 
   readonly addressChanged = output<UpdateUserAddressCommand>();
 
@@ -34,8 +47,8 @@ export class UserAddressComponent {
 
   protected readonly postalCodeLength = POSTAL_CODE_LENGTH;
 
-  // follows the user input
-  private readonly model = linkedSignal(() => toModel(this.user().address));
+  // follows the userAddress input
+  private readonly model = linkedSignal(() => toModel(this.userAddress().address));
 
   protected readonly addressForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -53,7 +66,7 @@ export class UserAddressComponent {
   }
 
   protected onCancel(): void {
-    this.model.set(toModel(this.user().address));
+    this.model.set(toModel(this.userAddress().address));
     this.addressForm().reset();
     this.isEditing.set(false);
   }
@@ -62,7 +75,7 @@ export class UserAddressComponent {
     submit(this.addressForm, async () => {
       const { addressLine1, addressLine2, postalCode, city, country } = this.model();
       const command: UpdateUserAddressCommand = {
-        id: this.user().id,
+        id: this.userAddress().id,
         addressLine1,
         addressLine2: addressLine2 || undefined,
         postalCode,
@@ -75,6 +88,6 @@ export class UserAddressComponent {
   }
 }
 
-function toModel(address: UserAddress): AddressFormModel {
+function toModel(address: AddressViewModel): AddressFormModel {
   return { ...address, addressLine2: address.addressLine2 ?? '' };
 }

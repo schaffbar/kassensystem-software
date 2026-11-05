@@ -15,7 +15,7 @@ import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-acti
 import {
   RfidReaderOptionViewModel,
   ToolRfidReaderAssignmentComponent,
-  ToolRfidReaderViewModel,
+  ToolRfidReaderAssignmentViewModel,
 } from './tool-rfid-reader-assignment.component';
 
 describe('ToolRfidReaderAssignmentComponent', () => {
@@ -25,7 +25,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     { id: 'reader-3', name: 'Reader 3', isAssignedToOtherTool: true },
   ];
 
-  function createTool(rfidReaderId: string | null = null): ToolRfidReaderViewModel {
+  function createTool(rfidReaderId: string | null = null): ToolRfidReaderAssignmentViewModel {
     return { id: 'tool-1', name: 'Tool 1', rfidReaderId };
   }
 
@@ -47,7 +47,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolRfidReaderAssignmentComponent);
-    fixture.componentRef.setInput('tool', createTool('reader-1'));
+    fixture.componentRef.setInput('toolRfidReaderAssignment', createTool('reader-1'));
     fixture.componentRef.setInput('rfidReaders', rfidReaders);
     changed = vi.fn();
     cleared = vi.fn();
@@ -90,7 +90,7 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     await select.open();
     await select.clickOptions({ text: 'Reader 2' });
 
-    fixture.componentRef.setInput('tool', createTool('reader-2'));
+    fixture.componentRef.setInput('toolRfidReaderAssignment', createTool('reader-2'));
     await fixture.whenStable();
 
     expect(await select.getValueText()).toBe('Reader 2');

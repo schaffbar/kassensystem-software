@@ -85,8 +85,14 @@
     <mat-tab [label]="'users.tabGroups.userDetails.detailsTab' | translate">
       <div class="tab-content tab-content--split">
         <div>
-          <schbar-user-contact class="user-info-section" [user]="user" (contactChanged)="onContactChanged($event)" />
-          <schbar-user-address class="user-info-section" [user]="user" (addressChanged)="onAddressChanged($event)" />
+          <schbar-user-contact
+            class="user-info-section"
+            [userContact]="user"
+            (contactChanged)="onContactChanged($event)" />
+          <schbar-user-address
+            class="user-info-section"
+            [userAddress]="user"
+            (addressChanged)="onAddressChanged($event)" />
         </div>
         <schbar-user-tool-certifications
           [certifications]="detailsStore.toolCertifications()"

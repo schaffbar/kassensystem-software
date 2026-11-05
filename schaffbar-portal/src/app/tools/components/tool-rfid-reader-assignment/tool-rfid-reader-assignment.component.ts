@@ -12,7 +12,7 @@ import { FieldErrorComponent } from '../../../shared/components/field-error/fiel
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand } from '../../tool.model';
 
-export interface ToolRfidReaderViewModel {
+export interface ToolRfidReaderAssignmentViewModel {
   id: string;
   name: string;
   rfidReaderId: string | null;
@@ -48,13 +48,13 @@ interface RfidReaderAssignmentFormModel {
 export class ToolRfidReaderAssignmentComponent {
   private readonly confirmActionDialog = inject(ConfirmActionDialogService);
 
-  readonly tool = input.required<ToolRfidReaderViewModel>();
+  readonly toolRfidReaderAssignment = input.required<ToolRfidReaderAssignmentViewModel>();
   readonly rfidReaders = input.required<RfidReaderOptionViewModel[]>();
 
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
   readonly rfidReaderCleared = output<ClearRfidReaderCommand>();
 
-  private readonly model = linkedSignal(() => toModel(this.tool()));
+  private readonly model = linkedSignal(() => toModel(this.toolRfidReaderAssignment()));
 
   protected readonly rfidReaderForm = form(this.model, (schema) => {
     validate(schema.rfidReaderId, ({ value }) =>
@@ -64,10 +64,12 @@ export class ToolRfidReaderAssignmentComponent {
     );
   });
 
-  protected readonly isDirty = computed(() => this.model().rfidReaderId !== toModel(this.tool()).rfidReaderId);
+  protected readonly isDirty = computed(
+    () => this.model().rfidReaderId !== toModel(this.toolRfidReaderAssignment()).rfidReaderId,
+  );
 
   protected onCancel(): void {
-    this.model.set(toModel(this.tool()));
+    this.model.set(toModel(this.toolRfidReaderAssignment()));
     this.rfidReaderForm().reset();
   }
 
@@ -76,7 +78,7 @@ export class ToolRfidReaderAssignmentComponent {
       const { rfidReaderId } = this.model();
       if (!rfidReaderId) return;
 
-      const command: ChangeRfidReaderCommand = { toolId: this.tool().id, rfidReaderId };
+      const command: ChangeRfidReaderCommand = { toolId: this.toolRfidReaderAssignment().id, rfidReaderId };
       this.rfidReaderChanged.emit(command);
     });
   }
@@ -86,13 +88,13 @@ export class ToolRfidReaderAssignmentComponent {
       .open({
         title: 'tools.dialogs.clearRfidReader.title',
         message: 'tools.dialogs.clearRfidReader.message',
-        entity: this.tool().name,
+        entity: this.toolRfidReaderAssignment().name,
         confirmLabel: 'tools.dialogs.clearRfidReader.confirm',
         destructive: true,
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: ClearRfidReaderCommand = { toolId: this.tool().id };
+          const command: ClearRfidReaderCommand = { toolId: this.toolRfidReaderAssignment().id };
           this.rfidReaderCleared.emit(command);
         }
       });
@@ -106,6 +108,6 @@ export class ToolRfidReaderAssignmentComponent {
   }
 }
 
-function toModel(tool: ToolRfidReaderViewModel): RfidReaderAssignmentFormModel {
+function toModel(tool: ToolRfidReaderAssignmentViewModel): RfidReaderAssignmentFormModel {
   return { rfidReaderId: tool.rfidReaderId ?? '' };
 }

@@ -13,10 +13,10 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { ExistingToolViewModel, ToolDetailInfoComponent, ToolInfoViewModel } from './tool-detail-info.component';
+import { ExistingToolViewModel, ToolDetailInfoComponent, ToolDetailInfoViewModel } from './tool-detail-info.component';
 
 describe('ToolDetailInfoComponent', () => {
-  const tool: ToolInfoViewModel = {
+  const tool: ToolDetailInfoViewModel = {
     id: 'tool-1',
     name: 'Bandsäge',
     description: 'Große Säge',
@@ -39,7 +39,7 @@ describe('ToolDetailInfoComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolDetailInfoComponent);
-    fixture.componentRef.setInput('tool', tool);
+    fixture.componentRef.setInput('toolDetailInfo', tool);
     fixture.componentRef.setInput('existingTools', existingTools);
     toolUpdated = vi.fn();
     fixture.componentInstance.toolUpdated.subscribe(toolUpdated);
@@ -164,7 +164,7 @@ describe('ToolDetailInfoComponent', () => {
   });
 
   it('should take over the values when the tool input changes', async () => {
-    fixture.componentRef.setInput('tool', { ...tool, name: 'Tischkreissäge' });
+    fixture.componentRef.setInput('toolDetailInfo', { ...tool, name: 'Tischkreissäge' });
     await fixture.whenStable();
 
     expect(await (await input('name')).getValue()).toBe('Tischkreissäge');

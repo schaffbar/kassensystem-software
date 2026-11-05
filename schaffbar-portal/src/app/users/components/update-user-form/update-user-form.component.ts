@@ -11,11 +11,19 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserCommand, User } from '../../user.model';
+import { UpdateUserCommand } from '../../user.model';
 import { DATE_OF_BIRTH_MAX, DATE_OF_BIRTH_MIN, validateDateOfBirth } from '../../user.validators';
 
+export interface UpdateUserViewModel {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  clubMember: boolean;
+}
+
 export interface UpdateUserDialogData {
-  user: User;
+  user: UpdateUserViewModel;
 }
 
 interface UpdateUserFormModel {
@@ -69,7 +77,7 @@ export class UpdateUserFormComponent {
   }
 }
 
-function toModel(user: User): UpdateUserFormModel {
+function toModel(user: UpdateUserViewModel): UpdateUserFormModel {
   return {
     firstName: user.firstName,
     lastName: user.lastName,

@@ -14,17 +14,16 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { provideDateAdapter } from '../../../shared/date/provide-date-adapter';
-import { User } from '../../user.model';
-import { UpdateUserFormComponent } from './update-user-form.component';
+import { UpdateUserFormComponent, UpdateUserViewModel } from './update-user-form.component';
 
 describe('UpdateUserFormComponent', () => {
-  const user = {
+  const user: UpdateUserViewModel = {
     id: 'user-1',
     firstName: 'Max',
     lastName: 'Mustermann',
     dateOfBirth: new Date(1990, 0, 31),
     clubMember: false,
-  } as User;
+  };
 
   let fixture: ComponentFixture<UpdateUserFormComponent>;
   let loader: HarnessLoader;

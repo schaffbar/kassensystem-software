@@ -8,7 +8,13 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserContactCommand, User } from '../../user.model';
+import { UpdateUserContactCommand } from '../../user.model';
+
+export interface UserContactViewModel {
+  id: string;
+  email: string;
+  phone: string | null;
+}
 
 interface ContactFormModel {
   email: string;
@@ -22,14 +28,14 @@ interface ContactFormModel {
   imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
 })
 export class UserContactComponent {
-  readonly user = input.required<User>();
+  readonly userContact = input.required<UserContactViewModel>();
 
   readonly contactChanged = output<UpdateUserContactCommand>();
 
   protected readonly isEditing = signal(false);
 
-  // follows the user input
-  private readonly model = linkedSignal(() => toModel(this.user()));
+  // follows the userContact input
+  private readonly model = linkedSignal(() => toModel(this.userContact()));
 
   protected readonly contactForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -45,7 +51,7 @@ export class UserContactComponent {
   }
 
   protected onCancel(): void {
-    this.model.set(toModel(this.user()));
+    this.model.set(toModel(this.userContact()));
     this.contactForm().reset();
     this.isEditing.set(false);
   }
@@ -53,13 +59,13 @@ export class UserContactComponent {
   protected onSave(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
-      const command: UpdateUserContactCommand = { id: this.user().id, email, phone: phone || undefined };
+      const command: UpdateUserContactCommand = { id: this.userContact().id, email, phone: phone || undefined };
       this.contactChanged.emit(command);
       this.isEditing.set(false);
     });
   }
 }
 
-function toModel(user: User): ContactFormModel {
-  return { email: user.email, phone: user.phone ?? '' };
+function toModel(userContact: UserContactViewModel): ContactFormModel {
+  return { email: userContact.email, phone: userContact.phone ?? '' };
 }

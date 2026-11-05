@@ -20,7 +20,7 @@
       <div class="tab-content--details">
         <div class="tab-content--details__left">
           <schbar-tool-detail-info
-            [tool]="tool"
+            [toolDetailInfo]="tool"
             [existingTools]="toolsStore.entities()"
             (toolUpdated)="onToolUpdated($event)" />
         </div>
@@ -48,7 +48,7 @@
     <mat-tab [label]="'tools.tabGroups.toolDetails.configurationTab' | translate">
       <div class="tab-content--configuration">
         <schbar-tool-rfid-reader-assignment
-          [tool]="tool"
+          [toolRfidReaderAssignment]="tool"
           [rfidReaders]="rfidReaderOptions()"
           (rfidReaderChanged)="onRfidReaderChanged($event)"
           (rfidReaderCleared)="onRfidReaderCleared($event)" />
