@@ -14,7 +14,7 @@ import { FieldErrorComponent } from '../../../shared/components/field-error/fiel
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';
 
-interface RfidReaderAssignmentModel {
+interface RfidReaderAssignmentFormModel {
   // '' = no RFID reader assigned
   rfidReaderId: string;
 }
@@ -97,6 +97,6 @@ export class ToolRfidReaderAssignmentComponent {
   }
 }
 
-function toModel(tool: Tool): RfidReaderAssignmentModel {
+function toModel(tool: Tool): RfidReaderAssignmentFormModel {
   return { rfidReaderId: tool.rfidReaderId ?? '' };
 }

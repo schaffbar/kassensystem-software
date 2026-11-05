@@ -18,7 +18,7 @@ export interface UpdateUserDialogData {
   user: User;
 }
 
-interface UpdateUserModel {
+interface UpdateUserFormModel {
   firstName: string;
   lastName: string;
   // null = no date selected (the datepicker has no "empty" value other than null)
@@ -50,7 +50,7 @@ export class UpdateUserFormComponent {
   protected readonly minDate = DATE_OF_BIRTH_MIN;
   protected readonly maxDate = DATE_OF_BIRTH_MAX;
 
-  private readonly model = signal<UpdateUserModel>(toModel(this.data.user));
+  private readonly model = signal<UpdateUserFormModel>(toModel(this.data.user));
 
   protected readonly userForm = form(this.model, (schema) => {
     required(schema.firstName);
@@ -69,7 +69,7 @@ export class UpdateUserFormComponent {
   }
 }
 
-function toModel(user: User): UpdateUserModel {
+function toModel(user: User): UpdateUserFormModel {
   return {
     firstName: user.firstName,
     lastName: user.lastName,

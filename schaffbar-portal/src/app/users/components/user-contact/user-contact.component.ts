@@ -10,7 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { UpdateUserContactCommand, User } from '../../user.model';
 
-interface ContactModel {
+interface ContactFormModel {
   email: string;
   phone: string;
 }
@@ -60,6 +60,6 @@ export class UserContactComponent {
   }
 }
 
-function toModel(user: User): ContactModel {
+function toModel(user: User): ContactFormModel {
   return { email: user.email, phone: user.phone ?? '' };
 }

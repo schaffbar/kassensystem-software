@@ -10,7 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 
-interface RfidReaderInfoModel {
+interface RfidReaderInfoFormModel {
   name: string;
   socketName: string;
 }
@@ -62,6 +62,6 @@ export class RfidReaderDetailInfoComponent {
   }
 }
 
-function toModel(reader: RfidReader): RfidReaderInfoModel {
+function toModel(reader: RfidReader): RfidReaderInfoFormModel {
   return { name: reader.name ?? '', socketName: reader.socketName ?? '' };
 }

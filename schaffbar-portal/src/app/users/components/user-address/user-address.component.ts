@@ -11,7 +11,7 @@ import { FieldErrorComponent } from '../../../shared/components/field-error/fiel
 import { UpdateUserAddressCommand, User, UserAddress } from '../../user.model';
 import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../user.validators';
 
-interface AddressModel {
+interface AddressFormModel {
   addressLine1: string;
   addressLine2: string;
   postalCode: string;
@@ -75,6 +75,6 @@ export class UserAddressComponent {
   }
 }
 
-function toModel(address: UserAddress): AddressModel {
+function toModel(address: UserAddress): AddressFormModel {
   return { ...address, addressLine2: address.addressLine2 ?? '' };
 }

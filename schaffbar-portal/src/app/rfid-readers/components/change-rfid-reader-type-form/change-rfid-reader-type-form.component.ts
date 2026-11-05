@@ -17,7 +17,7 @@ export interface ChangeRfidReaderTypeDialogData {
   rfidReader: RfidReader;
 }
 
-interface ChangeRfidReaderTypeModel {
+interface ChangeRfidReaderTypeFormModel {
   // '' = nothing selected (a new reader comes with `type: null` from the backend)
   type: RfidReaderType | '';
 }
@@ -44,7 +44,7 @@ export class ChangeRfidReaderTypeFormComponent {
 
   protected readonly rfidReaderTypes = Object.values(RfidReaderType);
 
-  private readonly model = signal<ChangeRfidReaderTypeModel>({ type: this.data.rfidReader.type ?? '' });
+  private readonly model = signal<ChangeRfidReaderTypeFormModel>({ type: this.data.rfidReader.type ?? '' });
 
   protected readonly typeForm = form(this.model, (schema) => {
     required(schema.type);

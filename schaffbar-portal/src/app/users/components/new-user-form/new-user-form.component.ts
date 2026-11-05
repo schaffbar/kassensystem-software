@@ -20,7 +20,7 @@ import {
   validatePostalCode,
 } from '../../user.validators';
 
-interface NewUserModel {
+interface NewUserFormModel {
   firstName: string;
   lastName: string;
   // null = no date selected (the datepicker has no "empty" value other than null)
@@ -59,7 +59,7 @@ export class NewUserFormComponent {
   protected readonly maxDate = DATE_OF_BIRTH_MAX;
   protected readonly postalCodeLength = POSTAL_CODE_LENGTH;
 
-  private readonly model = signal<NewUserModel>({
+  private readonly model = signal<NewUserFormModel>({
     firstName: '',
     lastName: '',
     dateOfBirth: null,

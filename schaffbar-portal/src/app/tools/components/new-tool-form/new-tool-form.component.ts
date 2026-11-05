@@ -17,7 +17,7 @@ import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
 import { ToolsStore } from '../../tools.store';
 
-interface NewToolModel {
+interface NewToolFormModel {
   name: string;
   description: string;
   area: ToolArea | '';
@@ -48,7 +48,7 @@ export class NewToolFormComponent {
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
-  private readonly model = signal<NewToolModel>({
+  private readonly model = signal<NewToolFormModel>({
     name: '',
     description: '',
     area: '',

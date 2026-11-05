@@ -13,7 +13,7 @@ import { ClearWlanRelaisCommand, SetWlanRelaisCommand, Tool, WLAN_RELAIS_TEMPLAT
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
-interface WlanRelaisModel {
+interface WlanRelaisFormModel {
   // '' = no WLAN relais
   wlanRelaisType: WlanRelaisType | '';
   ipAddress: string;
@@ -80,12 +80,12 @@ export class ToolWlanRelaisComponent {
   }
 }
 
-function toModel(tool: Tool): WlanRelaisModel {
+function toModel(tool: Tool): WlanRelaisFormModel {
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
 }
 
 // Without a relais type the (hidden) IP address is irrelevant – it is neither saved nor should it count as a change.
 // It stays in the model, so switching to '--' and back does not lose the entered IP address.
-function relevantValues({ wlanRelaisType, ipAddress }: WlanRelaisModel): WlanRelaisModel {
+function relevantValues({ wlanRelaisType, ipAddress }: WlanRelaisFormModel): WlanRelaisFormModel {
   return wlanRelaisType ? { wlanRelaisType, ipAddress } : { wlanRelaisType: '', ipAddress: '' };
 }
