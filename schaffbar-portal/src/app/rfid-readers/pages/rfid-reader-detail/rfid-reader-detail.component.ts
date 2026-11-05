@@ -1,4 +1,5 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, DestroyRef, inject, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -30,6 +31,7 @@ export class RfidReaderDetailComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly id = input.required<string>();
 
@@ -49,19 +51,21 @@ export class RfidReaderDetailComponent {
     const reader = this.detailsStore.rfidReader();
     if (!reader) return;
 
-    // TODO: should we not close subscription when component is destroyed?
     if (reader.type === RfidReaderType.SwitchBox) {
-      this.detailsStore.hasAssignedTools(reader.id).subscribe((hasAssignedTools) => {
-        if (hasAssignedTools) {
-          this.snackBar.open(
-            this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
-            this.translate.instant('shared.actions.close'),
-            { duration: 6000 },
-          );
-        } else {
-          this.openChangeTypeDialog(reader);
-        }
-      });
+      this.detailsStore
+        .hasAssignedTools(reader.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((hasAssignedTools) => {
+          if (hasAssignedTools) {
+            this.snackBar.open(
+              this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
+              this.translate.instant('shared.actions.close'),
+              { duration: 6000 },
+            );
+          } else {
+            this.openChangeTypeDialog(reader);
+          }
+        });
     } else {
       this.openChangeTypeDialog(reader);
     }

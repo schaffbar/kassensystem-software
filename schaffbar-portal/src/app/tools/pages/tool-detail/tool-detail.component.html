@@ -5,7 +5,7 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
-@if (selectedTool(); as tool) {
+@if (detailsStore.tool(); as tool) {
   <div class="tool-detail-header">
     <div class="tool-detail-header__title">
       <h1>{{ tool.name }}</h1>

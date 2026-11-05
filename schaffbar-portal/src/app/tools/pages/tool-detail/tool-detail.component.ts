@@ -62,7 +62,6 @@ export class ToolDetailComponent {
 
   readonly id = input.required<string>();
 
-  protected readonly selectedTool = computed(() => this.detailsStore.tool());
   protected readonly certificationRows = computed(() =>
     toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );

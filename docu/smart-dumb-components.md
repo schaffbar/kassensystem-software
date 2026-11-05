@@ -314,8 +314,8 @@ sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein 
 
 ### P5 – Aufräumen in smart components
 
-- [ ] `tool-detail`: durchgereichte `computed`s entfernen
-- [ ] `rfid-reader-detail`: `takeUntilDestroyed` für die Vorab-Prüfung
+- [x] `tool-detail`: durchgereichte `computed`s entfernen
+- [x] `rfid-reader-detail`: `takeUntilDestroyed` für die Vorab-Prüfung
 - [x] `tool-certifications.onSubmitBatch`: typisierte Command-Variable (mit V4)
 
 ### Danach
