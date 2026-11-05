@@ -275,7 +275,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
       (Mapping in `tool-detail`)
 - [x] V4 `ToolDetailStore.certifiableUsers` + `certifiers`; `tool-certifications` filtert nur noch nach Suchtext
 - [x] V5 `user-detail-info` auflösen, `user-detail` rendert `user-contact` + `user-address` direkt
-- [ ] ESLint-Block für `src/app/*/components/**` und `src/app/shared/components/**`: `no-restricted-imports` für
+- [x] ESLint-Block für `src/app/*/components/**` und `src/app/shared/components/**`: `no-restricted-imports` für
       `**/*.store`, `Router` aus `@angular/router`, `MatDialog` aus `@angular/material/dialog`, `MatSnackBar`,
       `@angular/common/http`. **Achtung:** In Flat Config ersetzt ein späterer Block dieselbe Regel – der neue Block
       muss das bestehende `shared/api`-Pattern wiederholen.
