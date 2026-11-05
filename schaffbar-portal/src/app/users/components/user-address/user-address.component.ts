@@ -8,8 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserAddressCommand, User, UserAddress } from '../../shared/models/user.model';
-import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../shared/validators/user.validators';
+import { UpdateUserAddressCommand, User, UserAddress } from '../../user.model';
+import { POSTAL_CODE_LENGTH, validatePostalCode } from '../../user.validators';
 
 interface AddressModel {
   addressLine1: string;

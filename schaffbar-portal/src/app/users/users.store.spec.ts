@@ -5,13 +5,15 @@ import { TestBed } from '@angular/core/testing';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { environment } from '../../../../environments/environment';
-import { CreateUserCommand, User } from '../models/user.model';
+import { environment } from '../../environments/environment';
+import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
+import { toUser } from './user.mapper';
+import { CreateUserCommand } from './user.model';
 import { UsersStore } from './users.store';
 
 describe('UsersStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/customers`;
-  const users = [{ id: 'user-1', firstName: 'Max', lastName: 'Mustermann' }] as User[];
+  const users = [customerFixture()];
 
   let store: InstanceType<typeof UsersStore>;
   let httpMock: HttpTestingController;
@@ -47,7 +49,7 @@ describe('UsersStore', () => {
   it('should load all users on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(users);
+    expect(store.entities()).toEqual(users.map(toUser));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -68,11 +70,11 @@ describe('UsersStore', () => {
     store.createUser(command);
     trigger();
     const create = httpMock.expectOne((req) => req.method === 'POST' && req.url === url);
-    expect(create.request.body).toEqual({ ...command, dateOfBirth: '1990-01-31' });
+    expect(create.request.body).toEqual({ ...command, dateOfBirth: '1990-01-31', phone: null, addressLine2: null });
     create.flush({});
     trigger();
 
-    expectLoad().flush([...users, { id: 'user-2' } as User]);
+    expectLoad().flush([...users, customerFixture({ id: 'user-2' })]);
     await settle();
     expect(store.entities()).toHaveLength(2);
   });

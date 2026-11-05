@@ -6,8 +6,8 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { WorkshopSession } from '../../shared/models/workshop-session.model';
-import { UserDetailStore } from '../../shared/stores/user-detail.store';
+import { WorkshopSession } from '../../workshop-session.model';
+import { UserDetailStore } from '../user-detail/user-detail.store';
 import { UserOpenSessionComponent } from './user-open-session.component';
 
 describe('UserOpenSessionComponent', () => {

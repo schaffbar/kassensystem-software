@@ -5,7 +5,7 @@ import {
   ToolUsageSummaryApiModel,
   WorkshopSessionApiModel,
   WorkshopUsageApiModel,
-} from '../../../shared/api/workshop-sessions/workshop-session.api-model';
+} from '../shared/api/workshop-sessions/workshop-session.api-model';
 import { ToolUsage, ToolUsageSummary, WorkshopSession, WorkshopUsage } from './workshop-session.model';
 
 export function toWorkshopSession(apiModel: WorkshopSessionApiModel): WorkshopSession {

@@ -41,6 +41,26 @@ module.exports = tseslint.config(
       '@angular-eslint/prefer-output-readonly': 'error',
       // import rules
       'import/no-unresolved': 'error',
+      // a feature imports only from itself and shared/; shared/ imports no feature
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            ...['dashboard', 'rfid-readers', 'rfid-tags', 'tools', 'users'].map((feature) => ({
+              target: `./src/app/${feature}`,
+              from: './src/app',
+              except: [`./${feature}`, './shared', './app.routes.ts'],
+              message: 'Features never import from another feature – use shared/api and a model of their own.',
+            })),
+            {
+              target: './src/app/shared',
+              from: './src/app',
+              except: ['./shared'],
+              message: 'shared/ belongs to no feature.',
+            },
+          ],
+        },
+      ],
       'no-restricted-syntax': [
         'error',
         {

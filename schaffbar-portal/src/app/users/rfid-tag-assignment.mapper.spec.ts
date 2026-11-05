@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
-import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { RfidTagAssignmentStatus } from '../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
 import {
   toRequestRfidTagAssignmentRequest,
   toRfidTagAssignment,

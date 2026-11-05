@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
-import { ToolCertification } from '../../shared/models/tool-certification.model';
-import { Tool } from '../../shared/models/tool.model';
+import { ToolCertification } from '../../tool-certification.model';
+import { Tool } from '../../tool.model';
 import { UserToolCertificationsComponent } from './user-tool-certifications.component';
 
 describe('UserToolCertificationsComponent', () => {

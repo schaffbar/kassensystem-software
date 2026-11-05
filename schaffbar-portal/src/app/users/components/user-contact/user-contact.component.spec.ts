@@ -10,7 +10,7 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { User } from '../../shared/models/user.model';
+import { User } from '../../user.model';
 import { UserContactComponent } from './user-contact.component';
 
 describe('UserContactComponent', () => {

@@ -11,8 +11,8 @@ import { MatTableHarness } from '@angular/material/table/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { User } from '../../shared/models/user.model';
-import { UsersStore } from '../../shared/stores/users.store';
+import { User } from '../../user.model';
+import { UsersStore } from '../../users.store';
 import { UserListComponent } from './user-list.component';
 
 describe('UserListComponent', () => {

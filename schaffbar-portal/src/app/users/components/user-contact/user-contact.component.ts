@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserContactCommand, User } from '../../shared/models/user.model';
+import { UpdateUserContactCommand, User } from '../../user.model';
 
 interface ContactModel {
   email: string;

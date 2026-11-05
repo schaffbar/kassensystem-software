@@ -18,7 +18,7 @@ import {
   DeleteToolCertificationCommand,
   ToolCertification,
 } from '../../tool-certification.model';
-import { User } from '../../../users/shared/models/user.model';
+import { User } from '../../user.model';
 
 @Component({
   selector: 'schbar-tool-certifications',

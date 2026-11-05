@@ -1,4 +1,4 @@
-import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { ToolCertificationStatus } from '../shared/models/tool-certification-status';
 
 export interface ToolCertification {
   id: string;

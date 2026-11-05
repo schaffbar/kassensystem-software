@@ -6,7 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { WorkshopUsage } from '../../shared/models/workshop-session.model';
+import { WorkshopUsage } from '../../workshop-session.model';
 
 @Component({
   selector: 'schbar-workshop-usage-summary',

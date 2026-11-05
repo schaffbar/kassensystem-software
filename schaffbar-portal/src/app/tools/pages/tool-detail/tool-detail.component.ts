@@ -8,7 +8,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
-import { UsersStore } from '../../../users/shared/stores/users.store';
 import { ToolCertificationsComponent } from '../../components/tool-certifications/tool-certifications.component';
 import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-detail-info.component';
 import { ToolInstructorsComponent } from '../../components/tool-instructors/tool-instructors.component';
@@ -47,13 +46,12 @@ import { ToolDetailStore } from './tool-detail.store';
 export class ToolDetailComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
   private readonly toolsStore = inject(ToolsStore);
-  private readonly usersStore = inject(UsersStore);
 
   readonly id = input.required<string>();
 
   protected readonly selectedTool = computed(() => this.detailsStore.tool());
   protected readonly toolCertifications = computed(() => this.detailsStore.toolCertifications());
-  protected readonly allUsers = computed(() => this.usersStore.entities());
+  protected readonly allUsers = computed(() => this.detailsStore.users());
   protected readonly allRfidReaders = computed(() => this.detailsStore.rfidReaders());
   protected readonly assignedRfidReaderIds = computed(() => {
     const currentToolId = this.selectedTool()?.id;
@@ -67,7 +65,6 @@ export class ToolDetailComponent {
   constructor() {
     this.detailsStore.setToolId(this.id);
     this.toolsStore.reloadTools();
-    this.usersStore.reloadUsers();
   }
 
   protected reloadTool(): void {

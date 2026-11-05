@@ -17,8 +17,8 @@ import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
-import { CreateUserCommand, DeleteUserCommand, User } from '../../shared/models/user.model';
-import { UsersStore } from '../../shared/stores/users.store';
+import { CreateUserCommand, DeleteUserCommand, User } from '../../user.model';
+import { UsersStore } from '../../users.store';
 
 @Component({
   selector: 'schbar-user-list',

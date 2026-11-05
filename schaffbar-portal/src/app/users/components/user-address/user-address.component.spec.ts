@@ -10,7 +10,7 @@ import { MatInputHarness } from '@angular/material/input/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { User, UserAddress } from '../../shared/models/user.model';
+import { User, UserAddress } from '../../user.model';
 import { UserAddressComponent } from './user-address.component';
 
 describe('UserAddressComponent', () => {

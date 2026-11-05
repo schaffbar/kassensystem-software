@@ -4,7 +4,7 @@ import {
   RequestRfidTagAssignmentRequest,
   RfidTagAssignmentApiModel,
   UnassignRfidTagRequest,
-} from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
+} from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { AssignRfidTagCommand, RfidTagAssignment, UnassignRfidTagCommand } from './rfid-tag-assignment.model';
 
 export function toRfidTagAssignment(apiModel: RfidTagAssignmentApiModel): RfidTagAssignment {

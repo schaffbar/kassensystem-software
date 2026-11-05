@@ -3,26 +3,32 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
 import { mutation } from '../../../shared/state/mutation';
-import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../models/rfid-tag-assignment.model';
+import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
 import {
   toRequestRfidTagAssignmentRequest,
   toRfidTagAssignment,
   toUnassignRfidTagRequest,
-} from '../models/rfid-tag-assignment.mapper';
+} from '../../rfid-tag-assignment.mapper';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-} from '../models/tool-certification.model';
-import { toToolCertification } from '../models/tool-certification.mapper';
-import { toTool } from '../models/tool.mapper';
+} from '../../tool-certification.model';
+import { toToolCertification } from '../../tool-certification.mapper';
+import { toTool } from '../../tool.mapper';
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
-import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
-import { CloseWorkshopSessionCommand, hasRunningUsage } from '../models/workshop-session.model';
-import { toWorkshopSession } from '../models/workshop-session.mapper';
+import {
+  toUpdateCustomerAddressRequest,
+  toUpdateCustomerContactRequest,
+  toUpdateCustomerRequest,
+  toUser,
+} from '../../user.mapper';
+import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../user.model';
+import { CloseWorkshopSessionCommand, hasRunningUsage } from '../../workshop-session.model';
+import { toWorkshopSession } from '../../workshop-session.mapper';
 import { RfidTagAssignmentsApiService } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
 import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
-import { UsersService } from '../services/users.service';
+import { CustomersApiService } from '../../../shared/api/customers/customers.api-service';
 import { WorkshopSessionsApiService } from '../../../shared/api/workshop-sessions/workshop-sessions.api-service';
 
 interface UserDetailState {
@@ -32,18 +38,18 @@ interface UserDetailState {
 export const UserDetailStore = signalStore(
   withState<UserDetailState>({ userId: null }),
   withProps((store) => {
-    const usersService = inject(UsersService);
+    const customersApi = inject(CustomersApiService);
     const rfidTagAssignmentsApi = inject(RfidTagAssignmentsApiService);
     const workshopSessionsApi = inject(WorkshopSessionsApiService);
     const toolCertificationsApi = inject(ToolCertificationsApiService);
     return {
       // services for the mutations
-      _usersService: usersService,
+      _customersApi: customersApi,
       _rfidTagAssignmentsApi: rfidTagAssignmentsApi,
       _workshopSessionsApi: workshopSessionsApi,
       _toolCertificationsApi: toolCertificationsApi,
       // resources for the queries
-      _userResource: usersService.userResource(store.userId),
+      _userResource: customersApi.customerResource(store.userId),
       _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
       _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
       _certificationsResource: toolCertificationsApi.certificationsByCustomerResource(store.userId),
@@ -61,7 +67,7 @@ export const UserDetailStore = signalStore(
       ];
       return {
         // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
-        user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
+        user: computed(() => (_userResource.hasValue() ? toUser(_userResource.value()) : null)),
         rfidTagAssignment: computed(() => {
           const assignment = _assignmentResource.hasValue() ? _assignmentResource.value() : null;
           return assignment ? toRfidTagAssignment(assignment) : null;
@@ -109,15 +115,17 @@ export const UserDetailStore = signalStore(
   // mutations of the user – reload the user on success
   withMethods((store) => ({
     updateUser: mutation<UpdateUserCommand>({
-      request: (command) => store._usersService.updateUser(command),
+      request: (command) => store._customersApi.updateCustomer(command.id, toUpdateCustomerRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
     updateUserContact: mutation<UpdateUserContactCommand>({
-      request: (command) => store._usersService.updateUserContact(command),
+      request: (command) =>
+        store._customersApi.updateCustomerContact(command.id, toUpdateCustomerContactRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
     updateUserAddress: mutation<UpdateUserAddressCommand>({
-      request: (command) => store._usersService.updateUserAddress(command),
+      request: (command) =>
+        store._customersApi.updateCustomerAddress(command.id, toUpdateCustomerAddressRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
   })),

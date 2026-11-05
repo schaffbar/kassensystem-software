@@ -6,6 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
+import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
 import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
@@ -22,6 +23,7 @@ describe('ToolDetailStore', () => {
   const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
   const certificationsUrl = `${environment.apiBaseUrl}/api/v1/tool-certifications`;
   const rfidReadersUrl = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
+  const customersUrl = `${environment.apiBaseUrl}/api/v1/customers`;
   const rfidReaders: RfidReaderApiModel[] = [
     {
       id: 'reader-1',
@@ -71,6 +73,10 @@ describe('ToolDetailStore', () => {
     return httpMock.expectOne((req) => req.method === 'GET' && req.url === `${toolsUrl}/tool-1`);
   }
 
+  function expectUsersRequest(): TestRequest {
+    return httpMock.expectOne((req) => req.method === 'GET' && req.url === customersUrl);
+  }
+
   function expectRfidReadersRequest(): TestRequest {
     return httpMock.expectOne((req) => req.method === 'GET' && req.url === rfidReadersUrl);
   }
@@ -87,18 +93,21 @@ describe('ToolDetailStore', () => {
     expectToolRequest().flush(tool);
     expectCertificationsRequest().flush(certifications);
     expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([customerFixture()]);
     await settle();
   }
 
-  it('should load only the RFID readers without an id', async () => {
+  it('should load only the RFID readers and the users without an id', async () => {
     trigger();
 
     expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([customerFixture()]);
     httpMock.expectNone(() => true);
     await settle();
     expect(store.tool()).toBeNull();
     expect(store.toolCertifications()).toEqual([]);
     expect(store.rfidReaders()).toEqual([{ id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox }]);
+    expect(store.users()).toEqual([{ id: 'user-1', firstName: 'Max', lastName: 'Mustermann' }]);
   });
 
   it('should load tool and certifications when the id is set', async () => {
@@ -117,6 +126,7 @@ describe('ToolDetailStore', () => {
     expectToolRequest().flush(tool);
     expectCertificationsRequest().flush([]);
     expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([customerFixture()]);
     await settle();
 
     expect(store.toolCertifications()).toEqual([]);
@@ -239,6 +249,7 @@ describe('ToolDetailStore', () => {
     expectToolRequest().flush('not found', { status: 404, statusText: 'Not Found' });
     expectCertificationsRequest().flush([]);
     expectRfidReadersRequest().flush([]);
+    expectUsersRequest().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

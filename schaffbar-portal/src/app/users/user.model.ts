@@ -1,16 +1,17 @@
+import { AgeGroup } from '../shared/models/age-group';
+
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
-  // ISO date without time (`1990-01-31`) – convert with `parseISO`
-  dateOfBirth: string;
+  dateOfBirth: Date;
   ageGroup: AgeGroup;
   clubMember: boolean;
   email: string;
   phone: string | null;
   address: UserAddress;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UserAddress {
@@ -19,12 +20,6 @@ export interface UserAddress {
   postalCode: string;
   city: string;
   country: string;
-}
-
-export enum AgeGroup {
-  Under16 = 'UNDER_16',
-  Under18 = 'UNDER_18',
-  Adult = 'ADULT',
 }
 
 // ----------------------------------------------------------------------------

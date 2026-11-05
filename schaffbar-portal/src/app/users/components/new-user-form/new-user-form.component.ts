@@ -11,14 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { CreateUserCommand } from '../../shared/models/user.model';
+import { CreateUserCommand } from '../../user.model';
 import {
   DATE_OF_BIRTH_MAX,
   DATE_OF_BIRTH_MIN,
   POSTAL_CODE_LENGTH,
   validateDateOfBirth,
   validatePostalCode,
-} from '../../shared/validators/user.validators';
+} from '../../user.validators';
 
 interface NewUserModel {
   firstName: string;

@@ -1,4 +1,4 @@
-import { WorkshopSessionStatus } from '../../../shared/models/workshop-session-status';
+import { WorkshopSessionStatus } from '../shared/models/workshop-session-status';
 
 export interface WorkshopSession {
   id: string;

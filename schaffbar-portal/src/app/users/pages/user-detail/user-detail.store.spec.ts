@@ -9,24 +9,25 @@ import { environment } from '../../../../environments/environment';
 import { RfidTagAssignmentApiModel } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
-import { toRfidTagAssignment } from '../models/rfid-tag-assignment.mapper';
+import { toRfidTagAssignment } from '../../rfid-tag-assignment.mapper';
 import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
-import { toToolCertification } from '../models/tool-certification.mapper';
+import { toToolCertification } from '../../tool-certification.mapper';
 import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
-import { User } from '../models/user.model';
+import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
+import { toUser } from '../../user.mapper';
 import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
 import {
   toolUsageSummaryFixture,
   workshopSessionFixture,
   workshopUsageFixture,
 } from '../../../shared/api/workshop-sessions/workshop-session.api-fixtures';
-import { toWorkshopSession } from '../models/workshop-session.mapper';
+import { toWorkshopSession } from '../../workshop-session.mapper';
 import { UserDetailStore } from './user-detail.store';
 
 describe('UserDetailStore', () => {
   const api = `${environment.apiBaseUrl}/api/v1`;
-  const user = { id: 'user-1', firstName: 'Max', lastName: 'Mustermann' } as User;
+  const user = customerFixture();
   const assignment: RfidTagAssignmentApiModel = {
     id: 'a-1',
     customerId: 'user-1',
@@ -118,7 +119,7 @@ describe('UserDetailStore', () => {
   it('should load user, assignment, open session and certifications when the id is set', async () => {
     await loadUser();
 
-    expect(store.user()).toEqual(user);
+    expect(store.user()).toEqual(toUser(user));
     expect(store.userName()).toBe('Max Mustermann');
     expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
     expect(store.openSession()).toEqual(toWorkshopSession(session));
@@ -157,6 +158,40 @@ describe('UserDetailStore', () => {
     await loadUser({ session: running });
 
     expect(store.hasRunningUsage()).toBe(true);
+  });
+
+  it('should send contact and address without the id and reload the user', async () => {
+    await loadUser();
+
+    store.updateUserContact({ id: 'user-1', email: 'max@example.org' });
+    trigger();
+    const contact = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1/contact`);
+    expect(contact.request.body).toEqual({ email: 'max@example.org', phone: null });
+    contact.flush(null);
+    trigger();
+    expectUser().flush(user);
+    await settle();
+
+    store.updateUserAddress({
+      id: 'user-1',
+      addressLine1: 'Hauptstraße 2',
+      postalCode: '12345',
+      city: 'Berlin',
+      country: 'Deutschland',
+    });
+    trigger();
+    const address = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1/address`);
+    expect(address.request.body).toEqual({
+      addressLine1: 'Hauptstraße 2',
+      addressLine2: null,
+      postalCode: '12345',
+      city: 'Berlin',
+      country: 'Deutschland',
+    });
+    address.flush(null);
+    trigger();
+    expectUser().flush(user);
+    await settle();
   });
 
   it('should only reload the assignment after assigning an RFID tag', async () => {

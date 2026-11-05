@@ -4,8 +4,8 @@ import {
   toolUsageSummaryFixture,
   workshopSessionFixture,
   workshopUsageFixture,
-} from '../../../shared/api/workshop-sessions/workshop-session.api-fixtures';
-import { WorkshopSessionStatus } from '../../../shared/models/workshop-session-status';
+} from '../shared/api/workshop-sessions/workshop-session.api-fixtures';
+import { WorkshopSessionStatus } from '../shared/models/workshop-session-status';
 import { toWorkshopSession } from './workshop-session.mapper';
 
 describe('toWorkshopSession', () => {

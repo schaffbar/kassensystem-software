@@ -1,4 +1,4 @@
-import { ToolApiModel } from '../../../shared/api/tools/tool.api-model';
+import { ToolApiModel } from '../shared/api/tools/tool.api-model';
 import { Tool } from './tool.model';
 
 export function toTool(apiModel: ToolApiModel): Tool {

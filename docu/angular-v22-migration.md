@@ -60,7 +60,7 @@ Diese Punkte zuerst, weil sie die spätere Migration direkt beeinflussen.
       `sort`/`paginator` `undefined`. Das funktioniert nur, weil die Entities später nochmal emittieren. Sobald die
       Store-Duplikate weg sind (Daten bereits gecacht), kann Sortierung/Paging sonst kaputtgehen.
       Migration: `ng generate @angular/core:signal-queries-migration`
-- [x] [workshop-session.service.ts](../schaffbar-portal/src/app/users/shared/services/workshop-session.service.ts)
+- [x] [workshop-sessions.api-service.ts](../schaffbar-portal/src/app/shared/api/workshop-sessions/workshop-sessions.api-service.ts)
       `closeWorkshopSession`: `this.httpOptions` wird als **Body** gesendet → `put(url, {}, this.httpOptions)`
 - [x] [app.config.ts](../schaffbar-portal/src/app/app.config.ts): `provideCheckNoChangesConfig(...)` nur im
       Dev-Build (z. B. über `environment.production` oder `isDevMode()`)
@@ -243,7 +243,7 @@ duplizierte `if (invalid) { markAllAsTouched(); return; }`.
       ([provideDateAdapter](../schaffbar-portal/src/app/shared/date/provide-date-adapter.ts), global in `app.config.ts`).
       Grund: `[formField]` überschreibt das statische `readonly` am Datumsfeld, getippte deutsche Daten konnte der
       native Adapter nicht parsen. Jetzt geht Tippen („31.1.1990“) und Picker. Gemeinsame Regeln
-      `validateDateOfBirth` / `validatePostalCode` in [user.validators.ts](../schaffbar-portal/src/app/users/shared/validators/user.validators.ts)
+      `validateDateOfBirth` / `validatePostalCode` in [user.validators.ts](../schaffbar-portal/src/app/users/user.validators.ts)
 - [x] [new-user-form](../schaffbar-portal/src/app/users/components/new-user-form/new-user-form.component.ts) –
       typisiertes Ergebnis statt `form.value` als `User`; `minLength`/`maxLength` für PLZ, `email()`
 - [x] Suchfeld in [user-list](../schaffbar-portal/src/app/users/pages/user-list/user-list.component.html):
@@ -309,12 +309,12 @@ Methoden und rufen danach `reload()` auf. Muster siehe Anhang B.
 - [x] [tool-detail.store.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.ts)
       (2 Resources: Tool, Zertifizierungen). Mutationen laden gezielt nur die betroffene Resource neu (vorher hat das
       Dirty-Flag immer beides geladen). Test: [tool-detail.store.spec.ts](../schaffbar-portal/src/app/tools/pages/tool-detail/tool-detail.store.spec.ts)
-- [x] [user-detail.store.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.ts)
+- [x] [user-detail.store.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.store.ts)
       (4 Resources: User, RFID-Assignment, Session, Zertifizierungen). RFID-Zuweisung per `parse` (erstes Element
       der Liste oder `null`); offene Session: Backend antwortet ohne Session mit 200 + leerem Body → `null`, kein
       Ladefehler. **Behobener Fehler:** `assignFixedRfidTag(this.id)`, `unassignRfidTag(this.id)`,
       `closeSession(this.userId)` übergaben das _Signal_ an eine `rxMethod` – die hätte bei jeder späteren Änderung
-      der id erneut ausgelöst. Jetzt Commands mit Werten. Test: [user-detail.store.spec.ts](../schaffbar-portal/src/app/users/shared/stores/user-detail.store.spec.ts)
+      der id erneut ausgelöst. Jetzt Commands mit Werten. Test: [user-detail.store.spec.ts](../schaffbar-portal/src/app/users/pages/user-detail/user-detail.store.spec.ts)
 - [x] Mutationen vereinheitlicht: [mutation()](../schaffbar-portal/src/app/shared/state/mutation.ts) –
       `mutation<Command>({ request, onSuccess, onError? })` mit eigenem `isPending` je Aktion; 26 Methoden in 7 Stores
       umgestellt (−300 Zeilen). `withRequestStatus` bleibt als Beispiel für ein Store-Feature (nur noch `loadAll…`

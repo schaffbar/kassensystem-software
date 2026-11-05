@@ -8,8 +8,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
 import { ToolUsageSummaryComponent } from '../../components/tool-usage-summary/tool-usage-summary.component';
 import { WorkshopUsageSummaryComponent } from '../../components/workshop-usage-summary/workshop-usage-summary.component';
-import { CloseWorkshopSessionCommand } from '../../shared/models/workshop-session.model';
-import { UserDetailStore } from '../../shared/stores/user-detail.store';
+import { CloseWorkshopSessionCommand } from '../../workshop-session.model';
+import { UserDetailStore } from '../user-detail/user-detail.store';
 
 @Component({
   selector: 'schbar-user-open-session',

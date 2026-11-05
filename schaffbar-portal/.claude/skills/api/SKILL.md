@@ -279,7 +279,7 @@ export interface UpdateRfidReaderCommand {
 - Shaped for the feature: `Date` instead of ISO strings, only the fields the feature uses, combined values where it
   helps. It starts as a copy of the API model and drifts when the feature needs it to.
 - A resource used by several features: **each feature has its own model and mapper**, with only its own commands
-  (`tools/tool-certification.model.ts` has `BatchCreate…` / `Delete…`, `users/shared/models/tool-certification.model.ts`
+  (`tools/tool-certification.model.ts` has `BatchCreate…` / `Delete…`, `users/tool-certification.model.ts`
   has `Pause…` / `Reactivate…` / `Revoke…`). The duplicated interface is intended – a feature never imports another
   feature's model, and `shared/models` holds enums only.
 - A feature that only needs a few fields of another resource (names for a list or a dropdown) **loads it in its own
@@ -384,22 +384,20 @@ Fixtures: when several specs need the same complex API model (a session with usa
 written inline in the spec.
 
 Mapper spec: one test per function – a `null` value, a date (`new Date('…Z')`), missing command fields → `null`, no
-id in the request.
+id in the request. Also for the small mappers that only pick a few fields (`{ id, name }` of another resource): map a
+complete fixture and expect exactly those fields.
 
 Component specs use feature models (`createdAt: new Date(…)`) and never API models.
 
-## Migrating an old `*.service.ts`
-
-Not migrated yet: `customers` (old pattern: `<feature>/*.service.ts` or
-`users/shared/services/`, one class with commands as parameters, no validation).
+## Adding a resource or an endpoint
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).
-2. Enums of the resource → `shared/models/<enum-name>.ts`; update all imports.
-3. `shared/api/<resource>/`: api model + api service; delete the old service.
-4. Feature: model (keep commands, `Date` for dates), mapper + spec.
-5. Stores: inject the `…ApiService`, map in `withComputed`, map in `mutation()`.
-6. Specs: test data as complete API models, expectations via the mapper, body checks, one schema-error test;
-   component fixtures with `Date`.
+2. New enums → `shared/models/<enum-name>.ts`.
+3. `shared/api/<resource>/`: api model + api service (+ `<x>.api-fixtures.ts` if several specs need the model).
+4. Feature: model (commands, `Date` for dates), mapper + spec.
+5. Store: inject the `…ApiService`, map in `withComputed`, map in `mutation()`.
+6. Specs: test data as complete API models, expectations via the mapper, body checks, one schema-error test per
+   store; component fixtures are feature models (with `Date`).
 7. `npx tsc -p tsconfig.spec.json --noEmit` (the build doesn't type-check specs) + the checks below.
 
 ## Checklist

@@ -1,6 +1,6 @@
 import { parseISO } from 'date-fns';
 
-import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
+import { ToolCertificationApiModel } from '../shared/api/tool-certifications/tool-certification.api-model';
 import { ToolCertification } from './tool-certification.model';
 
 export function toToolCertification(apiModel: ToolCertificationApiModel): ToolCertification {

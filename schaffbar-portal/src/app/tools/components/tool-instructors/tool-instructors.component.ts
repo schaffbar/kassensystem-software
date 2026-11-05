@@ -11,7 +11,7 @@ import { MatListModule } from '@angular/material/list';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { User } from '../../../users/shared/models/user.model';
+import { User } from '../../user.model';
 import { AddToolInstructorsCommand, RemoveToolInstructorsCommand } from '../../tool.model';
 
 @Component({

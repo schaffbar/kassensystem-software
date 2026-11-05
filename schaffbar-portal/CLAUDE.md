@@ -2,23 +2,23 @@
 
 ## Folders
 
-Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`,
-`rfid-tag-assignments`, `tool-certifications`, `tools`); the rules below describe the target.
-
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
   `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
   `<resource>.api-service.ts` (`…ApiService`).
 - `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
-  (`<entity>.mapper.ts`: API model → feature model, command → request) and stores, pages, components.
+  (`<entity>.mapper.ts`: API model → feature model, command → request), the list store (`<entities>.store.ts`),
+  validators (`<entity>.validators.ts`), `pages/` (a detail store next to its page:
+  `pages/<entity>-detail/<entity>-detail.store.ts`) and `components/`. No `shared/` folder inside a feature.
 - A backend resource used by several features gives each feature its **own** model and mapper (on purpose, not a
-  shared feature model): `tools/tool-certification.model.ts` and `users/shared/models/tool-certification.model.ts`,
+  shared feature model): `tools/tool-certification.model.ts` and `users/tool-certification.model.ts`,
   each with the commands of its feature.
 - `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,
   e.g. `rfid-reader-type.ts`). No entities, no commands.
 - Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
   models (enforced by ESLint).
-- A feature never imports from another feature's internals (`users/shared/…`, components, stores). Not migrated yet:
-  `tools` imports `User` and `UsersStore` from `users/shared/` (resolved with the `customers` migration).
+- A feature imports only from itself and `shared/`; `shared/` imports from no feature (both enforced by ESLint,
+  `import/no-restricted-paths` – a new feature folder is added to its list in `eslint.config.js`). Data of another
+  resource is loaded by the feature's own store (skill `api`).
 
 ## Services
 

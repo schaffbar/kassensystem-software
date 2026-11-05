@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { toActiveTool, toActiveUser } from './dashboard.mapper';
+import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
+import { toActiveTool, toActiveUser, toTool } from './dashboard.mapper';
 
 describe('dashboard.mapper', () => {
   describe('toActiveUser', () => {
@@ -32,6 +33,12 @@ describe('dashboard.mapper', () => {
       };
 
       expect(toActiveTool(apiModel)).toEqual(apiModel);
+    });
+  });
+
+  describe('toTool', () => {
+    it('should take only id and name from the API model', () => {
+      expect(toTool(toolFixture({ id: 'tool-1', name: 'Bandsäge' }))).toEqual({ id: 'tool-1', name: 'Bandsäge' });
     });
   });
 });

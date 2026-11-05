@@ -3,11 +3,13 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
 import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
+import { CustomersApiService } from '../../../shared/api/customers/customers.api-service';
 import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { mutation } from '../../../shared/state/mutation';
 import { toBatchCertifyRequest, toToolCertification } from '../../tool-certification.mapper';
 import { toRfidReader } from '../../rfid-reader.mapper';
+import { toUser } from '../../user.mapper';
 import { toInstructorsRequest, toSetWlanRelaisRequest, toTool, toUpdateToolRequest } from '../../tool.mapper';
 import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
 import {
@@ -36,10 +38,11 @@ export const ToolDetailStore = signalStore(
       _toolResource: toolsApi.toolResource(store.toolId),
       _certificationsResource: toolCertificationsApi.certificationsByToolResource(store.toolId),
       _rfidReadersResource: inject(RfidReadersApiService).rfidReadersResource(),
+      _usersResource: inject(CustomersApiService).customersResource(),
     };
   }),
-  withComputed(({ _toolResource, _certificationsResource, _rfidReadersResource }) => {
-    const resources = [_toolResource, _certificationsResource, _rfidReadersResource];
+  withComputed(({ _toolResource, _certificationsResource, _rfidReadersResource, _usersResource }) => {
+    const resources = [_toolResource, _certificationsResource, _rfidReadersResource, _usersResource];
     return {
       // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
       tool: computed(() => (_toolResource.hasValue() ? toTool(_toolResource.value()) : null)),
@@ -49,6 +52,7 @@ export const ToolDetailStore = signalStore(
       rfidReaders: computed(() =>
         _rfidReadersResource.hasValue() ? _rfidReadersResource.value().map(toRfidReader) : [],
       ),
+      users: computed(() => (_usersResource.hasValue() ? _usersResource.value().map(toUser) : [])),
       isLoading: computed(() => resources.some((resource) => resource.isLoading())),
       hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
     };
@@ -61,6 +65,7 @@ export const ToolDetailStore = signalStore(
       store._toolResource.reload();
       store._certificationsResource.reload();
       store._rfidReadersResource.reload();
+      store._usersResource.reload();
     },
   })),
   // mutations of the tool – reload the tool on success

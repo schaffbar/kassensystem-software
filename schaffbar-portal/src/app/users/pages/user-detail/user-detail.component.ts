@@ -18,14 +18,14 @@ import {
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
-import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../shared/models/rfid-tag-assignment.model';
+import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-} from '../../shared/models/tool-certification.model';
-import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../shared/models/user.model';
-import { UserDetailStore } from '../../shared/stores/user-detail.store';
+} from '../../tool-certification.model';
+import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../user.model';
+import { UserDetailStore } from './user-detail.store';
 import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
 

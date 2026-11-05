@@ -9,11 +9,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 
 import { TranslatePipe } from '@ngx-translate/core';
-import { parseISO } from 'date-fns';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { UpdateUserCommand, User } from '../../shared/models/user.model';
-import { DATE_OF_BIRTH_MAX, DATE_OF_BIRTH_MIN, validateDateOfBirth } from '../../shared/validators/user.validators';
+import { UpdateUserCommand, User } from '../../user.model';
+import { DATE_OF_BIRTH_MAX, DATE_OF_BIRTH_MIN, validateDateOfBirth } from '../../user.validators';
 
 export interface UpdateUserDialogData {
   user: User;
@@ -74,9 +73,7 @@ function toModel(user: User): UpdateUserModel {
   return {
     firstName: user.firstName,
     lastName: user.lastName,
-    // the backend sends the date as ISO string ("1990-01-31"), although the model declares a Date;
-    // parseISO creates a local date (new Date("1990-01-31") would be midnight UTC)
-    dateOfBirth: parseISO(user.dateOfBirth),
+    dateOfBirth: user.dateOfBirth,
     clubMember: user.clubMember,
   };
 }

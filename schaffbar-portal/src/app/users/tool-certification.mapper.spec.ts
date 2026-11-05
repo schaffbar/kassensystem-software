@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { ToolCertificationStatus } from '../shared/models/tool-certification-status';
 import { toToolCertification } from './tool-certification.mapper';
 
 describe('toToolCertification', () => {

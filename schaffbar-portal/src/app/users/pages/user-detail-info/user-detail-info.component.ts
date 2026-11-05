@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 
 import { UserAddressComponent } from '../../components/user-address/user-address.component';
 import { UserContactComponent } from '../../components/user-contact/user-contact.component';
-import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../shared/models/user.model';
+import { UpdateUserAddressCommand, UpdateUserContactCommand, User } from '../../user.model';
 
 @Component({
   selector: 'schbar-user-detail-info',
