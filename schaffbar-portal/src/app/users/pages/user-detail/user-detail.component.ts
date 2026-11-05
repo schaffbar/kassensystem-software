@@ -1,10 +1,6 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, computed, inject, input, linkedSignal } from '@angular/core';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 
@@ -20,9 +16,8 @@ import {
   UserToolCertificationsComponent,
 } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { UserAddressComponent } from '../../components/user-address/user-address.component';
+import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
 import { UserContactComponent } from '../../components/user-contact/user-contact.component';
-import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
-import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
 import {
   PauseToolCertificationCommand,
@@ -40,17 +35,14 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss',
   imports: [
+    UserDetailHeaderComponent,
     UserContactComponent,
     UserAddressComponent,
     UserOpenSessionComponent,
     UserToolCertificationsComponent,
     MatTabsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatIconModule,
     MatProgressBarModule,
     TranslatePipe,
-    LowerCasePipe,
   ],
   providers: [UserDetailStore],
 })
@@ -66,7 +58,6 @@ export class UserDetailComponent {
   protected readonly certificationRows = computed(() =>
     toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.tools()),
   );
-  protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
 
   constructor() {
     this.detailsStore.setUserId(this.id);
@@ -96,18 +87,11 @@ export class UserDetailComponent {
     });
   }
 
-  protected assignFixedRfidTag(): void {
-    const command: AssignRfidTagCommand = { customerId: this.id(), assignmentType: RfidTagAssignmentType.Fixed };
+  protected onAssignRfidTag(command: AssignRfidTagCommand): void {
     this.detailsStore.assignRfidTag(command);
   }
 
-  protected assignTemporaryRfidTag(): void {
-    const command: AssignRfidTagCommand = { customerId: this.id(), assignmentType: RfidTagAssignmentType.Temporary };
-    this.detailsStore.assignRfidTag(command);
-  }
-
-  protected unassignRfidTag(): void {
-    const command: UnassignRfidTagCommand = { customerId: this.id() };
+  protected onUnassignRfidTag(command: UnassignRfidTagCommand): void {
     this.detailsStore.unassignRfidTag(command);
   }
 

@@ -102,7 +102,7 @@ component (inputs, outputs, signals, handlers).
 - The translation key of an enum value is built by a small pure pipe of the feature, not in the template – including
   the `null` case: `{{ reader.type | rfidReaderTypeKey | translate }}` (`rfidReaders.types.switch_box`,
   `rfidReaders.types.none` for `null`). One place for the mapping, testable, and the UI never shows
-  `rfidReaders.types.null`. Not migrated yet: `'users.chips.userDetails.…' + (… | lowercase)` in `user-detail`.
+  `rfidReaders.types.null`.
 - Dash or text: a dash when a value simply does not exist (yet), e.g. the end time of a running tool usage. When the
   missing value means someone has to act, show a translated text and highlight it – e.g. a new RFID reader without
   type: `rfidReaders.types.none` with a warning icon in error color, plus a hint in the detail view.

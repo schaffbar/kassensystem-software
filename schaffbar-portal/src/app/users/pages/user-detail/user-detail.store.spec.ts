@@ -120,7 +120,6 @@ describe('UserDetailStore', () => {
     await loadUser();
 
     expect(store.user()).toEqual(toUser(user));
-    expect(store.userName()).toBe('Max Mustermann');
     expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
     expect(store.openSession()).toEqual(toWorkshopSession(session));
     expect(store.totalWorkshopDurationInMinutes()).toBe(80);

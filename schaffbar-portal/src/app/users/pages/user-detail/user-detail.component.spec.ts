@@ -3,10 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AgeGroup } from '../../../shared/models/age-group';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { ToolCertification } from '../../tool-certification.model';
 import { Tool } from '../../tool.model';
@@ -55,19 +57,21 @@ describe('UserDetailComponent', () => {
   ];
 
   let fixture: ComponentFixture<UserDetailComponent>;
+  let assignRfidTag: Mock;
 
   beforeEach(async () => {
+    assignRfidTag = vi.fn();
     const storeMock = {
       isLoading: signal(false),
       hasLoadError: signal(false),
       user: signal(user),
-      userName: signal('Max Mustermann'),
       rfidTagAssignment: signal(null),
       toolCertifications: signal(certifications),
       tools: signal(tools),
       // read by the open session tab
       openSession: signal(null),
       setUserId: vi.fn(),
+      assignRfidTag,
     };
 
     await TestBed.configureTestingModule({
@@ -105,5 +109,20 @@ describe('UserDetailComponent', () => {
         certifiedAt: new Date('2026-02-01T10:00:00Z'),
       },
     ]);
+  });
+
+  it('should pass the user to the header and execute its commands', () => {
+    const header: UserDetailHeaderComponent = fixture.debugElement.query(
+      By.directive(UserDetailHeaderComponent),
+    ).componentInstance;
+    expect(header.userDetailHeader()).toBe(user);
+    expect(header.rfidTagAssignment()).toBeNull();
+
+    header.assignRfidTag.emit({ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
+
+    expect(assignRfidTag).toHaveBeenCalledExactlyOnceWith({
+      customerId: 'user-1',
+      assignmentType: RfidTagAssignmentType.Fixed,
+    });
   });
 });

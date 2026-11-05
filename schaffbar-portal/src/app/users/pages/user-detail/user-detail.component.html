@@ -6,75 +6,13 @@
 }
 
 @if (detailsStore.user(); as user) {
-  <!-- null = no RFID tag (the backend deletes the assignment on unassign) -->
-  @let assignment = detailsStore.rfidTagAssignment();
-
-  <div class="user-detail-header">
-    <div class="user-detail-header-title">
-      <div class="user-detail-header-title-actions">
-        <h1>{{ detailsStore.userName() }}</h1>
-        <button matIconButton (click)="updateUser()">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button matIconButton (click)="reloadUser()">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div>
-      <div class="user-detail-header-title-chips">
-        <!-- TODO: move to .ts file to create list of chips -->
-        <mat-chip-set>
-          <mat-chip>
-            {{ 'users.chips.userDetails.ageGroup.' + (user.ageGroup | lowercase) | translate }}
-          </mat-chip>
-          @if (user.clubMember) {
-            <mat-chip>
-              {{ 'users.chips.userDetails.clubMember' | translate }}
-            </mat-chip>
-          }
-          @if (assignment) {
-            <mat-chip>
-              {{ 'users.chips.userDetails.rfidTags.' + (assignment.assignmentType | lowercase) | translate }}
-            </mat-chip>
-            @switch (assignment.status) {
-              @case (RfidTagAssignmentStatus.WaitingForAssignment) {
-                <mat-chip>{{ 'users.chips.userDetails.rfidTags.waiting' | translate }}</mat-chip>
-              }
-              @case (RfidTagAssignmentStatus.Assigned) {
-                <mat-chip>{{ assignment.rfidTagId }}</mat-chip>
-              }
-              @default never;
-            }
-          } @else {
-            <mat-chip>{{ 'users.chips.userDetails.rfidTags.noRfidTag' | translate }}</mat-chip>
-          }
-        </mat-chip-set>
-      </div>
-    </div>
-    @if (assignment) {
-      @switch (assignment.status) {
-        @case (RfidTagAssignmentStatus.WaitingForAssignment) {
-          <!-- no action until the tag is scanned – cancelling a request needs a backend endpoint (TODO.md) -->
-        }
-        @case (RfidTagAssignmentStatus.Assigned) {
-          <div class="user-detail-header-actions">
-            <button class="danger-button" matButton="filled" (click)="unassignRfidTag()">
-              {{ 'users.actions.unassignRfidTag' | translate }}
-            </button>
-          </div>
-        }
-        @default never;
-      }
-    } @else {
-      <div class="user-detail-header-actions">
-        <button matButton="filled" (click)="assignTemporaryRfidTag()">
-          {{ 'users.actions.assignTempRfidTag' | translate }}
-        </button>
-        <button matButton="filled" (click)="assignFixedRfidTag()">
-          {{ 'users.actions.assignFixedRfidTag' | translate }}
-        </button>
-      </div>
-    }
-  </div>
+  <schbar-user-detail-header
+    [userDetailHeader]="user"
+    [rfidTagAssignment]="detailsStore.rfidTagAssignment()"
+    (edit)="updateUser()"
+    (reload)="reloadUser()"
+    (assignRfidTag)="onAssignRfidTag($event)"
+    (unassignRfidTag)="onUnassignRfidTag($event)" />
 
   <mat-tab-group
     mat-stretch-tabs="false"

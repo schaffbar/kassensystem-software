@@ -83,8 +83,7 @@ export const UserDetailStore = signalStore(
       };
     },
   ),
-  withComputed(({ user, openSession }) => ({
-    userName: computed(() => (user() ? user()?.firstName + ' ' + user()?.lastName : 'N/A')),
+  withComputed(({ openSession }) => ({
     slots: computed(() => openSession()?.workshopUsages ?? []),
     toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
     totalWorkshopDurationInMinutes: computed(() => openSession()?.totalWorkshopDurationInMinutes ?? 0),

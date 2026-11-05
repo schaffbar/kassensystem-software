@@ -123,19 +123,20 @@ mappt mit `to<Name>ViewModel()`
 
 ### users
 
-| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                 | ViewModel (Soll)                                                                     | Status           |
-| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------- |
-| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                           | –                                                                                    | ✅               |
-| `user-detail`              | `pages/`      | Smart       | Smart, aber Header-Präsentation im Template                        | –                                           | – (füllt die ViewModels der Kinder)                                                  | ❌ V6            |
-| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                           | –                                                                                    | ✅ (V5 erledigt) |
-| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                    | –                                                                                    | ✅               |
-| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `UserContactViewModel`                      | ohne Mapper: `UserContactViewModel` (`id`, `email`, `phone`)                         | ✅               |
-| `user-address`             | `components/` | Dumb        | Dumb                                                               | `UserAddressViewModel`                      | ohne Mapper: `UserAddressViewModel` (`id`, `address: AddressViewModel`)              | ✅               |
-| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `UserToolCertificationRowViewModel[]`       | **Mapping** in `user-detail`: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ✅               |
-| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummaryViewModel`                 | ohne Mapper: `ToolUsageSummaryViewModel`                                             | ✅               |
-| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsageViewModel[]` + zwei Summen    | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`                     | ✅               |
-| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                           | – (keine Daten)                                                                      | ✅               |
-| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user: UpdateUserViewModel }` | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`                             | ✅               |
+| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                                        | ViewModel (Soll)                                                                     | Status           |
+| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------- |
+| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                                  | –                                                                                    | ✅               |
+| `user-detail`              | `pages/`      | Smart       | Smart; Header in `user-detail-header` ausgelagert                  | –                                                                  | – (füllt die ViewModels der Kinder)                                                  | ✅ (V6 erledigt) |
+| `user-detail-header` (neu) | `components/` | Dumb        | Dumb                                                               | `UserDetailHeaderViewModel` + `RfidTagAssignmentViewModel \| null` | ohne Mapper                                                                          | ✅               |
+| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                                                  | –                                                                                    | ✅ (V5 erledigt) |
+| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                           | –                                                                                    | ✅               |
+| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `UserContactViewModel`                                             | ohne Mapper: `UserContactViewModel` (`id`, `email`, `phone`)                         | ✅               |
+| `user-address`             | `components/` | Dumb        | Dumb                                                               | `UserAddressViewModel`                                             | ohne Mapper: `UserAddressViewModel` (`id`, `address: AddressViewModel`)              | ✅               |
+| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `UserToolCertificationRowViewModel[]`                              | **Mapping** in `user-detail`: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ✅               |
+| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummaryViewModel`                                        | ohne Mapper: `ToolUsageSummaryViewModel`                                             | ✅               |
+| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsageViewModel[]` + zwei Summen                           | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`                     | ✅               |
+| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                                  | – (keine Daten)                                                                      | ✅               |
+| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user: UpdateUserViewModel }`                        | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`                             | ✅               |
 
 ## Befunde im Detail
 
@@ -306,10 +307,10 @@ sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein 
 
 ### P4 – Header aus `user-detail` (V6)
 
-- [ ] dumb `users/components/user-detail-header/` mit `UserDetailHeaderViewModel`, Mapping in `user-detail`,
-      Command-Outputs
-- [ ] Pipes `ageGroupKey`, `rfidTagAssignmentTypeKey` (CLAUDE.md „Missing values“, Punkt „Not migrated yet“
-      streichen)
+- [x] dumb `users/components/user-detail-header/` mit `UserDetailHeaderViewModel` und `RfidTagAssignmentViewModel`
+      – abweichend **ohne Mapper**: `User` und `rfidTagAssignment()` passen direkt, als zwei Inputs;
+      Command-Outputs `assignRfidTag` / `unassignRfidTag`, dazu `edit` und `reload`; `userName` im Store entfällt
+- [x] Pipes `ageGroupKey`, `rfidTagAssignmentTypeKey`; CLAUDE.md-Punkt „Not migrated yet“ gestrichen
 
 ### P5 – Aufräumen in smart components
 
