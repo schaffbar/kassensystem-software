@@ -10,17 +10,15 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../rfid-reader.model';
-import { RfidReaderDetailInfoComponent } from './rfid-reader-detail-info.component';
+import { RfidReaderDetailInfoComponent, RfidReaderDetailInfoViewModel } from './rfid-reader-detail-info.component';
 
 describe('RfidReaderDetailInfoComponent', () => {
-  const rfidReader: RfidReader = {
+  const rfidReader: RfidReaderDetailInfoViewModel = {
     id: 'reader-1',
     macAddress: 'AA:BB:CC:DD:EE:FF',
     type: RfidReaderType.SwitchBox,
     name: 'Reader 1',
     socketName: 'Steckdose 1',
-    createdAt: new Date('2026-01-01T10:00:00Z'),
   };
 
   let fixture: ComponentFixture<RfidReaderDetailInfoComponent>;
@@ -34,7 +32,7 @@ describe('RfidReaderDetailInfoComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(RfidReaderDetailInfoComponent);
-    fixture.componentRef.setInput('rfidReader', rfidReader);
+    fixture.componentRef.setInput('rfidReaderDetailInfo', rfidReader);
     readerChanged = vi.fn();
     fixture.componentInstance.readerChanged.subscribe(readerChanged);
     loader = TestbedHarnessEnvironment.loader(fixture);
@@ -68,7 +66,7 @@ describe('RfidReaderDetailInfoComponent', () => {
   });
 
   it('should show "none" for a reader without a type (newly registered)', async () => {
-    fixture.componentRef.setInput('rfidReader', { ...rfidReader, type: null });
+    fixture.componentRef.setInput('rfidReaderDetailInfo', { ...rfidReader, type: null });
     await fixture.whenStable();
 
     expect(await (await input('type')).getValue()).toBe('rfidReaders.types.none');
@@ -131,7 +129,7 @@ describe('RfidReaderDetailInfoComponent', () => {
   });
 
   it('should take over the values when the rfidReader input changes', async () => {
-    fixture.componentRef.setInput('rfidReader', { ...rfidReader, name: 'Reader 2' });
+    fixture.componentRef.setInput('rfidReaderDetailInfo', { ...rfidReader, name: 'Reader 2' });
     await fixture.whenStable();
 
     expect(await (await input('name')).getValue()).toBe('Reader 2');

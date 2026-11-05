@@ -76,20 +76,20 @@ mappt mit `to<Name>ViewModel()`
 
 ### dashboard
 
-| Komponente            | Ordner        | Soll  | Ist   | Input heute                                                | ViewModel (Soll)                                                   | Status |
-| --------------------- | ------------- | ----- | ----- | ---------------------------------------------------------- | ------------------------------------------------------------------ | ------ |
-| `dashboard`           | `pages/`      | Smart | Smart | –                                                          | –                                                                  | ✅     |
-| `active-tools-widget` | `components/` | Dumb  | Dumb  | `Tool[]` + `ActiveTool[]`, joint intern zu `ToolStatusRow` | **Mapping**: `ToolStatusViewModel[]` (Name, in Benutzung, von wem) | ⚠️     |
-| `active-users-widget` | `components/` | Dumb  | Dumb  | `ActiveUser[]`                                             | ohne Mapper: `ActiveUserViewModel[]`                               | ⚠️     |
+| Komponente            | Ordner        | Soll  | Ist   | Input heute                                                | ViewModel (Soll)                                                                | Status |
+| --------------------- | ------------- | ----- | ----- | ---------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| `dashboard`           | `pages/`      | Smart | Smart | –                                                          | –                                                                               | ✅     |
+| `active-tools-widget` | `components/` | Dumb  | Dumb  | `Tool[]` + `ActiveTool[]`, joint intern zu `ToolStatusRow` | **Mapping**: `ToolStatusViewModel[]` (Name, in Benutzung, von wem)              | ⚠️     |
+| `active-users-widget` | `components/` | Dumb  | Dumb  | `ActiveUserViewModel[]`                                    | ohne Mapper: `ActiveUserViewModel[]`; `userSelected` emittiert die `customerId` | ✅     |
 
 ### rfid-readers
 
-| Komponente                     | Ordner        | Soll        | Ist                                       | Input heute                  | ViewModel (Soll)                                                                        | Status |
-| ------------------------------ | ------------- | ----------- | ----------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- | ------ |
-| `rfid-reader-list`             | `pages/`      | Smart       | Smart, rendert die Tabelle selbst         | –                            | –                                                                                       | ✅     |
-| `rfid-reader-detail`           | `pages/`      | Smart       | Smart (Vorab-Prüfung + Snackbar + Dialog) | –                            | –                                                                                       | ✅     |
-| `rfid-reader-detail-info`      | `components/` | Dumb        | Dumb                                      | `RfidReader`                 | ohne Mapper: `RfidReaderDetailInfoViewModel`                                            | ⚠️     |
-| `change-rfid-reader-type-form` | `components/` | Form-Dialog | Form-Dialog                               | Dialog-Data `{ rfidReader }` | ohne Mapper: Dialog-Data `{ rfidReader: ChangeRfidReaderTypeViewModel }` (`id`, `type`) | ⚠️     |
+| Komponente                     | Ordner        | Soll        | Ist                                       | Input heute                                                 | ViewModel (Soll)                                                                        | Status |
+| ------------------------------ | ------------- | ----------- | ----------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------ |
+| `rfid-reader-list`             | `pages/`      | Smart       | Smart, rendert die Tabelle selbst         | –                                                           | –                                                                                       | ✅     |
+| `rfid-reader-detail`           | `pages/`      | Smart       | Smart (Vorab-Prüfung + Snackbar + Dialog) | –                                                           | –                                                                                       | ✅     |
+| `rfid-reader-detail-info`      | `components/` | Dumb        | Dumb                                      | `RfidReaderDetailInfoViewModel`                             | ohne Mapper: `RfidReaderDetailInfoViewModel`                                            | ✅     |
+| `change-rfid-reader-type-form` | `components/` | Form-Dialog | Form-Dialog                               | Dialog-Data `{ rfidReader: ChangeRfidReaderTypeViewModel }` | ohne Mapper: Dialog-Data `{ rfidReader: ChangeRfidReaderTypeViewModel }` (`id`, `type`) | ✅     |
 
 ### rfid-tags
 
@@ -118,7 +118,7 @@ mappt mit `to<Name>ViewModel()`
 | `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern                 | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                               | ⚠️               |
 | `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertificationRowViewModel[]` + 2 × `UserOptionViewModel[]`     | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store          | ✅ (V4 erledigt) |
 | `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderAssignmentViewModel` + `RfidReaderOptionViewModel[]` | `ToolRfidReaderAssignmentViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`) | ✅ (V3 erledigt) |
-| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                              | ohne Mapper: `ToolWlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                              | ⚠️               |
+| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `ToolWlanRelaisViewModel`                                           | ohne Mapper: `ToolWlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                              | ✅               |
 | `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                     | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                             | ✅ (V2 erledigt) |
 
 ### users
@@ -288,10 +288,10 @@ Pro Komponente: ViewModel in der Komponente, Input ggf. umbenennen, Spec auf Vie
 sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein bleiben:
 
 - [x] users: `user-contact`, `user-address`, `tool-usage-summary`, `workshop-usage-summary`, `update-user-form`
-- [ ] tools: ~~`tool-detail-info`~~ (mit V1 erledigt), ~~`tool-rfid-reader-assignment`~~ (mit V3 erledigt),
-      `tool-wlan-relais`, ~~`new-tool-form`~~ (mit V2 erledigt)
-- [ ] rfid-readers: `rfid-reader-detail-info`, `change-rfid-reader-type-form`
-- [ ] dashboard: `active-users-widget`
+- [x] tools: `tool-detail-info` (mit V1), `tool-rfid-reader-assignment` (mit V3), `tool-wlan-relais`, `new-tool-form`
+      (mit V2)
+- [x] rfid-readers: `rfid-reader-detail-info`, `change-rfid-reader-type-form`
+- [x] dashboard: `active-users-widget`
 
 ### P3 – ViewModels mit Mapping in der Page (4 Komponenten)
 

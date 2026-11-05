@@ -12,8 +12,10 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../rfid-reader.model';
-import { ChangeRfidReaderTypeFormComponent } from './change-rfid-reader-type-form.component';
+import {
+  ChangeRfidReaderTypeFormComponent,
+  ChangeRfidReaderTypeViewModel,
+} from './change-rfid-reader-type-form.component';
 
 describe('ChangeRfidReaderTypeFormComponent', () => {
   let fixture: ComponentFixture<ChangeRfidReaderTypeFormComponent>;
@@ -21,7 +23,7 @@ describe('ChangeRfidReaderTypeFormComponent', () => {
   let dialogRef: { close: Mock };
 
   async function setup(type: RfidReaderType | null): Promise<void> {
-    const rfidReader = { id: 'reader-1', macAddress: 'aa', type, name: 'Reader 1', socketName: '' } as RfidReader;
+    const rfidReader: ChangeRfidReaderTypeViewModel = { id: 'reader-1', type };
     dialogRef = { close: vi.fn() };
 
     await TestBed.configureTestingModule({

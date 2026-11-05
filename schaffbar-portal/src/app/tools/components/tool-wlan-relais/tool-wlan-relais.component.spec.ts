@@ -11,11 +11,8 @@ import { MatSelectHarness } from '@angular/material/select/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { CertificationRequirement } from '../../../shared/models/certification-requirement';
-import { ToolArea } from '../../../shared/models/tool-area';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
-import { Tool } from '../../tool.model';
-import { ToolWlanRelaisComponent } from './tool-wlan-relais.component';
+import { ToolWlanRelaisComponent, ToolWlanRelaisViewModel } from './tool-wlan-relais.component';
 
 describe('ToolWlanRelaisComponent', () => {
   let fixture: ComponentFixture<ToolWlanRelaisComponent>;
@@ -23,32 +20,18 @@ describe('ToolWlanRelaisComponent', () => {
   let updated: Mock;
   let cleared: Mock;
 
-  function createTool(relais?: { wlanRelaisType: WlanRelaisType; ipAddress: string }): Tool {
-    return {
-      id: 'tool-1',
-      name: 'Tool 1',
-      description: '',
-      area: ToolArea.Holz,
-      certificationRequirement: CertificationRequirement.Yellow,
-      rfidReaderId: null,
-      wlanRelaisType: null,
-      ipAddress: null,
-      httpStartCommand: null,
-      onCommand: null,
-      offCommand: null,
-      instructors: [],
-      ...relais,
-    };
+  function createTool(relais?: { wlanRelaisType: WlanRelaisType; ipAddress: string }): ToolWlanRelaisViewModel {
+    return { id: 'tool-1', wlanRelaisType: null, ipAddress: null, ...relais };
   }
 
-  async function setup(tool: Tool): Promise<void> {
+  async function setup(tool: ToolWlanRelaisViewModel): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [ToolWlanRelaisComponent],
       providers: [provideZonelessChangeDetection(), provideTranslateService()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolWlanRelaisComponent);
-    fixture.componentRef.setInput('tool', tool);
+    fixture.componentRef.setInput('toolWlanRelais', tool);
     updated = vi.fn();
     cleared = vi.fn();
     fixture.componentInstance.wlanRelaisUpdated.subscribe(updated);
@@ -177,7 +160,7 @@ describe('ToolWlanRelaisComponent', () => {
       await (await ipInput())!.setValue('10.0.0.1');
 
       fixture.componentRef.setInput(
-        'tool',
+        'toolWlanRelais',
         createTool({ wlanRelaisType: WlanRelaisType.Shelly2, ipAddress: '172.16.0.1' }),
       );
       await fixture.whenStable();

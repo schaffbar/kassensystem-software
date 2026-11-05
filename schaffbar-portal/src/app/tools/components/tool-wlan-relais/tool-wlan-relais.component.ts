@@ -9,9 +9,15 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
-import { ClearWlanRelaisCommand, SetWlanRelaisCommand, Tool, WLAN_RELAIS_TEMPLATES } from '../../tool.model';
+import { ClearWlanRelaisCommand, SetWlanRelaisCommand, WLAN_RELAIS_TEMPLATES } from '../../tool.model';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+
+export interface ToolWlanRelaisViewModel {
+  id: string;
+  wlanRelaisType: WlanRelaisType | null;
+  ipAddress: string | null;
+}
 
 interface WlanRelaisFormModel {
   // '' = no WLAN relais
@@ -26,14 +32,14 @@ interface WlanRelaisFormModel {
   imports: [FormField, FormRoot, FieldErrorComponent, MatSelectModule, MatInputModule, MatButtonModule, TranslatePipe],
 })
 export class ToolWlanRelaisComponent {
-  readonly tool = input.required<Tool>();
+  readonly toolWlanRelais = input.required<ToolWlanRelaisViewModel>();
 
   readonly wlanRelaisUpdated = output<SetWlanRelaisCommand>();
   readonly wlanRelaisCleared = output<ClearWlanRelaisCommand>();
 
   protected readonly wlanRelaisTypes = Object.values(WlanRelaisType);
 
-  private readonly model = linkedSignal(() => toModel(this.tool()));
+  private readonly model = linkedSignal(() => toModel(this.toolWlanRelais()));
 
   protected readonly wlanRelaisForm = form(this.model, (schema) => {
     // a hidden field does not count for the validity of the form, so the IP rules only apply with a relais type
@@ -57,12 +63,12 @@ export class ToolWlanRelaisComponent {
 
   protected readonly isDirty = computed(() => {
     const current = relevantValues(this.model());
-    const saved = relevantValues(toModel(this.tool()));
+    const saved = relevantValues(toModel(this.toolWlanRelais()));
     return current.wlanRelaisType !== saved.wlanRelaisType || current.ipAddress !== saved.ipAddress;
   });
 
   protected onCancel(): void {
-    this.model.set(toModel(this.tool()));
+    this.model.set(toModel(this.toolWlanRelais()));
     this.wlanRelaisForm().reset();
   }
 
@@ -70,17 +76,17 @@ export class ToolWlanRelaisComponent {
     submit(this.wlanRelaisForm, async () => {
       const { wlanRelaisType, ipAddress } = this.model();
       if (wlanRelaisType) {
-        const command: SetWlanRelaisCommand = { toolId: this.tool().id, wlanRelaisType, ipAddress };
+        const command: SetWlanRelaisCommand = { toolId: this.toolWlanRelais().id, wlanRelaisType, ipAddress };
         this.wlanRelaisUpdated.emit(command);
       } else {
-        const command: ClearWlanRelaisCommand = { toolId: this.tool().id };
+        const command: ClearWlanRelaisCommand = { toolId: this.toolWlanRelais().id };
         this.wlanRelaisCleared.emit(command);
       }
     });
   }
 }
 
-function toModel(tool: Tool): WlanRelaisFormModel {
+function toModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormModel {
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
 }
 

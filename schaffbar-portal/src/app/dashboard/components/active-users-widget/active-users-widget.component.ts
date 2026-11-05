@@ -11,11 +11,16 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { differenceInMinutes } from 'date-fns';
 import { interval, map } from 'rxjs';
 
-import { ActiveUser } from '../../dashboard.model';
-
 const DURATION_REFRESH_MS = 60_000;
 
-interface ActiveUserRow extends ActiveUser {
+export interface ActiveUserViewModel {
+  customerId: string;
+  firstName: string;
+  lastName: string;
+  entryTime: Date;
+}
+
+interface ActiveUserRow extends ActiveUserViewModel {
   duration: string;
 }
 
@@ -26,10 +31,11 @@ interface ActiveUserRow extends ActiveUser {
   imports: [MatButtonModule, MatCardModule, MatTableModule, MatIconModule, DatePipe, TranslatePipe],
 })
 export class ActiveUsersWidgetComponent {
-  readonly activeUsers = input.required<ActiveUser[]>();
+  readonly activeUsers = input.required<ActiveUserViewModel[]>();
 
   readonly reload = output<void>();
-  readonly userSelected = output<ActiveUser>();
+  // the customer id
+  readonly userSelected = output<string>();
 
   protected readonly displayedColumns = ['name', 'entryTime', 'duration'];
   protected readonly activeUsersCount = computed(() => this.activeUsers().length);
@@ -52,8 +58,8 @@ export class ActiveUsersWidgetComponent {
     this.reload.emit();
   }
 
-  protected selectUser(user: ActiveUser): void {
-    this.userSelected.emit(user);
+  protected selectUser(user: ActiveUserViewModel): void {
+    this.userSelected.emit(user.customerId);
   }
 }
 

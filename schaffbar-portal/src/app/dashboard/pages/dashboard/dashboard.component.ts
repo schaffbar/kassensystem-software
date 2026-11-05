@@ -8,7 +8,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import { ActiveToolsWidgetComponent } from '../../components/active-tools-widget/active-tools-widget.component';
 import { ActiveUsersWidgetComponent } from '../../components/active-users-widget/active-users-widget.component';
-import { ActiveUser } from '../../dashboard.model';
 import { DashboardStore } from '../../dashboard.store';
 
 @Component({
@@ -30,7 +29,7 @@ export class DashboardComponent {
     this.store.reloadActiveTools();
   }
 
-  protected openUserSession(user: ActiveUser): void {
-    this.router.navigate([ROUTE.USERS, user.customerId], { queryParams: { tab: 'open-session' } });
+  protected openUserSession(customerId: string): void {
+    this.router.navigate([ROUTE.USERS, customerId], { queryParams: { tab: 'open-session' } });
   }
 }

@@ -7,8 +7,18 @@ import { MatInputModule } from '@angular/material/input';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
+
+export interface RfidReaderDetailInfoViewModel {
+  id: string;
+  macAddress: string;
+  // null for a new reader – someone has to set it
+  type: RfidReaderType | null;
+  name: string | null;
+  socketName: string | null;
+}
 
 interface RfidReaderInfoFormModel {
   name: string;
@@ -22,14 +32,14 @@ interface RfidReaderInfoFormModel {
   imports: [FormField, FormRoot, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe, RfidReaderTypeKeyPipe],
 })
 export class RfidReaderDetailInfoComponent {
-  readonly rfidReader = input.required<RfidReader>();
+  readonly rfidReaderDetailInfo = input.required<RfidReaderDetailInfoViewModel>();
 
   readonly readerChanged = output<UpdateRfidReaderCommand>();
 
   protected readonly isEditing = signal(false);
 
-  // follows the rfidReader input
-  private readonly model = linkedSignal(() => toModel(this.rfidReader()));
+  // follows the rfidReaderDetailInfo input
+  private readonly model = linkedSignal(() => toModel(this.rfidReaderDetailInfo()));
 
   protected readonly readerForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -43,7 +53,7 @@ export class RfidReaderDetailInfoComponent {
   }
 
   protected onCancel(): void {
-    this.model.set(toModel(this.rfidReader()));
+    this.model.set(toModel(this.rfidReaderDetailInfo()));
     this.readerForm().reset();
     this.isEditing.set(false);
   }
@@ -52,7 +62,7 @@ export class RfidReaderDetailInfoComponent {
     submit(this.readerForm, async () => {
       const { name, socketName } = this.model();
       const command: UpdateRfidReaderCommand = {
-        id: this.rfidReader().id,
+        id: this.rfidReaderDetailInfo().id,
         name: name || undefined,
         socketName: socketName || undefined,
       };
@@ -62,6 +72,6 @@ export class RfidReaderDetailInfoComponent {
   }
 }
 
-function toModel(reader: RfidReader): RfidReaderInfoFormModel {
+function toModel(reader: RfidReaderDetailInfoViewModel): RfidReaderInfoFormModel {
   return { name: reader.name ?? '', socketName: reader.socketName ?? '' };
 }

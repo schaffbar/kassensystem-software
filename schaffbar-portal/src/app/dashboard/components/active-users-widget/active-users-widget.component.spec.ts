@@ -4,11 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ActiveUser } from '../../dashboard.model';
-import { ActiveUsersWidgetComponent } from './active-users-widget.component';
+import { ActiveUsersWidgetComponent, ActiveUserViewModel } from './active-users-widget.component';
 
 describe('ActiveUsersWidgetComponent', () => {
-  const activeUsers: ActiveUser[] = [
+  const activeUsers: ActiveUserViewModel[] = [
     { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: new Date('2026-10-27T08:30:00') },
     { customerId: 'user-2', firstName: 'Erika', lastName: 'Musterfrau', entryTime: new Date('2026-10-27T09:55:00') },
   ];
@@ -46,12 +45,12 @@ describe('ActiveUsersWidgetComponent', () => {
     expect(durations()).toEqual(['1h 31m', '6m']);
   });
 
-  it('should emit the selected user when a row is clicked', () => {
+  it('should emit the customer id of the clicked row', () => {
     const selected = vi.fn();
     fixture.componentInstance.userSelected.subscribe(selected);
 
     fixture.nativeElement.querySelector('tr[mat-row]').click();
 
-    expect(selected).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'user-1' }));
+    expect(selected).toHaveBeenCalledExactlyOnceWith('user-1');
   });
 });

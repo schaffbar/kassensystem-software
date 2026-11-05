@@ -10,11 +10,16 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { ChangeRfidReaderTypeCommand, RfidReader } from '../../rfid-reader.model';
+import { ChangeRfidReaderTypeCommand } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 
+export interface ChangeRfidReaderTypeViewModel {
+  id: string;
+  type: RfidReaderType | null;
+}
+
 export interface ChangeRfidReaderTypeDialogData {
-  rfidReader: RfidReader;
+  rfidReader: ChangeRfidReaderTypeViewModel;
 }
 
 interface ChangeRfidReaderTypeFormModel {
