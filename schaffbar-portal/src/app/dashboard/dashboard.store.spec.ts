@@ -8,12 +8,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { environment } from '../../environments/environment';
 import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
 import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
+import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
 import { toActiveTool, toActiveUser } from './dashboard.mapper';
 import { DashboardStore } from './dashboard.store';
 
 describe('DashboardStore', () => {
   const activeUsersUrl = `${environment.apiBaseUrl}/api/v1/workshop-dashboard/active-users`;
   const activeToolsUrl = `${environment.apiBaseUrl}/api/v1/tool-dashboard/active-tools`;
+  const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
+  const tools = [toolFixture(), toolFixture({ id: 'tool-2', name: 'Drechselbank' })];
   const activeUsers: WorkshopDashboardEntryApiModel[] = [
     { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: '2026-10-27T08:30:00Z' },
   ];
@@ -48,32 +51,39 @@ describe('DashboardStore', () => {
   }
 
   const expectUsers = (): TestRequest => httpMock.expectOne({ method: 'GET', url: activeUsersUrl });
-  const expectTools = (): TestRequest => httpMock.expectOne({ method: 'GET', url: activeToolsUrl });
+  const expectActiveTools = (): TestRequest => httpMock.expectOne({ method: 'GET', url: activeToolsUrl });
+  const expectTools = (): TestRequest => httpMock.expectOne({ method: 'GET', url: toolsUrl });
 
   async function load(): Promise<void> {
     trigger();
     expectUsers().flush(activeUsers);
-    expectTools().flush(activeTools);
+    expectActiveTools().flush(activeTools);
+    expectTools().flush(tools);
     await settle();
   }
 
-  it('should load the active users and tools when the dashboard opens', async () => {
+  it('should load the active users, the active tools and all tools when the dashboard opens', async () => {
     await load();
 
     expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
     expect(store.activeTools()).toEqual(activeTools.map(toActiveTool));
+    expect(store.tools()).toEqual([
+      { id: 'tool-1', name: 'Bandsäge' },
+      { id: 'tool-2', name: 'Drechselbank' },
+    ]);
     expect(store.isLoading()).toBe(false);
   });
 
-  it('should be loading until both lists have arrived', async () => {
+  it('should be loading until all lists have arrived', async () => {
     trigger();
     expectUsers().flush(activeUsers);
-    // not settle(): whenStable() would wait for the open tools request
+    // not settle(): whenStable() would wait for the open requests
     await new Promise((resolve) => setTimeout(resolve));
     expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
     expect(store.isLoading()).toBe(true);
 
-    expectTools().flush(activeTools);
+    expectActiveTools().flush(activeTools);
+    expectTools().flush(tools);
     await settle();
     expect(store.isLoading()).toBe(false);
   });
@@ -90,22 +100,25 @@ describe('DashboardStore', () => {
     expect(store.activeTools()).toEqual(activeTools.map(toActiveTool));
   });
 
-  it('should reload only the active tools', async () => {
+  it('should reload only the active tools and the tools', async () => {
     await load();
 
     store.reloadActiveTools();
     trigger();
-    expectTools().flush([]);
+    expectActiveTools().flush([]);
+    expectTools().flush([tools[0]]);
     await settle();
 
     expect(store.activeTools()).toEqual([]);
+    expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
     expect(store.activeUsers()).toEqual(activeUsers.map(toActiveUser));
   });
 
   it('should expose a load error of either list', async () => {
     trigger();
     expectUsers().flush(activeUsers);
-    expectTools().flush('boom', { status: 500, statusText: 'Server Error' });
+    expectActiveTools().flush('boom', { status: 500, statusText: 'Server Error' });
+    expectTools().flush(tools);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
@@ -118,7 +131,8 @@ describe('DashboardStore', () => {
 
     trigger();
     expectUsers().flush([{ customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: 'gestern' }]);
-    expectTools().flush(activeTools);
+    expectActiveTools().flush(activeTools);
+    expectTools().flush(tools);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

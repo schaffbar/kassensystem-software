@@ -8,13 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import {
-  ClearWlanRelaisCommand,
-  SetWlanRelaisCommand,
-  Tool,
-  WLAN_RELAIS_TEMPLATES,
-  WlanRelaisType,
-} from '../../tool.model';
+import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
+import { ClearWlanRelaisCommand, SetWlanRelaisCommand, Tool, WLAN_RELAIS_TEMPLATES } from '../../tool.model';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 

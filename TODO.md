@@ -40,8 +40,10 @@
 
 ## Architecture
 
-- [Backend] HTTP response - missing values as null or NON_NULL option
 - [Frontend] Shared API Services with its own API model and runtime validation (zod)
+- [Frontend] Introduce ViewModel for all components
+- [Frontend] in dashboard - use global tools store vs fetch data to its own store
+- [Backend] HTTP response - missing values as null or NON_NULL option -> adapt ApiModels in frontend
 - [Backend] Facade vs Use Case and move all mutations to use cases
 - [Backend] Arch unit
 

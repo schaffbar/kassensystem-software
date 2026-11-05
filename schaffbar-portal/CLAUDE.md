@@ -3,7 +3,7 @@
 ## Folders
 
 Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, `workshop-sessions`,
-`rfid-tag-assignments`, `tool-certifications`); the rules below describe the target.
+`rfid-tag-assignments`, `tool-certifications`, `tools`); the rules below describe the target.
 
 - `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
   `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
@@ -18,7 +18,7 @@ Being migrated to `shared/api` (done: `rfid-tags`, `rfid-readers`, `dashboard`, 
 - Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
   models (enforced by ESLint).
 - A feature never imports from another feature's internals (`users/shared/…`, components, stores). Not migrated yet:
-  `tools` imports `User` and `UsersStore` from `users/shared/`.
+  `tools` imports `User` and `UsersStore` from `users/shared/` (resolved with the `customers` migration).
 
 ## Services
 
@@ -58,7 +58,9 @@ component (inputs, outputs, signals, handlers).
 
 - Data that is displayed is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the
   signal store. A one-off check at the time of an action (e.g. `getToolsByRfidReader` before changing the reader
-  type) stays a plain `HttpClient` observable – it is no state of the page. A dialog container loads its data with
+  type) stays a plain `HttpClient` observable – it is no state of the page. The store wraps it and returns what the
+  component needs (`hasAssignedTools(rfidReaderId): Observable<boolean>`), because components never import
+  `shared/api`. A dialog container loads its data with
   `httpResource` directly, without a store (see "Dialogs").
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),

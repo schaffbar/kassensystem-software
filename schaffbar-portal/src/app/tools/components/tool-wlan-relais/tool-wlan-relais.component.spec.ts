@@ -11,7 +11,10 @@ import { MatSelectHarness } from '@angular/material/select/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { CertificationRequirement, Tool, ToolArea, WlanRelaisType } from '../../tool.model';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { ToolArea } from '../../../shared/models/tool-area';
+import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
+import { Tool } from '../../tool.model';
 import { ToolWlanRelaisComponent } from './tool-wlan-relais.component';
 
 describe('ToolWlanRelaisComponent', () => {

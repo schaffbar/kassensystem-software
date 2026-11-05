@@ -6,29 +6,33 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
+import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
+import { ToolArea } from '../../../shared/models/tool-area';
+import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
 import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { toToolCertification } from '../../tool-certification.mapper';
-import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
+import { toTool } from '../../tool.mapper';
 import { ToolDetailStore } from './tool-detail.store';
 
 describe('ToolDetailStore', () => {
   const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
   const certificationsUrl = `${environment.apiBaseUrl}/api/v1/tool-certifications`;
-  const tool: Tool = {
-    id: 'tool-1',
-    name: 'Bandsäge',
-    description: '',
-    area: ToolArea.Holz,
-    certificationRequirement: CertificationRequirement.Yellow,
-    rfidReaderId: null,
-    wlanRelaisType: null,
-    ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
-    instructors: [],
-  };
+  const rfidReadersUrl = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
+  const rfidReaders: RfidReaderApiModel[] = [
+    {
+      id: 'reader-1',
+      macAddress: 'AA:BB',
+      type: RfidReaderType.SwitchBox,
+      name: 'Reader 1',
+      socketName: null,
+      createdAt: '2026-01-01T10:00:00Z',
+    },
+  ];
+  const tool = toolFixture();
   const certifications: ToolCertificationApiModel[] = [
     {
       id: 'cert-1',
@@ -67,6 +71,10 @@ describe('ToolDetailStore', () => {
     return httpMock.expectOne((req) => req.method === 'GET' && req.url === `${toolsUrl}/tool-1`);
   }
 
+  function expectRfidReadersRequest(): TestRequest {
+    return httpMock.expectOne((req) => req.method === 'GET' && req.url === rfidReadersUrl);
+  }
+
   function expectCertificationsRequest(): TestRequest {
     return httpMock.expectOne(
       (req) => req.method === 'GET' && req.url === certificationsUrl && req.params.get('toolId') === 'tool-1',
@@ -78,21 +86,25 @@ describe('ToolDetailStore', () => {
     trigger();
     expectToolRequest().flush(tool);
     expectCertificationsRequest().flush(certifications);
+    expectRfidReadersRequest().flush(rfidReaders);
     await settle();
   }
 
-  it('should not load anything without an id', () => {
+  it('should load only the RFID readers without an id', async () => {
     trigger();
 
+    expectRfidReadersRequest().flush(rfidReaders);
     httpMock.expectNone(() => true);
+    await settle();
     expect(store.tool()).toBeNull();
     expect(store.toolCertifications()).toEqual([]);
+    expect(store.rfidReaders()).toEqual([{ id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox }]);
   });
 
   it('should load tool and certifications when the id is set', async () => {
     await loadTool();
 
-    expect(store.tool()).toEqual(tool);
+    expect(store.tool()).toEqual(toTool(tool));
     expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
     expect(store.isLoading()).toBe(false);
   });
@@ -104,6 +116,7 @@ describe('ToolDetailStore', () => {
     trigger();
     expectToolRequest().flush(tool);
     expectCertificationsRequest().flush([]);
+    expectRfidReadersRequest().flush(rfidReaders);
     await settle();
 
     expect(store.toolCertifications()).toEqual([]);
@@ -123,6 +136,70 @@ describe('ToolDetailStore', () => {
     expectToolRequest().flush({ ...tool, instructors: ['user-1'] });
     await settle();
     expect(store.tool()?.instructors).toEqual(['user-1']);
+  });
+
+  it('should send the tool fields without the id when updating', async () => {
+    await loadTool();
+
+    store.updateTool({
+      id: 'tool-1',
+      name: 'Bandsäge groß',
+      area: ToolArea.Holz,
+      certificationRequirement: CertificationRequirement.Red,
+    });
+    trigger();
+    const update = httpMock.expectOne(`${toolsUrl}/tool-1`);
+    expect(update.request.method).toBe('PUT');
+    expect(update.request.body).toEqual({
+      name: 'Bandsäge groß',
+      description: null,
+      area: ToolArea.Holz,
+      certificationRequirement: CertificationRequirement.Red,
+    });
+    update.flush(null);
+    trigger();
+
+    expectToolRequest().flush(tool);
+    await settle();
+  });
+
+  it('should assign the RFID reader via the path and set the WLAN relais via the body', async () => {
+    await loadTool();
+
+    store.changeRfidReader({ toolId: 'tool-1', rfidReaderId: 'reader-1' });
+    trigger();
+    const assign = httpMock.expectOne(`${toolsUrl}/tool-1/rfid-reader/reader-1`);
+    expect(assign.request.method).toBe('PUT');
+    expect(assign.request.body).toEqual({});
+    assign.flush(null);
+    trigger();
+    expectToolRequest().flush(tool);
+    await settle();
+
+    store.setWlanRelais({ toolId: 'tool-1', wlanRelaisType: WlanRelaisType.Shelly1, ipAddress: '192.168.0.10' });
+    trigger();
+    const wlanRelais = httpMock.expectOne(`${toolsUrl}/tool-1/wlan-relais`);
+    expect(wlanRelais.request.method).toBe('PUT');
+    expect(wlanRelais.request.body).toEqual({ wlanRelaisType: WlanRelaisType.Shelly1, ipAddress: '192.168.0.10' });
+    wlanRelais.flush(null);
+    trigger();
+    expectToolRequest().flush(tool);
+    await settle();
+  });
+
+  it('should send the instructor ids as body of the DELETE when removing instructors', async () => {
+    await loadTool();
+
+    store.removeInstructors({ toolId: 'tool-1', instructorIds: ['user-1'] });
+    trigger();
+    const remove = httpMock.expectOne(`${toolsUrl}/tool-1/instructors`);
+    expect(remove.request.method).toBe('DELETE');
+    expect(remove.request.body).toEqual({ instructorIds: ['user-1'] });
+    remove.flush(null);
+    trigger();
+
+    expectToolRequest().flush(tool);
+    await settle();
   });
 
   it('should only reload the certifications after certifying several users', async () => {
@@ -161,6 +238,7 @@ describe('ToolDetailStore', () => {
     trigger();
     expectToolRequest().flush('not found', { status: 404, statusText: 'Not Found' });
     expectCertificationsRequest().flush([]);
+    expectRfidReadersRequest().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

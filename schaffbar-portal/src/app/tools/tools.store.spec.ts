@@ -6,12 +6,15 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../environments/environment';
-import { CertificationRequirement, Tool, ToolArea } from './tool.model';
+import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
+import { CertificationRequirement } from '../shared/models/certification-requirement';
+import { ToolArea } from '../shared/models/tool-area';
+import { toTool } from './tool.mapper';
 import { ToolsStore } from './tools.store';
 
 describe('ToolsStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/tools`;
-  const tools = [{ id: 'tool-1', name: 'Bandsäge' }] as Tool[];
+  const tools = [toolFixture()];
 
   let store: InstanceType<typeof ToolsStore>;
   let httpMock: HttpTestingController;
@@ -47,7 +50,7 @@ describe('ToolsStore', () => {
   it('should load all tools on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(tools);
+    expect(store.entities()).toEqual(tools.map(toTool));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -72,11 +75,17 @@ describe('ToolsStore', () => {
     });
     trigger();
     const create = httpMock.expectOne((req) => req.method === 'POST' && req.url === url);
+    expect(create.request.body).toEqual({
+      name: 'Drechselbank',
+      description: null,
+      area: ToolArea.Holz,
+      certificationRequirement: CertificationRequirement.Red,
+    });
     expect(store.createTool.isPending()).toBe(true);
     create.flush({});
     trigger();
 
-    expectLoad().flush([...tools, { id: 'tool-2', name: 'Drechselbank' } as Tool]);
+    expectLoad().flush([...tools, toolFixture({ id: 'tool-2', name: 'Drechselbank' })]);
     await settle();
     expect(store.entities()).toHaveLength(2);
     expect(store.createTool.isPending()).toBe(false);

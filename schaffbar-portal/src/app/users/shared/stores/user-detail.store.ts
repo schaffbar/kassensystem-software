@@ -15,6 +15,8 @@ import {
   RevokeToolCertificationCommand,
 } from '../models/tool-certification.model';
 import { toToolCertification } from '../models/tool-certification.mapper';
+import { toTool } from '../models/tool.mapper';
+import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../models/user.model';
 import { CloseWorkshopSessionCommand, hasRunningUsage } from '../models/workshop-session.model';
 import { toWorkshopSession } from '../models/workshop-session.mapper';
@@ -45,29 +47,39 @@ export const UserDetailStore = signalStore(
       _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
       _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
       _certificationsResource: toolCertificationsApi.certificationsByCustomerResource(store.userId),
+      _toolsResource: inject(ToolsApiService).toolsResource(),
     };
   }),
-  withComputed(({ _userResource, _assignmentResource, _openSessionResource, _certificationsResource }) => {
-    const resources = [_userResource, _assignmentResource, _openSessionResource, _certificationsResource];
-    return {
-      // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
-      user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
-      rfidTagAssignment: computed(() => {
-        const assignment = _assignmentResource.hasValue() ? _assignmentResource.value() : null;
-        return assignment ? toRfidTagAssignment(assignment) : null;
-      }),
-      openSession: computed(() => {
-        const session = _openSessionResource.hasValue() ? _openSessionResource.value() : null;
-        return session ? toWorkshopSession(session) : null;
-      }),
-      toolCertifications: computed(() =>
-        _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
-      ),
-      // loading and error states are combined from all resources
-      isLoading: computed(() => resources.some((resource) => resource.isLoading())),
-      hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
-    };
-  }),
+  withComputed(
+    ({ _userResource, _assignmentResource, _openSessionResource, _certificationsResource, _toolsResource }) => {
+      const resources = [
+        _userResource,
+        _assignmentResource,
+        _openSessionResource,
+        _certificationsResource,
+        _toolsResource,
+      ];
+      return {
+        // hasValue() stays true while reloading, so the page keeps showing the data instead of flickering
+        user: computed(() => (_userResource.hasValue() ? _userResource.value() : null)),
+        rfidTagAssignment: computed(() => {
+          const assignment = _assignmentResource.hasValue() ? _assignmentResource.value() : null;
+          return assignment ? toRfidTagAssignment(assignment) : null;
+        }),
+        openSession: computed(() => {
+          const session = _openSessionResource.hasValue() ? _openSessionResource.value() : null;
+          return session ? toWorkshopSession(session) : null;
+        }),
+        toolCertifications: computed(() =>
+          _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
+        ),
+        tools: computed(() => (_toolsResource.hasValue() ? _toolsResource.value().map(toTool) : [])),
+        // loading and error states are combined from all resources
+        isLoading: computed(() => resources.some((resource) => resource.isLoading())),
+        hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
+      };
+    },
+  ),
   withComputed(({ user, openSession }) => ({
     userName: computed(() => (user() ? user()?.firstName + ' ' + user()?.lastName : 'N/A')),
     slots: computed(() => openSession()?.workshopUsages ?? []),
@@ -91,6 +103,7 @@ export const UserDetailStore = signalStore(
       store._assignmentResource.reload();
       store._openSessionResource.reload();
       store._certificationsResource.reload();
+      store._toolsResource.reload();
     },
   })),
   // mutations of the user – reload the user on success

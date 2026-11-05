@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../../rfid-readers/rfid-reader.model';
+import { RfidReader } from '../../rfid-reader.model';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';

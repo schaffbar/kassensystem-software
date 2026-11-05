@@ -6,26 +6,13 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { CertificationRequirement, Tool, ToolArea } from '../../../tools/tool.model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { ToolCertification } from '../../shared/models/tool-certification.model';
+import { Tool } from '../../shared/models/tool.model';
 import { UserToolCertificationsComponent } from './user-tool-certifications.component';
 
 describe('UserToolCertificationsComponent', () => {
-  const tool: Tool = {
-    id: 'tool-1',
-    name: 'Bandsäge',
-    description: '',
-    area: ToolArea.Holz,
-    certificationRequirement: CertificationRequirement.Yellow,
-    rfidReaderId: null,
-    wlanRelaisType: null,
-    ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
-    instructors: [],
-  };
+  const tool: Tool = { id: 'tool-1', name: 'Bandsäge' };
 
   function certification(status: ToolCertificationStatus): ToolCertification {
     return {

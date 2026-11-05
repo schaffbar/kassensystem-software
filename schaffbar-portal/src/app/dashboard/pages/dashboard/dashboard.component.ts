@@ -6,7 +6,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
-import { ToolsStore } from '../../../tools/tools.store';
 import { ActiveToolsWidgetComponent } from '../../components/active-tools-widget/active-tools-widget.component';
 import { ActiveUsersWidgetComponent } from '../../components/active-users-widget/active-users-widget.component';
 import { ActiveUser } from '../../dashboard.model';
@@ -21,7 +20,6 @@ import { DashboardStore } from '../../dashboard.store';
 })
 export class DashboardComponent {
   protected readonly store = inject(DashboardStore);
-  protected readonly toolsStore = inject(ToolsStore);
   private readonly router = inject(Router);
 
   protected reloadActiveUsers(): void {
@@ -30,7 +28,6 @@ export class DashboardComponent {
 
   protected reloadActiveTools(): void {
     this.store.reloadActiveTools();
-    this.toolsStore.reloadTools();
   }
 
   protected openUserSession(user: ActiveUser): void {

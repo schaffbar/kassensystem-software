@@ -228,6 +228,15 @@ getToolsByRfidReader(rfidReaderId: string): Observable<ToolApiModel[]> {
 
 Prefix `get…`, plain value parameters. If you are unsure → it is displayed data → resource.
 
+The component can't call it (no `shared/api` in components) – the **store** wraps it and returns only what the
+component needs, so no API model and no mapper reach the component:
+
+```ts
+hasAssignedTools(rfidReaderId: string): Observable<boolean> {
+  return store._toolsApi.getToolsByRfidReader(rfidReaderId).pipe(map((tools) => tools.length > 0));
+},
+```
+
 ### Commands → `Observable<void>`
 
 - The signature mirrors the controller: **path variables as plain arguments, the body as `…Request`** –
@@ -273,6 +282,10 @@ export interface UpdateRfidReaderCommand {
   (`tools/tool-certification.model.ts` has `BatchCreate…` / `Delete…`, `users/shared/models/tool-certification.model.ts`
   has `Pause…` / `Reactivate…` / `Revoke…`). The duplicated interface is intended – a feature never imports another
   feature's model, and `shared/models` holds enums only.
+- A feature that only needs a few fields of another resource (names for a list or a dropdown) **loads it in its own
+  store** with the API service and maps it to a minimal model of its own – never another feature's store or model:
+  `dashboard` and `users` have `Tool { id, name }`, `tools` has `RfidReader { id, name, type }`. A resource without a
+  parameter (`toolsResource()`) loads as soon as the store exists, also before the page sets its id.
 - `| null` stays where the value can be missing (CLAUDE.md "Missing values").
 - Commands stay here, as described in CLAUDE.md "Commands" – components emit them, stores receive them. They never go
   to the API service directly.
@@ -377,7 +390,7 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
 
 ## Migrating an old `*.service.ts`
 
-Not migrated yet: `customers`, `tools` (old pattern: `<feature>/*.service.ts` or
+Not migrated yet: `customers` (old pattern: `<feature>/*.service.ts` or
 `users/shared/services/`, one class with commands as parameters, no validation).
 
 1. Backend: controller + `…ApiModel.java` → schema and requests (table above).

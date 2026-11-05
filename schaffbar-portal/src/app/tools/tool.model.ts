@@ -1,3 +1,7 @@
+import { CertificationRequirement } from '../shared/models/certification-requirement';
+import { ToolArea } from '../shared/models/tool-area';
+import { WlanRelaisType } from '../shared/models/wlan-relais-type';
+
 export interface Tool {
   id: string;
   name: string;
@@ -14,25 +18,7 @@ export interface Tool {
 }
 
 // ----------------------------------------------------------------------------
-// enums
-
-export enum WlanRelaisType {
-  Shelly1 = 'SHELLY_1',
-  Shelly2 = 'SHELLY_2',
-  ShellyPro = 'SHELLY_PRO',
-}
-
-export enum ToolArea {
-  Holz = 'HOLZ',
-  Metall = 'METALL',
-  Kreativ = 'KREATIV',
-  FabLab = 'FABLAB',
-}
-
-export enum CertificationRequirement {
-  Yellow = 'YELLOW',
-  Red = 'RED',
-}
+// WLAN relais
 
 export interface WlanRelaisTemplate {
   httpStartCommand: string;

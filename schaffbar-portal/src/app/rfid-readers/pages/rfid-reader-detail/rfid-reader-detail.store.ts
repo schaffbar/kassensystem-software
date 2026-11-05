@@ -1,8 +1,10 @@
 import { computed, inject } from '@angular/core';
 
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
+import { map, Observable } from 'rxjs';
 
 import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
+import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { mutation } from '../../../shared/state/mutation';
 import { toChangeRfidReaderTypeRequest, toRfidReader, toUpdateRfidReaderRequest } from '../../rfid-reader.mapper';
 import { ChangeRfidReaderTypeCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
@@ -17,6 +19,7 @@ export const RfidReaderDetailStore = signalStore(
     const rfidReadersApi = inject(RfidReadersApiService);
     return {
       _rfidReadersApi: rfidReadersApi,
+      _toolsApi: inject(ToolsApiService),
       // (re)loads whenever the id changes – replaces the dirty flag + effect + rxMethod
       _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
     };
@@ -33,6 +36,9 @@ export const RfidReaderDetailStore = signalStore(
     }),
     reloadRfidReader(): void {
       store._rfidReaderResource.reload();
+    },
+    hasAssignedTools(rfidReaderId: string): Observable<boolean> {
+      return store._toolsApi.getToolsByRfidReader(rfidReaderId).pipe(map((tools) => tools.length > 0));
     },
     updateRfidReader: mutation<UpdateRfidReaderCommand>({
       request: (command) => store._rfidReadersApi.updateRfidReader(command.id, toUpdateRfidReaderRequest(command)),

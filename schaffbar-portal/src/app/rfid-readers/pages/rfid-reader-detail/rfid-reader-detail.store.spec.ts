@@ -3,9 +3,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { toRfidReader } from '../../rfid-reader.mapper';
@@ -113,6 +115,20 @@ describe('RfidReaderDetailStore', () => {
     httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, type: RfidReaderType.GateKeeperIn });
     await settle();
     expect(store.rfidReader()?.type).toBe(RfidReaderType.GateKeeperIn);
+  });
+
+  it('should tell whether tools are assigned to a reader', async () => {
+    const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
+    const expectToolsOf = () =>
+      httpMock.expectOne((req) => req.url === toolsUrl && req.params.get('rfidReaderId') === 'reader-1');
+
+    const assigned = firstValueFrom(store.hasAssignedTools('reader-1'));
+    expectToolsOf().flush([toolFixture({ rfidReaderId: 'reader-1' })]);
+    expect(await assigned).toBe(true);
+
+    const notAssigned = firstValueFrom(store.hasAssignedTools('reader-1'));
+    expectToolsOf().flush([]);
+    expect(await notAssigned).toBe(false);
   });
 
   it('should expose a load error', async () => {

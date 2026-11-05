@@ -7,8 +7,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { Tool } from '../../../tools/tool.model';
-import { ActiveTool } from '../../dashboard.model';
+import { ActiveTool, Tool } from '../../dashboard.model';
 
 interface ToolStatusRow {
   id: string;

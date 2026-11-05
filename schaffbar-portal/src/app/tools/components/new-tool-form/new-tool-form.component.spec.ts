@@ -12,7 +12,9 @@ import { MatSelectHarness } from '@angular/material/select/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { ToolArea } from '../../../shared/models/tool-area';
+import { Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 import { NewToolFormComponent } from './new-tool-form.component';
 

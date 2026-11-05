@@ -12,3 +12,8 @@ export interface ActiveTool {
   firstName: string;
   lastName: string;
 }
+
+export interface Tool {
+  id: string;
+  name: string;
+}

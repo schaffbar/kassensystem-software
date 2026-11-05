@@ -9,13 +9,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
-import { ToolsService } from '../../../tools/tools.service';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import {
   ChangeRfidReaderTypeDialogData,
   ChangeRfidReaderTypeFormComponent,
 } from '../../components/change-rfid-reader-type-form/change-rfid-reader-type-form.component';
 import { RfidReaderDetailInfoComponent } from '../../components/rfid-reader-detail-info/rfid-reader-detail-info.component';
-import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
@@ -30,7 +29,6 @@ export class RfidReaderDetailComponent {
   protected readonly detailsStore = inject(RfidReaderDetailStore);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly toolsService = inject(ToolsService);
   private readonly translate = inject(TranslateService);
 
   readonly id = input.required<string>();
@@ -51,9 +49,10 @@ export class RfidReaderDetailComponent {
     const reader = this.detailsStore.rfidReader();
     if (!reader) return;
 
+    // TODO: should we not close subscription when component is destroyed?
     if (reader.type === RfidReaderType.SwitchBox) {
-      this.toolsService.getToolsByRfidReader(reader.id).subscribe((tools) => {
-        if (tools.length > 0) {
+      this.detailsStore.hasAssignedTools(reader.id).subscribe((hasAssignedTools) => {
+        if (hasAssignedTools) {
           this.snackBar.open(
             this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
             this.translate.instant('shared.actions.close'),

@@ -13,6 +13,7 @@ import { toRfidTagAssignment } from '../models/rfid-tag-assignment.mapper';
 import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { toToolCertification } from '../models/tool-certification.mapper';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { User } from '../models/user.model';
 import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
 import {
@@ -89,6 +90,7 @@ describe('UserDetailStore', () => {
   const expectAssignment = () => expectGet(`${api}/rfid-tag-assignments`, ['customer-id', 'user-1']);
   const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/active`);
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
+  const expectTools = () => expectGet(`${api}/tools`);
 
   async function loadUser(
     options: { assignments?: RfidTagAssignmentApiModel[]; session?: WorkshopSessionApiModel | null } = {},
@@ -99,14 +101,18 @@ describe('UserDetailStore', () => {
     expectAssignment().flush(options.assignments ?? [assignment]);
     expectSession().flush(options.session === undefined ? session : options.session);
     expectCertifications().flush(certifications);
+    expectTools().flush([toolFixture()]);
     await settle();
   }
 
-  it('should not load anything without an id', () => {
+  it('should load only the tools without an id', async () => {
     trigger();
 
+    expectTools().flush([toolFixture()]);
     httpMock.expectNone(() => true);
+    await settle();
     expect(store.user()).toBeNull();
+    expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
   });
 
   it('should load user, assignment, open session and certifications when the id is set', async () => {
@@ -120,6 +126,7 @@ describe('UserDetailStore', () => {
     expect(store.totalWorkshopUnits()).toBe(4);
     expect(store.hasRunningUsage()).toBe(false);
     expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
+    expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
     expect(store.hasLoadError()).toBe(false);
   });
 
@@ -232,6 +239,7 @@ describe('UserDetailStore', () => {
     expectAssignment().flush([]);
     expectSession().flush(null);
     expectCertifications().flush([]);
+    expectTools().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

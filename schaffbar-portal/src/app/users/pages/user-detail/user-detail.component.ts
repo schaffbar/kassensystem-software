@@ -11,7 +11,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
-import { ToolsStore } from '../../../tools/tools.store';
 import {
   UpdateUserDialogData,
   UpdateUserFormComponent,
@@ -51,14 +50,13 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
 export class UserDetailComponent {
   private readonly dialog = inject(MatDialog);
   protected readonly detailsStore = inject(UserDetailStore);
-  private readonly toolsStore = inject(ToolsStore);
 
   // Info: id and tab inputs are coming from the route parameters.
   readonly id = input.required<string>();
   readonly tab = input<string>();
 
   protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
-  protected readonly allTools = computed(() => this.toolsStore.entities());
+  protected readonly allTools = computed(() => this.detailsStore.tools());
   protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
 
   constructor() {

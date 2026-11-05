@@ -10,7 +10,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { CertificationRequirement, Tool, ToolArea, UpdateToolCommand } from '../../tool.model';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { ToolArea } from '../../../shared/models/tool-area';
+import { Tool, UpdateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
 import { ToolsStore } from '../../tools.store';
 

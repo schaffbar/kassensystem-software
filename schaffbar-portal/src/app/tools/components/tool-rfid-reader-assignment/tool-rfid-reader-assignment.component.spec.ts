@@ -12,36 +12,29 @@ import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../../rfid-readers/rfid-reader.model';
+import { RfidReader } from '../../rfid-reader.model';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { CertificationRequirement, Tool, ToolArea } from '../../tool.model';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { ToolArea } from '../../../shared/models/tool-area';
+import { Tool } from '../../tool.model';
 import { ToolRfidReaderAssignmentComponent } from './tool-rfid-reader-assignment.component';
 
 describe('ToolRfidReaderAssignmentComponent', () => {
   const rfidReaders: RfidReader[] = [
     {
       id: 'reader-1',
-      macAddress: 'aa',
       type: RfidReaderType.SwitchBox,
       name: 'Reader 1',
-      socketName: '',
-      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
     {
       id: 'reader-2',
-      macAddress: 'bb',
       type: RfidReaderType.SwitchBox,
       name: 'Reader 2',
-      socketName: '',
-      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
     {
       id: 'reader-3',
-      macAddress: 'cc',
       type: RfidReaderType.SwitchBox,
       name: 'Reader 3',
-      socketName: '',
-      createdAt: new Date('2026-01-01T10:00:00Z'),
     },
   ];
 
