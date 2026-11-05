@@ -56,8 +56,8 @@ Shared-Dialog-Modals eines.
   - **12 ohne Mapper** – ViewModel in der Komponente anlegen, die Page übergibt weiter das Feature-Model.
   - **4 mit Mapping in der Page** – sie joinen heute selbst: `tool-certifications`, `user-tool-certifications`,
     `tool-instructors`, `active-tools-widget`.
-- **Graubereich**: 3 dumb components öffnen selbst einen Bestätigungsdialog (`ConfirmDeleteDialogService` /
-  `ConfirmActionDialogService`) – siehe [D2](#d2-bestätigungsdialoge-in-dumb-components--offen).
+- **Erlaubt (D2)**: 3 dumb components öffnen selbst einen Bestätigungsdialog (`ConfirmDeleteDialogService` /
+  `ConfirmActionDialogService`) – siehe D2 unter „Entscheidungen“.
 
 ## Bestandsaufnahme
 
@@ -110,16 +110,16 @@ mappt mit `to<Name>ViewModel()`
 
 ### tools
 
-| Komponente                    | Ordner        | Soll        | Ist                                              | Input heute                                                                          | ViewModel (Soll)                                                                                                 | Status |
-| ----------------------------- | ------------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------ |
-| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst                | –                                                                                    | –                                                                                                                | ✅     |
-| `tool-detail`                 | `pages/`      | Smart       | Smart                                            | –                                                                                    | – (füllt die ViewModels der Kinder)                                                                              | ✅     |
-| `tool-detail-info`            | `components/` | Dumb        | **Dumb mit Store** – `inject(ToolsStore)`        | `Tool`                                                                               | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ❌ V1  |
-| `tool-instructors`            | `components/` | Dumb        | Dumb                                             | `User[]` + `instructorIds` + `toolId`, joint intern                                  | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️     |
-| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService`              | `ToolCertification[]` + `User[]` + `instructorIds`, joint und filtert nach Fachregel | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ❌ V4  |
-| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`              | `Tool` + `RfidReader[]` + `Set<string>`, filtert auf Switch-Boxen                    | ohne Mapper: `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]` (zuweisbare Reader aus dem Store)         | ❌ V3  |
-| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                             | `Tool`                                                                               | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️     |
-| `new-tool-form`               | `components/` | Form-Dialog | **Form-Dialog mit Store** – `inject(ToolsStore)` | –                                                                                    | ohne Mapper: Dialog-Data `{ existingTools: () => ExistingToolViewModel[] }`                                      | ❌ V2  |
+| Komponente                    | Ordner        | Soll        | Ist                                              | Input heute                                                                          | ViewModel (Soll)                                                                                                 | Status           |
+| ----------------------------- | ------------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst                | –                                                                                    | –                                                                                                                | ✅               |
+| `tool-detail`                 | `pages/`      | Smart       | Smart                                            | –                                                                                    | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
+| `tool-detail-info`            | `components/` | Dumb        | Dumb                                             | `ToolInfoViewModel` + `ExistingToolViewModel[]`                                      | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
+| `tool-instructors`            | `components/` | Dumb        | Dumb                                             | `User[]` + `instructorIds` + `toolId`, joint intern                                  | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
+| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService`              | `ToolCertification[]` + `User[]` + `instructorIds`, joint und filtert nach Fachregel | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ❌ V4            |
+| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`              | `Tool` + `RfidReader[]` + `Set<string>`, filtert auf Switch-Boxen                    | ohne Mapper: `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]` (zuweisbare Reader aus dem Store)         | ❌ V3            |
+| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                             | `Tool`                                                                               | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
+| `new-tool-form`               | `components/` | Form-Dialog | **Form-Dialog mit Store** – `inject(ToolsStore)` | –                                                                                    | ohne Mapper: Dialog-Data `{ existingTools: () => ExistingToolViewModel[] }`                                      | ❌ V2            |
 
 ### users
 
@@ -229,23 +229,23 @@ strukturelle Typisierung kostet das ViewModel dort nichts, wo die Form schon pas
 
 Skill-Abschnitt: „ViewModel“.
 
-### D2: Bestätigungsdialoge in dumb components – offen
+### D2: Bestätigungsdialoge in dumb components – entschieden (05.11.2026)
 
 `tool-certifications`, `tool-rfid-reader-assignment`, `user-tool-certifications` öffnen den Bestätigungsdialog
 selbst, die Listen-Seiten tun es in der Page.
 
-**Empfehlung: erlaubt** – aber nur `ConfirmDeleteDialogService` / `ConfirmActionDialogService`. Die Frage gehört zum
+**Erlaubt** – aber nur `ConfirmDeleteDialogService` / `ConfirmActionDialogService`. Die Frage gehört zum
 Button, den die Komponente rendert; beide Services liegen in `shared/`, haben keinen Zustand und liefern nur ja/nein.
 Die Alternative (Output „möchte löschen“, Page fragt nach) bläht `tool-detail` und `user-detail` um je 3 Handler mit
 Dialogtexten auf, ohne die Komponente wiederverwendbarer zu machen.
 
 Skill-Abschnitt: „Dumb component → What it may inject“.
 
-### D3: Tabellen der Listen-Seiten – offen
+### D3: Tabellen der Listen-Seiten – entschieden (05.11.2026)
 
 `tool-list`, `user-list`, `rfid-reader-list`, `rfid-tag-list` rendern ihre `mat-table` selbst.
 
-**Empfehlung: so lassen.** Jede Tabelle hat genau einen Nutzer, `MatSort`/`MatPaginator` per `viewChild` sind dort
+**Vorerst so lassen**; eigene dumb components für die Tabellen sind für später möglich. Jede Tabelle hat genau einen Nutzer, `MatSort`/`MatPaginator` per `viewChild` sind dort
 am einfachsten, und eine `…-table`-Komponente würde nur Inputs/Outputs durchreichen. Regel im Skill: Eine Page darf
 eigenes Markup haben, solange es keinen eigenen Zustand und kein Formular hat; ausgelagert wird, was eigenen
 UI-Zustand hat, wiederverwendet wird oder Fach-Fallunterscheidungen enthält (wie der Header in V6).
@@ -258,8 +258,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 
 ### P0 – Regeln festlegen
 
-- [x] D1 entscheiden
-- [ ] D2, D3 entscheiden
+- [x] D1–D3 entscheiden
 - [ ] Skill `component` fertigstellen (`schaffbar-portal/.claude/skills/component/SKILL.md`)
 - [ ] CLAUDE.md: kurzer Abschnitt „Components“ mit Verweis auf den Skill (wie bei „Dialogs“)
 - [ ] TODO.md: „Introduce ViewModel for all components“ präzisieren – „ViewModel in der Komponente für jede dumb
@@ -267,7 +266,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 
 ### P1 – Verstöße beheben und per ESLint absichern
 
-- [ ] V1 `tool-detail-info`: `existingTools = input.required<ExistingToolViewModel[]>()` statt `ToolsStore`;
+- [x] V1 `tool-detail-info`: `existingTools = input.required<ExistingToolViewModel[]>()` statt `ToolsStore`;
       `validateUniqueToolName` auf `() => { id: string; name: string }[]`
 - [ ] V2 `new-tool-form`: `existingTools` über `MAT_DIALOG_DATA` statt `ToolsStore`
 - [ ] V3 `ToolDetailStore.assignableRfidReaders` + `assignedRfidReaderIds` in den Store; Filter aus der Komponente
@@ -284,7 +283,7 @@ Pro Komponente: ViewModel in der Komponente, Input ggf. umbenennen, Spec auf Vie
 sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein bleiben:
 
 - [ ] users: `user-contact`, `user-address`, `tool-usage-summary`, `workshop-usage-summary`, `update-user-form`
-- [ ] tools: `tool-detail-info` (zusammen mit V1), `tool-rfid-reader-assignment` (zusammen mit V3),
+- [ ] tools: ~~`tool-detail-info`~~ (mit V1 erledigt), `tool-rfid-reader-assignment` (zusammen mit V3),
       `tool-wlan-relais`, `new-tool-form` (zusammen mit V2)
 - [ ] rfid-readers: `rfid-reader-detail-info`, `change-rfid-reader-type-form`
 - [ ] dashboard: `active-users-widget`

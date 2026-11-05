@@ -45,7 +45,7 @@ import { ToolDetailStore } from './tool-detail.store';
 })
 export class ToolDetailComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
-  private readonly toolsStore = inject(ToolsStore);
+  protected readonly toolsStore = inject(ToolsStore);
 
   readonly id = input.required<string>();
 

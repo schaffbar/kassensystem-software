@@ -1,5 +1,5 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { Component, input, linkedSignal, output, signal } from '@angular/core';
 import { form, FormField, FormRoot, readonly, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -12,11 +12,24 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { Tool, UpdateToolCommand } from '../../tool.model';
+import { UpdateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
-import { ToolsStore } from '../../tools.store';
 
-interface ToolInfoModel {
+export interface ToolInfoViewModel {
+  id: string;
+  name: string;
+  description: string | null;
+  area: ToolArea;
+  certificationRequirement: CertificationRequirement;
+}
+
+// all tools, incl. this one – for the unique name check
+export interface ExistingToolViewModel {
+  id: string;
+  name: string;
+}
+
+interface ToolFormModel {
   name: string;
   description: string;
   area: ToolArea;
@@ -40,9 +53,8 @@ interface ToolInfoModel {
   ],
 })
 export class ToolDetailInfoComponent {
-  private readonly toolsStore = inject(ToolsStore);
-
-  readonly tool = input.required<Tool>();
+  readonly tool = input.required<ToolInfoViewModel>();
+  readonly existingTools = input.required<ExistingToolViewModel[]>();
 
   readonly toolUpdated = output<UpdateToolCommand>();
 
@@ -58,7 +70,7 @@ export class ToolDetailInfoComponent {
     // readonly is inherited by all fields
     readonly(schema, { when: () => !this.isEditing() });
     required(schema.name);
-    validateUniqueToolName(schema.name, this.toolsStore.entities, () => this.tool().id);
+    validateUniqueToolName(schema.name, this.existingTools, () => this.tool().id);
   });
 
   protected onEdit(): void {
@@ -89,7 +101,7 @@ export class ToolDetailInfoComponent {
   }
 }
 
-function toModel(tool: Tool): ToolInfoModel {
+function toModel(tool: ToolInfoViewModel): ToolFormModel {
   return {
     name: tool.name,
     description: tool.description ?? '',

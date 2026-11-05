@@ -1,6 +1,6 @@
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatButtonHarness } from '@angular/material/button/testing';
@@ -13,26 +13,20 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { Tool } from '../../tool.model';
-import { ToolsStore } from '../../tools.store';
-import { ToolDetailInfoComponent } from './tool-detail-info.component';
+import { ExistingToolViewModel, ToolDetailInfoComponent, ToolInfoViewModel } from './tool-detail-info.component';
 
 describe('ToolDetailInfoComponent', () => {
-  const tool: Tool = {
+  const tool: ToolInfoViewModel = {
     id: 'tool-1',
     name: 'Bandsäge',
     description: 'Große Säge',
     area: ToolArea.Holz,
     certificationRequirement: CertificationRequirement.Yellow,
-    rfidReaderId: null,
-    wlanRelaisType: null,
-    ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
-    instructors: [],
   };
-  const otherTool: Tool = { ...tool, id: 'tool-2', name: 'Drechselbank' };
+  const existingTools: ExistingToolViewModel[] = [
+    { id: 'tool-1', name: 'Bandsäge' },
+    { id: 'tool-2', name: 'Drechselbank' },
+  ];
 
   let fixture: ComponentFixture<ToolDetailInfoComponent>;
   let loader: HarnessLoader;
@@ -41,15 +35,12 @@ describe('ToolDetailInfoComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ToolDetailInfoComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslateService(),
-        { provide: ToolsStore, useValue: { entities: signal([tool, otherTool]) } },
-      ],
+      providers: [provideZonelessChangeDetection(), provideTranslateService()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolDetailInfoComponent);
     fixture.componentRef.setInput('tool', tool);
+    fixture.componentRef.setInput('existingTools', existingTools);
     toolUpdated = vi.fn();
     fixture.componentInstance.toolUpdated.subscribe(toolUpdated);
     loader = TestbedHarnessEnvironment.loader(fixture);
@@ -134,6 +125,17 @@ describe('ToolDetailInfoComponent', () => {
   it('should reject the name of another tool (case-insensitive)', async () => {
     await click(editButton);
     await (await input('name')).setValue('DRECHSELBANK');
+
+    await click(saveButton);
+
+    expect(await nameErrors()).toEqual(['tools.dialogs.addTool.errors.nameExists']);
+    expect(toolUpdated).not.toHaveBeenCalled();
+  });
+
+  it('should check the name against the current existingTools input', async () => {
+    fixture.componentRef.setInput('existingTools', [...existingTools, { id: 'tool-3', name: 'Kreissäge' }]);
+    await click(editButton);
+    await (await input('name')).setValue('Kreissäge');
 
     await click(saveButton);
 

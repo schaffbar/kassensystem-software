@@ -70,7 +70,7 @@ Rules:
   back door.
 - No ids "for later" that the component doesn't use – but the ids the component needs for its commands are part of
   the ViewModel (`ContactViewModel.id` for `UpdateUserContactCommand`).
-- Not to be confused with the **form model** (`ContactModel`): local, not exported, describes what is edited
+- Not to be confused with the **form model** (`ContactFormModel`): local, not exported, describes what is edited
   (CLAUDE.md "Forms"). The ViewModel describes what comes in.
 - The store never imports a ViewModel – it doesn't know the components. Mapping happens in the page.
 - A form dialog's `…DialogData` is its ViewModel (same rules), e.g. `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
@@ -167,7 +167,7 @@ export interface ContactViewModel {
   phone: string | null;
 }
 
-interface ContactModel {
+interface ContactFormModel {
   email: string;
   phone: string;
 }
@@ -200,7 +200,7 @@ export class UserContactComponent {
   }
 }
 
-function toModel(contact: ContactViewModel): ContactModel {
+function toModel(contact: ContactViewModel): ContactFormModel {
   return { email: contact.email, phone: contact.phone ?? '' };
 }
 ```

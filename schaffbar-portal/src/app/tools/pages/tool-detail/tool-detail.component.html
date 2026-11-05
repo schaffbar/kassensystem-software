@@ -19,7 +19,10 @@
     <mat-tab [label]="'tools.tabGroups.toolDetails.detailsTab' | translate">
       <div class="tab-content--details">
         <div class="tab-content--details__left">
-          <schbar-tool-detail-info [tool]="tool" (toolUpdated)="onToolUpdated($event)" />
+          <schbar-tool-detail-info
+            [tool]="tool"
+            [existingTools]="toolsStore.entities()"
+            (toolUpdated)="onToolUpdated($event)" />
         </div>
         <div class="tab-content--details__right">
           <schbar-tool-instructors

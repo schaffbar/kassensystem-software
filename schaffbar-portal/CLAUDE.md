@@ -51,8 +51,8 @@ component (inputs, outputs, signals, handlers).
   (e.g. `this.user().id`); parent components only pass the command on and never assemble one.
 - Component output, store method and service method take the same command type.
 - Also for a single id: `ClearWlanRelaisCommand { toolId }`, not `string`.
-- Form models (`ToolInfoModel`, `ContactModel`, …) stay local in the component – they describe what is edited, the
-  command describes what is sent to the backend.
+- Form models (`<Name>FormModel`, e.g. `ToolFormModel`) stay local in the component – they describe what is edited,
+  the command describes what is sent to the backend.
 
 ## Stores
 
