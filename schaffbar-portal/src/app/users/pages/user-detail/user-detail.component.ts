@@ -16,6 +16,8 @@ import {
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
 import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
+import { UserAddressComponent } from '../../components/user-address/user-address.component';
+import { UserContactComponent } from '../../components/user-contact/user-contact.component';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
@@ -26,7 +28,6 @@ import {
 } from '../../tool-certification.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../user.model';
 import { UserDetailStore } from './user-detail.store';
-import { UserDetailInfoComponent } from '../user-detail-info/user-detail-info.component';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
 
 @Component({
@@ -34,7 +35,8 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss',
   imports: [
-    UserDetailInfoComponent,
+    UserContactComponent,
+    UserAddressComponent,
     UserOpenSessionComponent,
     UserToolCertificationsComponent,
     MatTabsModule,

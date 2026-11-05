@@ -84,10 +84,10 @@
     (selectedIndexChange)="selectedTabIndex.set($event)">
     <mat-tab [label]="'users.tabGroups.userDetails.detailsTab' | translate">
       <div class="tab-content tab-content--split">
-        <schbar-user-detail-info
-          [user]="user"
-          (addressChanged)="onAddressChanged($event)"
-          (contactChanged)="onContactChanged($event)" />
+        <div>
+          <schbar-user-contact class="user-info-section" [user]="user" (contactChanged)="onContactChanged($event)" />
+          <schbar-user-address class="user-info-section" [user]="user" (addressChanged)="onAddressChanged($event)" />
+        </div>
         <schbar-user-tool-certifications
           [certifications]="detailsStore.toolCertifications()"
           [allTools]="allTools()"

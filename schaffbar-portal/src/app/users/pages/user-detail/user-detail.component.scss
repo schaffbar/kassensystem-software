@@ -47,6 +47,13 @@
   }
 }
 
+.user-info-section {
+  display: block;
+  min-width: 300px;
+  max-width: 600px;
+  width: 100%;
+}
+
 .load-error {
   color: var(--mat-sys-error);
 }

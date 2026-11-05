@@ -123,19 +123,19 @@ mappt mit `to<Name>ViewModel()`
 
 ### users
 
-| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                              | ViewModel (Soll)                                                    | Status |
-| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------- | ------ |
-| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                        | –                                                                   | ✅     |
-| `user-detail`              | `pages/`      | Smart       | Smart, aber Header-Präsentation im Template                        | –                                                        | – (füllt die ViewModels der Kinder)                                 | ❌ V6  |
-| `user-detail-info`         | `pages/`      | Smart       | **Dumb** – reicht `user` und zwei Outputs nur durch                | `User`                                                   | – (wird aufgelöst)                                                  | ❌ V5  |
-| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                 | –                                                                   | ✅     |
-| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `ContactViewModel` (`id`, `email`, `phone`)            | ⚠️     |
-| `user-address`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `AddressViewModel` (`id`, `address`)                   | ⚠️     |
-| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `ToolCertification[]` + `Tool[]`, joint zu `toolNameMap` | **Mapping**: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ⚠️     |
-| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummary`                                       | ohne Mapper: `ToolUsageSummaryViewModel`                            | ⚠️     |
-| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsage[]` + zwei Summen                          | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`    | ⚠️     |
-| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                        | – (keine Daten)                                                     | ✅     |
-| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user }`                                   | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`            | ⚠️     |
+| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                              | ViewModel (Soll)                                                    | Status           |
+| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------- | ---------------- |
+| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                        | –                                                                   | ✅               |
+| `user-detail`              | `pages/`      | Smart       | Smart, aber Header-Präsentation im Template                        | –                                                        | – (füllt die ViewModels der Kinder)                                 | ❌ V6            |
+| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                                        | –                                                                   | ✅ (V5 erledigt) |
+| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                 | –                                                                   | ✅               |
+| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `ContactViewModel` (`id`, `email`, `phone`)            | ⚠️               |
+| `user-address`             | `components/` | Dumb        | Dumb                                                               | `User`                                                   | ohne Mapper: `AddressViewModel` (`id`, `address`)                   | ⚠️               |
+| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `ToolCertification[]` + `Tool[]`, joint zu `toolNameMap` | **Mapping**: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ⚠️               |
+| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummary`                                       | ohne Mapper: `ToolUsageSummaryViewModel`                            | ⚠️               |
+| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsage[]` + zwei Summen                          | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`    | ⚠️               |
+| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                        | – (keine Daten)                                                     | ✅               |
+| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user }`                                   | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`            | ⚠️               |
 
 ## Befunde im Detail
 
@@ -274,7 +274,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 - [x] V3 `ToolDetailStore.assignableRfidReaders`; „bereits zugewiesen“ als `isAssignedToOtherTool` im ViewModel
       (Mapping in `tool-detail`)
 - [x] V4 `ToolDetailStore.certifiableUsers` + `certifiers`; `tool-certifications` filtert nur noch nach Suchtext
-- [ ] V5 `user-detail-info` auflösen, `user-detail` rendert `user-contact` + `user-address` direkt
+- [x] V5 `user-detail-info` auflösen, `user-detail` rendert `user-contact` + `user-address` direkt
 - [ ] ESLint-Block für `src/app/*/components/**` und `src/app/shared/components/**`: `no-restricted-imports` für
       `**/*.store`, `Router` aus `@angular/router`, `MatDialog` aus `@angular/material/dialog`, `MatSnackBar`,
       `@angular/common/http`. **Achtung:** In Flat Config ersetzt ein späterer Block dieselbe Regel – der neue Block
