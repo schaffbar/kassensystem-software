@@ -7,8 +7,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
-import { ToolCertificationsComponent } from '../../components/tool-certifications/tool-certifications.component';
+import {
+  BatchCreateToolCertificationCommand,
+  DeleteToolCertificationCommand,
+  ToolCertification,
+} from '../../tool-certification.model';
+import {
+  ToolCertificationRowViewModel,
+  ToolCertificationsComponent,
+} from '../../components/tool-certifications/tool-certifications.component';
 import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-detail-info.component';
 import { ToolInstructorsComponent } from '../../components/tool-instructors/tool-instructors.component';
 import {
@@ -17,6 +24,7 @@ import {
 } from '../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
 import { ToolWlanRelaisComponent } from '../../components/tool-wlan-relais/tool-wlan-relais.component';
 import { RfidReader } from '../../rfid-reader.model';
+import { User } from '../../user.model';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
@@ -55,7 +63,9 @@ export class ToolDetailComponent {
   readonly id = input.required<string>();
 
   protected readonly selectedTool = computed(() => this.detailsStore.tool());
-  protected readonly toolCertifications = computed(() => this.detailsStore.toolCertifications());
+  protected readonly certificationRows = computed(() =>
+    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
+  );
   protected readonly allUsers = computed(() => this.detailsStore.users());
   protected readonly rfidReaderOptions = computed(() =>
     toRfidReaderOptionViewModels(
@@ -110,6 +120,20 @@ export class ToolDetailComponent {
   protected onInstructorsRemoved(command: RemoveToolInstructorsCommand): void {
     this.detailsStore.removeInstructors(command);
   }
+}
+
+function toCertificationRowViewModels(
+  certifications: ToolCertification[],
+  users: User[],
+): ToolCertificationRowViewModel[] {
+  const userNames = new Map(users.map((user) => [user.id, `${user.firstName} ${user.lastName}`]));
+  return certifications.map((certification) => ({
+    customerId: certification.customerId,
+    toolId: certification.toolId,
+    userName: userNames.get(certification.customerId) ?? null,
+    status: certification.status,
+    certifiedAt: certification.certifiedAt,
+  }));
 }
 
 function toRfidReaderOptionViewModels(

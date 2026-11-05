@@ -38,9 +38,9 @@
       <div class="tab-content--wide">
         <schbar-tool-certifications
           [toolId]="tool.id"
-          [certifications]="toolCertifications()"
-          [allUsers]="allUsers()"
-          [instructorIds]="tool.instructors"
+          [certifications]="certificationRows()"
+          [certifiableUsers]="detailsStore.certifiableUsers()"
+          [certifiers]="detailsStore.certifiers()"
           (batchCreate)="onBatchCreateCertifications($event)"
           (deleteCertification)="onDeleteCertification($event)" />
       </div>

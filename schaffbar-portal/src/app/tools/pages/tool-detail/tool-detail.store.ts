@@ -64,6 +64,21 @@ export const ToolDetailStore = signalStore(
       hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
     };
   }),
+  withComputed(({ tool, users, toolCertifications }) => ({
+    // only the instructors of the tool certify
+    certifiers: computed(() => {
+      const instructorIds = new Set(tool()?.instructors ?? []);
+      return users().filter((user) => instructorIds.has(user.id));
+    }),
+    // a user is certified once per tool; instructors need no certification
+    certifiableUsers: computed(() => {
+      const excludedIds = new Set([
+        ...(tool()?.instructors ?? []),
+        ...toolCertifications().map((certification) => certification.customerId),
+      ]);
+      return users().filter((user) => !excludedIds.has(user.id));
+    }),
+  })),
   withMethods((store) => ({
     setToolId: signalMethod<string>((toolId) => {
       patchState(store, { toolId });

@@ -140,6 +140,24 @@ describe('ToolDetailStore', () => {
     expect(store.isLoading()).toBe(false);
   });
 
+  it('should offer only instructors as certifiers and only uncertified non-instructors for certification', async () => {
+    store.setToolId('tool-1');
+    trigger();
+    expectToolRequest().flush({ ...tool, instructors: ['user-2'] });
+    // user-1 is certified already
+    expectCertificationsRequest().flush(certifications);
+    expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([
+      customerFixture(),
+      customerFixture({ id: 'user-2', firstName: 'Erika' }),
+      customerFixture({ id: 'user-3', firstName: 'Paul' }),
+    ]);
+    await settle();
+
+    expect(store.certifiers().map((user) => user.id)).toEqual(['user-2']);
+    expect(store.certifiableUsers().map((user) => user.id)).toEqual(['user-3']);
+  });
+
   it('should reload both on request', async () => {
     await loadTool();
 

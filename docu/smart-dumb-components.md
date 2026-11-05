@@ -110,16 +110,16 @@ mappt mit `to<Name>ViewModel()`
 
 ### tools
 
-| Komponente                    | Ordner        | Soll        | Ist                                 | Input heute                                                                          | ViewModel (Soll)                                                                                                 | Status           |
-| ----------------------------- | ------------- | ----------- | ----------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst   | –                                                                                    | –                                                                                                                | ✅               |
-| `tool-detail`                 | `pages/`      | Smart       | Smart                               | –                                                                                    | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
-| `tool-detail-info`            | `components/` | Dumb        | Dumb                                | `ToolInfoViewModel` + `ExistingToolViewModel[]`                                      | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
-| `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern                                  | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
-| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertification[]` + `User[]` + `instructorIds`, joint und filtert nach Fachregel | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ❌ V4            |
-| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]`                            | `ToolRfidReaderViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`)  | ✅ (V3 erledigt) |
-| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                                               | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
-| `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                                      | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                    | ✅ (V2 erledigt) |
+| Komponente                    | Ordner        | Soll        | Ist                                 | Input heute                                                     | ViewModel (Soll)                                                                                                 | Status           |
+| ----------------------------- | ------------- | ----------- | ----------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst   | –                                                               | –                                                                                                                | ✅               |
+| `tool-detail`                 | `pages/`      | Smart       | Smart                               | –                                                               | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
+| `tool-detail-info`            | `components/` | Dumb        | Dumb                                | `ToolInfoViewModel` + `ExistingToolViewModel[]`                 | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
+| `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern             | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
+| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertificationRowViewModel[]` + 2 × `UserOptionViewModel[]` | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ✅ (V4 erledigt) |
+| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]`       | `ToolRfidReaderViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`)  | ✅ (V3 erledigt) |
+| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                          | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
+| `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                 | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                    | ✅ (V2 erledigt) |
 
 ### users
 
@@ -273,7 +273,7 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 - [x] V2 `new-tool-form`: `existingTools` über `MAT_DIALOG_DATA` statt `ToolsStore`
 - [x] V3 `ToolDetailStore.assignableRfidReaders`; „bereits zugewiesen“ als `isAssignedToOtherTool` im ViewModel
       (Mapping in `tool-detail`)
-- [ ] V4 `ToolDetailStore.certifiableUsers` + `certifiers`; `tool-certifications` filtert nur noch nach Suchtext
+- [x] V4 `ToolDetailStore.certifiableUsers` + `certifiers`; `tool-certifications` filtert nur noch nach Suchtext
 - [ ] V5 `user-detail-info` auflösen, `user-detail` rendert `user-contact` + `user-address` direkt
 - [ ] ESLint-Block für `src/app/*/components/**` und `src/app/shared/components/**`: `no-restricted-imports` für
       `**/*.store`, `Router` aus `@angular/router`, `MatDialog` aus `@angular/material/dialog`, `MatSnackBar`,
@@ -293,7 +293,7 @@ sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein 
 
 ### P3 – ViewModels mit Mapping in der Page (4 Komponenten)
 
-- [ ] `tool-certifications`: `ToolCertificationRowViewModel` (mit `userName`), Mapping in `tool-detail`
+- [x] `tool-certifications`: `ToolCertificationRowViewModel` (mit `userName`), Mapping in `tool-detail` (mit V4)
 - [ ] `tool-instructors`: `InstructorViewModel` für Ausbilder und Kandidaten, Mapping in `tool-detail`
 - [ ] `user-tool-certifications`: `UserToolCertificationRowViewModel` (mit `toolName`), Mapping in `user-detail`
 - [ ] `active-tools-widget`: `ToolStatusViewModel`, Mapping in `dashboard`
@@ -310,7 +310,7 @@ sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein 
 
 - [ ] `tool-detail`: durchgereichte `computed`s entfernen
 - [ ] `rfid-reader-detail`: `takeUntilDestroyed` für die Vorab-Prüfung
-- [ ] `tool-certifications.onSubmitBatch`: typisierte Command-Variable
+- [x] `tool-certifications.onSubmitBatch`: typisierte Command-Variable (mit V4)
 
 ### Danach
 
