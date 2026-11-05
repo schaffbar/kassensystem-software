@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@a
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
 import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
@@ -57,7 +57,10 @@ describe('ToolDetailStore', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
 
   // lets the resources react to signal changes and send their requests
   function trigger(): void {
@@ -241,6 +244,21 @@ describe('ToolDetailStore', () => {
     expectCertificationsRequest().flush([]);
     await settle();
     expect(store.toolCertifications()).toEqual([]);
+  });
+
+  it('should expose a load error for a response that does not match the schema', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    store.setToolId('tool-1');
+    trigger();
+    expectToolRequest().flush({ ...tool, area: 'GARTEN' });
+    expectCertificationsRequest().flush(certifications);
+    expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([customerFixture()]);
+    await settle();
+
+    expect(store.hasLoadError()).toBe(true);
+    expect(store.tool()).toBeNull();
   });
 
   it('should expose a load error', async () => {

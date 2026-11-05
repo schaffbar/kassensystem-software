@@ -4,7 +4,7 @@ import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { firstValueFrom } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
 import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
@@ -40,7 +40,10 @@ describe('RfidReaderDetailStore', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
 
   // lets the resource react to signal changes and send its request (whenStable() would wait for the open request)
   function trigger(): void {
@@ -129,6 +132,18 @@ describe('RfidReaderDetailStore', () => {
     const notAssigned = firstValueFrom(store.hasAssignedTools('reader-1'));
     expectToolsOf().flush([]);
     expect(await notAssigned).toBe(false);
+  });
+
+  it('should expose a load error for a response that does not match the schema', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    store.setRfidReaderId('reader-1');
+    trigger();
+    httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, createdAt: 'gestern' });
+    await settle();
+
+    expect(store.hasLoadError()).toBe(true);
+    expect(store.rfidReader()).toBeNull();
   });
 
   it('should expose a load error', async () => {

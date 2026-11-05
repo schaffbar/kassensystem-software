@@ -21,7 +21,7 @@ export class ToolCertificationsApiService {
   // --------------------------------------------------------------------------
   // queries
 
-  certificationsByCustomerResource(
+  toolCertificationsByCustomerResource(
     customerId: () => string | null,
   ): HttpResourceRef<ToolCertificationApiModel[] | undefined> {
     return httpResource(
@@ -33,7 +33,9 @@ export class ToolCertificationsApiService {
     );
   }
 
-  certificationsByToolResource(toolId: () => string | null): HttpResourceRef<ToolCertificationApiModel[] | undefined> {
+  toolCertificationsByToolResource(
+    toolId: () => string | null,
+  ): HttpResourceRef<ToolCertificationApiModel[] | undefined> {
     return httpResource(
       () => {
         const id = toolId();
@@ -50,19 +52,19 @@ export class ToolCertificationsApiService {
     return this.http.post<void>(`${TOOL_CERTIFICATIONS_API_URL}/batch`, request);
   }
 
-  pause(customerId: string, toolId: string): Observable<void> {
+  pauseToolCertification(customerId: string, toolId: string): Observable<void> {
     return this.http.put<void>(`${certificationUrl(customerId, toolId)}/pause`, {});
   }
 
-  reactivate(customerId: string, toolId: string): Observable<void> {
+  reactivateToolCertification(customerId: string, toolId: string): Observable<void> {
     return this.http.put<void>(`${certificationUrl(customerId, toolId)}/reactivate`, {});
   }
 
-  revoke(customerId: string, toolId: string): Observable<void> {
+  revokeToolCertification(customerId: string, toolId: string): Observable<void> {
     return this.http.put<void>(`${certificationUrl(customerId, toolId)}/revoke`, {});
   }
 
-  delete(customerId: string, toolId: string): Observable<void> {
+  deleteToolCertification(customerId: string, toolId: string): Observable<void> {
     return this.http.delete<void>(certificationUrl(customerId, toolId));
   }
 }

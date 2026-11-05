@@ -43,16 +43,14 @@ export const UserDetailStore = signalStore(
     const workshopSessionsApi = inject(WorkshopSessionsApiService);
     const toolCertificationsApi = inject(ToolCertificationsApiService);
     return {
-      // services for the mutations
       _customersApi: customersApi,
       _rfidTagAssignmentsApi: rfidTagAssignmentsApi,
       _workshopSessionsApi: workshopSessionsApi,
       _toolCertificationsApi: toolCertificationsApi,
-      // resources for the queries
       _userResource: customersApi.customerResource(store.userId),
       _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
-      _openSessionResource: workshopSessionsApi.openSessionResource(store.userId),
-      _certificationsResource: toolCertificationsApi.certificationsByCustomerResource(store.userId),
+      _openSessionResource: workshopSessionsApi.activeWorkshopSessionResource(store.userId),
+      _certificationsResource: toolCertificationsApi.toolCertificationsByCustomerResource(store.userId),
       _toolsResource: inject(ToolsApiService).toolsResource(),
     };
   }),
@@ -80,7 +78,6 @@ export const UserDetailStore = signalStore(
           _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
         ),
         tools: computed(() => (_toolsResource.hasValue() ? _toolsResource.value().map(toTool) : [])),
-        // loading and error states are combined from all resources
         isLoading: computed(() => resources.some((resource) => resource.isLoading())),
         hasLoadError: computed(() => resources.some((resource) => !!resource.error())),
       };
@@ -151,15 +148,16 @@ export const UserDetailStore = signalStore(
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
     pauseCertification: mutation<PauseToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.pause(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.pauseToolCertification(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     reactivateCertification: mutation<ReactivateToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.reactivate(command.customerId, command.toolId),
+      request: (command) =>
+        store._toolCertificationsApi.reactivateToolCertification(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     revokeCertification: mutation<RevokeToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.revoke(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.revokeToolCertification(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

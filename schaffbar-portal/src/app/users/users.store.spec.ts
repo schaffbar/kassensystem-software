@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@a
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
 import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
@@ -26,7 +26,10 @@ describe('UsersStore', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
 
   // lets the resource react and send its request
   function trigger(): void {
@@ -89,6 +92,17 @@ describe('UsersStore', () => {
 
     expectLoad().flush([]);
     await settle();
+    expect(store.entities()).toEqual([]);
+  });
+
+  it('should expose a load error for a response that does not match the schema', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    trigger();
+    expectLoad().flush([{ id: 'id-1' }]);
+    await settle();
+
+    expect(store.hasLoadError()).toBe(true);
     expect(store.entities()).toEqual([]);
   });
 

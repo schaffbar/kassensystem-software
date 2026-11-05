@@ -20,7 +20,7 @@ export const RfidReaderDetailStore = signalStore(
     return {
       _rfidReadersApi: rfidReadersApi,
       _toolsApi: inject(ToolsApiService),
-      // (re)loads whenever the id changes – replaces the dirty flag + effect + rxMethod
+      // (re)loads whenever the id changes
       _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
     };
   }),

@@ -34,9 +34,9 @@ export const ToolDetailStore = signalStore(
     return {
       _toolsApi: toolsApi,
       _toolCertificationsApi: toolCertificationsApi,
-      // (re)load whenever the id changes – replaces the dirty flag + effect + rxMethods
+      // (re)load whenever the id changes
       _toolResource: toolsApi.toolResource(store.toolId),
-      _certificationsResource: toolCertificationsApi.certificationsByToolResource(store.toolId),
+      _certificationsResource: toolCertificationsApi.toolCertificationsByToolResource(store.toolId),
       _rfidReadersResource: inject(RfidReadersApiService).rfidReadersResource(),
       _usersResource: inject(CustomersApiService).customersResource(),
     };
@@ -106,7 +106,7 @@ export const ToolDetailStore = signalStore(
       onSuccess: () => store._certificationsResource.reload(),
     }),
     deleteCertification: mutation<DeleteToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.delete(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.deleteToolCertification(command.customerId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

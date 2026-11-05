@@ -16,7 +16,7 @@ export class CloseSessionDialogContainerComponent {
 
   readonly customerId = input.required<string>();
 
-  private readonly sessionResource = inject(WorkshopSessionsApiService).openSessionResource(this.customerId);
+  private readonly sessionResource = inject(WorkshopSessionsApiService).activeWorkshopSessionResource(this.customerId);
 
   protected readonly isLoading = computed(() => this.sessionResource.isLoading());
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());

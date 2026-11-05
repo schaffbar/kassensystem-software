@@ -13,7 +13,7 @@ export const ToolsStore = signalStore(
     const toolsApi = inject(ToolsApiService);
     return {
       _toolsApi: toolsApi,
-      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      // loads on first use of the store
       _toolsResource: toolsApi.toolsResource(),
     };
   }),

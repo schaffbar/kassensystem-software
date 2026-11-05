@@ -13,7 +13,7 @@ export const UsersStore = signalStore(
     const customersApi = inject(CustomersApiService);
     return {
       _customersApi: customersApi,
-      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      // loads on first use of the store
       _usersResource: customersApi.customersResource(),
     };
   }),

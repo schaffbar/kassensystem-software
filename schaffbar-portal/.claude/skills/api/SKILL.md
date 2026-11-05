@@ -188,7 +188,9 @@ General:
 
 ### Queries → `httpResource` + `parseWith`
 
-- Name: `<entity>Resource` / `<entities>Resource` / `<entities>By<Filter>Resource`.
+- Name: `<entity>Resource` / `<entities>Resource` / `<entities>By<Filter>Resource` with the full entity name
+  (`toolCertificationsByToolResource`, not `certificationsByToolResource`); a state from the backend path goes in
+  front (`GET /workshop-sessions/{customerId}/active` → `activeWorkshopSessionResource`).
 - Return type spelled out: `HttpResourceRef<XApiModel | undefined>` (`undefined` = not loaded yet / no request).
 - **Every resource validates**: `{ parse: parseWith(schema, 'GET /path/{param}') }`. The endpoint label uses the
   Spring path syntax of the controller. A list is `parseWith(z.array(xSchema), …)`.
@@ -241,7 +243,8 @@ hasAssignedTools(rfidReaderId: string): Observable<boolean> {
 
 - The signature mirrors the controller: **path variables as plain arguments, the body as `…Request`** –
   `updateRfidReader(rfidReaderId, request)`, `deleteRfidReader(rfidReaderId)`. No command types in `shared/api`.
-- Name like the backend action (`updateRfidReader`, `changeRfidReaderType`, `closeWorkshopSession`) – also when
+- Name like the backend action, always verb + entity (`updateRfidReader`, `changeRfidReaderType`,
+  `closeWorkshopSession`; backend `pause` in the `ToolCertificationController` → `pauseToolCertification`) – also when
   the feature calls it differently: `POST /rfid-tag-assignments` is `requestRfidTagAssignment(request)` in the API,
   the feature's command stays `AssignRfidTagCommand`, the mapper is `toRequestRfidTagAssignmentRequest`.
 - `Observable<void>` unless the backend really returns a body **the portal uses** (then validate it like a query).

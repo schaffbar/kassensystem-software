@@ -13,7 +13,7 @@ export const RfidReadersStore = signalStore(
     const rfidReadersApi = inject(RfidReadersApiService);
     return {
       _rfidReadersApi: rfidReadersApi,
-      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      // loads on first use of the store
       _rfidReadersResource: rfidReadersApi.rfidReadersResource(),
     };
   }),

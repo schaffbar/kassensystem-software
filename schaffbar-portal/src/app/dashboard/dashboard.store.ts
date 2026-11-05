@@ -10,7 +10,7 @@ import { toActiveTool, toActiveUser, toTool } from './dashboard.mapper';
 export const DashboardStore = signalStore(
   withProps(() => {
     return {
-      // load when the dashboard opens – replaces withEntities + rxMethods + onInit
+      // load when the dashboard opens
       _activeUsersResource: inject(WorkshopDashboardApiService).activeUsersResource(),
       _activeToolsResource: inject(ToolDashboardApiService).activeToolsResource(),
       _toolsResource: inject(ToolsApiService).toolsResource(),

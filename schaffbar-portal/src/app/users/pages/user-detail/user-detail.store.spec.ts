@@ -160,8 +160,28 @@ describe('UserDetailStore', () => {
     expect(store.hasRunningUsage()).toBe(true);
   });
 
-  it('should send contact and address without the id and reload the user', async () => {
+  it('should send user, contact and address without the id and reload the user', async () => {
     await loadUser();
+
+    store.updateUser({
+      id: 'user-1',
+      firstName: 'Moritz',
+      lastName: 'Mustermann',
+      dateOfBirth: new Date(1990, 0, 31),
+      clubMember: true,
+    });
+    trigger();
+    const update = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1`);
+    expect(update.request.body).toEqual({
+      firstName: 'Moritz',
+      lastName: 'Mustermann',
+      dateOfBirth: '1990-01-31',
+      clubMember: true,
+    });
+    update.flush(null);
+    trigger();
+    expectUser().flush(user);
+    await settle();
 
     store.updateUserContact({ id: 'user-1', email: 'max@example.org' });
     trigger();

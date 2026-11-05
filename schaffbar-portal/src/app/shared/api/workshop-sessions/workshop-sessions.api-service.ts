@@ -16,7 +16,9 @@ export class WorkshopSessionsApiService {
   // --------------------------------------------------------------------------
   // queries
 
-  openSessionResource(customerId: () => string | null): HttpResourceRef<WorkshopSessionApiModel | null | undefined> {
+  activeWorkshopSessionResource(
+    customerId: () => string | null,
+  ): HttpResourceRef<WorkshopSessionApiModel | null | undefined> {
     return httpResource(
       () => {
         const id = customerId();

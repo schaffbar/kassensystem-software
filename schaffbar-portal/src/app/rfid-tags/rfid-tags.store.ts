@@ -13,7 +13,7 @@ export const RfidTagsStore = signalStore(
     const rfidTagsApi = inject(RfidTagsApiService);
     return {
       _rfidTagsApi: rfidTagsApi,
-      // loads on first use of the store – replaces withEntities + rxMethod + onInit
+      // loads on first use of the store
       _rfidTagsResource: rfidTagsApi.rfidTagsResource(),
     };
   }),
