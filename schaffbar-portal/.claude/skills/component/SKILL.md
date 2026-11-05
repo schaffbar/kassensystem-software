@@ -22,7 +22,9 @@ feature model (`hasRunningUsage` in `workshop-session.model.ts`).
 
 Reference implementations:
 
-- smart: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – store, child components, command handlers
+- smart: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – store, child components, mapping, command
+  handlers, page spec with tabs
+- smart, small: [dashboard/](../../../src/app/dashboard/pages/dashboard/) – one mapping, navigation on an output
 - dumb with a ViewModel: [close-session-dialog-modal](../../../src/app/shared/dialogs/close-session-dialog/close-session-dialog-modal.component.ts)
 - dumb with a form and a ViewModel: [user-contact/](../../../src/app/users/components/user-contact/)
 - dumb with a main and further ViewModels: [tool-certifications/](../../../src/app/tools/components/tool-certifications/)
@@ -67,7 +69,6 @@ Rules:
   - **Further ViewModels** (rows, options, nested parts, a second input) are named after what they describe:
     `ToolCertificationRowViewModel`, `UserOptionViewModel`, `AddressViewModel`; their inputs likewise
     (`certifications`, `certifiers`).
-  - A form dialog's ViewModel is its `<Name>DialogData` (skill `dialog`).
 - Only the fields the template and the component read. A value the backend can send as `null` stays `| null`
   (CLAUDE.md "Missing values").
 - Plain data only: strings, numbers, booleans, `Date`, nested objects/arrays of these, and enums from
@@ -77,8 +78,11 @@ Rules:
   the ViewModel (`UserContactViewModel.id` for `UpdateUserContactCommand`).
 - Not to be confused with the **form model** (`ContactFormModel`): local, not exported, describes what is edited
   (CLAUDE.md "Forms"). The ViewModel describes what comes in.
-- The store never imports a ViewModel – it doesn't know the components. Mapping happens in the page.
-- A form dialog's `…DialogData` is its ViewModel (same rules), e.g. `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
+- The store never imports a ViewModel – it doesn't know the components. It may provide feature-model lists that a
+  rule or several children need (`instructors`, reused as `certifiers`; `certifiableUsers`) – the page passes them
+  directly. Any reshaping into a ViewModel happens in the page.
+- A form dialog's ViewModel is its `<Name>DialogData` (same rules, skill `dialog`), e.g.
+  `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
   Data the dialog has to follow while it is open comes as a `Signal` of the ViewModel – the page passes the store
   signal itself (`NewToolDialogData { existingTools: Signal<ExistingToolViewModel[]> }`, `this.store.entities`).
 - Outputs: a feature component keeps emitting the **commands** of its feature (CLAUDE.md "Commands"). A component in
@@ -157,7 +161,8 @@ Rules:
   fits, a `computed` + pure `to<Name>ViewModel()` after the class where it doesn't. No `computed(() => store.x())`
   that only renames.
 - Output handlers pass the command on to a store method (`mutation()`), nothing else. Commands are built by the dumb
-  child; the page only builds one when it has the ids itself (`assignFixedRfidTag()` with `this.id()`).
+  child; the page only builds one when the action starts in the page itself – e.g. after its own confirmation
+  dialog (`DeleteToolCommand` in `tool-list`, `CloseWorkshopSessionCommand` in `user-open-session`).
 - **Template**: layout (header, loading bar, load error, tabs, grid) plus child components. Markup without state of
   its own may stay in the page – e.g. the `mat-table` of a list page, whose `MatSort`/`MatPaginator` it holds via
   `viewChild`. Extract a dumb component when a part has its own UI state or a form, is used twice, or switches on
@@ -232,7 +237,7 @@ Rules:
   (`existingTools = input.required<ExistingToolViewModel[]>()` for `validateUniqueToolName`), not from a store.
 - Filtering by what the user typed (autocomplete search text) is UI logic and stays in the component.
 - Every output for a backend change emits a **command** (CLAUDE.md "Commands"). Outputs without a backend change
-  (`reload`, `userSelected`) emit `void` or the id.
+  (`edit`, `reload`, `userSelected`) emit `void` or the id.
 - Local UI state in signals (`isEditing`, `searchText`, `selectedUsers`), form models local (CLAUDE.md "Forms"),
   pure helpers after the class.
 
@@ -261,8 +266,10 @@ Smart component – store mocked, children real:
 - A child in another tab: select it with `MatTabGroupHarness.selectTab({ label })` and provide
   `{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }` – the tab content is attached only when
   its animation ends ([tool-detail.component.spec.ts](../../../src/app/tools/pages/tool-detail/tool-detail.component.spec.ts)).
-- A child's output calls the store method with the command
-  (`child(ActiveUsersWidgetComponent).userSelected.emit('user-1')`, then expect the store / router call).
+- A child's output calls the store method with the command: emit it on the child instance
+  (`child(ActiveUsersWidgetComponent).userSelected.emit('user-1')` with a small `child()` helper around
+  `By.directive`, see [dashboard.component.spec.ts](../../../src/app/dashboard/pages/dashboard/dashboard.component.spec.ts))
+  and expect the store / router call.
 - Business rules are tested in the **store spec**, not in the page.
 
 ## Checklist

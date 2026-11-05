@@ -264,10 +264,9 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 ### P0 – Regeln festlegen
 
 - [x] D1–D3 entscheiden
-- [ ] Skill `component` fertigstellen (`schaffbar-portal/.claude/skills/component/SKILL.md`)
-- [ ] CLAUDE.md: kurzer Abschnitt „Components“ mit Verweis auf den Skill (wie bei „Dialogs“)
-- [ ] TODO.md: „Introduce ViewModel for all components“ präzisieren – „ViewModel in der Komponente für jede dumb
-      component, außer sie braucht nur Ids / einfache Werte“
+- [x] Skill `component` fertigstellen (`schaffbar-portal/.claude/skills/component/SKILL.md`)
+- [x] CLAUDE.md: Abschnitt „Components“ mit den Kernregeln und Verweis auf den Skill (vor „Dialogs“)
+- [x] TODO.md: „Introduce ViewModel for all components“ gestrichen
 
 ### P1 – Verstöße beheben und per ESLint absichern
 

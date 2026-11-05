@@ -14,8 +14,8 @@
   each with the commands of its feature.
 - `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,
   e.g. `rfid-reader-type.ts`). No entities, no commands.
-- Only stores, mappers and dialog containers import from `shared/api`; components, pages and pipes use feature
-  models (enforced by ESLint).
+- Only stores, mappers and dialog containers import from `shared/api`; pages and pipes use feature models, dumb
+  components their own ViewModels (see "Components"; `shared/api` enforced by ESLint).
 - A feature imports only from itself and `shared/`; `shared/` imports from no feature (both enforced by ESLint,
   `import/no-restricted-paths` – a new feature folder is added to its list in `eslint.config.js`). Data of another
   resource is loaded by the feature's own store (skill `api`).
@@ -116,6 +116,28 @@ component (inputs, outputs, signals, handlers).
   get the global class `danger-button` (`src/styles.scss`), which works for filled, outlined, text and icon buttons.
 - Look and feel is changed with `mat.button-overrides(...)` / `mat.icon-button-overrides(...)`, not with
   `.mat-mdc-*` selectors and `!important`.
+
+## Components
+
+Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL.md`).
+
+- **Smart** (`<feature>/pages/`): knows where data comes from and where commands go – injects its store(s),
+  `Router`, `MatDialog`, dialog services, `MatSnackBar`. Template: layout plus child components; output handlers only
+  pass the command on to a store method.
+- **Dumb** (`<feature>/components/`, `shared/components/`): only `input()` / `output()` and local UI state (form,
+  edit mode, search text). Injects nothing – except `MAT_DIALOG_DATA` / `MatDialogRef` in a form dialog and
+  `ConfirmDeleteDialogService` / `ConfirmActionDialogService` for a confirmation. No store, `Router`, `MatDialog`,
+  `MatSnackBar`, `HttpClient` (enforced by ESLint).
+- Business rules live in the store or the feature model, never in a component. A dumb component gets its data
+  decided and combined – no filter by a rule (`assignableRfidReaders`), no join of lists (`userName` in the row).
+- **ViewModel**: every dumb component exports its input type from its own file: `<ComponentName>ViewModel`, input
+  `<componentName>`, with exactly the fields it reads and no feature model type inside (enums from `shared/models`
+  are fine). Further ViewModels (rows, options) are named after their content. Only one or two ids / plain values →
+  no ViewModel.
+- The page fills the ViewModel: it passes the feature model directly when that has all fields (structural typing,
+  checked by `strictTemplates`), otherwise it maps in a `computed` with a pure `to<Name>ViewModel()` after the class.
+  The store never imports a ViewModel.
+- No pass-through components. A list page may keep its own `mat-table`.
 
 ## Dialogs
 
