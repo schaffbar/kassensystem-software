@@ -18,11 +18,11 @@
       <mat-form-field class="full-width" floatLabel="always">
         <mat-label>{{ 'tools.shared.toolProperties.rfidReader' | translate }}</mat-label>
         <mat-select id="rfidReaderId" [formField]="rfidReaderForm.rfidReaderId">
-          @for (rfidReader of filteredRfidReaders(); track rfidReader.id) {
+          @for (rfidReader of rfidReaders(); track rfidReader.id) {
             <mat-option [value]="rfidReader.id">
               <div class="option-content">
                 <span>{{ rfidReader.name }}</span>
-                @if (isAssigned(rfidReader.id)) {
+                @if (rfidReader.isAssignedToOtherTool) {
                   <span class="option-content-already-assigned">
                     ({{ 'tools.pages.toolDetails.messages.alreadyAssigned' | translate }})
                   </span>

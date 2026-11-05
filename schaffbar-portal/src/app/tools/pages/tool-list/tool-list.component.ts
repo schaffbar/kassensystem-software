@@ -16,7 +16,7 @@ import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
+import { NewToolDialogData, NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 
@@ -78,10 +78,14 @@ export class ToolListComponent {
   }
 
   protected newToolDialog(): void {
-    const dialogRef = this.dialog.open<NewToolFormComponent, void, CreateToolCommand>(NewToolFormComponent, {
-      minWidth: DIALOG_WIDTH.medium,
-      disableClose: true,
-    });
+    const dialogRef = this.dialog.open<NewToolFormComponent, NewToolDialogData, CreateToolCommand>(
+      NewToolFormComponent,
+      {
+        data: { existingTools: this.store.entities },
+        minWidth: DIALOG_WIDTH.medium,
+        disableClose: true,
+      },
+    );
 
     dialogRef.afterClosed().subscribe((command) => {
       if (command) {

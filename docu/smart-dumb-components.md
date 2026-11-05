@@ -110,16 +110,16 @@ mappt mit `to<Name>ViewModel()`
 
 ### tools
 
-| Komponente                    | Ordner        | Soll        | Ist                                              | Input heute                                                                          | ViewModel (Soll)                                                                                                 | Status           |
-| ----------------------------- | ------------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst                | –                                                                                    | –                                                                                                                | ✅               |
-| `tool-detail`                 | `pages/`      | Smart       | Smart                                            | –                                                                                    | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
-| `tool-detail-info`            | `components/` | Dumb        | Dumb                                             | `ToolInfoViewModel` + `ExistingToolViewModel[]`                                      | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
-| `tool-instructors`            | `components/` | Dumb        | Dumb                                             | `User[]` + `instructorIds` + `toolId`, joint intern                                  | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
-| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService`              | `ToolCertification[]` + `User[]` + `instructorIds`, joint und filtert nach Fachregel | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ❌ V4            |
-| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`              | `Tool` + `RfidReader[]` + `Set<string>`, filtert auf Switch-Boxen                    | ohne Mapper: `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]` (zuweisbare Reader aus dem Store)         | ❌ V3            |
-| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                             | `Tool`                                                                               | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
-| `new-tool-form`               | `components/` | Form-Dialog | **Form-Dialog mit Store** – `inject(ToolsStore)` | –                                                                                    | ohne Mapper: Dialog-Data `{ existingTools: () => ExistingToolViewModel[] }`                                      | ❌ V2            |
+| Komponente                    | Ordner        | Soll        | Ist                                 | Input heute                                                                          | ViewModel (Soll)                                                                                                 | Status           |
+| ----------------------------- | ------------- | ----------- | ----------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `tool-list`                   | `pages/`      | Smart       | Smart, rendert die Tabelle selbst   | –                                                                                    | –                                                                                                                | ✅               |
+| `tool-detail`                 | `pages/`      | Smart       | Smart                               | –                                                                                    | – (füllt die ViewModels der Kinder)                                                                              | ✅               |
+| `tool-detail-info`            | `components/` | Dumb        | Dumb                                | `ToolInfoViewModel` + `ExistingToolViewModel[]`                                      | ohne Mapper: `ToolInfoViewModel` + `ExistingToolViewModel[]` (`id`, `name`)                                      | ✅ (V1 erledigt) |
+| `tool-instructors`            | `components/` | Dumb        | Dumb                                | `User[]` + `instructorIds` + `toolId`, joint intern                                  | **Mapping**: `InstructorViewModel[]` für Ausbilder und Kandidaten; `toolId` bleibt `string`                      | ⚠️               |
+| `tool-certifications`         | `components/` | Dumb        | Dumb + `ConfirmDeleteDialogService` | `ToolCertification[]` + `User[]` + `instructorIds`, joint und filtert nach Fachregel | **Mapping**: `ToolCertificationRowViewModel[]` (mit `userName`); `certifiableUsers` / `certifiers` aus dem Store | ❌ V4            |
+| `tool-rfid-reader-assignment` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService` | `ToolRfidReaderViewModel` + `RfidReaderOptionViewModel[]`                            | `ToolRfidReaderViewModel` ohne Mapper, **Mapping**: `RfidReaderOptionViewModel[]` (mit `isAssignedToOtherTool`)  | ✅ (V3 erledigt) |
+| `tool-wlan-relais`            | `components/` | Dumb        | Dumb                                | `Tool`                                                                               | ohne Mapper: `WlanRelaisViewModel` (`id`, `wlanRelaisType`, `ipAddress`)                                         | ⚠️               |
+| `new-tool-form`               | `components/` | Form-Dialog | Form-Dialog                         | Dialog-Data `NewToolDialogData`                                                      | ohne Mapper: Dialog-Data `{ existingTools: Signal<ExistingToolViewModel[]> }`                                    | ✅ (V2 erledigt) |
 
 ### users
 
@@ -164,9 +164,11 @@ Validator auch gegen eine Liste, die sich bei offenem Dialog ändert.
 ### Fachregeln in dumb components (V3, V4)
 
 - `tool-rfid-reader-assignment`: `filteredRfidReaders` = nur `RfidReaderType.SwitchBox`. Welche Reader einem
-  Werkzeug zugewiesen werden dürfen, ist eine Fachregel → `ToolDetailStore.assignableRfidReaders` (computed), die
-  Page übergibt sie an `RfidReaderOptionViewModel[]`. Dasselbe gilt für `assignedRfidReaderIds`, das heute in der Page
-  `tool-detail` berechnet wird.
+  Werkzeug zugewiesen werden dürfen, ist eine Fachregel → `ToolDetailStore.assignableRfidReaders` (computed).
+  **Umgesetzt:** Welcher Reader schon an einem anderen Werkzeug hängt, ist dagegen keine Regel, sondern ein Abgleich
+  zweier Datenquellen (`toolsStore.entities()` + aktuelles Werkzeug). Das bleibt in der Page und landet beim Mapping
+  als `isAssignedToOtherTool` in `RfidReaderOptionViewModel` – sonst müsste `ToolDetailStore` den `ToolsStore`
+  einbinden. Die Komponente bekommt damit einen Input statt zwei (`rfidReaders` + `assignedRfidReaderIds`).
 - `tool-certifications`: `filteredUsers` schließt bereits Zertifizierte und Ausbilder aus, `filteredCertifiers` nimmt
   nur Ausbilder – das sind die Regeln „wer kann zertifiziert werden“ und „wer darf zertifizieren“. →
   `ToolDetailStore.certifiableUsers` und `certifiers`; die Komponente filtert nur noch nach dem Suchtext (das ist
@@ -268,8 +270,9 @@ Jede Phase ist für sich lauffähig (Build, Lint, Tests grün) und kann einzeln 
 
 - [x] V1 `tool-detail-info`: `existingTools = input.required<ExistingToolViewModel[]>()` statt `ToolsStore`;
       `validateUniqueToolName` auf `() => { id: string; name: string }[]`
-- [ ] V2 `new-tool-form`: `existingTools` über `MAT_DIALOG_DATA` statt `ToolsStore`
-- [ ] V3 `ToolDetailStore.assignableRfidReaders` + `assignedRfidReaderIds` in den Store; Filter aus der Komponente
+- [x] V2 `new-tool-form`: `existingTools` über `MAT_DIALOG_DATA` statt `ToolsStore`
+- [x] V3 `ToolDetailStore.assignableRfidReaders`; „bereits zugewiesen“ als `isAssignedToOtherTool` im ViewModel
+      (Mapping in `tool-detail`)
 - [ ] V4 `ToolDetailStore.certifiableUsers` + `certifiers`; `tool-certifications` filtert nur noch nach Suchtext
 - [ ] V5 `user-detail-info` auflösen, `user-detail` rendert `user-contact` + `user-address` direkt
 - [ ] ESLint-Block für `src/app/*/components/**` und `src/app/shared/components/**`: `no-restricted-imports` für
@@ -283,8 +286,8 @@ Pro Komponente: ViewModel in der Komponente, Input ggf. umbenennen, Spec auf Vie
 sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein bleiben:
 
 - [ ] users: `user-contact`, `user-address`, `tool-usage-summary`, `workshop-usage-summary`, `update-user-form`
-- [ ] tools: ~~`tool-detail-info`~~ (mit V1 erledigt), `tool-rfid-reader-assignment` (zusammen mit V3),
-      `tool-wlan-relais`, `new-tool-form` (zusammen mit V2)
+- [ ] tools: ~~`tool-detail-info`~~ (mit V1 erledigt), ~~`tool-rfid-reader-assignment`~~ (mit V3 erledigt),
+      `tool-wlan-relais`, ~~`new-tool-form`~~ (mit V2 erledigt)
 - [ ] rfid-readers: `rfid-reader-detail-info`, `change-rfid-reader-type-form`
 - [ ] dashboard: `active-users-widget`
 

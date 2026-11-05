@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
 import { MatInputHarness } from '@angular/material/input/testing';
 import { MatSelectHarness } from '@angular/material/select/testing';
@@ -14,19 +14,18 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { Tool } from '../../tool.model';
-import { ToolsStore } from '../../tools.store';
-import { NewToolFormComponent } from './new-tool-form.component';
+import { ExistingToolViewModel, NewToolDialogData, NewToolFormComponent } from './new-tool-form.component';
 
 describe('NewToolFormComponent', () => {
   let fixture: ComponentFixture<NewToolFormComponent>;
   let loader: HarnessLoader;
   let dialogRef: { close: Mock };
-  let entities: WritableSignal<Tool[]>;
+  let existingTools: WritableSignal<ExistingToolViewModel[]>;
 
   beforeEach(async () => {
     dialogRef = { close: vi.fn() };
-    entities = signal([{ id: 'tool-1', name: 'Bandsäge' } as Tool]);
+    existingTools = signal([{ id: 'tool-1', name: 'Bandsäge' }]);
+    const data: NewToolDialogData = { existingTools };
 
     await TestBed.configureTestingModule({
       imports: [NewToolFormComponent],
@@ -34,7 +33,7 @@ describe('NewToolFormComponent', () => {
         provideZonelessChangeDetection(),
         provideTranslateService(),
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: ToolsStore, useValue: { entities } },
+        { provide: MAT_DIALOG_DATA, useValue: data },
       ],
     }).compileComponents();
 
@@ -87,7 +86,7 @@ describe('NewToolFormComponent', () => {
     await clickSave();
     expect(await nameErrors()).not.toContain('tools.dialogs.addTool.errors.nameExists');
 
-    entities.set([...entities(), { id: 'tool-2', name: 'Drechselbank' } as Tool]);
+    existingTools.set([...existingTools(), { id: 'tool-2', name: 'Drechselbank' }]);
     await fixture.whenStable();
 
     expect(await nameErrors()).toEqual(['tools.dialogs.addTool.errors.nameExists']);

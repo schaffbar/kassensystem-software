@@ -11,48 +11,22 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../rfid-reader.model';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { CertificationRequirement } from '../../../shared/models/certification-requirement';
-import { ToolArea } from '../../../shared/models/tool-area';
-import { Tool } from '../../tool.model';
-import { ToolRfidReaderAssignmentComponent } from './tool-rfid-reader-assignment.component';
+import {
+  RfidReaderOptionViewModel,
+  ToolRfidReaderAssignmentComponent,
+  ToolRfidReaderViewModel,
+} from './tool-rfid-reader-assignment.component';
 
 describe('ToolRfidReaderAssignmentComponent', () => {
-  const rfidReaders: RfidReader[] = [
-    {
-      id: 'reader-1',
-      type: RfidReaderType.SwitchBox,
-      name: 'Reader 1',
-    },
-    {
-      id: 'reader-2',
-      type: RfidReaderType.SwitchBox,
-      name: 'Reader 2',
-    },
-    {
-      id: 'reader-3',
-      type: RfidReaderType.SwitchBox,
-      name: 'Reader 3',
-    },
+  const rfidReaders: RfidReaderOptionViewModel[] = [
+    { id: 'reader-1', name: 'Reader 1', isAssignedToOtherTool: false },
+    { id: 'reader-2', name: 'Reader 2', isAssignedToOtherTool: false },
+    { id: 'reader-3', name: 'Reader 3', isAssignedToOtherTool: true },
   ];
 
-  function createTool(rfidReaderId: string | null = null): Tool {
-    return {
-      id: 'tool-1',
-      name: 'Tool 1',
-      description: '',
-      area: ToolArea.Holz,
-      certificationRequirement: CertificationRequirement.Yellow,
-      rfidReaderId,
-      wlanRelaisType: null,
-      ipAddress: null,
-      httpStartCommand: null,
-      onCommand: null,
-      offCommand: null,
-      instructors: [],
-    };
+  function createTool(rfidReaderId: string | null = null): ToolRfidReaderViewModel {
+    return { id: 'tool-1', name: 'Tool 1', rfidReaderId };
   }
 
   let fixture: ComponentFixture<ToolRfidReaderAssignmentComponent>;
@@ -75,7 +49,6 @@ describe('ToolRfidReaderAssignmentComponent', () => {
     fixture = TestBed.createComponent(ToolRfidReaderAssignmentComponent);
     fixture.componentRef.setInput('tool', createTool('reader-1'));
     fixture.componentRef.setInput('rfidReaders', rfidReaders);
-    fixture.componentRef.setInput('assignedRfidReaderIds', new Set(['reader-3']));
     changed = vi.fn();
     cleared = vi.fn();
     fixture.componentInstance.rfidReaderChanged.subscribe(changed);
@@ -93,6 +66,15 @@ describe('ToolRfidReaderAssignmentComponent', () => {
 
     expect(await select.getValueText()).toBe('Reader 1');
     expect(actionButtons().length).toBe(0);
+  });
+
+  it('should mark only the RFID readers assigned to another tool', async () => {
+    const select = await loader.getHarness(MatSelectHarness);
+    await select.open();
+
+    const options = await select.getOptions();
+    const texts = await Promise.all(options.map((option) => option.getText()));
+    expect(texts).toEqual(['Reader 1', 'Reader 2', 'Reader 3 (tools.pages.toolDetails.messages.alreadyAssigned)']);
   });
 
   it('should show save/cancel actions after selecting another RFID reader', async () => {

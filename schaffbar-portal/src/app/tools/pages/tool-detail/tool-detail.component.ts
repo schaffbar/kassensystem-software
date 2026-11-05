@@ -11,8 +11,12 @@ import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } f
 import { ToolCertificationsComponent } from '../../components/tool-certifications/tool-certifications.component';
 import { ToolDetailInfoComponent } from '../../components/tool-detail-info/tool-detail-info.component';
 import { ToolInstructorsComponent } from '../../components/tool-instructors/tool-instructors.component';
-import { ToolRfidReaderAssignmentComponent } from '../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
+import {
+  RfidReaderOptionViewModel,
+  ToolRfidReaderAssignmentComponent,
+} from '../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
 import { ToolWlanRelaisComponent } from '../../components/tool-wlan-relais/tool-wlan-relais.component';
+import { RfidReader } from '../../rfid-reader.model';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
@@ -20,6 +24,7 @@ import {
   ClearWlanRelaisCommand,
   RemoveToolInstructorsCommand,
   SetWlanRelaisCommand,
+  Tool,
   UpdateToolCommand,
 } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
@@ -52,15 +57,13 @@ export class ToolDetailComponent {
   protected readonly selectedTool = computed(() => this.detailsStore.tool());
   protected readonly toolCertifications = computed(() => this.detailsStore.toolCertifications());
   protected readonly allUsers = computed(() => this.detailsStore.users());
-  protected readonly allRfidReaders = computed(() => this.detailsStore.rfidReaders());
-  protected readonly assignedRfidReaderIds = computed(() => {
-    const currentToolId = this.selectedTool()?.id;
-    const ids = this.toolsStore
-      .entities()
-      .filter((tool) => tool.id !== currentToolId && tool.rfidReaderId)
-      .map((tool) => tool.rfidReaderId!);
-    return new Set(ids);
-  });
+  protected readonly rfidReaderOptions = computed(() =>
+    toRfidReaderOptionViewModels(
+      this.detailsStore.assignableRfidReaders(),
+      this.toolsStore.entities(),
+      this.detailsStore.tool()?.id,
+    ),
+  );
 
   constructor() {
     this.detailsStore.setToolId(this.id);
@@ -107,4 +110,19 @@ export class ToolDetailComponent {
   protected onInstructorsRemoved(command: RemoveToolInstructorsCommand): void {
     this.detailsStore.removeInstructors(command);
   }
+}
+
+function toRfidReaderOptionViewModels(
+  rfidReaders: RfidReader[],
+  tools: Tool[],
+  ownToolId: string | undefined,
+): RfidReaderOptionViewModel[] {
+  const assignedToOtherTools = new Set(
+    tools.flatMap((tool) => (tool.id !== ownToolId && tool.rfidReaderId ? [tool.rfidReaderId] : [])),
+  );
+  return rfidReaders.map((reader) => ({
+    id: reader.id,
+    name: reader.name,
+    isAssignedToOtherTool: assignedToOtherTools.has(reader.id),
+  }));
 }

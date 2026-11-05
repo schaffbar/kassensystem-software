@@ -33,6 +33,22 @@ describe('ToolDetailStore', () => {
       socketName: null,
       createdAt: '2026-01-01T10:00:00Z',
     },
+    {
+      id: 'reader-2',
+      macAddress: 'CC:DD',
+      type: RfidReaderType.GateKeeperIn,
+      name: 'Reader 2',
+      socketName: null,
+      createdAt: '2026-01-01T10:00:00Z',
+    },
+    {
+      id: 'reader-3',
+      macAddress: 'EE:FF',
+      type: null,
+      name: null,
+      socketName: null,
+      createdAt: '2026-01-01T10:00:00Z',
+    },
   ];
   const tool = toolFixture();
   const certifications: ToolCertificationApiModel[] = [
@@ -109,7 +125,10 @@ describe('ToolDetailStore', () => {
     await settle();
     expect(store.tool()).toBeNull();
     expect(store.toolCertifications()).toEqual([]);
-    expect(store.rfidReaders()).toEqual([{ id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox }]);
+    // only the switch box – no other type, no reader without type
+    expect(store.assignableRfidReaders()).toEqual([
+      { id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox },
+    ]);
     expect(store.users()).toEqual([{ id: 'user-1', firstName: 'Max', lastName: 'Mustermann' }]);
   });
 

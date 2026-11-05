@@ -1,9 +1,9 @@
 import { LowerCasePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, Signal, signal } from '@angular/core';
 import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,7 +15,17 @@ import { CertificationRequirement } from '../../../shared/models/certification-r
 import { ToolArea } from '../../../shared/models/tool-area';
 import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
-import { ToolsStore } from '../../tools.store';
+
+// all tools – for the unique name check
+export interface ExistingToolViewModel {
+  id: string;
+  name: string;
+}
+
+export interface NewToolDialogData {
+  // a signal, so the name check follows the tool list while the dialog is open
+  existingTools: Signal<ExistingToolViewModel[]>;
+}
 
 interface NewToolFormModel {
   name: string;
@@ -42,8 +52,8 @@ interface NewToolFormModel {
   ],
 })
 export class NewToolFormComponent {
+  private readonly data: NewToolDialogData = inject(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<NewToolFormComponent, CreateToolCommand>);
-  private readonly toolsStore = inject(ToolsStore);
 
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
@@ -57,7 +67,7 @@ export class NewToolFormComponent {
 
   protected readonly toolForm = form(this.model, (schema) => {
     required(schema.name);
-    validateUniqueToolName(schema.name, this.toolsStore.entities);
+    validateUniqueToolName(schema.name, this.data.existingTools);
     required(schema.area);
     required(schema.certificationRequirement);
   });

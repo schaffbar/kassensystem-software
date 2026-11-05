@@ -6,6 +6,7 @@ import { ToolCertificationsApiService } from '../../../shared/api/tool-certifica
 import { CustomersApiService } from '../../../shared/api/customers/customers.api-service';
 import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
+import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { mutation } from '../../../shared/state/mutation';
 import { toBatchCertifyRequest, toToolCertification } from '../../tool-certification.mapper';
 import { toRfidReader } from '../../rfid-reader.mapper';
@@ -49,8 +50,14 @@ export const ToolDetailStore = signalStore(
       toolCertifications: computed(() =>
         _certificationsResource.hasValue() ? _certificationsResource.value().map(toToolCertification) : [],
       ),
-      rfidReaders: computed(() =>
-        _rfidReadersResource.hasValue() ? _rfidReadersResource.value().map(toRfidReader) : [],
+      // only a switch box can switch a tool on and off
+      assignableRfidReaders: computed(() =>
+        _rfidReadersResource.hasValue()
+          ? _rfidReadersResource
+              .value()
+              .map(toRfidReader)
+              .filter((reader) => reader.type === RfidReaderType.SwitchBox)
+          : [],
       ),
       users: computed(() => (_usersResource.hasValue() ? _usersResource.value().map(toUser) : [])),
       isLoading: computed(() => resources.some((resource) => resource.isLoading())),

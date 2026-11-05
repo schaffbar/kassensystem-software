@@ -8,11 +8,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { RfidReader } from '../../rfid-reader.model';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { ChangeRfidReaderCommand, ClearRfidReaderCommand, Tool } from '../../tool.model';
+import { ChangeRfidReaderCommand, ClearRfidReaderCommand } from '../../tool.model';
+
+export interface ToolRfidReaderViewModel {
+  id: string;
+  name: string;
+  rfidReaderId: string | null;
+}
+
+// a reader that may be assigned to the tool
+export interface RfidReaderOptionViewModel {
+  id: string;
+  name: string | null;
+  isAssignedToOtherTool: boolean;
+}
 
 interface RfidReaderAssignmentFormModel {
   // '' = no RFID reader assigned
@@ -37,9 +48,8 @@ interface RfidReaderAssignmentFormModel {
 export class ToolRfidReaderAssignmentComponent {
   private readonly confirmActionDialog = inject(ConfirmActionDialogService);
 
-  readonly tool = input.required<Tool>();
-  readonly rfidReaders = input.required<RfidReader[]>();
-  readonly assignedRfidReaderIds = input<Set<string>>(new Set());
+  readonly tool = input.required<ToolRfidReaderViewModel>();
+  readonly rfidReaders = input.required<RfidReaderOptionViewModel[]>();
 
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
   readonly rfidReaderCleared = output<ClearRfidReaderCommand>();
@@ -48,21 +58,13 @@ export class ToolRfidReaderAssignmentComponent {
 
   protected readonly rfidReaderForm = form(this.model, (schema) => {
     validate(schema.rfidReaderId, ({ value }) =>
-      this.isAssigned(value())
+      this.isAssignedToOtherTool(value())
         ? { kind: 'alreadyAssigned', message: 'tools.pages.toolDetails.messages.alreadyAssignedError' }
         : undefined,
     );
   });
 
   protected readonly isDirty = computed(() => this.model().rfidReaderId !== toModel(this.tool()).rfidReaderId);
-
-  protected readonly filteredRfidReaders = computed(() => {
-    return this.rfidReaders().filter((reader) => reader.type === RfidReaderType.SwitchBox);
-  });
-
-  protected isAssigned(readerId: string): boolean {
-    return this.assignedRfidReaderIds().has(readerId);
-  }
 
   protected onCancel(): void {
     this.model.set(toModel(this.tool()));
@@ -95,8 +97,15 @@ export class ToolRfidReaderAssignmentComponent {
         }
       });
   }
+
+  // --------------------------------------------------------------------------
+  // helper
+
+  private isAssignedToOtherTool(readerId: string): boolean {
+    return this.rfidReaders().some((reader) => reader.id === readerId && reader.isAssignedToOtherTool);
+  }
 }
 
-function toModel(tool: Tool): RfidReaderAssignmentFormModel {
+function toModel(tool: ToolRfidReaderViewModel): RfidReaderAssignmentFormModel {
   return { rfidReaderId: tool.rfidReaderId ?? '' };
 }

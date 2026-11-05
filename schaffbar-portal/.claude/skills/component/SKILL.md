@@ -74,6 +74,8 @@ Rules:
   (CLAUDE.md "Forms"). The ViewModel describes what comes in.
 - The store never imports a ViewModel – it doesn't know the components. Mapping happens in the page.
 - A form dialog's `…DialogData` is its ViewModel (same rules), e.g. `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
+  Data the dialog has to follow while it is open comes as a `Signal` of the ViewModel – the page passes the store
+  signal itself (`NewToolDialogData { existingTools: Signal<ExistingToolViewModel[]> }`, `this.store.entities`).
 - Outputs: a feature component keeps emitting the **commands** of its feature (CLAUDE.md "Commands"). A component in
   `shared/` imports no feature (ESLint), so its outputs emit `void` or a result type of its own (skill `dialog`).
   A feature component needed by a second feature moves to `shared/components/` and switches its outputs then.
