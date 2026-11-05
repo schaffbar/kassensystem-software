@@ -110,8 +110,8 @@ public interface WorkshopSessionApiModel {
             @NotBlank String toolId, //
             String toolName, //
             boolean active, //
-            @Positive Long totalDurationInMinutes, //
-            @Positive Long totalUnits, //
+            @PositiveOrZero long totalDurationInMinutes, //
+            @PositiveOrZero long totalUnits, //
             @NotNull List<ToolUsageDetailApiDto> usages //
     ) {}
 
