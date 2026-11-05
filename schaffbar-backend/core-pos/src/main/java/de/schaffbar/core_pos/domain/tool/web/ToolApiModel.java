@@ -57,7 +57,7 @@ public interface ToolApiModel extends ValueObjectMapper {
             String httpStartCommand, //
             String onCommand, //
             String offCommand, //
-            Set<CustomerId> instructors //
+            @NotNull Set<CustomerId> instructors //
     ) {}
 
     // ------------------------------------------------------------------------

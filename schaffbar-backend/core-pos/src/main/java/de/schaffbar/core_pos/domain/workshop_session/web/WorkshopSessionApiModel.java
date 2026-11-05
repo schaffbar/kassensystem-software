@@ -94,8 +94,8 @@ public interface WorkshopSessionApiModel {
             @NotNull WorkshopSessionStatus status, //
             @PositiveOrZero long totalWorkshopDurationInMinutes, //
             @PositiveOrZero long totalWorkshopUnits, //
-            List<WorkshopUsageApiDto> workshopUsages, //
-            List<ToolUsageSummaryApiDto> toolUsageSummaries //
+            @NotNull List<WorkshopUsageApiDto> workshopUsages, //
+            @NotNull List<ToolUsageSummaryApiDto> toolUsageSummaries //
     ) {}
 
     record WorkshopUsageApiDto( //
@@ -112,7 +112,7 @@ public interface WorkshopSessionApiModel {
             boolean active, //
             @Positive Long totalDurationInMinutes, //
             @Positive Long totalUnits, //
-            List<ToolUsageDetailApiDto> usages //
+            @NotNull List<ToolUsageDetailApiDto> usages //
     ) {}
 
     record ToolUsageDetailApiDto( //
