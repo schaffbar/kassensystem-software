@@ -7,14 +7,11 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { ActiveTool, Tool } from '../../dashboard.model';
-
-interface ToolStatusRow {
+export interface ToolStatusViewModel {
   id: string;
   name: string;
-  isInUse: boolean;
-  firstName?: string;
-  lastName?: string;
+  // null while nobody uses the tool
+  usedBy: { firstName: string; lastName: string } | null;
 }
 
 @Component({
@@ -24,28 +21,16 @@ interface ToolStatusRow {
   imports: [MatButtonModule, MatCardModule, MatTableModule, MatIconModule, TranslatePipe],
 })
 export class ActiveToolsWidgetComponent {
-  readonly tools = input.required<Tool[]>();
-  readonly activeTools = input.required<ActiveTool[]>();
+  readonly toolStatuses = input.required<ToolStatusViewModel[]>();
 
   readonly reload = output<void>();
 
   protected readonly displayedColumns = ['status', 'name', 'user'];
-  protected readonly activeToolsCount = computed(() => this.activeTools().length);
+  protected readonly activeToolsCount = computed(() => this.toolStatuses().filter((tool) => tool.usedBy).length);
   protected readonly dataSource = computed(() => {
-    const activeToolMap = new Map(this.activeTools().map((at) => [at.toolId, at]));
-    const rows: ToolStatusRow[] = this.tools()
-      .map((tool) => {
-        const activeTool = activeToolMap.get(tool.id);
-        return {
-          id: tool.id,
-          name: tool.name,
-          isInUse: !!activeTool,
-          firstName: activeTool?.firstName,
-          lastName: activeTool?.lastName,
-        };
-      })
-      .sort((a, b) => Number(b.isInUse) - Number(a.isInUse));
-    return new MatTableDataSource<ToolStatusRow>(rows);
+    // tools in use first
+    const rows = [...this.toolStatuses()].sort((a, b) => Number(!!b.usedBy) - Number(!!a.usedBy));
+    return new MatTableDataSource<ToolStatusViewModel>(rows);
   });
 
   protected reloadActiveTools(): void {

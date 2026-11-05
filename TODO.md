@@ -40,8 +40,8 @@
 
 ## Architecture
 
-- [Frontend] Shared API Services with its own API model and runtime validation (zod)
 - [Frontend] Introduce ViewModel for all components
+- [Frontend] Each tab a page or dumb component which uses other dumb components
 - [Frontend] in dashboard - use global tools store vs fetch data to its own store
 
 - [Backend] Validate HTTP response before sending back

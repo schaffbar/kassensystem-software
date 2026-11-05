@@ -7,21 +7,19 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
-import { ToolCertification } from '../../tool-certification.model';
-import { Tool } from '../../tool.model';
-import { UserToolCertificationsComponent } from './user-tool-certifications.component';
+import {
+  UserToolCertificationRowViewModel,
+  UserToolCertificationsComponent,
+} from './user-tool-certifications.component';
 
 describe('UserToolCertificationsComponent', () => {
-  const tool: Tool = { id: 'tool-1', name: 'Bandsäge' };
-
-  function certification(status: ToolCertificationStatus): ToolCertification {
+  function certification(status: ToolCertificationStatus): UserToolCertificationRowViewModel {
     return {
-      id: 'cert-1',
       customerId: 'user-1',
       toolId: 'tool-1',
+      toolName: 'Bandsäge',
       status,
       certifiedAt: new Date('2026-01-01T10:00:00Z'),
-      certifiedBy: null,
     };
   }
 
@@ -39,7 +37,6 @@ describe('UserToolCertificationsComponent', () => {
       ],
     });
     fixture = TestBed.createComponent(UserToolCertificationsComponent);
-    fixture.componentRef.setInput('allTools', [tool]);
   });
 
   async function render(status: ToolCertificationStatus): Promise<void> {

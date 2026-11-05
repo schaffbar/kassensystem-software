@@ -15,7 +15,10 @@ import {
   UpdateUserDialogData,
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
-import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
+import {
+  UserToolCertificationRowViewModel,
+  UserToolCertificationsComponent,
+} from '../../components/user-tool-certifications/user-tool-certifications.component';
 import { UserAddressComponent } from '../../components/user-address/user-address.component';
 import { UserContactComponent } from '../../components/user-contact/user-contact.component';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
@@ -25,7 +28,9 @@ import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
+  ToolCertification,
 } from '../../tool-certification.model';
+import { Tool } from '../../tool.model';
 import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../user.model';
 import { UserDetailStore } from './user-detail.store';
 import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
@@ -58,7 +63,9 @@ export class UserDetailComponent {
   readonly tab = input<string>();
 
   protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
-  protected readonly allTools = computed(() => this.detailsStore.tools());
+  protected readonly certificationRows = computed(() =>
+    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.tools()),
+  );
   protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
 
   constructor() {
@@ -123,4 +130,18 @@ export class UserDetailComponent {
   protected onRevokeCertification(command: RevokeToolCertificationCommand): void {
     this.detailsStore.revokeCertification(command);
   }
+}
+
+function toCertificationRowViewModels(
+  certifications: ToolCertification[],
+  tools: Tool[],
+): UserToolCertificationRowViewModel[] {
+  const toolNames = new Map(tools.map((tool) => [tool.id, tool.name]));
+  return certifications.map((certification) => ({
+    customerId: certification.customerId,
+    toolId: certification.toolId,
+    toolName: toolNames.get(certification.toolId) ?? null,
+    status: certification.status,
+    certifiedAt: certification.certifiedAt,
+  }));
 }

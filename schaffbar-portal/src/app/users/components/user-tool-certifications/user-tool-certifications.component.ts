@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,26 +9,41 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { Tool } from '../../tool.model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import {
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
-  ToolCertification,
 } from '../../tool-certification.model';
+
+export interface UserToolCertificationRowViewModel {
+  customerId: string;
+  toolId: string;
+  // null if the tool has been deleted
+  toolName: string | null;
+  status: ToolCertificationStatus;
+  certifiedAt: Date;
+}
 
 @Component({
   selector: 'schbar-user-tool-certifications',
   templateUrl: './user-tool-certifications.component.html',
   styleUrl: './user-tool-certifications.component.scss',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, CertificationStatusChipComponent, DatePipe, TranslatePipe],
+  imports: [
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    CertificationStatusChipComponent,
+    DatePipe,
+    TranslatePipe,
+    OrDashPipe,
+  ],
 })
 export class UserToolCertificationsComponent {
   private readonly confirmActionDialog = inject(ConfirmActionDialogService);
 
-  readonly certifications = input.required<ToolCertification[]>();
-  readonly allTools = input.required<Tool[]>();
+  readonly certifications = input.required<UserToolCertificationRowViewModel[]>();
 
   readonly pauseCertification = output<PauseToolCertificationCommand>();
   readonly reactivateCertification = output<ReactivateToolCertificationCommand>();
@@ -39,22 +54,15 @@ export class UserToolCertificationsComponent {
 
   // TOOD: new after migration - need to understand this
   // mat-table rows are typed as `any`; restores the type so `@default never` can check the status
-  protected readonly asCertification = (row: ToolCertification): ToolCertification => row;
+  protected readonly asCertification = (row: UserToolCertificationRowViewModel): UserToolCertificationRowViewModel =>
+    row;
 
-  protected readonly toolNameMap = computed(() => {
-    const map = new Map<string, string>();
-    for (const t of this.allTools()) {
-      map.set(t.id, t.name);
-    }
-    return map;
-  });
-
-  protected onPause(cert: ToolCertification): void {
+  protected onPause(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.pauseCertification.title',
         message: 'users.dialogs.certifications.pauseCertification.message',
-        entity: this.toolNameMap().get(cert.toolId),
+        entity: cert.toolName ?? undefined,
         confirmLabel: 'users.dialogs.certifications.pauseCertification.confirm',
         destructive: true,
       })
@@ -66,12 +74,12 @@ export class UserToolCertificationsComponent {
       });
   }
 
-  protected onReactivate(cert: ToolCertification): void {
+  protected onReactivate(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.reactivateCertification.title',
         message: 'users.dialogs.certifications.reactivateCertification.message',
-        entity: this.toolNameMap().get(cert.toolId),
+        entity: cert.toolName ?? undefined,
         confirmLabel: 'users.dialogs.certifications.reactivateCertification.confirm',
         destructive: false,
       })
@@ -83,12 +91,12 @@ export class UserToolCertificationsComponent {
       });
   }
 
-  protected onRevoke(cert: ToolCertification): void {
+  protected onRevoke(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.revokeCertification.title',
         message: 'users.dialogs.certifications.revokeCertification.message',
-        entity: this.toolNameMap().get(cert.toolId),
+        entity: cert.toolName ?? undefined,
         confirmLabel: 'users.dialogs.certifications.revokeCertification.confirm',
         destructive: true,
       })

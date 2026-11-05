@@ -258,7 +258,11 @@ Smart component – store mocked, children real:
 - The mapping is tested here, through what reaches the child:
   `fixture.debugElement.query(By.directive(ToolCertificationsComponent)).componentInstance.certifications()` – the
   `to<Name>ViewModel()` functions are not exported.
-- A child's output calls the store method with the command.
+- A child in another tab: select it with `MatTabGroupHarness.selectTab({ label })` and provide
+  `{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }` – the tab content is attached only when
+  its animation ends ([tool-detail.component.spec.ts](../../../src/app/tools/pages/tool-detail/tool-detail.component.spec.ts)).
+- A child's output calls the store method with the command
+  (`child(ActiveUsersWidgetComponent).userSelected.emit('user-1')`, then expect the store / router call).
 - Business rules are tested in the **store spec**, not in the page.
 
 ## Checklist

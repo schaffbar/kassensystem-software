@@ -11,8 +11,14 @@ import { MatListModule } from '@angular/material/list';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { User } from '../../user.model';
 import { AddToolInstructorsCommand, RemoveToolInstructorsCommand } from '../../tool.model';
+
+// an instructor or a user who can become one
+export interface UserOptionViewModel {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
 
 @Component({
   selector: 'schbar-tool-instructors',
@@ -32,30 +38,23 @@ import { AddToolInstructorsCommand, RemoveToolInstructorsCommand } from '../../t
 })
 export class ToolInstructorsComponent {
   readonly toolId = input.required<string>();
-  readonly instructorIds = input.required<string[]>();
-  readonly allUsers = input.required<User[]>();
+  readonly instructors = input.required<UserOptionViewModel[]>();
+  readonly candidates = input.required<UserOptionViewModel[]>();
 
   readonly instructorsAdded = output<AddToolInstructorsCommand>();
   readonly instructorsRemoved = output<RemoveToolInstructorsCommand>();
 
   protected readonly searchText = signal('');
-  protected readonly selectedUsersToAdd = signal<User[]>([]);
+  protected readonly selectedUsersToAdd = signal<UserOptionViewModel[]>([]);
   protected readonly selectedInstructorIdsToRemove = signal<Set<string>>(new Set());
 
   private readonly searchInput = viewChild<ElementRef>('searchInput');
 
-  protected readonly instructors = computed(() => {
-    const ids = this.instructorIds();
-    return this.allUsers().filter((user) => ids.includes(user.id));
-  });
-
   protected readonly filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase();
-    const currentIds = this.instructorIds();
     const selectedIds = this.selectedUsersToAdd().map((u) => u.id);
 
-    return this.allUsers()
-      .filter((user) => !currentIds.includes(user.id))
+    return this.candidates()
       .filter((user) => !selectedIds.includes(user.id))
       .filter(
         (user) =>
@@ -63,7 +62,7 @@ export class ToolInstructorsComponent {
       );
   });
 
-  protected selectUser(user: User): void {
+  protected selectUser(user: UserOptionViewModel): void {
     this.selectedUsersToAdd.update((users) => [...users, user]);
     this.searchText.set('');
     const input = this.searchInput();
@@ -72,7 +71,7 @@ export class ToolInstructorsComponent {
     }
   }
 
-  protected removeSelectedUser(user: User): void {
+  protected removeSelectedUser(user: UserOptionViewModel): void {
     this.selectedUsersToAdd.update((users) => users.filter((u) => u.id !== user.id));
   }
 

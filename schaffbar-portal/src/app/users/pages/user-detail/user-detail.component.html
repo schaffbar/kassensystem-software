@@ -95,8 +95,7 @@
             (addressChanged)="onAddressChanged($event)" />
         </div>
         <schbar-user-tool-certifications
-          [certifications]="detailsStore.toolCertifications()"
-          [allTools]="allTools()"
+          [certifications]="certificationRows()"
           (pauseCertification)="onPauseCertification($event)"
           (reactivateCertification)="onReactivateCertification($event)"
           (revokeCertification)="onRevokeCertification($event)" />

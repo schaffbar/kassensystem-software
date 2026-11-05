@@ -66,7 +66,6 @@ export class ToolDetailComponent {
   protected readonly certificationRows = computed(() =>
     toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
-  protected readonly allUsers = computed(() => this.detailsStore.users());
   protected readonly rfidReaderOptions = computed(() =>
     toRfidReaderOptionViewModels(
       this.detailsStore.assignableRfidReaders(),

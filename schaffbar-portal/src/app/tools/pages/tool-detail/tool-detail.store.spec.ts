@@ -140,7 +140,7 @@ describe('ToolDetailStore', () => {
     expect(store.isLoading()).toBe(false);
   });
 
-  it('should offer only instructors as certifiers and only uncertified non-instructors for certification', async () => {
+  it('should split the users into instructors, candidates, certifiers and certifiable users', async () => {
     store.setToolId('tool-1');
     trigger();
     expectToolRequest().flush({ ...tool, instructors: ['user-2'] });
@@ -154,6 +154,8 @@ describe('ToolDetailStore', () => {
     ]);
     await settle();
 
+    expect(store.instructors().map((user) => user.id)).toEqual(['user-2']);
+    expect(store.instructorCandidates().map((user) => user.id)).toEqual(['user-1', 'user-3']);
     expect(store.certifiers().map((user) => user.id)).toEqual(['user-2']);
     expect(store.certifiableUsers().map((user) => user.id)).toEqual(['user-3']);
   });

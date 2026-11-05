@@ -27,8 +27,8 @@
         <div class="tab-content--details__right">
           <schbar-tool-instructors
             [toolId]="tool.id"
-            [instructorIds]="tool.instructors"
-            [allUsers]="allUsers()"
+            [instructors]="detailsStore.instructors()"
+            [candidates]="detailsStore.instructorCandidates()"
             (instructorsAdded)="onInstructorsAdded($event)"
             (instructorsRemoved)="onInstructorsRemoved($event)" />
         </div>

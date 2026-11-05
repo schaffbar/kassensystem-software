@@ -12,8 +12,5 @@
     [activeUsers]="store.activeUsers()"
     (reload)="reloadActiveUsers()"
     (userSelected)="openUserSession($event)" />
-  <schbar-active-tools-widget
-    [tools]="store.tools()"
-    [activeTools]="store.activeTools()"
-    (reload)="reloadActiveTools()" />
+  <schbar-active-tools-widget [toolStatuses]="toolStatuses()" (reload)="reloadActiveTools()" />
 </div>

@@ -8,7 +8,7 @@
           <th mat-header-cell *matHeaderCellDef>
             {{ 'users.tables.toolCertifications.toolNameColumn' | translate }}
           </th>
-          <td mat-cell *matCellDef="let cert">{{ toolNameMap().get(cert.toolId) ?? cert.toolId }}</td>
+          <td mat-cell *matCellDef="let cert">{{ cert.toolName | orDash }}</td>
         </ng-container>
 
         <ng-container matColumnDef="status">
