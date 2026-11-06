@@ -37,7 +37,6 @@
 
 <div class="mat-elevation-z2">
   <table mat-table [dataSource]="dataSource()" matSort>
-    <!-- Columns -->
     <ng-container matColumnDef="lastName">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ 'users.shared.userProperties.lastName' | translate }}
@@ -61,7 +60,6 @@
       </td>
     </ng-container>
 
-    <!-- Header and Row Declarations -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row (click)="openUserDetail(row)" *matRowDef="let row; columns: displayedColumns"></tr>
   </table>

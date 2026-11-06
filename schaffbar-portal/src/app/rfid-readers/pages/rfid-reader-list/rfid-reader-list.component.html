@@ -14,7 +14,6 @@
 
 <div class="mat-elevation-z2">
   <table mat-table [dataSource]="dataSource()" matSort>
-    <!-- Columns -->
     <ng-container matColumnDef="macAddress">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}
@@ -52,7 +51,6 @@
       </td>
     </ng-container>
 
-    <!-- Header and Row Declarations -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr
       mat-row

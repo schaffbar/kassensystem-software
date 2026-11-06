@@ -18,7 +18,6 @@
   gap: 1rem;
 }
 
-// styling columns using their auto-generated column names
 .mat-column-certificationRequirement {
   width: 40px;
   text-align: center;
@@ -29,7 +28,7 @@
   text-align: center;
 }
 
-// needed for selecting current row
+// transparent borders, so the rows don't shift when the hover border appears
 .mat-mdc-row .mat-mdc-cell {
   border-bottom: 1px solid transparent;
   border-top: 1px solid transparent;

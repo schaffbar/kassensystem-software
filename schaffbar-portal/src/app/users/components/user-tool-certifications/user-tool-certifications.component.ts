@@ -52,7 +52,6 @@ export class UserToolCertificationsComponent {
   protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
   protected readonly CertificationStatus = ToolCertificationStatus;
 
-  // TOOD: new after migration - need to understand this
   // mat-table rows are typed as `any`; restores the type so `@default never` can check the status
   protected readonly asCertification = (row: UserToolCertificationRowViewModel): UserToolCertificationRowViewModel =>
     row;

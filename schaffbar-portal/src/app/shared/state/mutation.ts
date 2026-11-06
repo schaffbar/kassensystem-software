@@ -9,17 +9,13 @@ import { exhaustMap, finalize, Observable, pipe } from 'rxjs';
  * rxMethod (see {@link mutation}).
  */
 interface MutationConfig<TCommand> {
-  /** the backend call for the command */
   request: (command: TCommand) => Observable<unknown>;
-  /** runs after a successful request, e.g. reloading the affected data */
   onSuccess: () => void;
   /** optional: runs after a failed request – the snackbar is shown by the error interceptor anyway */
   onError?: (error: unknown) => void;
 }
 
-/** A store method for a backend change, with its own pending state: `store.createTool.isPending()`. */
 export type Mutation<TCommand> = RxMethod<TCommand> & {
-  /** true while the request of this mutation is running */
   isPending: Signal<boolean>;
 };
 
