@@ -50,7 +50,7 @@ export class ToolListComponent {
     'name',
     'area',
     'description',
-    'rfidReader',
+    'rfidReaderId',
     'wlanRelaisType',
     'actions',
   ];
