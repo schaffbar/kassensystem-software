@@ -233,11 +233,16 @@ getToolsByRfidReader(rfidReaderId: string): Observable<ToolApiModel[]> {
 Prefix `get…`, plain value parameters. If you are unsure → it is displayed data → resource.
 
 The component can't call it (no `shared/api` in components) – the **store** wraps it and returns only what the
-component needs, so no API model and no mapper reach the component:
+component needs, so no API model and no mapper reach the component. The business rule around the check lives there
+too:
 
 ```ts
-hasAssignedTools(rfidReaderId: string): Observable<boolean> {
-  return store._toolsApi.getToolsByRfidReader(rfidReaderId).pipe(map((tools) => tools.length > 0));
+// a switch box keeps its type while a tool is assigned to it – the tool would lose its reader
+canChangeRfidReaderType(): Observable<boolean> {
+  const rfidReader = store.rfidReader();
+  if (!rfidReader) return of(false);
+  if (rfidReader.type !== RfidReaderType.SwitchBox) return of(true);
+  return store._toolsApi.getToolsByRfidReader(rfidReader.id).pipe(map((tools) => tools.length === 0));
 },
 ```
 

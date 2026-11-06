@@ -55,10 +55,10 @@ describe('RfidReaderDetailStore', () => {
     await TestBed.inject(ApplicationRef).whenStable();
   }
 
-  async function loadReader(): Promise<void> {
+  async function loadReader(apiModel: RfidReaderApiModel = reader): Promise<void> {
     store.setRfidReaderId('reader-1');
     trigger();
-    httpMock.expectOne(`${url}/reader-1`).flush(reader);
+    httpMock.expectOne(`${url}/reader-1`).flush(apiModel);
     await settle();
   }
 
@@ -120,18 +120,39 @@ describe('RfidReaderDetailStore', () => {
     expect(store.rfidReader()?.type).toBe(RfidReaderType.GateKeeperIn);
   });
 
-  it('should tell whether tools are assigned to a reader', async () => {
+  describe('canChangeRfidReaderType', () => {
     const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
     const expectToolsOf = () =>
       httpMock.expectOne((req) => req.url === toolsUrl && req.params.get('rfidReaderId') === 'reader-1');
 
-    const assigned = firstValueFrom(store.hasAssignedTools('reader-1'));
-    expectToolsOf().flush([toolFixture({ rfidReaderId: 'reader-1' })]);
-    expect(await assigned).toBe(true);
+    it('should not allow it for a switch box with an assigned tool', async () => {
+      await loadReader();
 
-    const notAssigned = firstValueFrom(store.hasAssignedTools('reader-1'));
-    expectToolsOf().flush([]);
-    expect(await notAssigned).toBe(false);
+      const canChange = firstValueFrom(store.canChangeRfidReaderType());
+      expectToolsOf().flush([toolFixture({ rfidReaderId: 'reader-1' })]);
+
+      expect(await canChange).toBe(false);
+    });
+
+    it('should allow it for a switch box without tools', async () => {
+      await loadReader();
+
+      const canChange = firstValueFrom(store.canChangeRfidReaderType());
+      expectToolsOf().flush([]);
+
+      expect(await canChange).toBe(true);
+    });
+
+    it('should allow it for any other type without asking the backend', async () => {
+      await loadReader({ ...reader, type: RfidReaderType.GateKeeperIn });
+
+      expect(await firstValueFrom(store.canChangeRfidReaderType())).toBe(true);
+      httpMock.expectNone(() => true);
+    });
+
+    it('should not allow it without a loaded reader', async () => {
+      expect(await firstValueFrom(store.canChangeRfidReaderType())).toBe(false);
+    });
   });
 
   it('should expose a load error for a response that does not match the schema', async () => {

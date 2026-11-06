@@ -92,7 +92,7 @@ export class UserContactComponent {
 - Data that is displayed is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the
   signal store. A one-off check at the time of an action (e.g. `getToolsByRfidReader` before changing the reader
   type) stays a plain `HttpClient` observable – it is no state of the page. The store wraps it and returns what the
-  component needs (`hasAssignedTools(rfidReaderId): Observable<boolean>`), because components never import
+  component needs (`canChangeRfidReaderType(): Observable<boolean>`), because components never import
   `shared/api`. A dialog container loads its data with
   `httpResource` directly, without a store (see "Dialogs").
 - A store method is named like its command without `Command`: `UpdateUserContactCommand` → `updateUserContact`,
@@ -110,7 +110,7 @@ export class UserContactComponent {
 ## Subscriptions
 
 - `subscribe()` only on observables that complete by themselves: `dialogRef.afterClosed()`, the `open()` of the
-  dialog services, a one-off `HttpClient` call (`hasAssignedTools`). They need no unsubscribe – they end after one
+  dialog services, a one-off `HttpClient` call (`canChangeRfidReaderType`). They need no unsubscribe – they end after one
   value.
 - Observables that never complete (`interval`, `BreakpointObserver`, `valueChanges`, router events) are never
   subscribed by hand: `toSignal()` in a component, `rxMethod` / `mutation()` in a store – both end with their

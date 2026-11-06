@@ -10,7 +10,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
-import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import {
   ChangeRfidReaderTypeDialogData,
   ChangeRfidReaderTypeFormComponent,
@@ -54,24 +53,20 @@ export class RfidReaderDetailComponent {
     const reader = this.detailsStore.rfidReader();
     if (!reader) return;
 
-    if (reader.type === RfidReaderType.SwitchBox) {
-      this.detailsStore
-        .hasAssignedTools(reader.id)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((hasAssignedTools) => {
-          if (hasAssignedTools) {
-            this.snackBar.open(
-              this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
-              this.translate.instant('shared.actions.close'),
-              { duration: 6000 },
-            );
-          } else {
-            this.openChangeTypeDialog(reader);
-          }
-        });
-    } else {
-      this.openChangeTypeDialog(reader);
-    }
+    this.detailsStore
+      .canChangeRfidReaderType()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((canChange) => {
+        if (canChange) {
+          this.openChangeTypeDialog(reader);
+        } else {
+          this.snackBar.open(
+            this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
+            this.translate.instant('shared.actions.close'),
+            { duration: 6000 },
+          );
+        }
+      });
   }
 
   // --------------------------------------------------------------------------

@@ -20,13 +20,13 @@ export interface Tool {
 // ----------------------------------------------------------------------------
 // WLAN relais
 
-export interface WlanRelaisTemplate {
+export interface WlanRelaisCommands {
   httpStartCommand: string;
   onCommand: string;
   offCommand: string;
 }
 
-export const WLAN_RELAIS_TEMPLATES: Record<WlanRelaisType, WlanRelaisTemplate> = {
+const WLAN_RELAIS_TEMPLATES: Record<WlanRelaisType, WlanRelaisCommands> = {
   [WlanRelaisType.Shelly1]: {
     httpStartCommand: 'http://{{ipAddress}}/relay/0?',
     onCommand: 'turn=on',
@@ -43,6 +43,11 @@ export const WLAN_RELAIS_TEMPLATES: Record<WlanRelaisType, WlanRelaisTemplate> =
     offCommand: 'id=0&on=false',
   },
 };
+
+export function wlanRelaisCommands(type: WlanRelaisType, ipAddress: string): WlanRelaisCommands {
+  const template = WLAN_RELAIS_TEMPLATES[type];
+  return { ...template, httpStartCommand: template.httpStartCommand.replace('{{ipAddress}}', ipAddress) };
+}
 
 // ----------------------------------------------------------------------------
 // commands

@@ -9,7 +9,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
-import { ClearWlanRelaisCommand, SetWlanRelaisCommand, WLAN_RELAIS_TEMPLATES } from '../../tool.model';
+import { ClearWlanRelaisCommand, SetWlanRelaisCommand, wlanRelaisCommands } from '../../tool.model';
 import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
@@ -60,15 +60,9 @@ export class ToolWlanRelaisComponent {
 
   protected readonly derivedCommands = computed(() => {
     const { wlanRelaisType, ipAddress } = this.model();
-    if (!wlanRelaisType) {
-      return { httpStartCommand: '', onCommand: '', offCommand: '' };
-    }
-    const template = WLAN_RELAIS_TEMPLATES[wlanRelaisType];
-    return {
-      httpStartCommand: template.httpStartCommand.replace('{{ipAddress}}', ipAddress),
-      onCommand: template.onCommand,
-      offCommand: template.offCommand,
-    };
+    return wlanRelaisType
+      ? wlanRelaisCommands(wlanRelaisType, ipAddress)
+      : { httpStartCommand: '', onCommand: '', offCommand: '' };
   });
 
   protected readonly isDirty = computed(() => {
