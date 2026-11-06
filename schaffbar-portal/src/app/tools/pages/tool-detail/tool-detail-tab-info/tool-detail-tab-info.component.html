@@ -1,0 +1,16 @@
+@if (detailsStore.tool(); as tool) {
+  <div class="left">
+    <schbar-tool-detail-info
+      [toolDetailInfo]="tool"
+      [existingTools]="toolsStore.entities()"
+      (toolUpdated)="onToolUpdated($event)" />
+  </div>
+  <div class="right">
+    <schbar-tool-instructors
+      [toolId]="tool.id"
+      [instructors]="detailsStore.instructors()"
+      [candidates]="detailsStore.instructorCandidates()"
+      (instructorsAdded)="onInstructorsAdded($event)"
+      (instructorsRemoved)="onInstructorsRemoved($event)" />
+  </div>
+}

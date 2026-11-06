@@ -22,8 +22,8 @@ feature model (`hasRunningUsage` in `workshop-session.model.ts`).
 
 Reference implementations:
 
-- smart: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – store, child components, mapping, command
-  handlers, page spec with tabs
+- smart with tabs: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – the page as frame, three tab
+  components with mappings and command handlers, a spec per tab
 - smart, small: [dashboard/](../../../src/app/dashboard/pages/dashboard/) – one mapping, navigation on an output
 - dumb with a ViewModel: [close-session-dialog-modal](../../../src/app/shared/dialogs/close-session-dialog/close-session-dialog-modal.component.ts)
 - dumb with a form and a ViewModel: [user-contact/](../../../src/app/users/components/user-contact/)
@@ -92,31 +92,24 @@ Rules:
 
 ## Smart component
 
+A tab component of `tool-detail` – the page itself is only the frame (see "Pages with tabs"):
+
 ```ts
 @Component({
-  selector: 'schbar-tool-detail',
-  templateUrl: './tool-detail.component.html',
-  styleUrl: './tool-detail.component.scss',
-  imports: [ToolDetailInfoComponent, ToolCertificationsComponent, MatProgressBarModule, TranslatePipe],
-  providers: [ToolDetailStore],
+  selector: 'schbar-tool-detail-tab-certifications',
+  templateUrl: './tool-detail-tab-certifications.component.html',
+  styleUrl: './tool-detail-tab-certifications.component.scss',
+  imports: [ToolCertificationsComponent],
 })
-export class ToolDetailComponent {
+export class ToolDetailTabCertificationsComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
-  protected readonly toolsStore = inject(ToolsStore);
-
-  // route parameter (withComponentInputBinding)
-  readonly id = input.required<string>();
 
   protected readonly certificationRows = computed(() =>
     toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
 
-  constructor() {
-    this.detailsStore.setToolId(this.id);
-  }
-
-  protected onToolUpdated(command: UpdateToolCommand): void {
-    this.detailsStore.updateTool(command);
+  protected onDeleteCertification(command: DeleteToolCertificationCommand): void {
+    this.detailsStore.deleteCertification(command);
   }
 }
 
@@ -137,25 +130,26 @@ function toCertificationRowViewModels(
 
 <!-- prettier-ignore -->
 ```html
-@if (detailsStore.isLoading()) {
-  <mat-progress-bar mode="indeterminate" />
-}
-@if (detailsStore.hasLoadError()) {
-  <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
-}
 @if (detailsStore.tool(); as tool) {
-  <!-- Tool has all fields of ToolDetailInfoViewModel, the tools all fields of ExistingToolViewModel -->
-  <schbar-tool-detail-info [toolDetailInfo]="tool" [existingTools]="toolsStore.entities()" (toolUpdated)="onToolUpdated($event)" />
-  <schbar-tool-certifications [certifications]="certificationRows()" … />
+  <schbar-tool-certifications
+    [toolId]="tool.id"
+    [certifications]="certificationRows()"
+    [certifiableUsers]="detailsStore.certifiableUsers()"
+    [certifiers]="detailsStore.certifiers()"
+    (deleteCertification)="onDeleteCertification($event)" … />
 }
 ```
+
+Where the shape fits, the feature model goes in directly – in `tool-detail-tab-info` the `Tool` has all fields of
+`ToolDetailInfoViewModel`, the tools all fields of `ExistingToolViewModel`:
+`<schbar-tool-detail-info [toolDetailInfo]="tool" [existingTools]="toolsStore.entities()" … />`.
 
 Rules:
 
 - Lives in `pages/`. A route component (page) or a tab component of a page (see "Pages with tabs").
 - Injects what connects the screen to the app: its store(s), `Router`, `MatDialog`, dialog services, `MatSnackBar`.
   Never `shared/api` (ESLint) – data comes from the store.
-- Inputs are route parameters (`id`, `tab`) or, for a nested page, ids.
+- Inputs are route parameters (`id`, `tab`) or, for a tab component, ids.
 - Fills the ViewModels of its children (see "ViewModel"): store signals straight into the template where the shape
   fits, a `computed` + pure `to<Name>ViewModel()` after the class where it doesn't. No `computed(() => store.x())`
   that only renames.
@@ -288,9 +282,10 @@ the store mock goes into the `TestBed` providers):
 - The mapping is tested here, through what reaches the child:
   `fixture.debugElement.query(By.directive(ToolCertificationsComponent)).componentInstance.certifications()` – the
   `to<Name>ViewModel()` functions are not exported.
-- A child in another tab: select it with `MatTabGroupHarness.selectTab({ label })` and provide
-  `{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }` – the tab content is attached only when
-  its animation ends ([tool-detail.component.spec.ts](../../../src/app/tools/pages/tool-detail/tool-detail.component.spec.ts)).
+- A page with tabs: the page spec covers only the frame (header, reload); the content of a tab is tested in the tab
+  spec, no tab selection needed. (Selecting a tab in a test needs `MatTabGroupHarness.selectTab({ label })` and
+  `{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }` – the content is attached only when the
+  tab animation ends.)
 - A child's output calls the store method with the command: emit it on the child instance
   (`child(ActiveUsersWidgetComponent).userSelected.emit('user-1')` with a small `child()` helper around
   `By.directive`, see [dashboard.component.spec.ts](../../../src/app/dashboard/pages/dashboard/dashboard.component.spec.ts))

@@ -17,45 +17,18 @@
 
   <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center" dynamicHeight>
     <mat-tab [label]="'tools.tabGroups.toolDetails.detailsTab' | translate">
-      <div class="tab-content--details">
-        <div class="tab-content--details__left">
-          <schbar-tool-detail-info
-            [toolDetailInfo]="tool"
-            [existingTools]="toolsStore.entities()"
-            (toolUpdated)="onToolUpdated($event)" />
-        </div>
-        <div class="tab-content--details__right">
-          <schbar-tool-instructors
-            [toolId]="tool.id"
-            [instructors]="detailsStore.instructors()"
-            [candidates]="detailsStore.instructorCandidates()"
-            (instructorsAdded)="onInstructorsAdded($event)"
-            (instructorsRemoved)="onInstructorsRemoved($event)" />
-        </div>
+      <div class="tab-content">
+        <schbar-tool-detail-tab-info />
       </div>
     </mat-tab>
     <mat-tab [label]="'tools.tabGroups.toolDetails.certificationsTab' | translate">
-      <div class="tab-content--wide">
-        <schbar-tool-certifications
-          [toolId]="tool.id"
-          [certifications]="certificationRows()"
-          [certifiableUsers]="detailsStore.certifiableUsers()"
-          [certifiers]="detailsStore.certifiers()"
-          (batchCreate)="onBatchCreateCertifications($event)"
-          (deleteCertification)="onDeleteCertification($event)" />
+      <div class="tab-content">
+        <schbar-tool-detail-tab-certifications />
       </div>
     </mat-tab>
     <mat-tab [label]="'tools.tabGroups.toolDetails.configurationTab' | translate">
-      <div class="tab-content--configuration">
-        <schbar-tool-rfid-reader-assignment
-          [toolRfidReaderAssignment]="tool"
-          [rfidReaders]="rfidReaderOptions()"
-          (rfidReaderChanged)="onRfidReaderChanged($event)"
-          (rfidReaderCleared)="onRfidReaderCleared($event)" />
-        <schbar-tool-wlan-relais
-          [toolWlanRelais]="tool"
-          (wlanRelaisUpdated)="onWlanRelaisUpdated($event)"
-          (wlanRelaisCleared)="onWlanRelaisCleared($event)" />
+      <div class="tab-content">
+        <schbar-tool-detail-tab-configuration />
       </div>
     </mat-tab>
   </mat-tab-group>

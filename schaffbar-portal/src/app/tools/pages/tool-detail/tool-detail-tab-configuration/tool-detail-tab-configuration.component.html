@@ -1,0 +1,11 @@
+@if (detailsStore.tool(); as tool) {
+  <schbar-tool-rfid-reader-assignment
+    [toolRfidReaderAssignment]="tool"
+    [rfidReaders]="rfidReaderOptions()"
+    (rfidReaderChanged)="onRfidReaderChanged($event)"
+    (rfidReaderCleared)="onRfidReaderCleared($event)" />
+  <schbar-tool-wlan-relais
+    [toolWlanRelais]="tool"
+    (wlanRelaisUpdated)="onWlanRelaisUpdated($event)"
+    (wlanRelaisCleared)="onWlanRelaisCleared($event)" />
+}
