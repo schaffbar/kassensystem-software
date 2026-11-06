@@ -9,7 +9,7 @@
   </mat-card-header>
 
   <mat-card-content>
-    <table mat-table class="full-width-table" [dataSource]="dataSource()">
+    <table mat-table [dataSource]="dataSource()">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>
           {{ 'dashboard.widgets.activeUsers.table.name' | translate }}
