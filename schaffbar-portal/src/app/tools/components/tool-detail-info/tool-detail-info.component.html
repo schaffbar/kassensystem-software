@@ -32,11 +32,11 @@
         @if (isEditing()) {
           <mat-select id="area" [formField]="toolForm.area">
             @for (area of toolAreas; track area) {
-              <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
+              <mat-option [value]="area">{{ area | toolAreaKey | translate }}</mat-option>
             }
           </mat-select>
         } @else {
-          <input id="area" matInput [value]="'tools.areas.' + toolDetailInfo().area | translate" readonly />
+          <input id="area" matInput [value]="toolDetailInfo().area | toolAreaKey | translate" readonly />
         }
       </mat-form-field>
     </div>
@@ -50,7 +50,7 @@
             @for (req of certificationRequirements; track req) {
               <mat-option [value]="req">
                 <schbar-certification-requirement-dot [certificationRequirement]="req" />
-                {{ 'tools.certificationRequirements.' + req | translate }}
+                {{ req | certificationRequirementKey | translate }}
               </mat-option>
             }
           </mat-select>
@@ -58,7 +58,7 @@
           <input
             id="certificationRequirement"
             matInput
-            [value]="'tools.certificationRequirements.' + toolDetailInfo().certificationRequirement | translate"
+            [value]="toolDetailInfo().certificationRequirement | certificationRequirementKey | translate"
             readonly />
         }
       </mat-form-field>

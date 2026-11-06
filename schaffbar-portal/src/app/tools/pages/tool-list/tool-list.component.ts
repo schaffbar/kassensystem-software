@@ -19,6 +19,8 @@ import { CertificationRequirementDotComponent } from '../../components/certifica
 import { NewToolDialogData, NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
+import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
 
 @Component({
   selector: 'schbar-tool-list',
@@ -34,6 +36,8 @@ import { ToolsStore } from '../../tools.store';
     MatIconModule,
     TranslatePipe,
     OrDashPipe,
+    ToolAreaKeyPipe,
+    WlanRelaisTypeKeyPipe,
   ],
 })
 export class ToolListComponent {

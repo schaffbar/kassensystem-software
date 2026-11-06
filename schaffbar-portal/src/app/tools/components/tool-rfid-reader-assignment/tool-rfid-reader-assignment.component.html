@@ -21,7 +21,7 @@
           @for (rfidReader of rfidReaders(); track rfidReader.id) {
             <mat-option [value]="rfidReader.id">
               <div class="option-content">
-                <span>{{ rfidReader.name }}</span>
+                <span>{{ rfidReader.name | orDash }}</span>
                 @if (rfidReader.isAssignedToOtherTool) {
                   <span class="option-content-already-assigned">
                     ({{ 'tools.pages.toolDetails.messages.alreadyAssigned' | translate }})

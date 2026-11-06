@@ -10,6 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
 import { ClearWlanRelaisCommand, SetWlanRelaisCommand, WLAN_RELAIS_TEMPLATES } from '../../tool.model';
+import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
 
 const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
@@ -29,7 +30,16 @@ interface WlanRelaisFormModel {
   selector: 'schbar-tool-wlan-relais',
   templateUrl: './tool-wlan-relais.component.html',
   styleUrl: './tool-wlan-relais.component.scss',
-  imports: [FormField, FormRoot, FieldErrorComponent, MatSelectModule, MatInputModule, MatButtonModule, TranslatePipe],
+  imports: [
+    FormField,
+    FormRoot,
+    FieldErrorComponent,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    TranslatePipe,
+    WlanRelaisTypeKeyPipe,
+  ],
 })
 export class ToolWlanRelaisComponent {
   readonly toolWlanRelais = input.required<ToolWlanRelaisViewModel>();

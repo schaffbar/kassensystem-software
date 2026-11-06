@@ -15,6 +15,8 @@ import { ToolArea } from '../../../shared/models/tool-area';
 import { CertificationRequirementDotComponent } from '../certification-requirement-dot/certification-requirement-dot.component';
 import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
+import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { CertificationRequirementKeyPipe } from '../../certification-requirement-key.pipe';
 
 // all tools – for the unique name check
 export interface ExistingToolViewModel {
@@ -49,6 +51,8 @@ interface NewToolFormModel {
     MatDividerModule,
     MatSelectModule,
     TranslatePipe,
+    ToolAreaKeyPipe,
+    CertificationRequirementKeyPipe,
   ],
 })
 export class NewToolFormComponent {

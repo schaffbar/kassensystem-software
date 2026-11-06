@@ -15,6 +15,7 @@ import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-dele
 import { DeleteRfidReaderCommand, RfidReader } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReadersStore } from '../../rfid-readers.store';
+import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 
 @Component({
   selector: 'schbar-rfid-reader-list',
@@ -29,6 +30,7 @@ import { RfidReadersStore } from '../../rfid-readers.store';
     MatIconModule,
     TranslatePipe,
     RfidReaderTypeKeyPipe,
+    OrDashPipe,
   ],
 })
 export class RfidReaderListComponent {

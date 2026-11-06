@@ -36,7 +36,7 @@
 
     <ng-container matColumnDef="area">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'tools.shared.toolProperties.area' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ 'tools.areas.' + row.area | translate }}</td>
+      <td mat-cell *matCellDef="let row">{{ row.area | toolAreaKey | translate }}</td>
     </ng-container>
 
     <ng-container matColumnDef="description">
@@ -54,7 +54,7 @@
         @if (row.rfidReaderId) {
           <mat-icon>check</mat-icon>
         } @else {
-          -
+          {{ row.rfidReaderId | orDash }}
         }
       </td>
     </ng-container>
@@ -64,11 +64,7 @@
         {{ 'tools.shared.toolProperties.wlanRelaisType' | translate }}
       </th>
       <td mat-cell *matCellDef="let row">
-        @if (row.wlanRelaisType) {
-          {{ 'tools.wlanRelaisTypes.' + row.wlanRelaisType | translate }}
-        } @else {
-          -
-        }
+        {{ row.wlanRelaisType | wlanRelaisTypeKey | translate | orDash }}
       </td>
     </ng-container>
 

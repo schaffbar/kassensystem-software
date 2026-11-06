@@ -31,7 +31,7 @@
           <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
           <mat-select [formField]="toolForm.area">
             @for (area of toolAreas; track area) {
-              <mat-option [value]="area">{{ 'tools.areas.' + area | translate }}</mat-option>
+              <mat-option [value]="area">{{ area | toolAreaKey | translate }}</mat-option>
             }
           </mat-select>
           <mat-error>
@@ -49,7 +49,7 @@
             @for (req of certificationRequirements; track req) {
               <mat-option [value]="req">
                 <schbar-certification-requirement-dot [certificationRequirement]="req" />
-                {{ 'tools.certificationRequirements.' + req | translate }}
+                {{ req | certificationRequirementKey | translate }}
               </mat-option>
             }
           </mat-select>

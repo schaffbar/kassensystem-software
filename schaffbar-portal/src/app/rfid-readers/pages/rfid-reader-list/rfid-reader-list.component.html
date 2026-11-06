@@ -26,7 +26,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}
       </th>
-      <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      <td mat-cell *matCellDef="let row">{{ row.name | orDash }}</td>
     </ng-container>
 
     <ng-container matColumnDef="type">

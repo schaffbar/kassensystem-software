@@ -14,6 +14,8 @@ import { ToolArea } from '../../../shared/models/tool-area';
 import { CertificationRequirementDotComponent } from '../certification-requirement-dot/certification-requirement-dot.component';
 import { UpdateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
+import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { CertificationRequirementKeyPipe } from '../../certification-requirement-key.pipe';
 
 export interface ToolDetailInfoViewModel {
   id: string;
@@ -50,6 +52,8 @@ interface ToolFormModel {
     MatIconModule,
     MatSelectModule,
     TranslatePipe,
+    ToolAreaKeyPipe,
+    CertificationRequirementKeyPipe,
   ],
 })
 export class ToolDetailInfoComponent {

@@ -11,7 +11,7 @@
           <mat-option value="">--</mat-option>
           @for (type of wlanRelaisTypes; track type) {
             <mat-option [value]="type">
-              {{ 'tools.wlanRelaisTypes.' + type | translate }}
+              {{ type | wlanRelaisTypeKey | translate }}
             </mat-option>
           }
         </mat-select>
