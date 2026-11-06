@@ -4,7 +4,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 
 import { WorkshopSessionApiModel } from '../../api/workshop-sessions/workshop-session.api-model';
 import { WorkshopSessionsApiService } from '../../api/workshop-sessions/workshop-sessions.api-service';
-import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close-session-dialog-modal.component';
+import { CloseSessionDialogModalComponent, CloseSessionDialogViewModel } from './close-session-dialog-modal.component';
 
 @Component({
   selector: 'schbar-close-session-dialog-container',
@@ -22,7 +22,7 @@ export class CloseSessionDialogContainerComponent {
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
   protected readonly viewModel = computed(() => {
     const session = this.sessionResource.hasValue() ? this.sessionResource.value() : null;
-    return session ? toCloseSessionViewModel(session) : null;
+    return session ? toCloseSessionDialogViewModel(session) : null;
   });
 
   // --------------------------------------------------------------------------
@@ -40,7 +40,7 @@ export class CloseSessionDialogContainerComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSessionViewModel {
+function toCloseSessionDialogViewModel(session: WorkshopSessionApiModel): CloseSessionDialogViewModel {
   return {
     workshop: { minutes: session.totalWorkshopDurationInMinutes, units: session.totalWorkshopUnits },
     tools: session.toolUsageSummaries.map((summary) => ({

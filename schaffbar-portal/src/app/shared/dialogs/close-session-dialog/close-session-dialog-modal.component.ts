@@ -10,7 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../pipes/or-dash.pipe';
 
-export interface CloseSessionViewModel {
+export interface CloseSessionDialogViewModel {
   workshop: { minutes: number; units: number };
   tools: { toolId: string; name: string | null; minutes: number; units: number }[];
   hasRunningUsage: boolean;
@@ -34,7 +34,7 @@ export class CloseSessionDialogModalComponent {
   readonly isLoading = input(false);
   readonly hasLoadError = input(false);
   // null: there is no open session (any more)
-  readonly viewModel = input.required<CloseSessionViewModel | null>();
+  readonly viewModel = input.required<CloseSessionDialogViewModel | null>();
 
   readonly confirmed = output<void>();
   readonly cancelled = output<void>();

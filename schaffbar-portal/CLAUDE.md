@@ -68,8 +68,11 @@ Files are divided by section comments – a separator line ending at column 79, 
   (`UpdateToolCommand`, `UpdateUserContactCommand`, `ClearWlanRelaisCommand`).
 - **The command contains the id(s)** of the affected entity. The component knows them from its input
   (e.g. `this.user().id`); parent components only pass the command on and never assemble one.
-- Component output, store method and service method take the same command type.
+- Component output and store method take the same command type. The store passes it on to the API service as path
+  variables + `…Request` (mapper `to…Request`) – no command types in `shared/api` (skill `api`).
 - Also for a single id: `ClearWlanRelaisCommand { toolId }`, not `string`.
+- The id field is always named after its entity – `toolId`, `rfidReaderId` – never just `id`, also when the command
+  changes that entity itself: `UpdateToolCommand { toolId, … }`.
 - Form models (`<Name>FormModel`, e.g. `ToolFormModel`) stay local in the component – they describe what is edited,
   the command describes what is sent to the backend.
 

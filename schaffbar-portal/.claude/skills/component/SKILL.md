@@ -25,9 +25,10 @@ Reference implementations:
 - smart with tabs: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – the page as frame, three tab
   components with mappings and command handlers, a spec per tab
 - smart, small: [dashboard/](../../../src/app/dashboard/pages/dashboard/) – one mapping, navigation on an output
-- dumb with a ViewModel: [close-session-dialog-modal](../../../src/app/shared/dialogs/close-session-dialog/close-session-dialog-modal.component.ts)
+- dumb with a ViewModel: [tool-wlan-relais/](../../../src/app/tools/components/tool-wlan-relais/)
 - dumb with a form and a ViewModel: [user-contact/](../../../src/app/users/components/user-contact/)
-- dumb with a main and further ViewModels: [tool-certifications/](../../../src/app/tools/components/tool-certifications/)
+- dumb with a main and a further ViewModel: [tool-rfid-reader-assignment/](../../../src/app/tools/components/tool-rfid-reader-assignment/)
+- dumb with further ViewModels only (rows, options) and a plain id: [tool-certifications/](../../../src/app/tools/components/tool-certifications/)
 
 ## What goes where
 
@@ -66,6 +67,8 @@ Rules:
   - The **main ViewModel** is named after the component: `<ComponentName>ViewModel`, its input
     `<componentName>` – `user-contact` → `UserContactViewModel`, `userContact`; `tool-detail-info` →
     `ToolDetailInfoViewModel`, `toolDetailInfo`. Never after the entity it happens to come from (`tool`, `user`).
+  - A **modal of a shared dialog** follows skill `dialog` instead: input `viewModel`, type `<Name>DialogViewModel`
+    (`ConfirmDeleteDialogViewModel`, `CloseSessionDialogViewModel`) – the service binds it by that name.
   - **Further ViewModels** (rows, options, nested parts, a second input) are named after what they describe:
     `ToolCertificationRowViewModel`, `UserOptionViewModel`, `AddressViewModel`; their inputs likewise
     (`certifications`, `certifiers`).

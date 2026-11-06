@@ -8,10 +8,10 @@ import { MatButtonHarness } from '@angular/material/button/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CloseSessionDialogModalComponent, CloseSessionViewModel } from './close-session-dialog-modal.component';
+import { CloseSessionDialogModalComponent, CloseSessionDialogViewModel } from './close-session-dialog-modal.component';
 
 describe('CloseSessionDialogModalComponent', () => {
-  const viewModel: CloseSessionViewModel = {
+  const viewModel: CloseSessionDialogViewModel = {
     workshop: { minutes: 75, units: 13 },
     tools: [
       { toolId: 'tool-1', name: 'Bandsäge', minutes: 31, units: 6 },
@@ -38,7 +38,7 @@ describe('CloseSessionDialogModalComponent', () => {
   async function render(inputs: {
     isLoading?: boolean;
     hasLoadError?: boolean;
-    viewModel: CloseSessionViewModel | null;
+    viewModel: CloseSessionDialogViewModel | null;
   }): Promise<void> {
     fixture.componentRef.setInput('isLoading', inputs.isLoading ?? false);
     fixture.componentRef.setInput('hasLoadError', inputs.hasLoadError ?? false);

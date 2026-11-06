@@ -100,7 +100,7 @@ export class ConfirmDeleteDialogModalComponent {
 Rules:
 
 - Name `<Name>DialogModalComponent`, selector `schbar-<name>-dialog-modal`. The view model is
-  `<Name>ViewModel` (or `<Name>DialogViewModel`), exported from the modal file – it is the modal's input type.
+  `<Name>DialogViewModel`, exported from the modal file – it is the modal's input `viewModel`.
 - **Inputs and outputs only.** No `MAT_DIALOG_DATA`, no `inject(MatDialogRef)`, no `[mat-dialog-close]`, no service,
   no store. The modal can be rendered and tested like any presentational component.
 - The view model is shaped for display, not the API model: only the fields the modal shows, already combined
@@ -149,7 +149,7 @@ export class CloseSessionDialogContainerComponent {
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
   protected readonly viewModel = computed(() => {
     const session = this.sessionResource.hasValue() ? this.sessionResource.value() : null;
-    return session ? toCloseSessionViewModel(session) : null;
+    return session ? toCloseSessionDialogViewModel(session) : null;
   });
 
   protected closeConfirmed(): void {
@@ -161,7 +161,7 @@ export class CloseSessionDialogContainerComponent {
   }
 }
 
-function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSessionViewModel { … }
+function toCloseSessionDialogViewModel(session: WorkshopSessionApiModel): CloseSessionDialogViewModel { … }
 
 function hasRunningUsage(session: WorkshopSessionApiModel): boolean { … }
 ```
