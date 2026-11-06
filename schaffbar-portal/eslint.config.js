@@ -6,7 +6,8 @@ const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommen
 const importPlugin = require('eslint-plugin-import');
 
 const noApiImports = {
-  group: ['**/shared/api/**'],
+  // also catches the relative path from inside shared/ (`../../api/…`)
+  group: ['**/api/**'],
   message: 'Components use feature models – only stores, mappers and dialog containers import shared/api.',
 };
 
@@ -121,7 +122,12 @@ module.exports = tseslint.config(
   },
   {
     // only stores, mappers and dialog containers talk to the API layer
-    files: ['src/app/**/*.component.ts', 'src/app/**/*.component.spec.ts', 'src/app/**/*.pipe.ts'],
+    files: [
+      'src/app/**/*.component.ts',
+      'src/app/**/*.component.spec.ts',
+      'src/app/**/*.pipe.ts',
+      'src/app/**/*.pipe.spec.ts',
+    ],
     ignores: ['src/app/shared/dialogs/**/*-dialog-container.component*.ts'],
     rules: {
       'no-restricted-imports': [
