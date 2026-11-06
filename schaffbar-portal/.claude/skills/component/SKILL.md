@@ -152,8 +152,7 @@ function toCertificationRowViewModels(
 
 Rules:
 
-- Lives in `pages/`. A route component, or a tab/section of one that uses the page's store (`user-open-session`
-  injects the `UserDetailStore` provided by `user-detail`).
+- Lives in `pages/`. A route component (page) or a tab component of a page (see "Pages with tabs").
 - Injects what connects the screen to the app: its store(s), `Router`, `MatDialog`, dialog services, `MatSnackBar`.
   Never `shared/api` (ESLint) – data comes from the store.
 - Inputs are route parameters (`id`, `tab`) or, for a nested page, ids.
@@ -162,13 +161,38 @@ Rules:
   that only renames.
 - Output handlers pass the command on to a store method (`mutation()`), nothing else. Commands are built by the dumb
   child; the page only builds one when the action starts in the page itself – e.g. after its own confirmation
-  dialog (`DeleteToolCommand` in `tool-list`, `CloseWorkshopSessionCommand` in `user-open-session`).
+  dialog (`DeleteToolCommand` in `tool-list`, `CloseWorkshopSessionCommand` in `user-detail-tab-session`).
 - **Template**: layout (header, loading bar, load error, tabs, grid) plus child components. Markup without state of
   its own may stay in the page – e.g. the `mat-table` of a list page, whose `MatSort`/`MatPaginator` it holds via
   `viewChild`. Extract a dumb component when a part has its own UI state or a form, is used twice, or switches on
   business states (the user header with chips and RFID tag buttons per `RfidTagAssignmentStatus`).
 - No pass-through components: a component that only forwards inputs and outputs to its children is dissolved, the
   page renders the children itself.
+
+### Pages with tabs
+
+A detail page with tabs is a **frame**: loading bar, load error, header, `mat-tab-group`. Every tab is a smart **tab
+component** in the page's folder:
+
+```
+users/pages/user-detail/
+  user-detail.component.*        frame
+  user-detail.store.ts
+  user-detail-tab-info/          UserDetailTabInfoComponent      schbar-user-detail-tab-info
+  user-detail-tab-session/       UserDetailTabSessionComponent   schbar-user-detail-tab-session
+```
+
+- Name `<page>-tab-<name>` – the tab folders stay together and visibly belong to their page.
+- It injects the **page's store** (`providers: [UserDetailStore]` on the page), so it only works inside its page. For
+  its part it does what a page does: fills the ViewModels of its dumb children, handles their outputs, opens its
+  dialogs.
+- Inputs: only the ids it needs for its own commands or dialogs (`userId` for the close session dialog); data comes
+  from the store.
+- Every tab gets a tab component, also one with a single child – no exceptions.
+- The page keeps what belongs to the whole page: the header and its actions, the selected tab (`tab` query
+  parameter).
+- Layout: the page wraps each tab in its padding (`<div class="tab-content">`), the tab component lays out its
+  children (`:host`).
 
 ## Dumb component
 
@@ -255,7 +279,8 @@ Dumb component – ViewModel in, command out, no store:
 - Material harnesses for fields and buttons (`MatInputHarness`, `MatButtonHarness`) –
   see [user-contact.component.spec.ts](../../../src/app/users/components/user-contact/user-contact.component.spec.ts).
 
-Smart component – store mocked, children real:
+Smart component – store mocked, children real (a tab component the same way, but it has no `providers` of its own:
+the store mock goes into the `TestBed` providers):
 
 - `{ provide: ToolDetailStore, useValue: { tool: signal(tool), updateTool: vi.fn(), … } }` – with
   `providers: [Store]` on the component a TestBed provider doesn't reach it, override it:
@@ -286,6 +311,7 @@ Smart component – store mocked, children real:
       pure `to<Name>ViewModel()` after the class; handlers only call the store
 - [ ] Smart template: layout + children; parts with own state, forms or business switches extracted; no
       pass-through components
+- [ ] Page with tabs: frame only; every tab a tab component `<page>-tab-<name>/` in the page's folder
 - [ ] Specs: dumb with complete ViewModel literals, smart with mocked store incl. the mapping, rules in the store
       spec
 - [ ] Comments only where the code can't say it

@@ -7,12 +7,9 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AgeGroup } from '../../../shared/models/age-group';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
-import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
-import { UserToolCertificationsComponent } from '../../components/user-tool-certifications/user-tool-certifications.component';
-import { ToolCertification } from '../../tool-certification.model';
-import { Tool } from '../../tool.model';
 import { User } from '../../user.model';
+import { UserDetailTabInfoComponent } from './user-detail-tab-info/user-detail-tab-info.component';
 import { UserDetailComponent } from './user-detail.component';
 import { UserDetailStore } from './user-detail.store';
 
@@ -36,26 +33,6 @@ describe('UserDetailComponent', () => {
     createdAt: new Date('2026-01-01T10:00:00Z'),
     updatedAt: new Date('2026-01-01T10:00:00Z'),
   };
-  const tools: Tool[] = [{ id: 'tool-1', name: 'Bandsäge' }];
-  const certifications: ToolCertification[] = [
-    {
-      id: 'cert-1',
-      customerId: 'user-1',
-      toolId: 'tool-1',
-      status: ToolCertificationStatus.Active,
-      certifiedAt: new Date('2026-01-01T10:00:00Z'),
-      certifiedBy: null,
-    },
-    {
-      id: 'cert-2',
-      customerId: 'user-1',
-      toolId: 'tool-deleted',
-      status: ToolCertificationStatus.Revoked,
-      certifiedAt: new Date('2026-02-01T10:00:00Z'),
-      certifiedBy: null,
-    },
-  ];
-
   let fixture: ComponentFixture<UserDetailComponent>;
   let assignRfidTag: Mock;
 
@@ -66,9 +43,9 @@ describe('UserDetailComponent', () => {
       hasLoadError: signal(false),
       user: signal(user),
       rfidTagAssignment: signal(null),
-      toolCertifications: signal(certifications),
-      tools: signal(tools),
-      // read by the open session tab
+      // read by the tabs
+      toolCertifications: signal([]),
+      tools: signal([]),
       openSession: signal(null),
       setUserId: vi.fn(),
       assignRfidTag,
@@ -88,29 +65,6 @@ describe('UserDetailComponent', () => {
     await fixture.whenStable();
   });
 
-  it('should pass the certifications with the tool names', () => {
-    const certificationsComponent: UserToolCertificationsComponent = fixture.debugElement.query(
-      By.directive(UserToolCertificationsComponent),
-    ).componentInstance;
-
-    expect(certificationsComponent.certifications()).toEqual([
-      {
-        customerId: 'user-1',
-        toolId: 'tool-1',
-        toolName: 'Bandsäge',
-        status: ToolCertificationStatus.Active,
-        certifiedAt: new Date('2026-01-01T10:00:00Z'),
-      },
-      {
-        customerId: 'user-1',
-        toolId: 'tool-deleted',
-        toolName: null,
-        status: ToolCertificationStatus.Revoked,
-        certifiedAt: new Date('2026-02-01T10:00:00Z'),
-      },
-    ]);
-  });
-
   it('should pass the user to the header and execute its commands', () => {
     const header: UserDetailHeaderComponent = fixture.debugElement.query(
       By.directive(UserDetailHeaderComponent),
@@ -124,5 +78,9 @@ describe('UserDetailComponent', () => {
       customerId: 'user-1',
       assignmentType: RfidTagAssignmentType.Fixed,
     });
+  });
+
+  it('should render the info tab', () => {
+    expect(fixture.debugElement.query(By.directive(UserDetailTabInfoComponent))).not.toBeNull();
   });
 });

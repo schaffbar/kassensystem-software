@@ -123,20 +123,21 @@ mappt mit `to<Name>ViewModel()`
 
 ### users
 
-| Komponente                 | Ordner        | Soll        | Ist                                                                | Input heute                                                        | ViewModel (Soll)                                                                     | Status           |
-| -------------------------- | ------------- | ----------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------- |
-| `user-list`                | `pages/`      | Smart       | Smart, rendert Tabelle + Suche selbst                              | –                                                                  | –                                                                                    | ✅               |
-| `user-detail`              | `pages/`      | Smart       | Smart; Header in `user-detail-header` ausgelagert                  | –                                                                  | – (füllt die ViewModels der Kinder)                                                  | ✅ (V6 erledigt) |
-| `user-detail-header` (neu) | `components/` | Dumb        | Dumb                                                               | `UserDetailHeaderViewModel` + `RfidTagAssignmentViewModel \| null` | ohne Mapper                                                                          | ✅               |
-| ~~`user-detail-info`~~     | –             | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address`   | –                                                                  | –                                                                                    | ✅ (V5 erledigt) |
-| `user-open-session`        | `pages/`      | Smart       | Smart, verschachtelt (nutzt den `UserDetailStore` der Elternseite) | `userId`                                                           | –                                                                                    | ✅               |
-| `user-contact`             | `components/` | Dumb        | Dumb                                                               | `UserContactViewModel`                                             | ohne Mapper: `UserContactViewModel` (`id`, `email`, `phone`)                         | ✅               |
-| `user-address`             | `components/` | Dumb        | Dumb                                                               | `UserAddressViewModel`                                             | ohne Mapper: `UserAddressViewModel` (`id`, `address: AddressViewModel`)              | ✅               |
-| `user-tool-certifications` | `components/` | Dumb        | Dumb + `ConfirmActionDialogService`                                | `UserToolCertificationRowViewModel[]`                              | **Mapping** in `user-detail`: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ✅               |
-| `tool-usage-summary`       | `components/` | Dumb        | Dumb                                                               | `ToolUsageSummaryViewModel`                                        | ohne Mapper: `ToolUsageSummaryViewModel`                                             | ✅               |
-| `workshop-usage-summary`   | `components/` | Dumb        | Dumb                                                               | `WorkshopUsageViewModel[]` + zwei Summen                           | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`                     | ✅               |
-| `new-user-form`            | `components/` | Form-Dialog | Form-Dialog                                                        | –                                                                  | – (keine Daten)                                                                      | ✅               |
-| `update-user-form`         | `components/` | Form-Dialog | Form-Dialog                                                        | Dialog-Data `{ user: UpdateUserViewModel }`                        | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`                             | ✅               |
+| Komponente                                             | Ordner               | Soll        | Ist                                                              | Input heute                                                        | ViewModel (Soll)                                                                     | Status           |
+| ------------------------------------------------------ | -------------------- | ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------- |
+| `user-list`                                            | `pages/`             | Smart       | Smart, rendert Tabelle + Suche selbst                            | –                                                                  | –                                                                                    | ✅               |
+| `user-detail`                                          | `pages/`             | Smart       | Smart; Header in `user-detail-header` ausgelagert                | –                                                                  | – (füllt die ViewModels der Kinder)                                                  | ✅ (V6 erledigt) |
+| `user-detail-header` (neu)                             | `components/`        | Dumb        | Dumb                                                             | `UserDetailHeaderViewModel` + `RfidTagAssignmentViewModel \| null` | ohne Mapper                                                                          | ✅               |
+| ~~`user-detail-info`~~                                 | –                    | –           | aufgelöst, `user-detail` rendert `user-contact` + `user-address` | –                                                                  | –                                                                                    | ✅ (V5 erledigt) |
+| `user-detail-tab-session` (vorher `user-open-session`) | `pages/user-detail/` | Smart (Tab) | Smart, Tab-Komponente mit dem `UserDetailStore` der Page         | `userId`                                                           | –                                                                                    | ✅               |
+| `user-detail-tab-info` (neu)                           | `pages/user-detail/` | Smart (Tab) | Smart, Tab-Komponente: Kontakt, Adresse, Zertifikate             | –                                                                  | – (füllt die ViewModels der Kinder)                                                  | ✅               |
+| `user-contact`                                         | `components/`        | Dumb        | Dumb                                                             | `UserContactViewModel`                                             | ohne Mapper: `UserContactViewModel` (`id`, `email`, `phone`)                         | ✅               |
+| `user-address`                                         | `components/`        | Dumb        | Dumb                                                             | `UserAddressViewModel`                                             | ohne Mapper: `UserAddressViewModel` (`id`, `address: AddressViewModel`)              | ✅               |
+| `user-tool-certifications`                             | `components/`        | Dumb        | Dumb + `ConfirmActionDialogService`                              | `UserToolCertificationRowViewModel[]`                              | **Mapping** in `user-detail`: `UserToolCertificationRowViewModel[]` (mit `toolName`) | ✅               |
+| `tool-usage-summary`                                   | `components/`        | Dumb        | Dumb                                                             | `ToolUsageSummaryViewModel`                                        | ohne Mapper: `ToolUsageSummaryViewModel`                                             | ✅               |
+| `workshop-usage-summary`                               | `components/`        | Dumb        | Dumb                                                             | `WorkshopUsageViewModel[]` + zwei Summen                           | ohne Mapper: `WorkshopUsageViewModel[]`, Summen bleiben `number`                     | ✅               |
+| `new-user-form`                                        | `components/`        | Form-Dialog | Form-Dialog                                                      | –                                                                  | – (keine Daten)                                                                      | ✅               |
+| `update-user-form`                                     | `components/`        | Form-Dialog | Form-Dialog                                                      | Dialog-Data `{ user: UpdateUserViewModel }`                        | ohne Mapper: Dialog-Data `{ user: UpdateUserViewModel }`                             | ✅               |
 
 ## Befunde im Detail
 
@@ -316,6 +317,15 @@ sich höchstens beim Input-Namen. Feature für Feature, damit die Commits klein 
 - [x] `tool-detail`: durchgereichte `computed`s entfernen
 - [x] `rfid-reader-detail`: `takeUntilDestroyed` für die Vorab-Prüfung
 - [x] `tool-certifications.onSubmitBatch`: typisierte Command-Variable (mit V4)
+
+### P6 – Tabs als smart components
+
+Entschieden 06.11.2026: Eine Detailseite mit Tabs ist ein Rahmen (Laden, Header, Tab-Gruppe); jeder Tab ist eine smart
+Tab-Komponente `<page>-tab-<name>/` im Ordner der Page, die den Store der Page injiziert (Skill „Pages with tabs“).
+
+- [x] Regel in Skill und CLAUDE.md
+- [x] `user-detail`: `user-detail-tab-info` (neu), `user-detail-tab-session` (vorher `user-open-session`)
+- [ ] `tool-detail`: `tool-detail-tab-info`, `tool-detail-tab-certifications`, `tool-detail-tab-configuration`
 
 ### Danach
 

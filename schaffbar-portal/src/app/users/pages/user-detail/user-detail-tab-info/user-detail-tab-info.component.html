@@ -1,0 +1,11 @@
+@if (detailsStore.user(); as user) {
+  <div>
+    <schbar-user-contact class="user-info-section" [userContact]="user" (contactChanged)="onContactChanged($event)" />
+    <schbar-user-address class="user-info-section" [userAddress]="user" (addressChanged)="onAddressChanged($event)" />
+  </div>
+  <schbar-user-tool-certifications
+    [certifications]="certificationRows()"
+    (pauseCertification)="onPauseCertification($event)"
+    (reactivateCertification)="onReactivateCertification($event)"
+    (revokeCertification)="onRevokeCertification($event)" />
+}

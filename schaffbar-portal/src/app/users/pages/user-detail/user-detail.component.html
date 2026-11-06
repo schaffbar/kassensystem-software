@@ -21,27 +21,13 @@
     [selectedIndex]="selectedTabIndex()"
     (selectedIndexChange)="selectedTabIndex.set($event)">
     <mat-tab [label]="'users.tabGroups.userDetails.detailsTab' | translate">
-      <div class="tab-content tab-content--split">
-        <div>
-          <schbar-user-contact
-            class="user-info-section"
-            [userContact]="user"
-            (contactChanged)="onContactChanged($event)" />
-          <schbar-user-address
-            class="user-info-section"
-            [userAddress]="user"
-            (addressChanged)="onAddressChanged($event)" />
-        </div>
-        <schbar-user-tool-certifications
-          [certifications]="certificationRows()"
-          (pauseCertification)="onPauseCertification($event)"
-          (reactivateCertification)="onReactivateCertification($event)"
-          (revokeCertification)="onRevokeCertification($event)" />
+      <div class="tab-content">
+        <schbar-user-detail-tab-info />
       </div>
     </mat-tab>
     <mat-tab [label]="'users.tabGroups.userDetails.openSessionTab' | translate">
       <div class="tab-content">
-        <schbar-user-open-session [userId]="user.id" />
+        <schbar-user-detail-tab-session [userId]="user.id" />
       </div>
     </mat-tab>
   </mat-tab-group>

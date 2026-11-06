@@ -41,6 +41,7 @@
 ## Architecture
 
 - [Frontend] Each tab a page or dumb component which uses other dumb components
+- [Frontend] onAssignRfidTag vs reload....
 - [Frontend] in dashboard - use global tools store vs fetch data to its own store
 
 - [Backend] Validate HTTP response before sending back

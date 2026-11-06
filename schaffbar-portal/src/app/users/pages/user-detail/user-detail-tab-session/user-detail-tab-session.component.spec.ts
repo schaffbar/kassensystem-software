@@ -5,12 +5,12 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { WorkshopSession } from '../../workshop-session.model';
-import { UserDetailStore } from '../user-detail/user-detail.store';
-import { UserOpenSessionComponent } from './user-open-session.component';
+import { CloseSessionDialogService } from '../../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
+import { WorkshopSession } from '../../../workshop-session.model';
+import { UserDetailStore } from '../user-detail.store';
+import { UserDetailTabSessionComponent } from './user-detail-tab-session.component';
 
-describe('UserOpenSessionComponent', () => {
+describe('UserDetailTabSessionComponent', () => {
   const session = {
     id: 'session-1',
     customerId: 'user-1',
@@ -22,7 +22,7 @@ describe('UserOpenSessionComponent', () => {
     toolUsageSummaries: [],
   } as unknown as WorkshopSession;
 
-  let fixture: ComponentFixture<UserOpenSessionComponent>;
+  let fixture: ComponentFixture<UserDetailTabSessionComponent>;
   let hasRunningUsage: WritableSignal<boolean>;
   let storeMock: Record<string, unknown> & { closeSession: Mock; reloadOpenSession: Mock };
   let openDialog: Mock;
@@ -43,7 +43,7 @@ describe('UserOpenSessionComponent', () => {
     openDialog = vi.fn();
 
     await TestBed.configureTestingModule({
-      imports: [UserOpenSessionComponent],
+      imports: [UserDetailTabSessionComponent],
       providers: [
         provideZonelessChangeDetection(),
         provideTranslateService(),
@@ -52,7 +52,7 @@ describe('UserOpenSessionComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserOpenSessionComponent);
+    fixture = TestBed.createComponent(UserDetailTabSessionComponent);
     fixture.componentRef.setInput('userId', 'user-1');
     await fixture.whenStable();
   });

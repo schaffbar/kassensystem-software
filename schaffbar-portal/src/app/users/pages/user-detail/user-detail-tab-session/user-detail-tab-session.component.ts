@@ -5,23 +5,26 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { ToolUsageSummaryComponent } from '../../components/tool-usage-summary/tool-usage-summary.component';
-import { WorkshopUsageSummaryComponent } from '../../components/workshop-usage-summary/workshop-usage-summary.component';
-import { CloseWorkshopSessionCommand } from '../../workshop-session.model';
-import { UserDetailStore } from '../user-detail/user-detail.store';
+import { CloseSessionDialogService } from '../../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
+import { ToolUsageSummaryComponent } from '../../../components/tool-usage-summary/tool-usage-summary.component';
+import { WorkshopUsageSummaryComponent } from '../../../components/workshop-usage-summary/workshop-usage-summary.component';
+import { CloseWorkshopSessionCommand } from '../../../workshop-session.model';
+import { UserDetailStore } from '../user-detail.store';
 
 @Component({
-  selector: 'schbar-user-open-session',
-  templateUrl: './user-open-session.component.html',
-  styleUrl: './user-open-session.component.scss',
+  selector: 'schbar-user-detail-tab-session',
+  templateUrl: './user-detail-tab-session.component.html',
+  styleUrl: './user-detail-tab-session.component.scss',
   imports: [MatButtonModule, MatIconModule, TranslatePipe, ToolUsageSummaryComponent, WorkshopUsageSummaryComponent],
 })
-export class UserOpenSessionComponent {
+export class UserDetailTabSessionComponent {
   protected readonly detailsStore = inject(UserDetailStore);
   private readonly closeSessionDialog = inject(CloseSessionDialogService);
 
   readonly userId = input.required<string>();
+
+  // --------------------------------------------------------------------------
+  // actions
 
   protected closeSession(): void {
     this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {

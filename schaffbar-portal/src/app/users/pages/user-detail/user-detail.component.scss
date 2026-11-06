@@ -2,25 +2,6 @@
   padding: 1rem;
 }
 
-.tab-content--split {
-  padding: 1rem;
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
-
-  > * {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-.user-info-section {
-  display: block;
-  min-width: 300px;
-  max-width: 600px;
-  width: 100%;
-}
-
 .load-error {
   color: var(--mat-sys-error);
 }

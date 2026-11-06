@@ -7,8 +7,9 @@
   `<resource>.api-service.ts` (`…ApiService`).
 - `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
   (`<entity>.mapper.ts`: API model → feature model, command → request), the list store (`<entities>.store.ts`),
-  validators (`<entity>.validators.ts`), `pages/` (a detail store next to its page:
-  `pages/<entity>-detail/<entity>-detail.store.ts`) and `components/`. No `shared/` folder inside a feature.
+  validators (`<entity>.validators.ts`), `pages/` (a detail store and the tab components next to their page:
+  `pages/<entity>-detail/<entity>-detail.store.ts`, `pages/<entity>-detail/<entity>-detail-tab-<name>/`) and
+  `components/`. No `shared/` folder inside a feature.
 - A backend resource used by several features gives each feature its **own** model and mapper (on purpose, not a
   shared feature model): `tools/tool-certification.model.ts` and `users/tool-certification.model.ts`,
   each with the commands of its feature.
@@ -138,6 +139,8 @@ Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL
   checked by `strictTemplates`), otherwise it maps in a `computed` with a pure `to<Name>ViewModel()` after the class.
   The store never imports a ViewModel.
 - No pass-through components. A list page may keep its own `mat-table`.
+- **Pages with tabs**: the page is the frame (loading, header, tab group); every tab is a smart tab component
+  `<page>-tab-<name>/` in the page's folder that injects the page's store and composes dumb components.
 
 ## Dialogs
 

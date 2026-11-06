@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, linkedSignal } from '@angular/core';
+import { Component, inject, input, linkedSignal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -11,24 +11,12 @@ import {
   UpdateUserDialogData,
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
-import {
-  UserToolCertificationRowViewModel,
-  UserToolCertificationsComponent,
-} from '../../components/user-tool-certifications/user-tool-certifications.component';
-import { UserAddressComponent } from '../../components/user-address/user-address.component';
 import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
-import { UserContactComponent } from '../../components/user-contact/user-contact.component';
 import { AssignRfidTagCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
-import {
-  PauseToolCertificationCommand,
-  ReactivateToolCertificationCommand,
-  RevokeToolCertificationCommand,
-  ToolCertification,
-} from '../../tool-certification.model';
-import { Tool } from '../../tool.model';
-import { UpdateUserAddressCommand, UpdateUserCommand, UpdateUserContactCommand } from '../../user.model';
+import { UpdateUserCommand } from '../../user.model';
+import { UserDetailTabInfoComponent } from './user-detail-tab-info/user-detail-tab-info.component';
+import { UserDetailTabSessionComponent } from './user-detail-tab-session/user-detail-tab-session.component';
 import { UserDetailStore } from './user-detail.store';
-import { UserOpenSessionComponent } from '../user-open-session/user-open-session.component';
 
 @Component({
   selector: 'schbar-user-detail',
@@ -36,10 +24,8 @@ import { UserOpenSessionComponent } from '../user-open-session/user-open-session
   styleUrl: './user-detail.component.scss',
   imports: [
     UserDetailHeaderComponent,
-    UserContactComponent,
-    UserAddressComponent,
-    UserOpenSessionComponent,
-    UserToolCertificationsComponent,
+    UserDetailTabInfoComponent,
+    UserDetailTabSessionComponent,
     MatTabsModule,
     MatProgressBarModule,
     TranslatePipe,
@@ -55,13 +41,13 @@ export class UserDetailComponent {
   readonly tab = input<string>();
 
   protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
-  protected readonly certificationRows = computed(() =>
-    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.tools()),
-  );
 
   constructor() {
     this.detailsStore.setUserId(this.id);
   }
+
+  // --------------------------------------------------------------------------
+  // actions
 
   protected reloadUser(): void {
     this.detailsStore.reloadUser();
@@ -94,38 +80,4 @@ export class UserDetailComponent {
   protected onUnassignRfidTag(command: UnassignRfidTagCommand): void {
     this.detailsStore.unassignRfidTag(command);
   }
-
-  protected onAddressChanged(command: UpdateUserAddressCommand) {
-    this.detailsStore.updateUserAddress(command);
-  }
-
-  protected onContactChanged(command: UpdateUserContactCommand) {
-    this.detailsStore.updateUserContact(command);
-  }
-
-  protected onPauseCertification(command: PauseToolCertificationCommand): void {
-    this.detailsStore.pauseCertification(command);
-  }
-
-  protected onReactivateCertification(command: ReactivateToolCertificationCommand): void {
-    this.detailsStore.reactivateCertification(command);
-  }
-
-  protected onRevokeCertification(command: RevokeToolCertificationCommand): void {
-    this.detailsStore.revokeCertification(command);
-  }
-}
-
-function toCertificationRowViewModels(
-  certifications: ToolCertification[],
-  tools: Tool[],
-): UserToolCertificationRowViewModel[] {
-  const toolNames = new Map(tools.map((tool) => [tool.id, tool.name]));
-  return certifications.map((certification) => ({
-    customerId: certification.customerId,
-    toolId: certification.toolId,
-    toolName: toolNames.get(certification.toolId) ?? null,
-    status: certification.status,
-    certifiedAt: certification.certifiedAt,
-  }));
 }
