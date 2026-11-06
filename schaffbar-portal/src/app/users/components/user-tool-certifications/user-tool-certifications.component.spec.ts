@@ -48,6 +48,14 @@ describe('UserToolCertificationsComponent', () => {
     fixture.nativeElement.querySelector(`button[title="users.actions.toolCertifications.${title}"]`).click();
   }
 
+  it('should show no actions for a revoked certification', async () => {
+    await render(ToolCertificationStatus.Revoked);
+
+    const actions: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-actions');
+    expect(actions.querySelectorAll('button').length).toBe(0);
+    expect(actions.textContent?.trim()).toBe('');
+  });
+
   it('should pause after a destructive confirmation', async () => {
     const paused = vi.fn();
     fixture.componentInstance.certificationPaused.subscribe(paused);
