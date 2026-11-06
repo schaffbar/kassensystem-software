@@ -91,6 +91,18 @@ Files are divided by section comments – a separator line ending at column 79, 
 - `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is kept only as an example of a custom
   store feature – it is not used anywhere.
 
+## Subscriptions
+
+- `subscribe()` only on observables that complete by themselves: `dialogRef.afterClosed()`, the `open()` of the
+  dialog services, a one-off `HttpClient` call (`hasAssignedTools`). They need no unsubscribe – they end after one
+  value.
+- Observables that never complete (`interval`, `BreakpointObserver`, `valueChanges`, router events) are never
+  subscribed by hand: `toSignal()` in a component, `rxMethod` / `mutation()` in a store – both end with their
+  injector.
+- `takeUntilDestroyed(this.destroyRef)` when a callback must not run after the page was left – e.g. an HTTP check
+  that opens a dialog (`changeRfidReaderType` in `rfid-reader-detail`). Dialogs close themselves on navigation
+  (`closeOnNavigation`), their callbacks then get `undefined` / `false` and do nothing.
+
 ## Forms
 
 - Every form has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
