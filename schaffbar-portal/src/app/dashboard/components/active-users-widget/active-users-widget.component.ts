@@ -33,7 +33,7 @@ interface ActiveUserRow extends ActiveUserViewModel {
 export class ActiveUsersWidgetComponent {
   readonly activeUsers = input.required<ActiveUserViewModel[]>();
 
-  readonly reload = output<void>();
+  readonly reloadRequested = output<void>();
   // the customer id
   readonly userSelected = output<string>();
 
@@ -55,7 +55,7 @@ export class ActiveUsersWidgetComponent {
   });
 
   protected reloadActiveUsers(): void {
-    this.reload.emit();
+    this.reloadRequested.emit();
   }
 
   protected selectUser(user: ActiveUserViewModel): void {

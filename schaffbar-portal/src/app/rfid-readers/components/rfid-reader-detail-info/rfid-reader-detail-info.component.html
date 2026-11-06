@@ -1,11 +1,11 @@
 <h3 class="reader-header">
   {{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderInformation' | translate }}
-  <button matIconButton type="button" aria-label="Edit reader" (click)="onEdit()" [disabled]="isEditing()">
+  <button matIconButton type="button" aria-label="Edit reader" (click)="editRfidReader()" [disabled]="isEditing()">
     <mat-icon>edit</mat-icon>
   </button>
 </h3>
 
-<form class="reader-content" [formRoot]="readerForm" (submit)="onSave()">
+<form class="reader-content" [formRoot]="readerForm" (submit)="saveRfidReader()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
@@ -56,7 +56,7 @@
 
   @if (isEditing()) {
     <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="discardRfidReaderChanges()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
       <button matButton="filled" type="submit">

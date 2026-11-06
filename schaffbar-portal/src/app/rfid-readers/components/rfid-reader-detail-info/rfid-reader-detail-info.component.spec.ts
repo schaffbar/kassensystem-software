@@ -23,7 +23,7 @@ describe('RfidReaderDetailInfoComponent', () => {
 
   let fixture: ComponentFixture<RfidReaderDetailInfoComponent>;
   let loader: HarnessLoader;
-  let readerChanged: Mock;
+  let rfidReaderChanged: Mock;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -33,8 +33,8 @@ describe('RfidReaderDetailInfoComponent', () => {
 
     fixture = TestBed.createComponent(RfidReaderDetailInfoComponent);
     fixture.componentRef.setInput('rfidReaderDetailInfo', rfidReader);
-    readerChanged = vi.fn();
-    fixture.componentInstance.readerChanged.subscribe(readerChanged);
+    rfidReaderChanged = vi.fn();
+    fixture.componentInstance.rfidReaderChanged.subscribe(rfidReaderChanged);
     loader = TestbedHarnessEnvironment.loader(fixture);
     await fixture.whenStable();
   });
@@ -102,8 +102,8 @@ describe('RfidReaderDetailInfoComponent', () => {
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
     await fixture.whenStable();
 
-    expect(readerChanged).toHaveBeenCalledTimes(1);
-    expect(readerChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: 'Steckdose 1' });
+    expect(rfidReaderChanged).toHaveBeenCalledTimes(1);
+    expect(rfidReaderChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: 'Steckdose 1' });
   });
 
   it('should emit the changes on save and switch back to read-only', async () => {
@@ -113,7 +113,7 @@ describe('RfidReaderDetailInfoComponent', () => {
 
     await click(saveButton);
 
-    expect(readerChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: undefined });
+    expect(rfidReaderChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: undefined });
     expect(await (await input('name')).isReadonly()).toBe(true);
   });
 
@@ -123,7 +123,7 @@ describe('RfidReaderDetailInfoComponent', () => {
 
     await click(cancelButton);
 
-    expect(readerChanged).not.toHaveBeenCalled();
+    expect(rfidReaderChanged).not.toHaveBeenCalled();
     expect(await (await input('name')).getValue()).toBe('Reader 1');
     expect(await (await input('name')).isReadonly()).toBe(true);
   });

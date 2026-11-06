@@ -55,7 +55,7 @@ export class ChangeRfidReaderTypeFormComponent {
     required(schema.type);
   });
 
-  protected onSave(): void {
+  protected saveRfidReaderType(): void {
     submit(this.typeForm, async () => {
       const { type } = this.model();
       if (!type) return;

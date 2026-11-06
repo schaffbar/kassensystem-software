@@ -34,7 +34,7 @@ interface RfidReaderInfoFormModel {
 export class RfidReaderDetailInfoComponent {
   readonly rfidReaderDetailInfo = input.required<RfidReaderDetailInfoViewModel>();
 
-  readonly readerChanged = output<UpdateRfidReaderCommand>();
+  readonly rfidReaderChanged = output<UpdateRfidReaderCommand>();
 
   protected readonly isEditing = signal(false);
 
@@ -46,19 +46,19 @@ export class RfidReaderDetailInfoComponent {
     readonly(schema, { when: () => !this.isEditing() });
   });
 
-  protected onEdit(): void {
+  protected editRfidReader(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
     this.readerForm.name().focusBoundControl();
   }
 
-  protected onCancel(): void {
+  protected discardRfidReaderChanges(): void {
     this.model.set(toModel(this.rfidReaderDetailInfo()));
     this.readerForm().reset();
     this.isEditing.set(false);
   }
 
-  protected onSave(): void {
+  protected saveRfidReader(): void {
     submit(this.readerForm, async () => {
       const { name, socketName } = this.model();
       const command: UpdateRfidReaderCommand = {
@@ -66,7 +66,7 @@ export class RfidReaderDetailInfoComponent {
         name: name || undefined,
         socketName: socketName || undefined,
       };
-      this.readerChanged.emit(command);
+      this.rfidReaderChanged.emit(command);
       this.isEditing.set(false);
     });
   }

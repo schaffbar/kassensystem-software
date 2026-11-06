@@ -10,7 +10,7 @@
     <div class="rfid-reader-detail-header-title">
       <div class="rfid-reader-detail-header-title-actions">
         <h1>{{ rfidReader.name || rfidReader.macAddress }}</h1>
-        <button matIconButton (click)="changeType()">
+        <button matIconButton (click)="changeRfidReaderType()">
           <mat-icon>swap_horiz</mat-icon>
         </button>
         <button matIconButton (click)="reloadRfidReader()">
@@ -20,5 +20,5 @@
     </div>
   </div>
 
-  <schbar-rfid-reader-detail-info [rfidReaderDetailInfo]="rfidReader" (readerChanged)="onRfidReaderChanged($event)" />
+  <schbar-rfid-reader-detail-info [rfidReaderDetailInfo]="rfidReader" (rfidReaderChanged)="updateRfidReader($event)" />
 }

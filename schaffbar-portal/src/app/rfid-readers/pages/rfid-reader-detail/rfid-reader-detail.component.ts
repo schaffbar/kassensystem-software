@@ -43,11 +43,11 @@ export class RfidReaderDetailComponent {
     this.detailsStore.reloadRfidReader();
   }
 
-  protected onRfidReaderChanged(command: UpdateRfidReaderCommand): void {
+  protected updateRfidReader(command: UpdateRfidReaderCommand): void {
     this.detailsStore.updateRfidReader(command);
   }
 
-  protected changeType(): void {
+  protected changeRfidReaderType(): void {
     const reader = this.detailsStore.rfidReader();
     if (!reader) return;
 

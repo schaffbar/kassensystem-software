@@ -56,11 +56,11 @@ export class RfidReaderListComponent {
     this.store.reloadRfidReaders();
   }
 
-  protected navigateToDetail(rfidReader: RfidReader): void {
+  protected openRfidReaderDetail(rfidReader: RfidReader): void {
     this.router.navigate([ROUTE.RFID_READERS, rfidReader.id]);
   }
 
-  protected deleteRfidReaderDialog(event: Event, rfidReader: RfidReader): void {
+  protected deleteRfidReader(event: Event, rfidReader: RfidReader): void {
     event.stopPropagation();
 
     if (!rfidReader || !rfidReader.id) {

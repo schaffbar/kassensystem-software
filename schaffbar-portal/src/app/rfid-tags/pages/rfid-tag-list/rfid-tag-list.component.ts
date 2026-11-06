@@ -51,7 +51,7 @@ export class RfidTagListComponent {
     this.store.reloadRfidTags();
   }
 
-  protected deleteRfidTagDialog(event: Event, rfidTag: RfidTag): void {
+  protected deleteRfidTag(event: Event, rfidTag: RfidTag): void {
     event.stopPropagation();
 
     if (!rfidTag || !rfidTag.id) {

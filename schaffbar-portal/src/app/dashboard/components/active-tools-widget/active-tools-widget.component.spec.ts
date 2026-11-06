@@ -41,11 +41,11 @@ describe('ActiveToolsWidgetComponent', () => {
   });
 
   it('should emit reload', () => {
-    const reload = vi.fn();
-    fixture.componentInstance.reload.subscribe(reload);
+    const reloadRequested = vi.fn();
+    fixture.componentInstance.reloadRequested.subscribe(reloadRequested);
 
     fixture.nativeElement.querySelector('mat-card-header button').click();
 
-    expect(reload).toHaveBeenCalledOnce();
+    expect(reloadRequested).toHaveBeenCalledOnce();
   });
 });

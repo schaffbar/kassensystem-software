@@ -23,7 +23,7 @@ export interface ToolStatusViewModel {
 export class ActiveToolsWidgetComponent {
   readonly toolStatuses = input.required<ToolStatusViewModel[]>();
 
-  readonly reload = output<void>();
+  readonly reloadRequested = output<void>();
 
   protected readonly displayedColumns = ['status', 'name', 'user'];
   protected readonly activeToolsCount = computed(() => this.toolStatuses().filter((tool) => tool.usedBy).length);
@@ -34,6 +34,6 @@ export class ActiveToolsWidgetComponent {
   });
 
   protected reloadActiveTools(): void {
-    this.reload.emit();
+    this.reloadRequested.emit();
   }
 }

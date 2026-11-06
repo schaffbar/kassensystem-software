@@ -10,7 +10,7 @@
 <div class="dashboard-widgets">
   <schbar-active-users-widget
     [activeUsers]="store.activeUsers()"
-    (reload)="reloadActiveUsers()"
+    (reloadRequested)="reloadActiveUsers()"
     (userSelected)="openUserSession($event)" />
-  <schbar-active-tools-widget [toolStatuses]="toolStatuses()" (reload)="reloadActiveTools()" />
+  <schbar-active-tools-widget [toolStatuses]="toolStatuses()" (reloadRequested)="reloadActiveTools()" />
 </div>
