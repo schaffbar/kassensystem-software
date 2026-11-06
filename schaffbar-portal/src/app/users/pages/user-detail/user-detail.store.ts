@@ -139,22 +139,22 @@ export const UserDetailStore = signalStore(
   })),
   // mutations of the open session – reload the session on success
   withMethods((store) => ({
-    closeSession: mutation<CloseWorkshopSessionCommand>({
+    closeWorkshopSession: mutation<CloseWorkshopSessionCommand>({
       request: (command) => store._workshopSessionsApi.closeWorkshopSession(command.userId),
       onSuccess: () => store._openSessionResource.reload(),
     }),
   })),
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
-    pauseCertification: mutation<PauseToolCertificationCommand>({
+    pauseToolCertification: mutation<PauseToolCertificationCommand>({
       request: (command) => store._toolCertificationsApi.pauseToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
-    reactivateCertification: mutation<ReactivateToolCertificationCommand>({
+    reactivateToolCertification: mutation<ReactivateToolCertificationCommand>({
       request: (command) => store._toolCertificationsApi.reactivateToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
-    revokeCertification: mutation<RevokeToolCertificationCommand>({
+    revokeToolCertification: mutation<RevokeToolCertificationCommand>({
       request: (command) => store._toolCertificationsApi.revokeToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),

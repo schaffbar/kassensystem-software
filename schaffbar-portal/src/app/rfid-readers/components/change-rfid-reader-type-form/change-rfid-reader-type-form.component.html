@@ -2,13 +2,13 @@
 
 <mat-divider />
 
-<form [formRoot]="typeForm" (submit)="saveRfidReaderType()">
+<form [formRoot]="rfidReaderTypeForm" (submit)="saveRfidReaderType()">
   <mat-dialog-content>
     <div class="form-row">
       <div class="form-col">
         <mat-form-field class="full-width">
           <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
-          <mat-select id="type" [formField]="typeForm.type">
+          <mat-select id="type" [formField]="rfidReaderTypeForm.type">
             @for (type of rfidReaderTypes; track type) {
               <mat-option [value]="type">
                 {{ type | rfidReaderTypeKey | translate }}
@@ -16,7 +16,9 @@
             }
           </mat-select>
           <mat-error>
-            <schbar-field-error [field]="typeForm.type" label="rfidReaders.shared.rfidReaderProperties.type" />
+            <schbar-field-error
+              [field]="rfidReaderTypeForm.type"
+              label="rfidReaders.shared.rfidReaderProperties.type" />
           </mat-error>
         </mat-form-field>
       </div>

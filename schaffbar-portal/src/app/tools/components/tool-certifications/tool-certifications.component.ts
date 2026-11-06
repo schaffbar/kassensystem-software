@@ -15,7 +15,7 @@ import { CertificationStatusChipComponent } from '../../../shared/components/cer
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
+import { BatchCreateToolCertificationsCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
 
 export interface ToolCertificationRowViewModel {
   customerId: string;
@@ -59,7 +59,7 @@ export class ToolCertificationsComponent {
   readonly certifiableUsers = input.required<UserOptionViewModel[]>();
   readonly certifiers = input.required<UserOptionViewModel[]>();
 
-  readonly certificationsCreated = output<BatchCreateToolCertificationCommand>();
+  readonly certificationsCreated = output<BatchCreateToolCertificationsCommand>();
   readonly certificationDeleted = output<DeleteToolCertificationCommand>();
 
   protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
@@ -113,7 +113,7 @@ export class ToolCertificationsComponent {
     const certifier = this.selectedCertifier();
     if (this.selectedUsers().length === 0 || !certifier) return;
 
-    const command: BatchCreateToolCertificationCommand = {
+    const command: BatchCreateToolCertificationsCommand = {
       userIds: this.selectedUsers().map((user) => user.id),
       toolId: this.toolId(),
       certifiedBy: certifier.id,

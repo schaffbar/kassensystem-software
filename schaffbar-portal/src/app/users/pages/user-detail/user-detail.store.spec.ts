@@ -248,7 +248,7 @@ describe('UserDetailStore', () => {
   it('should only reload the open session after closing it', async () => {
     await loadUser();
 
-    store.closeSession({ userId: 'user-1' });
+    store.closeWorkshopSession({ userId: 'user-1' });
     trigger();
     httpMock
       .expectOne((req) => req.method === 'PUT' && req.url === `${api}/workshop-sessions/user-1/close`)
@@ -263,7 +263,7 @@ describe('UserDetailStore', () => {
   it('should only reload the certifications after pausing one', async () => {
     await loadUser();
 
-    store.pauseCertification({ userId: 'user-1', toolId: 'tool-1' });
+    store.pauseToolCertification({ userId: 'user-1', toolId: 'tool-1' });
     trigger();
     httpMock
       .expectOne(

@@ -12,7 +12,7 @@ export interface ToolCertification {
 // ----------------------------------------------------------------------------
 // commands
 
-export interface BatchCreateToolCertificationCommand {
+export interface BatchCreateToolCertificationsCommand {
   userIds: string[];
   toolId: string;
   certifiedBy: string;

@@ -10,7 +10,7 @@
       [toolId]="tool.id"
       [instructors]="detailsStore.instructors()"
       [candidates]="detailsStore.instructorCandidates()"
-      (instructorsAdded)="addInstructors($event)"
-      (instructorsRemoved)="removeInstructors($event)" />
+      (instructorsAdded)="addToolInstructors($event)"
+      (instructorsRemoved)="removeToolInstructors($event)" />
   </div>
 }

@@ -32,7 +32,7 @@ describe('ToolUsageSummaryComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolUsageSummaryComponent);
-    fixture.componentRef.setInput('summary', summary);
+    fixture.componentRef.setInput('toolUsageSummary', summary);
     await fixture.whenStable();
   });
 
@@ -55,7 +55,7 @@ describe('ToolUsageSummaryComponent', () => {
   });
 
   it('should show a dash for a deleted tool and no chip when inactive', async () => {
-    fixture.componentRef.setInput('summary', { ...summary, toolName: null, active: false });
+    fixture.componentRef.setInput('toolUsageSummary', { ...summary, toolName: null, active: false });
     await fixture.whenStable();
 
     expect(text('.tool-summary-header')[0]).toBe('–');
@@ -63,7 +63,7 @@ describe('ToolUsageSummaryComponent', () => {
   });
 
   it('should show no table without usages', async () => {
-    fixture.componentRef.setInput('summary', { ...summary, usages: [] });
+    fixture.componentRef.setInput('toolUsageSummary', { ...summary, usages: [] });
     await fixture.whenStable();
 
     expect(fixture.nativeElement.querySelector('table')).toBeNull();

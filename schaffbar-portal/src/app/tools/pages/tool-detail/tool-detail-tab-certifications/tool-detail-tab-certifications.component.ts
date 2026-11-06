@@ -5,7 +5,7 @@ import {
   ToolCertificationsComponent,
 } from '../../../components/tool-certifications/tool-certifications.component';
 import {
-  BatchCreateToolCertificationCommand,
+  BatchCreateToolCertificationsCommand,
   DeleteToolCertificationCommand,
   ToolCertification,
 } from '../../../tool-certification.model';
@@ -28,12 +28,12 @@ export class ToolDetailTabCertificationsComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected batchCreateCertifications(command: BatchCreateToolCertificationCommand): void {
-    this.detailsStore.batchCreateCertifications(command);
+  protected batchCreateToolCertifications(command: BatchCreateToolCertificationsCommand): void {
+    this.detailsStore.batchCreateToolCertifications(command);
   }
 
-  protected deleteCertification(command: DeleteToolCertificationCommand): void {
-    this.detailsStore.deleteCertification(command);
+  protected deleteToolCertification(command: DeleteToolCertificationCommand): void {
+    this.detailsStore.deleteToolCertification(command);
   }
 }
 

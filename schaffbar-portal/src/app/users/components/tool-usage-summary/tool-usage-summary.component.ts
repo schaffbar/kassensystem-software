@@ -32,7 +32,7 @@ export interface ToolUsageSummaryViewModel {
   imports: [MatTableModule, MatChipsModule, DatePipe, TranslatePipe, OrDashPipe],
 })
 export class ToolUsageSummaryComponent {
-  readonly summary = input.required<ToolUsageSummaryViewModel>();
+  readonly toolUsageSummary = input.required<ToolUsageSummaryViewModel>();
 
   protected readonly toolUsageColumns: string[] = ['startTime', 'endTime', 'durationInMinutes', 'unitsUsed'];
 }

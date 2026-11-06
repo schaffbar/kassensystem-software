@@ -5,7 +5,7 @@
   </div>
   <schbar-user-tool-certifications
     [certifications]="certificationRows()"
-    (certificationPaused)="pauseCertification($event)"
-    (certificationReactivated)="reactivateCertification($event)"
-    (certificationRevoked)="revokeCertification($event)" />
+    (certificationPaused)="pauseToolCertification($event)"
+    (certificationReactivated)="reactivateToolCertification($event)"
+    (certificationRevoked)="revokeToolCertification($event)" />
 }

@@ -265,11 +265,11 @@ Rules:
 ```ts
 private readonly closeSessionDialog = inject(CloseSessionDialogService);
 
-protected closeSession(): void {
+protected closeWorkshopSession(): void {
   this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {
     if (confirmed) {
-      const command: CloseWorkshopSessionCommand = { customerId: this.userId() };
-      this.detailsStore.closeSession(command);
+      const command: CloseWorkshopSessionCommand = { userId: this.userId() };
+      this.detailsStore.closeWorkshopSession(command);
     } else {
       // the dialog loaded the session itself and may have shown a newer state than the page
       this.detailsStore.reloadOpenSession();

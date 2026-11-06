@@ -40,16 +40,16 @@ export class UserDetailTabInfoComponent {
     this.detailsStore.updateUserAddress(command);
   }
 
-  protected pauseCertification(command: PauseToolCertificationCommand): void {
-    this.detailsStore.pauseCertification(command);
+  protected pauseToolCertification(command: PauseToolCertificationCommand): void {
+    this.detailsStore.pauseToolCertification(command);
   }
 
-  protected reactivateCertification(command: ReactivateToolCertificationCommand): void {
-    this.detailsStore.reactivateCertification(command);
+  protected reactivateToolCertification(command: ReactivateToolCertificationCommand): void {
+    this.detailsStore.reactivateToolCertification(command);
   }
 
-  protected revokeCertification(command: RevokeToolCertificationCommand): void {
-    this.detailsStore.revokeCertification(command);
+  protected revokeToolCertification(command: RevokeToolCertificationCommand): void {
+    this.detailsStore.revokeToolCertification(command);
   }
 }
 

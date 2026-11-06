@@ -5,7 +5,7 @@
   </button>
 </h3>
 
-<form class="reader-content" [formRoot]="readerForm" (submit)="saveRfidReader()">
+<form class="reader-content" [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
@@ -41,7 +41,7 @@
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</mat-label>
-        <input id="name" matInput [formField]="readerForm.name" />
+        <input id="name" matInput [formField]="rfidReaderForm.name" />
       </mat-form-field>
     </div>
   </div>
@@ -49,7 +49,7 @@
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.socketName' | translate }}</mat-label>
-        <input id="socketName" matInput [formField]="readerForm.socketName" />
+        <input id="socketName" matInput [formField]="rfidReaderForm.socketName" />
       </mat-form-field>
     </div>
   </div>

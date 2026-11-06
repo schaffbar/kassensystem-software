@@ -4,7 +4,7 @@ import {
   BatchCertifyRequest,
   ToolCertificationApiModel,
 } from '../shared/api/tool-certifications/tool-certification.api-model';
-import { BatchCreateToolCertificationCommand, ToolCertification } from './tool-certification.model';
+import { BatchCreateToolCertificationsCommand, ToolCertification } from './tool-certification.model';
 
 // ----------------------------------------------------------------------------
 // API model → feature model
@@ -23,7 +23,7 @@ export function toToolCertification(apiModel: ToolCertificationApiModel): ToolCe
 // ----------------------------------------------------------------------------
 // command → request
 
-export function toBatchCertifyRequest(command: BatchCreateToolCertificationCommand): BatchCertifyRequest {
+export function toBatchCertifyRequest(command: BatchCreateToolCertificationsCommand): BatchCertifyRequest {
   return {
     customerIds: command.userIds,
     toolId: command.toolId,

@@ -48,7 +48,7 @@ export class ToolCertificationsApiService {
   // --------------------------------------------------------------------------
   // commands
 
-  batchCertify(request: BatchCertifyRequest): Observable<void> {
+  certifyCustomers(request: BatchCertifyRequest): Observable<void> {
     return this.http.post<void>(`${TOOL_CERTIFICATIONS_API_URL}/batch`, request);
   }
 

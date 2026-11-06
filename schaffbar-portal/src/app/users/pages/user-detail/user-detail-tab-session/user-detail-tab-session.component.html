@@ -11,7 +11,7 @@
         <h2>{{ 'users.pages.openSession.headers.toolUsage' | translate }}</h2>
 
         @for (summary of detailsStore.toolUsageSummaries(); track summary.toolId) {
-          <schbar-tool-usage-summary [summary]="summary" />
+          <schbar-tool-usage-summary [toolUsageSummary]="summary" />
         }
       </div>
     }
@@ -21,9 +21,9 @@
         class="close-button"
         matButton="filled"
         type="button"
-        [disabled]="detailsStore.hasRunningUsage() || detailsStore.closeSession.isPending()"
-        (click)="closeSession()">
-        {{ 'users.actions.closeSession' | translate }}
+        [disabled]="detailsStore.hasRunningUsage() || detailsStore.closeWorkshopSession.isPending()"
+        (click)="closeWorkshopSession()">
+        {{ 'users.actions.closeWorkshopSession' | translate }}
       </button>
       @if (detailsStore.hasRunningUsage()) {
         <p class="running-usage-hint">

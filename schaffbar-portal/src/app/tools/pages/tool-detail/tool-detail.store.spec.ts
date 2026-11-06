@@ -177,7 +177,7 @@ describe('ToolDetailStore', () => {
   it('should only reload the tool after adding instructors', async () => {
     await loadTool();
 
-    store.addInstructors({ toolId: 'tool-1', instructorIds: ['user-1'] });
+    store.addToolInstructors({ toolId: 'tool-1', instructorIds: ['user-1'] });
     trigger();
     const add = httpMock.expectOne(`${toolsUrl}/tool-1/instructors`);
     expect(add.request.method).toBe('POST');
@@ -242,7 +242,7 @@ describe('ToolDetailStore', () => {
   it('should send the instructor ids as body of the DELETE when removing instructors', async () => {
     await loadTool();
 
-    store.removeInstructors({ toolId: 'tool-1', instructorIds: ['user-1'] });
+    store.removeToolInstructors({ toolId: 'tool-1', instructorIds: ['user-1'] });
     trigger();
     const remove = httpMock.expectOne(`${toolsUrl}/tool-1/instructors`);
     expect(remove.request.method).toBe('DELETE');
@@ -257,7 +257,7 @@ describe('ToolDetailStore', () => {
   it('should only reload the certifications after certifying several users', async () => {
     await loadTool();
 
-    store.batchCreateCertifications({ userIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
+    store.batchCreateToolCertifications({ userIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
     trigger();
     const batch = httpMock.expectOne(`${certificationsUrl}/batch`);
     expect(batch.request.method).toBe('POST');
@@ -273,7 +273,7 @@ describe('ToolDetailStore', () => {
   it('should only reload the certifications after deleting one', async () => {
     await loadTool();
 
-    store.deleteCertification({ userId: 'user-1', toolId: 'tool-1' });
+    store.deleteToolCertification({ userId: 'user-1', toolId: 'tool-1' });
     trigger();
     const remove = httpMock.expectOne(`${certificationsUrl}/customers/user-1/tools/tool-1`);
     expect(remove.request.method).toBe('DELETE');

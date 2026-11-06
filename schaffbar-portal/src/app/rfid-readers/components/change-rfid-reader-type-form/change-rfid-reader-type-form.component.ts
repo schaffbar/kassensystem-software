@@ -51,7 +51,7 @@ export class ChangeRfidReaderTypeFormComponent {
 
   private readonly model = signal<ChangeRfidReaderTypeFormModel>({ type: this.data.rfidReader.type ?? '' });
 
-  protected readonly typeForm = form(this.model, (schema) => {
+  protected readonly rfidReaderTypeForm = form(this.model, (schema) => {
     required(schema.type);
   });
 
@@ -59,7 +59,7 @@ export class ChangeRfidReaderTypeFormComponent {
   // actions
 
   protected saveRfidReaderType(): void {
-    submit(this.typeForm, async () => {
+    submit(this.rfidReaderTypeForm, async () => {
       const { type } = this.model();
       if (!type) return;
 

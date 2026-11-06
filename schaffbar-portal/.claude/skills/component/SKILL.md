@@ -110,7 +110,7 @@ smart:  (contactChanged)="updateUserContact($event)"
 | What                                    | Name                                                       | Examples                                                                    |
 | --------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------- |
 | method in a dumb component              | verb + object of the UI step                               | `editContact`, `discardContactChanges`, `saveContact`, `pauseCertification` |
-| method in a page / tab for a command    | the name of the store method it calls                      | `updateUserContact`, `pauseCertification`, `assignRfidTag`                  |
+| method in a page / tab for a command    | the name of the store method it calls                      | `updateUserContact`, `pauseToolCertification`, `assignRfidTag`              |
 | method in a page opening a dialog first | the action the dialog leads to                             | `createTool`, `deleteTool`, `updateUser`, `changeRfidReaderType`            |
 | navigation                              | `open` + target                                            | `openToolDetail`, `openUserSession`                                         |
 | output                                  | object + participle – the event, from the component's view | `contactChanged`, `certificationPaused`, `rfidTagAssigned`, `editRequested` |
@@ -144,8 +144,8 @@ export class ToolDetailTabCertificationsComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected deleteCertification(command: DeleteToolCertificationCommand): void {
-    this.detailsStore.deleteCertification(command);
+  protected deleteToolCertification(command: DeleteToolCertificationCommand): void {
+    this.detailsStore.deleteToolCertification(command);
   }
 }
 
@@ -175,7 +175,7 @@ function toToolCertificationRowViewModels(
     [certifications]="certificationRows()"
     [certifiableUsers]="detailsStore.certifiableUsers()"
     [certifiers]="detailsStore.certifiers()"
-    (certificationDeleted)="deleteCertification($event)" … />
+    (certificationDeleted)="deleteToolCertification($event)" … />
 }
 ```
 

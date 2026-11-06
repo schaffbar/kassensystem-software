@@ -95,6 +95,8 @@ export class UserContactComponent {
   component needs (`hasAssignedTools(rfidReaderId): Observable<boolean>`), because components never import
   `shared/api`. A dialog container loads its data with
   `httpResource` directly, without a store (see "Dialogs").
+- A store method is named like its command without `Command`: `UpdateUserContactCommand` → `updateUserContact`,
+  `PauseToolCertificationCommand` → `pauseToolCertification`.
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
   `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not

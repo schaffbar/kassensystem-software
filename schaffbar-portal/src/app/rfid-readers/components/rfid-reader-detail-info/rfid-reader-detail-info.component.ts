@@ -41,7 +41,7 @@ export class RfidReaderDetailInfoComponent {
   // follows the rfidReaderDetailInfo input
   private readonly model = linkedSignal(() => toRfidReaderInfoFormModel(this.rfidReaderDetailInfo()));
 
-  protected readonly readerForm = form(this.model, (schema) => {
+  protected readonly rfidReaderForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
     readonly(schema, { when: () => !this.isEditing() });
   });
@@ -52,17 +52,17 @@ export class RfidReaderDetailInfoComponent {
   protected editRfidReader(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
-    this.readerForm.name().focusBoundControl();
+    this.rfidReaderForm.name().focusBoundControl();
   }
 
   protected discardRfidReaderChanges(): void {
     this.model.set(toRfidReaderInfoFormModel(this.rfidReaderDetailInfo()));
-    this.readerForm().reset();
+    this.rfidReaderForm().reset();
     this.isEditing.set(false);
   }
 
   protected saveRfidReader(): void {
-    submit(this.readerForm, async () => {
+    submit(this.rfidReaderForm, async () => {
       const { name, socketName } = this.model();
       const command: UpdateRfidReaderCommand = {
         rfidReaderId: this.rfidReaderDetailInfo().id,

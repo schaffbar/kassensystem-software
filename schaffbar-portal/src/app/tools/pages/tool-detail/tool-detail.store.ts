@@ -12,7 +12,7 @@ import { toBatchCertifyRequest, toToolCertification } from '../../tool-certifica
 import { toRfidReader } from '../../rfid-reader.mapper';
 import { toUser } from '../../user.mapper';
 import { toInstructorsRequest, toSetWlanRelaisRequest, toTool, toUpdateToolRequest } from '../../tool.mapper';
-import { BatchCreateToolCertificationCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
+import { BatchCreateToolCertificationsCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
@@ -112,22 +112,22 @@ export const ToolDetailStore = signalStore(
       request: (command) => store._toolsApi.clearWlanRelais(command.toolId),
       onSuccess: () => store._toolResource.reload(),
     }),
-    addInstructors: mutation<AddToolInstructorsCommand>({
+    addToolInstructors: mutation<AddToolInstructorsCommand>({
       request: (command) => store._toolsApi.addInstructors(command.toolId, toInstructorsRequest(command)),
       onSuccess: () => store._toolResource.reload(),
     }),
-    removeInstructors: mutation<RemoveToolInstructorsCommand>({
+    removeToolInstructors: mutation<RemoveToolInstructorsCommand>({
       request: (command) => store._toolsApi.removeInstructors(command.toolId, toInstructorsRequest(command)),
       onSuccess: () => store._toolResource.reload(),
     }),
   })),
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
-    batchCreateCertifications: mutation<BatchCreateToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.batchCertify(toBatchCertifyRequest(command)),
+    batchCreateToolCertifications: mutation<BatchCreateToolCertificationsCommand>({
+      request: (command) => store._toolCertificationsApi.certifyCustomers(toBatchCertifyRequest(command)),
       onSuccess: () => store._certificationsResource.reload(),
     }),
-    deleteCertification: mutation<DeleteToolCertificationCommand>({
+    deleteToolCertification: mutation<DeleteToolCertificationCommand>({
       request: (command) => store._toolCertificationsApi.deleteToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),

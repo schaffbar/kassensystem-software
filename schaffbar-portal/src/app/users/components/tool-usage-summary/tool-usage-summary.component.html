@@ -1,19 +1,19 @@
 <div class="tool-summary">
   <h3 class="tool-summary-header">
-    {{ summary().toolName | orDash }}
-    @if (summary().active) {
+    {{ toolUsageSummary().toolName | orDash }}
+    @if (toolUsageSummary().active) {
       <mat-chip>{{ 'users.chips.openSession.toolUsage.active' | translate }}</mat-chip>
     }
   </h3>
   <p class="tool-summary-totals">
-    {{ 'users.pages.openSession.headers.total' | translate }}: {{ summary().totalDurationInMinutes }}
-    {{ 'users.pages.openSession.headers.totalDurationSuffix' | translate }} - {{ summary().totalUnits }}
+    {{ 'users.pages.openSession.headers.total' | translate }}: {{ toolUsageSummary().totalDurationInMinutes }}
+    {{ 'users.pages.openSession.headers.totalDurationSuffix' | translate }} - {{ toolUsageSummary().totalUnits }}
     {{ 'users.pages.openSession.headers.totalUnitsSuffix' | translate }}
   </p>
 
-  @if (summary().usages.length > 0) {
+  @if (toolUsageSummary().usages.length > 0) {
     <div class="table-container">
-      <table mat-table [dataSource]="summary().usages" class="mat-elevation-z8">
+      <table mat-table [dataSource]="toolUsageSummary().usages" class="mat-elevation-z8">
         <ng-container matColumnDef="startTime">
           <th mat-header-cell *matHeaderCellDef>
             {{ 'users.tables.openSession.toolUsage.startTimeColumn' | translate }}

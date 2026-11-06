@@ -24,7 +24,7 @@ describe('UserDetailTabSessionComponent', () => {
 
   let fixture: ComponentFixture<UserDetailTabSessionComponent>;
   let hasRunningUsage: WritableSignal<boolean>;
-  let storeMock: Record<string, unknown> & { closeSession: Mock; reloadOpenSession: Mock };
+  let storeMock: Record<string, unknown> & { closeWorkshopSession: Mock; reloadOpenSession: Mock };
   let openDialog: Mock;
 
   beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('UserDetailTabSessionComponent', () => {
       totalWorkshopDurationInMinutes: signal(60),
       totalWorkshopUnits: signal(10),
       hasRunningUsage,
-      closeSession: Object.assign(vi.fn(), { isPending: signal(false) }),
+      closeWorkshopSession: Object.assign(vi.fn(), { isPending: signal(false) }),
       reloadOpenSession: vi.fn(),
     };
     openDialog = vi.fn();
@@ -86,14 +86,14 @@ describe('UserDetailTabSessionComponent', () => {
   it('should close the session of the user after confirmation', async () => {
     await clickClose(true);
 
-    expect(storeMock.closeSession).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+    expect(storeMock.closeWorkshopSession).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
     expect(storeMock.reloadOpenSession).not.toHaveBeenCalled();
   });
 
   it('should reload the session when the dialog is cancelled, as the dialog may have shown a newer state', async () => {
     await clickClose(false);
 
-    expect(storeMock.closeSession).not.toHaveBeenCalled();
+    expect(storeMock.closeWorkshopSession).not.toHaveBeenCalled();
     expect(storeMock.reloadOpenSession).toHaveBeenCalledOnce();
   });
 });

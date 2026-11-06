@@ -23,11 +23,11 @@ export class ToolDetailTabInfoComponent {
     this.detailsStore.updateTool(command);
   }
 
-  protected addInstructors(command: AddToolInstructorsCommand): void {
-    this.detailsStore.addInstructors(command);
+  protected addToolInstructors(command: AddToolInstructorsCommand): void {
+    this.detailsStore.addToolInstructors(command);
   }
 
-  protected removeInstructors(command: RemoveToolInstructorsCommand): void {
-    this.detailsStore.removeInstructors(command);
+  protected removeToolInstructors(command: RemoveToolInstructorsCommand): void {
+    this.detailsStore.removeToolInstructors(command);
   }
 }

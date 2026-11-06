@@ -34,17 +34,17 @@ describe('ToolDetailTabCertificationsComponent', () => {
   ];
 
   let fixture: ComponentFixture<ToolDetailTabCertificationsComponent>;
-  let deleteCertification: Mock;
+  let deleteToolCertification: Mock;
 
   beforeEach(async () => {
-    deleteCertification = vi.fn();
+    deleteToolCertification = vi.fn();
     const detailsStoreMock = {
       tool: signal({ id: 'tool-1' }),
       toolCertifications: signal(certifications),
       users: signal(users),
       certifiableUsers: signal([]),
       certifiers: signal([]),
-      deleteCertification,
+      deleteToolCertification,
     };
 
     await TestBed.configureTestingModule({
@@ -86,6 +86,6 @@ describe('ToolDetailTabCertificationsComponent', () => {
   it('should execute the delete command', () => {
     certificationsComponent().certificationDeleted.emit({ userId: 'user-1', toolId: 'tool-1' });
 
-    expect(deleteCertification).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
+    expect(deleteToolCertification).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 });

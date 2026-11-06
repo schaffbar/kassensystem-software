@@ -36,17 +36,17 @@ describe('ToolDetailTabInfoComponent', () => {
 
   let fixture: ComponentFixture<ToolDetailTabInfoComponent>;
   let updateTool: Mock;
-  let addInstructors: Mock;
+  let addToolInstructors: Mock;
 
   beforeEach(async () => {
     updateTool = vi.fn();
-    addInstructors = vi.fn();
+    addToolInstructors = vi.fn();
     const detailsStoreMock = {
       tool: signal(tool),
       instructors: signal(instructors),
       instructorCandidates: signal(candidates),
       updateTool,
-      addInstructors,
+      addToolInstructors,
     };
 
     await TestBed.configureTestingModule({
@@ -95,6 +95,6 @@ describe('ToolDetailTabInfoComponent', () => {
 
     instructorsComponent.instructorsAdded.emit({ toolId: 'tool-1', instructorIds: ['user-2'] });
 
-    expect(addInstructors).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-2'] });
+    expect(addToolInstructors).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-2'] });
   });
 });

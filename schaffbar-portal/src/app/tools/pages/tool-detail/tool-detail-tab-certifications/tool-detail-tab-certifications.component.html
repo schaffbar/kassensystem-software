@@ -4,6 +4,6 @@
     [certifications]="certificationRows()"
     [certifiableUsers]="detailsStore.certifiableUsers()"
     [certifiers]="detailsStore.certifiers()"
-    (certificationsCreated)="batchCreateCertifications($event)"
-    (certificationDeleted)="deleteCertification($event)" />
+    (certificationsCreated)="batchCreateToolCertifications($event)"
+    (certificationDeleted)="deleteToolCertification($event)" />
 }
