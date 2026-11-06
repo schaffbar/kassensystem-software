@@ -11,7 +11,7 @@ the API's shapes – they work with their own models, and a mapper translates be
 ```
 backend ──JSON──▶ shared/api/<resource>/            feature (<feature>/)
                     <entity>.api-model.ts ◀──────── <entity>.mapper.ts ──▶ <entity>.model.ts
-                    <resource>.api-service.ts ◀──── <feature>.store.ts      (feature model, commands)
+                    <resource>.api-service.ts ◀──── <entities>.store.ts     (feature model, commands)
                               │                          ▲
                               └──── shared/models/ ──────┘   enums: shared vocabulary of both
 ```
@@ -63,7 +63,9 @@ src/app/shared/api/
 src/app/<feature>/
   <entity>.model.ts                     feature model + commands
   <entity>.mapper.ts                    to<Entity>, to<Action>Request (+ .spec.ts)
-  <feature>.store.ts                    resource + mapping + mutations
+  <entities>.store.ts                   list store: resource + mapping + mutations
+  pages/<entity>-detail/
+    <entity>-detail.store.ts            detail store of the page, same structure (CLAUDE.md "Folders")
 ```
 
 Names: folder = the backend path (`rfid-readers`), files `rfid-reader.api-model.ts` / `rfid-readers.api-service.ts`,
@@ -273,7 +275,7 @@ export interface RfidReader {
 // commands
 
 export interface UpdateRfidReaderCommand {
-  id: string;
+  rfidReaderId: string;
   name?: string;
   socketName?: string;
 }
@@ -296,6 +298,9 @@ export interface UpdateRfidReaderCommand {
 ## Mapper
 
 ```ts
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
   return {
     id: apiModel.id,
@@ -306,6 +311,9 @@ export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
     createdAt: parseISO(apiModel.createdAt),
   };
 }
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toUpdateRfidReaderRequest(command: UpdateRfidReaderCommand): UpdateRfidReaderRequest {
   return {
@@ -320,7 +328,8 @@ export function toUpdateRfidReaderRequest(command: UpdateRfidReaderCommand): Upd
 - **Every field explicitly, no spread** (`...apiModel`, `...command`) – otherwise new API fields leak into the
   feature, and ids end up in request bodies.
 - Every body gets a mapper, also a trivial one (`{ type: command.type }`) – one rule, no exceptions. Path variables
-  don't need one: the store passes `command.id`.
+  don't need one: the store passes `command.rfidReaderId`.
+- Sections `// API model → feature model` and `// command → request` (CLAUDE.md "File sections").
 - Dates: `parseISO` / `format` from `date-fns`; a nullable date `apiModel.endTime ? parseISO(apiModel.endTime) : null`.
   Missing values: `?? null`.
 - Nested API models (a session with usages) get one mapper each; only the top-level one is exported, the others are
@@ -331,32 +340,43 @@ export function toUpdateRfidReaderRequest(command: UpdateRfidReaderCommand): Upd
 
 ## Store
 
+The detail store of `rfid-reader-detail` ([rfid-reader-detail.store.ts](../../../src/app/rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.store.ts)):
+
 ```ts
-withProps((store) => {
-  const rfidReadersApi = inject(RfidReadersApiService);
-  return {
-    _rfidReadersApi: rfidReadersApi,
-    // (re)loads whenever the id changes
-    _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
-  };
-}),
-withComputed(({ _rfidReaderResource }) => ({
-  // hasValue() stays true while reloading, so the page doesn't flicker
-  rfidReader: computed(() => (_rfidReaderResource.hasValue() ? toRfidReader(_rfidReaderResource.value()) : null)),
-  isLoading: computed(() => _rfidReaderResource.isLoading()),
-  hasLoadError: computed(() => !!_rfidReaderResource.error()),
-})),
-withMethods((store) => ({
-  updateRfidReader: mutation<UpdateRfidReaderCommand>({
-    request: (command) => store._rfidReadersApi.updateRfidReader(command.id, toUpdateRfidReaderRequest(command)),
-    onSuccess: () => store._rfidReaderResource.reload(),
+export const RfidReaderDetailStore = signalStore(
+  withState<RfidReaderDetailState>({ rfidReaderId: null }),
+  withProps((store) => {
+    const rfidReadersApi = inject(RfidReadersApiService);
+    return {
+      _rfidReadersApi: rfidReadersApi,
+      // (re)loads whenever the id changes
+      _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
+    };
   }),
-  deleteRfidReader: mutation<DeleteRfidReaderCommand>({
-    request: (command) => store._rfidReadersApi.deleteRfidReader(command.id),
-    onSuccess: () => store._rfidReadersResource.reload(),
-  }),
-})),
+  withComputed(({ _rfidReaderResource }) => ({
+    // hasValue() stays true while reloading, so the page keeps showing the reader instead of flickering
+    rfidReader: computed(() => (_rfidReaderResource.hasValue() ? toRfidReader(_rfidReaderResource.value()) : null)),
+    isLoading: computed(() => _rfidReaderResource.isLoading()),
+    hasLoadError: computed(() => !!_rfidReaderResource.error()),
+  })),
+  withMethods((store) => ({
+    setRfidReaderId: signalMethod<string>((rfidReaderId) => {
+      patchState(store, { rfidReaderId });
+    }),
+    reloadRfidReader(): void {
+      store._rfidReaderResource.reload();
+    },
+    updateRfidReader: mutation<UpdateRfidReaderCommand>({
+      request: (command) =>
+        store._rfidReadersApi.updateRfidReader(command.rfidReaderId, toUpdateRfidReaderRequest(command)),
+      onSuccess: () => store._rfidReaderResource.reload(),
+    }),
+  })),
+);
 ```
+
+A list store (`rfid-readers.store.ts`) has the same structure without `withState`: the resource loads on first use,
+its mutations (create, delete) reload the list resource.
 
 - The resource holds the API model; the store maps in `withComputed` (`.map(toX)` for lists, `toX(…)` for one).
   Components only see the computed.
