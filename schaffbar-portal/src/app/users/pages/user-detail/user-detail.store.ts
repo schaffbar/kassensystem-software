@@ -111,17 +111,17 @@ export const UserDetailStore = signalStore(
   // mutations of the user – reload the user on success
   withMethods((store) => ({
     updateUser: mutation<UpdateUserCommand>({
-      request: (command) => store._customersApi.updateCustomer(command.id, toUpdateCustomerRequest(command)),
+      request: (command) => store._customersApi.updateCustomer(command.userId, toUpdateCustomerRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
     updateUserContact: mutation<UpdateUserContactCommand>({
       request: (command) =>
-        store._customersApi.updateCustomerContact(command.id, toUpdateCustomerContactRequest(command)),
+        store._customersApi.updateCustomerContact(command.userId, toUpdateCustomerContactRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
     updateUserAddress: mutation<UpdateUserAddressCommand>({
       request: (command) =>
-        store._customersApi.updateCustomerAddress(command.id, toUpdateCustomerAddressRequest(command)),
+        store._customersApi.updateCustomerAddress(command.userId, toUpdateCustomerAddressRequest(command)),
       onSuccess: () => store._userResource.reload(),
     }),
   })),
@@ -140,23 +140,22 @@ export const UserDetailStore = signalStore(
   // mutations of the open session – reload the session on success
   withMethods((store) => ({
     closeSession: mutation<CloseWorkshopSessionCommand>({
-      request: (command) => store._workshopSessionsApi.closeWorkshopSession(command.customerId),
+      request: (command) => store._workshopSessionsApi.closeWorkshopSession(command.userId),
       onSuccess: () => store._openSessionResource.reload(),
     }),
   })),
   // mutations of the certifications – reload the certifications on success
   withMethods((store) => ({
     pauseCertification: mutation<PauseToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.pauseToolCertification(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.pauseToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     reactivateCertification: mutation<ReactivateToolCertificationCommand>({
-      request: (command) =>
-        store._toolCertificationsApi.reactivateToolCertification(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.reactivateToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     revokeCertification: mutation<RevokeToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.revokeToolCertification(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.revokeToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

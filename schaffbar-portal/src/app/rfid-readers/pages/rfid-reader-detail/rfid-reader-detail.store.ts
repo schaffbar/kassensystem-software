@@ -41,12 +41,13 @@ export const RfidReaderDetailStore = signalStore(
       return store._toolsApi.getToolsByRfidReader(rfidReaderId).pipe(map((tools) => tools.length > 0));
     },
     updateRfidReader: mutation<UpdateRfidReaderCommand>({
-      request: (command) => store._rfidReadersApi.updateRfidReader(command.id, toUpdateRfidReaderRequest(command)),
+      request: (command) =>
+        store._rfidReadersApi.updateRfidReader(command.rfidReaderId, toUpdateRfidReaderRequest(command)),
       onSuccess: () => store._rfidReaderResource.reload(),
     }),
     changeRfidReaderType: mutation<ChangeRfidReaderTypeCommand>({
       request: (command) =>
-        store._rfidReadersApi.changeRfidReaderType(command.id, toChangeRfidReaderTypeRequest(command)),
+        store._rfidReadersApi.changeRfidReaderType(command.rfidReaderId, toChangeRfidReaderTypeRequest(command)),
       onSuccess: () => store._rfidReaderResource.reload(),
     }),
   })),

@@ -32,7 +32,7 @@ export const UsersStore = signalStore(
       onSuccess: () => store._usersResource.reload(),
     }),
     deleteUser: mutation<DeleteUserCommand>({
-      request: (command) => store._customersApi.deleteCustomer(command.id),
+      request: (command) => store._customersApi.deleteCustomer(command.userId),
       onSuccess: () => store._usersResource.reload(),
     }),
   })),

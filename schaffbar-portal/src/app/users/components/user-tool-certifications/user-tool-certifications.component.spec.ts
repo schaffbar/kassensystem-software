@@ -70,7 +70,7 @@ describe('UserToolCertificationsComponent', () => {
       confirmLabel: 'users.dialogs.certifications.pauseCertification.confirm',
       destructive: true,
     });
-    expect(paused).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(paused).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 
   it('should reactivate after a non-destructive confirmation', async () => {
@@ -86,7 +86,7 @@ describe('UserToolCertificationsComponent', () => {
         destructive: false,
       }),
     );
-    expect(reactivated).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(reactivated).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 
   it('should revoke after a destructive confirmation', async () => {
@@ -102,7 +102,7 @@ describe('UserToolCertificationsComponent', () => {
         destructive: true,
       }),
     );
-    expect(revoked).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(revoked).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 
   it('should emit nothing when cancelled', async () => {

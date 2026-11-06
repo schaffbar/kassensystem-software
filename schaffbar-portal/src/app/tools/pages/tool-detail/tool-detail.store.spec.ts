@@ -194,7 +194,7 @@ describe('ToolDetailStore', () => {
     await loadTool();
 
     store.updateTool({
-      id: 'tool-1',
+      toolId: 'tool-1',
       name: 'Bandsäge groß',
       area: ToolArea.Holz,
       certificationRequirement: CertificationRequirement.Red,
@@ -257,7 +257,7 @@ describe('ToolDetailStore', () => {
   it('should only reload the certifications after certifying several users', async () => {
     await loadTool();
 
-    store.batchCreateCertifications({ customerIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
+    store.batchCreateCertifications({ userIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'user-3' });
     trigger();
     const batch = httpMock.expectOne(`${certificationsUrl}/batch`);
     expect(batch.request.method).toBe('POST');
@@ -273,7 +273,7 @@ describe('ToolDetailStore', () => {
   it('should only reload the certifications after deleting one', async () => {
     await loadTool();
 
-    store.deleteCertification({ customerId: 'user-1', toolId: 'tool-1' });
+    store.deleteCertification({ userId: 'user-1', toolId: 'tool-1' });
     trigger();
     const remove = httpMock.expectOne(`${certificationsUrl}/customers/user-1/tools/tool-1`);
     expect(remove.request.method).toBe('DELETE');

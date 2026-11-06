@@ -70,7 +70,7 @@ export class RfidTagListComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: DeleteRfidTagCommand = { id: rfidTag.id };
+          const command: DeleteRfidTagCommand = { rfidTagId: rfidTag.id };
           this.store.deleteRfidTag(command);
         }
       });

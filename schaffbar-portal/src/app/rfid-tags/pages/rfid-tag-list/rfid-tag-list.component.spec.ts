@@ -84,7 +84,7 @@ describe('RfidTagListComponent', () => {
     it('should delete the RFID tag after confirmation', () => {
       clickDeleteOfFirstRow(true);
 
-      expect(storeMock.deleteRfidTag).toHaveBeenCalledWith({ id: 'tag-1' });
+      expect(storeMock.deleteRfidTag).toHaveBeenCalledWith({ rfidTagId: 'tag-1' });
     });
 
     it('should not delete the RFID tag when the dialog is cancelled', () => {

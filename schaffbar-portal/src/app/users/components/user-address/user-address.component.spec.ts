@@ -84,7 +84,7 @@ describe('UserAddressComponent', () => {
     await click(saveButton);
 
     expect(addressChanged).toHaveBeenCalledExactlyOnceWith({
-      id: 'user-1',
+      userId: 'user-1',
       ...address,
       // an empty field is sent as missing, so the backend stores null
       addressLine2: undefined,

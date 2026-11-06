@@ -93,7 +93,7 @@ export const ToolDetailStore = signalStore(
   // mutations of the tool – reload the tool on success
   withMethods((store) => ({
     updateTool: mutation<UpdateToolCommand>({
-      request: (command) => store._toolsApi.updateTool(command.id, toUpdateToolRequest(command)),
+      request: (command) => store._toolsApi.updateTool(command.toolId, toUpdateToolRequest(command)),
       onSuccess: () => store._toolResource.reload(),
     }),
     changeRfidReader: mutation<ChangeRfidReaderCommand>({
@@ -128,7 +128,7 @@ export const ToolDetailStore = signalStore(
       onSuccess: () => store._certificationsResource.reload(),
     }),
     deleteCertification: mutation<DeleteToolCertificationCommand>({
-      request: (command) => store._toolCertificationsApi.deleteToolCertification(command.customerId, command.toolId),
+      request: (command) => store._toolCertificationsApi.deleteToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
   })),

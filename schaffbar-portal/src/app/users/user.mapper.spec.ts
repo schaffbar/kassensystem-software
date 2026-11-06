@@ -69,7 +69,7 @@ describe('user.mapper', () => {
     it('should send the date of birth as ISO date and no id', () => {
       expect(
         toUpdateCustomerRequest({
-          id: 'user-1',
+          userId: 'user-1',
           firstName: 'Max',
           lastName: 'Mustermann',
           dateOfBirth: new Date(1985, 2, 15),
@@ -81,7 +81,7 @@ describe('user.mapper', () => {
 
   describe('toUpdateCustomerContactRequest', () => {
     it('should send a missing phone as null and no id', () => {
-      expect(toUpdateCustomerContactRequest({ id: 'user-1', email: 'max@example.org' })).toEqual({
+      expect(toUpdateCustomerContactRequest({ userId: 'user-1', email: 'max@example.org' })).toEqual({
         email: 'max@example.org',
         phone: null,
       });
@@ -92,7 +92,7 @@ describe('user.mapper', () => {
     it('should send a missing second address line as null and no id', () => {
       expect(
         toUpdateCustomerAddressRequest({
-          id: 'user-1',
+          userId: 'user-1',
           addressLine1: 'Hauptstraße 1',
           postalCode: '12345',
           city: 'Berlin',

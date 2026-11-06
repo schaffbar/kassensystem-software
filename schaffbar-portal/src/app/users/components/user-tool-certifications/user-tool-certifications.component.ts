@@ -71,7 +71,7 @@ export class UserToolCertificationsComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: PauseToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+          const command: PauseToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
           this.certificationPaused.emit(command);
         }
       });
@@ -88,7 +88,7 @@ export class UserToolCertificationsComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: ReactivateToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+          const command: ReactivateToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
           this.certificationReactivated.emit(command);
         }
       });
@@ -105,7 +105,7 @@ export class UserToolCertificationsComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: RevokeToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
+          const command: RevokeToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
           this.certificationRevoked.emit(command);
         }
       });

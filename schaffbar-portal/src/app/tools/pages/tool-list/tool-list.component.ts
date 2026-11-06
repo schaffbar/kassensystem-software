@@ -113,7 +113,7 @@ export class ToolListComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: DeleteToolCommand = { id: tool.id };
+          const command: DeleteToolCommand = { toolId: tool.id };
           this.store.deleteTool(command);
         }
       });

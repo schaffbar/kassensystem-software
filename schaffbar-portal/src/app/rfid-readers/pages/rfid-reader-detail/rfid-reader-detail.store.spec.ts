@@ -90,7 +90,7 @@ describe('RfidReaderDetailStore', () => {
   it('should reload the reader after an update', async () => {
     await loadReader();
 
-    store.updateRfidReader({ id: 'reader-1', name: 'Neuer Name' });
+    store.updateRfidReader({ rfidReaderId: 'reader-1', name: 'Neuer Name' });
     trigger();
     const update = httpMock.expectOne(`${url}/reader-1`);
     expect(update.request.method).toBe('PUT');
@@ -107,7 +107,7 @@ describe('RfidReaderDetailStore', () => {
   it('should send only the type when changing it', async () => {
     await loadReader();
 
-    store.changeRfidReaderType({ id: 'reader-1', type: RfidReaderType.GateKeeperIn });
+    store.changeRfidReaderType({ rfidReaderId: 'reader-1', type: RfidReaderType.GateKeeperIn });
     trigger();
     const change = httpMock.expectOne(`${url}/reader-1/type`);
     expect(change.request.method).toBe('PATCH');

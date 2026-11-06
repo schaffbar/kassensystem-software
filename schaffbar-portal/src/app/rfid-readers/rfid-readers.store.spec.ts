@@ -80,7 +80,7 @@ describe('RfidReadersStore', () => {
   it('should reload the entries after deleting one', async () => {
     await load();
 
-    store.deleteRfidReader({ id: 'id-1' });
+    store.deleteRfidReader({ rfidReaderId: 'id-1' });
     trigger();
     expect(store.deleteRfidReader.isPending()).toBe(true);
     httpMock.expectOne({ method: 'DELETE', url: `${url}/id-1` }).flush(null);

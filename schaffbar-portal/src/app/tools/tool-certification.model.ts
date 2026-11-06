@@ -13,12 +13,12 @@ export interface ToolCertification {
 // commands
 
 export interface BatchCreateToolCertificationCommand {
-  customerIds: string[];
+  userIds: string[];
   toolId: string;
   certifiedBy: string;
 }
 
 export interface DeleteToolCertificationCommand {
-  customerId: string;
+  userId: string;
   toolId: string;
 }

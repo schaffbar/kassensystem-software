@@ -141,7 +141,7 @@ describe('ToolCertificationsComponent', () => {
     await (await submitButton()).click();
 
     expect(certificationsCreated).toHaveBeenCalledExactlyOnceWith({
-      customerIds: ['user-3', 'user-4'],
+      userIds: ['user-3', 'user-4'],
       toolId: 'tool-1',
       certifiedBy: 'user-2',
     });
@@ -164,7 +164,7 @@ describe('ToolCertificationsComponent', () => {
       message: 'users.dialogs.certifications.deleteCertification.message',
       entity: 'Max Mustermann',
     });
-    expect(certificationDeleted).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(certificationDeleted).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 
   it('should not emit the delete command when cancelled', async () => {

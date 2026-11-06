@@ -106,7 +106,7 @@ describe('UpdateUserFormComponent', () => {
     await click('users.dialogs.editUser.actions.confirm');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
-      id: 'user-1',
+      userId: 'user-1',
       firstName: 'Moritz',
       lastName: 'Mustermann',
       dateOfBirth: new Date(1990, 0, 31),

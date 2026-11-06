@@ -48,5 +48,5 @@ export function hasRunningUsage(session: WorkshopSession): boolean {
 // commands
 
 export interface CloseWorkshopSessionCommand {
-  customerId: string;
+  userId: string;
 }

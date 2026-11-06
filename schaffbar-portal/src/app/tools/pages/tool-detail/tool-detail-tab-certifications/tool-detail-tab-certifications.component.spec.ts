@@ -84,8 +84,8 @@ describe('ToolDetailTabCertificationsComponent', () => {
   });
 
   it('should execute the delete command', () => {
-    certificationsComponent().certificationDeleted.emit({ customerId: 'user-1', toolId: 'tool-1' });
+    certificationsComponent().certificationDeleted.emit({ userId: 'user-1', toolId: 'tool-1' });
 
-    expect(deleteCertification).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(deleteCertification).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });
   });
 });

@@ -55,7 +55,7 @@ export interface CreateToolCommand {
 }
 
 export interface UpdateToolCommand {
-  id: string;
+  toolId: string;
   name: string;
   description?: string;
   area: ToolArea;
@@ -92,5 +92,5 @@ export interface ClearWlanRelaisCommand {
 }
 
 export interface DeleteToolCommand {
-  id: string;
+  toolId: string;
 }

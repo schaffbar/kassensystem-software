@@ -25,7 +25,7 @@ export function toToolCertification(apiModel: ToolCertificationApiModel): ToolCe
 
 export function toBatchCertifyRequest(command: BatchCreateToolCertificationCommand): BatchCertifyRequest {
   return {
-    customerIds: command.customerIds,
+    customerIds: command.userIds,
     toolId: command.toolId,
     certifiedBy: command.certifiedBy,
   };

@@ -113,7 +113,7 @@ export class UserListComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: DeleteUserCommand = { id: user.id };
+          const command: DeleteUserCommand = { userId: user.id };
           this.store.deleteUser(command);
         }
       });

@@ -13,16 +13,16 @@ export interface RfidReader {
 // commands
 
 export interface UpdateRfidReaderCommand {
-  id: string;
+  rfidReaderId: string;
   name?: string;
   socketName?: string;
 }
 
 export interface ChangeRfidReaderTypeCommand {
-  id: string;
+  rfidReaderId: string;
   type: RfidReaderType;
 }
 
 export interface DeleteRfidReaderCommand {
-  id: string;
+  rfidReaderId: string;
 }

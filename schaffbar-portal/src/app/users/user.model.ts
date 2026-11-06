@@ -40,7 +40,7 @@ export interface CreateUserCommand {
 }
 
 export interface UpdateUserCommand {
-  id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: Date;
@@ -48,13 +48,13 @@ export interface UpdateUserCommand {
 }
 
 export interface UpdateUserContactCommand {
-  id: string;
+  userId: string;
   email: string;
   phone?: string;
 }
 
 export interface UpdateUserAddressCommand {
-  id: string;
+  userId: string;
   addressLine1: string;
   addressLine2?: string;
   postalCode: string;
@@ -63,5 +63,5 @@ export interface UpdateUserAddressCommand {
 }
 
 export interface DeleteUserCommand {
-  id: string;
+  userId: string;
 }

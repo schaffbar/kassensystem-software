@@ -92,7 +92,7 @@ export class ToolDetailInfoComponent {
     submit(this.toolForm, async () => {
       const { name, description, area, certificationRequirement } = this.model();
       const command: UpdateToolCommand = {
-        id: this.toolDetailInfo().id,
+        toolId: this.toolDetailInfo().id,
         name,
         description: description || undefined,
         area,

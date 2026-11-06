@@ -28,7 +28,7 @@ describe('rfid-reader.mapper', () => {
 
   describe('toUpdateRfidReaderRequest', () => {
     it('should send missing values as null and no id', () => {
-      expect(toUpdateRfidReaderRequest({ id: 'reader-1', name: 'Reader 1' })).toEqual({
+      expect(toUpdateRfidReaderRequest({ rfidReaderId: 'reader-1', name: 'Reader 1' })).toEqual({
         name: 'Reader 1',
         socketName: null,
       });
@@ -37,7 +37,7 @@ describe('rfid-reader.mapper', () => {
 
   describe('toChangeRfidReaderTypeRequest', () => {
     it('should send only the type', () => {
-      expect(toChangeRfidReaderTypeRequest({ id: 'reader-1', type: RfidReaderType.SwitchBox })).toEqual({
+      expect(toChangeRfidReaderTypeRequest({ rfidReaderId: 'reader-1', type: RfidReaderType.SwitchBox })).toEqual({
         type: RfidReaderType.SwitchBox,
       });
     });

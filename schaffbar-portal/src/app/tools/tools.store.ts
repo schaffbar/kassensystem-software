@@ -32,7 +32,7 @@ export const ToolsStore = signalStore(
       onSuccess: () => store._toolsResource.reload(),
     }),
     deleteTool: mutation<DeleteToolCommand>({
-      request: (command) => store._toolsApi.deleteTool(command.id),
+      request: (command) => store._toolsApi.deleteTool(command.toolId),
       onSuccess: () => store._toolsResource.reload(),
     }),
   })),

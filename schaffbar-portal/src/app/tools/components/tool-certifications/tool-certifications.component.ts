@@ -114,7 +114,7 @@ export class ToolCertificationsComponent {
     if (this.selectedUsers().length === 0 || !certifier) return;
 
     const command: BatchCreateToolCertificationCommand = {
-      customerIds: this.selectedUsers().map((user) => user.id),
+      userIds: this.selectedUsers().map((user) => user.id),
       toolId: this.toolId(),
       certifiedBy: certifier.id,
     };
@@ -135,7 +135,7 @@ export class ToolCertificationsComponent {
       .subscribe((confirmed) => {
         if (confirmed) {
           const command: DeleteToolCertificationCommand = {
-            customerId: certification.customerId,
+            userId: certification.customerId,
             toolId: certification.toolId,
           };
           this.certificationDeleted.emit(command);

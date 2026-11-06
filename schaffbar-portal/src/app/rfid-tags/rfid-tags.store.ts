@@ -28,7 +28,7 @@ export const RfidTagsStore = signalStore(
       store._rfidTagsResource.reload();
     },
     deleteRfidTag: mutation<DeleteRfidTagCommand>({
-      request: (command) => store._rfidTagsApi.deleteRfidTag(command.id),
+      request: (command) => store._rfidTagsApi.deleteRfidTag(command.rfidTagId),
       onSuccess: () => store._rfidTagsResource.reload(),
     }),
   })),

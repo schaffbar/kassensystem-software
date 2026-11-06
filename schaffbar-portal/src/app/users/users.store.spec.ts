@@ -85,7 +85,7 @@ describe('UsersStore', () => {
   it('should reload the users after deleting one', async () => {
     await load();
 
-    store.deleteUser({ id: 'user-1' });
+    store.deleteUser({ userId: 'user-1' });
     trigger();
     httpMock.expectOne({ method: 'DELETE', url: `${url}/user-1` }).flush(null);
     trigger();

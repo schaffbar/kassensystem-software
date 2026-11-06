@@ -14,10 +14,10 @@ export interface RfidTagAssignment {
 // commands
 
 export interface AssignRfidTagCommand {
-  customerId: string;
+  userId: string;
   assignmentType: RfidTagAssignmentType;
 }
 
 export interface UnassignRfidTagCommand {
-  customerId: string;
+  userId: string;
 }

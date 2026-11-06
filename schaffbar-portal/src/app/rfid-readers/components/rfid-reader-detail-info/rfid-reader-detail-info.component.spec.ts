@@ -103,7 +103,11 @@ describe('RfidReaderDetailInfoComponent', () => {
     await fixture.whenStable();
 
     expect(rfidReaderChanged).toHaveBeenCalledTimes(1);
-    expect(rfidReaderChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: 'Steckdose 1' });
+    expect(rfidReaderChanged).toHaveBeenCalledWith({
+      rfidReaderId: 'reader-1',
+      name: 'Neuer Name',
+      socketName: 'Steckdose 1',
+    });
   });
 
   it('should emit the changes on save and switch back to read-only', async () => {
@@ -113,7 +117,11 @@ describe('RfidReaderDetailInfoComponent', () => {
 
     await click(saveButton);
 
-    expect(rfidReaderChanged).toHaveBeenCalledWith({ id: 'reader-1', name: 'Neuer Name', socketName: undefined });
+    expect(rfidReaderChanged).toHaveBeenCalledWith({
+      rfidReaderId: 'reader-1',
+      name: 'Neuer Name',
+      socketName: undefined,
+    });
     expect(await (await input('name')).isReadonly()).toBe(true);
   });
 

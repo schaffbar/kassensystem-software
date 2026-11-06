@@ -96,7 +96,7 @@ describe('ToolDetailInfoComponent', () => {
     await click(saveButton);
 
     expect(toolUpdated).toHaveBeenCalledExactlyOnceWith({
-      id: 'tool-1',
+      toolId: 'tool-1',
       name: 'Kreissäge',
       description: 'Große Säge',
       area: ToolArea.Metall,

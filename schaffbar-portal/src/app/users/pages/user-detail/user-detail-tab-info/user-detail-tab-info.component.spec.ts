@@ -107,8 +107,8 @@ describe('UserDetailTabInfoComponent', () => {
     const contact = child(UserContactComponent);
     expect(contact.userContact()).toBe(user);
 
-    contact.contactChanged.emit({ id: 'user-1', email: 'neu@example.org' });
+    contact.contactChanged.emit({ userId: 'user-1', email: 'neu@example.org' });
 
-    expect(updateUserContact).toHaveBeenCalledExactlyOnceWith({ id: 'user-1', email: 'neu@example.org' });
+    expect(updateUserContact).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', email: 'neu@example.org' });
   });
 });

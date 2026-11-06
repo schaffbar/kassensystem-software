@@ -72,10 +72,10 @@ describe('UserDetailComponent', () => {
     expect(header.userDetailHeader()).toBe(user);
     expect(header.rfidTagAssignment()).toBeNull();
 
-    header.rfidTagAssigned.emit({ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
+    header.rfidTagAssigned.emit({ userId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
 
     expect(assignRfidTag).toHaveBeenCalledExactlyOnceWith({
-      customerId: 'user-1',
+      userId: 'user-1',
       assignmentType: RfidTagAssignmentType.Fixed,
     });
   });

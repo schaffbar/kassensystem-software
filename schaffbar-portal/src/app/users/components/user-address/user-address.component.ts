@@ -78,7 +78,7 @@ export class UserAddressComponent {
     submit(this.addressForm, async () => {
       const { addressLine1, addressLine2, postalCode, city, country } = this.model();
       const command: UpdateUserAddressCommand = {
-        id: this.userAddress().id,
+        userId: this.userAddress().id,
         addressLine1,
         addressLine2: addressLine2 || undefined,
         postalCode,

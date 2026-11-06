@@ -79,7 +79,7 @@ export class RfidReaderListComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: DeleteRfidReaderCommand = { id: rfidReader.id };
+          const command: DeleteRfidReaderCommand = { rfidReaderId: rfidReader.id };
           this.store.deleteRfidReader(command);
         }
       });

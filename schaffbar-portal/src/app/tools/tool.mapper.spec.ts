@@ -54,7 +54,7 @@ describe('tool.mapper', () => {
     it('should send the fields without the id', () => {
       expect(
         toUpdateToolRequest({
-          id: 'tool-1',
+          toolId: 'tool-1',
           name: 'Bandsäge',
           description: 'groß',
           area: ToolArea.Holz,

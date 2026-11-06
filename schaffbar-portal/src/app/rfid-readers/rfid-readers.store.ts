@@ -28,7 +28,7 @@ export const RfidReadersStore = signalStore(
       store._rfidReadersResource.reload();
     },
     deleteRfidReader: mutation<DeleteRfidReaderCommand>({
-      request: (command) => store._rfidReadersApi.deleteRfidReader(command.id),
+      request: (command) => store._rfidReadersApi.deleteRfidReader(command.rfidReaderId),
       onSuccess: () => store._rfidReadersResource.reload(),
     }),
   })),

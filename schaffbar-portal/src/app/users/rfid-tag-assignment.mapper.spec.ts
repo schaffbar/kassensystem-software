@@ -47,14 +47,14 @@ describe('rfid-tag-assignment.mapper', () => {
   describe('toRequestRfidTagAssignmentRequest', () => {
     it('should send customer and assignment type', () => {
       expect(
-        toRequestRfidTagAssignmentRequest({ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed }),
+        toRequestRfidTagAssignmentRequest({ userId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed }),
       ).toEqual({ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
     });
   });
 
   describe('toUnassignRfidTagRequest', () => {
     it('should send the customer', () => {
-      expect(toUnassignRfidTagRequest({ customerId: 'user-1' })).toEqual({ customerId: 'user-1' });
+      expect(toUnassignRfidTagRequest({ userId: 'user-1' })).toEqual({ customerId: 'user-1' });
     });
   });
 });

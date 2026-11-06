@@ -73,8 +73,8 @@ describe('UserDetailHeaderComponent', () => {
     fixed.click();
 
     expect(assign.mock.calls).toEqual([
-      [{ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Temporary }],
-      [{ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed }],
+      [{ userId: 'user-1', assignmentType: RfidTagAssignmentType.Temporary }],
+      [{ userId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed }],
     ]);
   });
 
@@ -96,7 +96,7 @@ describe('UserDetailHeaderComponent', () => {
     expect(texts('mat-chip').slice(2)).toEqual(['users.chips.userDetails.rfidTags.fixed', 'tag-42']);
     actionButtons()[0].click();
 
-    expect(unassign).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1' });
+    expect(unassign).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
   });
 
   it('should emit edit and reload', () => {

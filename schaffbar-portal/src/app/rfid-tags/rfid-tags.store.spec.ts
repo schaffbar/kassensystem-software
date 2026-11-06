@@ -71,7 +71,7 @@ describe('RfidTagsStore', () => {
   it('should reload the entries after deleting one', async () => {
     await load();
 
-    store.deleteRfidTag({ id: 'id-1' });
+    store.deleteRfidTag({ rfidTagId: 'id-1' });
     trigger();
     expect(store.deleteRfidTag.isPending()).toBe(true);
     httpMock.expectOne({ method: 'DELETE', url: `${url}/id-1` }).flush(null);

@@ -163,7 +163,7 @@ describe('UserDetailStore', () => {
     await loadUser();
 
     store.updateUser({
-      id: 'user-1',
+      userId: 'user-1',
       firstName: 'Moritz',
       lastName: 'Mustermann',
       dateOfBirth: new Date(1990, 0, 31),
@@ -182,7 +182,7 @@ describe('UserDetailStore', () => {
     expectUser().flush(user);
     await settle();
 
-    store.updateUserContact({ id: 'user-1', email: 'max@example.org' });
+    store.updateUserContact({ userId: 'user-1', email: 'max@example.org' });
     trigger();
     const contact = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1/contact`);
     expect(contact.request.body).toEqual({ email: 'max@example.org', phone: null });
@@ -192,7 +192,7 @@ describe('UserDetailStore', () => {
     await settle();
 
     store.updateUserAddress({
-      id: 'user-1',
+      userId: 'user-1',
       addressLine1: 'Hauptstraße 2',
       postalCode: '12345',
       city: 'Berlin',
@@ -216,7 +216,7 @@ describe('UserDetailStore', () => {
   it('should only reload the assignment after assigning an RFID tag', async () => {
     await loadUser({ assignments: [] });
 
-    store.assignRfidTag({ customerId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
+    store.assignRfidTag({ userId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
     trigger();
     const assign = httpMock.expectOne((req) => req.method === 'POST' && req.url === `${api}/rfid-tag-assignments`);
     expect(assign.request.body).toEqual({ customerId: 'user-1', assignmentType: 'FIXED' });
@@ -231,7 +231,7 @@ describe('UserDetailStore', () => {
   it('should only reload the assignment after unassigning the RFID tag', async () => {
     await loadUser();
 
-    store.unassignRfidTag({ customerId: 'user-1' });
+    store.unassignRfidTag({ userId: 'user-1' });
     trigger();
     const unassign = httpMock.expectOne(
       (req) => req.method === 'PUT' && req.url === `${api}/rfid-tag-assignments/unassign`,
@@ -248,7 +248,7 @@ describe('UserDetailStore', () => {
   it('should only reload the open session after closing it', async () => {
     await loadUser();
 
-    store.closeSession({ customerId: 'user-1' });
+    store.closeSession({ userId: 'user-1' });
     trigger();
     httpMock
       .expectOne((req) => req.method === 'PUT' && req.url === `${api}/workshop-sessions/user-1/close`)
@@ -263,7 +263,7 @@ describe('UserDetailStore', () => {
   it('should only reload the certifications after pausing one', async () => {
     await loadUser();
 
-    store.pauseCertification({ customerId: 'user-1', toolId: 'tool-1' });
+    store.pauseCertification({ userId: 'user-1', toolId: 'tool-1' });
     trigger();
     httpMock
       .expectOne(

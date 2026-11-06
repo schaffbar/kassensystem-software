@@ -26,13 +26,13 @@ export function toRfidTagAssignment(apiModel: RfidTagAssignmentApiModel): RfidTa
 
 export function toRequestRfidTagAssignmentRequest(command: AssignRfidTagCommand): RequestRfidTagAssignmentRequest {
   return {
-    customerId: command.customerId,
+    customerId: command.userId,
     assignmentType: command.assignmentType,
   };
 }
 
 export function toUnassignRfidTagRequest(command: UnassignRfidTagCommand): UnassignRfidTagRequest {
   return {
-    customerId: command.customerId,
+    customerId: command.userId,
   };
 }

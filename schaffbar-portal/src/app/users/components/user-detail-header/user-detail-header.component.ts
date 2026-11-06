@@ -58,12 +58,12 @@ export class UserDetailHeaderComponent {
   // actions
 
   protected assignRfidTag(assignmentType: RfidTagAssignmentType): void {
-    const command: AssignRfidTagCommand = { customerId: this.userDetailHeader().id, assignmentType };
+    const command: AssignRfidTagCommand = { userId: this.userDetailHeader().id, assignmentType };
     this.rfidTagAssigned.emit(command);
   }
 
   protected unassignRfidTag(): void {
-    const command: UnassignRfidTagCommand = { customerId: this.userDetailHeader().id };
+    const command: UnassignRfidTagCommand = { userId: this.userDetailHeader().id };
     this.rfidTagUnassigned.emit(command);
   }
 }

@@ -65,7 +65,7 @@ export class RfidReaderDetailInfoComponent {
     submit(this.readerForm, async () => {
       const { name, socketName } = this.model();
       const command: UpdateRfidReaderCommand = {
-        id: this.rfidReaderDetailInfo().id,
+        rfidReaderId: this.rfidReaderDetailInfo().id,
         name: name || undefined,
         socketName: socketName || undefined,
       };

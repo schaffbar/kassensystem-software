@@ -29,7 +29,7 @@ describe('tool-certification.mapper', () => {
   describe('toBatchCertifyRequest', () => {
     it('should send customers, tool and instructor', () => {
       expect(
-        toBatchCertifyRequest({ customerIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'instructor-1' }),
+        toBatchCertifyRequest({ userIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'instructor-1' }),
       ).toEqual({ customerIds: ['user-1', 'user-2'], toolId: 'tool-1', certifiedBy: 'instructor-1' });
     });
   });

@@ -7,5 +7,5 @@ export interface RfidTag {
 // commands
 
 export interface DeleteRfidTagCommand {
-  id: string;
+  rfidTagId: string;
 }

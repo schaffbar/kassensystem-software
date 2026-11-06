@@ -86,7 +86,7 @@ describe('UserDetailTabSessionComponent', () => {
   it('should close the session of the user after confirmation', async () => {
     await clickClose(true);
 
-    expect(storeMock.closeSession).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1' });
+    expect(storeMock.closeSession).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
     expect(storeMock.reloadOpenSession).not.toHaveBeenCalled();
   });
 

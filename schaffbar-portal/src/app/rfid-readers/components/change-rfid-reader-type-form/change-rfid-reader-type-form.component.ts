@@ -63,7 +63,7 @@ export class ChangeRfidReaderTypeFormComponent {
       const { type } = this.model();
       if (!type) return;
 
-      const command: ChangeRfidReaderTypeCommand = { id: this.data.rfidReader.id, type };
+      const command: ChangeRfidReaderTypeCommand = { rfidReaderId: this.data.rfidReader.id, type };
       this.dialogRef.close(command);
     });
   }

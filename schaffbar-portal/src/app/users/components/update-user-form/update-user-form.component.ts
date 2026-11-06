@@ -74,7 +74,7 @@ export class UpdateUserFormComponent {
       const { firstName, lastName, dateOfBirth, clubMember } = this.model();
       if (!dateOfBirth) return;
 
-      const command: UpdateUserCommand = { id: this.data.user.id, firstName, lastName, dateOfBirth, clubMember };
+      const command: UpdateUserCommand = { userId: this.data.user.id, firstName, lastName, dateOfBirth, clubMember };
       this.dialogRef.close(command);
     });
   }

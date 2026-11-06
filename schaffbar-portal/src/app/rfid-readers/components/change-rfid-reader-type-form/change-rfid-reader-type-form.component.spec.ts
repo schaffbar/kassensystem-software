@@ -62,7 +62,7 @@ describe('ChangeRfidReaderTypeFormComponent', () => {
 
     await clickSave();
 
-    expect(dialogRef.close).toHaveBeenCalledWith({ id: 'reader-1', type: RfidReaderType.GateKeeperIn });
+    expect(dialogRef.close).toHaveBeenCalledWith({ rfidReaderId: 'reader-1', type: RfidReaderType.GateKeeperIn });
   });
 
   it('should show a required error and not close when no type is selected', async () => {
@@ -81,7 +81,10 @@ describe('ChangeRfidReaderTypeFormComponent', () => {
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
     await fixture.whenStable();
 
-    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({ id: 'reader-1', type: RfidReaderType.SwitchBox });
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
+      rfidReaderId: 'reader-1',
+      type: RfidReaderType.SwitchBox,
+    });
   });
 
   it('should only close the dialog on cancel without saving', async () => {

@@ -13,16 +13,16 @@ export interface ToolCertification {
 // commands
 
 export interface PauseToolCertificationCommand {
-  customerId: string;
+  userId: string;
   toolId: string;
 }
 
 export interface ReactivateToolCertificationCommand {
-  customerId: string;
+  userId: string;
   toolId: string;
 }
 
 export interface RevokeToolCertificationCommand {
-  customerId: string;
+  userId: string;
   toolId: string;
 }

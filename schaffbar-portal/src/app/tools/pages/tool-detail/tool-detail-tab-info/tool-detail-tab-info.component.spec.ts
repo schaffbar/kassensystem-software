@@ -9,7 +9,7 @@ import { CertificationRequirement } from '../../../../shared/models/certificatio
 import { ToolArea } from '../../../../shared/models/tool-area';
 import { ToolDetailInfoComponent } from '../../../components/tool-detail-info/tool-detail-info.component';
 import { ToolInstructorsComponent } from '../../../components/tool-instructors/tool-instructors.component';
-import { Tool } from '../../../tool.model';
+import { Tool, UpdateToolCommand } from '../../../tool.model';
 import { ToolsStore } from '../../../tools.store';
 import { User } from '../../../user.model';
 import { ToolDetailStore } from '../tool-detail.store';
@@ -75,7 +75,13 @@ describe('ToolDetailTabInfoComponent', () => {
   });
 
   it('should execute the update command of the info', () => {
-    const command = { ...tool, description: 'Große Säge' };
+    const command: UpdateToolCommand = {
+      toolId: 'tool-1',
+      name: 'Bandsäge',
+      description: 'Große Säge',
+      area: ToolArea.Holz,
+      certificationRequirement: CertificationRequirement.Yellow,
+    };
 
     child(ToolDetailInfoComponent).toolUpdated.emit(command);
 
