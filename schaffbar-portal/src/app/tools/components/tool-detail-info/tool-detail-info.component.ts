@@ -94,7 +94,7 @@ export class ToolDetailInfoComponent {
       const command: UpdateToolCommand = {
         id: this.toolDetailInfo().id,
         name,
-        description,
+        description: description || undefined,
         area,
         certificationRequirement,
       };

@@ -105,6 +105,15 @@ describe('ToolDetailInfoComponent', () => {
     expect(await (await input('name')).isReadonly()).toBe(true);
   });
 
+  it('should send no description when it was cleared', async () => {
+    await click(editButton);
+    await (await input('description')).setValue('');
+
+    await click(saveButton);
+
+    expect(toolUpdated).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ description: undefined }));
+  });
+
   it('should require a name', async () => {
     await click(editButton);
     await (await input('name')).setValue('');
