@@ -111,7 +111,7 @@
       "editUser": {
         "title": "Edit User",
         "actions": {
-          "confirm": "Edit",
+          "confirm": "Save",
           "cancel": "Cancel"
         }
       },
