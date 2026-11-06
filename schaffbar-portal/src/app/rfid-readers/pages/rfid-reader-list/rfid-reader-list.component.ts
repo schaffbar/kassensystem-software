@@ -52,6 +52,9 @@ export class RfidReaderListComponent {
     this.store.reloadRfidReaders();
   }
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadRfidReaders(): void {
     this.store.reloadRfidReaders();
   }

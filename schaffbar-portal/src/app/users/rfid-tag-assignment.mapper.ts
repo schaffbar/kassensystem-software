@@ -7,6 +7,9 @@ import {
 } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { AssignRfidTagCommand, RfidTagAssignment, UnassignRfidTagCommand } from './rfid-tag-assignment.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toRfidTagAssignment(apiModel: RfidTagAssignmentApiModel): RfidTagAssignment {
   return {
     id: apiModel.id,
@@ -17,6 +20,9 @@ export function toRfidTagAssignment(apiModel: RfidTagAssignmentApiModel): RfidTa
     assignmentDate: apiModel.assignmentDate ? parseISO(apiModel.assignmentDate) : null,
   };
 }
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toRequestRfidTagAssignmentRequest(command: AssignRfidTagCommand): RequestRfidTagAssignmentRequest {
   return {

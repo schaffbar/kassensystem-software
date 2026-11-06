@@ -41,7 +41,6 @@
 
 ## Architecture
 
-- [Frontend] onAssignRfidTag vs reload....
 - [Frontend] check subscribe ...
 
 - [Backend] Validate HTTP response before sending back

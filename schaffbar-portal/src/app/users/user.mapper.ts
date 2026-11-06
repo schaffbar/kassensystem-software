@@ -19,6 +19,9 @@ import {
 
 const ISO_DATE = 'yyyy-MM-dd';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toUser(apiModel: CustomerApiModel): User {
   return {
     id: apiModel.id,
@@ -35,6 +38,19 @@ export function toUser(apiModel: CustomerApiModel): User {
     updatedAt: parseISO(apiModel.updatedAt),
   };
 }
+
+function toUserAddress(apiModel: CustomerAddressApiModel): UserAddress {
+  return {
+    addressLine1: apiModel.addressLine1,
+    addressLine2: apiModel.addressLine2,
+    postalCode: apiModel.postalCode,
+    city: apiModel.city,
+    country: apiModel.country,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toCreateCustomerRequest(command: CreateUserCommand): CreateCustomerRequest {
   return {
@@ -75,15 +91,5 @@ export function toUpdateCustomerAddressRequest(command: UpdateUserAddressCommand
     postalCode: command.postalCode,
     city: command.city,
     country: command.country,
-  };
-}
-
-function toUserAddress(apiModel: CustomerAddressApiModel): UserAddress {
-  return {
-    addressLine1: apiModel.addressLine1,
-    addressLine2: apiModel.addressLine2,
-    postalCode: apiModel.postalCode,
-    city: apiModel.city,
-    country: apiModel.country,
   };
 }

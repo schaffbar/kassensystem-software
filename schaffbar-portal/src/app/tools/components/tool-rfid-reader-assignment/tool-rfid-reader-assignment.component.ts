@@ -111,7 +111,7 @@ export class ToolRfidReaderAssignmentComponent {
   }
 }
 
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // mappers
 
 function toRfidReaderAssignmentFormModel(tool: ToolRfidReaderAssignmentViewModel): RfidReaderAssignmentFormModel {

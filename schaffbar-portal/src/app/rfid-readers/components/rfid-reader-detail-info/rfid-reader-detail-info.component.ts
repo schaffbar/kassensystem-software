@@ -46,6 +46,9 @@ export class RfidReaderDetailInfoComponent {
     readonly(schema, { when: () => !this.isEditing() });
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected editRfidReader(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
@@ -71,6 +74,9 @@ export class RfidReaderDetailInfoComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toRfidReaderInfoFormModel(reader: RfidReaderDetailInfoViewModel): RfidReaderInfoFormModel {
   return { name: reader.name ?? '', socketName: reader.socketName ?? '' };

@@ -44,6 +44,22 @@ Why: an unexported function is private to the file (stronger than TypeScript's `
 has no state, and can be used anywhere without caring about `this`. The class itself only contains what belongs to the
 component (inputs, outputs, signals, handlers).
 
+## File sections
+
+Files are divided by section comments – a separator line ending at column 79, then the name of the section:
+
+```ts
+// --------------------------------------------------------------------------
+// actions
+```
+
+- Components, in this order: (no header) injected services, inputs, outputs, signals, form, `computed`, constructor
+  → `// actions` (methods the template calls) → `// helper` (`private` methods); after the class `// mappers`
+  (`to…` functions) → `// helper` (other pure functions).
+- Mappers (`*.mapper.ts`): `// API model → feature model` → `// command → request`.
+- Models: `// commands`. API services: `// queries` → `// commands`.
+- A section only exists when it has content.
+
 ## Commands
 
 - Every action a component triggers for a change in the backend is passed on as a **command** – via `output.emit()`

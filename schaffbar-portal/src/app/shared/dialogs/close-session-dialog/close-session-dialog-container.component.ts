@@ -25,6 +25,9 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionViewModel(session) : null;
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected closeConfirmed(): void {
     this.dialogRef.close(true);
   }
@@ -33,6 +36,9 @@ export class CloseSessionDialogContainerComponent {
     this.dialogRef.close(false);
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSessionViewModel {
   return {
@@ -46,6 +52,9 @@ function toCloseSessionViewModel(session: WorkshopSessionApiModel): CloseSession
     hasRunningUsage: hasRunningUsage(session),
   };
 }
+
+// ----------------------------------------------------------------------------
+// helper
 
 function hasRunningUsage(session: WorkshopSessionApiModel): boolean {
   return (

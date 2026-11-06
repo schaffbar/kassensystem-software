@@ -8,6 +8,9 @@ import {
 } from '../shared/api/workshop-sessions/workshop-session.api-model';
 import { ToolUsage, ToolUsageSummary, WorkshopSession, WorkshopUsage } from './workshop-session.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toWorkshopSession(apiModel: WorkshopSessionApiModel): WorkshopSession {
   return {
     id: apiModel.id,

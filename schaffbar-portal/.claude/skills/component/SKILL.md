@@ -134,10 +134,16 @@ export class ToolDetailTabCertificationsComponent {
     toToolCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected deleteCertification(command: DeleteToolCertificationCommand): void {
     this.detailsStore.deleteCertification(command);
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toToolCertificationRowViewModels(
   certifications: ToolCertification[],
@@ -246,6 +252,9 @@ export class UserContactComponent {
 
   protected readonly contactForm = form(this.model, (schema) => { … });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected saveContact(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
@@ -255,6 +264,9 @@ export class UserContactComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toContactFormModel(userContact: UserContactViewModel): ContactFormModel {
   return { email: userContact.email, phone: userContact.phone ?? '' };
@@ -337,5 +349,7 @@ the store mock goes into the `TestBed` providers):
 - [ ] Page with tabs: frame only; every tab a tab component `<page>-tab-<name>/` in the page's folder
 - [ ] Specs: dumb with complete ViewModel literals, smart with mocked store incl. the mapping, rules in the store
       spec
+- [ ] Sections: `// actions`, `// helper` in the class; `// mappers`, `// helper` after it (CLAUDE.md "File
+      sections")
 - [ ] Comments only where the code can't say it
 - [ ] `npx ng build`, `npx ng lint`, `npx ng test --watch=false`, `npx prettier --check "src/**/*.{ts,html,scss}"`

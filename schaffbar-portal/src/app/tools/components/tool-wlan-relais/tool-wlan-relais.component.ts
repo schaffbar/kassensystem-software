@@ -96,6 +96,9 @@ function toWlanRelaisFormModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormMod
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
 }
 
+// ----------------------------------------------------------------------------
+// helper
+
 // Without a relais type the (hidden) IP address is irrelevant – it is neither saved nor should it count as a change.
 // It stays in the model, so switching to '--' and back does not lose the entered IP address.
 function relevantValues({ wlanRelaisType, ipAddress }: WlanRelaisFormModel): WlanRelaisFormModel {

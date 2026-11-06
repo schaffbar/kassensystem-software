@@ -47,6 +47,9 @@ export class RfidTagListComponent {
     this.store.reloadRfidTags();
   }
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadRfidTags(): void {
     this.store.reloadRfidTags();
   }

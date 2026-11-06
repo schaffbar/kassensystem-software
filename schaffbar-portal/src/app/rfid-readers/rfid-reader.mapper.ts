@@ -7,6 +7,9 @@ import {
 } from '../shared/api/rfid-readers/rfid-reader.api-model';
 import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from './rfid-reader.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
   return {
     id: apiModel.id,
@@ -17,6 +20,9 @@ export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
     createdAt: parseISO(apiModel.createdAt),
   };
 }
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toUpdateRfidReaderRequest(command: UpdateRfidReaderCommand): UpdateRfidReaderRequest {
   return {

@@ -54,6 +54,9 @@ export class ActiveUsersWidgetComponent {
     return new MatTableDataSource<ActiveUserRow>(rows);
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadActiveUsers(): void {
     this.reloadRequested.emit();
   }
@@ -62,6 +65,9 @@ export class ActiveUsersWidgetComponent {
     this.userSelected.emit(user.customerId);
   }
 }
+
+// ----------------------------------------------------------------------------
+// helper
 
 function formatDuration(entryTime: Date, now: Date): string {
   const totalMinutes = differenceInMinutes(now, entryTime);

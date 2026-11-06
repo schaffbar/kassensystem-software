@@ -43,6 +43,9 @@ export class FieldErrorComponent {
   });
 }
 
+// ----------------------------------------------------------------------------
+// mappers
+
 function toErrorMessage(error: ValidationError): ErrorMessage {
   if (error.message) return { key: error.message };
 

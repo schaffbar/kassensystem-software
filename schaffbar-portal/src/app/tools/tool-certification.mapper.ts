@@ -6,6 +6,9 @@ import {
 } from '../shared/api/tool-certifications/tool-certification.api-model';
 import { BatchCreateToolCertificationCommand, ToolCertification } from './tool-certification.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toToolCertification(apiModel: ToolCertificationApiModel): ToolCertification {
   return {
     id: apiModel.id,
@@ -16,6 +19,9 @@ export function toToolCertification(apiModel: ToolCertificationApiModel): ToolCe
     certifiedBy: apiModel.certifiedBy,
   };
 }
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toBatchCertifyRequest(command: BatchCreateToolCertificationCommand): BatchCertifyRequest {
   return {

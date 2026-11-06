@@ -75,12 +75,12 @@ export class ToolCertificationsComponent {
   protected readonly filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase();
     const selectedIds = new Set(this.selectedUsers().map((user) => user.id));
-    return this.certifiableUsers().filter((user) => !selectedIds.has(user.id) && this.matches(user, search));
+    return this.certifiableUsers().filter((user) => !selectedIds.has(user.id) && matches(user, search));
   });
 
   protected readonly filteredCertifiers = computed(() => {
     const search = this.certifierSearchText().toLowerCase();
-    return this.certifiers().filter((user) => this.matches(user, search));
+    return this.certifiers().filter((user) => matches(user, search));
   });
 
   // --------------------------------------------------------------------------
@@ -105,7 +105,7 @@ export class ToolCertificationsComponent {
 
   protected selectCertifier(user: UserOptionViewModel): void {
     this.selectedCertifier.set(user);
-    this.certifierSearchText.set(this.fullName(user));
+    this.certifierSearchText.set(fullName(user));
     this.certifierSearchInput()?.nativeElement.blur();
   }
 
@@ -142,15 +142,15 @@ export class ToolCertificationsComponent {
         }
       });
   }
+}
 
-  // --------------------------------------------------------------------------
-  // helper
+// ----------------------------------------------------------------------------
+// helper
 
-  private fullName(user: UserOptionViewModel): string {
-    return `${user.firstName} ${user.lastName}`;
-  }
+function fullName(user: UserOptionViewModel): string {
+  return `${user.firstName} ${user.lastName}`;
+}
 
-  private matches(user: UserOptionViewModel, search: string): boolean {
-    return this.fullName(user).toLowerCase().includes(search);
-  }
+function matches(user: UserOptionViewModel, search: string): boolean {
+  return fullName(user).toLowerCase().includes(search);
 }

@@ -5,6 +5,9 @@ import { ToolApiModel } from '../shared/api/tools/tool.api-model';
 import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
 import { ActiveTool, ActiveUser, Tool } from './dashboard.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toActiveUser(apiModel: WorkshopDashboardEntryApiModel): ActiveUser {
   return {
     customerId: apiModel.customerId,

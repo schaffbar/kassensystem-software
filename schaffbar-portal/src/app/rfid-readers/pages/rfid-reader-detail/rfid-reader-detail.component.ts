@@ -39,6 +39,9 @@ export class RfidReaderDetailComponent {
     this.detailsStore.setRfidReaderId(this.id);
   }
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadRfidReader(): void {
     this.detailsStore.reloadRfidReader();
   }
@@ -70,6 +73,9 @@ export class RfidReaderDetailComponent {
       this.openChangeTypeDialog(reader);
     }
   }
+
+  // --------------------------------------------------------------------------
+  // helper
 
   private openChangeTypeDialog(rfidReader: RfidReader): void {
     const dialogRef = this.dialog.open<

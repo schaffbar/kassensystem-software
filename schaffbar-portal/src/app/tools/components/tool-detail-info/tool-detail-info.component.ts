@@ -104,7 +104,7 @@ export class ToolDetailInfoComponent {
   }
 }
 
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // mappers
 
 function toToolFormModel(tool: ToolDetailInfoViewModel): ToolFormModel {

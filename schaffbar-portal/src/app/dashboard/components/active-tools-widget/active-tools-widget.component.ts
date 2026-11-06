@@ -33,6 +33,9 @@ export class ActiveToolsWidgetComponent {
     return new MatTableDataSource<ToolStatusViewModel>(rows);
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadActiveTools(): void {
     this.reloadRequested.emit();
   }

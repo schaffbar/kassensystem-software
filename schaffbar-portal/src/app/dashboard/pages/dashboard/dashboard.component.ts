@@ -29,6 +29,9 @@ export class DashboardComponent {
     toToolStatusViewModels(this.store.tools(), this.store.activeTools()),
   );
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadActiveUsers(): void {
     this.store.reloadActiveUsers();
   }
@@ -41,6 +44,9 @@ export class DashboardComponent {
     this.router.navigate([ROUTE.USERS, customerId], { queryParams: { tab: 'open-session' } });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toToolStatusViewModels(tools: Tool[], activeTools: ActiveTool[]): ToolStatusViewModel[] {
   const activeToolsById = new Map(activeTools.map((activeTool) => [activeTool.toolId, activeTool]));

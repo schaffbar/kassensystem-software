@@ -14,6 +14,9 @@ import {
   UpdateToolCommand,
 } from './tool.model';
 
+// ----------------------------------------------------------------------------
+// API model → feature model
+
 export function toTool(apiModel: ToolApiModel): Tool {
   return {
     id: apiModel.id,
@@ -30,6 +33,9 @@ export function toTool(apiModel: ToolApiModel): Tool {
     instructors: apiModel.instructors,
   };
 }
+
+// ----------------------------------------------------------------------------
+// command → request
 
 export function toCreateToolRequest(command: CreateToolCommand): CreateToolRequest {
   return {
