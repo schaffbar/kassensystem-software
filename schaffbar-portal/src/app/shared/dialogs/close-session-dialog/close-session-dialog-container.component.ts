@@ -25,11 +25,11 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionViewModel(session) : null;
   });
 
-  protected onConfirmed(): void {
+  protected closeConfirmed(): void {
     this.dialogRef.close(true);
   }
 
-  protected onCancelled(): void {
+  protected closeCancelled(): void {
     this.dialogRef.close(false);
   }
 }

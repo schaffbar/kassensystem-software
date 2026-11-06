@@ -152,11 +152,11 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionViewModel(session) : null;
   });
 
-  protected onConfirmed(): void {
+  protected closeConfirmed(): void {
     this.dialogRef.close(true);
   }
 
-  protected onCancelled(): void {
+  protected closeCancelled(): void {
     this.dialogRef.close(false);
   }
 }
@@ -171,8 +171,8 @@ function hasRunningUsage(session: WorkshopSessionApiModel): boolean { … }
   [isLoading]="isLoading()"
   [hasLoadError]="hasLoadError()"
   [viewModel]="viewModel()"
-  (confirmed)="onConfirmed()"
-  (cancelled)="onCancelled()" />
+  (confirmed)="closeConfirmed()"
+  (cancelled)="closeCancelled()" />
 ```
 
 Rules:
