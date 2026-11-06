@@ -113,6 +113,8 @@ smart:  (contactChanged)="updateUserContact($event)"
 - No `on…` prefix (it names the trigger, not the action), no `…Dialog` suffix (the dialog is part of the action).
 - An output is never named like a method of the same class – that is why outputs are events and methods verbs.
 - Outputs of shared dialogs stay `confirmed` / `cancelled` (skill `dialog`).
+- A mapping function (pure, after the class) is `to` + the exact target type, plural for a list:
+  `toContactFormModel`, `toToolCertificationRowViewModels` – like the mappers of a feature (`toTool`).
 
 ## Smart component
 
@@ -129,7 +131,7 @@ export class ToolDetailTabCertificationsComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
 
   protected readonly certificationRows = computed(() =>
-    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
+    toToolCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
 
   protected deleteCertification(command: DeleteToolCertificationCommand): void {
@@ -137,7 +139,7 @@ export class ToolDetailTabCertificationsComponent {
   }
 }
 
-function toCertificationRowViewModels(
+function toToolCertificationRowViewModels(
   certifications: ToolCertification[],
   users: User[],
 ): ToolCertificationRowViewModel[] {
@@ -240,7 +242,7 @@ export class UserContactComponent {
   protected readonly isEditing = signal(false);
 
   // follows the userContact input
-  private readonly model = linkedSignal(() => toModel(this.userContact()));
+  private readonly model = linkedSignal(() => toContactFormModel(this.userContact()));
 
   protected readonly contactForm = form(this.model, (schema) => { … });
 
@@ -254,7 +256,7 @@ export class UserContactComponent {
   }
 }
 
-function toModel(userContact: UserContactViewModel): ContactFormModel {
+function toContactFormModel(userContact: UserContactViewModel): ContactFormModel {
   return { email: userContact.email, phone: userContact.phone ?? '' };
 }
 ```

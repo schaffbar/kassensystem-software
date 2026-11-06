@@ -54,7 +54,7 @@ export class ToolRfidReaderAssignmentComponent {
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
   readonly rfidReaderCleared = output<ClearRfidReaderCommand>();
 
-  private readonly model = linkedSignal(() => toModel(this.toolRfidReaderAssignment()));
+  private readonly model = linkedSignal(() => toRfidReaderAssignmentFormModel(this.toolRfidReaderAssignment()));
 
   protected readonly rfidReaderForm = form(this.model, (schema) => {
     validate(schema.rfidReaderId, ({ value }) =>
@@ -65,14 +65,14 @@ export class ToolRfidReaderAssignmentComponent {
   });
 
   protected readonly isDirty = computed(
-    () => this.model().rfidReaderId !== toModel(this.toolRfidReaderAssignment()).rfidReaderId,
+    () => this.model().rfidReaderId !== toRfidReaderAssignmentFormModel(this.toolRfidReaderAssignment()).rfidReaderId,
   );
 
   // --------------------------------------------------------------------------
   // actions
 
   protected discardRfidReaderChanges(): void {
-    this.model.set(toModel(this.toolRfidReaderAssignment()));
+    this.model.set(toRfidReaderAssignmentFormModel(this.toolRfidReaderAssignment()));
     this.rfidReaderForm().reset();
   }
 
@@ -114,6 +114,6 @@ export class ToolRfidReaderAssignmentComponent {
 // --------------------------------------------------------------------------
 // mappers
 
-function toModel(tool: ToolRfidReaderAssignmentViewModel): RfidReaderAssignmentFormModel {
+function toRfidReaderAssignmentFormModel(tool: ToolRfidReaderAssignmentViewModel): RfidReaderAssignmentFormModel {
   return { rfidReaderId: tool.rfidReaderId ?? '' };
 }

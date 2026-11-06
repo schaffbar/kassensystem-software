@@ -48,7 +48,7 @@ export class UserAddressComponent {
   protected readonly postalCodeLength = POSTAL_CODE_LENGTH;
 
   // follows the userAddress input
-  private readonly model = linkedSignal(() => toModel(this.userAddress().address));
+  private readonly model = linkedSignal(() => toAddressFormModel(this.userAddress().address));
 
   protected readonly addressForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -69,7 +69,7 @@ export class UserAddressComponent {
   }
 
   protected discardAddressChanges(): void {
-    this.model.set(toModel(this.userAddress().address));
+    this.model.set(toAddressFormModel(this.userAddress().address));
     this.addressForm().reset();
     this.isEditing.set(false);
   }
@@ -94,6 +94,6 @@ export class UserAddressComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toModel(address: AddressViewModel): AddressFormModel {
+function toAddressFormModel(address: AddressViewModel): AddressFormModel {
   return { ...address, addressLine2: address.addressLine2 ?? '' };
 }

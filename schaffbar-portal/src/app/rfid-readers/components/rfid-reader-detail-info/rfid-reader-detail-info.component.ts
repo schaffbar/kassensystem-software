@@ -39,7 +39,7 @@ export class RfidReaderDetailInfoComponent {
   protected readonly isEditing = signal(false);
 
   // follows the rfidReaderDetailInfo input
-  private readonly model = linkedSignal(() => toModel(this.rfidReaderDetailInfo()));
+  private readonly model = linkedSignal(() => toRfidReaderInfoFormModel(this.rfidReaderDetailInfo()));
 
   protected readonly readerForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -53,7 +53,7 @@ export class RfidReaderDetailInfoComponent {
   }
 
   protected discardRfidReaderChanges(): void {
-    this.model.set(toModel(this.rfidReaderDetailInfo()));
+    this.model.set(toRfidReaderInfoFormModel(this.rfidReaderDetailInfo()));
     this.readerForm().reset();
     this.isEditing.set(false);
   }
@@ -72,6 +72,6 @@ export class RfidReaderDetailInfoComponent {
   }
 }
 
-function toModel(reader: RfidReaderDetailInfoViewModel): RfidReaderInfoFormModel {
+function toRfidReaderInfoFormModel(reader: RfidReaderDetailInfoViewModel): RfidReaderInfoFormModel {
   return { name: reader.name ?? '', socketName: reader.socketName ?? '' };
 }

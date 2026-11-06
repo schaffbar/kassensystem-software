@@ -58,7 +58,7 @@ export class UpdateUserFormComponent {
   protected readonly minDate = DATE_OF_BIRTH_MIN;
   protected readonly maxDate = DATE_OF_BIRTH_MAX;
 
-  private readonly model = signal<UpdateUserFormModel>(toModel(this.data.user));
+  private readonly model = signal<UpdateUserFormModel>(toUpdateUserFormModel(this.data.user));
 
   protected readonly userForm = form(this.model, (schema) => {
     required(schema.firstName);
@@ -83,7 +83,7 @@ export class UpdateUserFormComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toModel(user: UpdateUserViewModel): UpdateUserFormModel {
+function toUpdateUserFormModel(user: UpdateUserViewModel): UpdateUserFormModel {
   return {
     firstName: user.firstName,
     lastName: user.lastName,

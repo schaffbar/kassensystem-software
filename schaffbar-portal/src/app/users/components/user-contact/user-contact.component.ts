@@ -35,7 +35,7 @@ export class UserContactComponent {
   protected readonly isEditing = signal(false);
 
   // follows the userContact input
-  private readonly model = linkedSignal(() => toModel(this.userContact()));
+  private readonly model = linkedSignal(() => toContactFormModel(this.userContact()));
 
   protected readonly contactForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -54,7 +54,7 @@ export class UserContactComponent {
   }
 
   protected discardContactChanges(): void {
-    this.model.set(toModel(this.userContact()));
+    this.model.set(toContactFormModel(this.userContact()));
     this.contactForm().reset();
     this.isEditing.set(false);
   }
@@ -72,6 +72,6 @@ export class UserContactComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toModel(userContact: UserContactViewModel): ContactFormModel {
+function toContactFormModel(userContact: UserContactViewModel): ContactFormModel {
   return { email: userContact.email, phone: userContact.phone ?? '' };
 }

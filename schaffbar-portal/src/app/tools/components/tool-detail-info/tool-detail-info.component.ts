@@ -64,7 +64,7 @@ export class ToolDetailInfoComponent {
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
 
   // follows the toolDetailInfo input
-  private readonly model = linkedSignal(() => toModel(this.toolDetailInfo()));
+  private readonly model = linkedSignal(() => toToolFormModel(this.toolDetailInfo()));
 
   protected readonly toolForm = form(this.model, (schema) => {
     // readonly is inherited by all fields
@@ -83,7 +83,7 @@ export class ToolDetailInfoComponent {
   }
 
   protected discardToolChanges(): void {
-    this.model.set(toModel(this.toolDetailInfo()));
+    this.model.set(toToolFormModel(this.toolDetailInfo()));
     this.toolForm().reset();
     this.isEditing.set(false);
   }
@@ -107,7 +107,7 @@ export class ToolDetailInfoComponent {
 // --------------------------------------------------------------------------
 // mappers
 
-function toModel(tool: ToolDetailInfoViewModel): ToolFormModel {
+function toToolFormModel(tool: ToolDetailInfoViewModel): ToolFormModel {
   return {
     name: tool.name,
     description: tool.description ?? '',

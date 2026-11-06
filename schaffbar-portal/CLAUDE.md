@@ -33,8 +33,10 @@
 
 - **Pure functions** (no `this`, no signals, no injected services – the result depends only on the parameters) are
   module-level functions, **not exported**, and placed **after the class**.
-  Examples: `toModel(tool)`, `relevantValues(model)` in `tool-wlan-relais.component.ts`,
+  Examples: `toWlanRelaisFormModel(tool)`, `relevantValues(model)` in `tool-wlan-relais.component.ts`,
   `toErrorMessage(error)` in `field-error.component.ts`.
+- A mapping function is named `to` + the exact target type, plural for a list – like the mappers of a feature
+  (`toTool`, `toUpdateToolRequest`): `toContactFormModel`, `toToolCertificationRowViewModels`.
 - **Everything that needs `this`** (component state, signals, forms, services) is a `private` method in the
   `// helper` section at the end of the class.
 

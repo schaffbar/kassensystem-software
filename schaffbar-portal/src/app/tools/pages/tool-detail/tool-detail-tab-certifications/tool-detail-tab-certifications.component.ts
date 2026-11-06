@@ -22,7 +22,7 @@ export class ToolDetailTabCertificationsComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
 
   protected readonly certificationRows = computed(() =>
-    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
+    toToolCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
 
   // --------------------------------------------------------------------------
@@ -40,7 +40,7 @@ export class ToolDetailTabCertificationsComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toCertificationRowViewModels(
+function toToolCertificationRowViewModels(
   certifications: ToolCertification[],
   users: User[],
 ): ToolCertificationRowViewModel[] {

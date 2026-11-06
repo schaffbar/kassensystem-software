@@ -26,7 +26,7 @@ export class UserDetailTabInfoComponent {
   protected readonly detailsStore = inject(UserDetailStore);
 
   protected readonly certificationRows = computed(() =>
-    toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.tools()),
+    toUserToolCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.tools()),
   );
 
   // --------------------------------------------------------------------------
@@ -56,7 +56,7 @@ export class UserDetailTabInfoComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toCertificationRowViewModels(
+function toUserToolCertificationRowViewModels(
   certifications: ToolCertification[],
   tools: Tool[],
 ): UserToolCertificationRowViewModel[] {

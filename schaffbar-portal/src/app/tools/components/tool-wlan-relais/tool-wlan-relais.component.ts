@@ -39,7 +39,7 @@ export class ToolWlanRelaisComponent {
 
   protected readonly wlanRelaisTypes = Object.values(WlanRelaisType);
 
-  private readonly model = linkedSignal(() => toModel(this.toolWlanRelais()));
+  private readonly model = linkedSignal(() => toWlanRelaisFormModel(this.toolWlanRelais()));
 
   protected readonly wlanRelaisForm = form(this.model, (schema) => {
     // a hidden field does not count for the validity of the form, so the IP rules only apply with a relais type
@@ -63,7 +63,7 @@ export class ToolWlanRelaisComponent {
 
   protected readonly isDirty = computed(() => {
     const current = relevantValues(this.model());
-    const saved = relevantValues(toModel(this.toolWlanRelais()));
+    const saved = relevantValues(toWlanRelaisFormModel(this.toolWlanRelais()));
     return current.wlanRelaisType !== saved.wlanRelaisType || current.ipAddress !== saved.ipAddress;
   });
 
@@ -71,7 +71,7 @@ export class ToolWlanRelaisComponent {
   // actions
 
   protected discardWlanRelaisChanges(): void {
-    this.model.set(toModel(this.toolWlanRelais()));
+    this.model.set(toWlanRelaisFormModel(this.toolWlanRelais()));
     this.wlanRelaisForm().reset();
   }
 
@@ -92,7 +92,7 @@ export class ToolWlanRelaisComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormModel {
+function toWlanRelaisFormModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormModel {
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
 }
 
