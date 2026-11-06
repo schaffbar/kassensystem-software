@@ -1,4 +1,3 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, computed, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -16,6 +15,7 @@ import { ROUTE } from '../../../app.routes';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
+import { CertificationRequirementDotComponent } from '../../components/certification-requirement-dot/certification-requirement-dot.component';
 import { NewToolDialogData, NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, Tool } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
@@ -25,7 +25,7 @@ import { ToolsStore } from '../../tools.store';
   templateUrl: './tool-list.component.html',
   styleUrl: './tool-list.component.scss',
   imports: [
-    LowerCasePipe,
+    CertificationRequirementDotComponent,
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,

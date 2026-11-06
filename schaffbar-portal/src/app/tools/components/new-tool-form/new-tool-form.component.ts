@@ -1,4 +1,3 @@
-import { LowerCasePipe } from '@angular/common';
 import { Component, inject, Signal, signal } from '@angular/core';
 import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 
@@ -13,6 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
+import { CertificationRequirementDotComponent } from '../certification-requirement-dot/certification-requirement-dot.component';
 import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
 
@@ -42,7 +42,7 @@ interface NewToolFormModel {
     FormField,
     FormRoot,
     FieldErrorComponent,
-    LowerCasePipe,
+    CertificationRequirementDotComponent,
     MatInputModule,
     MatButtonModule,
     MatDialogModule,
