@@ -75,11 +75,11 @@ component (inputs, outputs, signals, handlers).
 
 ## Forms
 
-- Every form has a `<form [formRoot]="xyzForm" (submit)="onSave()">`; `onSave()` calls
+- Every form has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
   `submit(this.xyzForm, async () => …)`.
 - Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
   without `type` submits the form, so e.g. "cancel" would save.
-- The result of `onSave()` is built as an explicitly typed variable before it is passed on – for readability, even
+- The result of `saveXyz()` is built as an explicitly typed variable before it is passed on – for readability, even
   where `dialogRef.close()` / `output.emit()` would infer the type:
   `const command: CreateToolCommand = { … }; this.dialogRef.close(command);`
 - Form layout uses the global classes from `src/styles.scss`: `form-row` (a row of fields), `form-col` (columns share
@@ -139,6 +139,10 @@ Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL
   checked by `strictTemplates`), otherwise it maps in a `computed` with a pure `to<Name>ViewModel()` after the class.
   The store never imports a ViewModel.
 - No pass-through components. A list page may keep its own `mat-table`.
+- **Names**: a method called from a template is named for what it does – verb + object, no `on…` prefix, no
+  `…Dialog` suffix (`saveContact`, `discardContactChanges`, `deleteTool`, `openToolDetail`). A page or tab method
+  that executes a command is named like the store method it calls (`updateUserContact`). An output is the event:
+  object + participle (`contactChanged`, `certificationPaused`, `editRequested`).
 - **Pages with tabs**: the page is the frame (loading, header, tab group); every tab is a smart tab component
   `<page>-tab-<name>/` in the page's folder that injects the page's store and composes dumb components.
 

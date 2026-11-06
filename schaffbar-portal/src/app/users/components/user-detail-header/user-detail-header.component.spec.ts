@@ -66,7 +66,7 @@ describe('UserDetailHeaderComponent', () => {
 
   it('should emit an assign command per assignment type', () => {
     const assign = vi.fn();
-    fixture.componentInstance.assignRfidTag.subscribe(assign);
+    fixture.componentInstance.rfidTagAssigned.subscribe(assign);
 
     const [temporary, fixed] = actionButtons();
     temporary.click();
@@ -91,7 +91,7 @@ describe('UserDetailHeaderComponent', () => {
   it('should show the assigned tag and emit the unassign command', async () => {
     await render(assigned);
     const unassign = vi.fn();
-    fixture.componentInstance.unassignRfidTag.subscribe(unassign);
+    fixture.componentInstance.rfidTagUnassigned.subscribe(unassign);
 
     expect(texts('mat-chip').slice(2)).toEqual(['users.chips.userDetails.rfidTags.fixed', 'tag-42']);
     actionButtons()[0].click();
@@ -102,8 +102,8 @@ describe('UserDetailHeaderComponent', () => {
   it('should emit edit and reload', () => {
     const edit = vi.fn();
     const reload = vi.fn();
-    fixture.componentInstance.edit.subscribe(edit);
-    fixture.componentInstance.reload.subscribe(reload);
+    fixture.componentInstance.editRequested.subscribe(edit);
+    fixture.componentInstance.reloadRequested.subscribe(reload);
 
     fixture.nativeElement.querySelector('[aria-label="Edit user"]').click();
     fixture.nativeElement.querySelector('[aria-label="Reload user"]').click();

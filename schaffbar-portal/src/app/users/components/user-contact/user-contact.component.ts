@@ -44,19 +44,22 @@ export class UserContactComponent {
     email(schema.email);
   });
 
-  protected onEdit(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected editContact(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
     this.contactForm.email().focusBoundControl();
   }
 
-  protected onCancel(): void {
+  protected discardContactChanges(): void {
     this.model.set(toModel(this.userContact()));
     this.contactForm().reset();
     this.isEditing.set(false);
   }
 
-  protected onSave(): void {
+  protected saveContact(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
       const command: UpdateUserContactCommand = { id: this.userContact().id, email, phone: phone || undefined };
@@ -65,6 +68,9 @@ export class UserContactComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toModel(userContact: UserContactViewModel): ContactFormModel {
   return { email: userContact.email, phone: userContact.phone ?? '' };

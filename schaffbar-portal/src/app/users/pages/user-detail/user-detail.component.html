@@ -9,10 +9,10 @@
   <schbar-user-detail-header
     [userDetailHeader]="user"
     [rfidTagAssignment]="detailsStore.rfidTagAssignment()"
-    (edit)="updateUser()"
-    (reload)="reloadUser()"
-    (assignRfidTag)="onAssignRfidTag($event)"
-    (unassignRfidTag)="onUnassignRfidTag($event)" />
+    (editRequested)="updateUser()"
+    (reloadRequested)="reloadUser()"
+    (rfidTagAssigned)="assignRfidTag($event)"
+    (rfidTagUnassigned)="unassignRfidTag($event)" />
 
   <mat-tab-group
     mat-stretch-tabs="false"

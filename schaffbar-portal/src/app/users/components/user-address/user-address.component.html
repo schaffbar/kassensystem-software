@@ -1,11 +1,11 @@
 <h3 class="address-header">
   {{ 'users.pages.userDetails.headers.address' | translate }}
-  <button matIconButton type="button" aria-label="Edit address" (click)="onEdit()" [disabled]="isEditing()">
+  <button matIconButton type="button" aria-label="Edit address" (click)="editAddress()" [disabled]="isEditing()">
     <mat-icon>edit</mat-icon>
   </button>
 </h3>
 
-<form [formRoot]="addressForm" (submit)="onSave()">
+<form [formRoot]="addressForm" (submit)="saveAddress()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
@@ -60,7 +60,7 @@
 
   @if (isEditing()) {
     <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="discardAddressChanges()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
       <button matButton="filled" type="submit">

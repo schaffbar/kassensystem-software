@@ -330,6 +330,22 @@ Tab-Komponente `<page>-tab-<name>/` im Ordner der Page, die den Store der Page i
 - [x] `user-detail`: `user-detail-tab-info` (neu), `user-detail-tab-session` (vorher `user-open-session`)
 - [x] `tool-detail`: `tool-detail-tab-info`, `tool-detail-tab-certifications`, `tool-detail-tab-configuration`
 
+### P7 – Namen von Methoden und Outputs
+
+Entschieden 06.11.2026: Methoden, die ein Template aufruft, heißen nach dem, was sie tun (Verb + Objekt, ohne `on…`
+und `…Dialog`; in Page/Tab wie die Store-Methode); Outputs heißen nach dem Ereignis (Objekt + Partizip). Skill
+„Names of methods and outputs“, CLAUDE.md „Components“.
+
+- [x] Regel in Skill `component`, Skill `dialog` (Form-Dialoge) und CLAUDE.md („Forms“, „Components“)
+- [x] users – u. a. `onSave` → `saveContact`, `onAssignRfidTag` → `assignRfidTag`, `newUserDialog` → `createUser`;
+      Outputs `pauseCertification` → `certificationPaused`, `edit` → `editRequested`, `assignRfidTag` →
+      `rfidTagAssigned`
+- [ ] tools
+- [ ] rfid-readers
+- [ ] rfid-tags
+- [ ] dashboard
+- [ ] shared (Dialog-Container `onConfirmed` / `onCancelled`, Skill `dialog`)
+
 ### Danach
 
 Neue Komponenten folgen dem Skill; ESLint fängt Store-/Router-Zugriffe in `components/` ab. Was ESLint nicht

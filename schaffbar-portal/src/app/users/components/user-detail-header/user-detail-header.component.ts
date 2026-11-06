@@ -46,21 +46,24 @@ export class UserDetailHeaderComponent {
   // null = no RFID tag
   readonly rfidTagAssignment = input.required<RfidTagAssignmentViewModel | null>();
 
-  readonly edit = output<void>();
-  readonly reload = output<void>();
-  readonly assignRfidTag = output<AssignRfidTagCommand>();
-  readonly unassignRfidTag = output<UnassignRfidTagCommand>();
+  readonly editRequested = output<void>();
+  readonly reloadRequested = output<void>();
+  readonly rfidTagAssigned = output<AssignRfidTagCommand>();
+  readonly rfidTagUnassigned = output<UnassignRfidTagCommand>();
 
   protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
   protected readonly RfidTagAssignmentType = RfidTagAssignmentType;
 
-  protected onAssignRfidTag(assignmentType: RfidTagAssignmentType): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected assignRfidTag(assignmentType: RfidTagAssignmentType): void {
     const command: AssignRfidTagCommand = { customerId: this.userDetailHeader().id, assignmentType };
-    this.assignRfidTag.emit(command);
+    this.rfidTagAssigned.emit(command);
   }
 
-  protected onUnassignRfidTag(): void {
+  protected unassignRfidTag(): void {
     const command: UnassignRfidTagCommand = { customerId: this.userDetailHeader().id };
-    this.unassignRfidTag.emit(command);
+    this.rfidTagUnassigned.emit(command);
   }
 }

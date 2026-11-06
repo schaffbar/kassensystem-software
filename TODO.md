@@ -5,11 +5,12 @@
 
 ## Important
 
+- [Frontend] Validate Session before closing it
+
 - [Feature] WaitingForAssignment auch im Portal stoppen
 - [Backend] Scheduler to clean up WaitingForAssignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
 
-- [Frontend] Validate Session before closing it
 - [PostgreSql] init.sql Add NOT NULL constraints to customer
 - [Backend] close all tool sessions when restarting server/backend
 - [Frontend] check required properties in all entities and forms (update)
@@ -41,6 +42,8 @@
 ## Architecture
 
 - [Frontend] onAssignRfidTag vs reload....
+- [Frontend] check subscribe ...
+
 - [Backend] Validate HTTP response before sending back
 - [Backend] HTTP response - missing values as null or NON_NULL option -> adapt ApiModels in frontend
 - [Backend] Facade vs Use Case and move all mutations to use cases

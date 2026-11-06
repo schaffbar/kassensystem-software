@@ -45,9 +45,9 @@ export class UserToolCertificationsComponent {
 
   readonly certifications = input.required<UserToolCertificationRowViewModel[]>();
 
-  readonly pauseCertification = output<PauseToolCertificationCommand>();
-  readonly reactivateCertification = output<ReactivateToolCertificationCommand>();
-  readonly revokeCertification = output<RevokeToolCertificationCommand>();
+  readonly certificationPaused = output<PauseToolCertificationCommand>();
+  readonly certificationReactivated = output<ReactivateToolCertificationCommand>();
+  readonly certificationRevoked = output<RevokeToolCertificationCommand>();
 
   protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
   protected readonly CertificationStatus = ToolCertificationStatus;
@@ -57,7 +57,10 @@ export class UserToolCertificationsComponent {
   protected readonly asCertification = (row: UserToolCertificationRowViewModel): UserToolCertificationRowViewModel =>
     row;
 
-  protected onPause(cert: UserToolCertificationRowViewModel): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected pauseCertification(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.pauseCertification.title',
@@ -69,12 +72,12 @@ export class UserToolCertificationsComponent {
       .subscribe((confirmed) => {
         if (confirmed) {
           const command: PauseToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
-          this.pauseCertification.emit(command);
+          this.certificationPaused.emit(command);
         }
       });
   }
 
-  protected onReactivate(cert: UserToolCertificationRowViewModel): void {
+  protected reactivateCertification(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.reactivateCertification.title',
@@ -86,12 +89,12 @@ export class UserToolCertificationsComponent {
       .subscribe((confirmed) => {
         if (confirmed) {
           const command: ReactivateToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
-          this.reactivateCertification.emit(command);
+          this.certificationReactivated.emit(command);
         }
       });
   }
 
-  protected onRevoke(cert: UserToolCertificationRowViewModel): void {
+  protected revokeCertification(cert: UserToolCertificationRowViewModel): void {
     this.confirmActionDialog
       .open({
         title: 'users.dialogs.certifications.revokeCertification.title',
@@ -103,7 +106,7 @@ export class UserToolCertificationsComponent {
       .subscribe((confirmed) => {
         if (confirmed) {
           const command: RevokeToolCertificationCommand = { customerId: cert.customerId, toolId: cert.toolId };
-          this.revokeCertification.emit(command);
+          this.certificationRevoked.emit(command);
         }
       });
   }

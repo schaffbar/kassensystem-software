@@ -85,7 +85,10 @@ export class NewUserFormComponent {
     required(schema.country);
   });
 
-  protected onSave(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected saveUser(): void {
     submit(this.userForm, async () => {
       const { dateOfBirth, phone, addressLine2, ...rest } = this.model();
       if (!dateOfBirth) return;

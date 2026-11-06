@@ -59,19 +59,22 @@ export class UserAddressComponent {
     required(schema.country);
   });
 
-  protected onEdit(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected editAddress(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
     this.addressForm.addressLine1().focusBoundControl();
   }
 
-  protected onCancel(): void {
+  protected discardAddressChanges(): void {
     this.model.set(toModel(this.userAddress().address));
     this.addressForm().reset();
     this.isEditing.set(false);
   }
 
-  protected onSave(): void {
+  protected saveAddress(): void {
     submit(this.addressForm, async () => {
       const { addressLine1, addressLine2, postalCode, city, country } = this.model();
       const command: UpdateUserAddressCommand = {
@@ -87,6 +90,9 @@ export class UserAddressComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toModel(address: AddressViewModel): AddressFormModel {
   return { ...address, addressLine2: address.addressLine2 ?? '' };

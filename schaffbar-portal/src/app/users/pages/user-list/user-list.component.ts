@@ -64,11 +64,14 @@ export class UserListComponent {
     this.store.reloadUsers();
   }
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected reloadUsers(): void {
     this.store.reloadUsers();
   }
 
-  protected onSearchInput(): void {
+  protected showFirstPage(): void {
     this.paginator()?.firstPage();
   }
 
@@ -77,11 +80,11 @@ export class UserListComponent {
     this.paginator()?.firstPage();
   }
 
-  protected userDetails(user: User): void {
+  protected openUserDetail(user: User): void {
     this.router.navigate([ROUTE.USERS, user.id]);
   }
 
-  protected newUserDialog(): void {
+  protected createUser(): void {
     const dialogRef = this.dialog.open<NewUserFormComponent, void, CreateUserCommand>(NewUserFormComponent, {
       minWidth: DIALOG_WIDTH.large,
       disableClose: true,
@@ -94,7 +97,7 @@ export class UserListComponent {
     });
   }
 
-  protected deleteUserDialog(event: Event, user: User): void {
+  protected deleteUser(event: Event, user: User): void {
     event.stopPropagation();
 
     if (!user || !user.id) {

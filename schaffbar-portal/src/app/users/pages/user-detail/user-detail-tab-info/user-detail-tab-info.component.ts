@@ -32,23 +32,23 @@ export class UserDetailTabInfoComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected onContactChanged(command: UpdateUserContactCommand): void {
+  protected updateUserContact(command: UpdateUserContactCommand): void {
     this.detailsStore.updateUserContact(command);
   }
 
-  protected onAddressChanged(command: UpdateUserAddressCommand): void {
+  protected updateUserAddress(command: UpdateUserAddressCommand): void {
     this.detailsStore.updateUserAddress(command);
   }
 
-  protected onPauseCertification(command: PauseToolCertificationCommand): void {
+  protected pauseCertification(command: PauseToolCertificationCommand): void {
     this.detailsStore.pauseCertification(command);
   }
 
-  protected onReactivateCertification(command: ReactivateToolCertificationCommand): void {
+  protected reactivateCertification(command: ReactivateToolCertificationCommand): void {
     this.detailsStore.reactivateCertification(command);
   }
 
-  protected onRevokeCertification(command: RevokeToolCertificationCommand): void {
+  protected revokeCertification(command: RevokeToolCertificationCommand): void {
     this.detailsStore.revokeCertification(command);
   }
 }

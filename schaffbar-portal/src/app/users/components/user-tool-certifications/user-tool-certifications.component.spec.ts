@@ -50,7 +50,7 @@ describe('UserToolCertificationsComponent', () => {
 
   it('should pause after a destructive confirmation', async () => {
     const paused = vi.fn();
-    fixture.componentInstance.pauseCertification.subscribe(paused);
+    fixture.componentInstance.certificationPaused.subscribe(paused);
     await render(ToolCertificationStatus.Active);
 
     clickAction('pause');
@@ -67,7 +67,7 @@ describe('UserToolCertificationsComponent', () => {
 
   it('should reactivate after a non-destructive confirmation', async () => {
     const reactivated = vi.fn();
-    fixture.componentInstance.reactivateCertification.subscribe(reactivated);
+    fixture.componentInstance.certificationReactivated.subscribe(reactivated);
     await render(ToolCertificationStatus.Paused);
 
     clickAction('reactivate');
@@ -83,7 +83,7 @@ describe('UserToolCertificationsComponent', () => {
 
   it('should revoke after a destructive confirmation', async () => {
     const revoked = vi.fn();
-    fixture.componentInstance.revokeCertification.subscribe(revoked);
+    fixture.componentInstance.certificationRevoked.subscribe(revoked);
     await render(ToolCertificationStatus.Active);
 
     clickAction('revoke');
@@ -100,7 +100,7 @@ describe('UserToolCertificationsComponent', () => {
   it('should emit nothing when cancelled', async () => {
     openConfirmActionDialog.mockReturnValue(of(false));
     const paused = vi.fn();
-    fixture.componentInstance.pauseCertification.subscribe(paused);
+    fixture.componentInstance.certificationPaused.subscribe(paused);
     await render(ToolCertificationStatus.Active);
 
     clickAction('pause');

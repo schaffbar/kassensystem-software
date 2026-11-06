@@ -73,11 +73,11 @@ export class UserDetailComponent {
     });
   }
 
-  protected onAssignRfidTag(command: AssignRfidTagCommand): void {
+  protected assignRfidTag(command: AssignRfidTagCommand): void {
     this.detailsStore.assignRfidTag(command);
   }
 
-  protected onUnassignRfidTag(command: UnassignRfidTagCommand): void {
+  protected unassignRfidTag(command: UnassignRfidTagCommand): void {
     this.detailsStore.unassignRfidTag(command);
   }
 }

@@ -66,7 +66,10 @@ export class UpdateUserFormComponent {
     validateDateOfBirth(schema.dateOfBirth);
   });
 
-  protected onSave(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected saveUser(): void {
     submit(this.userForm, async () => {
       const { firstName, lastName, dateOfBirth, clubMember } = this.model();
       if (!dateOfBirth) return;
@@ -76,6 +79,9 @@ export class UpdateUserFormComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toModel(user: UpdateUserViewModel): UpdateUserFormModel {
   return {

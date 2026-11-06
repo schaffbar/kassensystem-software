@@ -314,7 +314,7 @@ A dialog whose content is a form (`new-tool-form`, `update-user-form`, …) live
 (`<feature>/components/<name>-form/`) and is opened directly by the one page that needs it. It keeps the form rules
 from CLAUDE.md "Forms" and closes itself:
 
-- data via `MAT_DIALOG_DATA`, `inject(MatDialogRef<…, Result>)`, `this.dialogRef.close(command)` in `onSave()`;
+- data via `MAT_DIALOG_DATA`, `inject(MatDialogRef<…, Result>)`, `this.dialogRef.close(command)` in `save<Subject>()` (`saveTool()`);
 - cancel: `<button matButton="outlined" type="button" [mat-dialog-close]="undefined">` (not `mat-dialog-close`
   without a value – that closes with `''`); no `cdkFocusInitial`, the first field gets the focus so Enter saves;
 - the page opens it typed – `this.dialog.open<NewToolFormComponent, void, CreateToolCommand>(…)` – with

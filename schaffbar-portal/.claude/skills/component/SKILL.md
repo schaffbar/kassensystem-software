@@ -90,6 +90,30 @@ Rules:
   A feature component needed by a second feature moves to `shared/components/` and switches its outputs then.
 - Never an API model as input (ESLint).
 
+## Names of methods and outputs
+
+A method called from a template is named for **what it does**, an output for **what happened** in the component:
+
+```
+dumb:   (click)="saveContact()"            saveContact() { … this.contactChanged.emit(command); }
+smart:  (contactChanged)="updateUserContact($event)"
+                                           updateUserContact(command) { this.detailsStore.updateUserContact(command); }
+```
+
+| What                                    | Name                                                       | Examples                                                                    |
+| --------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------- |
+| method in a dumb component              | verb + object of the UI step                               | `editContact`, `discardContactChanges`, `saveContact`, `pauseCertification` |
+| method in a page / tab for a command    | the name of the store method it calls                      | `updateUserContact`, `pauseCertification`, `assignRfidTag`                  |
+| method in a page opening a dialog first | the action the dialog leads to                             | `createTool`, `deleteTool`, `updateUser`, `changeRfidReaderType`            |
+| navigation                              | `open` + target                                            | `openToolDetail`, `openUserSession`                                         |
+| output                                  | object + participle – the event, from the component's view | `contactChanged`, `certificationPaused`, `rfidTagAssigned`, `editRequested` |
+
+- Always with an object – `saveContact()`, not `save()`: one rule without exceptions, readable in the template, and a
+  search finds exactly one place.
+- No `on…` prefix (it names the trigger, not the action), no `…Dialog` suffix (the dialog is part of the action).
+- An output is never named like a method of the same class – that is why outputs are events and methods verbs.
+- Outputs of shared dialogs stay `confirmed` / `cancelled` (skill `dialog`).
+
 ## Smart component
 
 A tab component of `tool-detail` – the page itself is only the frame (see "Pages with tabs"):
@@ -108,7 +132,7 @@ export class ToolDetailTabCertificationsComponent {
     toCertificationRowViewModels(this.detailsStore.toolCertifications(), this.detailsStore.users()),
   );
 
-  protected onDeleteCertification(command: DeleteToolCertificationCommand): void {
+  protected deleteCertification(command: DeleteToolCertificationCommand): void {
     this.detailsStore.deleteCertification(command);
   }
 }
@@ -136,7 +160,7 @@ function toCertificationRowViewModels(
     [certifications]="certificationRows()"
     [certifiableUsers]="detailsStore.certifiableUsers()"
     [certifiers]="detailsStore.certifiers()"
-    (deleteCertification)="onDeleteCertification($event)" … />
+    (certificationDeleted)="deleteCertification($event)" … />
 }
 ```
 
@@ -220,7 +244,7 @@ export class UserContactComponent {
 
   protected readonly contactForm = form(this.model, (schema) => { … });
 
-  protected onSave(): void {
+  protected saveContact(): void {
     submit(this.contactForm, async () => {
       const { email, phone } = this.model();
       const command: UpdateUserContactCommand = { id: this.userContact().id, email, phone: phone || undefined };
@@ -236,7 +260,7 @@ function toModel(userContact: UserContactViewModel): ContactFormModel {
 ```
 
 The page passes the `User` directly – it has all fields of `UserContactViewModel`:
-`<schbar-user-contact [userContact]="user" (contactChanged)="onContactChanged($event)" />`.
+`<schbar-user-contact [userContact]="user" (contactChanged)="updateUserContact($event)" />`.
 
 Rules:
 
@@ -255,7 +279,7 @@ Rules:
   (`existingTools = input.required<ExistingToolViewModel[]>()` for `validateUniqueToolName`), not from a store.
 - Filtering by what the user typed (autocomplete search text) is UI logic and stays in the component.
 - Every output for a backend change emits a **command** (CLAUDE.md "Commands"). Outputs without a backend change
-  (`edit`, `reload`, `userSelected`) emit `void` or the id.
+  (`editRequested`, `reloadRequested`, `userSelected`) emit `void` or the id.
 - Local UI state in signals (`isEditing`, `searchText`, `selectedUsers`), form models local (CLAUDE.md "Forms"),
   pure helpers after the class.
 
@@ -302,6 +326,8 @@ the store mock goes into the `TestBed` providers):
 - [ ] Dumb: only `input()` / `output()`; injects nothing (form dialog: dialog data/ref; confirmation services)
 - [ ] Dumb gets data decided and combined: no business rule, no join of lists inside; validator data as input
 - [ ] Outputs for backend changes emit commands with the ids (feature); `void` / own result type (shared)
+- [ ] Names: methods verb + object (page/tab: like the store method), outputs object + participle; no `on…`,
+      no `…Dialog`
 - [ ] Smart: injects store / router / dialogs; feature model passed directly where it fits, otherwise `computed` +
       pure `to<Name>ViewModel()` after the class; handlers only call the store
 - [ ] Smart template: layout + children; parts with own state, forms or business switches extracted; no

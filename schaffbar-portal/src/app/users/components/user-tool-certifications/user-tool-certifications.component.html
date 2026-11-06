@@ -37,14 +37,14 @@
                   class="danger-button"
                   matIconButton
                   [title]="'users.actions.toolCertifications.pause' | translate"
-                  (click)="onPause(cert)">
+                  (click)="pauseCertification(cert)">
                   <mat-icon>pause_circle</mat-icon>
                 </button>
                 <button
                   class="danger-button"
                   matIconButton
                   [title]="'users.actions.toolCertifications.revoke' | translate"
-                  (click)="onRevoke(cert)">
+                  (click)="revokeCertification(cert)">
                   <mat-icon>block</mat-icon>
                 </button>
               }
@@ -52,14 +52,14 @@
                 <button
                   matIconButton
                   [title]="'users.actions.toolCertifications.reactivate' | translate"
-                  (click)="onReactivate(cert)">
+                  (click)="reactivateCertification(cert)">
                   <mat-icon>play_circle</mat-icon>
                 </button>
                 <button
                   class="danger-button"
                   matIconButton
                   [title]="'users.actions.toolCertifications.revoke' | translate"
-                  (click)="onRevoke(cert)">
+                  (click)="revokeCertification(cert)">
                   <mat-icon>block</mat-icon>
                 </button>
               }

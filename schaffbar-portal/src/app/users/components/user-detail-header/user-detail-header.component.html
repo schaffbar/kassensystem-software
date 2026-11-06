@@ -5,10 +5,10 @@
   <div class="user-detail-header-title">
     <div class="user-detail-header-title-actions">
       <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-      <button matIconButton type="button" aria-label="Edit user" (click)="edit.emit()">
+      <button matIconButton type="button" aria-label="Edit user" (click)="editRequested.emit()">
         <mat-icon>edit</mat-icon>
       </button>
-      <button matIconButton type="button" aria-label="Reload user" (click)="reload.emit()">
+      <button matIconButton type="button" aria-label="Reload user" (click)="reloadRequested.emit()">
         <mat-icon>refresh</mat-icon>
       </button>
     </div>
@@ -42,7 +42,7 @@
       }
       @case (RfidTagAssignmentStatus.Assigned) {
         <div class="user-detail-header-actions">
-          <button class="danger-button" matButton="filled" type="button" (click)="onUnassignRfidTag()">
+          <button class="danger-button" matButton="filled" type="button" (click)="unassignRfidTag()">
             {{ 'users.actions.unassignRfidTag' | translate }}
           </button>
         </div>
@@ -51,10 +51,10 @@
     }
   } @else {
     <div class="user-detail-header-actions">
-      <button matButton="filled" type="button" (click)="onAssignRfidTag(RfidTagAssignmentType.Temporary)">
+      <button matButton="filled" type="button" (click)="assignRfidTag(RfidTagAssignmentType.Temporary)">
         {{ 'users.actions.assignTempRfidTag' | translate }}
       </button>
-      <button matButton="filled" type="button" (click)="onAssignRfidTag(RfidTagAssignmentType.Fixed)">
+      <button matButton="filled" type="button" (click)="assignRfidTag(RfidTagAssignmentType.Fixed)">
         {{ 'users.actions.assignFixedRfidTag' | translate }}
       </button>
     </div>
