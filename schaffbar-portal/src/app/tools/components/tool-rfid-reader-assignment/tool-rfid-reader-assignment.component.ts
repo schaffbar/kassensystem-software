@@ -68,12 +68,15 @@ export class ToolRfidReaderAssignmentComponent {
     () => this.model().rfidReaderId !== toModel(this.toolRfidReaderAssignment()).rfidReaderId,
   );
 
-  protected onCancel(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected discardRfidReaderChanges(): void {
     this.model.set(toModel(this.toolRfidReaderAssignment()));
     this.rfidReaderForm().reset();
   }
 
-  protected onSave(): void {
+  protected saveRfidReader(): void {
     submit(this.rfidReaderForm, async () => {
       const { rfidReaderId } = this.model();
       if (!rfidReaderId) return;
@@ -83,7 +86,7 @@ export class ToolRfidReaderAssignmentComponent {
     });
   }
 
-  protected onClear(): void {
+  protected clearRfidReader(): void {
     this.confirmActionDialog
       .open({
         title: 'tools.dialogs.clearRfidReader.title',
@@ -107,6 +110,9 @@ export class ToolRfidReaderAssignmentComponent {
     return this.rfidReaders().some((reader) => reader.id === readerId && reader.isAssignedToOtherTool);
   }
 }
+
+// --------------------------------------------------------------------------
+// mappers
 
 function toModel(tool: ToolRfidReaderAssignmentViewModel): RfidReaderAssignmentFormModel {
   return { rfidReaderId: tool.rfidReaderId ?? '' };

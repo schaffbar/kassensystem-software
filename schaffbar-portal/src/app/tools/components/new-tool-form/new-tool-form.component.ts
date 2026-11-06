@@ -72,7 +72,10 @@ export class NewToolFormComponent {
     required(schema.certificationRequirement);
   });
 
-  protected onSave(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected saveTool(): void {
     submit(this.toolForm, async () => {
       const { name, description, area, certificationRequirement } = this.model();
       if (!area || !certificationRequirement) return;

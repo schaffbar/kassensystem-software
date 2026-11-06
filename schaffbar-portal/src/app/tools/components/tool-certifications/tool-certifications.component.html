@@ -12,10 +12,10 @@
           matInput
           #certifierSearchInput
           [value]="certifierSearchText()"
-          (input)="onCertifierInput(certifierSearchInput.value)"
+          (input)="searchCertifiers(certifierSearchInput.value)"
           [matAutocomplete]="certifierAuto"
           placeholder="{{ 'tools.pages.toolDetails.certifications.batchCreate.certifiedBy' | translate }}" />
-        <mat-autocomplete #certifierAuto="matAutocomplete" (optionSelected)="onCertifierSelected($event.option.value)">
+        <mat-autocomplete #certifierAuto="matAutocomplete" (optionSelected)="selectCertifier($event.option.value)">
           @for (user of filteredCertifiers(); track user.id) {
             <mat-option [value]="user">{{ user.firstName }} {{ user.lastName }}</mat-option>
           }
@@ -33,7 +33,7 @@
           placeholder="{{ 'tools.pages.toolDetails.certifications.batchCreate.searchUsers' | translate }}" />
         <mat-autocomplete
           #userAuto="matAutocomplete"
-          (optionSelected)="onUserSelected($event.option.value); userSearchInput.value = ''">
+          (optionSelected)="selectUser($event.option.value); userSearchInput.value = ''">
           @for (user of filteredUsers(); track user.id) {
             <mat-option [value]="user">{{ user.firstName }} {{ user.lastName }}</mat-option>
           }
@@ -56,7 +56,7 @@
       <button
         matButton="filled"
         [disabled]="selectedUsers().length === 0 || !selectedCertifier()"
-        (click)="onSubmitBatch()">
+        (click)="certifySelectedUsers()">
         {{ 'tools.pages.toolDetails.certifications.batchCreate.submit' | translate }}
       </button>
     </div>
@@ -97,7 +97,7 @@
                   class="danger-button"
                   matIconButton
                   [title]="'users.actions.toolCertifications.delete' | translate"
-                  (click)="onDelete(cert)">
+                  (click)="deleteCertification(cert)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>

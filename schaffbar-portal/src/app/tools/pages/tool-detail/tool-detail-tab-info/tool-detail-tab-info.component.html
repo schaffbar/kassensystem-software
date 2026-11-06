@@ -3,14 +3,14 @@
     <schbar-tool-detail-info
       [toolDetailInfo]="tool"
       [existingTools]="toolsStore.entities()"
-      (toolUpdated)="onToolUpdated($event)" />
+      (toolUpdated)="updateTool($event)" />
   </div>
   <div class="right">
     <schbar-tool-instructors
       [toolId]="tool.id"
       [instructors]="detailsStore.instructors()"
       [candidates]="detailsStore.instructorCandidates()"
-      (instructorsAdded)="onInstructorsAdded($event)"
-      (instructorsRemoved)="onInstructorsRemoved($event)" />
+      (instructorsAdded)="addInstructors($event)"
+      (instructorsRemoved)="removeInstructors($event)" />
   </div>
 }

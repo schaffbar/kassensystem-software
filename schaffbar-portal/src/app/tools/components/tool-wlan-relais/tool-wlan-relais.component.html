@@ -2,7 +2,7 @@
   {{ 'tools.pages.toolDetails.headers.wlanRelais' | translate }}
 </h3>
 
-<form class="wlan-relais-content" [formRoot]="wlanRelaisForm" (submit)="onSave()">
+<form class="wlan-relais-content" [formRoot]="wlanRelaisForm" (submit)="saveWlanRelais()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always">
@@ -59,7 +59,7 @@
 
   @if (isDirty()) {
     <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="discardWlanRelaisChanges()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
       <button matButton="filled" type="submit">

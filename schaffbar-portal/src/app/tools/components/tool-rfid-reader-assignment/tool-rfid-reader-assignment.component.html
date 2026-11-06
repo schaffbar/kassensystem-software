@@ -5,14 +5,14 @@
       class="danger-button"
       matIconButton
       type="button"
-      (click)="onClear()"
+      (click)="clearRfidReader()"
       [matTooltip]="'tools.tooltips.clearRfidReader' | translate">
       <mat-icon>link_off</mat-icon>
     </button>
   }
 </h3>
 
-<form class="tool-rfid-reader-content" [formRoot]="rfidReaderForm" (submit)="onSave()">
+<form class="tool-rfid-reader-content" [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always">
@@ -40,7 +40,7 @@
 
   @if (isDirty() && rfidReaderForm().valid()) {
     <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="discardRfidReaderChanges()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
       <button matButton="filled" type="submit">

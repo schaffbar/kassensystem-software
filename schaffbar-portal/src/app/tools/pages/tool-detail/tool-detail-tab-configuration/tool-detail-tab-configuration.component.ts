@@ -37,19 +37,19 @@ export class ToolDetailTabConfigurationComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected onRfidReaderChanged(command: ChangeRfidReaderCommand): void {
+  protected changeRfidReader(command: ChangeRfidReaderCommand): void {
     this.detailsStore.changeRfidReader(command);
   }
 
-  protected onRfidReaderCleared(command: ClearRfidReaderCommand): void {
+  protected clearRfidReader(command: ClearRfidReaderCommand): void {
     this.detailsStore.clearRfidReader(command);
   }
 
-  protected onWlanRelaisUpdated(command: SetWlanRelaisCommand): void {
+  protected setWlanRelais(command: SetWlanRelaisCommand): void {
     this.detailsStore.setWlanRelais(command);
   }
 
-  protected onWlanRelaisCleared(command: ClearWlanRelaisCommand): void {
+  protected clearWlanRelais(command: ClearWlanRelaisCommand): void {
     this.detailsStore.clearWlanRelais(command);
   }
 }

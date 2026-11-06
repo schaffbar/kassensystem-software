@@ -73,19 +73,22 @@ export class ToolDetailInfoComponent {
     validateUniqueToolName(schema.name, this.existingTools, () => this.toolDetailInfo().id);
   });
 
-  protected onEdit(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected editTool(): void {
     this.isEditing.set(true);
     // the edit button gets disabled, so move the focus into the form – this also makes Enter submit the form
     this.toolForm.name().focusBoundControl();
   }
 
-  protected onCancel(): void {
+  protected discardToolChanges(): void {
     this.model.set(toModel(this.toolDetailInfo()));
     this.toolForm().reset();
     this.isEditing.set(false);
   }
 
-  protected onSave(): void {
+  protected saveTool(): void {
     submit(this.toolForm, async () => {
       const { name, description, area, certificationRequirement } = this.model();
       const command: UpdateToolCommand = {
@@ -100,6 +103,9 @@ export class ToolDetailInfoComponent {
     });
   }
 }
+
+// --------------------------------------------------------------------------
+// mappers
 
 function toModel(tool: ToolDetailInfoViewModel): ToolFormModel {
   return {

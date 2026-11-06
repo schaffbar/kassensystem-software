@@ -46,8 +46,8 @@ describe('ToolCertificationsComponent', () => {
 
   let fixture: ComponentFixture<ToolCertificationsComponent>;
   let loader: HarnessLoader;
-  let batchCreate: Mock;
-  let deleteCertification: Mock;
+  let certificationsCreated: Mock;
+  let certificationDeleted: Mock;
   let openConfirmDeleteDialog: Mock;
 
   beforeEach(async () => {
@@ -66,10 +66,10 @@ describe('ToolCertificationsComponent', () => {
     fixture.componentRef.setInput('certifications', certifications);
     fixture.componentRef.setInput('certifiableUsers', certifiableUsers);
     fixture.componentRef.setInput('certifiers', certifiers);
-    batchCreate = vi.fn();
-    deleteCertification = vi.fn();
-    fixture.componentInstance.batchCreate.subscribe(batchCreate);
-    fixture.componentInstance.deleteCertification.subscribe(deleteCertification);
+    certificationsCreated = vi.fn();
+    certificationDeleted = vi.fn();
+    fixture.componentInstance.certificationsCreated.subscribe(certificationsCreated);
+    fixture.componentInstance.certificationDeleted.subscribe(certificationDeleted);
     loader = TestbedHarnessEnvironment.loader(fixture);
     await fixture.whenStable();
   });
@@ -140,7 +140,7 @@ describe('ToolCertificationsComponent', () => {
 
     await (await submitButton()).click();
 
-    expect(batchCreate).toHaveBeenCalledExactlyOnceWith({
+    expect(certificationsCreated).toHaveBeenCalledExactlyOnceWith({
       customerIds: ['user-3', 'user-4'],
       toolId: 'tool-1',
       certifiedBy: 'user-2',
@@ -164,7 +164,7 @@ describe('ToolCertificationsComponent', () => {
       message: 'users.dialogs.certifications.deleteCertification.message',
       entity: 'Max Mustermann',
     });
-    expect(deleteCertification).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
+    expect(certificationDeleted).toHaveBeenCalledExactlyOnceWith({ customerId: 'user-1', toolId: 'tool-1' });
   });
 
   it('should not emit the delete command when cancelled', async () => {
@@ -172,6 +172,6 @@ describe('ToolCertificationsComponent', () => {
 
     await clickDelete();
 
-    expect(deleteCertification).not.toHaveBeenCalled();
+    expect(certificationDeleted).not.toHaveBeenCalled();
   });
 });

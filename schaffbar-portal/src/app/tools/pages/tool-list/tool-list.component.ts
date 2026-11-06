@@ -69,7 +69,10 @@ export class ToolListComponent {
     this.store.reloadTools();
   }
 
-  protected toolDetails(tool: Tool): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected openToolDetail(tool: Tool): void {
     this.router.navigate([ROUTE.TOOLS, tool.id]);
   }
 
@@ -77,7 +80,7 @@ export class ToolListComponent {
     this.store.reloadTools();
   }
 
-  protected newToolDialog(): void {
+  protected createTool(): void {
     const dialogRef = this.dialog.open<NewToolFormComponent, NewToolDialogData, CreateToolCommand>(
       NewToolFormComponent,
       {
@@ -94,7 +97,7 @@ export class ToolListComponent {
     });
   }
 
-  protected deleteToolDialog(event: Event, tool: Tool): void {
+  protected deleteTool(event: Event, tool: Tool): void {
     event.stopPropagation();
 
     if (!tool || !tool.id) {

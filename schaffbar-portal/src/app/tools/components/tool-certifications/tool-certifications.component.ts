@@ -59,8 +59,8 @@ export class ToolCertificationsComponent {
   readonly certifiableUsers = input.required<UserOptionViewModel[]>();
   readonly certifiers = input.required<UserOptionViewModel[]>();
 
-  readonly batchCreate = output<BatchCreateToolCertificationCommand>();
-  readonly deleteCertification = output<DeleteToolCertificationCommand>();
+  readonly certificationsCreated = output<BatchCreateToolCertificationCommand>();
+  readonly certificationDeleted = output<DeleteToolCertificationCommand>();
 
   protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
 
@@ -75,15 +75,18 @@ export class ToolCertificationsComponent {
   protected readonly filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase();
     const selectedIds = new Set(this.selectedUsers().map((user) => user.id));
-    return this.certifiableUsers().filter((user) => !selectedIds.has(user.id) && matches(user, search));
+    return this.certifiableUsers().filter((user) => !selectedIds.has(user.id) && this.matches(user, search));
   });
 
   protected readonly filteredCertifiers = computed(() => {
     const search = this.certifierSearchText().toLowerCase();
-    return this.certifiers().filter((user) => matches(user, search));
+    return this.certifiers().filter((user) => this.matches(user, search));
   });
 
-  protected onUserSelected(user: UserOptionViewModel): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected selectUser(user: UserOptionViewModel): void {
     this.selectedUsers.update((users) => [...users, user]);
     this.searchText.set('');
     this.userSearchInput()?.nativeElement.blur();
@@ -93,20 +96,20 @@ export class ToolCertificationsComponent {
     this.selectedUsers.update((users) => users.filter((u) => u.id !== user.id));
   }
 
-  protected onCertifierInput(value: string): void {
+  protected searchCertifiers(value: string): void {
     this.certifierSearchText.set(value);
     if (this.selectedCertifier()) {
       this.selectedCertifier.set(null);
     }
   }
 
-  protected onCertifierSelected(user: UserOptionViewModel): void {
+  protected selectCertifier(user: UserOptionViewModel): void {
     this.selectedCertifier.set(user);
-    this.certifierSearchText.set(fullName(user));
+    this.certifierSearchText.set(this.fullName(user));
     this.certifierSearchInput()?.nativeElement.blur();
   }
 
-  protected onSubmitBatch(): void {
+  protected certifySelectedUsers(): void {
     const certifier = this.selectedCertifier();
     if (this.selectedUsers().length === 0 || !certifier) return;
 
@@ -115,14 +118,14 @@ export class ToolCertificationsComponent {
       toolId: this.toolId(),
       certifiedBy: certifier.id,
     };
-    this.batchCreate.emit(command);
+    this.certificationsCreated.emit(command);
 
     this.selectedUsers.set([]);
     this.selectedCertifier.set(null);
     this.certifierSearchText.set('');
   }
 
-  protected onDelete(certification: ToolCertificationRowViewModel): void {
+  protected deleteCertification(certification: ToolCertificationRowViewModel): void {
     this.confirmDeleteDialog
       .open({
         title: 'users.dialogs.certifications.deleteCertification.title',
@@ -135,16 +138,19 @@ export class ToolCertificationsComponent {
             customerId: certification.customerId,
             toolId: certification.toolId,
           };
-          this.deleteCertification.emit(command);
+          this.certificationDeleted.emit(command);
         }
       });
   }
-}
 
-function fullName(user: UserOptionViewModel): string {
-  return `${user.firstName} ${user.lastName}`;
-}
+  // --------------------------------------------------------------------------
+  // helper
 
-function matches(user: UserOptionViewModel, search: string): boolean {
-  return fullName(user).toLowerCase().includes(search);
+  private fullName(user: UserOptionViewModel): string {
+    return `${user.firstName} ${user.lastName}`;
+  }
+
+  private matches(user: UserOptionViewModel, search: string): boolean {
+    return this.fullName(user).toLowerCase().includes(search);
+  }
 }

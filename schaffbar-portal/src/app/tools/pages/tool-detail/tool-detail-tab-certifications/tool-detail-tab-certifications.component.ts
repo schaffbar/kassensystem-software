@@ -28,11 +28,11 @@ export class ToolDetailTabCertificationsComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected onBatchCreateCertifications(command: BatchCreateToolCertificationCommand): void {
+  protected batchCreateCertifications(command: BatchCreateToolCertificationCommand): void {
     this.detailsStore.batchCreateCertifications(command);
   }
 
-  protected onDeleteCertification(command: DeleteToolCertificationCommand): void {
+  protected deleteCertification(command: DeleteToolCertificationCommand): void {
     this.detailsStore.deleteCertification(command);
   }
 }

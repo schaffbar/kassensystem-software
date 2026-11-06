@@ -1,11 +1,11 @@
 <h3 class="tool-info-header">
   {{ 'tools.pages.toolDetails.headers.toolInformation' | translate }}
-  <button matIconButton type="button" aria-label="Edit tool" (click)="onEdit()" [disabled]="isEditing()">
+  <button matIconButton type="button" aria-label="Edit tool" (click)="editTool()" [disabled]="isEditing()">
     <mat-icon>edit</mat-icon>
   </button>
 </h3>
 
-<form class="tool-info-content" [formRoot]="toolForm" (submit)="onSave()">
+<form class="tool-info-content" [formRoot]="toolForm" (submit)="saveTool()">
   <div class="form-row">
     <div class="form-col">
       <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
@@ -67,7 +67,7 @@
 
   @if (isEditing()) {
     <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="onCancel()">
+      <button matButton="outlined" type="button" (click)="discardToolChanges()">
         {{ 'shared.dialogs.actions.edit.cancel' | translate }}
       </button>
       <button matButton="filled" type="submit">

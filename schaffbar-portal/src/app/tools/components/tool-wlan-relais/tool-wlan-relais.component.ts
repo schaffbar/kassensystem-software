@@ -67,12 +67,15 @@ export class ToolWlanRelaisComponent {
     return current.wlanRelaisType !== saved.wlanRelaisType || current.ipAddress !== saved.ipAddress;
   });
 
-  protected onCancel(): void {
+  // --------------------------------------------------------------------------
+  // actions
+
+  protected discardWlanRelaisChanges(): void {
     this.model.set(toModel(this.toolWlanRelais()));
     this.wlanRelaisForm().reset();
   }
 
-  protected onSave(): void {
+  protected saveWlanRelais(): void {
     submit(this.wlanRelaisForm, async () => {
       const { wlanRelaisType, ipAddress } = this.model();
       if (wlanRelaisType) {
@@ -85,6 +88,9 @@ export class ToolWlanRelaisComponent {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
 
 function toModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormModel {
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };

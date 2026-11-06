@@ -62,6 +62,9 @@ export class ToolInstructorsComponent {
       );
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected selectUser(user: UserOptionViewModel): void {
     this.selectedUsersToAdd.update((users) => [...users, user]);
     this.searchText.set('');

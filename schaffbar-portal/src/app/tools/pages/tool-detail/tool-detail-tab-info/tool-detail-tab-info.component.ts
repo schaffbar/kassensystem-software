@@ -19,15 +19,15 @@ export class ToolDetailTabInfoComponent {
   // --------------------------------------------------------------------------
   // actions
 
-  protected onToolUpdated(command: UpdateToolCommand): void {
+  protected updateTool(command: UpdateToolCommand): void {
     this.detailsStore.updateTool(command);
   }
 
-  protected onInstructorsAdded(command: AddToolInstructorsCommand): void {
+  protected addInstructors(command: AddToolInstructorsCommand): void {
     this.detailsStore.addInstructors(command);
   }
 
-  protected onInstructorsRemoved(command: RemoveToolInstructorsCommand): void {
+  protected removeInstructors(command: RemoveToolInstructorsCommand): void {
     this.detailsStore.removeInstructors(command);
   }
 }
