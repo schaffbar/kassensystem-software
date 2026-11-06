@@ -2,12 +2,11 @@ import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { MatDialog } from '@angular/material/dialog';
-
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { RfidTag } from '../../rfid-tag.model';
 import { RfidTagsStore } from '../../rfid-tags.store';
 import { RfidTagListComponent } from './rfid-tag-list.component';
@@ -19,6 +18,7 @@ describe('RfidTagListComponent', () => {
   ];
 
   let fixture: ComponentFixture<RfidTagListComponent>;
+  let openConfirmDeleteDialog: Mock;
   let storeMock: {
     entities: WritableSignal<RfidTag[]>;
     isLoading: WritableSignal<boolean>;
@@ -28,6 +28,7 @@ describe('RfidTagListComponent', () => {
   };
 
   beforeEach(async () => {
+    openConfirmDeleteDialog = vi.fn();
     storeMock = {
       entities: signal(rfidTags),
       isLoading: signal(false),
@@ -43,6 +44,7 @@ describe('RfidTagListComponent', () => {
         provideRouter([]),
         provideTranslateService(),
         { provide: RfidTagsStore, useValue: storeMock },
+        { provide: ConfirmDeleteDialogService, useValue: { open: openConfirmDeleteDialog } },
       ],
     }).compileComponents();
 
@@ -74,9 +76,8 @@ describe('RfidTagListComponent', () => {
   });
 
   describe('delete', () => {
-    function clickDeleteOfFirstRow(dialogResult: boolean): void {
-      const dialog = fixture.debugElement.injector.get(MatDialog);
-      vi.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(dialogResult) } as never);
+    function clickDeleteOfFirstRow(confirmed: boolean): void {
+      openConfirmDeleteDialog.mockReturnValue(of(confirmed));
 
       fixture.nativeElement.querySelector('tr[mat-row] button').click();
     }
@@ -84,7 +85,12 @@ describe('RfidTagListComponent', () => {
     it('should delete the RFID tag after confirmation', () => {
       clickDeleteOfFirstRow(true);
 
-      expect(storeMock.deleteRfidTag).toHaveBeenCalledWith({ rfidTagId: 'tag-1' });
+      expect(openConfirmDeleteDialog).toHaveBeenCalledExactlyOnceWith({
+        title: 'rfidTags.dialogs.deleteRfidTag.title',
+        entity: 'tag-1',
+        message: 'rfidTags.dialogs.deleteRfidTag.message',
+      });
+      expect(storeMock.deleteRfidTag).toHaveBeenCalledExactlyOnceWith({ rfidTagId: 'tag-1' });
     });
 
     it('should not delete the RFID tag when the dialog is cancelled', () => {

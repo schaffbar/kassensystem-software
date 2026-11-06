@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
 import { RfidTagApiModel } from '../shared/api/rfid-tags/rfid-tag.api-model';
+import { toRfidTag } from './rfid-tag.mapper';
 import { RfidTagsStore } from './rfid-tags.store';
 
 describe('RfidTagsStore', () => {
@@ -53,7 +54,7 @@ describe('RfidTagsStore', () => {
   it('should load all entries on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(entities);
+    expect(store.entities()).toEqual(entities.map(toRfidTag));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -79,7 +80,7 @@ describe('RfidTagsStore', () => {
 
     expectLoad().flush([entities[1]]);
     await settle();
-    expect(store.entities()).toEqual([entities[1]]);
+    expect(store.entities()).toEqual([toRfidTag(entities[1])]);
     expect(store.deleteRfidTag.isPending()).toBe(false);
   });
 

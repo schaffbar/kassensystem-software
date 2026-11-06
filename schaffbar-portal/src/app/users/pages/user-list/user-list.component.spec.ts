@@ -4,14 +4,18 @@ import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { MatDialog } from '@angular/material/dialog';
 import { MatButtonHarness } from '@angular/material/button/testing';
 import { MatInputHarness } from '@angular/material/input/testing';
 import { MatTableHarness } from '@angular/material/table/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { of } from 'rxjs';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { User } from '../../user.model';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
+import { CreateUserCommand, User } from '../../user.model';
 import { UsersStore } from '../../users.store';
 import { UserListComponent } from './user-list.component';
 
@@ -25,9 +29,17 @@ describe('UserListComponent', () => {
   let fixture: ComponentFixture<UserListComponent>;
   let loader: HarnessLoader;
   let entities: WritableSignal<User[]>;
+  let createUser: Mock;
+  let deleteUser: Mock;
+  let openDialog: Mock;
+  let openConfirmDeleteDialog: Mock;
 
   beforeEach(async () => {
     entities = signal(users);
+    createUser = vi.fn();
+    deleteUser = vi.fn();
+    openDialog = vi.fn();
+    openConfirmDeleteDialog = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [UserListComponent],
@@ -42,10 +54,12 @@ describe('UserListComponent', () => {
             isLoading: signal(false),
             hasLoadError: signal(false),
             reloadUsers: vi.fn(),
-            createUser: vi.fn(),
-            deleteUser: vi.fn(),
+            createUser,
+            deleteUser,
           },
         },
+        { provide: MatDialog, useValue: { open: openDialog } },
+        { provide: ConfirmDeleteDialogService, useValue: { open: openConfirmDeleteDialog } },
       ],
     }).compileComponents();
 
@@ -96,5 +110,64 @@ describe('UserListComponent', () => {
     expect(
       await loader.getHarnessOrNull(MatButtonHarness.with({ selector: '[aria-label="Clear search"]' })),
     ).toBeNull();
+  });
+
+  describe('create', () => {
+    const command: CreateUserCommand = {
+      firstName: 'Paul',
+      lastName: 'Panzer',
+      dateOfBirth: new Date(1990, 0, 31),
+      clubMember: false,
+      email: 'paul@example.org',
+      addressLine1: 'Hauptstraße 1',
+      postalCode: '12345',
+      city: 'Berlin',
+      country: 'Deutschland',
+    };
+
+    function clickAdd(result: CreateUserCommand | undefined): void {
+      openDialog.mockReturnValue({ afterClosed: () => of(result) });
+      fixture.nativeElement.querySelector('.user-list-header__actions button').click();
+    }
+
+    it('should open the form and create the user', () => {
+      clickAdd(command);
+
+      expect(openDialog).toHaveBeenCalledExactlyOnceWith(
+        NewUserFormComponent,
+        expect.objectContaining({ disableClose: true }),
+      );
+      expect(createUser).toHaveBeenCalledExactlyOnceWith(command);
+    });
+
+    it('should not create a user when the form is cancelled', () => {
+      clickAdd(undefined);
+
+      expect(createUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('delete', () => {
+    function clickDeleteOfFirstRow(confirmed: boolean): void {
+      openConfirmDeleteDialog.mockReturnValue(of(confirmed));
+      fixture.nativeElement.querySelector('tr[mat-row] .danger-button').click();
+    }
+
+    it('should delete the user after confirmation', () => {
+      clickDeleteOfFirstRow(true);
+
+      expect(openConfirmDeleteDialog).toHaveBeenCalledExactlyOnceWith({
+        title: 'users.dialogs.deleteUser.title',
+        entity: 'Max Mustermann',
+        message: 'users.dialogs.deleteUser.message',
+      });
+      expect(deleteUser).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+    });
+
+    it('should not delete the user when the dialog is cancelled', () => {
+      clickDeleteOfFirstRow(false);
+
+      expect(deleteUser).not.toHaveBeenCalled();
+    });
   });
 });

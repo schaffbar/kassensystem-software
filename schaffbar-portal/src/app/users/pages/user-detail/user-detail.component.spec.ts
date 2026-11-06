@@ -2,13 +2,17 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
+import { MatDialog } from '@angular/material/dialog';
+
 import { provideTranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AgeGroup } from '../../../shared/models/age-group';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
 import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
-import { User } from '../../user.model';
+import { UpdateUserCommand, User } from '../../user.model';
 import { UserDetailTabInfoComponent } from './user-detail-tab-info/user-detail-tab-info.component';
 import { UserDetailComponent } from './user-detail.component';
 import { UserDetailStore } from './user-detail.store';
@@ -35,9 +39,13 @@ describe('UserDetailComponent', () => {
   };
   let fixture: ComponentFixture<UserDetailComponent>;
   let assignRfidTag: Mock;
+  let updateUser: Mock;
+  let openDialog: Mock;
 
   beforeEach(async () => {
     assignRfidTag = vi.fn();
+    updateUser = vi.fn();
+    openDialog = vi.fn();
     const storeMock = {
       isLoading: signal(false),
       hasLoadError: signal(false),
@@ -49,11 +57,16 @@ describe('UserDetailComponent', () => {
       openSession: signal(null),
       setUserId: vi.fn(),
       assignRfidTag,
+      updateUser,
     };
 
     await TestBed.configureTestingModule({
       imports: [UserDetailComponent],
-      providers: [provideZonelessChangeDetection(), provideTranslateService()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        { provide: MatDialog, useValue: { open: openDialog } },
+      ],
     })
       .overrideComponent(UserDetailComponent, {
         set: { providers: [{ provide: UserDetailStore, useValue: storeMock }] },
@@ -82,5 +95,39 @@ describe('UserDetailComponent', () => {
 
   it('should render the info tab', () => {
     expect(fixture.debugElement.query(By.directive(UserDetailTabInfoComponent))).not.toBeNull();
+  });
+
+  describe('update', () => {
+    const command: UpdateUserCommand = {
+      userId: 'user-1',
+      firstName: 'Maximilian',
+      lastName: 'Mustermann',
+      dateOfBirth: new Date(1990, 0, 31),
+      clubMember: true,
+    };
+
+    function requestEdit(result: UpdateUserCommand | undefined): void {
+      openDialog.mockReturnValue({ afterClosed: () => of(result) });
+      const header: UserDetailHeaderComponent = fixture.debugElement.query(
+        By.directive(UserDetailHeaderComponent),
+      ).componentInstance;
+      header.editRequested.emit();
+    }
+
+    it('should open the form with the user and update the user', () => {
+      requestEdit(command);
+
+      expect(openDialog).toHaveBeenCalledExactlyOnceWith(
+        UpdateUserFormComponent,
+        expect.objectContaining({ data: { user }, disableClose: true }),
+      );
+      expect(updateUser).toHaveBeenCalledExactlyOnceWith(command);
+    });
+
+    it('should not update the user when the form is cancelled', () => {
+      requestEdit(undefined);
+
+      expect(updateUser).not.toHaveBeenCalled();
+    });
   });
 });
