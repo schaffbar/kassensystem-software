@@ -32,8 +32,8 @@
             id="dateOfBirth"
             matInput
             [formField]="userForm.dateOfBirth"
-            [min]="minDate"
-            [max]="maxDate"
+            [min]="dateOfBirthLimits.min"
+            [max]="dateOfBirthLimits.max"
             [matDatepicker]="picker" />
           <mat-error>
             <schbar-field-error [field]="userForm.dateOfBirth" label="users.shared.userProperties.dateOfBirth" />

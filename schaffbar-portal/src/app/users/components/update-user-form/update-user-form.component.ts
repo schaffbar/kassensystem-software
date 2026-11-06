@@ -12,7 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { UpdateUserCommand } from '../../user.model';
-import { DATE_OF_BIRTH_MAX, DATE_OF_BIRTH_MIN, validateDateOfBirth } from '../../user.validators';
+import { dateOfBirthRange, validateDateOfBirth } from '../../user.validators';
 
 export interface UpdateUserViewModel {
   id: string;
@@ -55,8 +55,8 @@ export class UpdateUserFormComponent {
   private readonly data: UpdateUserDialogData = inject(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<UpdateUserFormComponent, UpdateUserCommand>);
 
-  protected readonly minDate = DATE_OF_BIRTH_MIN;
-  protected readonly maxDate = DATE_OF_BIRTH_MAX;
+  // computed when the dialog opens
+  protected readonly dateOfBirthLimits = dateOfBirthRange();
 
   private readonly model = signal<UpdateUserFormModel>(toUpdateUserFormModel(this.data.user));
 

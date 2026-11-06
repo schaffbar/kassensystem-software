@@ -12,13 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CreateUserCommand } from '../../user.model';
-import {
-  DATE_OF_BIRTH_MAX,
-  DATE_OF_BIRTH_MIN,
-  POSTAL_CODE_LENGTH,
-  validateDateOfBirth,
-  validatePostalCode,
-} from '../../user.validators';
+import { dateOfBirthRange, POSTAL_CODE_LENGTH, validateDateOfBirth, validatePostalCode } from '../../user.validators';
 
 interface NewUserFormModel {
   firstName: string;
@@ -55,8 +49,8 @@ interface NewUserFormModel {
 export class NewUserFormComponent {
   private readonly dialogRef = inject(MatDialogRef<NewUserFormComponent, CreateUserCommand>);
 
-  protected readonly minDate = DATE_OF_BIRTH_MIN;
-  protected readonly maxDate = DATE_OF_BIRTH_MAX;
+  // computed when the dialog opens
+  protected readonly dateOfBirthLimits = dateOfBirthRange();
   protected readonly postalCodeLength = POSTAL_CODE_LENGTH;
 
   private readonly model = signal<NewUserFormModel>({
