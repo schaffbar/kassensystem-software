@@ -13,14 +13,14 @@ import { interval, map } from 'rxjs';
 
 const DURATION_REFRESH_MS = 60_000;
 
-export interface ActiveUserViewModel {
+export interface ActiveUserRowViewModel {
   customerId: string;
   firstName: string;
   lastName: string;
   entryTime: Date;
 }
 
-interface ActiveUserRow extends ActiveUserViewModel {
+interface ActiveUserTableRow extends ActiveUserRowViewModel {
   duration: string;
 }
 
@@ -31,7 +31,7 @@ interface ActiveUserRow extends ActiveUserViewModel {
   imports: [MatButtonModule, MatCardModule, MatTableModule, MatIconModule, DatePipe, TranslatePipe],
 })
 export class ActiveUsersWidgetComponent {
-  readonly activeUsers = input.required<ActiveUserViewModel[]>();
+  readonly activeUsers = input.required<ActiveUserRowViewModel[]>();
 
   readonly reloadRequested = output<void>();
   // the customer id
@@ -47,11 +47,11 @@ export class ActiveUsersWidgetComponent {
 
   protected readonly dataSource = computed(() => {
     const now = this.now();
-    const rows: ActiveUserRow[] = this.activeUsers().map((user) => ({
+    const rows: ActiveUserTableRow[] = this.activeUsers().map((user) => ({
       ...user,
       duration: formatDuration(user.entryTime, now),
     }));
-    return new MatTableDataSource<ActiveUserRow>(rows);
+    return new MatTableDataSource<ActiveUserTableRow>(rows);
   });
 
   // --------------------------------------------------------------------------
@@ -61,7 +61,7 @@ export class ActiveUsersWidgetComponent {
     this.reloadRequested.emit();
   }
 
-  protected selectUser(user: ActiveUserViewModel): void {
+  protected selectUser(user: ActiveUserRowViewModel): void {
     this.userSelected.emit(user.customerId);
   }
 }

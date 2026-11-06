@@ -1,16 +1,12 @@
 @if (detailsStore.openSession(); as openSession) {
-  @if (detailsStore.slots().length > 0) {
-    <schbar-workshop-usage-summary
-      class="workshop-usage-container"
-      [usages]="detailsStore.slots()"
-      [totalTimeInMinutes]="detailsStore.totalWorkshopDurationInMinutes()"
-      [totalUnitsUsed]="detailsStore.totalWorkshopUnits()" />
+  @if (openSession.workshopUsages.length > 0) {
+    <schbar-workshop-usage-summary class="workshop-usage-container" [workshopUsageSummary]="openSession" />
 
-    @if (detailsStore.toolUsageSummaries().length > 0) {
+    @if (openSession.toolUsageSummaries.length > 0) {
       <div class="tool-usage-container">
         <h2>{{ 'users.pages.openSession.headers.toolUsage' | translate }}</h2>
 
-        @for (summary of detailsStore.toolUsageSummaries(); track summary.toolId) {
+        @for (summary of openSession.toolUsageSummaries; track summary.toolId) {
           <schbar-tool-usage-summary [toolUsageSummary]="summary" />
         }
       </div>
@@ -23,7 +19,7 @@
         type="button"
         [disabled]="detailsStore.hasRunningUsage() || detailsStore.closeWorkshopSession.isPending()"
         (click)="closeWorkshopSession()">
-        {{ 'users.actions.closeWorkshopSession' | translate }}
+        {{ 'users.actions.closeSession' | translate }}
       </button>
       @if (detailsStore.hasRunningUsage()) {
         <p class="running-usage-hint">

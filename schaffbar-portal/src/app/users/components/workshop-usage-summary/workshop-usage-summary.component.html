@@ -1,6 +1,6 @@
 <h2>{{ 'users.pages.openSession.headers.workshopTime' | translate }}</h2>
 <div class="table-container">
-  <table mat-table [dataSource]="usages()" class="mat-elevation-z8">
+  <table mat-table [dataSource]="workshopUsageSummary().workshopUsages" class="mat-elevation-z8">
     <ng-container matColumnDef="entryTime">
       <th mat-header-cell *matHeaderCellDef>
         {{ 'users.tables.openSession.workshopUsage.entryTimeColumn' | translate }}
@@ -31,7 +31,8 @@
 </div>
 
 <h3>
-  {{ 'users.pages.openSession.headers.total' | translate }}: {{ totalTimeInMinutes() }}
-  {{ 'users.pages.openSession.headers.totalDurationSuffix' | translate }} - {{ totalUnitsUsed() }}
+  {{ 'users.pages.openSession.headers.total' | translate }}: {{ workshopUsageSummary().totalWorkshopDurationInMinutes }}
+  {{ 'users.pages.openSession.headers.totalDurationSuffix' | translate }} -
+  {{ workshopUsageSummary().totalWorkshopUnits }}
   {{ 'users.pages.openSession.headers.totalUnitsSuffix' | translate }}
 </h3>

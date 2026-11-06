@@ -84,10 +84,6 @@ export const UserDetailStore = signalStore(
     },
   ),
   withComputed(({ openSession }) => ({
-    slots: computed(() => openSession()?.workshopUsages ?? []),
-    toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
-    totalWorkshopDurationInMinutes: computed(() => openSession()?.totalWorkshopDurationInMinutes ?? 0),
-    totalWorkshopUnits: computed(() => openSession()?.totalWorkshopUnits ?? 0),
     hasRunningUsage: computed(() => {
       const session = openSession();
       return session ? hasRunningUsage(session) : false;

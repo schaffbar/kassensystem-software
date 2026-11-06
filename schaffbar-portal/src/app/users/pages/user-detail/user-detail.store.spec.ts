@@ -122,8 +122,6 @@ describe('UserDetailStore', () => {
     expect(store.user()).toEqual(toUser(user));
     expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
     expect(store.openSession()).toEqual(toWorkshopSession(session));
-    expect(store.totalWorkshopDurationInMinutes()).toBe(80);
-    expect(store.totalWorkshopUnits()).toBe(4);
     expect(store.hasRunningUsage()).toBe(false);
     expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
     expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
@@ -135,7 +133,6 @@ describe('UserDetailStore', () => {
 
     expect(store.rfidTagAssignment()).toBeNull();
     expect(store.openSession()).toBeNull();
-    expect(store.slots()).toEqual([]);
     expect(store.hasRunningUsage()).toBe(false);
     expect(store.hasLoadError()).toBe(false);
   });

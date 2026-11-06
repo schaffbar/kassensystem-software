@@ -7,8 +7,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-export interface ToolStatusViewModel {
-  id: string;
+export interface ToolStatusRowViewModel {
   name: string;
   // null while nobody uses the tool
   usedBy: { firstName: string; lastName: string } | null;
@@ -21,7 +20,7 @@ export interface ToolStatusViewModel {
   imports: [MatButtonModule, MatCardModule, MatTableModule, MatIconModule, TranslatePipe],
 })
 export class ActiveToolsWidgetComponent {
-  readonly toolStatuses = input.required<ToolStatusViewModel[]>();
+  readonly toolStatuses = input.required<ToolStatusRowViewModel[]>();
 
   readonly reloadRequested = output<void>();
 
@@ -30,7 +29,7 @@ export class ActiveToolsWidgetComponent {
   protected readonly dataSource = computed(() => {
     // tools in use first
     const rows = [...this.toolStatuses()].sort((a, b) => Number(!!b.usedBy) - Number(!!a.usedBy));
-    return new MatTableDataSource<ToolStatusViewModel>(rows);
+    return new MatTableDataSource<ToolStatusRowViewModel>(rows);
   });
 
   // --------------------------------------------------------------------------

@@ -4,10 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { WorkshopUsageSummaryComponent, WorkshopUsageViewModel } from './workshop-usage-summary.component';
+import { WorkshopUsageRowViewModel, WorkshopUsageSummaryComponent } from './workshop-usage-summary.component';
 
 describe('WorkshopUsageSummaryComponent', () => {
-  const usages: WorkshopUsageViewModel[] = [
+  const workshopUsages: WorkshopUsageRowViewModel[] = [
     {
       entryTime: new Date('2026-01-01T10:00:00Z'),
       exitTime: new Date('2026-01-01T12:00:00Z'),
@@ -26,9 +26,11 @@ describe('WorkshopUsageSummaryComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(WorkshopUsageSummaryComponent);
-    fixture.componentRef.setInput('usages', usages);
-    fixture.componentRef.setInput('totalTimeInMinutes', 120);
-    fixture.componentRef.setInput('totalUnitsUsed', 4);
+    fixture.componentRef.setInput('workshopUsageSummary', {
+      workshopUsages,
+      totalWorkshopDurationInMinutes: 120,
+      totalWorkshopUnits: 4,
+    });
     await fixture.whenStable();
   });
 

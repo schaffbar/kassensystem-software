@@ -4,12 +4,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ActiveToolsWidgetComponent, ToolStatusViewModel } from './active-tools-widget.component';
+import { ActiveToolsWidgetComponent, ToolStatusRowViewModel } from './active-tools-widget.component';
 
 describe('ActiveToolsWidgetComponent', () => {
-  const toolStatuses: ToolStatusViewModel[] = [
-    { id: 'tool-1', name: 'Bandsäge', usedBy: null },
-    { id: 'tool-2', name: 'Drechselbank', usedBy: { firstName: 'Max', lastName: 'Mustermann' } },
+  const toolStatuses: ToolStatusRowViewModel[] = [
+    { name: 'Bandsäge', usedBy: null },
+    { name: 'Drechselbank', usedBy: { firstName: 'Max', lastName: 'Mustermann' } },
   ];
 
   let fixture: ComponentFixture<ActiveToolsWidgetComponent>;

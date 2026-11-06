@@ -8,7 +8,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ROUTE } from '../../../app.routes';
 import {
   ActiveToolsWidgetComponent,
-  ToolStatusViewModel,
+  ToolStatusRowViewModel,
 } from '../../components/active-tools-widget/active-tools-widget.component';
 import { ActiveUsersWidgetComponent } from '../../components/active-users-widget/active-users-widget.component';
 import { ActiveTool, Tool } from '../../dashboard.model';
@@ -26,7 +26,7 @@ export class DashboardComponent {
   private readonly router = inject(Router);
 
   protected readonly toolStatuses = computed(() =>
-    toToolStatusViewModels(this.store.tools(), this.store.activeTools()),
+    toToolStatusRowViewModels(this.store.tools(), this.store.activeTools()),
   );
 
   // --------------------------------------------------------------------------
@@ -48,12 +48,11 @@ export class DashboardComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
-function toToolStatusViewModels(tools: Tool[], activeTools: ActiveTool[]): ToolStatusViewModel[] {
+function toToolStatusRowViewModels(tools: Tool[], activeTools: ActiveTool[]): ToolStatusRowViewModel[] {
   const activeToolsById = new Map(activeTools.map((activeTool) => [activeTool.toolId, activeTool]));
   return tools.map((tool) => {
     const activeTool = activeToolsById.get(tool.id);
     return {
-      id: tool.id,
       name: tool.name,
       usedBy: activeTool ? { firstName: activeTool.firstName, lastName: activeTool.lastName } : null,
     };

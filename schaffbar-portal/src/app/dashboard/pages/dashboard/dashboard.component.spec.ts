@@ -54,8 +54,8 @@ describe('DashboardComponent', () => {
 
   it('should pass every tool with the user who is using it', () => {
     expect(child(ActiveToolsWidgetComponent).toolStatuses()).toEqual([
-      { id: 'tool-1', name: 'Bandsäge', usedBy: null },
-      { id: 'tool-2', name: 'Drechselbank', usedBy: { firstName: 'Max', lastName: 'Mustermann' } },
+      { name: 'Bandsäge', usedBy: null },
+      { name: 'Drechselbank', usedBy: { firstName: 'Max', lastName: 'Mustermann' } },
     ]);
   });
 

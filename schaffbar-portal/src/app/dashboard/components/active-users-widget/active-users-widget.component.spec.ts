@@ -4,10 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ActiveUsersWidgetComponent, ActiveUserViewModel } from './active-users-widget.component';
+import { ActiveUsersWidgetComponent, ActiveUserRowViewModel } from './active-users-widget.component';
 
 describe('ActiveUsersWidgetComponent', () => {
-  const activeUsers: ActiveUserViewModel[] = [
+  const activeUsers: ActiveUserRowViewModel[] = [
     { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: new Date('2026-10-27T08:30:00') },
     { customerId: 'user-2', firstName: 'Erika', lastName: 'Musterfrau', entryTime: new Date('2026-10-27T09:55:00') },
   ];

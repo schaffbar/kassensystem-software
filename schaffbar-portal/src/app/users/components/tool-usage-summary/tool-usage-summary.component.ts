@@ -8,7 +8,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 
-export interface ToolUsageViewModel {
+export interface ToolUsageRowViewModel {
   startTime: Date;
   // null while the tool is still in use
   endTime: Date | null;
@@ -22,7 +22,7 @@ export interface ToolUsageSummaryViewModel {
   active: boolean;
   totalDurationInMinutes: number;
   totalUnits: number;
-  usages: ToolUsageViewModel[];
+  usages: ToolUsageRowViewModel[];
 }
 
 @Component({

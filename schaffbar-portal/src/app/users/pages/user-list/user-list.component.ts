@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +24,6 @@ import { UsersStore } from '../../users.store';
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
   imports: [
-    FormField,
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -45,9 +43,7 @@ export class UserListComponent {
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
 
-  private readonly search = signal({ term: '' });
-  // TODO: do I need to use form here
-  protected readonly searchForm = form(this.search);
+  protected readonly searchText = signal('');
 
   protected readonly displayedColumns = ['lastName', 'firstName', 'actions'];
   protected readonly usersCount = computed(() => this.store.entities().length);
@@ -56,7 +52,7 @@ export class UserListComponent {
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
     // part of the computed, so the filter survives reloading the users (MatTableDataSource default filter predicate)
-    result.filter = this.search().term.trim().toLowerCase();
+    result.filter = this.searchText().trim().toLowerCase();
     return result;
   });
 
@@ -71,12 +67,13 @@ export class UserListComponent {
     this.store.reloadUsers();
   }
 
-  protected showFirstPage(): void {
+  protected searchUsers(term: string): void {
+    this.searchText.set(term);
     this.paginator()?.firstPage();
   }
 
   protected clearSearch(): void {
-    this.search.set({ term: '' });
+    this.searchText.set('');
     this.paginator()?.firstPage();
   }
 

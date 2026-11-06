@@ -1,4 +1,4 @@
-import { computed, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
@@ -32,10 +32,6 @@ describe('UserDetailTabSessionComponent', () => {
     hasRunningUsage = signal(false);
     storeMock = {
       openSession,
-      slots: computed(() => openSession()?.workshopUsages ?? []),
-      toolUsageSummaries: computed(() => openSession()?.toolUsageSummaries ?? []),
-      totalWorkshopDurationInMinutes: signal(60),
-      totalWorkshopUnits: signal(10),
       hasRunningUsage,
       closeWorkshopSession: Object.assign(vi.fn(), { isPending: signal(false) }),
       reloadOpenSession: vi.fn(),

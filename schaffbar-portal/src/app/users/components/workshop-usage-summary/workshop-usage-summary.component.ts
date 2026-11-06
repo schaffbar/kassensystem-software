@@ -7,12 +7,18 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 
-export interface WorkshopUsageViewModel {
+export interface WorkshopUsageRowViewModel {
   entryTime: Date;
   // null while the user is still in the workshop
   exitTime: Date | null;
   durationInMinutes: number | null;
   unitsUsed: number | null;
+}
+
+export interface WorkshopUsageSummaryViewModel {
+  workshopUsages: WorkshopUsageRowViewModel[];
+  totalWorkshopDurationInMinutes: number;
+  totalWorkshopUnits: number;
 }
 
 @Component({
@@ -22,9 +28,7 @@ export interface WorkshopUsageViewModel {
   imports: [MatTableModule, DatePipe, TranslatePipe, OrDashPipe],
 })
 export class WorkshopUsageSummaryComponent {
-  readonly usages = input.required<WorkshopUsageViewModel[]>();
-  readonly totalTimeInMinutes = input.required<number>();
-  readonly totalUnitsUsed = input.required<number>();
+  readonly workshopUsageSummary = input.required<WorkshopUsageSummaryViewModel>();
 
   protected readonly displayedColumns: string[] = ['entryTime', 'exitTime', 'durationInMinutes', 'unitsUsed'];
 }
