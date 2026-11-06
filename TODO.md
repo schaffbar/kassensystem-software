@@ -40,10 +40,7 @@
 
 ## Architecture
 
-- [Frontend] Each tab a page or dumb component which uses other dumb components
 - [Frontend] onAssignRfidTag vs reload....
-- [Frontend] in dashboard - use global tools store vs fetch data to its own store
-
 - [Backend] Validate HTTP response before sending back
 - [Backend] HTTP response - missing values as null or NON_NULL option -> adapt ApiModels in frontend
 - [Backend] Facade vs Use Case and move all mutations to use cases
