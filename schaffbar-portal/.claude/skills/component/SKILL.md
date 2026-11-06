@@ -36,6 +36,7 @@ Reference implementations:
 | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | loading, reloading, backend changes                            | store (skill `api`), called by the smart component                     |
 | business rules (which readers are assignable, who may certify) | store `withComputed` / feature model function                          |
+| matching two sources (is the reader used by another tool?)     | page mapping (`to…ViewModel`) – a join, not a rule                     |
 | the input type of a dumb component                             | **ViewModel in the dumb component's file**                             |
 | filling the ViewModel (pass through or map)                    | smart component                                                        |
 | navigation, opening a feature dialog, snackbar                 | smart component                                                        |
@@ -71,7 +72,10 @@ Rules:
     (`ConfirmDeleteDialogViewModel`, `CloseSessionDialogViewModel`) – the service binds it by that name.
   - **Further ViewModels** (rows, options, nested parts, a second input) are named after what they describe:
     `ToolCertificationRowViewModel`, `UserOptionViewModel`, `AddressViewModel`; their inputs likewise
-    (`certifications`, `certifiers`).
+    (`certifications`, `certifiers`). A row of a table ends in `RowViewModel`.
+  - **Lists**: a component whose only input is a list gets just the row ViewModel, no main ViewModel –
+    `toolStatuses` of type `ToolStatusRowViewModel[]`. When it needs more than the list (totals, a title), the main
+    `<ComponentName>ViewModel` contains the list and the rest – not several inputs side by side.
 - Only the fields the template and the component read. A value the backend can send as `null` stays `| null`
   (CLAUDE.md "Missing values").
 - Plain data only: strings, numbers, booleans, `Date`, nested objects/arrays of these, and enums from
@@ -241,7 +245,7 @@ interface ContactFormModel {
   selector: 'schbar-user-contact',
   templateUrl: './user-contact.component.html',
   styleUrl: './user-contact.component.scss',
-  imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, TranslatePipe],
+  imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
 })
 export class UserContactComponent {
   readonly userContact = input.required<UserContactViewModel>();

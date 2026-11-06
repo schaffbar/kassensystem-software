@@ -46,18 +46,29 @@ component (inputs, outputs, signals, handlers).
 
 ## File sections
 
-Files are divided by section comments – a separator line ending at column 79, then the name of the section:
+Files are divided by section comments – a separator line ending at column 79 (the indentation counts), then the name
+of the section:
 
 ```ts
-// --------------------------------------------------------------------------
-// actions
+export class UserContactComponent {
+  …
+  // --------------------------------------------------------------------------
+  // actions
+  …
+}
+
+// ----------------------------------------------------------------------------
+// mappers
 ```
 
 - Components, in this order: (no header) injected services, inputs, outputs, signals, form, `computed`, constructor
   → `// actions` (methods the template calls) → `// helper` (`private` methods); after the class `// mappers`
   (`to…` functions) → `// helper` (other pure functions).
 - Mappers (`*.mapper.ts`): `// API model → feature model` → `// command → request`.
-- Models: `// commands`. API services: `// queries` → `// commands`.
+- API models (`*.api-model.ts`): (no header) schemas and `…ApiModel` types → `// requests`.
+- Feature models (`*.model.ts`): (no header) the model → further sections by content (`// WLAN relais` in
+  `tool.model.ts`) → `// commands` last.
+- API services: `// queries` → `// commands`.
 - A section only exists when it has content.
 
 ## Commands
@@ -108,8 +119,9 @@ Files are divided by section comments – a separator line ending at column 79, 
 
 ## Forms
 
-- Every form has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
+- Every form that saves data has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
   `submit(this.xyzForm, async () => …)`.
+- A field that only filters (search text, autocomplete) is no form: a plain `signal('')` set by `(input)`.
 - Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
   without `type` submits the form, so e.g. "cancel" would save.
 - The result of `saveXyz()` is built as an explicitly typed variable before it is passed on – for readability, even
@@ -202,5 +214,5 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
   always "delete"), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
   with its own `confirmLabel` and `destructive: true | false`.
 - **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
-  form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it, Enter saves); destructive or
-  irreversible confirmations put `cdkFocusInitial` on cancel.
+  form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it; Enter in a text field saves);
+  destructive or irreversible confirmations put `cdkFocusInitial` on cancel.

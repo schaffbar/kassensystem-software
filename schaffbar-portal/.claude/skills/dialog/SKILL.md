@@ -152,6 +152,9 @@ export class CloseSessionDialogContainerComponent {
     return session ? toCloseSessionDialogViewModel(session) : null;
   });
 
+  // --------------------------------------------------------------------------
+  // actions
+
   protected closeConfirmed(): void {
     this.dialogRef.close(true);
   }
@@ -161,7 +164,13 @@ export class CloseSessionDialogContainerComponent {
   }
 }
 
+// ----------------------------------------------------------------------------
+// mappers
+
 function toCloseSessionDialogViewModel(session: WorkshopSessionApiModel): CloseSessionDialogViewModel { … }
+
+// ----------------------------------------------------------------------------
+// helper
 
 function hasRunningUsage(session: WorkshopSessionApiModel): boolean { … }
 ```
@@ -316,8 +325,10 @@ from CLAUDE.md "Forms" and closes itself:
 
 - data via `MAT_DIALOG_DATA`, `inject(MatDialogRef<…, Result>)`, `this.dialogRef.close(command)` in `save<Subject>()` (`saveTool()`);
 - cancel: `<button matButton="outlined" type="button" [mat-dialog-close]="undefined">` (not `mat-dialog-close`
-  without a value – that closes with `''`); no `cdkFocusInitial`, the first field gets the focus so Enter saves;
-- the page opens it typed – `this.dialog.open<NewToolFormComponent, void, CreateToolCommand>(…)` – with
+  without a value – that closes with `''`); no `cdkFocusInitial`, the first field gets the focus (in a text field
+  Enter saves; in a `mat-select` Enter opens the options);
+- the page opens it typed – `this.dialog.open<NewUserFormComponent, void, CreateUserCommand>(…)`, with data
+  `this.dialog.open<NewToolFormComponent, NewToolDialogData, CreateToolCommand>(…, { data: … })` – with
   `minWidth: DIALOG_WIDTH.…` and `disableClose: true`.
 
 Once a form dialog is needed in a second place, it moves to `shared/dialogs/` and gets a service.
