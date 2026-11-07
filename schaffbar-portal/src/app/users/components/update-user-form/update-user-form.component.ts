@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -46,7 +45,6 @@ interface UpdateUserFormModel {
     MatCheckboxModule,
     MatButtonModule,
     MatDialogModule,
-    MatDividerModule,
     MatDatepickerModule,
     TranslatePipe,
   ],

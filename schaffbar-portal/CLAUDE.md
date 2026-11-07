@@ -169,6 +169,24 @@ export class UserContactComponent {
 - Look and feel is changed with `mat.button-overrides(...)` / `mat.icon-button-overrides(...)`, not with
   `.mat-mdc-*` selectors and `!important`.
 
+## Design system
+
+The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
+
+- Colors only from the tokens in `src/styles.scss` (`--text`, `--text-2`, `--surface`, `--border`, `--accent`,
+  `--danger`, …) – no hex values in component styles. Neon green `--accent` only as a surface; green text is
+  `--accent-text`.
+- Material components get their look from the `mat.*-overrides(...)` in `src/styles.scss`.
+- Building blocks in `shared/components/`; their texts are passed **translated**:
+  - `schbar-page-header` – `h1`, `subtitle`, `breadcrumbs`; actions are projected, status badges with
+    `pageHeaderMeta`.
+  - `schbar-status-badge` – a status as icon + text, never by color alone (`tone`: `success`, `info`, `warn`,
+    `danger`, `neutral`). An enum gets its own badge that maps it once (`certification-status-badge`,
+    `certification-requirement-badge`). Not inside a `mat-option`: `mat-select` takes the icon name into the text.
+  - `schbar-row-menu` – the ⋯ menu of a table row instead of action buttons; destructive entries come last after a
+    `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
+  - `schbar-empty-state` – instead of an empty table or list.
+
 ## Components
 
 Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL.md`).

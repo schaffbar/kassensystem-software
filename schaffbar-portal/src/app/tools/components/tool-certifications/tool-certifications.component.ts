@@ -11,7 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { CertificationStatusChipComponent } from '../../../shared/components/certification-status-chip/certification-status-chip.component';
+import { CertificationStatusBadgeComponent } from '../../../shared/components/certification-status-badge/certification-status-badge.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
@@ -46,7 +46,7 @@ export interface UserOptionViewModel {
     MatIconModule,
     MatInputModule,
     MatTableModule,
-    CertificationStatusChipComponent,
+    CertificationStatusBadgeComponent,
     TranslatePipe,
     OrDashPipe,
   ],

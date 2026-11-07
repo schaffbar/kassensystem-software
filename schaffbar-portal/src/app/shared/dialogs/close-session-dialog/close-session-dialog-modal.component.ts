@@ -2,7 +2,6 @@ import { Component, computed, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -20,15 +19,7 @@ export interface CloseSessionDialogViewModel {
   selector: 'schbar-close-session-dialog-modal',
   templateUrl: './close-session-dialog-modal.component.html',
   styleUrl: './close-session-dialog-modal.component.scss',
-  imports: [
-    MatButtonModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    TranslatePipe,
-    OrDashPipe,
-  ],
+  imports: [MatButtonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule, TranslatePipe, OrDashPipe],
 })
 export class CloseSessionDialogModalComponent {
   readonly isLoading = input(false);

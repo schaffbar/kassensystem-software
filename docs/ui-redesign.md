@@ -466,13 +466,14 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
    `danger-button` und `.readonly-field` auf Tokens.
 2. [x] **Layout:** Navy-Seitenleiste mit Logo und Gruppen Betrieb/Hardware, heller Inhaltsbereich (`core/navigation`).
    Mobil eine Navy-Leiste mit Menü-Button und Logo; das Menü schließt sich nach der Auswahl.
-3. [ ] **Gemeinsame Bausteine** – nur, was die vorhandenen Seiten brauchen:
-   - `StatusBadge` (Icon + Text) ersetzt `certification-status-chip` und `certification-requirement-dot`; Texte über die
-     vorhandenen Key-Pipes.
+3. [x] **Gemeinsame Bausteine** – nur, was die vorhandenen Seiten brauchen (eingesetzt werden sie in Schritt 4;
+   Verwendung: CLAUDE.md, Abschnitt „Design system“):
+   - `StatusBadge` (Icon + Text) ersetzt `certification-status-chip` und `certification-requirement-dot` – jetzt
+     `certification-status-badge` und `certification-requirement-badge`.
    - `RowMenu` (⋯) ersetzt den roten Löschen-Button pro Zeile – mit den Aktionen, die es heute gibt.
    - `PageHeader` (Titel, Aktionen, Brotkrümel auf Detailseiten).
    - `EmptyState` für leere Listen.
-   - Dialoge nur im neuen Aussehen (Kopf, Inhalt, Fußzeile).
+   - Dialoge nur im neuen Aussehen (Kopf, Inhalt, Fußzeile) – ohne Trennlinie, Abstände über `mat.dialog-overrides`.
 4. [ ] **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht: Tabellen, Karten
    und Formulare im neuen Design, Tabs wie im Entwurf benannt, Übersicht mit den zwei vorhandenen Widgets als Karten.
    Refresh-Buttons bleiben. Fest eingetragene Farben in Komponenten-Styles durch Tokens ersetzen.

@@ -1,7 +1,5 @@
 <h2 mat-dialog-title>{{ 'tools.dialogs.addTool.title' | translate }}</h2>
 
-<mat-divider />
-
 <form [formRoot]="toolForm" (submit)="saveTool()">
   <mat-dialog-content>
     <div class="form-row">
@@ -48,7 +46,6 @@
           <mat-select [formField]="toolForm.certificationRequirement">
             @for (req of certificationRequirements; track req) {
               <mat-option [value]="req">
-                <schbar-certification-requirement-dot [certificationRequirement]="req" />
                 {{ req | certificationRequirementKey | translate }}
               </mat-option>
             }

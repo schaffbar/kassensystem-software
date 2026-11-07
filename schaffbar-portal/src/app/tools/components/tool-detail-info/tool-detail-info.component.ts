@@ -11,7 +11,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { CertificationRequirementDotComponent } from '../certification-requirement-dot/certification-requirement-dot.component';
 import { UpdateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
 import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
@@ -46,7 +45,6 @@ interface ToolFormModel {
     FormField,
     FormRoot,
     FieldErrorComponent,
-    CertificationRequirementDotComponent,
     MatInputModule,
     MatButtonModule,
     MatIconModule,

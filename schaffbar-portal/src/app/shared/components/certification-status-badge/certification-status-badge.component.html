@@ -1,0 +1,5 @@
+@let currentBadge = badge();
+
+<schbar-status-badge [tone]="currentBadge.tone" [icon]="currentBadge.icon">
+  {{ 'shared.certificationStatuses.' + status() | translate }}
+</schbar-status-badge>

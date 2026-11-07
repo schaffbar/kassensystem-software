@@ -49,7 +49,6 @@
           <mat-select id="certificationRequirement" [formField]="toolForm.certificationRequirement">
             @for (req of certificationRequirements; track req) {
               <mat-option [value]="req">
-                <schbar-certification-requirement-dot [certificationRequirement]="req" />
                 {{ req | certificationRequirementKey | translate }}
               </mat-option>
             }

@@ -3,7 +3,6 @@ import { form, FormField, FormRoot, required, submit } from '@angular/forms/sign
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -12,11 +11,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { CertificationRequirementDotComponent } from '../certification-requirement-dot/certification-requirement-dot.component';
 import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
 import { CertificationRequirementKeyPipe } from '../../certification-requirement-key.pipe';
+import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
 
 // all tools – for the unique name check
 export interface ExistingToolViewModel {
@@ -44,15 +42,13 @@ interface NewToolFormModel {
     FormField,
     FormRoot,
     FieldErrorComponent,
-    CertificationRequirementDotComponent,
     MatInputModule,
     MatButtonModule,
     MatDialogModule,
-    MatDividerModule,
     MatSelectModule,
     TranslatePipe,
-    ToolAreaKeyPipe,
     CertificationRequirementKeyPipe,
+    ToolAreaKeyPipe,
   ],
 })
 export class NewToolFormComponent {

@@ -15,7 +15,8 @@
     "actions": {
       "close": "Schließen",
       "save": "Speichern",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "rowMenu": "Aktionen für {{name}}"
     },
     "table": {
       "actionsColumn": "Aktionen"
@@ -51,6 +52,9 @@
       "ACTIVE": "Aktiv",
       "PAUSED": "Pausiert",
       "REVOKED": "Entzogen"
+    },
+    "pageHeader": {
+      "breadcrumbs": "Brotkrümelnavigation"
     }
   },
   "sidebar": {
@@ -287,8 +291,8 @@
       "FABLAB": "FabLab"
     },
     "certificationRequirements": {
-      "YELLOW": "Hinweis (Gelb)",
-      "RED": "Erforderlich (Rot)"
+      "YELLOW": "Einweisung empfohlen",
+      "RED": "Einweisung Pflicht"
     },
     "tabGroups": {
       "toolDetails": {

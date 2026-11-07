@@ -30,6 +30,12 @@
   --on-danger: light-dark(#ffffff, var(--navy-950));
   --focus: #2a8ffb;
 
+  // light backgrounds of status badges, with the matching text color above
+  --accent-soft: light-dark(#eef7dc, rgb(140 200 12 / 14%));
+  --info-soft: light-dark(#e5f0fd, rgb(42 143 251 / 16%));
+  --warn-soft: light-dark(#fff3df, rgb(255 176 57 / 12%));
+  --danger-soft: light-dark(#fdebe5, rgb(251 88 42 / 14%));
+
   // sidebar: dark in both modes
   --nav: light-dark(var(--navy-950), #040b1a);
   --nav-2: var(--navy-900);
@@ -103,6 +109,8 @@ html {
       outlined-container-shape: 10px,
       outlined-outline-color: var(--border),
       outlined-label-text-color: var(--text),
+      outlined-state-layer-color: var(--text),
+      text-state-layer-color: var(--text),
       protected-container-shape: 10px,
       text-container-shape: 10px,
       tonal-container-shape: 10px,
@@ -125,9 +133,29 @@ html {
       outlined-outline-color: var(--border),
     )
   );
+  // dialog: title 20/700, content and button bar with the same side padding
   @include mat.dialog-overrides(
     (
       container-shape: 16px,
+      subhead-size: 20px,
+      subhead-line-height: 28px,
+      subhead-weight: 700,
+      subhead-color: var(--text),
+      supporting-text-color: var(--text-2),
+      headline-padding: 24px 24px 8px,
+      content-padding: 8px 24px 16px,
+      with-actions-content-padding: 8px 24px 16px,
+      actions-padding: 8px 24px 24px,
+      actions-alignment: flex-end,
+    )
+  );
+  // ⋯ menu: rounded container, muted icons
+  @include mat.menu-overrides(
+    (
+      container-shape: 12px,
+      item-label-text-weight: 500,
+      item-icon-color: var(--text-3),
+      divider-color: var(--border),
     )
   );
   @include mat.tabs-overrides(
@@ -186,6 +214,17 @@ body {
   @include mat.icon-button-overrides(
     (
       icon-color: var(--danger),
+    )
+  );
+}
+
+// destructive entry of a ⋯ menu (`schbar-row-menu`) – like `danger-button`, it always asks first
+.danger-menu-item {
+  @include mat.menu-overrides(
+    (
+      item-label-text-color: var(--danger),
+      item-icon-color: var(--danger),
+      item-label-text-weight: 600,
     )
   );
 }

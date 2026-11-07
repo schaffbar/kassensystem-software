@@ -1,0 +1,29 @@
+@if (breadcrumbs().length > 0) {
+  <nav class="breadcrumbs" [attr.aria-label]="'shared.pageHeader.breadcrumbs' | translate">
+    <ol>
+      @for (breadcrumb of breadcrumbs(); track breadcrumb.link) {
+        <li>
+          <a [routerLink]="breadcrumb.link">{{ breadcrumb.label }}</a>
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </li>
+      }
+      <li aria-current="page">{{ title() }}</li>
+    </ol>
+  </nav>
+}
+
+<div class="title-row">
+  <div class="title-block">
+    <h1>{{ title() }}</h1>
+    @if (subtitle(); as currentSubtitle) {
+      <p class="subtitle">{{ currentSubtitle }}</p>
+    }
+    <div class="meta">
+      <ng-content select="[pageHeaderMeta]" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <ng-content />
+  </div>
+</div>

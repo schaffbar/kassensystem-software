@@ -3,7 +3,6 @@ import { form, FormField, FormRoot, required, submit } from '@angular/forms/sign
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -39,7 +38,6 @@ interface ChangeRfidReaderTypeFormModel {
     MatSelectModule,
     MatButtonModule,
     MatDialogModule,
-    MatDividerModule,
     TranslatePipe,
   ],
 })

@@ -1,0 +1,10 @@
+<span class="icon" aria-hidden="true">
+  <mat-icon>{{ icon() }}</mat-icon>
+</span>
+<p class="title">{{ title() }}</p>
+@if (message(); as currentMessage) {
+  <p class="message">{{ currentMessage }}</p>
+}
+<div class="action">
+  <ng-content />
+</div>

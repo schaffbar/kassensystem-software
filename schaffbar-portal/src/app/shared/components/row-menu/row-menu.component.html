@@ -1,0 +1,13 @@
+<!-- stopPropagation: the row itself is a link to the detail page -->
+<button
+  type="button"
+  matIconButton
+  [attr.aria-label]="label()"
+  [matMenuTriggerFor]="menu"
+  (click)="$event.stopPropagation()">
+  <mat-icon>more_horiz</mat-icon>
+</button>
+
+<mat-menu #menu="matMenu" xPosition="before">
+  <ng-content />
+</mat-menu>

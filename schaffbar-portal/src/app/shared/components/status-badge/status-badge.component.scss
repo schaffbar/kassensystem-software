@@ -1,0 +1,52 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+mat-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host(.tone-success) {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+:host(.tone-info) {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+:host(.tone-warn) {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+:host(.tone-danger) {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+:host(.tone-neutral) {
+  padding: 3px 9px 3px 7px;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}

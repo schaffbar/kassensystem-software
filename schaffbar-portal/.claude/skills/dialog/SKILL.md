@@ -73,7 +73,7 @@ export interface ConfirmDeleteDialogViewModel {
 @Component({
   selector: 'schbar-confirm-delete-dialog-modal',
   templateUrl: './confirm-delete-dialog-modal.component.html',
-  imports: [MatButtonModule, MatDialogModule, MatDividerModule, TranslatePipe],
+  imports: [MatButtonModule, MatDialogModule, TranslatePipe],
 })
 export class ConfirmDeleteDialogModalComponent {
   readonly viewModel = input.required<ConfirmDeleteDialogViewModel>();
@@ -87,8 +87,6 @@ export class ConfirmDeleteDialogModalComponent {
 @let currentViewModel = viewModel();
 
 <h2 mat-dialog-title>{{ currentViewModel.title | translate }}</h2>
-
-<mat-divider />
 
 <mat-dialog-content>…</mat-dialog-content>
 
@@ -109,9 +107,9 @@ Rules:
   what `null` means).
 - Confirm is `confirmed = output<void>()` (or `output<…Result>()` for a choice of the user), cancel is always
   `cancelled = output<void>()`. No commands – the view model contains only what is displayed, no ids for a command.
-- Layout: `mat-dialog-title`, `<mat-divider />`, `mat-dialog-content`, `mat-dialog-actions`. Buttons: cancel first
-  (`matButton="outlined"`), then confirm (`matButton="filled"`, `danger-button` for destructive actions), every
-  button `type="button"`.
+- Layout: `mat-dialog-title`, `mat-dialog-content`, `mat-dialog-actions` – no `<mat-divider />`, the spacing comes
+  from `mat.dialog-overrides` in `src/styles.scss`. Buttons: cancel first (`matButton="outlined"`), then confirm
+  (`matButton="filled"`, `danger-button` for destructive actions), every button `type="button"`.
 - `cdkFocusInitial` on cancel for destructive or irreversible actions (delete, closing a session) – an accidental
   Enter must not confirm.
 - A modal that receives loading state shows a `<mat-spinner diameter="40" />` while loading, an error text

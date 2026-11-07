@@ -2,7 +2,6 @@ import { Component, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -19,7 +18,7 @@ export interface ConfirmActionDialogViewModel {
 @Component({
   selector: 'schbar-confirm-action-dialog-modal',
   templateUrl: './confirm-action-dialog-modal.component.html',
-  imports: [MatButtonModule, MatDialogModule, MatDividerModule, TranslatePipe],
+  imports: [MatButtonModule, MatDialogModule, TranslatePipe],
 })
 export class ConfirmActionDialogModalComponent {
   readonly viewModel = input.required<ConfirmActionDialogViewModel>();
