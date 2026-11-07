@@ -16,7 +16,11 @@
       "close": "Close",
       "save": "Save",
       "cancel": "Cancel",
-      "rowMenu": "Actions for {{name}}"
+      "rowMenu": "Actions for {{name}}",
+      "reload": "Reload",
+      "details": "Details",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "table": {
       "actionsColumn": "Actions"
@@ -55,6 +59,15 @@
     },
     "pageHeader": {
       "breadcrumbs": "Breadcrumbs"
+    },
+    "paginator": {
+      "label": "Select page",
+      "itemsPerPage": "Items per page",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "nextPage": "Next page",
+      "previousPage": "Previous page",
+      "range": "{{start}} – {{end}} of {{length}}"
     }
   },
   "sidebar": {
@@ -394,12 +407,22 @@
       "switch_box": "Switch Box"
     },
     "pages": {
+      "rfidReaderList": {
+        "subtitle": "{{count}} in total",
+        "empty": {
+          "title": "No readers yet",
+          "message": "Readers appear here automatically as soon as they connect to the server."
+        }
+      },
       "rfidReaderDetails": {
         "headers": {
-          "rfidReaderInformation": "RFID Reader Information"
+          "rfidReaderInformation": "Device Information"
         },
         "hints": {
           "typeMissing": "The reader can't be used until a type is set."
+        },
+        "actions": {
+          "changeType": "Change Type"
         }
       }
     },

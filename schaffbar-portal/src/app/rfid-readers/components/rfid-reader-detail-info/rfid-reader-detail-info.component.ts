@@ -29,6 +29,7 @@ interface RfidReaderInfoFormModel {
   selector: 'schbar-rfid-reader-detail-info',
   templateUrl: './rfid-reader-detail-info.component.html',
   styleUrl: './rfid-reader-detail-info.component.scss',
+  host: { class: 'card' },
   imports: [FormField, FormRoot, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe, RfidReaderTypeKeyPipe],
 })
 export class RfidReaderDetailInfoComponent {

@@ -11,12 +11,14 @@ import {
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { errorInterceptor } from './core/http/error.interceptor';
+import { TranslatedPaginatorIntl } from './core/i18n/translated-paginator-intl';
 import { TranslatedTitleStrategy } from './core/routing/translated-title.strategy';
 import { provideDateAdapter } from './shared/date/provide-date-adapter';
 
@@ -40,5 +42,6 @@ export const appConfig: ApplicationConfig = {
     ...(isDevMode() ? [provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 })] : []),
     { provide: LOCALE_ID, useValue: 'de-DE' },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+    { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
   ],
 };

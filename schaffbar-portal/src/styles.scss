@@ -229,9 +229,70 @@ body {
   );
 }
 
+// white surface of a page section, with a header row: h2 left, actions right
+.card {
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+
+  @media (max-width: 599.98px) {
+    padding: 16px;
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+  }
+}
+
+// frame of a list table with paginator; the table scrolls inside `table-scroll` on narrow screens
+.table-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+
+  th {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+// table row that opens the detail page; a ⋯ menu in the row offers the same for keyboard users
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
 // IDs, MAC and IP addresses, socket names
 .mono {
   font-family: var(--font-mono);
+}
+
+// the same for the value of a form field (on `mat-form-field`)
+.mono-field {
+  @include mat.form-field-overrides(
+    (
+      container-text-font: var(--font-mono),
+    )
+  );
 }
 
 // form layout: a row of fields, the columns share the width equally

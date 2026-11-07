@@ -16,7 +16,11 @@
       "close": "Schließen",
       "save": "Speichern",
       "cancel": "Abbrechen",
-      "rowMenu": "Aktionen für {{name}}"
+      "rowMenu": "Aktionen für {{name}}",
+      "reload": "Neu laden",
+      "details": "Details",
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
     },
     "table": {
       "actionsColumn": "Aktionen"
@@ -55,6 +59,15 @@
     },
     "pageHeader": {
       "breadcrumbs": "Brotkrümelnavigation"
+    },
+    "paginator": {
+      "label": "Seite auswählen",
+      "itemsPerPage": "Einträge pro Seite",
+      "firstPage": "Erste Seite",
+      "lastPage": "Letzte Seite",
+      "nextPage": "Nächste Seite",
+      "previousPage": "Vorherige Seite",
+      "range": "{{start}} – {{end}} von {{length}}"
     }
   },
   "sidebar": {
@@ -394,12 +407,22 @@
       "switch_box": "Schaltbox"
     },
     "pages": {
+      "rfidReaderList": {
+        "subtitle": "{{count}} insgesamt",
+        "empty": {
+          "title": "Noch keine Lesegeräte",
+          "message": "Lesegeräte erscheinen hier automatisch, sobald sie sich mit dem Server verbinden."
+        }
+      },
       "rfidReaderDetails": {
         "headers": {
-          "rfidReaderInformation": "Lesegerät-Informationen"
+          "rfidReaderInformation": "Geräteinformationen"
         },
         "hints": {
           "typeMissing": "Das Lesegerät ist erst einsatzbereit, wenn ein Typ festgelegt ist."
+        },
+        "actions": {
+          "changeType": "Typ ändern"
         }
       }
     },

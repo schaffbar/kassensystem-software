@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -58,6 +59,7 @@ describe('RfidReaderDetailComponent', () => {
       imports: [RfidReaderDetailComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideRouter([]),
         provideTranslateService(),
         { provide: MatDialog, useValue: { open: openDialog } },
         { provide: MatSnackBar, useValue: { open: openSnackBar } },
@@ -74,11 +76,23 @@ describe('RfidReaderDetailComponent', () => {
   });
 
   function clickChangeType(): void {
-    fixture.nativeElement.querySelector('.rfid-reader-detail-header-title-actions button').click();
+    fixture.nativeElement.querySelector('schbar-page-header button[matButton]').click();
   }
 
   it('should load the reader of the route', () => {
     expect(storeMock.setRfidReaderId).toHaveBeenCalledOnce();
+  });
+
+  it('should show the name as title and link back to the list', () => {
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Reader 1');
+    expect(fixture.nativeElement.querySelector('.breadcrumbs a').getAttribute('href')).toBe('/rfid-readers');
+  });
+
+  it('should show the MAC address as title for a reader without name', async () => {
+    storeMock.rfidReader.set({ ...rfidReader, name: null });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('AA:BB');
   });
 
   it('should pass the reader to the info and execute its update command', () => {

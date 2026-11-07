@@ -1,42 +1,12 @@
-.rfid-reader-list-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  gap: 1rem;
-}
-
 .mat-column-actions {
-  width: 100px;
-  text-align: center;
+  width: 56px;
+  text-align: right;
 }
 
-// transparent borders, so the rows don't shift when the hover border appears
-.mat-mdc-row .mat-mdc-cell {
-  border-bottom: 1px solid transparent;
-  border-top: 1px solid transparent;
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-  border-color: currentColor;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.type-missing {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--mat-sys-error);
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
+.name {
+  font-weight: 600;
 }
 
 .load-error {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }

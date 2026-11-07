@@ -9,6 +9,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { ROUTE } from '../../../app.routes';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import { SNACKBAR_DURATION_MS } from '../../../shared/snack-bar/snack-bar-constants';
 import {
@@ -23,7 +25,14 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
   selector: 'schbar-rfid-reader-detail',
   templateUrl: './rfid-reader-detail.component.html',
   styleUrl: './rfid-reader-detail.component.scss',
-  imports: [RfidReaderDetailInfoComponent, MatButtonModule, MatIconModule, MatProgressBarModule, TranslatePipe],
+  imports: [
+    RfidReaderDetailInfoComponent,
+    PageHeaderComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    TranslatePipe,
+  ],
   providers: [RfidReaderDetailStore],
 })
 export class RfidReaderDetailComponent {
@@ -34,6 +43,8 @@ export class RfidReaderDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly id = input.required<string>();
+
+  protected readonly rfidReadersLink = `/${ROUTE.RFID_READERS}`;
 
   constructor() {
     this.detailsStore.setRfidReaderId(this.id);

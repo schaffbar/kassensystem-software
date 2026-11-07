@@ -1,14 +1,19 @@
-<h3 class="reader-header">
-  {{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderInformation' | translate }}
-  <button matIconButton type="button" aria-label="Edit reader" (click)="editRfidReader()" [disabled]="isEditing()">
+<div class="card-header">
+  <h2>{{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderInformation' | translate }}</h2>
+  <button
+    matIconButton
+    type="button"
+    [attr.aria-label]="'shared.actions.edit' | translate"
+    (click)="editRfidReader()"
+    [disabled]="isEditing()">
     <mat-icon>edit</mat-icon>
   </button>
-</h3>
+</div>
 
-<form class="reader-content" [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
+<form [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
   <div class="form-row">
     <div class="form-col">
-      <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
+      <mat-form-field class="full-width readonly-field mono-field" floatLabel="always" [hideRequiredMarker]="true">
         <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</mat-label>
         <input id="macAddress" matInput [value]="rfidReaderDetailInfo().macAddress" readonly />
       </mat-form-field>

@@ -1,15 +1,8 @@
-.reader-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.reader-content {
-  min-width: 300px;
-  max-width: 600px;
-  width: 100%;
+:host {
+  display: block;
+  max-width: 640px;
 }
 
 .type-missing {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }

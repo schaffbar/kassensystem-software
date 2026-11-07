@@ -6,19 +6,21 @@
 }
 
 @if (detailsStore.rfidReader(); as rfidReader) {
-  <div class="rfid-reader-detail-header">
-    <div class="rfid-reader-detail-header-title">
-      <div class="rfid-reader-detail-header-title-actions">
-        <h1>{{ rfidReader.name || rfidReader.macAddress }}</h1>
-        <button matIconButton (click)="changeRfidReaderType()">
-          <mat-icon>swap_horiz</mat-icon>
-        </button>
-        <button matIconButton (click)="reloadRfidReader()">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
+  <schbar-page-header
+    [title]="rfidReader.name || rfidReader.macAddress"
+    [breadcrumbs]="[{ label: 'rfidReaders.title' | translate, link: rfidReadersLink }]">
+    <button matButton="outlined" type="button" (click)="changeRfidReaderType()">
+      <mat-icon>swap_horiz</mat-icon>
+      {{ 'rfidReaders.pages.rfidReaderDetails.actions.changeType' | translate }}
+    </button>
+    <button
+      matIconButton
+      type="button"
+      [attr.aria-label]="'shared.actions.reload' | translate"
+      (click)="reloadRfidReader()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </schbar-page-header>
 
   <schbar-rfid-reader-detail-info [rfidReaderDetailInfo]="rfidReader" (rfidReaderChanged)="updateRfidReader($event)" />
 }

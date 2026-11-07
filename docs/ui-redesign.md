@@ -477,6 +477,13 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
 4. [ ] **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht: Tabellen, Karten
    und Formulare im neuen Design, Tabs wie im Entwurf benannt, Übersicht mit den zwei vorhandenen Widgets als Karten.
    Refresh-Buttons bleiben. Fest eingetragene Farben in Komponenten-Styles durch Tokens ersetzen.
+   - [x] RFID-Lesegeräte: Liste mit Seitenkopf, Tabelle als Karte (mobil scrollbar), ⋯-Menü (Details, Löschen) statt
+     rotem Button, leere Liste, Typ „Nicht festgelegt“ als Badge, MAC in Mono. Details mit Brotkrümeln,
+     „Typ ändern“ als Button mit Text, Geräteinformationen als Karte. Paginator überall auf Deutsch.
+   - [ ] RFID-Tags
+   - [ ] Werkzeuge
+   - [ ] Benutzer
+   - [ ] Übersicht
 
 ### Spätere Aufgaben
 

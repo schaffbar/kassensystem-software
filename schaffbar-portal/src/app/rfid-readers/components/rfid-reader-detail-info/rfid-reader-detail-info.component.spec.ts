@@ -49,7 +49,7 @@ describe('RfidReaderDetailInfoComponent', () => {
     await fixture.whenStable();
   }
 
-  const editButton = '[aria-label="Edit reader"]';
+  const editButton = '[aria-label="shared.actions.edit"]';
   const cancelButton = '.form-actions button[type="button"]';
   const saveButton = '.form-actions button[type="submit"]';
 

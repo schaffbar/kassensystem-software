@@ -186,6 +186,14 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   - `schbar-row-menu` – the ⋯ menu of a table row instead of action buttons; destructive entries come last after a
     `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
   - `schbar-empty-state` – instead of an empty table or list.
+- Global classes for the page layout (`src/styles.scss`):
+  - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
+    card sets it as `host: { class: 'card' }`.
+  - `table-card` around a list table and its paginator, the table inside `table-scroll` (scrolls on narrow
+    screens). The row that opens the detail page is a `clickable-row`; its ⋯ menu offers "Details" as well, because
+    a row cannot be reached with the keyboard.
+  - `mono` for IDs, MAC and IP addresses; `mono-field` on a `mat-form-field` that shows one.
+- Every `matIconButton` has a translated `aria-label` (`shared.actions.reload`, `shared.actions.edit`, …).
 
 ## Components
 
