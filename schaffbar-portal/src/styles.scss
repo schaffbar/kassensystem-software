@@ -1,4 +1,151 @@
 @use '@angular/material' as mat;
+@use './theme-colors' as theme;
+
+// ----------------------------------------------------------------------------
+// design tokens
+
+// colors of the redesign (docs/ui-redesign.md, "Designsystem"); `light-dark()` follows `color-scheme`, so dark mode
+// only needs `color-scheme: dark` on `html`
+:root {
+  --navy-950: #071021;
+  --navy-900: #131c2c;
+  --navy-800: #1f2632;
+
+  --bg: light-dark(#f4f6f9, var(--navy-950));
+  --surface: light-dark(#ffffff, var(--navy-900));
+  --surface-2: light-dark(#eef1f5, var(--navy-800));
+  --border: light-dark(#dfe4eb, #2c3442);
+  --text: light-dark(#0b1526, #fcfcfc);
+  --text-2: light-dark(#4a5568, #bfc2c9);
+  --text-3: light-dark(#5f6b7d, #a5adba);
+
+  // neon green only as a surface – as text it has 2:1 on white, use --accent-text
+  --accent: #8cc80c;
+  --on-accent: var(--navy-950);
+  --accent-text: light-dark(#3f6a00, #9fda1f);
+
+  --info: light-dark(#1a5fb4, #5aa9ff);
+  --warn: light-dark(#9a5b00, #ffb039);
+  --danger: light-dark(#c23a12, #ff7a52);
+  --on-danger: light-dark(#ffffff, var(--navy-950));
+
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+// ----------------------------------------------------------------------------
+// Material theme
+
+html {
+  // dark mode is prepared by the tokens, but not switched on yet
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: theme.$primary-palette,
+        tertiary: theme.$tertiary-palette,
+        theme-type: color-scheme,
+      ),
+      typography: (
+        plain-family: Inter,
+        brand-family: Inter,
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  // Material's system colors from the tokens above, so that all components use the same colors
+  @include mat.theme-overrides(
+    (
+      primary: var(--accent-text),
+      background: var(--bg),
+      on-background: var(--text),
+      surface: var(--surface),
+      on-surface: var(--text),
+      on-surface-variant: var(--text-2),
+      surface-container-lowest: var(--surface),
+      surface-container-low: var(--surface),
+      surface-container: var(--surface),
+      surface-container-high: var(--surface),
+      surface-container-highest: var(--surface-2),
+      outline: var(--text-3),
+      outline-variant: var(--border),
+      error: var(--danger),
+      on-error: var(--on-danger),
+    )
+  );
+
+  // visible focus ring for keyboard users
+  @include mat.strong-focus-indicators(
+    (
+      border-color: var(--info),
+      border-radius: 10px,
+    )
+  );
+
+  // main action: neon green surface with navy text; radius 10 instead of the M3 pill shape
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--accent),
+      filled-label-text-color: var(--on-accent),
+      filled-container-shape: 10px,
+      outlined-container-shape: 10px,
+      outlined-outline-color: var(--border),
+      outlined-label-text-color: var(--text),
+      protected-container-shape: 10px,
+      text-container-shape: 10px,
+      tonal-container-shape: 10px,
+    )
+  );
+  @include mat.icon-button-overrides(
+    (
+      container-shape: 8px,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 10px,
+    )
+  );
+  @include mat.card-overrides(
+    (
+      elevated-container-shape: 14px,
+      outlined-container-shape: 14px,
+      outlined-outline-color: var(--border),
+    )
+  );
+  @include mat.dialog-overrides(
+    (
+      container-shape: 16px,
+    )
+  );
+  @include mat.tabs-overrides(
+    (
+      active-indicator-color: var(--accent),
+      active-focus-indicator-color: var(--accent),
+      active-hover-indicator-color: var(--accent),
+      active-indicator-height: 3px,
+      active-label-text-color: var(--text),
+      active-focus-label-text-color: var(--text),
+      active-hover-label-text-color: var(--text),
+      inactive-label-text-color: var(--text-2),
+      divider-color: var(--border),
+    )
+  );
+  @include mat.table-overrides(
+    (
+      background-color: var(--surface),
+      header-headline-color: var(--text-3),
+      header-headline-size: 12px,
+      header-headline-weight: 600,
+      row-item-label-text-size: 14px,
+      row-item-outline-color: var(--border),
+    )
+  );
+}
 
 html,
 body {
@@ -7,39 +154,37 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, sans-serif;
+  font-size: 14px;
 }
 
-html {
-  // buttons with slightly rounded corners instead of the M3 pill shape
-  @include mat.button-overrides(
-    (
-      filled-container-shape: 5px,
-      outlined-container-shape: 5px,
-      protected-container-shape: 5px,
-      text-container-shape: 5px,
-      tonal-container-shape: 5px,
-    )
-  );
-}
+// ----------------------------------------------------------------------------
+// global classes
 
-// destructive actions (delete, revoke, pause, unassign): error color instead of primary – `color="warn"` has no
+// destructive actions (delete, revoke, pause, unassign): danger color instead of the accent – `color="warn"` has no
 // effect in the M3 theme
 .danger-button {
   @include mat.button-overrides(
     (
-      filled-container-color: var(--mat-sys-error),
-      filled-label-text-color: var(--mat-sys-on-error),
-      outlined-label-text-color: var(--mat-sys-error),
-      outlined-outline-color: var(--mat-sys-error),
-      text-label-text-color: var(--mat-sys-error),
+      filled-container-color: var(--danger),
+      filled-label-text-color: var(--on-danger),
+      outlined-label-text-color: var(--danger),
+      outlined-outline-color: var(--danger),
+      text-label-text-color: var(--danger),
     )
   );
   @include mat.icon-button-overrides(
     (
-      icon-color: var(--mat-sys-error),
+      icon-color: var(--danger),
     )
   );
+}
+
+// IDs, MAC and IP addresses, socket names
+.mono {
+  font-family: var(--font-mono);
 }
 
 // form layout: a row of fields, the columns share the width equally
@@ -67,9 +212,11 @@ html {
 
 // form fields that only display a value and are never editable (e.g. MAC address, derived commands)
 .readonly-field {
-  opacity: 0.7;
-
-  input {
-    color: rgba(0, 0, 0, 0.5);
-  }
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: var(--border),
+      outlined-hover-outline-color: var(--border),
+      outlined-input-text-color: var(--text-3),
+    )
+  );
 }

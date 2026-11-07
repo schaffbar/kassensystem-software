@@ -454,49 +454,64 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
   Hardware*), Benutzer *Info / Sitzung* (Entwurf: *Übersicht / Einweisungen / Offene Sitzung* – Tab „Einweisungen“
   fehlt).
 
-### Reihenfolge
+### Phase 1 – umstellen, was es gibt
 
-1. **Theme:** Eigenes Angular-Material-Theme mit `mat.theme()` und den Farben oben statt `azure-blue.css`. Inter und
-   JetBrains Mono in `index.html` laden. Tokens als CSS-Variablen inkl. Dunkel-Modus in `src/styles.scss`. Die
-   5px-Überschreibung für Buttons fällt weg (Radius 10). `.readonly-field` nutzt heute fest `rgba(0, 0, 0, 0.5)` – auf
-   Tokens umstellen, sonst passt es im Dunkel-Modus nicht. `danger-button` auf `--danger` abbilden.
-2. **Layout:** Seitenleiste (Navy, Gruppen Betrieb/Hardware, Logo), Seitenkopf und mobil eine Tab-Leiste unten in
-   `core/navigation`.
-3. **Gemeinsame Bausteine** unter `shared/`:
-   - `StatusBadge` (Icon + Text, Varianten frei/in Benutzung/Hinweis/Pflicht/offline). Ersetzt
-     `certification-status-chip` und `certification-requirement-dot`; Texte über die vorhandenen Key-Pipes.
-   - `RowMenu` (⋯-Menü mit `mat-menu`).
-   - **Bestätigungsdialoge erweitern** statt einen neuen zu bauen: `confirm-delete-dialog` und `confirm-action-dialog`
-     bekommen Titel als Frage, Text mit den Folgen, optional Häkchen oder Namen eintippen und einen gesperrten Zustand
-     mit Erklärung und nächstem Schritt („Sitzung beenden …“). Der Button nennt schon in beiden Dialogen Verb + Objekt
-     („Benutzer löschen“, `confirmLabel`).
-   - `PageHeader` (Brotkrümel, Titel, Status-Chips, Aktionen).
-   - `EmptyState`.
-   - `UserMultiSelect` (Personen suchen und als Chips auswählen) für „Einweisungen eintragen“ und „Einweiser
-     hinzufügen“. `tool-certifications` macht es schon richtig (Suche im ganzen Namen, `<button matChipRemove>`),
-     `tool-instructors` noch nicht (Vor- oder Nachname einzeln, `<mat-icon matChipRemove>`). Zuerst
-     `tool-instructors` angleichen (TODO „refactor tool instructor“), dann beide zu einer Komponente zusammenführen,
-     die festlegt:
-     - Suche im ganzen Namen („max must“ findet Max Mustermann).
-     - Nach einer Auswahl wird das Suchfeld auf einem Weg geleert – heute in `tool-certifications` im Template plus
-       `blur()` per `viewChild`, in `tool-instructors` nur per `viewChild`.
-     - Nicht wählbare Personen ausgegraut mit Grund (schon eingewiesen, schon Einweiser, pausiert) statt
-       ausgeblendet.
-     - Dumb component mit ViewModel; wer wählbar ist, liefert weiter der Store (Skill `component`).
-   - Danach CLAUDE.md und die Skills `component` und `dialog` um die neuen Bausteine ergänzen.
-4. **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht (klein nach groß).
-   Pro Seite: Löschen-Button in der Zeile durch das ⋯-Menü ersetzen, Tabs wie im Entwurf benennen bzw. ergänzen.
-   Zuerst nur mit den Daten, die es heute gibt – Elemente, die auf das Backend warten, weglassen statt Platzhalter
-   anzeigen.
-5. **Live-Aktualisierung:** Die Refresh-Buttons lassen sich schon vor SSE/WebSocket durch Polling ersetzen
-   (`interval` über `toSignal` / `rxMethod` lädt die Ressource neu, siehe Regel „Subscriptions“ in CLAUDE.md).
-6. **Backend-Lücken** parallel:
-   1. **Problems API** (TODO.md) – ohne verständliche `409`-Meldungen lassen sich gesperrte Aktionen und die neuen
-      Regeln nicht sauber anzeigen.
-   2. **Online-Status/Heartbeat** für Lesegeräte – davon hängen Übersicht, Lesegeräte und Werkzeug-Hardware ab.
-   3. Die übrigen Punkte aus der [Gesamtliste](#backend-lücken--gesamtliste).
-7. **Annahmen klären** (Checkliste oben), mindestens Zahlungsart, Altersgruppen und Einweiser-Regel. Sie blockieren erst
-   die Dialoge in Schritt 4, nicht Theme und Layout.
+Branch `ui-redesign`. Dieselben Seiten, Daten, Aktionen und Dialoge im neuen Design – kein Backend, keine neuen
+Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die Teile, für die Daten fehlen.
+
+1. [ ] **Theme:** `mat.theme()` mit eigenen Paletten (`src/_theme-colors.scss`, erzeugt mit
+   `ng generate @angular/material:theme-color`) statt `azure-blue.css`. Inter und JetBrains Mono in `index.html`.
+   Tokens als CSS-Variablen mit `light-dark()` – Dunkel-Modus damit vorbereitet, aber noch `color-scheme: light`.
+   Radien (Button/Input 10, Karte 14, Dialog 16) statt der 5px-Überschreibung, Primär-Button Neon-Grün mit Navy-Text,
+   `danger-button` und `.readonly-field` auf Tokens.
+2. [ ] **Layout:** Navy-Seitenleiste mit Logo und Gruppen Betrieb/Hardware, heller Inhaltsbereich (`core/navigation`).
+   Mobil bleibt vorerst das Menü zum Aufklappen.
+3. [ ] **Gemeinsame Bausteine** – nur, was die vorhandenen Seiten brauchen:
+   - `StatusBadge` (Icon + Text) ersetzt `certification-status-chip` und `certification-requirement-dot`; Texte über die
+     vorhandenen Key-Pipes.
+   - `RowMenu` (⋯) ersetzt den roten Löschen-Button pro Zeile – mit den Aktionen, die es heute gibt.
+   - `PageHeader` (Titel, Aktionen, Brotkrümel auf Detailseiten).
+   - `EmptyState` für leere Listen.
+   - Dialoge nur im neuen Aussehen (Kopf, Inhalt, Fußzeile).
+4. [ ] **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht: Tabellen, Karten
+   und Formulare im neuen Design, Tabs wie im Entwurf benannt, Übersicht mit den zwei vorhandenen Widgets als Karten.
+   Refresh-Buttons bleiben. Fest eingetragene Farben in Komponenten-Styles durch Tokens ersetzen.
+
+### Spätere Aufgaben
+
+Jede ist eine eigene Aufgabe nach Phase 1.
+
+| Aufgabe | Backend nötig? |
+| --- | --- |
+| Dunkel-Modus einschalten (Umschalter) und alle Seiten prüfen | nein |
+| Tab-Leiste unten auf dem Handy | nein |
+| Live-Aktualisierung per Polling statt Refresh-Button (`interval` über `toSignal` / `rxMethod`, siehe „Subscriptions“ in CLAUDE.md); später SSE/WebSocket | nein |
+| Bestätigungsdialoge: Titel als Frage, Folgen erklären, Häkchen oder Namen eintippen, gesperrter Zustand mit nächstem Schritt | teils (Sperren) |
+| `UserMultiSelect` für Einweisungen und Einweiser (siehe unten) | nein |
+| Werkzeuge: Umschalter Karten/Liste, nach Bereich gruppieren, Bereichsfilter | nein |
+| Filter-Chips in den Listen (z. B. „Ohne RFID-Tag“, „Unter 18“) | teils |
+| Neue Dialoge: Benutzer in einem Dialog bearbeiten, Tag manuell erfassen, Werkzeug vom Lesegerät aus zuordnen, … | teils |
+| „Braucht Aufmerksamkeit“, Kennzahlen, Online-Status, Lese-Protokoll, Zahlungsart, … | ja |
+
+**`UserMultiSelect`:** `tool-certifications` macht es schon richtig (Suche im ganzen Namen, `<button matChipRemove>`),
+`tool-instructors` noch nicht (Vor- oder Nachname einzeln, `<mat-icon matChipRemove>`). Zuerst `tool-instructors`
+angleichen (TODO „refactor tool instructor“), dann beide zu einer Komponente zusammenführen, die festlegt:
+
+- Suche im ganzen Namen („max must“ findet Max Mustermann).
+- Nach einer Auswahl wird das Suchfeld auf einem Weg geleert – heute in `tool-certifications` im Template plus
+  `blur()` per `viewChild`, in `tool-instructors` nur per `viewChild`.
+- Nicht wählbare Personen ausgegraut mit Grund (schon eingewiesen, schon Einweiser, pausiert) statt ausgeblendet.
+- Dumb component mit ViewModel; wer wählbar ist, liefert weiter der Store (Skill `component`).
+
+**Backend** parallel, in dieser Reihenfolge:
+
+1. **Problems API** (TODO.md) – ohne verständliche `409`-Meldungen lassen sich gesperrte Aktionen und die neuen Regeln
+   nicht sauber anzeigen.
+2. **Online-Status/Heartbeat** für Lesegeräte – davon hängen Übersicht, Lesegeräte und Werkzeug-Hardware ab.
+3. Die übrigen Punkte aus der [Gesamtliste](#backend-lücken--gesamtliste).
+
+**Annahmen klären** (Checkliste oben), mindestens Zahlungsart, Altersgruppen und Einweiser-Regel – sie blockieren erst
+die neuen Dialoge, nicht Phase 1.
 
 Den Prototyp-Code (`.dc.html`) nicht übernehmen – er ist ein Entwurf mit Inline-Styles. Maße, Farben und Texte
 daraus übernehmen, die Umsetzung mit Angular Material.
