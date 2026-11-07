@@ -73,6 +73,7 @@ export class RfidReaderListComponent {
         title: 'rfidReaders.dialogs.deleteRfidReader.title',
         entity: rfidReader.name || rfidReader.macAddress,
         message: 'rfidReaders.dialogs.deleteRfidReader.message',
+        confirmLabel: 'rfidReaders.dialogs.deleteRfidReader.confirm',
       })
       .subscribe((confirmed) => {
         if (confirmed) {

@@ -130,6 +130,7 @@ export class ToolCertificationsComponent {
       .open({
         title: 'tools.dialogs.deleteCertification.title',
         message: 'tools.dialogs.deleteCertification.message',
+        confirmLabel: 'tools.dialogs.deleteCertification.confirm',
         entity: certification.userName ?? undefined,
       })
       .subscribe((confirmed) => {

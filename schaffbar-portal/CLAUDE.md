@@ -216,9 +216,12 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 - **Shared dialogs return yes/no** (or a result type of their own) and import nothing from a feature – no feature
   model, no command. The caller builds the command from its inputs and passes it to its store's `mutation()`; if the
   dialog loaded data itself, the caller reloads also on cancel.
-- **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (button
-  always "delete"), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
-  with its own `confirmLabel` and `destructive: true | false`.
+- **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (always
+  `danger-button`), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
+  with `destructive: true | false`.
+- **The confirm button names the action as verb + object** (`confirmLabel`, required in both dialogs): "Benutzer
+  löschen", "Einweisung pausieren" – not "Löschen" or "OK". Users often read only the button, and similar actions
+  (delete vs. revoke a certification) must stay apart. The key is the caller's: `<feature>.dialogs.<action>.confirm`.
 - **Every button with `danger-button` asks first** – delete through `ConfirmDeleteDialogService`, everything else
   (unassign, remove, clear, pause, revoke) through `ConfirmActionDialogService` with `destructive: true`. No red
   button acts directly.

@@ -64,6 +64,7 @@ export class RfidTagListComponent {
         title: 'rfidTags.dialogs.deleteRfidTag.title',
         entity: rfidTag.id,
         message: 'rfidTags.dialogs.deleteRfidTag.message',
+        confirmLabel: 'rfidTags.dialogs.deleteRfidTag.confirm',
       })
       .subscribe((confirmed) => {
         if (confirmed) {

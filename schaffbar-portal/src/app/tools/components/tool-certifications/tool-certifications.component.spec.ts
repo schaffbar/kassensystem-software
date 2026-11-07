@@ -162,6 +162,7 @@ describe('ToolCertificationsComponent', () => {
     expect(openConfirmDeleteDialog).toHaveBeenCalledExactlyOnceWith({
       title: 'tools.dialogs.deleteCertification.title',
       message: 'tools.dialogs.deleteCertification.message',
+      confirmLabel: 'tools.dialogs.deleteCertification.confirm',
       entity: 'Max Mustermann',
     });
     expect(certificationDeleted).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1', toolId: 'tool-1' });

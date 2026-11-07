@@ -102,6 +102,7 @@ describe('RfidReaderListComponent', () => {
         title: 'rfidReaders.dialogs.deleteRfidReader.title',
         entity: 'Reader 1',
         message: 'rfidReaders.dialogs.deleteRfidReader.message',
+        confirmLabel: 'rfidReaders.dialogs.deleteRfidReader.confirm',
       });
       expect(storeMock.deleteRfidReader).toHaveBeenCalledExactlyOnceWith({ rfidReaderId: 'reader-1' });
     });

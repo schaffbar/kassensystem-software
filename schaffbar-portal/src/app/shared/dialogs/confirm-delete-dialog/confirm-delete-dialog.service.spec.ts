@@ -23,7 +23,9 @@ describe('ConfirmDeleteDialogService', () => {
   afterEach(() => TestBed.inject(MatDialog).closeAll());
 
   function open(): Promise<boolean> {
-    const result = firstValueFrom(service.open({ title: 'tools.dialogs.deleteTool.title', message: 'm' }));
+    const result = firstValueFrom(
+      service.open({ title: 'tools.dialogs.deleteTool.title', message: 'm', confirmLabel: 'c' }),
+    );
     TestBed.tick();
     return result;
   }

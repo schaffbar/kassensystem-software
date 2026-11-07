@@ -19,7 +19,7 @@ describe('ConfirmActionDialogModalComponent', () => {
     });
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('de', {
-      pause: { title: 'Einweisung pausieren', message: 'Wirklich pausieren?', confirm: 'Pausieren' },
+      pause: { title: 'Einweisung pausieren', message: 'Wirklich pausieren?', confirm: 'Einweisung pausieren' },
       shared: { dialogs: { confirmAction: { actions: { cancel: 'Abbrechen' } } } },
     });
     translate.use('de');
@@ -54,7 +54,7 @@ describe('ConfirmActionDialogModalComponent', () => {
 
     expect(texts('h2')).toEqual(['Einweisung pausieren']);
     expect(texts('mat-dialog-content')[0]).toBe('Wirklich pausieren? (Bandsäge)');
-    expect(texts('button')).toEqual(['Abbrechen', 'Pausieren']);
+    expect(texts('button')).toEqual(['Abbrechen', 'Einweisung pausieren']);
   });
 
   it('should focus confirm and use a normal button for a non-destructive action', async () => {

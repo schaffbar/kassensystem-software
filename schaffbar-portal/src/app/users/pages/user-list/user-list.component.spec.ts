@@ -167,6 +167,7 @@ describe('UserListComponent', () => {
         title: 'users.dialogs.deleteUser.title',
         entity: 'Max Mustermann',
         message: 'users.dialogs.deleteUser.message',
+        confirmLabel: 'users.dialogs.deleteUser.confirm',
       });
       expect(deleteUser).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
     });

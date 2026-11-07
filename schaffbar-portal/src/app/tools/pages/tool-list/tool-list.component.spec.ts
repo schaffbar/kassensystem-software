@@ -171,6 +171,7 @@ describe('ToolListComponent', () => {
         title: 'tools.dialogs.deleteTool.title',
         entity: 'Drechselbank',
         message: 'tools.dialogs.deleteTool.message',
+        confirmLabel: 'tools.dialogs.deleteTool.confirm',
       });
       expect(storeMock.deleteTool).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-2' });
       expect(navigate).not.toHaveBeenCalled();

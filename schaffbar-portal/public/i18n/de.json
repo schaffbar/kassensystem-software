@@ -23,7 +23,6 @@
     "dialogs": {
       "confirmDelete": {
         "actions": {
-          "confirm": "Löschen",
           "cancel": "Abbrechen"
         }
       },
@@ -110,29 +109,30 @@
       },
       "deleteUser": {
         "title": "Benutzer löschen",
-        "message": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?"
+        "message": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
+        "confirm": "Benutzer löschen"
       },
       "certifications": {
         "pauseCertification": {
           "title": "Einweisung pausieren",
           "message": "Sind Sie sicher, dass Sie diese Einweisung pausieren möchten?",
-          "confirm": "Pausieren"
+          "confirm": "Einweisung pausieren"
         },
         "reactivateCertification": {
           "title": "Einweisung reaktivieren",
           "message": "Sind Sie sicher, dass Sie diese Einweisung reaktivieren möchten?",
-          "confirm": "Reaktivieren"
+          "confirm": "Einweisung reaktivieren"
         },
         "revokeCertification": {
           "title": "Einweisung entziehen",
           "message": "Sind Sie sicher, dass Sie diese Einweisung entziehen möchten?",
-          "confirm": "Entziehen"
+          "confirm": "Einweisung entziehen"
         }
       },
       "unassignRfidTag": {
         "title": "RFID-Tag entfernen",
         "message": "Sind Sie sicher, dass Sie den RFID-Tag dieses Benutzers entfernen möchten?",
-        "confirm": "Entfernen"
+        "confirm": "RFID-Tag entfernen"
       }
     },
     "tables": {
@@ -239,21 +239,23 @@
       },
       "deleteTool": {
         "title": "Werkzeug löschen",
-        "message": "Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
+        "message": "Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?",
+        "confirm": "Werkzeug löschen"
       },
       "clearRfidReader": {
         "title": "RFID-Lesegerät-Zuweisung aufheben",
         "message": "Sind Sie sicher, dass Sie die RFID-Lesegerät-Zuweisung aufheben möchten?",
-        "confirm": "Aufheben"
+        "confirm": "Zuweisung aufheben"
       },
       "removeInstructors": {
         "title": "Einweiser entfernen",
         "message": "Sind Sie sicher, dass Sie die ausgewählten Einweiser entfernen möchten?",
-        "confirm": "Entfernen"
+        "confirm": "Einweiser entfernen"
       },
       "deleteCertification": {
         "title": "Einweisung löschen",
-        "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?"
+        "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?",
+        "confirm": "Einweisung löschen"
       }
     },
     "tooltips": {
@@ -342,7 +344,8 @@
     "dialogs": {
       "deleteRfidTag": {
         "title": "RFID-Tag löschen",
-        "message": "Sind Sie sicher, dass Sie diesen RFID-Tag löschen möchten?"
+        "message": "Sind Sie sicher, dass Sie diesen RFID-Tag löschen möchten?",
+        "confirm": "RFID-Tag löschen"
       }
     },
     "shared": {
@@ -361,7 +364,8 @@
     "dialogs": {
       "deleteRfidReader": {
         "title": "RFID-Lesegerät löschen",
-        "message": "Sind Sie sicher, dass Sie dieses RFID-Lesegerät löschen möchten?"
+        "message": "Sind Sie sicher, dass Sie dieses RFID-Lesegerät löschen möchten?",
+        "confirm": "RFID-Lesegerät löschen"
       },
       "changeRfidReaderType": {
         "title": "Typ ändern",

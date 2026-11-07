@@ -89,6 +89,7 @@ describe('RfidTagListComponent', () => {
         title: 'rfidTags.dialogs.deleteRfidTag.title',
         entity: 'tag-1',
         message: 'rfidTags.dialogs.deleteRfidTag.message',
+        confirmLabel: 'rfidTags.dialogs.deleteRfidTag.confirm',
       });
       expect(storeMock.deleteRfidTag).toHaveBeenCalledExactlyOnceWith({ rfidTagId: 'tag-1' });
     });

@@ -52,7 +52,7 @@ A shared dialog belongs to no feature, so it doesn't reach into one:
   chooses something, a result type of its own exported from the modal file. The caller builds the command from what
   it knows (its inputs) – see "Caller".
 - The dialog's own texts (title, labels, hints, buttons) live under `shared.dialogs.<name>.*` in `public/i18n/*.json`
-  (`shared.dialogs.closeSession.title`, `shared.dialogs.confirmDelete.actions.confirm`) – also when a page shows a
+  (`shared.dialogs.closeSession.title`, `shared.dialogs.confirmDelete.actions.cancel`) – also when a page shows a
   similar text. Texts the caller passes in the view model (confirmations) are the caller's keys.
 
 Decide first: **does the dialog need data the caller doesn't already have, or that must be current at the time of
@@ -65,6 +65,7 @@ export interface ConfirmDeleteDialogViewModel {
   // translation keys
   title: string;
   message: string;
+  confirmLabel: string;
   // plain text
   entity?: string;
 }
@@ -123,10 +124,14 @@ A yes/no question before an action uses one of the two confirmation dialogs – 
 button with `danger-button` asks first** (unassign a tag, remove instructors, clear a reader, …) – no red button acts
 directly:
 
-| Action                                    | Service                                                             | Confirm button                                                                                                      |
-| ----------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| delete                                    | `ConfirmDeleteDialogService.open({ title, message, entity? })`      | always "delete", `danger-button`, focus on cancel                                                                   |
-| everything else (pause, revoke, clear, …) | `ConfirmActionDialogService.open({ …, confirmLabel, destructive })` | `confirmLabel`; `destructive: true` → `danger-button` + focus on cancel, `false` → normal button + focus on confirm |
+| Action                                    | Service                                                                      | Confirm button                                                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| delete                                    | `ConfirmDeleteDialogService.open({ title, message, confirmLabel, entity? })` | `confirmLabel`, always `danger-button`, focus on cancel                                                             |
+| everything else (pause, revoke, clear, …) | `ConfirmActionDialogService.open({ …, confirmLabel, destructive })`          | `confirmLabel`; `destructive: true` → `danger-button` + focus on cancel, `false` → normal button + focus on confirm |
+
+`confirmLabel` names the action as **verb + object** – "Benutzer löschen", "Einweisung entziehen", never just
+"Löschen" or "OK": users often read only the button, and similar actions (delete vs. revoke a certification) must
+stay apart. It is the caller's translation key, next to title and message: `users.dialogs.deleteUser.confirm`.
 
 `destructive` follows the button on the page: an action whose page button has `danger-button` is destructive in the
 dialog too. Inside the modal a conditional focus is bound as an attribute:

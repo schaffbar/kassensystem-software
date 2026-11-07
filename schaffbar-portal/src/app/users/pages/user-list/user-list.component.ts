@@ -102,6 +102,7 @@ export class UserListComponent {
         title: 'users.dialogs.deleteUser.title',
         entity: user.firstName + ' ' + user.lastName,
         message: 'users.dialogs.deleteUser.message',
+        confirmLabel: 'users.dialogs.deleteUser.confirm',
       })
       .subscribe((confirmed) => {
         if (confirmed) {

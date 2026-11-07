@@ -107,6 +107,7 @@ export class ToolListComponent {
         title: 'tools.dialogs.deleteTool.title',
         entity: tool.name,
         message: 'tools.dialogs.deleteTool.message',
+        confirmLabel: 'tools.dialogs.deleteTool.confirm',
       })
       .subscribe((confirmed) => {
         if (confirmed) {

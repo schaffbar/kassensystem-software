@@ -431,8 +431,9 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
 
 ### Schon erledigt (Stand 07.11.2026)
 
-- **Grundsatz 6:** Bestätigungsdialoge nennen die konkrete Aktion (`confirmLabel` im `ConfirmActionDialog`), die
-  Anlegen-Dialoge sagen, was sie anlegen („Benutzer hinzufügen“).
+- **Grundsatz 6:** Der Bestätigen-Button nennt die Aktion als Verb + Objekt – im Löschen-Dialog („Benutzer löschen“)
+  wie im `ConfirmActionDialog` („Einweisung pausieren“); die Anlegen-Dialoge sagen, was sie anlegen („Benutzer
+  hinzufügen“). Titel als Frage fehlt noch.
 - **Grundsatz 9:** Destruktive Bestätigungen setzen den Fokus auf „Abbrechen“ (`cdkFocusInitial`).
 - **Gefährliche Aktionen:** einheitlich mit der Klasse `danger-button`, jede fragt vorher nach
   (`ConfirmDeleteDialogService` / `ConfirmActionDialogService`).
@@ -467,9 +468,8 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
    - `RowMenu` (⋯-Menü mit `mat-menu`).
    - **Bestätigungsdialoge erweitern** statt einen neuen zu bauen: `confirm-delete-dialog` und `confirm-action-dialog`
      bekommen Titel als Frage, Text mit den Folgen, optional Häkchen oder Namen eintippen und einen gesperrten Zustand
-     mit Erklärung und nächstem Schritt („Sitzung beenden …“).
-     **Offen:** CLAUDE.md legt fest, dass der Löschen-Button immer „Löschen“ heißt; der Entwurf will die konkrete
-     Aktion („Benutzer löschen“). Eins von beiden anpassen.
+     mit Erklärung und nächstem Schritt („Sitzung beenden …“). Der Button nennt schon in beiden Dialogen Verb + Objekt
+     („Benutzer löschen“, `confirmLabel`).
    - `PageHeader` (Brotkrümel, Titel, Status-Chips, Aktionen).
    - `EmptyState`.
    - `UserMultiSelect` (Personen suchen und als Chips auswählen) für „Einweisungen eintragen“ und „Einweiser

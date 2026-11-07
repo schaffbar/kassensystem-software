@@ -16,6 +16,6 @@
     {{ 'shared.dialogs.confirmDelete.actions.cancel' | translate }}
   </button>
   <button class="danger-button" matButton="filled" type="button" (click)="confirmed.emit()">
-    {{ 'shared.dialogs.confirmDelete.actions.confirm' | translate }}
+    {{ currentViewModel.confirmLabel | translate }}
   </button>
 </mat-dialog-actions>

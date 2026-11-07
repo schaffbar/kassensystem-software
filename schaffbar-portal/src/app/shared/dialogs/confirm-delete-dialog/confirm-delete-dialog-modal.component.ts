@@ -10,6 +10,7 @@ export interface ConfirmDeleteDialogViewModel {
   // translation keys
   title: string;
   message: string;
+  confirmLabel: string;
   // plain text
   entity?: string;
 }
