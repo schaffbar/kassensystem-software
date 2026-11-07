@@ -441,6 +441,17 @@ Vorschlag für die Reihenfolge, wenn der Entwurf passt:
      Namen eintippen, gesperrter Zustand mit Erklärung)
    - `PageHeader` (Brotkrümel, Titel, Status-Chips, Aktionen)
    - `EmptyState`
+   - `UserMultiSelect` (Personen suchen und als Chips auswählen) für „Einweisungen eintragen“ und „Einweiser
+     hinzufügen“. Beide Auswahlen sind heute getrennt gebaut (`tool-certifications`, `tool-instructors`) und weichen
+     voneinander ab. Die neue Komponente ersetzt beide und legt fest:
+     - Suche im ganzen Namen („max must“ findet Max Mustermann) – `tool-instructors` sucht heute Vor- oder Nachname
+       einzeln.
+     - Nach einer Auswahl wird das Suchfeld auf einem Weg geleert – heute einmal im Template, einmal per
+       `viewChild`.
+     - Chips mit `<button matChipRemove>` (Tastatur, Screenreader) – `tool-instructors` nutzt `<mat-icon>`.
+     - Nicht wählbare Personen ausgegraut mit Grund (schon eingewiesen, schon Einweiser, pausiert), wie im Entwurf
+       beschrieben, statt ausgeblendet.
+     - Dumb component mit ViewModel; wer wählbar ist, liefert weiter der Store (Skill `component`).
 4. **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht (klein nach groß,
    passt zur Reihenfolge der [Angular-v22-Migration](angular-v22-migration.md)).
 5. **Backend-Lücken** parallel, beginnend mit Online-Status/Heartbeat für Lesegeräte – davon hängen Übersicht,
