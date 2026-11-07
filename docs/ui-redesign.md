@@ -7,7 +7,8 @@ und Dialoge pro Feature, was im Backend dafür fehlt und welche Annahmen noch zu
 Prototyp (klickbar, privat – zum Teilen im Share-Menü freigeben):
 <https://claude.ai/artifact/MUj2FTVMMR2MEUWdbJ5vEM>
 
-Stand: 23.10.2026. Noch nichts davon ist im Code umgesetzt.
+Entwurf vom 23.10.2026, abgeglichen mit dem Code am 07.11.2026. Das neue Design (Theme, Layout, Seiten) ist noch nicht
+umgesetzt; was schon erledigt ist, steht unter [Umsetzung im Code](#umsetzung-im-code).
 
 ## Inhalt
 
@@ -199,9 +200,9 @@ Gelten für alle Seiten und Dialoge:
 | Serverseitige Suche über Name, E-Mail **und Tag-ID**, Filter-Zählungen, Paginierung | Erweiterung |
 | „Zuletzt da“ und Anzahl Einweisungen pro Benutzer in der Liste | Erweiterung |
 | Duplikat-Prüfung beim Anlegen (Name + Geburtsdatum / E-Mail) | Neuer Endpunkt |
-| Bearbeiten in einem Dialog – heute getrennt: `PUT /users/{id}`, `/contact`, `/address` | Drei Aufrufe oder neuer Endpunkt |
+| Bearbeiten in einem Dialog – heute getrennt: `PUT /users/{id}`, `/contact`, `/address` (Dialog `update-user-form` deckt nur die Personendaten ab, Kontakt und Adresse sind eigene Karten) | Drei Aufrufe oder neuer Endpunkt |
 | Löschen sperren bei offener Sitzung | Regel im Backend |
-| **Betrag** beim Abschluss (heute nur Einheiten, `WorkshopSession` hat keinen Preis) | Neu |
+| **Betrag** beim Abschluss (`WorkshopSession` speichert seit 31.10. Minuten und Einheiten, aber keinen Preis) | Neu |
 | **Zahlungsart** beim Abschluss | Neues Feld |
 | Laufende Werkzeuge beim Abschluss ausschalten | Prüfen / neu |
 | **Grund** bei Pausieren/Entziehen einer Einweisung | Neues Feld |
@@ -428,34 +429,74 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
 
 ## Umsetzung im Code
 
-Vorschlag für die Reihenfolge, wenn der Entwurf passt:
+### Schon erledigt (Stand 07.11.2026)
 
-1. **Theme:** Eigenes Angular-Material-Theme mit den Farben oben, Inter als Schrift, Tokens als CSS-Variablen inkl.
-   Dunkel-Modus in `src/styles.scss`. Die bisherige Border-Radius-Überschreibung für Buttons fällt weg.
-2. **Layout:** Seitenleiste (Navy, Gruppen Betrieb/Hardware, Logo) und Seitenkopf in `app.component` /
+- **Grundsatz 6:** Bestätigungsdialoge nennen die konkrete Aktion (`confirmLabel` im `ConfirmActionDialog`), die
+  Anlegen-Dialoge sagen, was sie anlegen („Benutzer hinzufügen“).
+- **Grundsatz 9:** Destruktive Bestätigungen setzen den Fokus auf „Abbrechen“ (`cdkFocusInitial`).
+- **Gefährliche Aktionen:** einheitlich mit der Klasse `danger-button`, jede fragt vorher nach
+  (`ConfirmDeleteDialogService` / `ConfirmActionDialogService`).
+- **Grundsatz 4:** Ganze Zeile klickbar bei Benutzern, Werkzeugen und Lesegeräten – noch nicht bei RFID-Tags.
+- **Struktur:** Jeder Tab einer Detailseite ist eine eigene Komponente (`<page>-tab-<name>/`), dumb components haben
+  ViewModels, Übersetzungsschlüssel für Enums kommen aus Pipes (`rfidReaderTypeKey`). Das erleichtert den Umbau der
+  Seiten.
+
+### Noch nicht umgesetzt
+
+- Theme: Es wird noch das fertige Theme `azure-blue.css` geladen (`angular.json`), Schrift Roboto, Buttons mit 5px
+  Radius (`src/styles.scss`).
+- Layout: Standard-Seitenleiste mit Toolbar „Menu“ in `core/navigation`.
+- Alle vier Listen haben einen roten Löschen-Button pro Zeile und einen Refresh-Button (Grundsätze 2 und 5).
+- Status ohne Icon: `certification-status-chip` zeigt nur Text, `certification-requirement-dot` nur einen Farbpunkt
+  (Grundsatz 3).
+- Tabs heißen anders als im Entwurf: Werkzeug *Info / Einweisungen / Konfiguration* (Entwurf: *Details / Einweisungen /
+  Hardware*), Benutzer *Info / Sitzung* (Entwurf: *Übersicht / Einweisungen / Offene Sitzung* – Tab „Einweisungen“
+  fehlt).
+
+### Reihenfolge
+
+1. **Theme:** Eigenes Angular-Material-Theme mit `mat.theme()` und den Farben oben statt `azure-blue.css`. Inter und
+   JetBrains Mono in `index.html` laden. Tokens als CSS-Variablen inkl. Dunkel-Modus in `src/styles.scss`. Die
+   5px-Überschreibung für Buttons fällt weg (Radius 10). `.readonly-field` nutzt heute fest `rgba(0, 0, 0, 0.5)` – auf
+   Tokens umstellen, sonst passt es im Dunkel-Modus nicht. `danger-button` auf `--danger` abbilden.
+2. **Layout:** Seitenleiste (Navy, Gruppen Betrieb/Hardware, Logo), Seitenkopf und mobil eine Tab-Leiste unten in
    `core/navigation`.
-3. **Gemeinsame Komponenten** unter `shared/components`:
-   - `StatusBadge` (Icon + Text, Varianten frei/in Benutzung/Hinweis/Pflicht/offline)
-   - `RowMenu` (⋯-Menü mit `mat-menu`)
-   - `ConfirmDialog` (ersetzt `confirm-delete`; Titel als Frage, Button mit konkreter Aktion, optional Häkchen oder
-     Namen eintippen, gesperrter Zustand mit Erklärung)
-   - `PageHeader` (Brotkrümel, Titel, Status-Chips, Aktionen)
-   - `EmptyState`
+3. **Gemeinsame Bausteine** unter `shared/`:
+   - `StatusBadge` (Icon + Text, Varianten frei/in Benutzung/Hinweis/Pflicht/offline). Ersetzt
+     `certification-status-chip` und `certification-requirement-dot`; Texte über die vorhandenen Key-Pipes.
+   - `RowMenu` (⋯-Menü mit `mat-menu`).
+   - **Bestätigungsdialoge erweitern** statt einen neuen zu bauen: `confirm-delete-dialog` und `confirm-action-dialog`
+     bekommen Titel als Frage, Text mit den Folgen, optional Häkchen oder Namen eintippen und einen gesperrten Zustand
+     mit Erklärung und nächstem Schritt („Sitzung beenden …“).
+     **Offen:** CLAUDE.md legt fest, dass der Löschen-Button immer „Löschen“ heißt; der Entwurf will die konkrete
+     Aktion („Benutzer löschen“). Eins von beiden anpassen.
+   - `PageHeader` (Brotkrümel, Titel, Status-Chips, Aktionen).
+   - `EmptyState`.
    - `UserMultiSelect` (Personen suchen und als Chips auswählen) für „Einweisungen eintragen“ und „Einweiser
-     hinzufügen“. Beide Auswahlen sind heute getrennt gebaut (`tool-certifications`, `tool-instructors`) und weichen
-     voneinander ab. Die neue Komponente ersetzt beide und legt fest:
-     - Suche im ganzen Namen („max must“ findet Max Mustermann) – `tool-instructors` sucht heute Vor- oder Nachname
-       einzeln.
-     - Nach einer Auswahl wird das Suchfeld auf einem Weg geleert – heute einmal im Template, einmal per
-       `viewChild`.
-     - Chips mit `<button matChipRemove>` (Tastatur, Screenreader) – `tool-instructors` nutzt `<mat-icon>`.
-     - Nicht wählbare Personen ausgegraut mit Grund (schon eingewiesen, schon Einweiser, pausiert), wie im Entwurf
-       beschrieben, statt ausgeblendet.
+     hinzufügen“. `tool-certifications` macht es schon richtig (Suche im ganzen Namen, `<button matChipRemove>`),
+     `tool-instructors` noch nicht (Vor- oder Nachname einzeln, `<mat-icon matChipRemove>`). Zuerst
+     `tool-instructors` angleichen (TODO „refactor tool instructor“), dann beide zu einer Komponente zusammenführen,
+     die festlegt:
+     - Suche im ganzen Namen („max must“ findet Max Mustermann).
+     - Nach einer Auswahl wird das Suchfeld auf einem Weg geleert – heute in `tool-certifications` im Template plus
+       `blur()` per `viewChild`, in `tool-instructors` nur per `viewChild`.
+     - Nicht wählbare Personen ausgegraut mit Grund (schon eingewiesen, schon Einweiser, pausiert) statt
+       ausgeblendet.
      - Dumb component mit ViewModel; wer wählbar ist, liefert weiter der Store (Skill `component`).
-4. **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht (klein nach groß,
-   passt zur Reihenfolge der [Angular-v22-Migration](angular-v22-migration.md)).
-5. **Backend-Lücken** parallel, beginnend mit Online-Status/Heartbeat für Lesegeräte – davon hängen Übersicht,
-   Lesegeräte und Werkzeug-Hardware ab.
+   - Danach CLAUDE.md und die Skills `component` und `dialog` um die neuen Bausteine ergänzen.
+4. **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht (klein nach groß).
+   Pro Seite: Löschen-Button in der Zeile durch das ⋯-Menü ersetzen, Tabs wie im Entwurf benennen bzw. ergänzen.
+   Zuerst nur mit den Daten, die es heute gibt – Elemente, die auf das Backend warten, weglassen statt Platzhalter
+   anzeigen.
+5. **Live-Aktualisierung:** Die Refresh-Buttons lassen sich schon vor SSE/WebSocket durch Polling ersetzen
+   (`interval` über `toSignal` / `rxMethod` lädt die Ressource neu, siehe Regel „Subscriptions“ in CLAUDE.md).
+6. **Backend-Lücken** parallel:
+   1. **Problems API** (TODO.md) – ohne verständliche `409`-Meldungen lassen sich gesperrte Aktionen und die neuen
+      Regeln nicht sauber anzeigen.
+   2. **Online-Status/Heartbeat** für Lesegeräte – davon hängen Übersicht, Lesegeräte und Werkzeug-Hardware ab.
+   3. Die übrigen Punkte aus der [Gesamtliste](#backend-lücken--gesamtliste).
+7. **Annahmen klären** (Checkliste oben), mindestens Zahlungsart, Altersgruppen und Einweiser-Regel. Sie blockieren erst
+   die Dialoge in Schritt 4, nicht Theme und Layout.
 
 Den Prototyp-Code (`.dc.html`) nicht übernehmen – er ist ein Entwurf mit Inline-Styles. Maße, Farben und Texte
 daraus übernehmen, die Umsetzung mit Angular Material.
