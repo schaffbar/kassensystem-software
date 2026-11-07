@@ -102,7 +102,8 @@
         "headers": {
           "contactInformation": "Contact Information",
           "billingInformation": "Billing Information"
-        }
+        },
+        "confirm": "Add User"
       },
       "editUser": {
         "title": "Edit User"
@@ -233,7 +234,8 @@
         "title": "Add New Tool",
         "errors": {
           "nameExists": "A tool with this name already exists."
-        }
+        },
+        "confirm": "Add Tool"
       },
       "deleteTool": {
         "title": "Delete Tool",

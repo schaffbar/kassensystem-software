@@ -102,7 +102,8 @@
         "headers": {
           "contactInformation": "Kontaktinformationen",
           "billingInformation": "Rechnungsinformationen"
-        }
+        },
+        "confirm": "Benutzer hinzufügen"
       },
       "editUser": {
         "title": "Benutzer bearbeiten"
@@ -233,7 +234,8 @@
         "title": "Neues Werkzeug hinzufügen",
         "errors": {
           "nameExists": "Ein Werkzeug mit diesem Namen existiert bereits."
-        }
+        },
+        "confirm": "Werkzeug hinzufügen"
       },
       "deleteTool": {
         "title": "Werkzeug löschen",

@@ -54,7 +54,7 @@ describe('NewToolFormComponent', () => {
   }
 
   async function clickSave(): Promise<void> {
-    const save = await loader.getHarness(MatButtonHarness.with({ text: 'shared.actions.save' }));
+    const save = await loader.getHarness(MatButtonHarness.with({ text: 'tools.dialogs.addTool.confirm' }));
     await save.click();
     await fixture.whenStable();
   }

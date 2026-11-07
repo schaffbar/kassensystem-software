@@ -125,6 +125,9 @@ export class UserContactComponent {
 - Every form that saves data has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
   `submit(this.xyzForm, async () => …)`.
 - A field that only filters (search text, autocomplete) is no form: a plain `signal('')` set by `(input)`.
+- The submit button names the action: a dialog that creates something says what it creates
+  (`users.dialogs.addNewUser.confirm` → "Benutzer hinzufügen"), a form that changes something existing says
+  "Speichern" (`shared.actions.save`). Cancel is always `shared.actions.cancel`.
 - Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
   without `type` submits the form, so e.g. "cancel" would save.
 - The result of `saveXyz()` is built as an explicitly typed variable before it is passed on – for readability, even

@@ -73,7 +73,7 @@ describe('NewUserFormComponent', () => {
   });
 
   it('should show required errors and not close when saving an empty form', async () => {
-    await click('shared.actions.save');
+    await click('users.dialogs.addNewUser.confirm');
 
     for (const label of ['firstName', 'lastName', 'dateOfBirth', 'email', 'addressLine1', 'postalCode', 'city']) {
       expect(await errors(label)).toEqual(['shared.errors.required']);
@@ -86,7 +86,7 @@ describe('NewUserFormComponent', () => {
     await setValue('email', 'max-example.com');
     await setValue('postalCode', '123');
 
-    await click('shared.actions.save');
+    await click('users.dialogs.addNewUser.confirm');
 
     expect(await errors('email')).toEqual(['shared.errors.email']);
     expect(await errors('postalCode')).toEqual(['shared.errors.minLength']);
@@ -97,7 +97,7 @@ describe('NewUserFormComponent', () => {
     await fillRequiredFields();
     await (await loader.getHarness(MatCheckboxHarness)).check();
 
-    await click('shared.actions.save');
+    await click('users.dialogs.addNewUser.confirm');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
       firstName: 'Max',
