@@ -19,7 +19,7 @@ export const RfidTagsStore = signalStore(
   }),
   withComputed(({ _rfidTagsResource }) => ({
     // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
-    entities: computed(() => (_rfidTagsResource.hasValue() ? _rfidTagsResource.value().map(toRfidTag) : [])),
+    rfidTags: computed(() => (_rfidTagsResource.hasValue() ? _rfidTagsResource.value().map(toRfidTag) : [])),
     isLoading: computed(() => _rfidTagsResource.isLoading()),
     hasLoadError: computed(() => !!_rfidTagsResource.error()),
   })),

@@ -30,6 +30,6 @@ describe('CertificationStatusChipComponent', () => {
     const chips: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('mat-chip');
     expect(chips.length).toBe(1);
     expect(chips[0].classList).toContain(cssClass);
-    expect(chips[0].textContent).toContain(`users.tables.toolCertifications.statuses.${status}`);
+    expect(chips[0].textContent).toContain(`shared.certificationStatuses.${status}`);
   });
 });

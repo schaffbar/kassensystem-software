@@ -13,18 +13,14 @@
       "serverUnreachable": "Der Server ist nicht erreichbar."
     },
     "actions": {
-      "close": "Schließen"
+      "close": "Schließen",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
     },
     "table": {
       "actionsColumn": "Aktionen"
     },
     "dialogs": {
-      "actions": {
-        "edit": {
-          "confirm": "Speichern",
-          "cancel": "Abbrechen"
-        }
-      },
       "confirmDelete": {
         "actions": {
           "confirm": "Löschen",
@@ -51,6 +47,11 @@
           "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
         }
       }
+    },
+    "certificationStatuses": {
+      "ACTIVE": "Aktiv",
+      "PAUSED": "Pausiert",
+      "REVOKED": "Entzogen"
     }
   },
   "sidebar": {
@@ -92,8 +93,7 @@
       "toolCertifications": {
         "pause": "Einweisung pausieren",
         "reactivate": "Einweisung reaktivieren",
-        "revoke": "Einweisung entziehen",
-        "delete": "Einweisung löschen"
+        "revoke": "Einweisung entziehen"
       }
     },
     "dialogs": {
@@ -102,26 +102,14 @@
         "headers": {
           "contactInformation": "Kontaktinformationen",
           "billingInformation": "Rechnungsinformationen"
-        },
-        "actions": {
-          "confirm": "Benutzer hinzufügen",
-          "cancel": "Abbrechen"
         }
       },
       "editUser": {
-        "title": "Benutzer bearbeiten",
-        "actions": {
-          "confirm": "Speichern",
-          "cancel": "Abbrechen"
-        }
+        "title": "Benutzer bearbeiten"
       },
       "deleteUser": {
         "title": "Benutzer löschen",
-        "message": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
-        "actions": {
-          "confirm": "Löschen",
-          "cancel": "Abbrechen"
-        }
+        "message": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?"
       },
       "certifications": {
         "pauseCertification": {
@@ -138,11 +126,12 @@
           "title": "Einweisung entziehen",
           "message": "Sind Sie sicher, dass Sie diese Einweisung entziehen möchten?",
           "confirm": "Entziehen"
-        },
-        "deleteCertification": {
-          "title": "Einweisung löschen",
-          "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?"
         }
+      },
+      "unassignRfidTag": {
+        "title": "RFID-Tag entfernen",
+        "message": "Sind Sie sicher, dass Sie den RFID-Tag dieses Benutzers entfernen möchten?",
+        "confirm": "Entfernen"
       }
     },
     "tables": {
@@ -161,12 +150,7 @@
       "toolCertifications": {
         "toolNameColumn": "Werkzeug",
         "statusColumn": "Status",
-        "certifiedAtColumn": "Eingewiesen am",
-        "statuses": {
-          "ACTIVE": "Aktiv",
-          "PAUSED": "Pausiert",
-          "REVOKED": "Entzogen"
-        }
+        "certifiedAtColumn": "Eingewiesen am"
       }
     },
     "tabGroups": {
@@ -211,7 +195,6 @@
         "headers": {
           "workshopTime": "Werkstattzeit",
           "toolUsage": "Werkzeugnutzung",
-          "toolUsageTotal": "Werkzeugnutzung gesamt",
           "total": "Werkstattzeit gesamt",
           "totalDurationSuffix": "Minuten",
           "totalUnitsSuffix": "Einheiten"
@@ -242,7 +225,8 @@
   "tools": {
     "title": "Werkzeuge",
     "actions": {
-      "addTool": "Werkzeug hinzufügen"
+      "addTool": "Werkzeug hinzufügen",
+      "deleteCertification": "Einweisung löschen"
     },
     "dialogs": {
       "addTool": {
@@ -259,6 +243,15 @@
         "title": "RFID-Lesegerät-Zuweisung aufheben",
         "message": "Sind Sie sicher, dass Sie die RFID-Lesegerät-Zuweisung aufheben möchten?",
         "confirm": "Aufheben"
+      },
+      "removeInstructors": {
+        "title": "Einweiser entfernen",
+        "message": "Sind Sie sicher, dass Sie die ausgewählten Einweiser entfernen möchten?",
+        "confirm": "Entfernen"
+      },
+      "deleteCertification": {
+        "title": "Einweisung löschen",
+        "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?"
       }
     },
     "tooltips": {
@@ -299,7 +292,6 @@
           "toolInformation": "Werkzeuginformationen",
           "rfidReaderAssignment": "RFID-Lesegerät",
           "wlanRelais": "WLAN-Relais",
-          "certifications": "Einweisungen",
           "instructors": "Einweiser"
         },
         "certifications": {
@@ -356,6 +348,10 @@
         "id": "ID",
         "active": "Aktiv"
       }
+    },
+    "states": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
     }
   },
   "rfidReaders": {
@@ -400,6 +396,8 @@
     }
   },
   "notFound": {
-    "title": "Seite nicht gefunden"
+    "title": "Seite nicht gefunden",
+    "message": "Die angeforderte Seite gibt es nicht.",
+    "backToDashboard": "Zur Übersicht"
   }
 }

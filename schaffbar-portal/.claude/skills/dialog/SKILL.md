@@ -119,7 +119,9 @@ Rules:
 
 ## Confirmations
 
-A yes/no question before an action uses one of the two confirmation dialogs – no new dialog per action:
+A yes/no question before an action uses one of the two confirmation dialogs – no new dialog per action. **Every
+button with `danger-button` asks first** (unassign a tag, remove instructors, clear a reader, …) – no red button acts
+directly:
 
 | Action                                    | Service                                                             | Confirm button                                                                                                      |
 | ----------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |

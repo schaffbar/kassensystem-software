@@ -12,6 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DeleteRfidTagCommand, RfidTag } from '../../rfid-tag.model';
 import { RfidTagsStore } from '../../rfid-tags.store';
+import { RfidTagStateKeyPipe } from '../../rfid-tag-state-key.pipe';
 
 @Component({
   selector: 'schbar-rfid-tag-list',
@@ -25,6 +26,7 @@ import { RfidTagsStore } from '../../rfid-tags.store';
     MatSortModule,
     MatIconModule,
     TranslatePipe,
+    RfidTagStateKeyPipe,
   ],
 })
 export class RfidTagListComponent {
@@ -35,9 +37,9 @@ export class RfidTagListComponent {
   private readonly sort = viewChild(MatSort);
 
   protected readonly displayedColumns = ['id', 'active', 'actions'];
-  protected readonly rfidTagsCount = computed(() => this.store.entities().length);
+  protected readonly rfidTagsCount = computed(() => this.store.rfidTags().length);
   protected readonly dataSource = computed(() => {
-    const result = new MatTableDataSource<RfidTag>(this.store.entities());
+    const result = new MatTableDataSource<RfidTag>(this.store.rfidTags());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
     return result;
@@ -56,11 +58,6 @@ export class RfidTagListComponent {
 
   protected deleteRfidTag(event: Event, rfidTag: RfidTag): void {
     event.stopPropagation();
-
-    if (!rfidTag || !rfidTag.id) {
-      console.warn('No RFID tag selected for deletion');
-      return;
-    }
 
     this.confirmDeleteDialog
       .open({

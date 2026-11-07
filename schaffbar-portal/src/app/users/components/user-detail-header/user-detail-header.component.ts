@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { AgeGroup } from '../../../shared/models/age-group';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
@@ -42,6 +43,8 @@ export interface RfidTagAssignmentViewModel {
   ],
 })
 export class UserDetailHeaderComponent {
+  private readonly confirmActionDialog = inject(ConfirmActionDialogService);
+
   readonly userDetailHeader = input.required<UserDetailHeaderViewModel>();
   // null = no RFID tag
   readonly rfidTagAssignment = input.required<RfidTagAssignmentViewModel | null>();
@@ -63,7 +66,20 @@ export class UserDetailHeaderComponent {
   }
 
   protected unassignRfidTag(): void {
-    const command: UnassignRfidTagCommand = { userId: this.userDetailHeader().id };
-    this.rfidTagUnassigned.emit(command);
+    const user = this.userDetailHeader();
+    this.confirmActionDialog
+      .open({
+        title: 'users.dialogs.unassignRfidTag.title',
+        message: 'users.dialogs.unassignRfidTag.message',
+        entity: `${user.firstName} ${user.lastName}`,
+        confirmLabel: 'users.dialogs.unassignRfidTag.confirm',
+        destructive: true,
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: UnassignRfidTagCommand = { userId: user.id };
+          this.rfidTagUnassigned.emit(command);
+        }
+      });
   }
 }

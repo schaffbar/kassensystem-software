@@ -95,6 +95,7 @@ export class UserContactComponent {
   component needs (`canChangeRfidReaderType(): Observable<boolean>`), because components never import
   `shared/api`. A dialog container loads its data with
   `httpResource` directly, without a store (see "Dialogs").
+- Store data is named after its content – `tools`, `users`, `rfidReaders` – not `entities`.
 - A store method is named like its command without `Command`: `UpdateUserContactCommand` → `updateUserContact`,
   `PauseToolCertificationCommand` → `pauseToolCertification`.
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
@@ -215,6 +216,9 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 - **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (button
   always "delete"), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
   with its own `confirmLabel` and `destructive: true | false`.
+- **Every button with `danger-button` asks first** – delete through `ConfirmDeleteDialogService`, everything else
+  (unassign, remove, clear, pause, revoke) through `ConfirmActionDialogService` with `destructive: true`. No red
+  button acts directly.
 - **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
   form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it; Enter in a text field saves);
   destructive or irreversible confirmations put `cdkFocusInitial` on cancel.

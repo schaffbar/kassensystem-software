@@ -20,9 +20,9 @@ import {
 
 describe('ToolRfidReaderAssignmentComponent', () => {
   const rfidReaders: RfidReaderOptionViewModel[] = [
-    { id: 'reader-1', name: 'Reader 1', isAssignedToOtherTool: false },
-    { id: 'reader-2', name: 'Reader 2', isAssignedToOtherTool: false },
-    { id: 'reader-3', name: 'Reader 3', isAssignedToOtherTool: true },
+    { id: 'reader-1', label: 'Reader 1', isAssignedToOtherTool: false },
+    { id: 'reader-2', label: 'Reader 2', isAssignedToOtherTool: false },
+    { id: 'reader-3', label: 'Reader 3', isAssignedToOtherTool: true },
   ];
 
   function createTool(rfidReaderId: string | null = null): ToolRfidReaderAssignmentViewModel {

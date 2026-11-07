@@ -106,7 +106,7 @@ describe('ToolWlanRelaisComponent', () => {
 
     it('should require the IP address once a type is selected', async () => {
       await selectType('tools.wlanRelaisTypes.SHELLY_1');
-      await click('shared.dialogs.actions.edit.confirm');
+      await click('shared.actions.save');
 
       expect(await ipErrors()).toEqual(['shared.errors.required']);
       expect(updated).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('ToolWlanRelaisComponent', () => {
     it('should reject an invalid IP address', async () => {
       await selectType('tools.wlanRelaisTypes.SHELLY_1');
       await (await ipInput())!.setValue('192.168.0.300');
-      await click('shared.dialogs.actions.edit.confirm');
+      await click('shared.actions.save');
 
       expect(await ipErrors()).toEqual(['tools.pages.toolDetails.errors.invalidIpAddress']);
       expect(updated).not.toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe('ToolWlanRelaisComponent', () => {
     it('should emit the command for a valid configuration', async () => {
       await selectType('tools.wlanRelaisTypes.SHELLY_PRO');
       await (await ipInput())!.setValue('10.0.0.5');
-      await click('shared.dialogs.actions.edit.confirm');
+      await click('shared.actions.save');
 
       expect(updated).toHaveBeenCalledWith({
         toolId: 'tool-1',
@@ -142,7 +142,7 @@ describe('ToolWlanRelaisComponent', () => {
       await selectType('--');
 
       expect(await ipInput()).toBeNull();
-      await click('shared.dialogs.actions.edit.confirm');
+      await click('shared.actions.save');
 
       expect(cleared).toHaveBeenCalledWith({ toolId: 'tool-1' });
       expect(updated).not.toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe('ToolWlanRelaisComponent', () => {
 
     it('should restore the saved values on cancel', async () => {
       await (await ipInput())!.setValue('10.0.0.1');
-      await click('shared.dialogs.actions.edit.cancel');
+      await click('shared.actions.cancel');
 
       expect(await (await ipInput())!.getValue()).toBe('192.168.0.10');
       expect(actionButtonCount()).toBe(0);

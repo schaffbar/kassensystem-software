@@ -46,9 +46,9 @@ export class UserListComponent {
   protected readonly searchText = signal('');
 
   protected readonly displayedColumns = ['lastName', 'firstName', 'actions'];
-  protected readonly usersCount = computed(() => this.store.entities().length);
+  protected readonly usersCount = computed(() => this.store.users().length);
   protected readonly dataSource = computed(() => {
-    const result = new MatTableDataSource<User>(this.store.entities());
+    const result = new MatTableDataSource<User>(this.store.users());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
     // part of the computed, so the filter survives reloading the users (MatTableDataSource default filter predicate)
@@ -96,11 +96,6 @@ export class UserListComponent {
 
   protected deleteUser(event: Event, user: User): void {
     event.stopPropagation();
-
-    if (!user || !user.id) {
-      console.warn('No user selected for deletion');
-      return;
-    }
 
     this.confirmDeleteDialog
       .open({

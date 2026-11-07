@@ -6,7 +6,7 @@
     </button>
   </div>
   <div class="tool-list-header__actions">
-    <button matButton="filled" [disabled]="isCreatingTool()" (click)="createTool()">
+    <button matButton="filled" [disabled]="store.createTool.isPending()" (click)="createTool()">
       {{ 'tools.actions.addTool' | translate }}
     </button>
   </div>
@@ -77,14 +77,18 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row (click)="openToolDetail(row)" *matRowDef="let row; columns: displayedColumns"></tr>
+    <tr
+      mat-row
+      class="clickable-row"
+      (click)="openToolDetail(row)"
+      *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
 
   <mat-paginator
     #paginator
     [length]="toolsCount()"
     [pageIndex]="0"
-    [pageSize]="10"
-    [pageSizeOptions]="[5, 10, 20]"
+    [pageSize]="15"
+    [pageSizeOptions]="[5, 10, 15, 20]"
     aria-label="Select page" />
 </div>

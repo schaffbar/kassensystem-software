@@ -8,6 +8,11 @@ export const ROUTE = {
   RFID_TAGS: 'rfid-tags',
 } as const;
 
+// tabs of the user detail page that can be opened by the `tab` query parameter
+export const USER_DETAIL_TAB = {
+  OPEN_SESSION: 'open-session',
+} as const;
+
 // route titles are translation keys, translated by TranslatedTitleStrategy
 
 export const routes: Routes = [

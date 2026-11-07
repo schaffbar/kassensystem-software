@@ -28,15 +28,15 @@ describe('UserListComponent', () => {
 
   let fixture: ComponentFixture<UserListComponent>;
   let loader: HarnessLoader;
-  let entities: WritableSignal<User[]>;
-  let createUser: Mock;
+  let storeUsers: WritableSignal<User[]>;
+  let createUser: Mock & { isPending: WritableSignal<boolean> };
   let deleteUser: Mock;
   let openDialog: Mock;
   let openConfirmDeleteDialog: Mock;
 
   beforeEach(async () => {
-    entities = signal(users);
-    createUser = vi.fn();
+    storeUsers = signal(users);
+    createUser = Object.assign(vi.fn(), { isPending: signal(false) });
     deleteUser = vi.fn();
     openDialog = vi.fn();
     openConfirmDeleteDialog = vi.fn();
@@ -50,7 +50,7 @@ describe('UserListComponent', () => {
         {
           provide: UsersStore,
           useValue: {
-            entities,
+            users: storeUsers,
             isLoading: signal(false),
             hasLoadError: signal(false),
             reloadUsers: vi.fn(),
@@ -92,7 +92,7 @@ describe('UserListComponent', () => {
   it('should keep the filter when the users are reloaded', async () => {
     await search('otto');
 
-    entities.set([...users, { id: 'user-4', firstName: 'Otto', lastName: 'Waalkes' } as User]);
+    storeUsers.set([...users, { id: 'user-4', firstName: 'Otto', lastName: 'Waalkes' } as User]);
     await fixture.whenStable();
 
     expect(await lastNames()).toEqual(['Normalverbraucher', 'Waalkes']);
@@ -138,6 +138,13 @@ describe('UserListComponent', () => {
         expect.objectContaining({ disableClose: true }),
       );
       expect(createUser).toHaveBeenCalledExactlyOnceWith(command);
+    });
+
+    it('should disable adding while a user is being created', async () => {
+      createUser.isPending.set(true);
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.user-list-header__actions button').disabled).toBe(true);
     });
 
     it('should not create a user when the form is cancelled', () => {

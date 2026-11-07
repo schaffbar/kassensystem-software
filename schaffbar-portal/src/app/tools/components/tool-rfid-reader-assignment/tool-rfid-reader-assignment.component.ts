@@ -11,7 +11,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand } from '../../tool.model';
-import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 
 export interface ToolRfidReaderAssignmentViewModel {
   id: string;
@@ -22,7 +21,8 @@ export interface ToolRfidReaderAssignmentViewModel {
 // a reader that may be assigned to the tool
 export interface RfidReaderOptionViewModel {
   id: string;
-  name: string | null;
+  // the name, or the MAC address of a reader without name
+  label: string;
   isAssignedToOtherTool: boolean;
 }
 
@@ -44,7 +44,6 @@ interface RfidReaderAssignmentFormModel {
     MatIconModule,
     MatTooltipModule,
     TranslatePipe,
-    OrDashPipe,
   ],
 })
 export class ToolRfidReaderAssignmentComponent {

@@ -2,8 +2,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { of } from 'rxjs';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { AgeGroup } from '../../../shared/models/age-group';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
@@ -28,11 +30,17 @@ describe('UserDetailHeaderComponent', () => {
   };
 
   let fixture: ComponentFixture<UserDetailHeaderComponent>;
+  let openConfirmActionDialog: Mock;
 
   beforeEach(async () => {
+    openConfirmActionDialog = vi.fn();
     await TestBed.configureTestingModule({
       imports: [UserDetailHeaderComponent],
-      providers: [provideZonelessChangeDetection(), provideTranslateService()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        { provide: ConfirmActionDialogService, useValue: { open: openConfirmActionDialog } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserDetailHeaderComponent);
@@ -88,15 +96,34 @@ describe('UserDetailHeaderComponent', () => {
     expect(actionButtons()).toEqual([]);
   });
 
-  it('should show the assigned tag and emit the unassign command', async () => {
+  it('should show the assigned tag and emit the unassign command after a destructive confirmation', async () => {
     await render(assigned);
     const unassign = vi.fn();
     fixture.componentInstance.rfidTagUnassigned.subscribe(unassign);
+    openConfirmActionDialog.mockReturnValue(of(true));
 
     expect(texts('mat-chip').slice(2)).toEqual(['users.chips.userDetails.rfidTags.fixed', 'tag-42']);
     actionButtons()[0].click();
 
+    expect(openConfirmActionDialog).toHaveBeenCalledExactlyOnceWith({
+      title: 'users.dialogs.unassignRfidTag.title',
+      message: 'users.dialogs.unassignRfidTag.message',
+      entity: 'Max Mustermann',
+      confirmLabel: 'users.dialogs.unassignRfidTag.confirm',
+      destructive: true,
+    });
     expect(unassign).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+  });
+
+  it('should not unassign the tag when the confirmation is cancelled', async () => {
+    await render(assigned);
+    const unassign = vi.fn();
+    fixture.componentInstance.rfidTagUnassigned.subscribe(unassign);
+    openConfirmActionDialog.mockReturnValue(of(false));
+
+    actionButtons()[0].click();
+
+    expect(unassign).not.toHaveBeenCalled();
   });
 
   it('should emit edit and reload', () => {

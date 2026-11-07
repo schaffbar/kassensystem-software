@@ -13,18 +13,14 @@
       "serverUnreachable": "The server cannot be reached."
     },
     "actions": {
-      "close": "Close"
+      "close": "Close",
+      "save": "Save",
+      "cancel": "Cancel"
     },
     "table": {
       "actionsColumn": "Actions"
     },
     "dialogs": {
-      "actions": {
-        "edit": {
-          "confirm": "Save",
-          "cancel": "Cancel"
-        }
-      },
       "confirmDelete": {
         "actions": {
           "confirm": "Delete",
@@ -51,6 +47,11 @@
           "runningUsage": "The session can only be closed once all workshop and tool usages have ended."
         }
       }
+    },
+    "certificationStatuses": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "REVOKED": "Revoked"
     }
   },
   "sidebar": {
@@ -92,8 +93,7 @@
       "toolCertifications": {
         "pause": "Pause Certification",
         "reactivate": "Reactivate Certification",
-        "revoke": "Revoke Certification",
-        "delete": "Delete Certification"
+        "revoke": "Revoke Certification"
       }
     },
     "dialogs": {
@@ -102,26 +102,14 @@
         "headers": {
           "contactInformation": "Contact Information",
           "billingInformation": "Billing Information"
-        },
-        "actions": {
-          "confirm": "Add User",
-          "cancel": "Cancel"
         }
       },
       "editUser": {
-        "title": "Edit User",
-        "actions": {
-          "confirm": "Save",
-          "cancel": "Cancel"
-        }
+        "title": "Edit User"
       },
       "deleteUser": {
         "title": "Delete User",
-        "message": "Are you sure you want to delete this user?",
-        "actions": {
-          "confirm": "Delete",
-          "cancel": "Cancel"
-        }
+        "message": "Are you sure you want to delete this user?"
       },
       "certifications": {
         "pauseCertification": {
@@ -138,11 +126,12 @@
           "title": "Revoke Certification",
           "message": "Are you sure you want to revoke this certification?",
           "confirm": "Revoke"
-        },
-        "deleteCertification": {
-          "title": "Delete Certification",
-          "message": "Are you sure you want to delete this certification?"
         }
+      },
+      "unassignRfidTag": {
+        "title": "Unassign RFID Tag",
+        "message": "Are you sure you want to unassign the RFID tag of this user?",
+        "confirm": "Unassign"
       }
     },
     "tables": {
@@ -161,12 +150,7 @@
       "toolCertifications": {
         "toolNameColumn": "Tool",
         "statusColumn": "Status",
-        "certifiedAtColumn": "Certified At",
-        "statuses": {
-          "ACTIVE": "Active",
-          "PAUSED": "Paused",
-          "REVOKED": "Revoked"
-        }
+        "certifiedAtColumn": "Certified At"
       }
     },
     "tabGroups": {
@@ -211,7 +195,6 @@
         "headers": {
           "workshopTime": "Workshop Time",
           "toolUsage": "Tool Usage",
-          "toolUsageTotal": "Tool Usage Total",
           "total": "Workshop Time Total",
           "totalDurationSuffix": "Minutes",
           "totalUnitsSuffix": "Units"
@@ -242,7 +225,8 @@
   "tools": {
     "title": "Tools",
     "actions": {
-      "addTool": "Add Tool"
+      "addTool": "Add Tool",
+      "deleteCertification": "Delete Certification"
     },
     "dialogs": {
       "addTool": {
@@ -259,6 +243,15 @@
         "title": "Clear RFID Reader Assignment",
         "message": "Are you sure you want to clear the RFID reader assignment?",
         "confirm": "Clear"
+      },
+      "removeInstructors": {
+        "title": "Remove Instructors",
+        "message": "Are you sure you want to remove the selected instructors?",
+        "confirm": "Remove"
+      },
+      "deleteCertification": {
+        "title": "Delete Certification",
+        "message": "Are you sure you want to delete this certification?"
       }
     },
     "tooltips": {
@@ -299,7 +292,6 @@
           "toolInformation": "Tool Information",
           "rfidReaderAssignment": "RFID Reader",
           "wlanRelais": "WLAN Relais",
-          "certifications": "Certifications",
           "instructors": "Instructors"
         },
         "certifications": {
@@ -356,6 +348,10 @@
         "id": "ID",
         "active": "Active"
       }
+    },
+    "states": {
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "rfidReaders": {
@@ -400,6 +396,8 @@
     }
   },
   "notFound": {
-    "title": "Page not found"
+    "title": "Page not found",
+    "message": "The requested page does not exist.",
+    "backToDashboard": "Back to the dashboard"
   }
 }

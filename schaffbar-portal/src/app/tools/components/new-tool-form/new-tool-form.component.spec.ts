@@ -54,7 +54,7 @@ describe('NewToolFormComponent', () => {
   }
 
   async function clickSave(): Promise<void> {
-    const save = await loader.getHarness(MatButtonHarness.with({ text: 'shared.dialogs.actions.edit.confirm' }));
+    const save = await loader.getHarness(MatButtonHarness.with({ text: 'shared.actions.save' }));
     await save.click();
     await fixture.whenStable();
   }
@@ -110,7 +110,7 @@ describe('NewToolFormComponent', () => {
   it('should only close the dialog on cancel without saving', async () => {
     await setName('Drechselbank');
 
-    const cancel = await loader.getHarness(MatButtonHarness.with({ text: 'shared.dialogs.actions.edit.cancel' }));
+    const cancel = await loader.getHarness(MatButtonHarness.with({ text: 'shared.actions.cancel' }));
     await cancel.click();
     await fixture.whenStable();
 

@@ -2,7 +2,7 @@
   <div class="left">
     <schbar-tool-detail-info
       [toolDetailInfo]="tool"
-      [existingTools]="toolsStore.entities()"
+      [existingTools]="toolsStore.tools()"
       (toolUpdated)="updateTool($event)" />
   </div>
   <div class="right">

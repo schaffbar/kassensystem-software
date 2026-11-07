@@ -59,7 +59,7 @@ describe('ToolDetailComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideTranslateService(),
-        { provide: ToolsStore, useValue: { entities: signal([tool]), reloadTools } },
+        { provide: ToolsStore, useValue: { tools: signal([tool]), reloadTools } },
       ],
     })
       .overrideComponent(ToolDetailComponent, {

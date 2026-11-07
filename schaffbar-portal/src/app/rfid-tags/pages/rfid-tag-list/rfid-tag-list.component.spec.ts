@@ -20,7 +20,7 @@ describe('RfidTagListComponent', () => {
   let fixture: ComponentFixture<RfidTagListComponent>;
   let openConfirmDeleteDialog: Mock;
   let storeMock: {
-    entities: WritableSignal<RfidTag[]>;
+    rfidTags: WritableSignal<RfidTag[]>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     reloadRfidTags: Mock;
@@ -30,7 +30,7 @@ describe('RfidTagListComponent', () => {
   beforeEach(async () => {
     openConfirmDeleteDialog = vi.fn();
     storeMock = {
-      entities: signal(rfidTags),
+      rfidTags: signal(rfidTags),
       isLoading: signal(false),
       hasLoadError: signal(false),
       reloadRfidTags: vi.fn(),

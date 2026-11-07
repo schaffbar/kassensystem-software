@@ -128,8 +128,8 @@ export class ToolCertificationsComponent {
   protected deleteCertification(certification: ToolCertificationRowViewModel): void {
     this.confirmDeleteDialog
       .open({
-        title: 'users.dialogs.certifications.deleteCertification.title',
-        message: 'users.dialogs.certifications.deleteCertification.message',
+        title: 'tools.dialogs.deleteCertification.title',
+        message: 'tools.dialogs.deleteCertification.message',
         entity: certification.userName ?? undefined,
       })
       .subscribe((confirmed) => {

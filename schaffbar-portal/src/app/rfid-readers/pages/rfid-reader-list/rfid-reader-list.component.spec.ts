@@ -34,7 +34,7 @@ describe('RfidReaderListComponent', () => {
 
   let fixture: ComponentFixture<RfidReaderListComponent>;
   let storeMock: {
-    entities: WritableSignal<RfidReader[]>;
+    rfidReaders: WritableSignal<RfidReader[]>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     reloadRfidReaders: Mock;
@@ -44,7 +44,7 @@ describe('RfidReaderListComponent', () => {
 
   beforeEach(async () => {
     storeMock = {
-      entities: signal(rfidReaders),
+      rfidReaders: signal(rfidReaders),
       isLoading: signal(false),
       hasLoadError: signal(false),
       reloadRfidReaders: vi.fn(),

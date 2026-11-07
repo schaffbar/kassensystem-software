@@ -5,7 +5,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { ROUTE } from '../../../app.routes';
+import { ROUTE, USER_DETAIL_TAB } from '../../../app.routes';
 import {
   ActiveToolsWidgetComponent,
   ToolStatusRowViewModel,
@@ -41,7 +41,7 @@ export class DashboardComponent {
   }
 
   protected openUserSession(customerId: string): void {
-    this.router.navigate([ROUTE.USERS, customerId], { queryParams: { tab: 'open-session' } });
+    this.router.navigate([ROUTE.USERS, customerId], { queryParams: { tab: USER_DETAIL_TAB.OPEN_SESSION } });
   }
 }
 

@@ -36,9 +36,9 @@ describe('ToolDetailTabConfigurationComponent', () => {
 
   const tool = createTool('tool-1', 'reader-1');
   const rfidReaders: RfidReader[] = [
-    { id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox },
-    { id: 'reader-2', name: 'Reader 2', type: RfidReaderType.SwitchBox },
-    { id: 'reader-3', name: 'Reader 3', type: RfidReaderType.SwitchBox },
+    { id: 'reader-1', macAddress: 'AA:BB', name: 'Reader 1', type: RfidReaderType.SwitchBox },
+    { id: 'reader-2', macAddress: 'CC:DD', name: 'Reader 2', type: RfidReaderType.SwitchBox },
+    { id: 'reader-3', macAddress: 'EE:FF', name: null, type: RfidReaderType.SwitchBox },
   ];
 
   let fixture: ComponentFixture<ToolDetailTabConfigurationComponent>;
@@ -52,7 +52,7 @@ describe('ToolDetailTabConfigurationComponent', () => {
       clearWlanRelais,
     };
     // reader-1 belongs to this tool, reader-2 to another one
-    const toolsStoreMock = { entities: signal([tool, createTool('tool-2', 'reader-2'), createTool('tool-3', null)]) };
+    const toolsStoreMock = { tools: signal([tool, createTool('tool-2', 'reader-2'), createTool('tool-3', null)]) };
 
     await TestBed.configureTestingModule({
       imports: [ToolDetailTabConfigurationComponent],
@@ -72,11 +72,11 @@ describe('ToolDetailTabConfigurationComponent', () => {
     return fixture.debugElement.query(By.directive(component)).componentInstance;
   }
 
-  it('should mark only the RFID readers of other tools as assigned', () => {
+  it('should mark only the RFID readers of other tools as assigned and label a reader without name by its MAC', () => {
     expect(child(ToolRfidReaderAssignmentComponent).rfidReaders()).toEqual([
-      { id: 'reader-1', name: 'Reader 1', isAssignedToOtherTool: false },
-      { id: 'reader-2', name: 'Reader 2', isAssignedToOtherTool: true },
-      { id: 'reader-3', name: 'Reader 3', isAssignedToOtherTool: false },
+      { id: 'reader-1', label: 'Reader 1', isAssignedToOtherTool: false },
+      { id: 'reader-2', label: 'Reader 2', isAssignedToOtherTool: true },
+      { id: 'reader-3', label: 'EE:FF', isAssignedToOtherTool: false },
     ]);
   });
 

@@ -53,7 +53,7 @@ describe('ToolsStore', () => {
   it('should load all tools on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(tools.map(toTool));
+    expect(store.tools()).toEqual(tools.map(toTool));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -65,7 +65,7 @@ describe('ToolsStore', () => {
     expectLoad().flush([]);
     await settle();
 
-    expect(store.entities()).toEqual([]);
+    expect(store.tools()).toEqual([]);
   });
 
   it('should reload the tools after creating one', async () => {
@@ -90,7 +90,7 @@ describe('ToolsStore', () => {
 
     expectLoad().flush([...tools, toolFixture({ id: 'tool-2', name: 'Drechselbank' })]);
     await settle();
-    expect(store.entities()).toHaveLength(2);
+    expect(store.tools()).toHaveLength(2);
     expect(store.createTool.isPending()).toBe(false);
   });
 
@@ -102,7 +102,7 @@ describe('ToolsStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.tools()).toEqual([]);
   });
 
   it('should expose a load error', async () => {
@@ -111,6 +111,6 @@ describe('ToolsStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.tools()).toEqual([]);
   });
 });

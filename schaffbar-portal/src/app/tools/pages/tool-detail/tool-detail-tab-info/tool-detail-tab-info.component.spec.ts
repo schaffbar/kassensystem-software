@@ -55,7 +55,7 @@ describe('ToolDetailTabInfoComponent', () => {
         provideZonelessChangeDetection(),
         provideTranslateService(),
         { provide: ToolDetailStore, useValue: detailsStoreMock },
-        { provide: ToolsStore, useValue: { entities: signal([tool, otherTool]) } },
+        { provide: ToolsStore, useValue: { tools: signal([tool, otherTool]) } },
       ],
     }).compileComponents();
 

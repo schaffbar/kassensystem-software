@@ -73,7 +73,7 @@ describe('NewUserFormComponent', () => {
   });
 
   it('should show required errors and not close when saving an empty form', async () => {
-    await click('users.dialogs.addNewUser.actions.confirm');
+    await click('shared.actions.save');
 
     for (const label of ['firstName', 'lastName', 'dateOfBirth', 'email', 'addressLine1', 'postalCode', 'city']) {
       expect(await errors(label)).toEqual(['shared.errors.required']);
@@ -86,7 +86,7 @@ describe('NewUserFormComponent', () => {
     await setValue('email', 'max-example.com');
     await setValue('postalCode', '123');
 
-    await click('users.dialogs.addNewUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(await errors('email')).toEqual(['shared.errors.email']);
     expect(await errors('postalCode')).toEqual(['shared.errors.minLength']);
@@ -97,7 +97,7 @@ describe('NewUserFormComponent', () => {
     await fillRequiredFields();
     await (await loader.getHarness(MatCheckboxHarness)).check();
 
-    await click('users.dialogs.addNewUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
       firstName: 'Max',
@@ -115,7 +115,7 @@ describe('NewUserFormComponent', () => {
   });
 
   it('should only close the dialog on cancel without saving', async () => {
-    await click('users.dialogs.addNewUser.actions.cancel');
+    await click('shared.actions.cancel');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(undefined);
   });

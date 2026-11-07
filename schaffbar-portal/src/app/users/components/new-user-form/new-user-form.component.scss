@@ -1,13 +1,3 @@
-.new-user-form {
-  min-width: 300px;
-  max-width: 800px;
-  width: 100%;
-}
-
-.half-width {
-  width: calc(50% - 10px);
-}
-
 // the <form> wraps mat-dialog-content and mat-dialog-actions; without display: contents it would break the dialog
 // layout (scrollable content, actions at the bottom)
 form {

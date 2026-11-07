@@ -52,7 +52,7 @@ describe('UsersStore', () => {
   it('should load all users on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(users.map(toUser));
+    expect(store.users()).toEqual(users.map(toUser));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -79,7 +79,7 @@ describe('UsersStore', () => {
 
     expectLoad().flush([...users, customerFixture({ id: 'user-2' })]);
     await settle();
-    expect(store.entities()).toHaveLength(2);
+    expect(store.users()).toHaveLength(2);
   });
 
   it('should reload the users after deleting one', async () => {
@@ -92,7 +92,7 @@ describe('UsersStore', () => {
 
     expectLoad().flush([]);
     await settle();
-    expect(store.entities()).toEqual([]);
+    expect(store.users()).toEqual([]);
   });
 
   it('should expose a load error for a response that does not match the schema', async () => {
@@ -103,7 +103,7 @@ describe('UsersStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.users()).toEqual([]);
   });
 
   it('should expose a load error', async () => {
@@ -112,6 +112,6 @@ describe('UsersStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.users()).toEqual([]);
   });
 });

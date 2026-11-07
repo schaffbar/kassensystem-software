@@ -48,7 +48,7 @@ describe('ToolListComponent', () => {
   let fixture: ComponentFixture<ToolListComponent>;
   let loader: HarnessLoader;
   let storeMock: {
-    entities: WritableSignal<Tool[]>;
+    tools: WritableSignal<Tool[]>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     reloadTools: Mock;
@@ -60,7 +60,7 @@ describe('ToolListComponent', () => {
 
   beforeEach(async () => {
     storeMock = {
-      entities: signal(tools),
+      tools: signal(tools),
       isLoading: signal(false),
       hasLoadError: signal(false),
       reloadTools: vi.fn(),
@@ -137,9 +137,16 @@ describe('ToolListComponent', () => {
 
       expect(openDialog).toHaveBeenCalledExactlyOnceWith(
         NewToolFormComponent,
-        expect.objectContaining({ data: { existingTools: storeMock.entities }, disableClose: true }),
+        expect.objectContaining({ data: { existingTools: storeMock.tools }, disableClose: true }),
       );
       expect(storeMock.createTool).toHaveBeenCalledExactlyOnceWith(command);
+    });
+
+    it('should disable adding while a tool is being created', async () => {
+      storeMock.createTool.isPending.set(true);
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.tool-list-header__actions button').disabled).toBe(true);
     });
 
     it('should not create a tool when the form is cancelled', () => {

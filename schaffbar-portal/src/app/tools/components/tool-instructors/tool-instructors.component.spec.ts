@@ -8,8 +8,10 @@ import { MatButtonHarness } from '@angular/material/button/testing';
 import { MatCheckboxHarness } from '@angular/material/checkbox/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ToolInstructorsComponent, UserOptionViewModel } from './tool-instructors.component';
 
 describe('ToolInstructorsComponent', () => {
@@ -26,11 +28,17 @@ describe('ToolInstructorsComponent', () => {
   let loader: HarnessLoader;
   let added: Mock;
   let removed: Mock;
+  let openConfirmActionDialog: Mock;
 
   beforeEach(async () => {
+    openConfirmActionDialog = vi.fn();
     await TestBed.configureTestingModule({
       imports: [ToolInstructorsComponent],
-      providers: [provideZonelessChangeDetection(), provideTranslateService()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        { provide: ConfirmActionDialogService, useValue: { open: openConfirmActionDialog } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolInstructorsComponent);
@@ -81,7 +89,8 @@ describe('ToolInstructorsComponent', () => {
     expect(added).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-4'] });
   });
 
-  it('should emit the remove command with the checked instructors', async () => {
+  async function removeErika(confirmed: boolean): Promise<MatButtonHarness> {
+    openConfirmActionDialog.mockReturnValue(of(confirmed));
     const removeButton = await loader.getHarness(
       MatButtonHarness.with({ text: /tools.pages.toolDetails.instructors.remove$/ }),
     );
@@ -89,7 +98,26 @@ describe('ToolInstructorsComponent', () => {
 
     await (await loader.getHarness(MatCheckboxHarness.with({ label: 'Erika Musterfrau' }))).check();
     await removeButton.click();
+    return removeButton;
+  }
 
+  it('should emit the remove command with the checked instructors after a destructive confirmation', async () => {
+    await removeErika(true);
+
+    expect(openConfirmActionDialog).toHaveBeenCalledExactlyOnceWith({
+      title: 'tools.dialogs.removeInstructors.title',
+      message: 'tools.dialogs.removeInstructors.message',
+      entity: 'Erika Musterfrau',
+      confirmLabel: 'tools.dialogs.removeInstructors.confirm',
+      destructive: true,
+    });
     expect(removed).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-2'] });
+  });
+
+  it('should keep the selection and emit nothing when the confirmation is cancelled', async () => {
+    const removeButton = await removeErika(false);
+
+    expect(removed).not.toHaveBeenCalled();
+    expect(await removeButton.isDisabled()).toBe(false);
   });
 });

@@ -54,7 +54,7 @@ describe('RfidTagsStore', () => {
   it('should load all entries on first use', async () => {
     await load();
 
-    expect(store.entities()).toEqual(entities.map(toRfidTag));
+    expect(store.rfidTags()).toEqual(entities.map(toRfidTag));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -66,7 +66,7 @@ describe('RfidTagsStore', () => {
     expectLoad().flush([]);
     await settle();
 
-    expect(store.entities()).toEqual([]);
+    expect(store.rfidTags()).toEqual([]);
   });
 
   it('should reload the entries after deleting one', async () => {
@@ -80,7 +80,7 @@ describe('RfidTagsStore', () => {
 
     expectLoad().flush([entities[1]]);
     await settle();
-    expect(store.entities()).toEqual([toRfidTag(entities[1])]);
+    expect(store.rfidTags()).toEqual([toRfidTag(entities[1])]);
     expect(store.deleteRfidTag.isPending()).toBe(false);
   });
 
@@ -92,7 +92,7 @@ describe('RfidTagsStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.rfidTags()).toEqual([]);
   });
 
   it('should expose a load error', async () => {
@@ -101,6 +101,6 @@ describe('RfidTagsStore', () => {
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
-    expect(store.entities()).toEqual([]);
+    expect(store.rfidTags()).toEqual([]);
   });
 });

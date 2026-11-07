@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
+import { SNACKBAR_DURATION_MS } from '../../../shared/snack-bar/snack-bar-constants';
 import {
   ChangeRfidReaderTypeDialogData,
   ChangeRfidReaderTypeFormComponent,
@@ -63,7 +64,7 @@ export class RfidReaderDetailComponent {
           this.snackBar.open(
             this.translate.instant('rfidReaders.dialogs.changeRfidReaderType.errors.switchBoxHasAssignedTool'),
             this.translate.instant('shared.actions.close'),
-            { duration: 6000 },
+            { duration: SNACKBAR_DURATION_MS },
           );
         }
       });

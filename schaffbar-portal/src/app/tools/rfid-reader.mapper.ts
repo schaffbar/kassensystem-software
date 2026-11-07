@@ -7,6 +7,7 @@ import { RfidReader } from './rfid-reader.model';
 export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
   return {
     id: apiModel.id,
+    macAddress: apiModel.macAddress,
     name: apiModel.name,
     type: apiModel.type,
   };

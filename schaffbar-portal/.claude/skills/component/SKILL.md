@@ -91,7 +91,7 @@ Rules:
 - A form dialog's ViewModel is its `<Name>DialogData` (same rules, skill `dialog`), e.g.
   `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
   Data the dialog has to follow while it is open comes as a `Signal` of the ViewModel – the page passes the store
-  signal itself (`NewToolDialogData { existingTools: Signal<ExistingToolViewModel[]> }`, `this.store.entities`).
+  signal itself (`NewToolDialogData { existingTools: Signal<ExistingToolViewModel[]> }`, `this.store.tools`).
 - Outputs: a feature component keeps emitting the **commands** of its feature (CLAUDE.md "Commands"). A component in
   `shared/` imports no feature (ESLint), so its outputs emit `void` or a result type of its own (skill `dialog`).
   A feature component needed by a second feature moves to `shared/components/` and switches its outputs then.
@@ -181,7 +181,7 @@ function toToolCertificationRowViewModels(
 
 Where the shape fits, the feature model goes in directly – in `tool-detail-tab-info` the `Tool` has all fields of
 `ToolDetailInfoViewModel`, the tools all fields of `ExistingToolViewModel`:
-`<schbar-tool-detail-info [toolDetailInfo]="tool" [existingTools]="toolsStore.entities()" … />`.
+`<schbar-tool-detail-info [toolDetailInfo]="tool" [existingTools]="toolsStore.tools()" … />`.
 
 Rules:
 

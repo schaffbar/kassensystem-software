@@ -19,7 +19,7 @@ export const ToolsStore = signalStore(
   }),
   withComputed(({ _toolsResource }) => ({
     // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
-    entities: computed(() => (_toolsResource.hasValue() ? _toolsResource.value().map(toTool) : [])),
+    tools: computed(() => (_toolsResource.hasValue() ? _toolsResource.value().map(toTool) : [])),
     isLoading: computed(() => _toolsResource.isLoading()),
     hasLoadError: computed(() => !!_toolsResource.error()),
   })),

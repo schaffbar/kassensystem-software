@@ -42,9 +42,9 @@ export class RfidReaderListComponent {
   private readonly sort = viewChild(MatSort);
 
   protected readonly displayedColumns = ['macAddress', 'name', 'type', 'actions'];
-  protected readonly rfidReadersCount = computed(() => this.store.entities().length);
+  protected readonly rfidReadersCount = computed(() => this.store.rfidReaders().length);
   protected readonly dataSource = computed(() => {
-    const result = new MatTableDataSource<RfidReader>(this.store.entities());
+    const result = new MatTableDataSource<RfidReader>(this.store.rfidReaders());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
     return result;
@@ -67,11 +67,6 @@ export class RfidReaderListComponent {
 
   protected deleteRfidReader(event: Event, rfidReader: RfidReader): void {
     event.stopPropagation();
-
-    if (!rfidReader || !rfidReader.id) {
-      console.warn('No RFID reader selected for deletion');
-      return;
-    }
 
     this.confirmDeleteDialog
       .open({

@@ -59,15 +59,13 @@ export class ToolListComponent {
     'actions',
   ];
 
-  protected readonly toolsCount = computed(() => this.store.entities().length);
+  protected readonly toolsCount = computed(() => this.store.tools().length);
   protected readonly dataSource = computed(() => {
-    const result = new MatTableDataSource<Tool>(this.store.entities());
+    const result = new MatTableDataSource<Tool>(this.store.tools());
     result.sort = this.sort() ?? null;
     result.paginator = this.paginator() ?? null;
     return result;
   });
-
-  protected readonly isCreatingTool = this.store.createTool.isPending;
 
   constructor() {
     this.store.reloadTools();
@@ -88,7 +86,7 @@ export class ToolListComponent {
     const dialogRef = this.dialog.open<NewToolFormComponent, NewToolDialogData, CreateToolCommand>(
       NewToolFormComponent,
       {
-        data: { existingTools: this.store.entities },
+        data: { existingTools: this.store.tools },
         minWidth: DIALOG_WIDTH.medium,
         disableClose: true,
       },
@@ -103,11 +101,6 @@ export class ToolListComponent {
 
   protected deleteTool(event: Event, tool: Tool): void {
     event.stopPropagation();
-
-    if (!tool || !tool.id) {
-      console.warn('No tool selected for deletion');
-      return;
-    }
 
     this.confirmDeleteDialog
       .open({

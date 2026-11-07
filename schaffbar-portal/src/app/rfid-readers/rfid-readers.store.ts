@@ -19,7 +19,9 @@ export const RfidReadersStore = signalStore(
   }),
   withComputed(({ _rfidReadersResource }) => ({
     // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
-    entities: computed(() => (_rfidReadersResource.hasValue() ? _rfidReadersResource.value().map(toRfidReader) : [])),
+    rfidReaders: computed(() =>
+      _rfidReadersResource.hasValue() ? _rfidReadersResource.value().map(toRfidReader) : [],
+    ),
     isLoading: computed(() => _rfidReadersResource.isLoading()),
     hasLoadError: computed(() => !!_rfidReadersResource.error()),
   })),

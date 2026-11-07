@@ -6,6 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { USER_DETAIL_TAB } from '../../../app.routes';
 import { DIALOG_WIDTH } from '../../../shared/dialogs/dialog-constants';
 import {
   UpdateUserDialogData,
@@ -40,7 +41,9 @@ export class UserDetailComponent {
   readonly id = input.required<string>();
   readonly tab = input<string>();
 
-  protected readonly selectedTabIndex = linkedSignal<number>(() => (this.tab() === 'open-session' ? 1 : 0));
+  protected readonly selectedTabIndex = linkedSignal<number>(() =>
+    this.tab() === USER_DETAIL_TAB.OPEN_SESSION ? 1 : 0,
+  );
 
   constructor() {
     this.detailsStore.setUserId(this.id);

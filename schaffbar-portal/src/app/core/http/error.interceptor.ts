@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { catchError, throwError } from 'rxjs';
 
-const SNACKBAR_DURATION_MS = 6000;
+import { SNACKBAR_DURATION_MS } from '../../shared/snack-bar/snack-bar-constants';
 
 /**
  * Shows a snackbar for every failed HTTP request and passes the error on, so stores and resources still get it.

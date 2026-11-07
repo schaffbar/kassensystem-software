@@ -29,7 +29,7 @@ export class ToolDetailTabConfigurationComponent {
   protected readonly rfidReaderOptions = computed(() =>
     toRfidReaderOptionViewModels(
       this.detailsStore.assignableRfidReaders(),
-      this.toolsStore.entities(),
+      this.toolsStore.tools(),
       this.detailsStore.tool()?.id,
     ),
   );
@@ -67,7 +67,7 @@ function toRfidReaderOptionViewModels(
   );
   return rfidReaders.map((reader) => ({
     id: reader.id,
-    name: reader.name,
+    label: reader.name ?? reader.macAddress,
     isAssignedToOtherTool: assignedToOtherTools.has(reader.id),
   }));
 }

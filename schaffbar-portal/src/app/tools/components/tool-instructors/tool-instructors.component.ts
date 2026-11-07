@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { MatListModule } from '@angular/material/list';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { AddToolInstructorsCommand, RemoveToolInstructorsCommand } from '../../tool.model';
 
 // an instructor or a user who can become one
@@ -37,6 +38,8 @@ export interface UserOptionViewModel {
   ],
 })
 export class ToolInstructorsComponent {
+  private readonly confirmActionDialog = inject(ConfirmActionDialogService);
+
   readonly toolId = input.required<string>();
   readonly instructors = input.required<UserOptionViewModel[]>();
   readonly candidates = input.required<UserOptionViewModel[]>();
@@ -101,10 +104,26 @@ export class ToolInstructorsComponent {
 
   protected removeInstructors(): void {
     const ids = Array.from(this.selectedInstructorIdsToRemove());
-    if (ids.length > 0) {
-      const command: RemoveToolInstructorsCommand = { toolId: this.toolId(), instructorIds: ids };
-      this.instructorsRemoved.emit(command);
-      this.selectedInstructorIdsToRemove.set(new Set());
-    }
+    if (ids.length === 0) return;
+
+    const names = this.instructors()
+      .filter((instructor) => ids.includes(instructor.id))
+      .map((instructor) => `${instructor.firstName} ${instructor.lastName}`)
+      .join(', ');
+    this.confirmActionDialog
+      .open({
+        title: 'tools.dialogs.removeInstructors.title',
+        message: 'tools.dialogs.removeInstructors.message',
+        entity: names,
+        confirmLabel: 'tools.dialogs.removeInstructors.confirm',
+        destructive: true,
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: RemoveToolInstructorsCommand = { toolId: this.toolId(), instructorIds: ids };
+          this.instructorsRemoved.emit(command);
+          this.selectedInstructorIdsToRemove.set(new Set());
+        }
+      });
   }
 }

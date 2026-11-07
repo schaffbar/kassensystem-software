@@ -4,13 +4,13 @@
 <mat-chip-set>
   @switch (currentStatus) {
     @case (Status.Active) {
-      <mat-chip class="active">{{ 'users.tables.toolCertifications.statuses.ACTIVE' | translate }}</mat-chip>
+      <mat-chip class="active">{{ 'shared.certificationStatuses.ACTIVE' | translate }}</mat-chip>
     }
     @case (Status.Paused) {
-      <mat-chip class="paused">{{ 'users.tables.toolCertifications.statuses.PAUSED' | translate }}</mat-chip>
+      <mat-chip class="paused">{{ 'shared.certificationStatuses.PAUSED' | translate }}</mat-chip>
     }
     @case (Status.Revoked) {
-      <mat-chip class="revoked">{{ 'users.tables.toolCertifications.statuses.REVOKED' | translate }}</mat-chip>
+      <mat-chip class="revoked">{{ 'shared.certificationStatuses.REVOKED' | translate }}</mat-chip>
     }
     @default never;
   }

@@ -6,7 +6,9 @@
     </button>
   </div>
   <div class="user-list-header__actions">
-    <button matButton="filled" (click)="createUser()">{{ 'users.actions.addUser' | translate }}</button>
+    <button matButton="filled" [disabled]="store.createUser.isPending()" (click)="createUser()">
+      {{ 'users.actions.addUser' | translate }}
+    </button>
   </div>
 </div>
 
@@ -61,7 +63,11 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row (click)="openUserDetail(row)" *matRowDef="let row; columns: displayedColumns"></tr>
+    <tr
+      mat-row
+      class="clickable-row"
+      (click)="openUserDetail(row)"
+      *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
 
   <mat-paginator

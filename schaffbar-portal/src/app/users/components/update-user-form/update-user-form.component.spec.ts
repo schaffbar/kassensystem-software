@@ -75,7 +75,7 @@ describe('UpdateUserFormComponent', () => {
   it('should accept a typed German date', async () => {
     await (await loader.getHarness(MatDatepickerInputHarness)).setValue('15.3.1985');
 
-    await click('users.dialogs.editUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(dialogRef.close).toHaveBeenCalledOnce();
     expect(dialogRef.close.mock.calls[0][0].dateOfBirth).toEqual(new Date(1985, 2, 15));
@@ -84,7 +84,7 @@ describe('UpdateUserFormComponent', () => {
   it('should reject a date of birth outside the allowed range (e.g. two-digit year)', async () => {
     await (await loader.getHarness(MatDatepickerInputHarness)).setValue('31.01.90');
 
-    await click('users.dialogs.editUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(await dateOfBirthErrors()).toEqual(['shared.errors.invalid']);
     expect(dialogRef.close).not.toHaveBeenCalled();
@@ -93,7 +93,7 @@ describe('UpdateUserFormComponent', () => {
   it('should require a date of birth', async () => {
     await (await loader.getHarness(MatDatepickerInputHarness)).setValue('');
 
-    await click('users.dialogs.editUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(await dateOfBirthErrors()).toEqual(['shared.errors.required']);
     expect(dialogRef.close).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe('UpdateUserFormComponent', () => {
     await (await input('firstName')).setValue('Moritz');
     await (await loader.getHarness(MatCheckboxHarness)).check();
 
-    await click('users.dialogs.editUser.actions.confirm');
+    await click('shared.actions.save');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
       userId: 'user-1',
@@ -118,7 +118,7 @@ describe('UpdateUserFormComponent', () => {
     await (await input('firstName')).setValue('');
     await (await input('lastName')).setValue('');
 
-    await click('users.dialogs.editUser.actions.confirm');
+    await click('shared.actions.save');
 
     for (const label of ['firstName', 'lastName']) {
       const field = await loader.getHarness(
@@ -130,7 +130,7 @@ describe('UpdateUserFormComponent', () => {
   });
 
   it('should only close the dialog on cancel without saving', async () => {
-    await click('users.dialogs.editUser.actions.cancel');
+    await click('shared.actions.cancel');
 
     expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(undefined);
   });

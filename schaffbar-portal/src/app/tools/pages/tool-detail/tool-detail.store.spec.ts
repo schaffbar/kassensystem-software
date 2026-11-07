@@ -127,7 +127,7 @@ describe('ToolDetailStore', () => {
     expect(store.toolCertifications()).toEqual([]);
     // only the switch box – no other type, no reader without type
     expect(store.assignableRfidReaders()).toEqual([
-      { id: 'reader-1', name: 'Reader 1', type: RfidReaderType.SwitchBox },
+      { id: 'reader-1', macAddress: 'AA:BB', name: 'Reader 1', type: RfidReaderType.SwitchBox },
     ]);
     expect(store.users()).toEqual([{ id: 'user-1', firstName: 'Max', lastName: 'Mustermann' }]);
   });

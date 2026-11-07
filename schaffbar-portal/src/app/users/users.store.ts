@@ -19,7 +19,7 @@ export const UsersStore = signalStore(
   }),
   withComputed(({ _usersResource }) => ({
     // hasValue() stays true while reloading, so the list keeps showing the entries instead of flickering
-    entities: computed(() => (_usersResource.hasValue() ? _usersResource.value().map(toUser) : [])),
+    users: computed(() => (_usersResource.hasValue() ? _usersResource.value().map(toUser) : [])),
     isLoading: computed(() => _usersResource.isLoading()),
     hasLoadError: computed(() => !!_usersResource.error()),
   })),
