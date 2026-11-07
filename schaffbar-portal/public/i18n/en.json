@@ -58,7 +58,14 @@
     "users": "Users",
     "tools": "Tools",
     "rfidTags": "RFID Tags",
-    "rfidReaders": "RFID Readers"
+    "rfidReaders": "RFID Readers",
+    "label": "Main navigation",
+    "subtitle": "Workshop portal",
+    "openMenu": "Open menu",
+    "groups": {
+      "operations": "Operations",
+      "hardware": "Hardware"
+    }
   },
   "dashboard": {
     "title": "Dashboard",

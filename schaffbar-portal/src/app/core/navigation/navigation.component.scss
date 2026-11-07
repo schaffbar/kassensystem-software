@@ -1,21 +1,146 @@
-.sidenav-container {
+@use '@angular/material' as mat;
+
+.shell {
   height: 100%;
+
+  @include mat.sidenav-overrides(
+    (
+      container-background-color: var(--nav),
+      container-text-color: var(--nav-text),
+      container-shape: 0,
+      container-width: 248px,
+      container-divider-color: transparent,
+      content-background-color: var(--bg),
+      content-text-color: var(--text),
+    )
+  );
 }
 
-.sidenav {
-  width: 200px;
+// ----------------------------------------------------------------------------
+// sidebar
+
+.sidebar-nav {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 100%;
+  padding: 20px 16px;
 }
 
-.sidenav .mat-toolbar {
-  background: inherit;
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-decoration: none;
 }
 
-.mat-toolbar.mat-primary {
+.brand-logo {
+  display: block;
+  width: 180px;
+  height: auto;
+}
+
+.brand-subtitle,
+.nav-group-title {
+  color: var(--nav-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-subtitle {
+  padding-left: 6px;
+  letter-spacing: 0.1em;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-group-title {
+  padding: 0 12px 6px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--nav-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: var(--nav-2);
+    color: var(--nav-text-active);
+  }
+
+  &.active {
+    background: rgb(from var(--accent) r g b / 14%);
+    color: var(--nav-text-active);
+
+    mat-icon {
+      color: var(--accent);
+    }
+  }
+}
+
+.brand,
+.nav-link {
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// content
+
+.mobile-bar {
   position: sticky;
   top: 0;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px 4px 4px;
+  background: var(--nav);
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--nav-text-active),
+    )
+  );
+}
+
+.mobile-logo {
+  display: block;
+  width: 120px;
+  height: auto;
 }
 
 .content {
-  padding: 20px;
+  display: block;
+  padding: 28px 32px 48px;
+}
+
+@media (max-width: 599.98px) {
+  .content {
+    padding: 20px 16px 32px;
+  }
 }

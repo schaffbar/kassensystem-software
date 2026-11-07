@@ -58,7 +58,14 @@
     "users": "Benutzer",
     "tools": "Werkzeuge",
     "rfidTags": "RFID-Tags",
-    "rfidReaders": "RFID-Lesegeräte"
+    "rfidReaders": "RFID-Lesegeräte",
+    "label": "Hauptnavigation",
+    "subtitle": "Werkstatt-Portal",
+    "openMenu": "Menü öffnen",
+    "groups": {
+      "operations": "Betrieb",
+      "hardware": "Hardware"
+    }
   },
   "dashboard": {
     "title": "Übersicht",

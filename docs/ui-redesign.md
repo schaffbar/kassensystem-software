@@ -459,13 +459,13 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
 Branch `ui-redesign`. Dieselben Seiten, Daten, Aktionen und Dialoge im neuen Design – kein Backend, keine neuen
 Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die Teile, für die Daten fehlen.
 
-1. [ ] **Theme:** `mat.theme()` mit eigenen Paletten (`src/_theme-colors.scss`, erzeugt mit
+1. [x] **Theme:** `mat.theme()` mit eigenen Paletten (`src/_theme-colors.scss`, erzeugt mit
    `ng generate @angular/material:theme-color`) statt `azure-blue.css`. Inter und JetBrains Mono in `index.html`.
    Tokens als CSS-Variablen mit `light-dark()` – Dunkel-Modus damit vorbereitet, aber noch `color-scheme: light`.
    Radien (Button/Input 10, Karte 14, Dialog 16) statt der 5px-Überschreibung, Primär-Button Neon-Grün mit Navy-Text,
    `danger-button` und `.readonly-field` auf Tokens.
-2. [ ] **Layout:** Navy-Seitenleiste mit Logo und Gruppen Betrieb/Hardware, heller Inhaltsbereich (`core/navigation`).
-   Mobil bleibt vorerst das Menü zum Aufklappen.
+2. [x] **Layout:** Navy-Seitenleiste mit Logo und Gruppen Betrieb/Hardware, heller Inhaltsbereich (`core/navigation`).
+   Mobil eine Navy-Leiste mit Menü-Button und Logo; das Menü schließt sich nach der Auswahl.
 3. [ ] **Gemeinsame Bausteine** – nur, was die vorhandenen Seiten brauchen:
    - `StatusBadge` (Icon + Text) ersetzt `certification-status-chip` und `certification-requirement-dot`; Texte über die
      vorhandenen Key-Pipes.
@@ -485,6 +485,8 @@ Jede ist eine eigene Aufgabe nach Phase 1.
 | --- | --- |
 | Dunkel-Modus einschalten (Umschalter) und alle Seiten prüfen | nein |
 | Tab-Leiste unten auf dem Handy | nein |
+| Sprachumschalter DE/EN in der Seitenleiste | nein |
+| Statusbox „Werkstatt geöffnet“ (Personen anwesend, Werkzeuge aktiv) und Anzahl nicht zugeordneter Lesegeräte in der Seitenleiste | ja |
 | Live-Aktualisierung per Polling statt Refresh-Button (`interval` über `toSignal` / `rxMethod`, siehe „Subscriptions“ in CLAUDE.md); später SSE/WebSocket | nein |
 | Bestätigungsdialoge: Titel als Frage, Folgen erklären, Häkchen oder Namen eintippen, gesperrter Zustand mit nächstem Schritt | teils (Sperren) |
 | `UserMultiSelect` für Einweisungen und Einweiser (siehe unten) | nein |

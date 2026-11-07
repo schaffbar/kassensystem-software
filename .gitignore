@@ -1,2 +1,5 @@
 ### Environment Variables
 .env
+
+# Playwright MCP (screenshots, snapshots, console logs)
+.playwright-mcp/

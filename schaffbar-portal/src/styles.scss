@@ -28,6 +28,14 @@
   --warn: light-dark(#9a5b00, #ffb039);
   --danger: light-dark(#c23a12, #ff7a52);
   --on-danger: light-dark(#ffffff, var(--navy-950));
+  --focus: #2a8ffb;
+
+  // sidebar: dark in both modes
+  --nav: light-dark(var(--navy-950), #040b1a);
+  --nav-2: var(--navy-900);
+  --nav-text: #bfc2c9;
+  --nav-text-active: #fcfcfc;
+  --nav-muted: #8a93a3;
 
   --font-mono: 'JetBrains Mono', monospace;
 }
@@ -81,7 +89,7 @@ html {
   // visible focus ring for keyboard users
   @include mat.strong-focus-indicators(
     (
-      border-color: var(--info),
+      border-color: var(--focus),
       border-radius: 10px,
     )
   );
