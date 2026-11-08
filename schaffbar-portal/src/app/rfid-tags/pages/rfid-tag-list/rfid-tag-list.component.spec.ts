@@ -32,7 +32,7 @@ describe('RfidTagListComponent', () => {
   let fixture: ComponentFixture<RfidTagListComponent>;
   let storeMock: {
     rfidTags: WritableSignal<RfidTag[]>;
-    waitingUsers: WritableSignal<WaitingUser[]>;
+    waitingUser: WritableSignal<WaitingUser | null>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     reloadRfidTags: Mock;
@@ -45,7 +45,7 @@ describe('RfidTagListComponent', () => {
   beforeEach(async () => {
     storeMock = {
       rfidTags: signal(rfidTags),
-      waitingUsers: signal([]),
+      waitingUser: signal(null),
       isLoading: signal(false),
       hasLoadError: signal(false),
       reloadRfidTags: vi.fn(),
@@ -165,16 +165,23 @@ describe('RfidTagListComponent', () => {
     expect(query('schbar-filter-chips')).toBeNull();
   });
 
-  it('should list the people waiting for a tag', async () => {
-    expect(query('.waiting-card')).toBeNull();
+  it('should show the person waiting for a tag above the list', async () => {
+    expect(query('.waiting-banner')).toBeNull();
 
-    storeMock.waitingUsers.set([
-      { userId: 'user-2', userName: 'Max Schulz', assignmentType: RfidTagAssignmentType.Temporary },
-    ]);
+    storeMock.waitingUser.set({
+      userId: 'user-2',
+      userName: 'Max Schulz',
+      assignmentType: RfidTagAssignmentType.Temporary,
+    });
     await fixture.whenStable();
 
-    expect(texts('.waiting-card li')).toEqual(['Max Schulz rfidTags.pages.rfidTagList.waiting.entry']);
-    expect(query('.waiting-card a')?.getAttribute('href')).toBe('/users/user-2');
+    expect(texts('.waiting-banner p')).toEqual([
+      'Max Schulz rfidTags.pages.rfidTagList.waiting.entry rfidTags.pages.rfidTagList.waiting.hint',
+    ]);
+    expect(query('.waiting-banner a')?.getAttribute('href')).toBe('/users/user-2');
+    // before the list and the side cards
+    const banner = query('.waiting-banner');
+    expect(banner?.compareDocumentPosition(query('.layout') as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   describe('row menu', () => {

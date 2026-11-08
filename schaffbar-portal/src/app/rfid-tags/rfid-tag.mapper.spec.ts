@@ -4,7 +4,7 @@ import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
 import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { RfidTagAssignmentStatus } from '../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
-import { toRfidTags, toUnassignRfidTagRequest, toWaitingUsers } from './rfid-tag.mapper';
+import { toRfidTags, toUnassignRfidTagRequest, toWaitingUser } from './rfid-tag.mapper';
 
 describe('rfid-tag.mapper', () => {
   const anna = customerFixture({ id: 'user-1', firstName: 'Anna', lastName: 'Becker' });
@@ -59,11 +59,17 @@ describe('rfid-tag.mapper', () => {
     });
   });
 
-  describe('toWaitingUsers', () => {
-    it('should return the people waiting for a tag with their name', () => {
-      expect(toWaitingUsers([assigned, waiting], [anna, max])).toEqual([
-        { userId: 'user-2', userName: 'Max Schulz', assignmentType: RfidTagAssignmentType.Temporary },
-      ]);
+  describe('toWaitingUser', () => {
+    it('should return the person waiting for a tag with the name', () => {
+      expect(toWaitingUser([assigned, waiting], [anna, max])).toEqual({
+        userId: 'user-2',
+        userName: 'Max Schulz',
+        assignmentType: RfidTagAssignmentType.Temporary,
+      });
+    });
+
+    it('should return null when nobody waits', () => {
+      expect(toWaitingUser([assigned], [anna, max])).toBeNull();
     });
   });
 

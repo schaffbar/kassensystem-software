@@ -431,9 +431,9 @@
           "step3": "Assign it to a person in the user profile."
         },
         "waiting": {
-          "title": "Waiting for a tag ({{count}})",
           "entry": "is waiting for a tag ({{type}}).",
-          "hint": "Hold a free tag to the \"RFID Tag Assigner\" reader."
+          "hint": "Hold a free tag to the \"RFID Tag Assigner\" reader.",
+          "profile": "Open profile →"
         },
         "legend": {
           "title": "Fixed or loan tag?",

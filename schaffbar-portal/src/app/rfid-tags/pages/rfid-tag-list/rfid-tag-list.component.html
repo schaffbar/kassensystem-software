@@ -15,6 +15,24 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
+<!-- an open task at the counter, so it comes first -->
+@if (store.waitingUser(); as waitingUser) {
+  <section class="waiting-banner" role="status">
+    <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+    <p>
+      <strong>{{ waitingUser.userName }}</strong>
+      {{
+        'rfidTags.pages.rfidTagList.waiting.entry'
+          | translate: { type: (waitingUser.assignmentType | rfidTagAssignmentTypeKey | translate) }
+      }}
+      {{ 'rfidTags.pages.rfidTagList.waiting.hint' | translate }}
+    </p>
+    <a [routerLink]="[usersLink, waitingUser.userId]">
+      {{ 'rfidTags.pages.rfidTagList.waiting.profile' | translate }}
+    </a>
+  </section>
+}
+
 <div class="layout">
   <div class="main">
     @if (isEmpty()) {
@@ -154,27 +172,6 @@
         <li>{{ 'rfidTags.pages.rfidTagList.register.step3' | translate }}</li>
       </ol>
     </section>
-
-    @if (store.waitingUsers().length > 0) {
-      <section class="waiting-card">
-        <h2>
-          <mat-icon aria-hidden="true">hourglass_top</mat-icon>
-          {{ 'rfidTags.pages.rfidTagList.waiting.title' | translate: { count: store.waitingUsers().length } }}
-        </h2>
-        <ul>
-          @for (waitingUser of store.waitingUsers(); track waitingUser.userId) {
-            <li>
-              <a [routerLink]="[usersLink, waitingUser.userId]">{{ waitingUser.userName }}</a>
-              {{
-                'rfidTags.pages.rfidTagList.waiting.entry'
-                  | translate: { type: (waitingUser.assignmentType | rfidTagAssignmentTypeKey | translate) }
-              }}
-            </li>
-          }
-        </ul>
-        <p>{{ 'rfidTags.pages.rfidTagList.waiting.hint' | translate }}</p>
-      </section>
-    }
 
     <section class="card legend-card">
       <h2>{{ 'rfidTags.pages.rfidTagList.legend.title' | translate }}</h2>

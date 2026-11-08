@@ -1,3 +1,36 @@
+// like the offline hint of the readers: full width above the list
+.waiting-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-bottom: 20px;
+  padding: 14px 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--warn-soft);
+
+  mat-icon {
+    flex: 0 0 auto;
+    color: var(--warn);
+  }
+
+  p {
+    flex: 1 1 360px;
+    margin: 0;
+  }
+
+  a {
+    color: var(--accent-text);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .layout {
   display: flex;
   flex-wrap: wrap;
@@ -56,36 +89,6 @@
   }
 }
 
-.waiting-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--warn-soft);
-
-  h2 {
-    color: var(--warn);
-    font-size: 15px;
-  }
-
-  mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
-  }
-
-  ul {
-    padding-left: 18px;
-  }
-
-  a {
-    color: var(--text);
-    font-weight: 600;
-  }
-}
-
 .legend-card {
   display: flex;
   flex-direction: column;
@@ -102,6 +105,7 @@
 
 .tag-id {
   color: var(--text);
+  white-space: nowrap;
 }
 
 .assignee {

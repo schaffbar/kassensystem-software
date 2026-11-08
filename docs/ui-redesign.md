@@ -497,10 +497,11 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
    - [x] RFID-Tags: Liste wie im Prototyp – Untertitel mit Zählung, Suche (Tag-ID mit/ohne Leerzeichen, Name),
      Filter-Chips (Alle, Zugewiesen, Frei, Deaktiviert), Tag-ID in Vierergruppen, Status als Badge, „Zugewiesen an“
      mit Link zur Person, Fest/Leihtag und Datum (aus `GET /rfid-tag-assignments` + `GET /customers`), ⋯-Menü
-     (Profil, Zuweisung aufheben …, Tag löschen …). Seitenleiste: „Neuen Tag registrieren“ (Anleitung), „Wartet auf
-     Tag“ (wartende Zuweisungen), „Fest oder Leihtag?“. Ohne Backend noch offen: „Rückgabe ausstehend“, Leihtag-
-     Nummer, „Zuletzt gelesen“, Deaktivieren/Reaktivieren, Person vom Tag aus zuweisen, Live-Status des Register-
-     Lesegeräts. Ohne neuen Dialog noch offen: „ID manuell eingeben“ (`POST /rfid-tags` gibt es schon).
+     (Profil, Zuweisung aufheben …, Tag löschen … – nur ohne Zuweisung). Seitenleiste: „Neuen Tag registrieren“
+     (Anleitung), „Fest oder Leihtag?“. Abweichend vom Prototyp steht „Wartet auf Tag“ als Banner über der Liste –
+     eine offene Aufgabe an der Theke, wichtiger als die Anleitung; ohne Anzahl, das Backend erlaubt nur eine Person. Ohne Backend noch offen: „Rückgabe ausstehend“, Leihtag-Nummer, „Zuletzt gelesen“,
+     Deaktivieren/Reaktivieren, Person vom Tag aus zuweisen, Live-Status des Register-Lesegeräts. Ohne neuen Dialog
+     noch offen: „ID manuell eingeben“ (`POST /rfid-tags` gibt es schon).
    - [ ] Werkzeuge
    - [ ] Benutzer
    - [ ] Übersicht

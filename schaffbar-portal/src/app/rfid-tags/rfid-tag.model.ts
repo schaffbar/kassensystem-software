@@ -24,7 +24,8 @@ export interface RfidTagAssignee {
 // ----------------------------------------------------------------------------
 // waiting for a tag
 
-// a person who asked for a tag at the counter and waits until one is placed on the assigner
+// the person who asked for a tag at the counter and waits until one is placed on the assigner – the backend allows
+// only one at a time
 export interface WaitingUser {
   userId: string;
   userName: string;

@@ -11,7 +11,7 @@ import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rf
 import { RfidTagApiModel } from '../shared/api/rfid-tags/rfid-tag.api-model';
 import { RfidTagAssignmentStatus } from '../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
-import { toRfidTags, toWaitingUsers } from './rfid-tag.mapper';
+import { toRfidTags, toWaitingUser } from './rfid-tag.mapper';
 import { RfidTagsStore } from './rfid-tags.store';
 
 describe('RfidTagsStore', () => {
@@ -80,12 +80,12 @@ describe('RfidTagsStore', () => {
     await settle();
   }
 
-  it('should load the tags with their assignments and the waiting people on first use', async () => {
+  it('should load the tags with their assignments and the waiting person on first use', async () => {
     await load();
 
     expect(store.rfidTags()).toEqual(toRfidTags(entities, assignments, users));
     expect(store.rfidTags().map((rfidTag) => rfidTag.state)).toEqual(['assigned', 'deactivated']);
-    expect(store.waitingUsers()).toEqual(toWaitingUsers(assignments, users));
+    expect(store.waitingUser()).toEqual(toWaitingUser(assignments, users));
     expect(store.isLoading()).toBe(false);
   });
 
@@ -100,7 +100,7 @@ describe('RfidTagsStore', () => {
     await settle();
 
     expect(store.rfidTags()).toEqual([]);
-    expect(store.waitingUsers()).toEqual([]);
+    expect(store.waitingUser()).toBeNull();
   });
 
   it('should send only the person when unassigning and reload the assignments', async () => {

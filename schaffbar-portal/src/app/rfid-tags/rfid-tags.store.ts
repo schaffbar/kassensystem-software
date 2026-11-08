@@ -6,7 +6,7 @@ import { CustomersApiService } from '../shared/api/customers/customers.api-servi
 import { RfidTagAssignmentsApiService } from '../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
 import { RfidTagsApiService } from '../shared/api/rfid-tags/rfid-tags.api-service';
 import { mutation } from '../shared/state/mutation';
-import { toRfidTags, toUnassignRfidTagRequest, toWaitingUsers } from './rfid-tag.mapper';
+import { toRfidTags, toUnassignRfidTagRequest, toWaitingUser } from './rfid-tag.mapper';
 import { DeleteRfidTagCommand, UnassignRfidTagCommand } from './rfid-tag.model';
 
 export const RfidTagsStore = signalStore(
@@ -31,7 +31,7 @@ export const RfidTagsStore = signalStore(
       rfidTags: computed(() =>
         _rfidTagsResource.hasValue() ? toRfidTags(_rfidTagsResource.value(), assignments(), users()) : [],
       ),
-      waitingUsers: computed(() => toWaitingUsers(assignments(), users())),
+      waitingUser: computed(() => toWaitingUser(assignments(), users())),
       isLoading: computed(
         () => _rfidTagsResource.isLoading() || _assignmentsResource.isLoading() || _usersResource.isLoading(),
       ),

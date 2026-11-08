@@ -35,15 +35,18 @@ export function toRfidTags(
   });
 }
 
-export function toWaitingUsers(assignments: RfidTagAssignmentApiModel[], customers: CustomerApiModel[]): WaitingUser[] {
-  const userNames = toUserNames(customers);
-  return assignments
-    .filter((assignment) => assignment.status === RfidTagAssignmentStatus.WaitingForAssignment)
-    .map((assignment) => ({
-      userId: assignment.customerId,
-      userName: userNames.get(assignment.customerId) ?? '',
-      assignmentType: assignment.assignmentType,
-    }));
+export function toWaitingUser(
+  assignments: RfidTagAssignmentApiModel[],
+  customers: CustomerApiModel[],
+): WaitingUser | null {
+  const waiting = assignments.find((assignment) => assignment.status === RfidTagAssignmentStatus.WaitingForAssignment);
+  if (!waiting) return null;
+
+  return {
+    userId: waiting.customerId,
+    userName: toUserNames(customers).get(waiting.customerId) ?? '',
+    assignmentType: waiting.assignmentType,
+  };
 }
 
 function toRfidTagAssignee(assignment: RfidTagAssignmentApiModel, userNames: Map<string, string>): RfidTagAssignee {

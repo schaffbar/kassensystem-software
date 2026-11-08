@@ -431,9 +431,9 @@
           "step3": "Zuweisung an eine Person im Benutzerprofil."
         },
         "waiting": {
-          "title": "Wartet auf Tag ({{count}})",
           "entry": "wartet auf einen Tag ({{type}}).",
-          "hint": "Freien Tag an das Lesegerät „RFID-Tag-Zuweiser“ halten."
+          "hint": "Freien Tag an das Lesegerät „RFID-Tag-Zuweiser“ halten.",
+          "profile": "Zum Profil →"
         },
         "legend": {
           "title": "Fest oder Leihtag?",
