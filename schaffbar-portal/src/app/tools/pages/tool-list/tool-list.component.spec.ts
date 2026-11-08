@@ -116,6 +116,17 @@ describe('ToolListComponent', () => {
     expect(storeMock.reloadTools).toHaveBeenCalledOnce();
   });
 
+  it('should count the tools in use and those not set up in the subtitle', async () => {
+    expect(texts('schbar-page-header .subtitle')).toEqual([
+      'tools.pages.toolList.subtitle · tools.pages.toolList.notSetUp',
+    ]);
+
+    storeMock.tools.set([tools[1]]);
+    await fixture.whenStable();
+
+    expect(texts('schbar-page-header .subtitle')).toEqual(['tools.pages.toolList.subtitleOne']);
+  });
+
   describe('cards', () => {
     it('should group the tools by area, sorted by name', () => {
       expect(texts('.section-title')).toEqual(['tools.areas.HOLZ · 2', 'tools.areas.FABLAB · 1']);
@@ -223,6 +234,22 @@ describe('ToolListComponent', () => {
       await clickSegment('area-filter', 4);
 
       expect(texts('.card-name')).toEqual(['Lasercutter']);
+    });
+
+    it('should show only the tools whose hardware is not set up yet', async () => {
+      expect(texts('.not-set-up-filter button')).toEqual(['warning tools.pages.toolList.hardware.notSetUp 2']);
+
+      query('.not-set-up-filter button')?.click();
+      await fixture.whenStable();
+
+      expect(texts('.card-name')).toEqual(['Kreissäge', 'Lasercutter']);
+    });
+
+    it('should leave out the hardware filter when everything is set up', async () => {
+      storeMock.tools.set([tools[1]]);
+      await fixture.whenStable();
+
+      expect(query('.not-set-up-filter')).toBeNull();
     });
 
     it('should search by name', async () => {

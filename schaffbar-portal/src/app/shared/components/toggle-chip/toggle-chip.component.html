@@ -1,0 +1,14 @@
+<button
+  type="button"
+  class="chip"
+  [class.selected]="pressed()"
+  [attr.aria-pressed]="pressed()"
+  (click)="pressed.set(!pressed())">
+  @if (icon(); as currentIcon) {
+    <mat-icon aria-hidden="true">{{ currentIcon }}</mat-icon>
+  }
+  {{ label() }}
+  @if (count() !== null) {
+    <span class="chip-count">{{ count() }}</span>
+  }
+</button>

@@ -6,6 +6,6 @@
     [attr.aria-pressed]="chip.id === selected()"
     (click)="selected.set(chip.id)">
     {{ chip.label }}
-    <span class="count">{{ chip.count }}</span>
+    <span class="chip-count">{{ chip.count }}</span>
   </button>
 }

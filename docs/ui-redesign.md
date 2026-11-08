@@ -507,7 +507,9 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      Karten nach Bereich gruppiert mit Status (In Benutzung/Frei aus `GET /tool-dashboard/active-tools`),
      Einweisungspflicht, „Genutzt von …“ (nur bei laufender Nutzung) und Hardware: eingerichtet „Schaltbox · Shelly
      …“, sonst Warn-Icon + „Hardware einrichten“ (was fehlt, zeigt die Detailseite; es gibt keine Werkzeuge, die
-     absichtlich ohne Hardware bleiben); Liste mit denselben Hardware-Texten und ⋯-Menü (Details, Löschen). Dialog „Neues Werkzeug anlegen“ als Formular-Dialog mit
+     absichtlich ohne Hardware bleiben); Liste mit denselben Hardware-Texten und ⋯-Menü (Details, Löschen).
+     Zusätzlich zum Prototyp: „· N nicht eingerichtet“ im Untertitel und Filter „Hardware einrichten“
+     (`schbar-toggle-chip`), kombinierbar mit Bereich und Suche. Dialog „Neues Werkzeug anlegen“ als Formular-Dialog mit
      Bereich und Einweisungspflicht als Auswahlkarten, Beschreibung mit Zähler – höchstens 255 Zeichen
      (`tool.description` ist `VARCHAR(255)`, der Prototyp nennt 500). Ohne Backend noch offen: „Störung“, „seit“
      bei der Nutzung, Anzahl Eingewiesene (`GET /tool-certifications` nur pro Person oder Werkzeug). „Anlegen &

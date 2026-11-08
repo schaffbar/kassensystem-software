@@ -194,6 +194,8 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   - `schbar-danger-zone` – last card of a detail page with the destructive action (`danger-button`, asks first).
   - `schbar-filter-chips` – the filters of a list with counts (`[(selected)]` = id of the active filter); the counts
     ignore the search. Next to it the search: `mat-form-field` with the global class `search-field` (44px, no hint).
+  - `schbar-toggle-chip` – a single filter that is on or off (`[(pressed)]`, optional icon and count), e.g.
+    "Hardware einrichten" in the tool list; it looks like the filter chips (global class `chip`).
   - `schbar-segmented-control` – one choice out of a few next to each other (area, cards / list), optional count and
     icon per segment; filter chips are for a row of filters.
 - Choices with an explanation are radio cards, not a `mat-select`: `<mat-radio-button class="radio-card">` with the

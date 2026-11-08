@@ -1,4 +1,7 @@
-<schbar-page-header [title]="'tools.title' | translate" [subtitle]="subtitle().key | translate: subtitle().params">
+@let notSetUpText = 'tools.pages.toolList.notSetUp' | translate: { count: notSetUpCount() };
+<schbar-page-header
+  [title]="'tools.title' | translate"
+  [subtitle]="(subtitle().key | translate: subtitle().params) + (notSetUpCount() > 0 ? ' · ' + notSetUpText : '')">
   <button matIconButton type="button" [attr.aria-label]="'shared.actions.reload' | translate" (click)="reloadTools()">
     <mat-icon>refresh</mat-icon>
   </button>
@@ -49,6 +52,15 @@
         </button>
       }
     </mat-form-field>
+    <!-- stays visible while it is on, even when nothing is left to set up -->
+    @if (notSetUpCount() > 0 || notSetUpOnly()) {
+      <schbar-toggle-chip
+        class="not-set-up-filter"
+        icon="warning"
+        [label]="'tools.pages.toolList.hardware.notSetUp' | translate"
+        [count]="notSetUpCount()"
+        [(pressed)]="notSetUpOnly" />
+    }
     <schbar-segmented-control
       class="area-filter"
       [label]="'tools.pages.toolList.areaFilter.label' | translate"

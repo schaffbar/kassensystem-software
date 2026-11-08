@@ -15,8 +15,9 @@ schbar-page-header {
   align-items: center;
   gap: 12px;
 
+  // starts narrow, so search, filters and view fit into one row on a desktop; it takes the space that is left
   .search-field {
-    flex: 1 1 280px;
+    flex: 1 1 200px;
   }
 }
 

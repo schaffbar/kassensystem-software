@@ -327,6 +327,7 @@
       "toolList": {
         "subtitle": "{{count}} Werkzeuge · {{inUse}} in Benutzung",
         "subtitleOne": "1 Werkzeug · {{inUse}} in Benutzung",
+        "notSetUp": "{{count}} nicht eingerichtet",
         "search": "Werkzeug suchen",
         "searchPlaceholder": "Werkzeug suchen",
         "clearSearch": "Suche leeren",

@@ -23,6 +23,7 @@ import {
   SegmentViewModel,
 } from '../../../shared/components/segmented-control/segmented-control.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { ToggleChipComponent } from '../../../shared/components/toggle-chip/toggle-chip.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH, FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog-constants';
 import { ToolArea } from '../../../shared/models/tool-area';
@@ -58,6 +59,7 @@ type ToolListView = 'cards' | 'list';
     RowMenuComponent,
     SegmentedControlComponent,
     StatusBadgeComponent,
+    ToggleChipComponent,
     CertificationRequirementBadgeComponent,
     ToolAreaKeyPipe,
     WlanRelaisTypeKeyPipe,
@@ -73,6 +75,7 @@ export class ToolListComponent {
   protected readonly searchText = signal('');
   protected readonly area = signal<string>(ALL_AREAS);
   protected readonly view = signal<string>('cards' satisfies ToolListView);
+  protected readonly notSetUpOnly = signal(false);
 
   protected readonly isHardwareSetUp = isHardwareSetUp;
 
@@ -91,6 +94,7 @@ export class ToolListComponent {
   protected readonly isEmpty = computed(
     () => !this.store.isLoading() && !this.store.hasLoadError() && this.toolsCount() === 0,
   );
+  protected readonly notSetUpCount = computed(() => this.store.tools().filter((tool) => !isHardwareSetUp(tool)).length);
   protected readonly subtitle = computed(() => ({
     key: this.toolsCount() === 1 ? 'tools.pages.toolList.subtitleOne' : 'tools.pages.toolList.subtitle',
     params: {
@@ -119,10 +123,12 @@ export class ToolListComponent {
 
   protected readonly shownTools = computed(() => {
     const area = this.area();
+    const notSetUpOnly = this.notSetUpOnly();
     const searchText = this.searchText().trim().toLowerCase();
     return this.store
       .tools()
       .filter((tool) => area === ALL_AREAS || tool.area === area)
+      .filter((tool) => !notSetUpOnly || !isHardwareSetUp(tool))
       .filter((tool) => !searchText || tool.name.toLowerCase().includes(searchText))
       .sort((a, b) => a.name.localeCompare(b.name, 'de'));
   });
