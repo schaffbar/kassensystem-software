@@ -6,7 +6,8 @@ describe('RfidTagStateKeyPipe', () => {
   const pipe = new RfidTagStateKeyPipe();
 
   it('should return the translation key of the state', () => {
-    expect(pipe.transform(true)).toBe('rfidTags.states.active');
-    expect(pipe.transform(false)).toBe('rfidTags.states.inactive');
+    expect(pipe.transform('assigned')).toBe('rfidTags.states.assigned');
+    expect(pipe.transform('free')).toBe('rfidTags.states.free');
+    expect(pipe.transform('deactivated')).toBe('rfidTags.states.deactivated');
   });
 });

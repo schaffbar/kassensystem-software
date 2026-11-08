@@ -25,7 +25,7 @@ Reference implementations:
 [shared/api/rfid-readers/](../../../src/app/shared/api/rfid-readers/) +
 [rfid-readers/](../../../src/app/rfid-readers/) (resource + detail resource, enum with `null`, date, commands with
 body), [shared/api/rfid-tags/](../../../src/app/shared/api/rfid-tags/) + [rfid-tags/](../../../src/app/rfid-tags/)
-(smallest case).
+(a list joined from three resources: tags, assignments and users in one mapper).
 
 ## Who may import what
 

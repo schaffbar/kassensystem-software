@@ -373,19 +373,76 @@
     "dialogs": {
       "deleteRfidTag": {
         "title": "RFID-Tag löschen",
-        "message": "Sind Sie sicher, dass Sie diesen RFID-Tag löschen möchten?",
+        "message": "Der Tag verschwindet aus dem Bestand. Hält ihn später jemand an ein Lesegerät, wird er als unbekannt abgelehnt.",
         "confirm": "RFID-Tag löschen"
-      }
-    },
-    "shared": {
-      "rfidTagProperties": {
-        "id": "ID",
-        "active": "Aktiv"
+      },
+      "unassignRfidTag": {
+        "title": "Zuweisung aufheben",
+        "message": "Danach kann die Person weder einchecken noch Werkzeuge freischalten, bis ein neuer Tag zugewiesen ist. Der Tag wird wieder frei.",
+        "confirm": "Zuweisung aufheben"
       }
     },
     "states": {
-      "active": "Aktiv",
-      "inactive": "Inaktiv"
+      "assigned": "Zugewiesen",
+      "free": "Frei",
+      "deactivated": "Deaktiviert"
+    },
+    "assignmentTypes": {
+      "fixed": "Fest",
+      "temporary": "Leihtag"
+    },
+    "pages": {
+      "rfidTagList": {
+        "subtitle": "{{count}} Tags · {{assigned}} zugewiesen · {{free}} frei · {{deactivated}} deaktiviert",
+        "subtitleOne": "1 Tag · {{assigned}} zugewiesen · {{free}} frei · {{deactivated}} deaktiviert",
+        "search": "Tags durchsuchen",
+        "searchPlaceholder": "Tag-ID oder Name",
+        "clearSearch": "Suche leeren",
+        "filters": {
+          "label": "Nach Status filtern",
+          "all": "Alle",
+          "assigned": "Zugewiesen",
+          "free": "Frei",
+          "deactivated": "Deaktiviert"
+        },
+        "columns": {
+          "id": "Tag",
+          "state": "Status",
+          "assignee": "Zugewiesen an"
+        },
+        "assignedSince": "{{type}} · seit {{date}}",
+        "actions": {
+          "profile": "Profil von {{name}}",
+          "unassign": "Zuweisung aufheben …",
+          "delete": "Tag löschen …"
+        },
+        "empty": {
+          "title": "Noch keine RFID-Tags",
+          "message": "Neue Tags erscheinen hier, sobald sie an das Lesegerät „RFID-Tag-Register“ gehalten werden."
+        },
+        "noResults": {
+          "title": "Kein Tag gefunden",
+          "message": "Suchbegriff oder Filter anpassen."
+        },
+        "register": {
+          "title": "Neuen Tag registrieren",
+          "step1": "Neuen Tag an das Lesegerät „RFID-Tag-Register“ halten.",
+          "step2": "Der Tag erscheint sofort als „Frei“ in der Liste.",
+          "step3": "Zuweisung an eine Person im Benutzerprofil."
+        },
+        "waiting": {
+          "title": "Wartet auf Tag ({{count}})",
+          "entry": "wartet auf einen Tag ({{type}}).",
+          "hint": "Freien Tag an das Lesegerät „RFID-Tag-Zuweiser“ halten."
+        },
+        "legend": {
+          "title": "Fest oder Leihtag?",
+          "fixedLabel": "Fest:",
+          "fixed": "gehört der Person dauerhaft, z. B. Mitglieder.",
+          "temporaryLabel": "Leihtag:",
+          "temporary": "für Gäste, wird beim Auschecken am „Türwächter Ausgang“ zurückgegeben."
+        }
+      }
     }
   },
   "rfidReaders": {

@@ -22,6 +22,12 @@ export class RfidTagAssignmentsApiService {
   // --------------------------------------------------------------------------
   // queries
 
+  rfidTagAssignmentsResource(): HttpResourceRef<RfidTagAssignmentApiModel[] | undefined> {
+    return httpResource(() => RFID_TAG_ASSIGNMENTS_API_URL, {
+      parse: parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments'),
+    });
+  }
+
   currentRfidTagAssignmentResource(
     customerId: () => string | null,
   ): HttpResourceRef<RfidTagAssignmentApiModel | null | undefined> {

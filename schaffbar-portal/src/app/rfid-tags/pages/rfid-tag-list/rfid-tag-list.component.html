@@ -1,9 +1,12 @@
-<div class="rfid-tag-list-header">
-  <h1>{{ 'rfidTags.title' | translate }} ({{ rfidTagsCount() }})</h1>
-  <button matIconButton (click)="reloadRfidTags()">
+<schbar-page-header [title]="'rfidTags.title' | translate" [subtitle]="subtitle().key | translate: subtitle().params">
+  <button
+    matIconButton
+    type="button"
+    [attr.aria-label]="'shared.actions.reload' | translate"
+    (click)="reloadRfidTags()">
     <mat-icon>refresh</mat-icon>
   </button>
-</div>
+</schbar-page-header>
 
 @if (store.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
@@ -12,40 +15,177 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
-<div class="mat-elevation-z2">
-  <table mat-table [dataSource]="dataSource()" matSort>
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'rfidTags.shared.rfidTagProperties.id' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-    </ng-container>
+<div class="layout">
+  <div class="main">
+    @if (isEmpty()) {
+      <schbar-empty-state
+        class="table-card"
+        icon="sell"
+        [title]="'rfidTags.pages.rfidTagList.empty.title' | translate"
+        [message]="'rfidTags.pages.rfidTagList.empty.message' | translate" />
+    } @else {
+      <mat-form-field class="search-field" subscriptSizing="dynamic">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          #searchInput
+          matInput
+          type="search"
+          [attr.aria-label]="'rfidTags.pages.rfidTagList.search' | translate"
+          [placeholder]="'rfidTags.pages.rfidTagList.searchPlaceholder' | translate"
+          [value]="searchText()"
+          (input)="searchRfidTags(searchInput.value)" />
+        @if (searchText()) {
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            [attr.aria-label]="'rfidTags.pages.rfidTagList.clearSearch' | translate"
+            (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
 
-    <ng-container matColumnDef="active">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'rfidTags.shared.rfidTagProperties.active' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.active | rfidTagStateKey | translate }}</td>
-    </ng-container>
+      <schbar-filter-chips
+        [label]="'rfidTags.pages.rfidTagList.filters.label' | translate"
+        [filterChips]="filterChips()"
+        [(selected)]="filter" />
 
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>{{ 'shared.table.actionsColumn' | translate }}</th>
-      <td mat-cell *matCellDef="let row">
-        <button class="danger-button" matIconButton type="button" (click)="deleteRfidTag($event, row)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+      @if (hasNoResults()) {
+        <schbar-empty-state
+          class="no-results"
+          icon="search_off"
+          [title]="'rfidTags.pages.rfidTagList.noResults.title' | translate"
+          [message]="'rfidTags.pages.rfidTagList.noResults.message' | translate" />
+      }
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+      <!-- hidden instead of removed, so that the paginator stays connected to the data source -->
+      <div class="table-card" [hidden]="hasNoResults()">
+        <div class="table-scroll">
+          <table mat-table [dataSource]="dataSource()">
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>{{ 'rfidTags.pages.rfidTagList.columns.id' | translate }}</th>
+              <td mat-cell *matCellDef="let row" class="tag-id mono">{{ row.id | rfidTagId }}</td>
+            </ng-container>
 
-  <mat-paginator
-    #paginator
-    [length]="rfidTagsCount()"
-    [pageIndex]="0"
-    [pageSize]="15"
-    [pageSizeOptions]="[5, 10, 15, 20]"
-    aria-label="Select page" />
+            <ng-container matColumnDef="state">
+              <th mat-header-cell *matHeaderCellDef>{{ 'rfidTags.pages.rfidTagList.columns.state' | translate }}</th>
+              <td mat-cell *matCellDef="let row">
+                <schbar-rfid-tag-state-badge [state]="row.state" />
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="assignee">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'rfidTags.pages.rfidTagList.columns.assignee' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let row">
+                @if (row.assignee; as assignee) {
+                  <div class="assignee">
+                    <a class="assignee-name" [routerLink]="[usersLink, assignee.userId]">{{ assignee.userName }}</a>
+                    <span class="assignee-meta">
+                      @if (assignee.assignedAt) {
+                        {{
+                          'rfidTags.pages.rfidTagList.assignedSince'
+                            | translate
+                              : {
+                                  type: (assignee.assignmentType | rfidTagAssignmentTypeKey | translate),
+                                  date: (assignee.assignedAt | date: 'mediumDate'),
+                                }
+                        }}
+                      } @else {
+                        {{ assignee.assignmentType | rfidTagAssignmentTypeKey | translate }}
+                      }
+                    </span>
+                  </div>
+                } @else {
+                  <span class="no-assignee">–</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>
+                <span class="cdk-visually-hidden">{{ 'shared.table.actionsColumn' | translate }}</span>
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: (row.id | rfidTagId) }">
+                  @if (row.assignee; as assignee) {
+                    <a mat-menu-item [routerLink]="[usersLink, assignee.userId]">
+                      <mat-icon>person</mat-icon>
+                      <span>{{
+                        'rfidTags.pages.rfidTagList.actions.profile' | translate: { name: assignee.userName }
+                      }}</span>
+                    </a>
+                    <button mat-menu-item type="button" (click)="unassignRfidTag(row)">
+                      <mat-icon>link_off</mat-icon>
+                      <span>{{ 'rfidTags.pages.rfidTagList.actions.unassign' | translate }}</span>
+                    </button>
+                  }
+                  @if (canDeleteRfidTag(row)) {
+                    <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidTag(row)">
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ 'rfidTags.pages.rfidTagList.actions.delete' | translate }}</span>
+                    </button>
+                  }
+                </schbar-row-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [pageSize]="15"
+          [pageSizeOptions]="[15, 30, 50]"
+          [attr.aria-label]="'shared.paginator.label' | translate" />
+      </div>
+    }
+  </div>
+
+  <aside class="side">
+    <section class="register-card">
+      <h2>{{ 'rfidTags.pages.rfidTagList.register.title' | translate }}</h2>
+      <ol>
+        <li>{{ 'rfidTags.pages.rfidTagList.register.step1' | translate }}</li>
+        <li>{{ 'rfidTags.pages.rfidTagList.register.step2' | translate }}</li>
+        <li>{{ 'rfidTags.pages.rfidTagList.register.step3' | translate }}</li>
+      </ol>
+    </section>
+
+    @if (store.waitingUsers().length > 0) {
+      <section class="waiting-card">
+        <h2>
+          <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+          {{ 'rfidTags.pages.rfidTagList.waiting.title' | translate: { count: store.waitingUsers().length } }}
+        </h2>
+        <ul>
+          @for (waitingUser of store.waitingUsers(); track waitingUser.userId) {
+            <li>
+              <a [routerLink]="[usersLink, waitingUser.userId]">{{ waitingUser.userName }}</a>
+              {{
+                'rfidTags.pages.rfidTagList.waiting.entry'
+                  | translate: { type: (waitingUser.assignmentType | rfidTagAssignmentTypeKey | translate) }
+              }}
+            </li>
+          }
+        </ul>
+        <p>{{ 'rfidTags.pages.rfidTagList.waiting.hint' | translate }}</p>
+      </section>
+    }
+
+    <section class="card legend-card">
+      <h2>{{ 'rfidTags.pages.rfidTagList.legend.title' | translate }}</h2>
+      <p>
+        <strong>{{ 'rfidTags.pages.rfidTagList.legend.fixedLabel' | translate }}</strong>
+        {{ 'rfidTags.pages.rfidTagList.legend.fixed' | translate }}
+      </p>
+      <p>
+        <strong>{{ 'rfidTags.pages.rfidTagList.legend.temporaryLabel' | translate }}</strong>
+        {{ 'rfidTags.pages.rfidTagList.legend.temporary' | translate }}
+      </p>
+    </section>
+  </aside>
 </div>

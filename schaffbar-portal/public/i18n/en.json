@@ -373,19 +373,76 @@
     "dialogs": {
       "deleteRfidTag": {
         "title": "Delete RFID Tag",
-        "message": "Are you sure you want to delete this RFID tag?",
+        "message": "The tag is removed from the inventory. If someone holds it to a reader later, it is rejected as unknown.",
         "confirm": "Delete RFID Tag"
-      }
-    },
-    "shared": {
-      "rfidTagProperties": {
-        "id": "ID",
-        "active": "Active"
+      },
+      "unassignRfidTag": {
+        "title": "Clear Assignment",
+        "message": "Afterwards the person can neither check in nor unlock tools until a new tag is assigned. The tag becomes free again.",
+        "confirm": "Clear Assignment"
       }
     },
     "states": {
-      "active": "Active",
-      "inactive": "Inactive"
+      "assigned": "Assigned",
+      "free": "Free",
+      "deactivated": "Deactivated"
+    },
+    "assignmentTypes": {
+      "fixed": "Fixed",
+      "temporary": "Loan tag"
+    },
+    "pages": {
+      "rfidTagList": {
+        "subtitle": "{{count}} tags · {{assigned}} assigned · {{free}} free · {{deactivated}} deactivated",
+        "subtitleOne": "1 tag · {{assigned}} assigned · {{free}} free · {{deactivated}} deactivated",
+        "search": "Search tags",
+        "searchPlaceholder": "Tag ID or name",
+        "clearSearch": "Clear search",
+        "filters": {
+          "label": "Filter by state",
+          "all": "All",
+          "assigned": "Assigned",
+          "free": "Free",
+          "deactivated": "Deactivated"
+        },
+        "columns": {
+          "id": "Tag",
+          "state": "State",
+          "assignee": "Assigned to"
+        },
+        "assignedSince": "{{type}} · since {{date}}",
+        "actions": {
+          "profile": "Profile of {{name}}",
+          "unassign": "Clear assignment …",
+          "delete": "Delete tag …"
+        },
+        "empty": {
+          "title": "No RFID tags yet",
+          "message": "New tags appear here as soon as they are held to the \"RFID Tag Register\" reader."
+        },
+        "noResults": {
+          "title": "No tag found",
+          "message": "Change the search or the filter."
+        },
+        "register": {
+          "title": "Register a new tag",
+          "step1": "Hold the new tag to the \"RFID Tag Register\" reader.",
+          "step2": "The tag appears as \"Free\" in the list right away.",
+          "step3": "Assign it to a person in the user profile."
+        },
+        "waiting": {
+          "title": "Waiting for a tag ({{count}})",
+          "entry": "is waiting for a tag ({{type}}).",
+          "hint": "Hold a free tag to the \"RFID Tag Assigner\" reader."
+        },
+        "legend": {
+          "title": "Fixed or loan tag?",
+          "fixedLabel": "Fixed:",
+          "fixed": "belongs to the person permanently, e.g. members.",
+          "temporaryLabel": "Loan tag:",
+          "temporary": "for guests, returned when checking out at the \"Gate Keeper Out\"."
+        }
+      }
     }
   },
   "rfidReaders": {

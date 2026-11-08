@@ -5,6 +5,7 @@
 
 ## Important
 
+- [Backend] RFID-Tag löschen nur ohne Zuweisung: `RfidTagService.deleteRfidTag` prüft das nicht (TODO im Code), und `rfid_tag_assignment.rfid_tag_id` hat keinen Fremdschlüssel. Ein zugewiesener Tag lässt sich löschen, die Zuweisung zeigt danach auf einen Tag, den es nicht mehr gibt (Person bekommt keinen neuen Tag, bis die Zuweisung aufgehoben ist; wird der Tag neu registriert, gehört er wieder der alten Person). Ablehnen mit `409` – das Portal bietet „Tag löschen“ für zugewiesene Tags schon nicht mehr an
 - [Feature] WaitingForAssignment auch im Portal stoppen
 - [Backend] Scheduler to clean up WaitingForAssignment
 - [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
@@ -17,6 +18,8 @@
 - [Frontend] RFID-Reader detail page trennen (mac + type / name + socket)
 - [Frontend] Fix Geburtsdatum
 - [Frontend] Tool Detail page - refactor tool instructor
+
+- [RFID-Reader] Bearbeiten vs Typ ändern button
 
 ## Fehlerbehandlung / Problems API
 
@@ -46,6 +49,9 @@
 - [Frontend] Test infrastructure
 
 ## Feature
+
+- [RFID-Tag] deactivate
+- [RFID-Tag] Show time left to assign - after schedular is implemented
 
 - [Feature] Test connection to shelly
 - [Backend] Implement new interfaces for device

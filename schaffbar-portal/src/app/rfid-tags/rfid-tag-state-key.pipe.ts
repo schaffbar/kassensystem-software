@@ -1,13 +1,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+import { RfidTagState } from './rfid-tag.model';
+
 /**
- * Translation key of the state of an RFID tag.
+ * Translation key of the state of a tag.
  *
- * `{{ rfidTag.active | rfidTagStateKey | translate }}`
+ * `{{ rfidTag.state | rfidTagStateKey | translate }}`
  */
 @Pipe({ name: 'rfidTagStateKey' })
 export class RfidTagStateKeyPipe implements PipeTransform {
-  transform(active: boolean): string {
-    return active ? 'rfidTags.states.active' : 'rfidTags.states.inactive';
+  transform(state: RfidTagState): string {
+    return `rfidTags.states.${state}`;
   }
 }

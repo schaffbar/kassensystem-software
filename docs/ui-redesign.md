@@ -494,7 +494,13 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      Noch offen (Backend): Online-Status/Offline-Banner, letzte Lesevorgänge, Werkzeug zuordnen/trennen,
      Namens-Duplikatprüfung. Der Typ wird ohne Bestätigungsdialog gespeichert (Entscheidung 08.11.2026 – der
      Dialog „Typ ändern“ aus dem Entwurf entfällt); gesperrt bleibt er bei einer Schaltbox mit Werkzeug.
-   - [ ] RFID-Tags
+   - [x] RFID-Tags: Liste wie im Prototyp – Untertitel mit Zählung, Suche (Tag-ID mit/ohne Leerzeichen, Name),
+     Filter-Chips (Alle, Zugewiesen, Frei, Deaktiviert), Tag-ID in Vierergruppen, Status als Badge, „Zugewiesen an“
+     mit Link zur Person, Fest/Leihtag und Datum (aus `GET /rfid-tag-assignments` + `GET /customers`), ⋯-Menü
+     (Profil, Zuweisung aufheben …, Tag löschen …). Seitenleiste: „Neuen Tag registrieren“ (Anleitung), „Wartet auf
+     Tag“ (wartende Zuweisungen), „Fest oder Leihtag?“. Ohne Backend noch offen: „Rückgabe ausstehend“, Leihtag-
+     Nummer, „Zuletzt gelesen“, Deaktivieren/Reaktivieren, Person vom Tag aus zuweisen, Live-Status des Register-
+     Lesegeräts. Ohne neuen Dialog noch offen: „ID manuell eingeben“ (`POST /rfid-tags` gibt es schon).
    - [ ] Werkzeuge
    - [ ] Benutzer
    - [ ] Übersicht
