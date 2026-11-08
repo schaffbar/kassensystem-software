@@ -4,29 +4,6 @@
   display: block;
 }
 
-dl {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px 24px;
-  margin: 0;
-}
-
-dl > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-dt {
-  color: var(--text-3);
-  font-size: 13px;
-}
-
-dd {
-  margin: 0;
-  font-weight: 500;
-}
-
 // the copy button must not make this row taller than the others
 .mac-address {
   display: flex;

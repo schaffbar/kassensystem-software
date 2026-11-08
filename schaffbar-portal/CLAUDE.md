@@ -141,7 +141,7 @@ export class UserContactComponent {
   (`src/styles.scss`).
 - A detail page shows its values read-only in a card (`<dl>`, see "Design system") and edits them in a form dialog
   opened by "Bearbeiten" – no inline edit form in the card (`rfid-reader-detail-info` + `update-rfid-reader-form`).
-  The remaining inline forms (`tool-detail-info`, `user-contact`, `user-address`) are converted with their pages.
+  The remaining inline forms (`user-contact`, `user-address`) are converted with the user page.
 - Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in
   `app.config.ts`; tests of components with a datepicker add `provideDateAdapter()` to their providers). Typing
   (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
@@ -202,6 +202,7 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   global classes `radio-card-text`, `radio-card-label`, `radio-card-description` (reader type, tool area and
   certification requirement).
 - Global classes for the page layout (`src/styles.scss`):
+  - `detail-list` on a `<dl>` – the read-only values of a card (label above value, in a wrapping grid).
   - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
     card sets it as `host: { class: 'card' }`.
   - `table-card` around a list table and its paginator, the table inside `table-scroll` (scrolls on narrow

@@ -1,16 +1,18 @@
 @if (detailsStore.tool(); as tool) {
-  <div class="left">
-    <schbar-tool-detail-info
-      [toolDetailInfo]="tool"
-      [existingTools]="toolsStore.tools()"
-      (toolUpdated)="updateTool($event)" />
-  </div>
-  <div class="right">
+  <div class="main">
+    @if (toolDetailInfo(); as info) {
+      <schbar-tool-detail-info [toolDetailInfo]="info" (editRequested)="editTool()" />
+    }
     <schbar-tool-instructors
       [toolId]="tool.id"
       [instructors]="detailsStore.instructors()"
-      [candidates]="detailsStore.instructorCandidates()"
-      (instructorsAdded)="addToolInstructors($event)"
+      (addRequested)="addToolInstructors()"
       (instructorsRemoved)="removeToolInstructors($event)" />
   </div>
+  @if (toolHardwareSummary(); as hardware) {
+    <schbar-tool-hardware-summary
+      class="side"
+      [toolHardwareSummary]="hardware"
+      (configureRequested)="hardwareConfigurationRequested.emit()" />
+  }
 }

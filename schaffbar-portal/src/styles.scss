@@ -422,6 +422,31 @@ body {
   font-size: 13px;
 }
 
+// read-only values of a card: `<dl class="detail-list">` with one `<div><dt>…</dt><dd>…</dd></div>` per value, in a
+// grid that wraps on narrow screens
+.detail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
 // IDs, MAC and IP addresses, socket names
 .mono {
   font-family: var(--font-mono);

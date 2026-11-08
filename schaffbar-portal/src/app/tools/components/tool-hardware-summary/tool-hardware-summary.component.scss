@@ -1,0 +1,65 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-header {
+  margin-bottom: 0;
+}
+
+.hardware-part {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  > mat-icon {
+    flex: 0 0 auto;
+    color: var(--text-3);
+  }
+
+  // like "Hardware einrichten" in the tool list: only the icon is colored
+  &.missing > mat-icon {
+    color: var(--warn);
+  }
+}
+
+.part-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.part-label {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.part-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+a.part-value {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.missing .part-value {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.mono {
+  font-weight: 500;
+}
+
+.configure-button {
+  align-self: flex-start;
+}

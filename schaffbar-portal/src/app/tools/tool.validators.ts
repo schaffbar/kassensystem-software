@@ -1,4 +1,11 @@
-import { SchemaPath, validate } from '@angular/forms/signals';
+import { maxLength, SchemaPath, validate } from '@angular/forms/signals';
+
+// the database column `tool.description` holds 255 characters
+export const TOOL_DESCRIPTION_MAX_LENGTH = 255;
+
+export function validateToolDescription(path: SchemaPath<string>): void {
+  maxLength(path, TOOL_DESCRIPTION_MAX_LENGTH);
+}
 
 /**
  * Validates that no other tool already uses the name (case-insensitive).

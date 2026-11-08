@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -67,7 +68,13 @@ describe('ToolDetailStore', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), ToolDetailStore],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        ToolDetailStore,
+      ],
     });
     store = TestBed.inject(ToolDetailStore);
     httpMock = TestBed.inject(HttpTestingController);
@@ -158,6 +165,57 @@ describe('ToolDetailStore', () => {
     expect(store.instructorCandidates().map((user) => user.id)).toEqual(['user-1', 'user-3']);
     expect(store.certifiers().map((user) => user.id)).toEqual(['user-2']);
     expect(store.certifiableUsers().map((user) => user.id)).toEqual(['user-3']);
+  });
+
+  it('should count the certifications of each instructor and add the own certification of each candidate', async () => {
+    store.setToolId('tool-1');
+    trigger();
+    expectToolRequest().flush({ ...tool, instructors: ['user-2'], rfidReaderId: 'reader-1' });
+    expectCertificationsRequest().flush([
+      { ...certifications[0], certifiedBy: 'user-2' },
+      {
+        id: 'cert-2',
+        customerId: 'user-3',
+        toolId: 'tool-1',
+        status: ToolCertificationStatus.Paused,
+        certifiedAt: '2026-02-01T10:00:00Z',
+        certifiedBy: 'user-2',
+      },
+    ]);
+    expectRfidReadersRequest().flush(rfidReaders);
+    expectUsersRequest().flush([
+      customerFixture(),
+      customerFixture({ id: 'user-2', firstName: 'Erika' }),
+      customerFixture({ id: 'user-3', firstName: 'Paul' }),
+    ]);
+    await settle();
+
+    expect(store.instructors()).toEqual([
+      { id: 'user-2', firstName: 'Erika', lastName: 'Mustermann', certificationsGiven: 2 },
+    ]);
+    expect(store.instructorCandidates().map((candidate) => candidate.certification)).toEqual([
+      { status: ToolCertificationStatus.Active, certifiedAt: new Date('2026-01-01T10:00:00Z') },
+      { status: ToolCertificationStatus.Paused, certifiedAt: new Date('2026-02-01T10:00:00Z') },
+    ]);
+    expect(store.activeCertificationsCount()).toBe(1);
+    expect(store.assignedRfidReader()).toEqual({
+      id: 'reader-1',
+      macAddress: 'AA:BB',
+      name: 'Reader 1',
+      type: RfidReaderType.SwitchBox,
+    });
+  });
+
+  it('should go back to the list after deleting the tool', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await loadTool();
+
+    store.deleteTool({ toolId: 'tool-1' });
+    trigger();
+    httpMock.expectOne({ method: 'DELETE', url: `${toolsUrl}/tool-1` }).flush(null);
+    await settle();
+
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['tools']);
   });
 
   it('should reload both on request', async () => {

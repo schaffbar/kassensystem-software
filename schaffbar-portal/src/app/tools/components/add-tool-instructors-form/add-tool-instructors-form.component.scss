@@ -1,0 +1,80 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// a scrolling list of people, each a row with checkbox, initials, name and the own certification
+.candidates {
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.candidate {
+  display: block;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &.selected {
+    background: var(--accent-soft);
+  }
+
+  // the whole row selects the person, not only the text: mat-checkbox has no token for the width of its label
+  ::ng-deep .mdc-form-field {
+    display: flex;
+  }
+
+  ::ng-deep .mdc-form-field > label {
+    flex: 1 1 auto;
+    cursor: pointer;
+  }
+}
+
+.candidate-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.avatar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.candidate-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.candidate-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.candidate-meta {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.no-candidates {
+  margin: 0;
+  padding: 20px;
+  color: var(--text-3);
+  text-align: center;
+}

@@ -6,22 +6,54 @@
 }
 
 @if (detailsStore.tool(); as tool) {
-  <div class="tool-detail-header">
-    <div class="tool-detail-header__title">
-      <h1>{{ tool.name }}</h1>
-      <button matIconButton (click)="reloadTool()">
-        <mat-icon>refresh</mat-icon>
-      </button>
-    </div>
-  </div>
+  <schbar-page-header
+    icon="build"
+    [title]="tool.name"
+    [breadcrumbs]="[{ label: 'tools.title' | translate, link: toolsLink }]">
+    <schbar-status-badge pageHeaderMeta tone="neutral">{{ tool.area | toolAreaKey | translate }}</schbar-status-badge>
+    <schbar-certification-requirement-badge pageHeaderMeta [certificationRequirement]="tool.certificationRequirement" />
+    @if (usedBy(); as user) {
+      <schbar-status-badge pageHeaderMeta tone="info" icon="play_circle">
+        {{ 'tools.pages.toolList.inUseBy' | translate: { name: user } }}
+      </schbar-status-badge>
+    }
 
-  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center" dynamicHeight>
+    <button matButton="outlined" type="button" (click)="editTool()">
+      <mat-icon>edit</mat-icon>
+      {{ 'tools.pages.toolDetails.actions.edit' | translate }}
+    </button>
+    <button matIconButton type="button" [attr.aria-label]="'shared.actions.reload' | translate" (click)="reloadTool()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: tool.name }">
+      <button mat-menu-item type="button" (click)="editTool()">
+        <mat-icon>edit</mat-icon>
+        <span>{{ 'tools.pages.toolDetails.actions.editMenu' | translate }}</span>
+      </button>
+      <mat-divider />
+      <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteTool()">
+        <mat-icon>delete</mat-icon>
+        <span>{{ 'tools.pages.toolDetails.actions.delete' | translate }}</span>
+      </button>
+    </schbar-row-menu>
+  </schbar-page-header>
+
+  <mat-tab-group
+    mat-stretch-tabs="false"
+    mat-align-tabs="start"
+    dynamicHeight
+    [selectedIndex]="selectedTab()"
+    (selectedIndexChange)="selectedTab.set($event)">
     <mat-tab [label]="'tools.tabGroups.toolDetails.detailsTab' | translate">
       <div class="tab-content">
-        <schbar-tool-detail-tab-info />
+        <schbar-tool-detail-tab-info (hardwareConfigurationRequested)="showHardware()" />
       </div>
     </mat-tab>
-    <mat-tab [label]="'tools.tabGroups.toolDetails.certificationsTab' | translate">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        {{ 'tools.tabGroups.toolDetails.certificationsTab' | translate }}
+        <span class="tab-count">{{ detailsStore.toolCertifications().length }}</span>
+      </ng-template>
       <div class="tab-content">
         <schbar-tool-detail-tab-certifications />
       </div>

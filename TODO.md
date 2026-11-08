@@ -50,7 +50,6 @@
 
 ## Feature
 
-- [Tools] Filter for not ready/set up tools
 - [RFID-Tag] deactivate
 - [RFID-Tag] Show time left to assign - after schedular is implemented
 

@@ -281,14 +281,35 @@
         "confirm": "Clear Assignment"
       },
       "removeInstructors": {
-        "title": "Remove Instructors",
-        "message": "Are you sure you want to remove the selected instructors?",
-        "confirm": "Remove Instructors"
+        "title": "Remove as instructor?",
+        "message": "The person can no longer enter new certifications for this tool. Certifications given so far stay valid, and so does their own certification.",
+        "confirm": "Remove as Instructor",
+        "messageLast": "The person can no longer enter new certifications – and there are no instructors left: nobody can enter new certifications for this tool. Certifications given so far stay valid."
       },
       "deleteCertification": {
         "title": "Delete Certification",
         "message": "Are you sure you want to delete this certification?",
         "confirm": "Delete Certification"
+      },
+      "editTool": {
+        "title": "Edit Tool",
+        "subtitle": "{{name}} · {{count}} people certified",
+        "impactToRed": "Afterwards only the {{count}} people with an active certification can unlock \"{{name}}\" at the switch box. Everybody else is rejected.",
+        "impactToYellow": "The switch box then unlocks \"{{name}}\" for everybody – also without certification. The usage is still recorded."
+      },
+      "addInstructors": {
+        "title": "Add Instructors",
+        "subtitle": "{{name}} · instructors may certify other people",
+        "search": "Search people",
+        "searchPlaceholder": "Search name",
+        "onlyCertified": "Show only people with an active certification",
+        "certifiedSince": "Certified since {{date}}",
+        "paused": "Certification paused",
+        "revoked": "Certification revoked",
+        "notCertified": "Not certified",
+        "noPersons": "No matching person",
+        "confirm": "Add Instructors",
+        "confirmCount": "Add {{count}} Instructors"
       }
     },
     "tooltips": {
@@ -320,7 +341,7 @@
       "toolDetails": {
         "detailsTab": "Details",
         "certificationsTab": "Certifications",
-        "configurationTab": "Configuration"
+        "configurationTab": "Hardware"
       }
     },
     "pages": {
@@ -373,7 +394,8 @@
           "toolInformation": "Tool Information",
           "rfidReaderAssignment": "RFID Reader",
           "wlanRelais": "WLAN Relais",
-          "instructors": "Instructors"
+          "instructors": "Instructors ({{count}})",
+          "hardware": "Hardware"
         },
         "certifications": {
           "batchCreate": {
@@ -392,12 +414,30 @@
         "errors": {
           "invalidIpAddress": "Please enter a valid IP address (e.g. 192.168.1.1)."
         },
-        "instructors": {
-          "noInstructors": "No instructors assigned to this tool.",
-          "addTitle": "Add Instructors",
-          "searchUsers": "Search Users",
-          "add": "Add Instructors",
-          "remove": "Remove Selected"
+        "actions": {
+          "edit": "Edit",
+          "editMenu": "Edit …",
+          "delete": "Delete tool …",
+          "configureHardware": "Configure hardware",
+          "addInstructors": "Add instructors",
+          "removeInstructor": "Remove …",
+          "removeInstructorLabel": "Remove {{name}} as instructor"
+        },
+        "properties": {
+          "activeCertifications": "Active certifications"
+        },
+        "persons": "{{count}} people",
+        "personsOne": "1 person",
+        "noDescription": "No description",
+        "certificationsGiven": "{{count}} certifications given",
+        "certificationsGivenOne": "1 certification given",
+        "noInstructors": "No instructors yet – only instructors can enter new certifications.",
+        "hardware": {
+          "rfidReader": "RFID reader (switch box)",
+          "noRfidReader": "No switch box assigned",
+          "wlanRelais": "WLAN relais",
+          "noWlanRelais": "No WLAN relais set up",
+          "unnamedRfidReader": "Reader {{macAddress}}"
         }
       }
     },

@@ -1,77 +1,39 @@
-<h3 class="tool-info-header">
-  {{ 'tools.pages.toolDetails.headers.toolInformation' | translate }}
-  <button matIconButton type="button" aria-label="Edit tool" (click)="editTool()" [disabled]="isEditing()">
-    <mat-icon>edit</mat-icon>
+@let info = toolDetailInfo();
+
+<div class="card-header">
+  <h2>{{ 'tools.pages.toolDetails.headers.toolInformation' | translate }}</h2>
+  <button matButton type="button" (click)="editRequested.emit()">
+    {{ 'tools.pages.toolDetails.actions.edit' | translate }}
   </button>
-</h3>
+</div>
 
-<form class="tool-info-content" [formRoot]="toolForm" (submit)="saveTool()">
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
-        <input id="name" matInput [formField]="toolForm.name" />
-        <mat-error>
-          <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
-        </mat-error>
-      </mat-form-field>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
-        <input id="description" matInput [formField]="toolForm.description" />
-      </mat-form-field>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
-        @if (isEditing()) {
-          <mat-select id="area" [formField]="toolForm.area">
-            @for (area of toolAreas; track area) {
-              <mat-option [value]="area">{{ area | toolAreaKey | translate }}</mat-option>
-            }
-          </mat-select>
-        } @else {
-          <input id="area" matInput [value]="toolDetailInfo().area | toolAreaKey | translate" readonly />
-        }
-      </mat-form-field>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
-        @if (isEditing()) {
-          <mat-select id="certificationRequirement" [formField]="toolForm.certificationRequirement">
-            @for (req of certificationRequirements; track req) {
-              <mat-option [value]="req">
-                {{ req | certificationRequirementKey | translate }}
-              </mat-option>
-            }
-          </mat-select>
-        } @else {
-          <input
-            id="certificationRequirement"
-            matInput
-            [value]="toolDetailInfo().certificationRequirement | certificationRequirementKey | translate"
-            readonly />
-        }
-      </mat-form-field>
-    </div>
-  </div>
+<p class="description" [class.missing]="!info.description">
+  {{ info.description || ('tools.pages.toolDetails.noDescription' | translate) }}
+</p>
 
-  @if (isEditing()) {
-    <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="discardToolChanges()">
-        {{ 'shared.actions.cancel' | translate }}
-      </button>
-      <button matButton="filled" type="submit">
-        {{ 'shared.actions.save' | translate }}
-      </button>
-    </div>
-  }
-</form>
+<dl class="detail-list">
+  <div>
+    <dt>{{ 'tools.shared.toolProperties.area' | translate }}</dt>
+    <dd class="area">{{ info.area | toolAreaKey | translate }}</dd>
+  </div>
+  <div>
+    <dt>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</dt>
+    <dd><schbar-certification-requirement-badge [certificationRequirement]="info.certificationRequirement" /></dd>
+  </div>
+  <div>
+    <dt>{{ 'tools.pages.toolDetails.properties.activeCertifications' | translate }}</dt>
+    <dd class="active-certifications">
+      {{
+        (info.activeCertificationsCount === 1
+          ? 'tools.pages.toolDetails.personsOne'
+          : 'tools.pages.toolDetails.persons'
+        ) | translate: { count: info.activeCertificationsCount }
+      }}
+    </dd>
+  </div>
+</dl>
+
+<p class="requirement-hint">
+  <mat-icon aria-hidden="true">info</mat-icon>
+  {{ info.certificationRequirement | certificationRequirementDescriptionKey | translate }}
+</p>

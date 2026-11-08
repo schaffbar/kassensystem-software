@@ -515,6 +515,17 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      bei der Nutzung, Anzahl Eingewiesene (`GET /tool-certifications` nur pro Person oder Werkzeug). „Anlegen &
      Hardware einrichten“ aus dem Entwurf entfällt vorerst (Entscheidung 08.11.2026). Noch im ⋯-Menü offen: „Bearbeiten …“ und „Einweisungen
      eintragen …“ (die Dialoge gehören zur Detailseite). Nebenbei: `index.html` hat jetzt `lang="de"`.
+   - [x] Werkzeug-Details, Tab „Details“ (die Tabs Einweisungen und Hardware sind noch die alten): Kopf mit Icon,
+     Bereich, Einweisungspflicht und „In Benutzung · Name“, „Bearbeiten“ und ⋯-Menü (Bearbeiten, Werkzeug löschen);
+     Tabs Details / Einweisungen (mit Anzahl) / Hardware. Karte Werkzeuginformationen (Beschreibung, Bereich,
+     Einweisung, aktive Einweisungen, Erklärung der Einweisungspflicht) mit Dialog „Werkzeug bearbeiten“ (Auswahl-
+     karten, Hinweis auf die Folgen beim Wechsel der Einweisungspflicht, „Änderungen speichern“). Karte Einweiser
+     mit „N Einweisungen durchgeführt“ (aus `certifiedBy`), „Entfernen …“ pro Person und Dialog „Einweiser
+     hinzufügen“ (Suche, Filter „Nur Personen mit aktiver Einweisung“, Einweisungsstand je Person). Karte Hardware
+     (Schaltbox verlinkt, WLAN-Relais mit IP, „Hardware konfigurieren“ wechselt zum Tab). Abweichend vom Prototyp:
+     im Dialog „Einweiser hinzufügen“ keine gesperrten Zeilen („Bereits Einweiser“, „Erst reaktivieren“) – es
+     erscheinen nur Personen, die noch keine Einweiser sind, ohne Filter auch nicht eingewiesene. Ohne Backend noch
+     offen: Online-Status der Schaltbox, Zustand des Relais („Eingeschaltet“), „seit“ bei der Nutzung.
    - [ ] Benutzer
    - [ ] Übersicht
 

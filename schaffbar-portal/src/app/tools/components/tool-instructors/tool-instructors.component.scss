@@ -1,26 +1,81 @@
-.instructors-header {
-  margin-bottom: 1rem;
+@use '@angular/material' as mat;
+
+// the rows reach the edges of the card, the header keeps the card padding
+:host {
+  display: block;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
 }
 
-.instructors-list {
-  margin-bottom: 1.5rem;
+.card-header {
+  padding: 0 20px;
 }
 
 .no-instructors {
-  color: rgba(0, 0, 0, 0.54);
-  font-style: italic;
+  margin: 0;
+  padding: 0 20px 20px;
+  color: var(--text-3);
 }
 
-mat-list {
-  margin-bottom: 0.5rem;
-}
+.instructor-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 
-.add-instructors {
-  h4 {
-    margin-bottom: 0.5rem;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 12px 20px;
+    border-top: 1px solid var(--border);
   }
 }
 
-mat-chip-set {
-  margin-bottom: 1rem;
+.avatar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.instructor-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.instructor-name {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.instructor-meta {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+// quiet in the row – the confirmation is red
+.remove-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+
+  @include mat.button-overrides(
+    (
+      text-label-text-color: var(--text-3),
+    )
+  );
 }

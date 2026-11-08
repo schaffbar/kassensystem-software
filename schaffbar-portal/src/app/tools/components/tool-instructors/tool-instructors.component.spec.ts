@@ -1,123 +1,112 @@
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { MatAutocompleteHarness } from '@angular/material/autocomplete/testing';
-import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatCheckboxHarness } from '@angular/material/checkbox/testing';
+import { provideRouter } from '@angular/router';
 
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
-import { ToolInstructorsComponent, UserOptionViewModel } from './tool-instructors.component';
+import { ToolInstructorsComponent, ToolInstructorViewModel } from './tool-instructors.component';
 
 describe('ToolInstructorsComponent', () => {
-  const instructors: UserOptionViewModel[] = [
-    { id: 'user-1', firstName: 'Max', lastName: 'Mustermann' },
-    { id: 'user-2', firstName: 'Erika', lastName: 'Musterfrau' },
-  ];
-  const candidates: UserOptionViewModel[] = [
-    { id: 'user-3', firstName: 'Paul', lastName: 'Panzer' },
-    { id: 'user-4', firstName: 'Karl', lastName: 'Klammer' },
+  const instructors: ToolInstructorViewModel[] = [
+    { id: 'user-1', firstName: 'Lena', lastName: 'Hoffmann', certificationsGiven: 4 },
+    { id: 'user-2', firstName: 'Paul', lastName: 'Richter', certificationsGiven: 1 },
   ];
 
   let fixture: ComponentFixture<ToolInstructorsComponent>;
-  let loader: HarnessLoader;
-  let added: Mock;
-  let removed: Mock;
-  let openConfirmActionDialog: Mock;
+  let openConfirmAction: Mock;
+  let instructorsRemoved: Mock;
 
   beforeEach(async () => {
-    openConfirmActionDialog = vi.fn();
+    openConfirmAction = vi.fn();
     await TestBed.configureTestingModule({
       imports: [ToolInstructorsComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideRouter([]),
         provideTranslateService(),
-        { provide: ConfirmActionDialogService, useValue: { open: openConfirmActionDialog } },
+        { provide: ConfirmActionDialogService, useValue: { open: openConfirmAction } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolInstructorsComponent);
     fixture.componentRef.setInput('toolId', 'tool-1');
     fixture.componentRef.setInput('instructors', instructors);
-    fixture.componentRef.setInput('candidates', candidates);
-    added = vi.fn();
-    removed = vi.fn();
-    fixture.componentInstance.instructorsAdded.subscribe(added);
-    fixture.componentInstance.instructorsRemoved.subscribe(removed);
-    loader = TestbedHarnessEnvironment.loader(fixture);
+    instructorsRemoved = vi.fn();
+    fixture.componentInstance.instructorsRemoved.subscribe(instructorsRemoved);
     await fixture.whenStable();
   });
 
-  async function optionTexts(autocomplete: MatAutocompleteHarness): Promise<string[]> {
-    const options = await autocomplete.getOptions();
-    return Promise.all(options.map((option) => option.getText()));
+  function texts(selector: string): string[] {
+    const elements: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll(selector);
+    return Array.from(elements).map((element) => element.textContent?.replace(/\s+/g, ' ').trim() ?? '');
   }
 
-  it('should list the instructors', async () => {
-    const checkboxes = await loader.getAllHarnesses(MatCheckboxHarness);
+  function removeButtons(): HTMLButtonElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.remove-button'));
+  }
 
-    expect(await Promise.all(checkboxes.map((checkbox) => checkbox.getLabelText()))).toEqual([
-      'Max Mustermann',
-      'Erika Musterfrau',
+  it('should list the instructors with initials, link and the certifications they gave', () => {
+    expect(texts('.avatar')).toEqual(['LH', 'PR']);
+    expect(texts('.instructor-name')).toEqual(['Lena Hoffmann', 'Paul Richter']);
+    expect(fixture.nativeElement.querySelector('.instructor-name').getAttribute('href')).toBe('/users/user-1');
+    expect(texts('.instructor-meta')).toEqual([
+      'tools.pages.toolDetails.certificationsGiven',
+      'tools.pages.toolDetails.certificationsGivenOne',
     ]);
+    expect(removeButtons()[0].getAttribute('aria-label')).toBe('tools.pages.toolDetails.actions.removeInstructorLabel');
   });
 
-  it('should offer the candidates that are not selected yet, filtered by the search text', async () => {
-    const autocomplete = await loader.getHarness(MatAutocompleteHarness);
+  it('should say so when there are no instructors', async () => {
+    fixture.componentRef.setInput('instructors', []);
+    await fixture.whenStable();
 
-    await autocomplete.focus();
-    expect(await optionTexts(autocomplete)).toEqual(['Paul Panzer', 'Karl Klammer']);
-
-    await autocomplete.selectOption({ text: 'Paul Panzer' });
-    // after a selection the panel only opens again while typing
-    await autocomplete.enterText('k');
-    expect(await optionTexts(autocomplete)).toEqual(['Karl Klammer']);
+    expect(texts('.no-instructors')).toEqual(['tools.pages.toolDetails.noInstructors']);
   });
 
-  it('should emit the add command with the selected candidates', async () => {
-    await (await loader.getHarness(MatAutocompleteHarness)).selectOption({ text: 'Karl Klammer' });
+  it('should request adding instructors', () => {
+    const addRequested = vi.fn();
+    fixture.componentInstance.addRequested.subscribe(addRequested);
 
-    await (
-      await loader.getHarness(MatButtonHarness.with({ text: /tools.pages.toolDetails.instructors.add$/ }))
-    ).click();
+    fixture.nativeElement.querySelector('.card-header button').click();
 
-    expect(added).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-4'] });
+    expect(addRequested).toHaveBeenCalledOnce();
   });
 
-  async function removeErika(confirmed: boolean): Promise<MatButtonHarness> {
-    openConfirmActionDialog.mockReturnValue(of(confirmed));
-    const removeButton = await loader.getHarness(
-      MatButtonHarness.with({ text: /tools.pages.toolDetails.instructors.remove$/ }),
-    );
-    expect(await removeButton.isDisabled()).toBe(true);
+  it('should remove an instructor after confirmation', () => {
+    openConfirmAction.mockReturnValue(of(true));
 
-    await (await loader.getHarness(MatCheckboxHarness.with({ label: 'Erika Musterfrau' }))).check();
-    await removeButton.click();
-    return removeButton;
-  }
+    removeButtons()[1].click();
 
-  it('should emit the remove command with the checked instructors after a destructive confirmation', async () => {
-    await removeErika(true);
-
-    expect(openConfirmActionDialog).toHaveBeenCalledExactlyOnceWith({
+    expect(openConfirmAction).toHaveBeenCalledExactlyOnceWith({
       title: 'tools.dialogs.removeInstructors.title',
       message: 'tools.dialogs.removeInstructors.message',
-      entity: 'Erika Musterfrau',
+      entity: 'Paul Richter',
       confirmLabel: 'tools.dialogs.removeInstructors.confirm',
       destructive: true,
     });
-    expect(removed).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-2'] });
+    expect(instructorsRemoved).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1', instructorIds: ['user-2'] });
   });
 
-  it('should keep the selection and emit nothing when the confirmation is cancelled', async () => {
-    const removeButton = await removeErika(false);
+  it('should warn when the last instructor is removed', async () => {
+    openConfirmAction.mockReturnValue(of(true));
+    fixture.componentRef.setInput('instructors', [instructors[0]]);
+    await fixture.whenStable();
 
-    expect(removed).not.toHaveBeenCalled();
-    expect(await removeButton.isDisabled()).toBe(false);
+    removeButtons()[0].click();
+
+    expect(openConfirmAction).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'tools.dialogs.removeInstructors.messageLast' }),
+    );
+  });
+
+  it('should not remove an instructor when the confirmation is cancelled', () => {
+    openConfirmAction.mockReturnValue(of(false));
+
+    removeButtons()[0].click();
+
+    expect(instructorsRemoved).not.toHaveBeenCalled();
   });
 });

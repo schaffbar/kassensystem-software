@@ -1,0 +1,59 @@
+<schbar-form-dialog-header
+  [title]="'tools.dialogs.addInstructors.title' | translate"
+  [subtitle]="'tools.dialogs.addInstructors.subtitle' | translate: { name: data.toolName }" />
+
+<mat-dialog-content>
+  <mat-form-field class="search-field full-width" subscriptSizing="dynamic">
+    <mat-icon matPrefix>search</mat-icon>
+    <input
+      #searchInput
+      matInput
+      type="search"
+      [attr.aria-label]="'tools.dialogs.addInstructors.search' | translate"
+      [placeholder]="'tools.dialogs.addInstructors.searchPlaceholder' | translate"
+      [value]="searchText()"
+      (input)="searchCandidates(searchInput.value)" />
+  </mat-form-field>
+
+  <mat-checkbox class="only-certified" [checked]="onlyCertified()" (change)="showOnlyCertified($event.checked)">
+    {{ 'tools.dialogs.addInstructors.onlyCertified' | translate }}
+  </mat-checkbox>
+
+  <div class="candidates" role="group" [attr.aria-label]="'tools.dialogs.addInstructors.search' | translate">
+    @for (candidate of shownCandidates(); track candidate.id) {
+      <mat-checkbox
+        class="candidate"
+        [class.selected]="selectedIds().has(candidate.id)"
+        [checked]="selectedIds().has(candidate.id)"
+        (change)="toggleCandidate(candidate.id)">
+        <span class="candidate-content">
+          <span class="avatar" aria-hidden="true">{{ candidate.initials }}</span>
+          <span class="candidate-text">
+            <span class="candidate-name">{{ candidate.name }}</span>
+            <span class="candidate-meta">
+              {{
+                candidate.certificationKey
+                  | translate: { date: (candidate.certification?.certifiedAt | date: 'mediumDate') }
+              }}
+            </span>
+          </span>
+        </span>
+      </mat-checkbox>
+    } @empty {
+      <p class="no-candidates">{{ 'tools.dialogs.addInstructors.noPersons' | translate }}</p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
+    {{ 'shared.actions.cancel' | translate }}
+  </button>
+  <button matButton="filled" type="button" [disabled]="selectedIds().size === 0" (click)="addToolInstructors()">
+    @if (selectedIds().size > 0) {
+      {{ 'tools.dialogs.addInstructors.confirmCount' | translate: { count: selectedIds().size } }}
+    } @else {
+      {{ 'tools.dialogs.addInstructors.confirm' | translate }}
+    }
+  </button>
+</mat-dialog-actions>

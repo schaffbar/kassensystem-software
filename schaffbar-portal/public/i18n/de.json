@@ -281,14 +281,35 @@
         "confirm": "Zuweisung aufheben"
       },
       "removeInstructors": {
-        "title": "Einweiser entfernen",
-        "message": "Sind Sie sicher, dass Sie die ausgewählten Einweiser entfernen möchten?",
-        "confirm": "Einweiser entfernen"
+        "title": "Als Einweiser entfernen?",
+        "message": "Die Person kann danach für dieses Werkzeug keine neuen Einweisungen mehr eintragen. Bisher durchgeführte Einweisungen bleiben gültig, ebenso ihre eigene Einweisung.",
+        "confirm": "Als Einweiser entfernen",
+        "messageLast": "Die Person kann danach keine neuen Einweisungen mehr eintragen – und es gibt danach keine Einweiser mehr: Niemand kann für dieses Werkzeug neue Einweisungen eintragen. Bisher durchgeführte Einweisungen bleiben gültig."
       },
       "deleteCertification": {
         "title": "Einweisung löschen",
         "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?",
         "confirm": "Einweisung löschen"
+      },
+      "editTool": {
+        "title": "Werkzeug bearbeiten",
+        "subtitle": "{{name}} · {{count}} Personen eingewiesen",
+        "impactToRed": "Danach können nur noch die {{count}} Personen mit aktiver Einweisung „{{name}}“ an der Schaltbox freischalten. Alle anderen werden abgelehnt.",
+        "impactToYellow": "Die Schaltbox gibt „{{name}}“ danach für alle frei – auch ohne Einweisung. Die Nutzung wird weiter erfasst."
+      },
+      "addInstructors": {
+        "title": "Einweiser hinzufügen",
+        "subtitle": "{{name}} · Einweiser dürfen andere Personen einweisen",
+        "search": "Personen suchen",
+        "searchPlaceholder": "Name suchen",
+        "onlyCertified": "Nur Personen mit aktiver Einweisung zeigen",
+        "certifiedSince": "Eingewiesen seit {{date}}",
+        "paused": "Einweisung pausiert",
+        "revoked": "Einweisung entzogen",
+        "notCertified": "Nicht eingewiesen",
+        "noPersons": "Keine passende Person",
+        "confirm": "Einweiser hinzufügen",
+        "confirmCount": "{{count}} Einweiser hinzufügen"
       }
     },
     "tooltips": {
@@ -320,7 +341,7 @@
       "toolDetails": {
         "detailsTab": "Details",
         "certificationsTab": "Einweisungen",
-        "configurationTab": "Konfiguration"
+        "configurationTab": "Hardware"
       }
     },
     "pages": {
@@ -373,7 +394,8 @@
           "toolInformation": "Werkzeuginformationen",
           "rfidReaderAssignment": "RFID-Lesegerät",
           "wlanRelais": "WLAN-Relais",
-          "instructors": "Einweiser"
+          "instructors": "Einweiser ({{count}})",
+          "hardware": "Hardware"
         },
         "certifications": {
           "batchCreate": {
@@ -392,12 +414,30 @@
         "errors": {
           "invalidIpAddress": "Bitte geben Sie eine gültige IP-Adresse ein (z.B. 192.168.1.1)."
         },
-        "instructors": {
-          "noInstructors": "Keine Einweiser für dieses Werkzeug vorhanden.",
-          "addTitle": "Einweiser hinzufügen",
-          "searchUsers": "Benutzer suchen",
-          "add": "Einweiser hinzufügen",
-          "remove": "Ausgewählte entfernen"
+        "actions": {
+          "edit": "Bearbeiten",
+          "editMenu": "Bearbeiten …",
+          "delete": "Werkzeug löschen …",
+          "configureHardware": "Hardware konfigurieren",
+          "addInstructors": "Einweiser hinzufügen",
+          "removeInstructor": "Entfernen …",
+          "removeInstructorLabel": "{{name}} als Einweiser entfernen"
+        },
+        "properties": {
+          "activeCertifications": "Aktive Einweisungen"
+        },
+        "persons": "{{count}} Personen",
+        "personsOne": "1 Person",
+        "noDescription": "Keine Beschreibung",
+        "certificationsGiven": "{{count}} Einweisungen durchgeführt",
+        "certificationsGivenOne": "1 Einweisung durchgeführt",
+        "noInstructors": "Noch keine Einweiser – nur Einweiser können neue Einweisungen eintragen.",
+        "hardware": {
+          "rfidReader": "RFID-Lesegerät (Schaltbox)",
+          "noRfidReader": "Keine Schaltbox zugeordnet",
+          "wlanRelais": "WLAN-Relais",
+          "noWlanRelais": "Kein WLAN-Relais eingerichtet",
+          "unnamedRfidReader": "Lesegerät {{macAddress}}"
         }
       }
     },

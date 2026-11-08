@@ -1,16 +1,20 @@
+// two columns like the prototype: information and instructors, next to them the hardware; one column on a phone
 :host {
   display: flex;
-  gap: 40px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-.left {
-  min-width: 300px;
-  max-width: 600px;
-  flex: 1;
+.main {
+  display: flex;
+  flex: 2 1 460px;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
 }
 
-.right {
-  min-width: 280px;
-  max-width: 400px;
-  flex: 0 0 auto;
+.side {
+  flex: 1 1 320px;
+  min-width: 0;
 }

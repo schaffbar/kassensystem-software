@@ -1,21 +1,17 @@
-.tool-detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.tool-detail-header__title {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px;
-}
-
 .tab-content {
-  padding: 20px;
+  padding: 20px 0;
+}
+
+// number of certifications next to the tab label, like in the prototype
+.tab-count {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
 }
 
 .load-error {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }

@@ -1,10 +1,40 @@
-.tool-info-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.tool-info-content {
+:host {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.card-header {
+  margin-bottom: 0;
+}
+
+.description {
+  max-width: 640px;
+  margin: 0;
+  color: var(--text-2);
+  white-space: pre-line;
+
+  &.missing {
+    color: var(--text-3);
+  }
+}
+
+// what the requirement means at the switch box
+.requirement-hint {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 13px;
+
+  mat-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: var(--text-3);
+    font-size: 18px;
+  }
 }

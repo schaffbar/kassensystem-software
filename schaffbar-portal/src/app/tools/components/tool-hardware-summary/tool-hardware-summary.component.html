@@ -1,0 +1,44 @@
+@let hardware = toolHardwareSummary();
+
+<div class="card-header">
+  <h2>{{ 'tools.pages.toolDetails.headers.hardware' | translate }}</h2>
+</div>
+
+<div class="hardware-part rfid-reader" [class.missing]="!hardware.rfidReader">
+  <mat-icon aria-hidden="true">{{ hardware.rfidReader ? 'sensors' : 'warning' }}</mat-icon>
+  <span class="part-text">
+    <span class="part-label">{{ 'tools.pages.toolDetails.hardware.rfidReader' | translate }}</span>
+    @if (hardware.rfidReader; as rfidReader) {
+      <a class="part-value" [routerLink]="[rfidReadersLink, rfidReader.id]">
+        {{
+          rfidReader.name ||
+            ('tools.pages.toolDetails.hardware.unnamedRfidReader' | translate: { macAddress: rfidReader.macAddress })
+        }}
+      </a>
+    } @else {
+      <span class="part-value">{{ 'tools.pages.toolDetails.hardware.noRfidReader' | translate }}</span>
+    }
+  </span>
+</div>
+
+<div class="hardware-part wlan-relais" [class.missing]="!hardware.wlanRelaisType">
+  <mat-icon aria-hidden="true">{{ hardware.wlanRelaisType ? 'electrical_services' : 'warning' }}</mat-icon>
+  <span class="part-text">
+    <span class="part-label">{{ 'tools.pages.toolDetails.hardware.wlanRelais' | translate }}</span>
+    @if (hardware.wlanRelaisType) {
+      <span class="part-value">
+        {{ hardware.wlanRelaisType | wlanRelaisTypeKey | translate }}
+        @if (hardware.ipAddress) {
+          · <span class="mono">{{ hardware.ipAddress }}</span>
+        }
+      </span>
+    } @else {
+      <span class="part-value">{{ 'tools.pages.toolDetails.hardware.noWlanRelais' | translate }}</span>
+    }
+  </span>
+</div>
+
+<button matButton="outlined" type="button" class="configure-button" (click)="configureRequested.emit()">
+  {{ 'tools.pages.toolDetails.actions.configureHardware' | translate }}
+  <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+</button>
