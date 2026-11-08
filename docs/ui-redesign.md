@@ -502,7 +502,16 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      eine offene Aufgabe an der Theke, wichtiger als die Anleitung; ohne Anzahl, das Backend erlaubt nur eine Person. Ohne Backend noch offen: „Rückgabe ausstehend“, Leihtag-Nummer, „Zuletzt gelesen“,
      Deaktivieren/Reaktivieren, Person vom Tag aus zuweisen, Live-Status des Register-Lesegeräts. Ohne neuen Dialog
      noch offen: „ID manuell eingeben“ (`POST /rfid-tags` gibt es schon).
-   - [ ] Werkzeuge
+   - [x] Werkzeuge (Liste, ohne Detailseite): wie im Prototyp – Untertitel „N Werkzeuge · N in Benutzung“, Button
+     „Werkzeug hinzufügen“, Suche, Bereichsfilter mit Anzahl und Umschalter Karten/Liste (`schbar-segmented-control`).
+     Karten nach Bereich gruppiert mit Status (In Benutzung/Frei aus `GET /tool-dashboard/active-tools`),
+     Einweisungspflicht, „Genutzt von …“ und Hardware („Schaltbox · Shelly …“ oder „Ohne Schaltbox – Nutzung wird
+     nicht erfasst“); Liste mit ⋯-Menü (Details, Löschen). Dialog „Neues Werkzeug anlegen“ als Formular-Dialog mit
+     Bereich und Einweisungspflicht als Auswahlkarten, Beschreibung mit Zähler – höchstens 255 Zeichen
+     (`tool.description` ist `VARCHAR(255)`, der Prototyp nennt 500). Ohne Backend noch offen: „Störung“, „seit“
+     bei der Nutzung, Anzahl Eingewiesene (`GET /tool-certifications` nur pro Person oder Werkzeug). „Anlegen &
+     Hardware einrichten“ aus dem Entwurf entfällt vorerst (Entscheidung 08.11.2026). Noch im ⋯-Menü offen: „Bearbeiten …“ und „Einweisungen
+     eintragen …“ (die Dialoge gehören zur Detailseite). Nebenbei: `index.html` hat jetzt `lang="de"`.
    - [ ] Benutzer
    - [ ] Übersicht
 
@@ -519,8 +528,8 @@ Jede ist eine eigene Aufgabe nach Phase 1.
 | Live-Aktualisierung per Polling statt Refresh-Button (`interval` über `toSignal` / `rxMethod`, siehe „Subscriptions“ in CLAUDE.md); später SSE/WebSocket | nein |
 | Bestätigungsdialoge: Titel als Frage, Folgen erklären, Häkchen oder Namen eintippen, gesperrter Zustand mit nächstem Schritt | teils (Sperren) |
 | `UserMultiSelect` für Einweisungen und Einweiser (siehe unten) | nein |
-| Werkzeuge: Umschalter Karten/Liste, nach Bereich gruppieren, Bereichsfilter | nein |
-| Filter-Chips in den Listen (z. B. „Ohne RFID-Tag“, „Unter 18“) – Baustein `schbar-filter-chips` gibt es, eingesetzt bei den Lesegeräten | teils |
+| ~~Werkzeuge: Umschalter Karten/Liste, nach Bereich gruppieren, Bereichsfilter~~ – erledigt mit der Werkzeugliste | nein |
+| Filter-Chips in den Listen (z. B. „Ohne RFID-Tag“, „Unter 18“) – Baustein `schbar-filter-chips` gibt es, eingesetzt bei Lesegeräten und Tags | teils |
 | Neue Dialoge: Benutzer in einem Dialog bearbeiten, Tag manuell erfassen, Werkzeug vom Lesegerät aus zuordnen, … | teils |
 | „Braucht Aufmerksamkeit“, Kennzahlen, Online-Status, Lese-Protokoll, Zahlungsart, … | ja |
 
