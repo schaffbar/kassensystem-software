@@ -73,6 +73,10 @@ export class AddToolInstructorsFormComponent {
     this.searchText.set(searchText);
   }
 
+  protected clearSearch(): void {
+    this.searchText.set('');
+  }
+
   protected showOnlyCertified(onlyCertified: boolean): void {
     this.onlyCertified.set(onlyCertified);
   }

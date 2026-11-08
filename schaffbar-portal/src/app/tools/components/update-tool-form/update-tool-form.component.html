@@ -63,7 +63,12 @@
         <span class="optional">{{ 'tools.dialogs.addTool.optional' | translate }}</span>
       </label>
       <mat-form-field class="full-width description-field" subscriptSizing="dynamic">
-        <textarea id="description" matInput rows="3" [formField]="toolForm.description"></textarea>
+        <textarea
+          id="description"
+          matInput
+          rows="3"
+          [placeholder]="'tools.dialogs.addTool.descriptionPlaceholder' | translate"
+          [formField]="toolForm.description"></textarea>
         <mat-hint align="end">{{ toolForm.description().value().length }} / {{ descriptionMaxLength }}</mat-hint>
         <mat-error>
           <schbar-field-error [field]="toolForm.description" label="tools.shared.toolProperties.description" />

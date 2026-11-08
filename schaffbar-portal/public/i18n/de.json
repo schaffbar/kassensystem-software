@@ -302,6 +302,7 @@
         "subtitle": "{{name}} · Einweiser dürfen andere Personen einweisen",
         "search": "Personen suchen",
         "searchPlaceholder": "Name suchen",
+        "clearSearch": "Suche leeren",
         "onlyCertified": "Nur Personen mit aktiver Einweisung zeigen",
         "certifiedSince": "Eingewiesen seit {{date}}",
         "paused": "Einweisung pausiert",

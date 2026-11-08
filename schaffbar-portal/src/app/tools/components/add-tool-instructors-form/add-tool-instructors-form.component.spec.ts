@@ -105,6 +105,20 @@ describe('AddToolInstructorsFormComponent', () => {
     expect(texts('.candidate-name')).toEqual(['Mia Fischer']);
   });
 
+  it('should clear the search', async () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="search"]');
+    expect(fixture.nativeElement.querySelector('.search-field button')).toBeNull();
+    input.value = 'mia';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    fixture.nativeElement.querySelector('.search-field button').click();
+    await fixture.whenStable();
+
+    expect(input.value).toBe('');
+    expect(texts('.candidate-name')).toEqual(['Jonas Weber', 'Mia Fischer']);
+  });
+
   it('should add nothing before a person is selected', () => {
     expect(saveButton().disabled).toBe(true);
     expect(saveButton().textContent?.trim()).toBe('tools.dialogs.addInstructors.confirm');

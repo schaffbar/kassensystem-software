@@ -302,6 +302,7 @@
         "subtitle": "{{name}} · instructors may certify other people",
         "search": "Search people",
         "searchPlaceholder": "Search name",
+        "clearSearch": "Clear search",
         "onlyCertified": "Show only people with an active certification",
         "certifiedSince": "Certified since {{date}}",
         "paused": "Certification paused",

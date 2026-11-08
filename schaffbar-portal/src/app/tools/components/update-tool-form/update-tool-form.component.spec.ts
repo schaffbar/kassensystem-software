@@ -79,6 +79,7 @@ describe('UpdateToolFormComponent', () => {
     );
     expect(query('schbar-form-dialog-header .subtitle')?.textContent?.trim()).toBe('tools.dialogs.editTool.subtitle');
     expect(query('button[type="submit"]')?.textContent?.trim()).toBe('shared.actions.saveChanges');
+    expect(query('#description')?.getAttribute('placeholder')).toBe('tools.dialogs.addTool.descriptionPlaceholder');
   });
 
   it('should close with the update command', async () => {
