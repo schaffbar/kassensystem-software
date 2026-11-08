@@ -473,13 +473,22 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
    - `RowMenu` (⋯) ersetzt den roten Löschen-Button pro Zeile – mit den Aktionen, die es heute gibt.
    - `PageHeader` (Titel, Aktionen, Brotkrümel auf Detailseiten).
    - `EmptyState` für leere Listen.
-   - Dialoge nur im neuen Aussehen (Kopf, Inhalt, Fußzeile) – ohne Trennlinie, Abstände über `mat.dialog-overrides`.
+   - Dialoge nur im neuen Aussehen (Kopf, Inhalt, Fußzeile) – ohne `<mat-divider />`, Abstände über
+     `mat.dialog-overrides`. Bestätigungen ohne Linien; Formular-Dialoge mit Linien und Schließen-X (Schritt 4).
 4. [ ] **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht: Tabellen, Karten
    und Formulare im neuen Design, Tabs wie im Entwurf benannt, Übersicht mit den zwei vorhandenen Widgets als Karten.
    Refresh-Buttons bleiben. Fest eingetragene Farben in Komponenten-Styles durch Tokens ersetzen.
    - [x] RFID-Lesegeräte: Liste mit Seitenkopf, Tabelle als Karte (mobil scrollbar), ⋯-Menü (Details, Löschen) statt
-     rotem Button, leere Liste, Typ „Nicht festgelegt“ als Badge, MAC in Mono. Details mit Brotkrümeln,
-     „Typ ändern“ als Button mit Text, Geräteinformationen als Karte. Paginator überall auf Deutsch.
+     rotem Button, leere Liste, Typ „Nicht festgelegt“ als Badge, MAC in Mono. Paginator überall auf Deutsch.
+     Details wie im Prototyp: Kopf mit Icon, Typ-Badge, MAC, „Bearbeiten“ und ⋯-Menü; Geräteinformationen als Liste
+     mit Kopier-Button und Dialog „Lesegerät bearbeiten“ (Formatprüfung Socket-Name, Hinweis bei geändertem
+     Socket-Namen); Gerätetyp mit Beschreibung und Auswahlkarten; Gefahrenzone mit „Lesegerät löschen …“.
+     Formular-Dialoge wie im Prototyp: Kopf mit Untertitel und Schließen-X, Linien oben und unten, „Änderungen
+     speichern“ (`schbar-form-dialog-header`, Klasse `form-dialog`) – die übrigen Formular-Dialoge folgen mit ihren
+     Seiten.
+     Noch offen (Backend): Online-Status/Offline-Banner, letzte Lesevorgänge, Werkzeug zuordnen/trennen,
+     Namens-Duplikatprüfung. Der Typ wird ohne Bestätigungsdialog gespeichert (Entscheidung 08.11.2026 – der
+     Dialog „Typ ändern“ aus dem Entwurf entfällt); gesperrt bleibt er bei einer Schaltbox mit Werkzeug.
    - [ ] RFID-Tags
    - [ ] Werkzeuge
    - [ ] Benutzer

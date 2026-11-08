@@ -1,14 +1,16 @@
 import { computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { map, Observable, of } from 'rxjs';
 
+import { ROUTE } from '../../../app.routes';
 import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { mutation } from '../../../shared/state/mutation';
 import { toChangeRfidReaderTypeRequest, toRfidReader, toUpdateRfidReaderRequest } from '../../rfid-reader.mapper';
-import { ChangeRfidReaderTypeCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { ChangeRfidReaderTypeCommand, DeleteRfidReaderCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 
 interface RfidReaderDetailState {
   rfidReaderId: string | null;
@@ -21,6 +23,7 @@ export const RfidReaderDetailStore = signalStore(
     return {
       _rfidReadersApi: rfidReadersApi,
       _toolsApi: inject(ToolsApiService),
+      _router: inject(Router),
       // (re)loads whenever the id changes
       _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
     };
@@ -54,6 +57,11 @@ export const RfidReaderDetailStore = signalStore(
       request: (command) =>
         store._rfidReadersApi.changeRfidReaderType(command.rfidReaderId, toChangeRfidReaderTypeRequest(command)),
       onSuccess: () => store._rfidReaderResource.reload(),
+    }),
+    // the page has nothing left to show, so it goes back to the list
+    deleteRfidReader: mutation<DeleteRfidReaderCommand>({
+      request: (command) => store._rfidReadersApi.deleteRfidReader(command.rfidReaderId),
+      onSuccess: () => void store._router.navigate([ROUTE.RFID_READERS]),
     }),
   })),
 );

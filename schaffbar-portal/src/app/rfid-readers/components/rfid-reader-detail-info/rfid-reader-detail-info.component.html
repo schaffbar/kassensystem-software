@@ -1,72 +1,42 @@
+@let info = rfidReaderDetailInfo();
+
 <div class="card-header">
   <h2>{{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderInformation' | translate }}</h2>
-  <button
-    matIconButton
-    type="button"
-    [attr.aria-label]="'shared.actions.edit' | translate"
-    (click)="editRfidReader()"
-    [disabled]="isEditing()">
-    <mat-icon>edit</mat-icon>
+  <button matButton type="button" (click)="editRequested.emit()">
+    {{ 'rfidReaders.pages.rfidReaderDetails.actions.edit' | translate }}
   </button>
 </div>
 
-<form [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width readonly-field mono-field" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</mat-label>
-        <input id="macAddress" matInput [value]="rfidReaderDetailInfo().macAddress" readonly />
-      </mat-form-field>
-    </div>
+<dl>
+  <div>
+    <dt>{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</dt>
+    <dd class="name">{{ info.name | orDash }}</dd>
   </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width readonly-field" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.type' | translate }}</mat-label>
-        <input
-          id="type"
-          matInput
-          [class.type-missing]="!rfidReaderDetailInfo().type"
-          [value]="rfidReaderDetailInfo().type | rfidReaderTypeKey | translate"
-          readonly />
-        <!-- a reader without type does not work yet, so the missing type is highlighted;
-             one @if per node, otherwise mat-form-field does not project them into the suffix and hint slots -->
-        @if (!rfidReaderDetailInfo().type) {
-          <mat-icon matSuffix class="type-missing">warning</mat-icon>
-        }
-        @if (!rfidReaderDetailInfo().type) {
-          <mat-hint class="type-missing">
-            {{ 'rfidReaders.pages.rfidReaderDetails.hints.typeMissing' | translate }}
-          </mat-hint>
-        }
-      </mat-form-field>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</mat-label>
-        <input id="name" matInput [formField]="rfidReaderForm.name" />
-      </mat-form-field>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always" [hideRequiredMarker]="true">
-        <mat-label>{{ 'rfidReaders.shared.rfidReaderProperties.socketName' | translate }}</mat-label>
-        <input id="socketName" matInput [formField]="rfidReaderForm.socketName" />
-      </mat-form-field>
-    </div>
-  </div>
-
-  @if (isEditing()) {
-    <div class="form-actions">
-      <button matButton="outlined" type="button" (click)="discardRfidReaderChanges()">
-        {{ 'shared.actions.cancel' | translate }}
+  <div>
+    <dt>{{ 'rfidReaders.shared.rfidReaderProperties.macAddress' | translate }}</dt>
+    <dd class="mac-address">
+      <span class="mono">{{ info.macAddress }}</span>
+      <button
+        matIconButton
+        type="button"
+        [attr.aria-label]="'rfidReaders.pages.rfidReaderDetails.actions.copyMacAddress' | translate"
+        [cdkCopyToClipboard]="info.macAddress"
+        (cdkCopyToClipboardCopied)="showMacAddressCopied($event)">
+        <mat-icon>{{ isMacAddressCopied() ? 'check' : 'content_copy' }}</mat-icon>
       </button>
-      <button matButton="filled" type="submit">
-        {{ 'shared.actions.save' | translate }}
-      </button>
-    </div>
-  }
-</form>
+      <span class="cdk-visually-hidden" aria-live="polite">
+        @if (isMacAddressCopied()) {
+          {{ 'rfidReaders.pages.rfidReaderDetails.actions.macAddressCopied' | translate }}
+        }
+      </span>
+    </dd>
+  </div>
+  <div>
+    <dt>{{ 'rfidReaders.shared.rfidReaderProperties.socketName' | translate }}</dt>
+    <dd class="socket-name mono">{{ info.socketName | orDash }}</dd>
+  </div>
+  <div>
+    <dt>{{ 'rfidReaders.shared.rfidReaderProperties.createdAt' | translate }}</dt>
+    <dd class="created-at">{{ info.createdAt | date: 'mediumDate' }}</dd>
+  </div>
+</dl>

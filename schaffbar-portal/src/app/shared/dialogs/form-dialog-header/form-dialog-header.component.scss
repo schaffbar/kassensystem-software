@@ -1,0 +1,43 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 16px 16px 24px;
+  border-bottom: 1px solid var(--border);
+  // the title keeps its look from the global dialog overrides, only its padding moves to this header
+  @include mat.dialog-overrides(
+    (
+      headline-padding: 0,
+    )
+  );
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+// Material lines up the title with a 40px high ::before – the header sets its own spacing
+h2::before {
+  display: none;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-3);
+}
+
+button {
+  flex: 0 0 auto;
+  margin-top: -6px;
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--text-3),
+    )
+  );
+}

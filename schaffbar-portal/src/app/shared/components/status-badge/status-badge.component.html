@@ -1,2 +1,4 @@
-<mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
+@if (icon(); as currentIcon) {
+  <mat-icon aria-hidden="true">{{ currentIcon }}</mat-icon>
+}
 <span class="label"><ng-content /></span>

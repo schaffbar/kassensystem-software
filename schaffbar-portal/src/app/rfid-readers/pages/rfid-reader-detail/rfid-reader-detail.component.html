@@ -6,12 +6,26 @@
 }
 
 @if (detailsStore.rfidReader(); as rfidReader) {
+  @let rfidReaderName = rfidReader.name || rfidReader.macAddress;
+
   <schbar-page-header
-    [title]="rfidReader.name || rfidReader.macAddress"
+    [icon]="rfidReader.type | rfidReaderTypeIcon"
+    [title]="rfidReaderName"
     [breadcrumbs]="[{ label: 'rfidReaders.title' | translate, link: rfidReadersLink }]">
-    <button matButton="outlined" type="button" (click)="changeRfidReaderType()">
-      <mat-icon>swap_horiz</mat-icon>
-      {{ 'rfidReaders.pages.rfidReaderDetails.actions.changeType' | translate }}
+    @if (rfidReader.type) {
+      <schbar-status-badge pageHeaderMeta tone="neutral">
+        {{ rfidReader.type | rfidReaderTypeKey | translate }}
+      </schbar-status-badge>
+    } @else {
+      <schbar-status-badge pageHeaderMeta tone="danger" icon="warning">
+        {{ rfidReader.type | rfidReaderTypeKey | translate }}
+      </schbar-status-badge>
+    }
+    <span pageHeaderMeta class="mac-address mono">{{ rfidReader.macAddress }}</span>
+
+    <button matButton="outlined" type="button" (click)="editRfidReader()">
+      <mat-icon>edit</mat-icon>
+      {{ 'rfidReaders.pages.rfidReaderDetails.actions.edit' | translate }}
     </button>
     <button
       matIconButton
@@ -20,7 +34,28 @@
       (click)="reloadRfidReader()">
       <mat-icon>refresh</mat-icon>
     </button>
+    <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: rfidReaderName }">
+      <button mat-menu-item type="button" (click)="editRfidReader()">
+        <mat-icon>edit</mat-icon>
+        <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.editMenu' | translate }}</span>
+      </button>
+      <mat-divider />
+      <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidReader()">
+        <mat-icon>delete</mat-icon>
+        <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}</span>
+      </button>
+    </schbar-row-menu>
   </schbar-page-header>
 
-  <schbar-rfid-reader-detail-info [rfidReaderDetailInfo]="rfidReader" (rfidReaderChanged)="updateRfidReader($event)" />
+  <div class="detail-layout">
+    <schbar-rfid-reader-detail-info [rfidReaderDetailInfo]="rfidReader" (editRequested)="editRfidReader()" />
+    <schbar-rfid-reader-detail-type
+      [rfidReaderDetailType]="rfidReader"
+      (typeChangeRequested)="changeRfidReaderType($event)" />
+    <schbar-danger-zone [message]="'rfidReaders.pages.rfidReaderDetails.hints.dangerZone' | translate">
+      <button matButton="outlined" type="button" class="danger-button" (click)="deleteRfidReader()">
+        {{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}
+      </button>
+    </schbar-danger-zone>
+  </div>
 }

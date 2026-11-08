@@ -7,10 +7,11 @@ import { StatusBadgeComponent, StatusBadgeTone } from './status-badge.component'
 
 @Component({
   imports: [StatusBadgeComponent],
-  template: `<schbar-status-badge [tone]="tone()" icon="pause_circle">Pausiert</schbar-status-badge>`,
+  template: `<schbar-status-badge [tone]="tone()" [icon]="icon()">Pausiert</schbar-status-badge>`,
 })
 class HostComponent {
   readonly tone = signal<StatusBadgeTone>('warn');
+  readonly icon = signal<string | null>('pause_circle');
 }
 
 describe('StatusBadgeComponent', () => {
@@ -32,6 +33,14 @@ describe('StatusBadgeComponent', () => {
   it('should show the icon and the projected label', () => {
     expect(badge().querySelector('mat-icon')?.textContent).toBe('pause_circle');
     expect(badge().querySelector('mat-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(badge().querySelector('.label')?.textContent).toBe('Pausiert');
+  });
+
+  it('should show only the label without icon', async () => {
+    fixture.componentInstance.icon.set(null);
+    await fixture.whenStable();
+
+    expect(badge().querySelector('mat-icon')).toBeNull();
     expect(badge().querySelector('.label')?.textContent).toBe('Pausiert');
   });
 

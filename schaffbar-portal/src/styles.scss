@@ -171,6 +171,15 @@ html {
       divider-color: var(--border),
     )
   );
+  // page size select as small as the other controls of the paginator
+  @include mat.paginator-overrides(
+    (
+      container-text-color: var(--text-2),
+      form-field-container-height: 32px,
+      form-field-container-vertical-padding: 4px,
+      page-size-select-width: 72px,
+    )
+  );
   @include mat.table-overrides(
     (
       background-color: var(--surface),
@@ -198,6 +207,39 @@ body {
 
 // ----------------------------------------------------------------------------
 // global classes
+
+// form dialogs (create, edit) as `host: { class: 'form-dialog' }`: header (`schbar-form-dialog-header`) and button bar
+// separated by lines, content with more space – confirmations stay without lines. Compact fields like in the
+// prototype: the label above the field (`<label class="field-label" for="…">` instead of `mat-label`), 44px high
+.form-dialog {
+  @include mat.dialog-overrides(
+    (
+      content-padding: 20px 24px,
+      with-actions-content-padding: 20px 24px,
+      actions-padding: 16px 24px,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      container-height: 44px,
+      container-vertical-padding: 10px,
+      subscript-text-size: 13px,
+      subscript-text-line-height: 18px,
+    )
+  );
+
+  mat-dialog-actions {
+    border-top: 1px solid var(--border);
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
 
 // destructive actions (delete, revoke, pause, unassign): danger color instead of the accent – `color="warn"` has no
 // effect in the M3 theme
@@ -252,6 +294,11 @@ body {
     margin: 0;
     font-size: 17px;
     font-weight: 700;
+  }
+
+  // on narrow screens the heading wraps, not the button text
+  > button {
+    flex-shrink: 0;
   }
 }
 

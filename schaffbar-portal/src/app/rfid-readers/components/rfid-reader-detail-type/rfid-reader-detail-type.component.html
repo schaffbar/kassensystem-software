@@ -1,0 +1,55 @@
+@let detailType = rfidReaderDetailType();
+
+<div class="card-header">
+  <div class="header-text">
+    <h2>{{ 'rfidReaders.pages.rfidReaderDetails.headers.rfidReaderType' | translate }}</h2>
+    <p class="intro">{{ 'rfidReaders.pages.rfidReaderDetails.hints.rfidReaderType' | translate }}</p>
+  </div>
+  @if (!isEditing()) {
+    <button matButton="outlined" type="button" (click)="editRfidReaderType()">
+      {{ 'rfidReaders.pages.rfidReaderDetails.actions.changeType' | translate }}
+    </button>
+  }
+</div>
+
+@if (isEditing()) {
+  <form [formRoot]="rfidReaderTypeForm" (submit)="saveRfidReaderType()">
+    <mat-radio-group
+      class="type-options"
+      [formField]="rfidReaderTypeForm.type"
+      [attr.aria-label]="'rfidReaders.pages.rfidReaderDetails.actions.selectType' | translate">
+      @for (type of rfidReaderTypes; track type) {
+        <mat-radio-button
+          class="type-option"
+          [class.selected]="rfidReaderTypeForm.type().value() === type"
+          [value]="type">
+          <span class="type-label">{{ type | rfidReaderTypeKey | translate }}</span>
+          <span class="type-description">{{ type | rfidReaderTypeDescriptionKey | translate }}</span>
+        </mat-radio-button>
+      }
+    </mat-radio-group>
+
+    @if (rfidReaderTypeForm.type().touched() && rfidReaderTypeForm.type().invalid()) {
+      <p class="type-error">
+        <schbar-field-error [field]="rfidReaderTypeForm.type" label="rfidReaders.shared.rfidReaderProperties.type" />
+      </p>
+    }
+
+    <div class="form-actions">
+      <button matButton="outlined" type="button" (click)="discardRfidReaderTypeChanges()">
+        {{ 'shared.actions.cancel' | translate }}
+      </button>
+      <button matButton="filled" type="submit">
+        {{ 'rfidReaders.pages.rfidReaderDetails.actions.saveType' | translate }}
+      </button>
+    </div>
+  </form>
+} @else {
+  <div class="current-type" [class.type-missing]="!detailType.type">
+    <mat-icon aria-hidden="true">{{ detailType.type ? 'check' : 'warning' }}</mat-icon>
+    <div class="type-text">
+      <span class="type-label">{{ detailType.type | rfidReaderTypeKey | translate }}</span>
+      <span class="type-description">{{ detailType.type | rfidReaderTypeDescriptionKey | translate }}</span>
+    </div>
+  </div>
+}

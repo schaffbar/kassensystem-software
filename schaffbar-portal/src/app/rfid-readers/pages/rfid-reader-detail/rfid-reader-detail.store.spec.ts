@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -33,6 +34,7 @@ describe('RfidReaderDetailStore', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         RfidReaderDetailStore,
       ],
     });
@@ -118,6 +120,32 @@ describe('RfidReaderDetailStore', () => {
     httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, type: RfidReaderType.GateKeeperIn });
     await settle();
     expect(store.rfidReader()?.type).toBe(RfidReaderType.GateKeeperIn);
+  });
+
+  it('should go back to the list after deleting the reader', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await loadReader();
+
+    store.deleteRfidReader({ rfidReaderId: 'reader-1' });
+    trigger();
+    const deletion = httpMock.expectOne(`${url}/reader-1`);
+    expect(deletion.request.method).toBe('DELETE');
+    deletion.flush(null);
+    await settle();
+
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['rfid-readers']);
+  });
+
+  it('should stay on the page when deleting fails', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await loadReader();
+
+    store.deleteRfidReader({ rfidReaderId: 'reader-1' });
+    trigger();
+    httpMock.expectOne(`${url}/reader-1`).flush(null, { status: 409, statusText: 'Conflict' });
+    await settle();
+
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   describe('canChangeRfidReaderType', () => {

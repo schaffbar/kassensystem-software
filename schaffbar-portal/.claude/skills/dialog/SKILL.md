@@ -334,7 +334,37 @@ from CLAUDE.md "Forms" and closes itself:
   Enter saves; in a `mat-select` Enter opens the options);
 - the page opens it typed – `this.dialog.open<NewUserFormComponent, void, CreateUserCommand>(…)`, with data
   `this.dialog.open<NewToolFormComponent, NewToolDialogData, CreateToolCommand>(…, { data: … })` – with
-  `minWidth: DIALOG_WIDTH.…` and `disableClose: true`.
+  `...FORM_DIALOG_CONFIG` (`disableClose`, at the top of the window, focus on the first field – otherwise the close
+  button in the header would get it) and `minWidth: DIALOG_WIDTH.…`;
+- layout like the prototype – reference: `rfid-readers/components/update-rfid-reader-form/`:
+
+  ```html
+  <schbar-form-dialog-header
+    [title]="'rfidReaders.dialogs.updateRfidReader.title' | translate"
+    [subtitle]="rfidReader.name + ' · ' + (rfidReader.type | rfidReaderTypeKey | translate)" />
+
+  <form [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
+    <mat-dialog-content>
+      <div>
+        <label class="field-label" for="name">{{ 'rfidReaders.shared.rfidReaderProperties.name' | translate }}</label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input id="name" matInput [formField]="rfidReaderForm.name" />
+          <mat-hint>…</mat-hint>
+          <mat-error><schbar-field-error [field]="rfidReaderForm.name" label="…" /></mat-error>
+        </mat-form-field>
+      </div>
+      …
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button matButton="outlined" type="button" [mat-dialog-close]="undefined">{{ 'shared.actions.cancel' | translate }}</button>
+      <button matButton="filled" type="submit">{{ 'shared.actions.saveChanges' | translate }}</button>
+    </mat-dialog-actions>
+  </form>
+  ```
+
+  with `host: { class: 'form-dialog' }` on the component (lines below the header and above the buttons, padding,
+  44px fields with the label above instead of a floating `mat-label`) and `form { display: contents; }` in its
+  styles. The header's close button closes with `undefined` like cancel.
 
 Once a form dialog is needed in a second place, it moves to `shared/dialogs/` and gets a service.
 

@@ -17,5 +17,6 @@ export type StatusBadgeTone = 'success' | 'info' | 'warn' | 'danger' | 'neutral'
 export class StatusBadgeComponent {
   readonly tone = input.required<StatusBadgeTone>();
   // Material icon name – a status is never shown by color alone
-  readonly icon = input.required<string>();
+  // only a neutral badge for a plain property (e.g. the type of a reader) goes without icon – a status never
+  readonly icon = input<string | null>(null);
 }

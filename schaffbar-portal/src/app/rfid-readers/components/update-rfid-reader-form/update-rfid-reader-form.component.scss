@@ -1,0 +1,60 @@
+// the <form> wraps mat-dialog-content and mat-dialog-actions; without display: contents it would break the dialog
+// layout (scrollable content, actions at the bottom)
+form {
+  display: contents;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.socket-name-changed {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+  color: var(--text);
+
+  mat-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: var(--warn);
+    font-size: 18px;
+  }
+}
+
+.fixed-values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    color: var(--text-3);
+    font-size: 12px;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text);
+    font-weight: 500;
+  }
+}
+
+.type-hint {
+  color: var(--text-3);
+  font-weight: 400;
+}

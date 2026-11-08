@@ -5,6 +5,11 @@
   margin-bottom: 24px;
 }
 
+// 8px gap of the host + 12px = the 20px between the sections of a page
+.breadcrumbs {
+  margin-bottom: 12px;
+}
+
 .breadcrumbs ol {
   display: flex;
   flex-wrap: wrap;
@@ -53,6 +58,32 @@
   gap: 16px;
 }
 
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+// the sidebar's navy with the neon green of the logo – a surface, so the contrast rules for text don't apply
+.icon-tile {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--nav);
+  color: var(--accent);
+
+  mat-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+  }
+}
+
 .title-block {
   display: flex;
   flex-direction: column;
@@ -75,6 +106,7 @@ h1 {
 
 .meta {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
 

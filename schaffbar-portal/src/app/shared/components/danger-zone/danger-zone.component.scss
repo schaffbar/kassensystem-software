@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 520px;
+}
+
+h2 {
+  margin: 0;
+  color: var(--danger);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+p {
+  margin: 0;
+  color: var(--text-2);
+}

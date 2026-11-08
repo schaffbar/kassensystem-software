@@ -22,5 +22,7 @@ export class PageHeaderComponent {
   // translated, like all texts of the header
   readonly title = input.required<string>();
   readonly subtitle = input<string | null>(null);
+  // Material icon in a navy tile in front of the title (detail pages)
+  readonly icon = input<string | null>(null);
   readonly breadcrumbs = input<BreadcrumbViewModel[]>([]);
 }

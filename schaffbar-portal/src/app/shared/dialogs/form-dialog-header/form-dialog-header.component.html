@@ -1,0 +1,14 @@
+<div class="titles">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+  @if (subtitle(); as currentSubtitle) {
+    <p class="subtitle">{{ currentSubtitle }}</p>
+  }
+</div>
+<!-- closes with undefined like the cancel button – no command; mat-dialog-close sets the aria-label from its own input -->
+<button
+  matIconButton
+  type="button"
+  [mat-dialog-close]="undefined"
+  [aria-label]="'shared.actions.closeDialog' | translate">
+  <mat-icon>close</mat-icon>
+</button>

@@ -20,7 +20,9 @@
       "reload": "Neu laden",
       "details": "Details",
       "edit": "Bearbeiten",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "saveChanges": "Änderungen speichern",
+      "closeDialog": "Dialog schließen"
     },
     "table": {
       "actionsColumn": "Aktionen"
@@ -68,6 +70,9 @@
       "nextPage": "Nächste Seite",
       "previousPage": "Vorherige Seite",
       "range": "{{start}} – {{end}} von {{length}}"
+    },
+    "dangerZone": {
+      "title": "Gefahrenzone"
     }
   },
   "sidebar": {
@@ -388,13 +393,25 @@
     "dialogs": {
       "deleteRfidReader": {
         "title": "RFID-Lesegerät löschen",
-        "message": "Sind Sie sicher, dass Sie dieses RFID-Lesegerät löschen möchten?",
+        "message": "Das Lesegerät wird aus dem System entfernt. Verbindet es sich erneut, erscheint es als neues, nicht eingerichtetes Gerät.",
         "confirm": "RFID-Lesegerät löschen"
       },
       "changeRfidReaderType": {
-        "title": "Typ ändern",
         "errors": {
           "switchBoxHasAssignedTool": "Diesem Lesegerät ist ein Werkzeug zugewiesen. Bitte zuerst die Zuweisung entfernen."
+        }
+      },
+      "updateRfidReader": {
+        "title": "Lesegerät bearbeiten",
+        "hints": {
+          "name": "So erscheint das Gerät in Listen und Meldungen, z. B. „Tor Ausgang“.",
+          "socketName": "Nur Kleinbuchstaben, Ziffern und Bindestriche. Muss mit der Konfiguration auf dem Gerät übereinstimmen.",
+          "socketNameChanged": "Das Gerät verbindet sich erst wieder, wenn der Socket-Name auch auf dem Gerät geändert wurde:",
+          "macAddressFixed": "MAC-Adresse (fest)",
+          "type": "im Abschnitt „Gerätetyp“ ändern"
+        },
+        "errors": {
+          "socketNameFormat": "Ungültiges Zeichen – erlaubt sind a–z, 0–9 und „-“"
         }
       }
     },
@@ -406,6 +423,14 @@
       "gate_keeper_out": "Türwächter Ausgang",
       "switch_box": "Schaltbox"
     },
+    "typeDescriptions": {
+      "none": "Das Lesegerät ist erst einsatzbereit, wenn ein Typ festgelegt ist.",
+      "rfid_tag_register": "Nimmt neue Tags ins System auf.",
+      "rfid_tag_assigner": "Weist einen Tag der Person zu, die gerade darauf wartet.",
+      "gate_keeper_in": "Checkt Personen beim Betreten der Werkstatt ein.",
+      "gate_keeper_out": "Checkt Personen beim Verlassen aus und bucht Leihtags zurück.",
+      "switch_box": "Gibt ein Werkzeug nur mit gültiger Einweisung frei."
+    },
     "pages": {
       "rfidReaderList": {
         "subtitle": "{{count}} insgesamt",
@@ -416,13 +441,22 @@
       },
       "rfidReaderDetails": {
         "headers": {
-          "rfidReaderInformation": "Geräteinformationen"
+          "rfidReaderInformation": "Geräteinformationen",
+          "rfidReaderType": "Gerätetyp"
         },
         "hints": {
-          "typeMissing": "Das Lesegerät ist erst einsatzbereit, wenn ein Typ festgelegt ist."
+          "rfidReaderType": "Legt fest, was beim Auflegen eines Tags passiert.",
+          "dangerZone": "Entfernt das Gerät aus dem System. Verbindet es sich erneut, erscheint es wieder als neues Gerät."
         },
         "actions": {
-          "changeType": "Typ ändern"
+          "edit": "Bearbeiten",
+          "editMenu": "Bearbeiten …",
+          "changeType": "Typ ändern",
+          "saveType": "Typ speichern",
+          "selectType": "Gerätetyp wählen",
+          "copyMacAddress": "MAC-Adresse kopieren",
+          "macAddressCopied": "MAC-Adresse kopiert",
+          "delete": "Lesegerät löschen …"
         }
       }
     },
@@ -431,7 +465,8 @@
         "macAddress": "MAC-Adresse",
         "type": "Typ",
         "name": "Name",
-        "socketName": "Socket-Name"
+        "socketName": "Socket-Name",
+        "createdAt": "Registriert am"
       }
     }
   },

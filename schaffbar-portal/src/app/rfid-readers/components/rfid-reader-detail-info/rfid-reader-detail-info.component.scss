@@ -1,8 +1,51 @@
+@use '@angular/material' as mat;
+
 :host {
   display: block;
-  max-width: 640px;
 }
 
-.type-missing {
-  color: var(--danger);
+dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+}
+
+dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+dt {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+// the copy button must not make this row taller than the others
+.mac-address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+
+  button {
+    @include mat.icon-button-overrides(
+      (
+        state-layer-size: 32px,
+        icon-color: var(--text-3),
+      )
+    );
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
 }

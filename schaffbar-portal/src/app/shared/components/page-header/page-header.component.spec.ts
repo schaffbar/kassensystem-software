@@ -10,7 +10,7 @@ import { BreadcrumbViewModel, PageHeaderComponent } from './page-header.componen
 @Component({
   imports: [PageHeaderComponent],
   template: `
-    <schbar-page-header [title]="title()" [subtitle]="subtitle()" [breadcrumbs]="breadcrumbs()">
+    <schbar-page-header [title]="title()" [subtitle]="subtitle()" [icon]="icon()" [breadcrumbs]="breadcrumbs()">
       <span pageHeaderMeta>Aktiv</span>
       <button type="button">Bearbeiten</button>
     </schbar-page-header>
@@ -19,6 +19,7 @@ import { BreadcrumbViewModel, PageHeaderComponent } from './page-header.componen
 class HostComponent {
   readonly title = signal('Bandsäge');
   readonly subtitle = signal<string | null>(null);
+  readonly icon = signal<string | null>(null);
   readonly breadcrumbs = signal<BreadcrumbViewModel[]>([]);
 }
 
@@ -44,9 +45,17 @@ describe('PageHeaderComponent', () => {
     expect(query('.meta [pageHeaderMeta]')?.textContent).toBe('Aktiv');
   });
 
-  it('should show neither subtitle nor breadcrumbs by default', () => {
+  it('should show neither subtitle, icon nor breadcrumbs by default', () => {
     expect(query('.subtitle')).toBeNull();
+    expect(query('.icon-tile')).toBeNull();
     expect(query('nav')).toBeNull();
+  });
+
+  it('should show the icon in front of the title', async () => {
+    fixture.componentInstance.icon.set('sensors');
+    await fixture.whenStable();
+
+    expect(query('.icon-tile mat-icon')?.textContent).toBe('sensors');
   });
 
   it('should show the subtitle', async () => {

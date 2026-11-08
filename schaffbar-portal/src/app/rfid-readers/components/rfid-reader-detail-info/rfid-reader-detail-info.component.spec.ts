@@ -1,145 +1,103 @@
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
+import { LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatInputHarness } from '@angular/material/input/testing';
-
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { RfidReaderDetailInfoComponent, RfidReaderDetailInfoViewModel } from './rfid-reader-detail-info.component';
+
+registerLocaleData(localeDe);
 
 describe('RfidReaderDetailInfoComponent', () => {
   const rfidReader: RfidReaderDetailInfoViewModel = {
-    id: 'reader-1',
+    name: 'Tor Ausgang',
     macAddress: 'AA:BB:CC:DD:EE:FF',
-    type: RfidReaderType.SwitchBox,
-    name: 'Reader 1',
-    socketName: 'Steckdose 1',
+    socketName: 'gate-out',
+    createdAt: new Date('2025-01-14T10:00:00Z'),
   };
 
   let fixture: ComponentFixture<RfidReaderDetailInfoComponent>;
-  let loader: HarnessLoader;
-  let rfidReaderChanged: Mock;
+  let copy: Mock;
 
   beforeEach(async () => {
+    copy = vi.fn().mockReturnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [RfidReaderDetailInfoComponent],
-      providers: [provideZonelessChangeDetection(), provideTranslateService()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        { provide: LOCALE_ID, useValue: 'de-DE' },
+        { provide: Clipboard, useValue: { copy } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RfidReaderDetailInfoComponent);
     fixture.componentRef.setInput('rfidReaderDetailInfo', rfidReader);
-    rfidReaderChanged = vi.fn();
-    fixture.componentInstance.rfidReaderChanged.subscribe(rfidReaderChanged);
-    loader = TestbedHarnessEnvironment.loader(fixture);
     await fixture.whenStable();
   });
 
-  function input(id: string): Promise<MatInputHarness> {
-    return loader.getHarness(MatInputHarness.with({ selector: `#${id}` }));
+  afterEach(() => vi.useRealTimers());
+
+  function text(selector: string): string {
+    return fixture.nativeElement.querySelector(selector)?.textContent.trim() ?? '';
   }
 
-  async function click(selector: string): Promise<void> {
-    const button = await loader.getHarness(MatButtonHarness.with({ selector }));
-    await button.click();
-    await fixture.whenStable();
+  function copyButton(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('.mac-address button');
   }
 
-  const editButton = '[aria-label="shared.actions.edit"]';
-  const cancelButton = '.form-actions button[type="button"]';
-  const saveButton = '.form-actions button[type="submit"]';
-
-  it('should show the reader values read-only', async () => {
-    expect(await (await input('macAddress')).getValue()).toBe('AA:BB:CC:DD:EE:FF');
-    expect(await (await input('name')).getValue()).toBe('Reader 1');
-    expect(await (await input('name')).isReadonly()).toBe(true);
-    expect(await (await input('socketName')).isReadonly()).toBe(true);
-    expect(await loader.getHarnessOrNull(MatButtonHarness.with({ selector: saveButton }))).toBeNull();
+  it('should show the values of the reader', () => {
+    expect(text('.name')).toBe('Tor Ausgang');
+    expect(text('.mac-address .mono')).toBe('AA:BB:CC:DD:EE:FF');
+    expect(text('.socket-name')).toBe('gate-out');
+    expect(text('.created-at')).toBe('14.01.2025');
   });
 
-  it('should show the translation key of the reader type', async () => {
-    expect(await (await input('type')).getValue()).toBe('rfidReaders.types.switch_box');
-  });
-
-  it('should show "none" for a reader without a type (newly registered)', async () => {
-    fixture.componentRef.setInput('rfidReaderDetailInfo', { ...rfidReader, type: null });
+  it('should show a dash for a reader without name and socket name', async () => {
+    fixture.componentRef.setInput('rfidReaderDetailInfo', { ...rfidReader, name: null, socketName: null });
     await fixture.whenStable();
 
-    expect(await (await input('type')).getValue()).toBe('rfidReaders.types.none');
-    // the hint must be projected into the subscript below the field, not into the field itself
-    const hint: HTMLElement | null = fixture.nativeElement.querySelector(
-      '.mat-mdc-form-field-subscript-wrapper mat-hint',
-    );
-    expect(hint?.textContent).toContain('rfidReaders.pages.rfidReaderDetails.hints.typeMissing');
+    expect(text('.name')).toBe('–');
+    expect(text('.socket-name')).toBe('–');
   });
 
-  it('should show no hint for a reader with a type', () => {
-    expect(fixture.nativeElement.querySelector('mat-hint')).toBeNull();
+  it('should request editing', () => {
+    const editRequested = vi.fn();
+    fixture.componentInstance.editRequested.subscribe(editRequested);
+
+    fixture.nativeElement.querySelector('.card-header button').click();
+
+    expect(editRequested).toHaveBeenCalledOnce();
   });
 
-  it('should make name and socket name editable after clicking edit', async () => {
-    await click(editButton);
+  // whenStable() would wait for the fake timer, so the changes are detected by hand
+  it('should copy the MAC address and confirm it for a while', () => {
+    vi.useFakeTimers();
 
-    expect(await (await input('name')).isReadonly()).toBe(false);
-    expect(await (await input('socketName')).isReadonly()).toBe(false);
-    expect(await (await input('macAddress')).isReadonly()).toBe(true);
+    copyButton().click();
+    fixture.detectChanges();
+
+    expect(copy).toHaveBeenCalledExactlyOnceWith('AA:BB:CC:DD:EE:FF');
+    expect(text('.mac-address mat-icon')).toBe('check');
+    expect(text('[aria-live]')).toBe('rfidReaders.pages.rfidReaderDetails.actions.macAddressCopied');
+
+    vi.advanceTimersByTime(2000);
+    fixture.detectChanges();
+
+    expect(text('.mac-address mat-icon')).toBe('content_copy');
+    expect(text('[aria-live]')).toBe('');
   });
 
-  it('should focus the name field after clicking edit', async () => {
-    await click(editButton);
+  it('should not confirm when copying failed', async () => {
+    copy.mockReturnValue(false);
 
-    expect(await (await input('name')).isFocused()).toBe(true);
-  });
-
-  it('should save exactly once when the form is submitted (e.g. Enter in a field)', async () => {
-    await click(editButton);
-    await (await input('name')).setValue('Neuer Name');
-
-    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
+    copyButton().click();
     await fixture.whenStable();
 
-    expect(rfidReaderChanged).toHaveBeenCalledTimes(1);
-    expect(rfidReaderChanged).toHaveBeenCalledWith({
-      rfidReaderId: 'reader-1',
-      name: 'Neuer Name',
-      socketName: 'Steckdose 1',
-    });
-  });
-
-  it('should emit the changes on save and switch back to read-only', async () => {
-    await click(editButton);
-    await (await input('name')).setValue('Neuer Name');
-    await (await input('socketName')).setValue('');
-
-    await click(saveButton);
-
-    expect(rfidReaderChanged).toHaveBeenCalledWith({
-      rfidReaderId: 'reader-1',
-      name: 'Neuer Name',
-      socketName: undefined,
-    });
-    expect(await (await input('name')).isReadonly()).toBe(true);
-  });
-
-  it('should restore the values on cancel without emitting', async () => {
-    await click(editButton);
-    await (await input('name')).setValue('Neuer Name');
-
-    await click(cancelButton);
-
-    expect(rfidReaderChanged).not.toHaveBeenCalled();
-    expect(await (await input('name')).getValue()).toBe('Reader 1');
-    expect(await (await input('name')).isReadonly()).toBe(true);
-  });
-
-  it('should take over the values when the rfidReader input changes', async () => {
-    fixture.componentRef.setInput('rfidReaderDetailInfo', { ...rfidReader, name: 'Reader 2' });
-    await fixture.whenStable();
-
-    expect(await (await input('name')).getValue()).toBe('Reader 2');
+    expect(text('.mac-address mat-icon')).toBe('content_copy');
   });
 });

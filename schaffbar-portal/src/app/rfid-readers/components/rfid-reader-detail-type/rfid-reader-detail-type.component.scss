@@ -1,0 +1,95 @@
+:host {
+  display: block;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.intro {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.current-type {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+
+  mat-icon {
+    flex: 0 0 auto;
+    color: var(--accent-text);
+  }
+
+  &.type-missing {
+    background: var(--danger-soft);
+
+    mat-icon,
+    .type-label {
+      color: var(--danger);
+    }
+  }
+}
+
+.type-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.type-label {
+  font-weight: 600;
+}
+
+.type-description {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// the selected option gets the accent border; the border width stays the same, so nothing shifts
+.type-option {
+  display: block;
+  padding: 4px 14px 4px 4px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+
+  &:hover {
+    border-color: var(--text-3);
+  }
+
+  &.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .type-label,
+  .type-description {
+    display: block;
+  }
+
+  .type-label {
+    padding-top: 8px;
+  }
+
+  .type-description {
+    padding-bottom: 8px;
+  }
+}
+
+.type-error {
+  margin: 8px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}

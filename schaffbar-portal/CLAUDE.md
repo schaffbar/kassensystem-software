@@ -126,8 +126,9 @@ export class UserContactComponent {
   `submit(this.xyzForm, async () => …)`.
 - A field that only filters (search text, autocomplete) is no form: a plain `signal('')` set by `(input)`.
 - The submit button names the action: a dialog that creates something says what it creates
-  (`users.dialogs.addNewUser.confirm` → "Benutzer hinzufügen"), a form that changes something existing says
-  "Speichern" (`shared.actions.save`). Cancel is always `shared.actions.cancel`.
+  (`users.dialogs.addNewUser.confirm` → "Benutzer hinzufügen"), a dialog that changes something existing says
+  "Änderungen speichern" (`shared.actions.saveChanges`), a form on a page "Speichern" (`shared.actions.save`).
+  Cancel is always `shared.actions.cancel`.
 - Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
   without `type` submits the form, so e.g. "cancel" would save.
 - The result of `saveXyz()` is built as an explicitly typed variable before it is passed on – for readability, even
@@ -138,6 +139,9 @@ export class UserContactComponent {
   styles.
 - Form fields that only display a value and are never editable get the global class `readonly-field`
   (`src/styles.scss`).
+- A detail page shows its values read-only in a card (`<dl>`, see "Design system") and edits them in a form dialog
+  opened by "Bearbeiten" – no inline edit form in the card (`rfid-reader-detail-info` + `update-rfid-reader-form`).
+  The remaining inline forms (`tool-detail-info`, `user-contact`, `user-address`) are converted with their pages.
 - Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in
   `app.config.ts`; tests of components with a datepicker add `provideDateAdapter()` to their providers). Typing
   (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
@@ -178,14 +182,16 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   `--accent-text`.
 - Material components get their look from the `mat.*-overrides(...)` in `src/styles.scss`.
 - Building blocks in `shared/components/`; their texts are passed **translated**:
-  - `schbar-page-header` – `h1`, `subtitle`, `breadcrumbs`; actions are projected, status badges with
-    `pageHeaderMeta`.
+  - `schbar-page-header` – `h1`, `subtitle`, `breadcrumbs`, `icon` (navy tile, detail pages); actions are projected,
+    status badges and further meta (e.g. the MAC address) with `pageHeaderMeta`.
   - `schbar-status-badge` – a status as icon + text, never by color alone (`tone`: `success`, `info`, `warn`,
     `danger`, `neutral`). An enum gets its own badge that maps it once (`certification-status-badge`,
     `certification-requirement-badge`). Not inside a `mat-option`: `mat-select` takes the icon name into the text.
+    Without `icon` only as `neutral` for a plain property, not a status (the type in the header of a reader).
   - `schbar-row-menu` – the ⋯ menu of a table row instead of action buttons; destructive entries come last after a
     `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
   - `schbar-empty-state` – instead of an empty table or list.
+  - `schbar-danger-zone` – last card of a detail page with the destructive action (`danger-button`, asks first).
 - Global classes for the page layout (`src/styles.scss`):
   - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
     card sets it as `host: { class: 'card' }`.
@@ -235,7 +241,12 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
   `bindings: [inputBinding(…), outputBinding(…)]`.
 - **Form dialogs** (`<feature>/components/<name>-form/`) are opened directly by one page and close themselves:
   `dialogRef.close(command)` on save, `[mat-dialog-close]="undefined"` on cancel (not `mat-dialog-close` without a
-  value – that closes with `''`).
+  value – that closes with `''`). They look like the prototype: `host: { class: 'form-dialog' }` (lines below the
+  header and above the buttons), `<schbar-form-dialog-header [title] [subtitle]>` instead of `mat-dialog-title` (title,
+  subtitle naming the entity, close button), compact fields with the label above (`<label class="field-label"
+  for="…">` instead of `mat-label`), and the page opens them with `...FORM_DIALOG_CONFIG` (at the top of the window,
+  focus on the first field instead of the close button, `disableClose`). Confirmations stay centered, without header
+  line and close button.
 - **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
   `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is
   `Result | undefined` – no hand-written types in `subscribe`.
