@@ -1,51 +1,58 @@
-<h3 class="tool-rfid-reader-header">
-  {{ 'tools.pages.toolDetails.headers.rfidReaderAssignment' | translate }}
-  @if (toolRfidReaderAssignment().rfidReaderId) {
-    <button
-      class="danger-button"
-      matIconButton
-      type="button"
-      (click)="clearRfidReader()"
-      [matTooltip]="'tools.tooltips.clearRfidReader' | translate">
-      <mat-icon>link_off</mat-icon>
-    </button>
-  }
-</h3>
+@let tool = toolRfidReaderAssignment();
 
-<form class="tool-rfid-reader-content" [formRoot]="rfidReaderForm" (submit)="saveRfidReader()">
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always">
-        <mat-label>{{ 'tools.shared.toolProperties.rfidReader' | translate }}</mat-label>
-        <mat-select id="rfidReaderId" [formField]="rfidReaderForm.rfidReaderId">
-          @for (rfidReader of rfidReaders(); track rfidReader.id) {
-            <mat-option [value]="rfidReader.id">
-              <div class="option-content">
-                <span>{{ rfidReader.label }}</span>
-                @if (rfidReader.isAssignedToOtherTool) {
-                  <span class="option-content-already-assigned">
-                    ({{ 'tools.pages.toolDetails.messages.alreadyAssigned' | translate }})
-                  </span>
-                }
-              </div>
-            </mat-option>
-          }
-        </mat-select>
-        <mat-error>
-          <schbar-field-error [field]="rfidReaderForm.rfidReaderId" label="tools.shared.toolProperties.rfidReader" />
-        </mat-error>
-      </mat-form-field>
-    </div>
+<div class="card-header">
+  <h2>{{ 'tools.pages.toolDetails.headers.rfidReaderAssignment' | translate }}</h2>
+</div>
+
+<form class="compact-form" [formRoot]="rfidReaderForm" (submit)="changeRfidReader()">
+  <div>
+    <label class="field-label" for="rfidReaderId">
+      {{ 'tools.pages.toolDetails.hardwareConfiguration.switchBox' | translate }}
+    </label>
+    <mat-form-field class="full-width" subscriptSizing="dynamic">
+      <mat-select
+        id="rfidReaderId"
+        [placeholder]="'tools.pages.toolDetails.hardwareConfiguration.noSwitchBox' | translate"
+        [formField]="rfidReaderForm.rfidReaderId">
+        @for (rfidReader of rfidReaders(); track rfidReader.id) {
+          <mat-option [value]="rfidReader.id">
+            {{ rfidReader.name || rfidReader.macAddress }}
+            @if (rfidReader.name) {
+              · <span class="mono">{{ rfidReader.macAddress }}</span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+      <mat-hint>
+        @if (rfidReaders().length) {
+          {{ 'tools.pages.toolDetails.hardwareConfiguration.switchBoxHint' | translate }}
+        } @else {
+          {{ 'tools.pages.toolDetails.hardwareConfiguration.noFreeSwitchBox' | translate }}
+        }
+      </mat-hint>
+    </mat-form-field>
   </div>
 
-  @if (isDirty() && rfidReaderForm().valid()) {
-    <div class="form-actions">
+  <div class="actions">
+    @if (tool.rfidReaderId) {
+      <button
+        matButton="outlined"
+        type="button"
+        class="danger-button clear-button"
+        [disabled]="!tool.canClearRfidReader"
+        (click)="clearRfidReader()">
+        {{ 'tools.pages.toolDetails.hardwareConfiguration.clearSwitchBox' | translate }}
+      </button>
+    }
+    @if (isDirty()) {
       <button matButton="outlined" type="button" (click)="discardRfidReaderChanges()">
         {{ 'shared.actions.cancel' | translate }}
       </button>
-      <button matButton="filled" type="submit">
-        {{ 'shared.actions.save' | translate }}
-      </button>
-    </div>
+      <button matButton="filled" type="submit">{{ 'shared.actions.save' | translate }}</button>
+    }
+  </div>
+
+  @if (tool.rfidReaderId && !tool.canClearRfidReader) {
+    <p class="blocked-hint">{{ 'tools.pages.toolDetails.hardwareConfiguration.clearSwitchBoxBlocked' | translate }}</p>
   }
 </form>

@@ -521,7 +521,7 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      eintragen“: Einweiser auswählen (nur Einweiser des Werkzeugs, einer wird vorausgewählt; ohne Einweiser ein
      Hinweis), Personen per Suche (Name oder E-Mail) und Häkchen, Auswahl als Chips darüber. Ohne Backend noch offen:
      „Datum der Einweisung“ und „Grund“ beim Pausieren/Entziehen (keine Felder im Backend).
-   - [x] Werkzeug-Details, Tab „Details“ (der Tab Hardware ist noch der alte): Kopf mit Icon,
+   - [x] Werkzeug-Details, Tab „Details“: Kopf mit Icon,
      Bereich, Einweisungspflicht und „In Benutzung · Name“, „Bearbeiten“ und ⋯-Menü (Bearbeiten, Werkzeug löschen);
      Tabs Details / Einweisungen (mit Anzahl) / Hardware. Karte Werkzeuginformationen (Beschreibung, Bereich,
      Einweisung, aktive Einweisungen, Erklärung der Einweisungspflicht) mit Dialog „Werkzeug bearbeiten“ (Auswahl-
@@ -532,6 +532,15 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      im Dialog „Einweiser hinzufügen“ keine gesperrten Zeilen („Bereits Einweiser“, „Erst reaktivieren“) – es
      erscheinen nur Personen, die noch keine Einweiser sind, ohne Filter auch nicht eingewiesene. Ohne Backend noch
      offen: Online-Status der Schaltbox, Zustand des Relais („Eingeschaltet“), „seit“ bei der Nutzung.
+   - [x] Werkzeug-Details, Tab „Hardware“: zwei Karten nebeneinander (auf dem Handy untereinander) mit kompakten
+     Feldern (globale Klasse `compact-form`). Karte RFID-Lesegerät: Auswahl „Zugeordnete Schaltbox“ (Name · MAC; nur
+     freie Schaltboxen und die eigene – Schaltboxen anderer Werkzeuge erscheinen nicht mehr), Speichern/Abbrechen erst
+     nach einer Änderung, „Schaltbox trennen …“ mit Bestätigung; gesperrt mit Hinweis, solange das Werkzeug läuft.
+     Gibt es keine freie Schaltbox, ist die Auswahl gesperrt und der Hinweis verweist auf „RFID-Lesegeräte“. Karte
+     WLAN-Relais: Typ und IP-Adresse, „Befehle (aus Vorlage)“ erst bei gültiger IP, „Relais entfernen …“ mit
+     Bestätigung statt der früheren Option „--“ im Typ. Ohne Backend noch offen: Online-Status der Schaltbox,
+     „Verbindung testen“, „Relais vorher ausschalten“ beim Entfernen. Die Sperre „Schaltbox trennen, solange das
+     Werkzeug läuft“ prüft nur das Frontend – das Backend sollte sie selbst durchsetzen.
    - [ ] Benutzer
    - [ ] Übersicht
 

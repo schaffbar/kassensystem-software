@@ -34,6 +34,11 @@ export function isHardwareSetUp(tool: Tool): boolean {
   return !!tool.rfidReaderId && !!tool.wlanRelaisType;
 }
 
+// a running tool keeps its switch box – the session of the person using it would not be closed properly
+export function canClearRfidReader(tool: ToolListItem): boolean {
+  return !tool.usedBy;
+}
+
 // ----------------------------------------------------------------------------
 // WLAN relais
 

@@ -255,7 +255,8 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
   header and above the buttons), `<schbar-form-dialog-header [title] [subtitle]>` instead of `mat-dialog-title` (title,
   subtitle naming the entity, close button), compact fields with the label above (`<label class="field-label"
   for="…">` instead of `mat-label`), and the page opens them with `...FORM_DIALOG_CONFIG` (at the top of the window,
-  focus on the first field instead of the close button, `disableClose`). Confirmations stay centered, without header
+  focus on the first field instead of the close button, `disableClose`). A form inside a card (the hardware tab of a tool) gets the same compact fields
+  and `field-label` with the global class `compact-form` on the `<form>`. Confirmations stay centered, without header
   line and close button.
 - **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
   `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is

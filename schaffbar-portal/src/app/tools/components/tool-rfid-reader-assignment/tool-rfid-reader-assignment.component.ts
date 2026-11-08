@@ -1,14 +1,11 @@
 import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
-import { form, FormField, FormRoot, submit, validate } from '@angular/forms/signals';
+import { disabled, form, FormField, FormRoot, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ChangeRfidReaderCommand, ClearRfidReaderCommand } from '../../tool.model';
 
@@ -16,18 +13,19 @@ export interface ToolRfidReaderAssignmentViewModel {
   id: string;
   name: string;
   rfidReaderId: string | null;
+  // false while the tool is running
+  canClearRfidReader: boolean;
 }
 
-// a reader that may be assigned to the tool
+// a switch box that may be assigned to the tool
 export interface RfidReaderOptionViewModel {
   id: string;
-  // the name, or the MAC address of a reader without name
-  label: string;
-  isAssignedToOtherTool: boolean;
+  name: string | null;
+  macAddress: string;
 }
 
 interface RfidReaderAssignmentFormModel {
-  // '' = no RFID reader assigned
+  // '' = no switch box assigned
   rfidReaderId: string;
 }
 
@@ -35,16 +33,8 @@ interface RfidReaderAssignmentFormModel {
   selector: 'schbar-tool-rfid-reader-assignment',
   templateUrl: './tool-rfid-reader-assignment.component.html',
   styleUrl: './tool-rfid-reader-assignment.component.scss',
-  imports: [
-    FormField,
-    FormRoot,
-    FieldErrorComponent,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    TranslatePipe,
-  ],
+  imports: [FormField, FormRoot, MatButtonModule, MatSelectModule, TranslatePipe],
+  host: { class: 'card' },
 })
 export class ToolRfidReaderAssignmentComponent {
   private readonly confirmActionDialog = inject(ConfirmActionDialogService);
@@ -55,14 +45,12 @@ export class ToolRfidReaderAssignmentComponent {
   readonly rfidReaderChanged = output<ChangeRfidReaderCommand>();
   readonly rfidReaderCleared = output<ClearRfidReaderCommand>();
 
+  // follows the input – a saved change arrives as the new assignment
   private readonly model = linkedSignal(() => toRfidReaderAssignmentFormModel(this.toolRfidReaderAssignment()));
 
   protected readonly rfidReaderForm = form(this.model, (schema) => {
-    validate(schema.rfidReaderId, ({ value }) =>
-      this.isAssignedToOtherTool(value())
-        ? { kind: 'alreadyAssigned', message: 'tools.pages.toolDetails.messages.alreadyAssignedError' }
-        : undefined,
-    );
+    // the tool's own switch box is always offered, so an empty list means: nothing to choose
+    disabled(schema.rfidReaderId, () => this.rfidReaders().length === 0);
   });
 
   protected readonly isDirty = computed(
@@ -77,7 +65,7 @@ export class ToolRfidReaderAssignmentComponent {
     this.rfidReaderForm().reset();
   }
 
-  protected saveRfidReader(): void {
+  protected changeRfidReader(): void {
     submit(this.rfidReaderForm, async () => {
       const { rfidReaderId } = this.model();
       if (!rfidReaderId) return;
@@ -88,27 +76,23 @@ export class ToolRfidReaderAssignmentComponent {
   }
 
   protected clearRfidReader(): void {
+    const tool = this.toolRfidReaderAssignment();
+    if (!tool.canClearRfidReader) return;
+
     this.confirmActionDialog
       .open({
         title: 'tools.dialogs.clearRfidReader.title',
         message: 'tools.dialogs.clearRfidReader.message',
-        entity: this.toolRfidReaderAssignment().name,
+        entity: tool.name,
         confirmLabel: 'tools.dialogs.clearRfidReader.confirm',
         destructive: true,
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: ClearRfidReaderCommand = { toolId: this.toolRfidReaderAssignment().id };
+          const command: ClearRfidReaderCommand = { toolId: tool.id };
           this.rfidReaderCleared.emit(command);
         }
       });
-  }
-
-  // --------------------------------------------------------------------------
-  // helper
-
-  private isAssignedToOtherTool(readerId: string): boolean {
-    return this.rfidReaders().some((reader) => reader.id === readerId && reader.isAssignedToOtherTool);
   }
 }
 

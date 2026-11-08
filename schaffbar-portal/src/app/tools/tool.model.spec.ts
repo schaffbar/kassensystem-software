@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { WlanRelaisType } from '../shared/models/wlan-relais-type';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
-import { isHardwareSetUp, Tool, wlanRelaisCommands } from './tool.model';
+import { canClearRfidReader, isHardwareSetUp, Tool, wlanRelaisCommands } from './tool.model';
 
 describe('wlanRelaisCommands', () => {
   it('should fill in the IP address of the relais', () => {
@@ -47,5 +47,30 @@ describe('isHardwareSetUp', () => {
     expect(isHardwareSetUp({ ...tool, rfidReaderId: 'reader-1' })).toBe(false);
     expect(isHardwareSetUp({ ...tool, wlanRelaisType: WlanRelaisType.Shelly1 })).toBe(false);
     expect(isHardwareSetUp(tool)).toBe(false);
+  });
+});
+
+describe('canClearRfidReader', () => {
+  const tool: Tool = {
+    id: 'tool-1',
+    name: 'Bandsäge',
+    description: null,
+    area: ToolArea.Holz,
+    certificationRequirement: CertificationRequirement.Red,
+    rfidReaderId: 'reader-1',
+    wlanRelaisType: null,
+    ipAddress: null,
+    httpStartCommand: null,
+    onCommand: null,
+    offCommand: null,
+    instructors: [],
+  };
+
+  it('should allow it while the tool is not in use', () => {
+    expect(canClearRfidReader({ ...tool, usedBy: null })).toBe(true);
+  });
+
+  it('should not allow it while somebody uses the tool', () => {
+    expect(canClearRfidReader({ ...tool, usedBy: 'Anna Becker' })).toBe(false);
   });
 });

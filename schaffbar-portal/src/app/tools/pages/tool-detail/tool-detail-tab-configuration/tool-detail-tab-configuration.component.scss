@@ -1,8 +1,12 @@
+// two cards next to each other like the prototype; one column on a phone
 :host {
   display: flex;
-  flex-direction: column;
-  gap: 40px;
-  min-width: 300px;
-  max-width: 600px;
-  width: 100%;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+
+  > * {
+    flex: 1 1 380px;
+    min-width: 0;
+  }
 }

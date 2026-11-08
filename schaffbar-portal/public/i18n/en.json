@@ -275,9 +275,9 @@
         "confirm": "Delete Tool"
       },
       "clearRfidReader": {
-        "title": "Clear RFID Reader Assignment",
-        "message": "Are you sure you want to clear the RFID reader assignment?",
-        "confirm": "Clear Assignment"
+        "title": "Disconnect switch box?",
+        "message": "Afterwards the tool can no longer be unlocked with an RFID tag, the certification requirement is no longer checked and the usage is no longer recorded and billed. The switch box becomes \"Unassigned\" and can be assigned to another tool.",
+        "confirm": "Disconnect Switch Box"
       },
       "removeInstructors": {
         "title": "Remove as instructor?",
@@ -340,10 +340,12 @@
         "confirm": "Enter Certifications",
         "confirmOne": "Enter 1 Certification",
         "confirmCount": "Enter {{count}} Certifications"
+      },
+      "clearWlanRelais": {
+        "title": "Remove WLAN relais?",
+        "message": "IP address and switching commands are deleted. The switch box can then no longer switch the tool on and off. The device itself stays unchanged and can be set up again at any time.",
+        "confirm": "Remove Relais"
       }
-    },
-    "tooltips": {
-      "clearRfidReader": "Clear RFID Reader Assignment"
     },
     "wlanRelaisTypes": {
       "SHELLY_1": "Shelly 1",
@@ -446,10 +448,6 @@
             "message": "Change the search."
           }
         },
-        "messages": {
-          "alreadyAssigned": "already assigned",
-          "alreadyAssignedError": "This RFID reader is already assigned to another tool."
-        },
         "errors": {
           "invalidIpAddress": "Please enter a valid IP address (e.g. 192.168.1.1)."
         },
@@ -477,6 +475,20 @@
           "wlanRelais": "WLAN relais",
           "noWlanRelais": "No WLAN relais set up",
           "unnamedRfidReader": "Reader {{macAddress}}"
+        },
+        "hardwareConfiguration": {
+          "switchBox": "Assigned switch box",
+          "noSwitchBox": "No switch box",
+          "switchBoxHint": "Only readers of the type \"Switch Box\" that are not assigned to a tool yet are shown.",
+          "noFreeSwitchBox": "There is no free switch box. A new reader is set up as a switch box under “RFID Readers”.",
+          "clearSwitchBox": "Disconnect switch box …",
+          "clearSwitchBoxBlocked": "The tool is running – disconnecting is only possible once it is switched off.",
+          "relaisType": "Type",
+          "noRelais": "No WLAN relais",
+          "commands": "Commands (from template)",
+          "on": "On",
+          "off": "Off",
+          "removeRelais": "Remove relais …"
         }
       }
     },

@@ -1,20 +1,31 @@
-.tool-rfid-reader-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+:host {
+  display: block;
 }
 
-.tool-rfid-reader-content {
+form {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.option-content {
+// disconnect on the left, save on the right – like the button bar of the WLAN relais
+.actions {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+
+  &:empty {
+    display: none;
+  }
 }
 
-.option-content-already-assigned {
-  font-style: italic;
-  opacity: 0.6;
+.clear-button {
+  margin-right: auto;
+}
+
+.blocked-hint {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
 }

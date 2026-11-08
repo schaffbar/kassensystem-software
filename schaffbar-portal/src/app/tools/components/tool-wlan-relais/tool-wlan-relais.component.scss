@@ -1,10 +1,54 @@
-.wlan-relais-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+:host {
+  display: block;
 }
 
-.wlan-relais-content {
+form {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+// the full URLs the switch box calls, built from the template of the relais type
+.commands {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .field-label {
+    margin-bottom: 0;
+  }
+
+  code {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 12px;
+    line-height: 1.7;
+    word-break: break-all;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.clear-button {
+  margin-right: auto;
 }

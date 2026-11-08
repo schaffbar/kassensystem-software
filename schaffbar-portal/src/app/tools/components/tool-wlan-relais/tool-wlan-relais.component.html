@@ -1,70 +1,63 @@
-<h3 class="wlan-relais-header">
-  {{ 'tools.pages.toolDetails.headers.wlanRelais' | translate }}
-</h3>
+@let tool = toolWlanRelais();
 
-<form class="wlan-relais-content" [formRoot]="wlanRelaisForm" (submit)="saveWlanRelais()">
-  <div class="form-row">
-    <div class="form-col">
-      <mat-form-field class="full-width" floatLabel="always">
-        <mat-label>{{ 'tools.shared.toolProperties.wlanRelaisType' | translate }}</mat-label>
-        <mat-select id="wlanRelaisType" [formField]="wlanRelaisForm.wlanRelaisType">
-          <mat-option value="">--</mat-option>
+<div class="card-header">
+  <h2>{{ 'tools.pages.toolDetails.headers.wlanRelais' | translate }}</h2>
+</div>
+
+<form class="compact-form" [formRoot]="wlanRelaisForm" (submit)="saveWlanRelais()">
+  <div class="fields">
+    <div>
+      <label class="field-label" for="wlanRelaisType">
+        {{ 'tools.pages.toolDetails.hardwareConfiguration.relaisType' | translate }}
+      </label>
+      <mat-form-field class="full-width" subscriptSizing="dynamic">
+        <mat-select
+          id="wlanRelaisType"
+          [placeholder]="'tools.pages.toolDetails.hardwareConfiguration.noRelais' | translate"
+          [formField]="wlanRelaisForm.wlanRelaisType">
           @for (type of wlanRelaisTypes; track type) {
-            <mat-option [value]="type">
-              {{ type | wlanRelaisTypeKey | translate }}
-            </mat-option>
+            <mat-option [value]="type">{{ type | wlanRelaisTypeKey | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
     </div>
-  </div>
 
-  @if (!wlanRelaisForm.ipAddress().hidden()) {
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width" floatLabel="always">
-          <mat-label>{{ 'tools.shared.toolProperties.ipAddress' | translate }}</mat-label>
+    @if (!wlanRelaisForm.ipAddress().hidden()) {
+      <div>
+        <label class="field-label" for="ipAddress">{{ 'tools.shared.toolProperties.ipAddress' | translate }}</label>
+        <mat-form-field class="full-width mono-field" subscriptSizing="dynamic">
           <input id="ipAddress" matInput [formField]="wlanRelaisForm.ipAddress" />
           <mat-error>
             <schbar-field-error [field]="wlanRelaisForm.ipAddress" label="tools.shared.toolProperties.ipAddress" />
           </mat-error>
         </mat-form-field>
       </div>
-    </div>
+    }
+  </div>
 
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width readonly-field" floatLabel="always">
-          <mat-label>{{ 'tools.shared.toolProperties.httpStartCommand' | translate }}</mat-label>
-          <input matInput [value]="derivedCommands().httpStartCommand" readonly />
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width readonly-field" floatLabel="always">
-          <mat-label>{{ 'tools.shared.toolProperties.onCommand' | translate }}</mat-label>
-          <input matInput [value]="derivedCommands().onCommand" readonly />
-        </mat-form-field>
-      </div>
-      <div class="form-col">
-        <mat-form-field class="full-width readonly-field" floatLabel="always">
-          <mat-label>{{ 'tools.shared.toolProperties.offCommand' | translate }}</mat-label>
-          <input matInput [value]="derivedCommands().offCommand" readonly />
-        </mat-form-field>
-      </div>
+  @if (derivedCommands(); as commands) {
+    <div class="commands">
+      <span class="field-label">{{ 'tools.pages.toolDetails.hardwareConfiguration.commands' | translate }}</span>
+      <code class="mono">
+        <span>{{ 'tools.pages.toolDetails.hardwareConfiguration.on' | translate }}:</span>
+        <span>{{ commands.httpStartCommand }}{{ commands.onCommand }}</span>
+        <span>{{ 'tools.pages.toolDetails.hardwareConfiguration.off' | translate }}:</span>
+        <span>{{ commands.httpStartCommand }}{{ commands.offCommand }}</span>
+      </code>
     </div>
   }
 
-  @if (isDirty()) {
-    <div class="form-actions">
+  <div class="actions">
+    @if (tool.wlanRelaisType) {
+      <button matButton="outlined" type="button" class="danger-button clear-button" (click)="clearWlanRelais()">
+        {{ 'tools.pages.toolDetails.hardwareConfiguration.removeRelais' | translate }}
+      </button>
+    }
+    @if (isDirty()) {
       <button matButton="outlined" type="button" (click)="discardWlanRelaisChanges()">
         {{ 'shared.actions.cancel' | translate }}
       </button>
-      <button matButton="filled" type="submit">
-        {{ 'shared.actions.save' | translate }}
-      </button>
-    </div>
-  }
+      <button matButton="filled" type="submit">{{ 'shared.actions.save' | translate }}</button>
+    }
+  </div>
 </form>

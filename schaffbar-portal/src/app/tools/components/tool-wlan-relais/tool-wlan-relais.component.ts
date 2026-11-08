@@ -1,4 +1,4 @@
-import { Component, computed, input, linkedSignal, output } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
 import { form, FormField, FormRoot, hidden, pattern, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
 import { ClearWlanRelaisCommand, SetWlanRelaisCommand, wlanRelaisCommands } from '../../tool.model';
 import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
@@ -16,12 +17,13 @@ const IP_PATTERN = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?
 
 export interface ToolWlanRelaisViewModel {
   id: string;
+  name: string;
   wlanRelaisType: WlanRelaisType | null;
   ipAddress: string | null;
 }
 
 interface WlanRelaisFormModel {
-  // '' = no WLAN relais
+  // '' = no WLAN relais yet; removing a relais is its own action
   wlanRelaisType: WlanRelaisType | '';
   ipAddress: string;
 }
@@ -40,8 +42,11 @@ interface WlanRelaisFormModel {
     TranslatePipe,
     WlanRelaisTypeKeyPipe,
   ],
+  host: { class: 'card' },
 })
 export class ToolWlanRelaisComponent {
+  private readonly confirmActionDialog = inject(ConfirmActionDialogService);
+
   readonly toolWlanRelais = input.required<ToolWlanRelaisViewModel>();
 
   readonly wlanRelaisUpdated = output<SetWlanRelaisCommand>();
@@ -58,16 +63,17 @@ export class ToolWlanRelaisComponent {
     pattern(schema.ipAddress, IP_PATTERN, { message: 'tools.pages.toolDetails.errors.invalidIpAddress' });
   });
 
+  // only for a valid IP address – otherwise the URLs would read `http:///…`
   protected readonly derivedCommands = computed(() => {
     const { wlanRelaisType, ipAddress } = this.model();
-    return wlanRelaisType
+    return wlanRelaisType && this.wlanRelaisForm.ipAddress().valid()
       ? wlanRelaisCommands(wlanRelaisType, ipAddress)
-      : { httpStartCommand: '', onCommand: '', offCommand: '' };
+      : null;
   });
 
   protected readonly isDirty = computed(() => {
-    const current = relevantValues(this.model());
-    const saved = relevantValues(toWlanRelaisFormModel(this.toolWlanRelais()));
+    const current = this.model();
+    const saved = toWlanRelaisFormModel(this.toolWlanRelais());
     return current.wlanRelaisType !== saved.wlanRelaisType || current.ipAddress !== saved.ipAddress;
   });
 
@@ -82,14 +88,29 @@ export class ToolWlanRelaisComponent {
   protected saveWlanRelais(): void {
     submit(this.wlanRelaisForm, async () => {
       const { wlanRelaisType, ipAddress } = this.model();
-      if (wlanRelaisType) {
-        const command: SetWlanRelaisCommand = { toolId: this.toolWlanRelais().id, wlanRelaisType, ipAddress };
-        this.wlanRelaisUpdated.emit(command);
-      } else {
-        const command: ClearWlanRelaisCommand = { toolId: this.toolWlanRelais().id };
-        this.wlanRelaisCleared.emit(command);
-      }
+      if (!wlanRelaisType) return;
+
+      const command: SetWlanRelaisCommand = { toolId: this.toolWlanRelais().id, wlanRelaisType, ipAddress };
+      this.wlanRelaisUpdated.emit(command);
     });
+  }
+
+  protected clearWlanRelais(): void {
+    const tool = this.toolWlanRelais();
+    this.confirmActionDialog
+      .open({
+        title: 'tools.dialogs.clearWlanRelais.title',
+        message: 'tools.dialogs.clearWlanRelais.message',
+        entity: tool.name,
+        confirmLabel: 'tools.dialogs.clearWlanRelais.confirm',
+        destructive: true,
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: ClearWlanRelaisCommand = { toolId: tool.id };
+          this.wlanRelaisCleared.emit(command);
+        }
+      });
   }
 }
 
@@ -98,13 +119,4 @@ export class ToolWlanRelaisComponent {
 
 function toWlanRelaisFormModel(tool: ToolWlanRelaisViewModel): WlanRelaisFormModel {
   return { wlanRelaisType: tool.wlanRelaisType ?? '', ipAddress: tool.ipAddress ?? '' };
-}
-
-// ----------------------------------------------------------------------------
-// helper
-
-// Without a relais type the (hidden) IP address is irrelevant – it is neither saved nor should it count as a change.
-// It stays in the model, so switching to '--' and back does not lose the entered IP address.
-function relevantValues({ wlanRelaisType, ipAddress }: WlanRelaisFormModel): WlanRelaisFormModel {
-  return wlanRelaisType ? { wlanRelaisType, ipAddress } : { wlanRelaisType: '', ipAddress: '' };
 }

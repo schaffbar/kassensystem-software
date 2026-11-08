@@ -275,9 +275,9 @@
         "confirm": "Werkzeug löschen"
       },
       "clearRfidReader": {
-        "title": "RFID-Lesegerät-Zuweisung aufheben",
-        "message": "Sind Sie sicher, dass Sie die RFID-Lesegerät-Zuweisung aufheben möchten?",
-        "confirm": "Zuweisung aufheben"
+        "title": "Schaltbox trennen?",
+        "message": "Danach ist Freischalten per RFID-Tag nicht mehr möglich, die Einweisungspflicht wird nicht mehr geprüft und die Nutzung nicht mehr erfasst und abgerechnet. Die Schaltbox wird „Nicht zugeordnet“ und kann einem anderen Werkzeug zugeordnet werden.",
+        "confirm": "Schaltbox trennen"
       },
       "removeInstructors": {
         "title": "Als Einweiser entfernen?",
@@ -340,10 +340,12 @@
         "confirm": "Einweisungen eintragen",
         "confirmOne": "1 Einweisung eintragen",
         "confirmCount": "{{count}} Einweisungen eintragen"
+      },
+      "clearWlanRelais": {
+        "title": "WLAN-Relais entfernen?",
+        "message": "IP-Adresse und Schaltbefehle werden gelöscht. Die Schaltbox kann das Werkzeug danach nicht mehr ein- und ausschalten. Das Gerät selbst bleibt unverändert und kann jederzeit neu eingerichtet werden.",
+        "confirm": "Relais entfernen"
       }
-    },
-    "tooltips": {
-      "clearRfidReader": "RFID-Lesegerät-Zuweisung aufheben"
     },
     "wlanRelaisTypes": {
       "SHELLY_1": "Shelly 1",
@@ -446,10 +448,6 @@
             "message": "Suchbegriff anpassen."
           }
         },
-        "messages": {
-          "alreadyAssigned": "bereits zugewiesen",
-          "alreadyAssignedError": "Dieses RFID-Lesegerät ist bereits einem anderen Werkzeug zugewiesen."
-        },
         "errors": {
           "invalidIpAddress": "Bitte geben Sie eine gültige IP-Adresse ein (z.B. 192.168.1.1)."
         },
@@ -477,6 +475,20 @@
           "wlanRelais": "WLAN-Relais",
           "noWlanRelais": "Kein WLAN-Relais eingerichtet",
           "unnamedRfidReader": "Lesegerät {{macAddress}}"
+        },
+        "hardwareConfiguration": {
+          "switchBox": "Zugeordnete Schaltbox",
+          "noSwitchBox": "Keine Schaltbox",
+          "switchBoxHint": "Es werden nur Lesegeräte vom Typ „Schaltbox“ angezeigt, die noch keinem Werkzeug zugeordnet sind.",
+          "noFreeSwitchBox": "Es gibt keine freie Schaltbox. Ein neues Lesegerät wird unter „RFID-Lesegeräte“ als Schaltbox eingerichtet.",
+          "clearSwitchBox": "Schaltbox trennen …",
+          "clearSwitchBoxBlocked": "Das Werkzeug läuft gerade – trennen ist erst nach dem Ausschalten möglich.",
+          "relaisType": "Typ",
+          "noRelais": "Kein WLAN-Relais",
+          "commands": "Befehle (aus Vorlage)",
+          "on": "Ein",
+          "off": "Aus",
+          "removeRelais": "Relais entfernen …"
         }
       }
     },

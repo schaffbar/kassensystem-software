@@ -7,6 +7,7 @@ import {
 import { ToolWlanRelaisComponent } from '../../../components/tool-wlan-relais/tool-wlan-relais.component';
 import { RfidReader } from '../../../rfid-reader.model';
 import {
+  canClearRfidReader,
   ChangeRfidReaderCommand,
   ClearRfidReaderCommand,
   ClearWlanRelaisCommand,
@@ -25,6 +26,15 @@ import { ToolDetailStore } from '../tool-detail.store';
 export class ToolDetailTabConfigurationComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
   private readonly toolsStore = inject(ToolsStore);
+
+  protected readonly rfidReaderAssignment = computed(() => {
+    const tool = this.detailsStore.tool();
+    if (!tool) return null;
+
+    // the tool list knows who uses the tool right now
+    const usedBy = this.toolsStore.tools().find((listedTool) => listedTool.id === tool.id)?.usedBy ?? null;
+    return { ...tool, canClearRfidReader: canClearRfidReader({ ...tool, usedBy }) };
+  });
 
   protected readonly rfidReaderOptions = computed(() =>
     toRfidReaderOptionViewModels(
@@ -57,6 +67,7 @@ export class ToolDetailTabConfigurationComponent {
 // ----------------------------------------------------------------------------
 // mappers
 
+// a switch box of another tool is not offered – it would have to be disconnected there first
 function toRfidReaderOptionViewModels(
   rfidReaders: RfidReader[],
   tools: Tool[],
@@ -65,9 +76,7 @@ function toRfidReaderOptionViewModels(
   const assignedToOtherTools = new Set(
     tools.flatMap((tool) => (tool.id !== ownToolId && tool.rfidReaderId ? [tool.rfidReaderId] : [])),
   );
-  return rfidReaders.map((reader) => ({
-    id: reader.id,
-    label: reader.name ?? reader.macAddress,
-    isAssignedToOtherTool: assignedToOtherTools.has(reader.id),
-  }));
+  return rfidReaders
+    .filter((reader) => !assignedToOtherTools.has(reader.id))
+    .map((reader) => ({ id: reader.id, name: reader.name, macAddress: reader.macAddress }));
 }

@@ -208,17 +208,9 @@ body {
 // ----------------------------------------------------------------------------
 // global classes
 
-// form dialogs (create, edit) as `host: { class: 'form-dialog' }`: header (`schbar-form-dialog-header`) and button bar
-// separated by lines, content with more space – confirmations stay without lines. Compact fields like in the
-// prototype: the label above the field (`<label class="field-label" for="…">` instead of `mat-label`), 44px high
-.form-dialog {
-  @include mat.dialog-overrides(
-    (
-      content-padding: 20px 24px,
-      with-actions-content-padding: 20px 24px,
-      actions-padding: 16px 24px,
-    )
-  );
+// compact fields like in the prototype: the label above the field (`<label class="field-label" for="…">` instead of
+// `mat-label`), 44px high
+@mixin compact-fields {
   @include mat.form-field-overrides(
     (
       container-height: 44px,
@@ -228,10 +220,6 @@ body {
     )
   );
 
-  mat-dialog-actions {
-    border-top: 1px solid var(--border);
-  }
-
   .field-label {
     display: block;
     margin-bottom: 6px;
@@ -239,6 +227,41 @@ body {
     font-size: 13px;
     font-weight: 600;
   }
+
+  // hint and error flush with the label above instead of indented like the text in the field, and as far from the
+  // field as the label – there is no override token for this padding
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    padding: 6px 0 0;
+  }
+
+  // Material starts hint and error with an empty inline-block, so a line break in the template before the text
+  // (`<mat-error>⏎<schbar-field-error …/>`) is shown as a leading space
+  .mat-mdc-form-field-bottom-align::before {
+    display: none;
+  }
+}
+
+// form dialogs (create, edit) as `host: { class: 'form-dialog' }`: header (`schbar-form-dialog-header`) and button bar
+// separated by lines, content with more space – confirmations stay without lines
+.form-dialog {
+  @include mat.dialog-overrides(
+    (
+      content-padding: 20px 24px,
+      with-actions-content-padding: 20px 24px,
+      actions-padding: 16px 24px,
+    )
+  );
+  @include compact-fields;
+
+  mat-dialog-actions {
+    border-top: 1px solid var(--border);
+  }
+}
+
+// a form inside a card (hardware tab of a tool): compact fields like a form dialog
+.compact-form {
+  @include compact-fields;
 }
 
 // destructive actions (delete, revoke, pause, unassign): danger color instead of the accent – `color="warn"` has no

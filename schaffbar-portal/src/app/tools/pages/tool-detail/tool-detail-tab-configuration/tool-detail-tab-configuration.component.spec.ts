@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -11,13 +11,13 @@ import { ToolArea } from '../../../../shared/models/tool-area';
 import { ToolRfidReaderAssignmentComponent } from '../../../components/tool-rfid-reader-assignment/tool-rfid-reader-assignment.component';
 import { ToolWlanRelaisComponent } from '../../../components/tool-wlan-relais/tool-wlan-relais.component';
 import { RfidReader } from '../../../rfid-reader.model';
-import { Tool } from '../../../tool.model';
+import { ToolListItem } from '../../../tool.model';
 import { ToolsStore } from '../../../tools.store';
 import { ToolDetailStore } from '../tool-detail.store';
 import { ToolDetailTabConfigurationComponent } from './tool-detail-tab-configuration.component';
 
 describe('ToolDetailTabConfigurationComponent', () => {
-  function createTool(id: string, rfidReaderId: string | null): Tool {
+  function createTool(id: string, rfidReaderId: string | null, usedBy: string | null = null): ToolListItem {
     return {
       id,
       name: `Tool ${id}`,
@@ -31,6 +31,7 @@ describe('ToolDetailTabConfigurationComponent', () => {
       onCommand: null,
       offCommand: null,
       instructors: [],
+      usedBy,
     };
   }
 
@@ -43,6 +44,7 @@ describe('ToolDetailTabConfigurationComponent', () => {
 
   let fixture: ComponentFixture<ToolDetailTabConfigurationComponent>;
   let clearWlanRelais: Mock;
+  let tools: WritableSignal<ToolListItem[]>;
 
   beforeEach(async () => {
     clearWlanRelais = vi.fn();
@@ -52,7 +54,8 @@ describe('ToolDetailTabConfigurationComponent', () => {
       clearWlanRelais,
     };
     // reader-1 belongs to this tool, reader-2 to another one
-    const toolsStoreMock = { tools: signal([tool, createTool('tool-2', 'reader-2'), createTool('tool-3', null)]) };
+    tools = signal([tool, createTool('tool-2', 'reader-2'), createTool('tool-3', null)]);
+    const toolsStoreMock = { tools };
 
     await TestBed.configureTestingModule({
       imports: [ToolDetailTabConfigurationComponent],
@@ -72,12 +75,20 @@ describe('ToolDetailTabConfigurationComponent', () => {
     return fixture.debugElement.query(By.directive(component)).componentInstance;
   }
 
-  it('should mark only the RFID readers of other tools as assigned and label a reader without name by its MAC', () => {
+  it('should offer the free switch boxes and the own one, but none of another tool', () => {
     expect(child(ToolRfidReaderAssignmentComponent).rfidReaders()).toEqual([
-      { id: 'reader-1', label: 'Reader 1', isAssignedToOtherTool: false },
-      { id: 'reader-2', label: 'Reader 2', isAssignedToOtherTool: true },
-      { id: 'reader-3', label: 'EE:FF', isAssignedToOtherTool: false },
+      { id: 'reader-1', name: 'Reader 1', macAddress: 'AA:BB' },
+      { id: 'reader-3', name: null, macAddress: 'EE:FF' },
     ]);
+  });
+
+  it('should allow to disconnect the switch box only while nobody uses the tool', async () => {
+    expect(child(ToolRfidReaderAssignmentComponent).toolRfidReaderAssignment().canClearRfidReader).toBe(true);
+
+    tools.set([createTool('tool-1', 'reader-1', 'Max Mustermann')]);
+    await fixture.whenStable();
+
+    expect(child(ToolRfidReaderAssignmentComponent).toolRfidReaderAssignment().canClearRfidReader).toBe(false);
   });
 
   it('should execute the clear command of the WLAN relais', () => {
