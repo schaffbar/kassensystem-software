@@ -85,10 +85,7 @@
               @if (tool.usedBy) {
                 <span class="card-usage">{{ 'tools.pages.toolList.usedBy' | translate: { name: tool.usedBy } }}</span>
               }
-              <span class="card-footer" [class.no-switch-box]="!tool.rfidReaderId">
-                @if (tool.rfidReaderId) {
-                  <mat-icon aria-hidden="true">electrical_services</mat-icon>
-                }
+              <span class="card-footer">
                 <ng-container *ngTemplateOutlet="hardware; context: { $implicit: tool }" />
               </span>
             </a>
@@ -126,8 +123,8 @@
 
           <ng-container matColumnDef="hardware">
             <th mat-header-cell *matHeaderCellDef>{{ 'tools.pages.toolList.columns.hardware' | translate }}</th>
-            <td mat-cell *matCellDef="let row" class="hardware">
-              <ng-container *ngTemplateOutlet="hardware; context: { $implicit: row, short: true }" />
+            <td mat-cell *matCellDef="let row">
+              <ng-container *ngTemplateOutlet="hardware; context: { $implicit: row }" />
             </td>
           </ng-container>
 
@@ -178,18 +175,20 @@
   }
 </ng-template>
 
-<!-- a tool is switched by its switch box (RFID reader) and the WLAN relais; without switch box nothing is recorded -->
-<ng-template #hardware let-tool let-short="short">
-  @if (tool.rfidReaderId && tool.wlanRelaisType) {
-    {{
-      'tools.pages.toolList.hardware.switchBox'
-        | translate: { relais: (tool.wlanRelaisType | wlanRelaisTypeKey | translate) }
-    }}
-  } @else if (tool.rfidReaderId) {
-    {{ 'tools.pages.toolList.hardware.switchBoxOnly' | translate }}
-  } @else if (short) {
-    –
+<!-- set up: what is switching the tool; otherwise a hint – the details are on the detail page -->
+<ng-template #hardware let-tool>
+  @if (isHardwareSetUp(tool)) {
+    <span class="hardware-setup">
+      <mat-icon aria-hidden="true">electrical_services</mat-icon>
+      {{
+        'tools.pages.toolList.hardware.setUp'
+          | translate: { relais: (tool.wlanRelaisType | wlanRelaisTypeKey | translate) }
+      }}
+    </span>
   } @else {
-    {{ 'tools.pages.toolList.hardware.none' | translate }}
+    <span class="hardware-setup">
+      <mat-icon aria-hidden="true" class="todo-icon">warning</mat-icon>
+      {{ 'tools.pages.toolList.hardware.notSetUp' | translate }}
+    </span>
   }
 </ng-template>

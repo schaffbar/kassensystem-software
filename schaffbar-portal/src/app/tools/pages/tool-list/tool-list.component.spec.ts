@@ -132,12 +132,13 @@ describe('ToolListComponent', () => {
       expect(texts('.card-usage')).toEqual(['tools.pages.toolList.usedBy']);
     });
 
-    it('should describe the hardware of a tool', () => {
+    it('should show the switching hardware or what is left to set up', () => {
       expect(texts('.card-footer')).toEqual([
-        'electrical_services tools.pages.toolList.hardware.switchBox',
-        'tools.pages.toolList.hardware.none',
-        'electrical_services tools.pages.toolList.hardware.switchBoxOnly',
+        'electrical_services tools.pages.toolList.hardware.setUp',
+        'warning tools.pages.toolList.hardware.notSetUp',
+        'warning tools.pages.toolList.hardware.notSetUp',
       ]);
+      expect(fixture.nativeElement.querySelectorAll('.card-footer .todo-icon')).toHaveLength(2);
     });
 
     it('should link a card to the detail page of its tool', () => {
@@ -158,11 +159,11 @@ describe('ToolListComponent', () => {
       ]);
     });
 
-    it('should show the hardware short, with a dash for a tool without switch box', () => {
-      expect(texts('td.hardware')).toEqual([
-        'tools.pages.toolList.hardware.switchBox',
-        '–',
-        'tools.pages.toolList.hardware.switchBoxOnly',
+    it('should show the same hardware state as the cards', () => {
+      expect(texts('td.mat-column-hardware')).toEqual([
+        'electrical_services tools.pages.toolList.hardware.setUp',
+        'warning tools.pages.toolList.hardware.notSetUp',
+        'warning tools.pages.toolList.hardware.notSetUp',
       ]);
     });
 

@@ -346,9 +346,8 @@
         "inUseBy": "In use · {{name}}",
         "usedBy": "Used by {{name}}",
         "hardware": {
-          "switchBox": "Switch box · {{relais}}",
-          "switchBoxOnly": "Switch box · no WLAN relais",
-          "none": "No switch box – usage is not recorded"
+          "setUp": "Switch box · {{relais}}",
+          "notSetUp": "Set up hardware"
         },
         "columns": {
           "tool": "Tool",

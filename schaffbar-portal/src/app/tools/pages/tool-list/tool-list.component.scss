@@ -98,23 +98,28 @@ schbar-page-header {
 
 // pushed to the bottom, so the footers of a row line up
 .card-footer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border);
-  color: var(--text-2);
   font-size: 13px;
+}
 
-  &.no-switch-box {
-    color: var(--text-3);
-  }
+.hardware-setup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
 
   mat-icon {
+    flex: 0 0 auto;
     width: 16px;
     height: 16px;
     font-size: 16px;
+  }
+
+  // only the icon is colored, so a list of tools without hardware does not get too loud
+  .todo-icon {
+    color: var(--warn);
   }
 }
 
@@ -126,10 +131,6 @@ schbar-page-header {
 .tool-area {
   color: var(--text-3);
   font-size: 13px;
-}
-
-.hardware {
-  color: var(--text-2);
 }
 
 .mat-column-actions {

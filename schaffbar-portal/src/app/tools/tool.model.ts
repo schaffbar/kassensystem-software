@@ -26,6 +26,15 @@ export interface ToolListItem extends Tool {
 }
 
 // ----------------------------------------------------------------------------
+// hardware
+
+// a tool is switched by its switch box (an RFID reader that checks the certification) and a WLAN relais; until both
+// are set up, the tool can't be unlocked by RFID
+export function isHardwareSetUp(tool: Tool): boolean {
+  return !!tool.rfidReaderId && !!tool.wlanRelaisType;
+}
+
+// ----------------------------------------------------------------------------
 // WLAN relais
 
 export interface WlanRelaisCommands {

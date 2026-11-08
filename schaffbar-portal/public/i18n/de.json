@@ -346,9 +346,8 @@
         "inUseBy": "In Benutzung · {{name}}",
         "usedBy": "Genutzt von {{name}}",
         "hardware": {
-          "switchBox": "Schaltbox · {{relais}}",
-          "switchBoxOnly": "Schaltbox · ohne WLAN-Relais",
-          "none": "Ohne Schaltbox – Nutzung wird nicht erfasst"
+          "setUp": "Schaltbox · {{relais}}",
+          "notSetUp": "Hardware einrichten"
         },
         "columns": {
           "tool": "Werkzeug",

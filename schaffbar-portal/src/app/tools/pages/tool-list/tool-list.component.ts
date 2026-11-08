@@ -28,7 +28,7 @@ import { DIALOG_WIDTH, FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog
 import { ToolArea } from '../../../shared/models/tool-area';
 import { CertificationRequirementBadgeComponent } from '../../components/certification-requirement-badge/certification-requirement-badge.component';
 import { NewToolDialogData, NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
-import { CreateToolCommand, DeleteToolCommand, ToolListItem } from '../../tool.model';
+import { CreateToolCommand, DeleteToolCommand, isHardwareSetUp, ToolListItem } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
 import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
@@ -73,6 +73,8 @@ export class ToolListComponent {
   protected readonly searchText = signal('');
   protected readonly area = signal<string>(ALL_AREAS);
   protected readonly view = signal<string>('cards' satisfies ToolListView);
+
+  protected readonly isHardwareSetUp = isHardwareSetUp;
 
   protected readonly listColumns = ['name', 'certificationRequirement', 'state', 'hardware', 'actions'];
 
