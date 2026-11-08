@@ -1,36 +1,43 @@
 import { DatePipe } from '@angular/common';
-import { Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ROUTE } from '../../../app.routes';
 import { CertificationStatusBadgeComponent } from '../../../shared/components/certification-status-badge/certification-status-badge.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
+import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { BatchCreateToolCertificationsCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
+import {
+  canPauseToolCertification,
+  canReactivateToolCertification,
+  canRevokeToolCertification,
+  DeleteToolCertificationCommand,
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
+} from '../../tool-certification.model';
 
 export interface ToolCertificationRowViewModel {
   customerId: string;
   toolId: string;
   // null if the user has been deleted
   userName: string | null;
+  // null if unknown or the instructor has been deleted
+  certifierName: string | null;
   status: ToolCertificationStatus;
   certifiedAt: Date;
-}
-
-// a user to pick in the autocompletes
-export interface UserOptionViewModel {
-  id: string;
-  firstName: string;
-  lastName: string;
 }
 
 @Component({
@@ -39,93 +46,78 @@ export interface UserOptionViewModel {
   styleUrl: './tool-certifications.component.scss',
   imports: [
     DatePipe,
-    MatAutocompleteModule,
+    RouterLink,
     MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
+    MatDividerModule,
     MatIconModule,
     MatInputModule,
+    MatMenuModule,
     MatTableModule,
-    CertificationStatusBadgeComponent,
     TranslatePipe,
     OrDashPipe,
+    CertificationStatusBadgeComponent,
+    EmptyStateComponent,
+    RowMenuComponent,
   ],
+  host: { class: 'table-card' },
 })
 export class ToolCertificationsComponent {
+  private readonly confirmActionDialog = inject(ConfirmActionDialogService);
   private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
-  readonly toolId = input.required<string>();
   readonly certifications = input.required<ToolCertificationRowViewModel[]>();
-  readonly certifiableUsers = input.required<UserOptionViewModel[]>();
-  readonly certifiers = input.required<UserOptionViewModel[]>();
 
-  readonly certificationsCreated = output<BatchCreateToolCertificationsCommand>();
+  readonly createRequested = output<void>();
+  readonly certificationPaused = output<PauseToolCertificationCommand>();
+  readonly certificationReactivated = output<ReactivateToolCertificationCommand>();
+  readonly certificationRevoked = output<RevokeToolCertificationCommand>();
   readonly certificationDeleted = output<DeleteToolCertificationCommand>();
 
-  protected readonly displayedColumns: string[] = ['userName', 'status', 'certifiedAt', 'actions'];
+  protected readonly displayedColumns = ['person', 'certifiedAt', 'certifiedBy', 'status', 'actions'];
+  protected readonly usersLink = `/${ROUTE.USERS}`;
 
   protected readonly searchText = signal('');
-  protected readonly selectedUsers = signal<UserOptionViewModel[]>([]);
-  protected readonly selectedCertifier = signal<UserOptionViewModel | null>(null);
-  protected readonly certifierSearchText = signal('');
 
-  private readonly userSearchInput = viewChild<ElementRef>('userSearchInput');
-  private readonly certifierSearchInput = viewChild<ElementRef>('certifierSearchInput');
-
-  protected readonly filteredUsers = computed(() => {
-    const search = this.searchText().toLowerCase();
-    const selectedIds = new Set(this.selectedUsers().map((user) => user.id));
-    return this.certifiableUsers().filter((user) => !selectedIds.has(user.id) && matches(user, search));
-  });
-
-  protected readonly filteredCertifiers = computed(() => {
-    const search = this.certifierSearchText().toLowerCase();
-    return this.certifiers().filter((user) => matches(user, search));
+  protected readonly rows = computed(() => {
+    const searchText = this.searchText().trim().toLowerCase();
+    return this.certifications()
+      .filter((certification) => !searchText || (certification.userName ?? '').toLowerCase().includes(searchText))
+      .map((certification) => ({
+        ...certification,
+        canPause: canPauseToolCertification(certification.status),
+        canReactivate: canReactivateToolCertification(certification.status),
+        canRevoke: canRevokeToolCertification(certification.status),
+      }))
+      .sort((a, b) => (a.userName ?? '').localeCompare(b.userName ?? '', 'de'));
   });
 
   // --------------------------------------------------------------------------
   // actions
 
-  protected selectUser(user: UserOptionViewModel): void {
-    this.selectedUsers.update((users) => [...users, user]);
+  protected searchCertifications(searchText: string): void {
+    this.searchText.set(searchText);
+  }
+
+  protected clearSearch(): void {
     this.searchText.set('');
-    this.userSearchInput()?.nativeElement.blur();
   }
 
-  protected removeSelectedUser(user: UserOptionViewModel): void {
-    this.selectedUsers.update((users) => users.filter((u) => u.id !== user.id));
+  protected pauseToolCertification(certification: ToolCertificationRowViewModel): void {
+    const command: PauseToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'pauseCertification', true, () => this.certificationPaused.emit(command));
   }
 
-  protected searchCertifiers(value: string): void {
-    this.certifierSearchText.set(value);
-    if (this.selectedCertifier()) {
-      this.selectedCertifier.set(null);
-    }
+  protected reactivateToolCertification(certification: ToolCertificationRowViewModel): void {
+    const command: ReactivateToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'reactivateCertification', false, () => this.certificationReactivated.emit(command));
   }
 
-  protected selectCertifier(user: UserOptionViewModel): void {
-    this.selectedCertifier.set(user);
-    this.certifierSearchText.set(fullName(user));
-    this.certifierSearchInput()?.nativeElement.blur();
+  protected revokeToolCertification(certification: ToolCertificationRowViewModel): void {
+    const command: RevokeToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'revokeCertification', true, () => this.certificationRevoked.emit(command));
   }
 
-  protected certifySelectedUsers(): void {
-    const certifier = this.selectedCertifier();
-    if (this.selectedUsers().length === 0 || !certifier) return;
-
-    const command: BatchCreateToolCertificationsCommand = {
-      userIds: this.selectedUsers().map((user) => user.id),
-      toolId: this.toolId(),
-      certifiedBy: certifier.id,
-    };
-    this.certificationsCreated.emit(command);
-
-    this.selectedUsers.set([]);
-    this.selectedCertifier.set(null);
-    this.certifierSearchText.set('');
-  }
-
-  protected deleteCertification(certification: ToolCertificationRowViewModel): void {
+  protected deleteToolCertification(certification: ToolCertificationRowViewModel): void {
     this.confirmDeleteDialog
       .open({
         title: 'tools.dialogs.deleteCertification.title',
@@ -135,23 +127,39 @@ export class ToolCertificationsComponent {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: DeleteToolCertificationCommand = {
-            userId: certification.customerId,
-            toolId: certification.toolId,
-          };
+          const command: DeleteToolCertificationCommand = toCommand(certification);
           this.certificationDeleted.emit(command);
         }
+      });
+  }
+
+  // --------------------------------------------------------------------------
+  // helper
+
+  private confirm(
+    certification: ToolCertificationRowViewModel,
+    dialog: 'pauseCertification' | 'reactivateCertification' | 'revokeCertification',
+    destructive: boolean,
+    onConfirmed: () => void,
+  ): void {
+    this.confirmActionDialog
+      .open({
+        title: `tools.dialogs.${dialog}.title`,
+        message: `tools.dialogs.${dialog}.message`,
+        confirmLabel: `tools.dialogs.${dialog}.confirm`,
+        entity: certification.userName ?? undefined,
+        destructive,
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) onConfirmed();
       });
   }
 }
 
 // ----------------------------------------------------------------------------
-// helper
+// mappers
 
-function fullName(user: UserOptionViewModel): string {
-  return `${user.firstName} ${user.lastName}`;
-}
-
-function matches(user: UserOptionViewModel, search: string): boolean {
-  return fullName(user).toLowerCase().includes(search);
+// all commands of a certification name it by the user and the tool
+function toCommand(certification: ToolCertificationRowViewModel): { userId: string; toolId: string } {
+  return { userId: certification.customerId, toolId: certification.toolId };
 }

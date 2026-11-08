@@ -255,8 +255,7 @@
   "tools": {
     "title": "Werkzeuge",
     "actions": {
-      "addTool": "Werkzeug hinzufügen",
-      "deleteCertification": "Einweisung löschen"
+      "addTool": "Werkzeug hinzufügen"
     },
     "dialogs": {
       "addTool": {
@@ -287,8 +286,8 @@
         "messageLast": "Die Person kann danach keine neuen Einweisungen mehr eintragen – und es gibt danach keine Einweiser mehr: Niemand kann für dieses Werkzeug neue Einweisungen eintragen. Bisher durchgeführte Einweisungen bleiben gültig."
       },
       "deleteCertification": {
-        "title": "Einweisung löschen",
-        "message": "Sind Sie sicher, dass Sie diese Einweisung löschen möchten?",
+        "title": "Einweisung löschen?",
+        "message": "Nur für Fehleinträge: Der Eintrag wird vollständig entfernt. Wer das Werkzeug nicht mehr nutzen darf, bekommt die Einweisung besser entzogen.",
         "confirm": "Einweisung löschen"
       },
       "editTool": {
@@ -311,17 +310,40 @@
         "noPersons": "Keine passende Person",
         "confirm": "Einweiser hinzufügen",
         "confirmCount": "{{count}} Einweiser hinzufügen"
+      },
+      "pauseCertification": {
+        "title": "Einweisung pausieren?",
+        "message": "Die Person kann das Werkzeug vorübergehend nicht freischalten. Die Einweisung bleibt erhalten und kann jederzeit reaktiviert werden.",
+        "confirm": "Einweisung pausieren"
+      },
+      "reactivateCertification": {
+        "title": "Einweisung reaktivieren?",
+        "message": "Die Person kann das Werkzeug sofort wieder freischalten.",
+        "confirm": "Einweisung reaktivieren"
+      },
+      "revokeCertification": {
+        "title": "Einweisung entziehen?",
+        "message": "Die Person darf das Werkzeug nicht mehr nutzen. Für eine erneute Nutzung ist eine neue Einweisung nötig.",
+        "confirm": "Einweisung entziehen"
+      },
+      "createCertifications": {
+        "title": "Einweisungen eintragen",
+        "certifiedBy": "Eingewiesen von",
+        "certifiedByHint": "Nur eingetragene Einweiser dieses Werkzeugs",
+        "noCertifiers": "Noch keine Einweiser – zuerst im Tab „Details“ einen Einweiser hinzufügen.",
+        "persons": "Personen ({{count}} ausgewählt)",
+        "search": "Personen suchen",
+        "searchPlaceholder": "Name oder E-Mail suchen",
+        "clearSearch": "Suche leeren",
+        "removePerson": "{{name}} entfernen",
+        "noPersons": "Niemand gefunden",
+        "confirm": "Einweisungen eintragen",
+        "confirmOne": "1 Einweisung eintragen",
+        "confirmCount": "{{count}} Einweisungen eintragen"
       }
     },
     "tooltips": {
       "clearRfidReader": "RFID-Lesegerät-Zuweisung aufheben"
-    },
-    "tables": {
-      "toolCertifications": {
-        "userNameColumn": "Benutzer",
-        "statusColumn": "Status",
-        "certifiedAtColumn": "Eingewiesen am"
-      }
     },
     "wlanRelaisTypes": {
       "SHELLY_1": "Shelly 1",
@@ -399,14 +421,30 @@
           "hardware": "Hardware"
         },
         "certifications": {
-          "batchCreate": {
-            "title": "Neue Einweisungen eintragen",
-            "searchUsers": "Benutzer suchen",
-            "certifiedBy": "Eingewiesen von",
-            "submit": "Einweisungen eintragen"
+          "search": "Einweisungen durchsuchen",
+          "searchPlaceholder": "Person suchen",
+          "clearSearch": "Suche leeren",
+          "create": "Neue Einweisungen eintragen",
+          "columns": {
+            "person": "Person",
+            "certifiedAt": "Eingewiesen am",
+            "certifiedBy": "Einweiser",
+            "status": "Status"
           },
-          "noCertifications": "Keine Einweisungen für dieses Werkzeug vorhanden.",
-          "listTitle": "Eingewiesene Benutzer"
+          "actions": {
+            "pause": "Pausieren …",
+            "reactivate": "Reaktivieren …",
+            "revoke": "Entziehen …",
+            "delete": "Löschen …"
+          },
+          "empty": {
+            "title": "Noch keine Einweisungen",
+            "message": "Einweisungen tragen die Einweiser dieses Werkzeugs ein."
+          },
+          "noResults": {
+            "title": "Keine Einweisung gefunden",
+            "message": "Suchbegriff anpassen."
+          }
         },
         "messages": {
           "alreadyAssigned": "bereits zugewiesen",

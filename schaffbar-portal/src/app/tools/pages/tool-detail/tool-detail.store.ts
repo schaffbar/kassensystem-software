@@ -15,7 +15,13 @@ import { toBatchCertifyRequest, toToolCertification } from '../../tool-certifica
 import { toRfidReader } from '../../rfid-reader.mapper';
 import { toUser } from '../../user.mapper';
 import { toInstructorsRequest, toSetWlanRelaisRequest, toTool, toUpdateToolRequest } from '../../tool.mapper';
-import { BatchCreateToolCertificationsCommand, DeleteToolCertificationCommand } from '../../tool-certification.model';
+import {
+  BatchCreateToolCertificationsCommand,
+  DeleteToolCertificationCommand,
+  PauseToolCertificationCommand,
+  ReactivateToolCertificationCommand,
+  RevokeToolCertificationCommand,
+} from '../../tool-certification.model';
 import { InstructorCandidate, ToolInstructor } from '../../user.model';
 import {
   AddToolInstructorsCommand,
@@ -163,6 +169,18 @@ export const ToolDetailStore = signalStore(
   withMethods((store) => ({
     batchCreateToolCertifications: mutation<BatchCreateToolCertificationsCommand>({
       request: (command) => store._toolCertificationsApi.certifyCustomers(toBatchCertifyRequest(command)),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
+    pauseToolCertification: mutation<PauseToolCertificationCommand>({
+      request: (command) => store._toolCertificationsApi.pauseToolCertification(command.userId, command.toolId),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
+    reactivateToolCertification: mutation<ReactivateToolCertificationCommand>({
+      request: (command) => store._toolCertificationsApi.reactivateToolCertification(command.userId, command.toolId),
+      onSuccess: () => store._certificationsResource.reload(),
+    }),
+    revokeToolCertification: mutation<RevokeToolCertificationCommand>({
+      request: (command) => store._toolCertificationsApi.revokeToolCertification(command.userId, command.toolId),
       onSuccess: () => store._certificationsResource.reload(),
     }),
     deleteToolCertification: mutation<DeleteToolCertificationCommand>({

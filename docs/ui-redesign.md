@@ -515,7 +515,13 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      bei der Nutzung, Anzahl Eingewiesene (`GET /tool-certifications` nur pro Person oder Werkzeug). „Anlegen &
      Hardware einrichten“ aus dem Entwurf entfällt vorerst (Entscheidung 08.11.2026). Noch im ⋯-Menü offen: „Bearbeiten …“ und „Einweisungen
      eintragen …“ (die Dialoge gehören zur Detailseite). Nebenbei: `index.html` hat jetzt `lang="de"`.
-   - [x] Werkzeug-Details, Tab „Details“ (die Tabs Einweisungen und Hardware sind noch die alten): Kopf mit Icon,
+   - [x] Werkzeug-Details, Tab „Einweisungen“: Karte mit Suche und „Neue Einweisungen eintragen“; Tabelle Person
+     (verlinkt), Eingewiesen am, Einweiser (aus `certifiedBy`), Status; ⋯-Menü nach Status (Aktiv: Pausieren,
+     Entziehen; Pausiert: Reaktivieren, Entziehen; Entzogen: nur Löschen) mit Bestätigung. Dialog „Einweisungen
+     eintragen“: Einweiser auswählen (nur Einweiser des Werkzeugs, einer wird vorausgewählt; ohne Einweiser ein
+     Hinweis), Personen per Suche (Name oder E-Mail) und Häkchen, Auswahl als Chips darüber. Ohne Backend noch offen:
+     „Datum der Einweisung“ und „Grund“ beim Pausieren/Entziehen (keine Felder im Backend).
+   - [x] Werkzeug-Details, Tab „Details“ (der Tab Hardware ist noch der alte): Kopf mit Icon,
      Bereich, Einweisungspflicht und „In Benutzung · Name“, „Bearbeiten“ und ⋯-Menü (Bearbeiten, Werkzeug löschen);
      Tabs Details / Einweisungen (mit Anzahl) / Hardware. Karte Werkzeuginformationen (Beschreibung, Bereich,
      Einweisung, aktive Einweisungen, Erklärung der Einweisungspflicht) mit Dialog „Werkzeug bearbeiten“ (Auswahl-

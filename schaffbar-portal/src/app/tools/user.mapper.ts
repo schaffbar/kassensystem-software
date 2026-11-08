@@ -9,5 +9,6 @@ export function toUser(apiModel: CustomerApiModel): User {
     id: apiModel.id,
     firstName: apiModel.firstName,
     lastName: apiModel.lastName,
+    email: apiModel.email,
   };
 }

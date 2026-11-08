@@ -1,9 +1,7 @@
-@if (detailsStore.tool(); as tool) {
-  <schbar-tool-certifications
-    [toolId]="tool.id"
-    [certifications]="certificationRows()"
-    [certifiableUsers]="detailsStore.certifiableUsers()"
-    [certifiers]="detailsStore.certifiers()"
-    (certificationsCreated)="batchCreateToolCertifications($event)"
-    (certificationDeleted)="deleteToolCertification($event)" />
-}
+<schbar-tool-certifications
+  [certifications]="certificationRows()"
+  (createRequested)="batchCreateToolCertifications()"
+  (certificationPaused)="pauseToolCertification($event)"
+  (certificationReactivated)="reactivateToolCertification($event)"
+  (certificationRevoked)="revokeToolCertification($event)"
+  (certificationDeleted)="deleteToolCertification($event)" />

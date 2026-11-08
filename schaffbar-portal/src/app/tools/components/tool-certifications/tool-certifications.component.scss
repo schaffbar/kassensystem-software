@@ -1,38 +1,36 @@
-.tool-certifications {
-  .certifications-layout {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
+:host {
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+
+  .search-field {
+    flex: 0 1 360px;
   }
+}
 
-  .batch-create-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex: 1;
-    min-width: 0;
+.person a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
 
-    .user-search-field,
-    .certifier-search-field {
-      width: 100%;
-    }
-
-    .selected-users-chips {
-      margin-bottom: 0.5rem;
-    }
+  &:hover {
+    text-decoration: underline;
   }
+}
 
-  .certifications-list {
-    flex: 1;
-    min-width: 0;
-  }
+.secondary {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
 
-  .table-container {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-  }
+.mat-column-actions {
+  width: 56px;
+  text-align: right;
 }

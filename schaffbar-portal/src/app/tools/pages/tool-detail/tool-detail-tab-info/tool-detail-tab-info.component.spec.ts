@@ -40,13 +40,14 @@ describe('ToolDetailTabInfoComponent', () => {
     instructors: ['user-1'],
   };
   const instructors: ToolInstructor[] = [
-    { id: 'user-1', firstName: 'Max', lastName: 'Mustermann', certificationsGiven: 3 },
+    { id: 'user-1', firstName: 'Max', lastName: 'Mustermann', email: 'max@example.org', certificationsGiven: 3 },
   ];
   const candidates: InstructorCandidate[] = [
     {
       id: 'user-2',
       firstName: 'Erika',
       lastName: 'Musterfrau',
+      email: 'erika@example.org',
       certification: { status: ToolCertificationStatus.Active, certifiedAt: new Date('2026-01-01T10:00:00Z') },
     },
   ];

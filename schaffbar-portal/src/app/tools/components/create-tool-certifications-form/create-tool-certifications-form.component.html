@@ -1,0 +1,106 @@
+<schbar-form-dialog-header
+  [title]="'tools.dialogs.createCertifications.title' | translate"
+  [subtitle]="data.toolName" />
+
+<mat-dialog-content>
+  @if (certifiers.length === 0) {
+    <p class="no-certifiers" role="status">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      {{ 'tools.dialogs.createCertifications.noCertifiers' | translate }}
+    </p>
+  } @else {
+    <div>
+      <label class="field-label" for="certifier">{{
+        'tools.dialogs.createCertifications.certifiedBy' | translate
+      }}</label>
+      <mat-form-field class="full-width" subscriptSizing="dynamic">
+        <mat-select id="certifier" [value]="certifierId()" (valueChange)="selectCertifier($event)">
+          @for (certifier of certifiers; track certifier.id) {
+            <mat-option [value]="certifier.id">{{ certifier.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ 'tools.dialogs.createCertifications.certifiedByHint' | translate }}</mat-hint>
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="persons">
+    <span class="field-label" id="persons-label">
+      {{ 'tools.dialogs.createCertifications.persons' | translate: { count: selectedIds().length } }}
+    </span>
+
+    @if (selectedCandidates().length > 0) {
+      <div class="selected-persons">
+        @for (person of selectedCandidates(); track person.id) {
+          <span class="selected-person">
+            <span class="selected-person-name">{{ person.name }}</span>
+            <button
+              type="button"
+              [attr.aria-label]="'tools.dialogs.createCertifications.removePerson' | translate: { name: person.name }"
+              (click)="toggleCandidate(person.id)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </span>
+        }
+      </div>
+    }
+
+    <mat-form-field class="search-field full-width" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #searchInput
+        matInput
+        type="search"
+        [attr.aria-label]="'tools.dialogs.createCertifications.search' | translate"
+        [placeholder]="'tools.dialogs.createCertifications.searchPlaceholder' | translate"
+        [value]="searchText()"
+        (input)="searchCandidates(searchInput.value)" />
+      @if (searchText()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          [attr.aria-label]="'tools.dialogs.createCertifications.clearSearch' | translate"
+          (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <div class="candidates" role="group" aria-labelledby="persons-label">
+      @for (candidate of shownCandidates(); track candidate.id) {
+        <mat-checkbox
+          class="candidate"
+          [class.selected]="selectedIds().includes(candidate.id)"
+          [checked]="selectedIds().includes(candidate.id)"
+          (change)="toggleCandidate(candidate.id)">
+          <span class="candidate-text">
+            <span class="candidate-name">{{ candidate.name }}</span>
+            <span class="candidate-email">{{ candidate.email }}</span>
+          </span>
+        </mat-checkbox>
+      } @empty {
+        <p class="no-candidates">{{ 'tools.dialogs.createCertifications.noPersons' | translate }}</p>
+      }
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
+    {{ 'shared.actions.cancel' | translate }}
+  </button>
+  <button matButton="filled" type="button" [disabled]="!canSave()" (click)="batchCreateToolCertifications()">
+    @switch (selectedIds().length) {
+      @case (0) {
+        {{ 'tools.dialogs.createCertifications.confirm' | translate }}
+      }
+      @case (1) {
+        {{ 'tools.dialogs.createCertifications.confirmOne' | translate }}
+      }
+      @default {
+        {{ 'tools.dialogs.createCertifications.confirmCount' | translate: { count: selectedIds().length } }}
+      }
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,132 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.no-certifiers {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--info-soft);
+  color: var(--text);
+
+  mat-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: var(--info);
+    font-size: 18px;
+  }
+}
+
+.persons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .field-label {
+    margin-bottom: 0;
+  }
+}
+
+.selected-persons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// a picked person as a chip with its own remove button
+.selected-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 4px 0 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 13px;
+  font-weight: 600;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--focus);
+    }
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.candidates {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.candidate {
+  display: block;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &.selected {
+    background: var(--accent-soft);
+  }
+
+  // the whole row selects the person, not only the text: mat-checkbox has no token for the width of its label
+  ::ng-deep .mdc-form-field {
+    display: flex;
+  }
+
+  ::ng-deep .mdc-form-field > label {
+    flex: 1 1 auto;
+    cursor: pointer;
+  }
+}
+
+.candidate-text {
+  display: flex;
+  flex-direction: column;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.candidate-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.candidate-email {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.no-candidates {
+  margin: 0;
+  padding: 20px;
+  color: var(--text-3);
+  text-align: center;
+}

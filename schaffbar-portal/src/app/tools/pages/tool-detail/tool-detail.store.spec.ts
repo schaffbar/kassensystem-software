@@ -136,7 +136,9 @@ describe('ToolDetailStore', () => {
     expect(store.assignableRfidReaders()).toEqual([
       { id: 'reader-1', macAddress: 'AA:BB', name: 'Reader 1', type: RfidReaderType.SwitchBox },
     ]);
-    expect(store.users()).toEqual([{ id: 'user-1', firstName: 'Max', lastName: 'Mustermann' }]);
+    expect(store.users()).toEqual([
+      { id: 'user-1', firstName: 'Max', lastName: 'Mustermann', email: 'max@example.org' },
+    ]);
   });
 
   it('should load tool and certifications when the id is set', async () => {
@@ -191,7 +193,7 @@ describe('ToolDetailStore', () => {
     await settle();
 
     expect(store.instructors()).toEqual([
-      { id: 'user-2', firstName: 'Erika', lastName: 'Mustermann', certificationsGiven: 2 },
+      { id: 'user-2', firstName: 'Erika', lastName: 'Mustermann', email: 'max@example.org', certificationsGiven: 2 },
     ]);
     expect(store.instructorCandidates().map((candidate) => candidate.certification)).toEqual([
       { status: ToolCertificationStatus.Active, certifiedAt: new Date('2026-01-01T10:00:00Z') },
@@ -341,6 +343,24 @@ describe('ToolDetailStore', () => {
     expectCertificationsRequest().flush([]);
     await settle();
     expect(store.toolCertifications()).toEqual([]);
+  });
+
+  it.each([
+    ['pause', 'pauseToolCertification'],
+    ['reactivate', 'reactivateToolCertification'],
+    ['revoke', 'revokeToolCertification'],
+  ] as const)('should %s a certification and reload the certifications', async (action, method) => {
+    await loadTool();
+
+    store[method]({ userId: 'user-1', toolId: 'tool-1' });
+    trigger();
+    const change = httpMock.expectOne(`${certificationsUrl}/customers/user-1/tools/tool-1/${action}`);
+    expect(change.request.method).toBe('PUT');
+    change.flush(null);
+    trigger();
+
+    expectCertificationsRequest().flush(certifications);
+    await settle();
   });
 
   it('should expose a load error for a response that does not match the schema', async () => {
