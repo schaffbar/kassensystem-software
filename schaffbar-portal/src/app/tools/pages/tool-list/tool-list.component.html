@@ -1,16 +1,12 @@
-<div class="tool-list-header">
-  <div class="tool-list-header__title">
-    <h1>{{ 'tools.title' | translate }} ({{ toolsCount() }})</h1>
-    <button matIconButton (click)="reloadTools()">
-      <mat-icon>refresh</mat-icon>
-    </button>
-  </div>
-  <div class="tool-list-header__actions">
-    <button matButton="filled" [disabled]="store.createTool.isPending()" (click)="createTool()">
-      {{ 'tools.actions.addTool' | translate }}
-    </button>
-  </div>
-</div>
+<schbar-page-header [title]="'tools.title' | translate" [subtitle]="subtitle().key | translate: subtitle().params">
+  <button matIconButton type="button" [attr.aria-label]="'shared.actions.reload' | translate" (click)="reloadTools()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+  <button matButton="filled" type="button" [disabled]="store.createTool.isPending()" (click)="createTool()">
+    <mat-icon>add</mat-icon>
+    {{ 'tools.actions.addTool' | translate }}
+  </button>
+</schbar-page-header>
 
 @if (store.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
@@ -19,76 +15,181 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
-<div class="mat-elevation-z2">
-  <table mat-table [dataSource]="dataSource()" matSort>
-    <ng-container matColumnDef="certificationRequirement">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
-      <td mat-cell *matCellDef="let row">
-        <schbar-certification-requirement-badge [certificationRequirement]="row.certificationRequirement" />
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'tools.shared.toolProperties.name' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="area">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'tools.shared.toolProperties.area' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ row.area | toolAreaKey | translate }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="description">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'tools.shared.toolProperties.description' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.description | orDash }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="rfidReaderId">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'tools.shared.toolProperties.rfidReader' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">
-        @if (row.rfidReaderId) {
-          <mat-icon>check</mat-icon>
-        } @else {
-          {{ row.rfidReaderId | orDash }}
-        }
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="wlanRelaisType">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'tools.shared.toolProperties.wlanRelaisType' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">
-        {{ row.wlanRelaisType | wlanRelaisTypeKey | translate | orDash }}
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>{{ 'shared.table.actionsColumn' | translate }}</th>
-      <td mat-cell *matCellDef="let row">
-        <button class="danger-button" matIconButton type="button" (click)="deleteTool($event, row)">
-          <mat-icon>delete</mat-icon>
+@if (isEmpty()) {
+  <schbar-empty-state
+    class="table-card"
+    icon="build"
+    [title]="'tools.pages.toolList.empty.title' | translate"
+    [message]="'tools.pages.toolList.empty.message' | translate">
+    <button matButton="filled" type="button" (click)="createTool()">
+      <mat-icon>add</mat-icon>
+      {{ 'tools.actions.addTool' | translate }}
+    </button>
+  </schbar-empty-state>
+} @else {
+  <div class="toolbar">
+    <mat-form-field class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #searchInput
+        matInput
+        type="search"
+        [attr.aria-label]="'tools.pages.toolList.search' | translate"
+        [placeholder]="'tools.pages.toolList.searchPlaceholder' | translate"
+        [value]="searchText()"
+        (input)="searchTools(searchInput.value)" />
+      @if (searchText()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          [attr.aria-label]="'tools.pages.toolList.clearSearch' | translate"
+          (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
         </button>
-      </td>
-    </ng-container>
+      }
+    </mat-form-field>
+    <schbar-segmented-control
+      class="area-filter"
+      [label]="'tools.pages.toolList.areaFilter.label' | translate"
+      [segments]="areaSegments()"
+      [(selected)]="area" />
+    <schbar-segmented-control
+      class="view-switch"
+      [label]="'tools.pages.toolList.views.label' | translate"
+      [segments]="viewSegments()"
+      [(selected)]="view" />
+  </div>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      mat-row
-      class="clickable-row"
-      (click)="openToolDetail(row)"
-      *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+  @if (hasNoResults()) {
+    <schbar-empty-state
+      class="no-results"
+      icon="search_off"
+      [title]="'tools.pages.toolList.noResults.title' | translate"
+      [message]="'tools.pages.toolList.noResults.message' | translate" />
+  } @else if (view() === 'cards') {
+    @for (group of areaGroups(); track group.area) {
+      <section class="area-section">
+        <h2 class="section-title">{{ group.area | toolAreaKey | translate }} · {{ group.tools.length }}</h2>
+        <div class="tool-cards">
+          @for (tool of group.tools; track tool.id) {
+            <a class="tool-card" [routerLink]="[tool.id]">
+              <span class="card-head">
+                <span class="card-name">{{ tool.name }}</span>
+                <ng-container *ngTemplateOutlet="toolState; context: { $implicit: tool, withUser: false }" />
+              </span>
+              <span class="card-badges">
+                <schbar-certification-requirement-badge [certificationRequirement]="tool.certificationRequirement" />
+              </span>
+              <!-- explains the state; "Frei" needs no explanation -->
+              @if (tool.usedBy) {
+                <span class="card-usage">{{ 'tools.pages.toolList.usedBy' | translate: { name: tool.usedBy } }}</span>
+              }
+              <span class="card-footer" [class.no-switch-box]="!tool.rfidReaderId">
+                @if (tool.rfidReaderId) {
+                  <mat-icon aria-hidden="true">electrical_services</mat-icon>
+                }
+                <ng-container *ngTemplateOutlet="hardware; context: { $implicit: tool }" />
+              </span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    <div class="table-card">
+      <div class="table-scroll">
+        <table mat-table [dataSource]="shownTools()">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>{{ 'tools.pages.toolList.columns.tool' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="tool-name">{{ row.name }}</span>
+              <span class="tool-area">{{ row.area | toolAreaKey | translate }}</span>
+            </td>
+          </ng-container>
 
-  <mat-paginator
-    #paginator
-    [length]="toolsCount()"
-    [pageIndex]="0"
-    [pageSize]="15"
-    [pageSizeOptions]="[5, 10, 15, 20]"
-    aria-label="Select page" />
-</div>
+          <ng-container matColumnDef="certificationRequirement">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'tools.pages.toolList.columns.certificationRequirement' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <schbar-certification-requirement-badge [certificationRequirement]="row.certificationRequirement" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="state">
+            <th mat-header-cell *matHeaderCellDef>{{ 'tools.pages.toolList.columns.state' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              <ng-container *ngTemplateOutlet="toolState; context: { $implicit: row, withUser: true }" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="hardware">
+            <th mat-header-cell *matHeaderCellDef>{{ 'tools.pages.toolList.columns.hardware' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="hardware">
+              <ng-container *ngTemplateOutlet="hardware; context: { $implicit: row, short: true }" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>
+              <span class="cdk-visually-hidden">{{ 'shared.table.actionsColumn' | translate }}</span>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: row.name }">
+                <button mat-menu-item type="button" (click)="openToolDetail(row)">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span>{{ 'shared.actions.details' | translate }}</span>
+                </button>
+                <mat-divider />
+                <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteTool(row)">
+                  <mat-icon>delete</mat-icon>
+                  <span>{{ 'tools.pages.toolList.actions.delete' | translate }}</span>
+                </button>
+              </schbar-row-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="listColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: listColumns"
+            (click)="openToolDetail(row)"
+            class="clickable-row"></tr>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<ng-template #toolState let-tool let-withUser="withUser">
+  @if (tool.usedBy) {
+    <schbar-status-badge tone="info" icon="play_circle">
+      @if (withUser) {
+        {{ 'tools.pages.toolList.inUseBy' | translate: { name: tool.usedBy } }}
+      } @else {
+        {{ 'tools.pages.toolList.states.inUse' | translate }}
+      }
+    </schbar-status-badge>
+  } @else {
+    <schbar-status-badge tone="success" icon="check_circle">
+      {{ 'tools.pages.toolList.states.free' | translate }}
+    </schbar-status-badge>
+  }
+</ng-template>
+
+<!-- a tool is switched by its switch box (RFID reader) and the WLAN relais; without switch box nothing is recorded -->
+<ng-template #hardware let-tool let-short="short">
+  @if (tool.rfidReaderId && tool.wlanRelaisType) {
+    {{
+      'tools.pages.toolList.hardware.switchBox'
+        | translate: { relais: (tool.wlanRelaisType | wlanRelaisTypeKey | translate) }
+    }}
+  } @else if (tool.rfidReaderId) {
+    {{ 'tools.pages.toolList.hardware.switchBoxOnly' | translate }}
+  } @else if (short) {
+    –
+  } @else {
+    {{ 'tools.pages.toolList.hardware.none' | translate }}
+  }
+</ng-template>

@@ -260,11 +260,15 @@
     },
     "dialogs": {
       "addTool": {
-        "title": "Neues Werkzeug hinzufügen",
+        "title": "Neues Werkzeug anlegen",
         "errors": {
           "nameExists": "Ein Werkzeug mit diesem Namen existiert bereits."
         },
-        "confirm": "Werkzeug hinzufügen"
+        "confirm": "Werkzeug anlegen",
+        "subtitle": "Hardware (Schaltbox, WLAN-Relais) wird danach im Werkzeug eingerichtet.",
+        "namePlaceholder": "z. B. Formatkreissäge",
+        "descriptionPlaceholder": "Arbeitsfläche, geeignete Materialien, Sicherheitshinweise …",
+        "optional": "(optional)"
       },
       "deleteTool": {
         "title": "Werkzeug löschen",
@@ -320,6 +324,50 @@
       }
     },
     "pages": {
+      "toolList": {
+        "subtitle": "{{count}} Werkzeuge · {{inUse}} in Benutzung",
+        "subtitleOne": "1 Werkzeug · {{inUse}} in Benutzung",
+        "search": "Werkzeug suchen",
+        "searchPlaceholder": "Werkzeug suchen",
+        "clearSearch": "Suche leeren",
+        "areaFilter": {
+          "label": "Nach Bereich filtern",
+          "all": "Alle"
+        },
+        "views": {
+          "label": "Ansicht",
+          "cards": "Karten",
+          "list": "Liste"
+        },
+        "states": {
+          "inUse": "In Benutzung",
+          "free": "Frei"
+        },
+        "inUseBy": "In Benutzung · {{name}}",
+        "usedBy": "Genutzt von {{name}}",
+        "hardware": {
+          "switchBox": "Schaltbox · {{relais}}",
+          "switchBoxOnly": "Schaltbox · ohne WLAN-Relais",
+          "none": "Ohne Schaltbox – Nutzung wird nicht erfasst"
+        },
+        "columns": {
+          "tool": "Werkzeug",
+          "certificationRequirement": "Einweisung",
+          "state": "Status",
+          "hardware": "Hardware"
+        },
+        "actions": {
+          "delete": "Werkzeug löschen …"
+        },
+        "empty": {
+          "title": "Noch keine Werkzeuge",
+          "message": "Schaltbox und WLAN-Relais werden nach dem Anlegen im Werkzeug eingerichtet."
+        },
+        "noResults": {
+          "title": "Kein Werkzeug gefunden",
+          "message": "Suchbegriff oder Bereich anpassen."
+        }
+      },
       "toolDetails": {
         "headers": {
           "toolInformation": "Werkzeuginformationen",
@@ -366,6 +414,10 @@
         "onCommand": "Ein-Befehl",
         "offCommand": "Aus-Befehl"
       }
+    },
+    "certificationRequirementDescriptions": {
+      "YELLOW": "Jeder darf das Werkzeug nutzen. Eine Einweisung wird empfohlen und angezeigt.",
+      "RED": "Nur Personen mit aktiver Einweisung können das Werkzeug an der Schaltbox freischalten."
     }
   },
   "rfidTags": {

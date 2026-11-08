@@ -1,0 +1,16 @@
+@for (segment of segments(); track segment.id) {
+  <button
+    type="button"
+    class="segment"
+    [class.selected]="segment.id === selected()"
+    [attr.aria-pressed]="segment.id === selected()"
+    (click)="selected.set(segment.id)">
+    @if (segment.icon) {
+      <mat-icon aria-hidden="true">{{ segment.icon }}</mat-icon>
+    }
+    {{ segment.label }}
+    @if (segment.count !== undefined) {
+      <span class="count">{{ segment.count }}</span>
+    }
+  </button>
+}

@@ -1,19 +1,21 @@
 import { Component, inject, Signal, signal } from '@angular/core';
-import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
+import { form, FormField, FormRoot, maxLength, required, submit } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
+import { FormDialogHeaderComponent } from '../../../shared/dialogs/form-dialog-header/form-dialog-header.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
 import { CreateToolCommand } from '../../tool.model';
 import { validateUniqueToolName } from '../../tool.validators';
-import { CertificationRequirementKeyPipe } from '../../certification-requirement-key.pipe';
+import { CertificationRequirementBadgeComponent } from '../certification-requirement-badge/certification-requirement-badge.component';
+import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
 import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
 
 // all tools – for the unique name check
@@ -26,6 +28,9 @@ export interface NewToolDialogData {
   // a signal, so the name check follows the tool list while the dialog is open
   existingTools: Signal<ExistingToolViewModel[]>;
 }
+
+// the database column holds 255 characters
+export const DESCRIPTION_MAX_LENGTH = 255;
 
 interface NewToolFormModel {
   name: string;
@@ -42,14 +47,17 @@ interface NewToolFormModel {
     FormField,
     FormRoot,
     FieldErrorComponent,
+    FormDialogHeaderComponent,
+    CertificationRequirementBadgeComponent,
     MatInputModule,
     MatButtonModule,
     MatDialogModule,
-    MatSelectModule,
+    MatRadioModule,
     TranslatePipe,
-    CertificationRequirementKeyPipe,
+    CertificationRequirementDescriptionKeyPipe,
     ToolAreaKeyPipe,
   ],
+  host: { class: 'form-dialog' },
 })
 export class NewToolFormComponent {
   private readonly data: NewToolDialogData = inject(MAT_DIALOG_DATA);
@@ -57,6 +65,7 @@ export class NewToolFormComponent {
 
   protected readonly toolAreas = Object.values(ToolArea);
   protected readonly certificationRequirements = Object.values(CertificationRequirement);
+  protected readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
 
   private readonly model = signal<NewToolFormModel>({
     name: '',
@@ -70,6 +79,7 @@ export class NewToolFormComponent {
     validateUniqueToolName(schema.name, this.data.existingTools);
     required(schema.area);
     required(schema.certificationRequirement);
+    maxLength(schema.description, DESCRIPTION_MAX_LENGTH);
   });
 
   // --------------------------------------------------------------------------

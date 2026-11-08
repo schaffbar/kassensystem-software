@@ -1,62 +1,84 @@
-<h2 mat-dialog-title>{{ 'tools.dialogs.addTool.title' | translate }}</h2>
+<schbar-form-dialog-header
+  [title]="'tools.dialogs.addTool.title' | translate"
+  [subtitle]="'tools.dialogs.addTool.subtitle' | translate" />
 
 <form [formRoot]="toolForm" (submit)="saveTool()">
   <mat-dialog-content>
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'tools.shared.toolProperties.name' | translate }}</mat-label>
-          <input id="name" matInput [formField]="toolForm.name" />
-          <mat-error>
-            <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
-          </mat-error>
-        </mat-form-field>
-      </div>
+    <div>
+      <label class="field-label" for="name">{{ 'tools.shared.toolProperties.name' | translate }}</label>
+      <mat-form-field class="full-width" subscriptSizing="dynamic">
+        <input
+          id="name"
+          matInput
+          [placeholder]="'tools.dialogs.addTool.namePlaceholder' | translate"
+          [formField]="toolForm.name" />
+        <mat-error>
+          <schbar-field-error [field]="toolForm.name" label="tools.shared.toolProperties.name" />
+        </mat-error>
+      </mat-form-field>
     </div>
 
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'tools.shared.toolProperties.description' | translate }}</mat-label>
-          <textarea id="description" matInput [formField]="toolForm.description" rows="2"></textarea>
-        </mat-form-field>
-      </div>
-    </div>
+    <fieldset>
+      <legend class="field-label">{{ 'tools.shared.toolProperties.area' | translate }}</legend>
+      <mat-radio-group class="area-options" [formField]="toolForm.area">
+        @for (area of toolAreas; track area) {
+          <mat-radio-button class="radio-card" [class.selected]="toolForm.area().value() === area" [value]="area">
+            <span class="radio-card-text">
+              <span class="radio-card-label">{{ area | toolAreaKey | translate }}</span>
+            </span>
+          </mat-radio-button>
+        }
+      </mat-radio-group>
+      @if (toolForm.area().touched() && toolForm.area().invalid()) {
+        <p class="choice-error">
+          <schbar-field-error [field]="toolForm.area" label="tools.shared.toolProperties.area" />
+        </p>
+      }
+    </fieldset>
 
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'tools.shared.toolProperties.area' | translate }}</mat-label>
-          <mat-select [formField]="toolForm.area">
-            @for (area of toolAreas; track area) {
-              <mat-option [value]="area">{{ area | toolAreaKey | translate }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>
-            <schbar-field-error [field]="toolForm.area" label="tools.shared.toolProperties.area" />
-          </mat-error>
-        </mat-form-field>
-      </div>
-    </div>
+    <fieldset>
+      <legend class="field-label">{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</legend>
+      <mat-radio-group class="requirement-options" [formField]="toolForm.certificationRequirement">
+        @for (requirement of certificationRequirements; track requirement) {
+          <mat-radio-button
+            class="radio-card"
+            [class.selected]="toolForm.certificationRequirement().value() === requirement"
+            [value]="requirement">
+            <span class="radio-card-text">
+              <schbar-certification-requirement-badge [certificationRequirement]="requirement" />
+              <span class="radio-card-description">
+                {{ requirement | certificationRequirementDescriptionKey | translate }}
+              </span>
+            </span>
+          </mat-radio-button>
+        }
+      </mat-radio-group>
+      @if (toolForm.certificationRequirement().touched() && toolForm.certificationRequirement().invalid()) {
+        <p class="choice-error">
+          <schbar-field-error
+            [field]="toolForm.certificationRequirement"
+            label="tools.shared.toolProperties.certificationRequirement" />
+        </p>
+      }
+    </fieldset>
 
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'tools.shared.toolProperties.certificationRequirement' | translate }}</mat-label>
-          <mat-select [formField]="toolForm.certificationRequirement">
-            @for (req of certificationRequirements; track req) {
-              <mat-option [value]="req">
-                {{ req | certificationRequirementKey | translate }}
-              </mat-option>
-            }
-          </mat-select>
-          <mat-error>
-            <schbar-field-error
-              [field]="toolForm.certificationRequirement"
-              label="tools.shared.toolProperties.certificationRequirement" />
-          </mat-error>
-        </mat-form-field>
-      </div>
+    <div>
+      <label class="field-label" for="description">
+        {{ 'tools.shared.toolProperties.description' | translate }}
+        <span class="optional">{{ 'tools.dialogs.addTool.optional' | translate }}</span>
+      </label>
+      <mat-form-field class="full-width description-field" subscriptSizing="dynamic">
+        <textarea
+          id="description"
+          matInput
+          rows="3"
+          [placeholder]="'tools.dialogs.addTool.descriptionPlaceholder' | translate"
+          [formField]="toolForm.description"></textarea>
+        <mat-hint align="end">{{ toolForm.description().value().length }} / {{ descriptionMaxLength }}</mat-hint>
+        <mat-error>
+          <schbar-field-error [field]="toolForm.description" label="tools.shared.toolProperties.description" />
+        </mat-error>
+      </mat-form-field>
     </div>
   </mat-dialog-content>
 

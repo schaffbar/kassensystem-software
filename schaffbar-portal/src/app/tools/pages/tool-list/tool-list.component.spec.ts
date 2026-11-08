@@ -1,27 +1,25 @@
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
-import { MatSortHeaderHarness } from '@angular/material/sort/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog-constants';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
 import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
 import { NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
-import { CreateToolCommand, Tool } from '../../tool.model';
+import { CreateToolCommand, ToolListItem } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 import { ToolListComponent } from './tool-list.component';
 
 describe('ToolListComponent', () => {
-  function createTool(id: string, name: string, overrides: Partial<Tool> = {}): Tool {
+  function createTool(id: string, name: string, overrides: Partial<ToolListItem> = {}): ToolListItem {
     return {
       id,
       name,
@@ -35,20 +33,25 @@ describe('ToolListComponent', () => {
       onCommand: null,
       offCommand: null,
       instructors: [],
+      usedBy: null,
       ...overrides,
     };
   }
 
-  const tools: Tool[] = [
-    createTool('tool-1', 'Bandsäge'),
-    createTool('tool-2', 'Drechselbank', { rfidReaderId: 'reader-1', wlanRelaisType: WlanRelaisType.Shelly1 }),
-    createTool('tool-3', 'Kreissäge'),
+  const tools: ToolListItem[] = [
+    createTool('tool-1', 'Kreissäge'),
+    createTool('tool-2', 'Drechselbank', {
+      rfidReaderId: 'reader-1',
+      wlanRelaisType: WlanRelaisType.ShellyPro,
+      certificationRequirement: CertificationRequirement.Red,
+      usedBy: 'Anna Becker',
+    }),
+    createTool('tool-3', 'Lasercutter', { area: ToolArea.FabLab, rfidReaderId: 'reader-2' }),
   ];
 
   let fixture: ComponentFixture<ToolListComponent>;
-  let loader: HarnessLoader;
   let storeMock: {
-    tools: WritableSignal<Tool[]>;
+    tools: WritableSignal<ToolListItem[]>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     reloadTools: Mock;
@@ -83,104 +86,205 @@ describe('ToolListComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolListComponent);
-    loader = TestbedHarnessEnvironment.loader(fixture);
     await fixture.whenStable();
   });
 
+  afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
+
   function texts(selector: string): string[] {
     const elements: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll(selector);
-    return Array.from(elements).map((element) => element.textContent?.trim() ?? '');
+    return Array.from(elements).map((element) => element.textContent?.replace(/\s+/g, ' ').trim() ?? '');
+  }
+
+  function query(selector: string): HTMLElement | null {
+    return fixture.nativeElement.querySelector(selector);
+  }
+
+  async function clickSegment(control: 'area-filter' | 'view-switch', index: number): Promise<void> {
+    fixture.nativeElement.querySelectorAll(`.${control} button`)[index].click();
+    await fixture.whenStable();
+  }
+
+  async function search(text: string): Promise<void> {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="search"]');
+    input.value = text;
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
   }
 
   it('should load the tools on init', () => {
     expect(storeMock.reloadTools).toHaveBeenCalledOnce();
   });
 
-  it('should show a check for an assigned RFID reader and a dash for missing values', () => {
-    expect(texts('td.mat-column-rfidReaderId')).toEqual(['–', 'check', '–']);
-    expect(texts('td.mat-column-wlanRelaisType')).toEqual(['–', 'tools.wlanRelaisTypes.SHELLY_1', '–']);
+  describe('cards', () => {
+    it('should group the tools by area, sorted by name', () => {
+      expect(texts('.section-title')).toEqual(['tools.areas.HOLZ · 2', 'tools.areas.FABLAB · 1']);
+      expect(texts('.card-name')).toEqual(['Drechselbank', 'Kreissäge', 'Lasercutter']);
+    });
+
+    it('should show who uses a tool and whether it is free', () => {
+      expect(texts('.card-head .label')).toEqual([
+        'tools.pages.toolList.states.inUse',
+        'tools.pages.toolList.states.free',
+        'tools.pages.toolList.states.free',
+      ]);
+      // only the tool in use explains its state
+      expect(texts('.card-usage')).toEqual(['tools.pages.toolList.usedBy']);
+    });
+
+    it('should describe the hardware of a tool', () => {
+      expect(texts('.card-footer')).toEqual([
+        'electrical_services tools.pages.toolList.hardware.switchBox',
+        'tools.pages.toolList.hardware.none',
+        'electrical_services tools.pages.toolList.hardware.switchBoxOnly',
+      ]);
+    });
+
+    it('should link a card to the detail page of its tool', () => {
+      expect(query('a.tool-card')?.getAttribute('href')).toBe('/tool-2');
+    });
   });
 
-  it('should sort by the assigned RFID reader', async () => {
-    const header = await loader.getHarness(
-      MatSortHeaderHarness.with({ label: 'tools.shared.toolProperties.rfidReader' }),
-    );
+  describe('list', () => {
+    beforeEach(() => clickSegment('view-switch', 1));
 
-    await header.click();
-    await header.click();
+    it('should show the tools in a table, sorted by name', () => {
+      expect(query('.tool-cards')).toBeNull();
+      expect(texts('td .tool-name')).toEqual(['Drechselbank', 'Kreissäge', 'Lasercutter']);
+      expect(texts('td.mat-column-state .label')).toEqual([
+        'tools.pages.toolList.inUseBy',
+        'tools.pages.toolList.states.free',
+        'tools.pages.toolList.states.free',
+      ]);
+    });
 
-    expect(texts('td.mat-column-name')[0]).toBe('Drechselbank');
+    it('should show the hardware short, with a dash for a tool without switch box', () => {
+      expect(texts('td.hardware')).toEqual([
+        'tools.pages.toolList.hardware.switchBox',
+        '–',
+        'tools.pages.toolList.hardware.switchBoxOnly',
+      ]);
+    });
+
+    it('should open the detail page of a clicked tool', () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+      query('tr[mat-row]')?.click();
+
+      expect(navigate).toHaveBeenCalledExactlyOnceWith(['tools', 'tool-2']);
+    });
+
+    describe('delete', () => {
+      async function clickDelete(confirmed: boolean): Promise<void> {
+        openConfirmDeleteDialog.mockReturnValue(of(confirmed));
+        query('tr[mat-row] schbar-row-menu button')?.click();
+        await fixture.whenStable();
+        document.querySelector<HTMLElement>('.danger-menu-item')?.click();
+      }
+
+      it('should delete the tool after confirmation without opening its detail page', async () => {
+        const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+        await clickDelete(true);
+
+        expect(openConfirmDeleteDialog).toHaveBeenCalledExactlyOnceWith({
+          title: 'tools.dialogs.deleteTool.title',
+          entity: 'Drechselbank',
+          message: 'tools.dialogs.deleteTool.message',
+          confirmLabel: 'tools.dialogs.deleteTool.confirm',
+        });
+        expect(storeMock.deleteTool).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-2' });
+        expect(navigate).not.toHaveBeenCalled();
+      });
+
+      it('should not delete the tool when the dialog is cancelled', async () => {
+        await clickDelete(false);
+
+        expect(storeMock.deleteTool).not.toHaveBeenCalled();
+      });
+    });
   });
 
-  it('should open the detail page of a clicked tool', () => {
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+  describe('filter and search', () => {
+    it('should count the tools per area, ignoring the search', async () => {
+      await search('dre');
 
-    fixture.nativeElement.querySelector('tr[mat-row]').click();
+      expect(texts('.area-filter button')).toEqual([
+        'tools.pages.toolList.areaFilter.all 3',
+        'tools.areas.HOLZ 2',
+        'tools.areas.METALL 0',
+        'tools.areas.KREATIV 0',
+        'tools.areas.FABLAB 1',
+      ]);
+    });
 
-    expect(navigate).toHaveBeenCalledExactlyOnceWith(['tools', 'tool-1']);
+    it('should show only the tools of the selected area', async () => {
+      await clickSegment('area-filter', 4);
+
+      expect(texts('.card-name')).toEqual(['Lasercutter']);
+    });
+
+    it('should search by name', async () => {
+      await search('LASER');
+
+      expect(texts('.card-name')).toEqual(['Lasercutter']);
+    });
+
+    it('should say so when nothing matches', async () => {
+      await clickSegment('area-filter', 2);
+
+      expect(texts('schbar-empty-state.no-results .title')).toEqual(['tools.pages.toolList.noResults.title']);
+      expect(query('.tool-cards')).toBeNull();
+    });
+  });
+
+  describe('empty list', () => {
+    it('should offer to add the first tool', async () => {
+      storeMock.tools.set([]);
+      await fixture.whenStable();
+
+      expect(texts('schbar-empty-state .title')).toEqual(['tools.pages.toolList.empty.title']);
+      expect(query('.toolbar')).toBeNull();
+      expect(query('schbar-empty-state button')).not.toBeNull();
+    });
   });
 
   describe('create', () => {
     const command: CreateToolCommand = {
-      name: 'Standbohrmaschine',
-      area: ToolArea.Metall,
+      name: 'Hobelbank',
+      area: ToolArea.Holz,
       certificationRequirement: CertificationRequirement.Red,
     };
 
-    function clickAdd(result: CreateToolCommand | undefined): void {
-      openDialog.mockReturnValue({ afterClosed: () => of(result) });
-      fixture.nativeElement.querySelector('.tool-list-header__actions button').click();
+    function clickAdd(): void {
+      query('schbar-page-header button[matButton="filled"]')?.click();
     }
 
     it('should open the form with all tools for the name check and create the tool', () => {
-      clickAdd(command);
+      openDialog.mockReturnValue({ afterClosed: () => of(command) });
+
+      clickAdd();
 
       expect(openDialog).toHaveBeenCalledExactlyOnceWith(
         NewToolFormComponent,
-        expect.objectContaining({ data: { existingTools: storeMock.tools }, disableClose: true }),
+        expect.objectContaining({ ...FORM_DIALOG_CONFIG, data: { existingTools: storeMock.tools } }),
       );
       expect(storeMock.createTool).toHaveBeenCalledExactlyOnceWith(command);
+    });
+
+    it('should not create a tool when the form is cancelled', () => {
+      openDialog.mockReturnValue({ afterClosed: () => of(undefined) });
+
+      clickAdd();
+
+      expect(storeMock.createTool).not.toHaveBeenCalled();
     });
 
     it('should disable adding while a tool is being created', async () => {
       storeMock.createTool.isPending.set(true);
       await fixture.whenStable();
 
-      expect(fixture.nativeElement.querySelector('.tool-list-header__actions button').disabled).toBe(true);
-    });
-
-    it('should not create a tool when the form is cancelled', () => {
-      clickAdd(undefined);
-
-      expect(storeMock.createTool).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('delete', () => {
-    function clickDeleteOfSecondRow(confirmed: boolean): void {
-      openConfirmDeleteDialog.mockReturnValue(of(confirmed));
-      fixture.nativeElement.querySelectorAll('tr[mat-row] .danger-button')[1].click();
-    }
-
-    it('should delete the tool after confirmation without opening its detail page', () => {
-      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
-
-      clickDeleteOfSecondRow(true);
-
-      expect(openConfirmDeleteDialog).toHaveBeenCalledExactlyOnceWith({
-        title: 'tools.dialogs.deleteTool.title',
-        entity: 'Drechselbank',
-        message: 'tools.dialogs.deleteTool.message',
-        confirmLabel: 'tools.dialogs.deleteTool.confirm',
-      });
-      expect(storeMock.deleteTool).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-2' });
-      expect(navigate).not.toHaveBeenCalled();
-    });
-
-    it('should not delete the tool when the dialog is cancelled', () => {
-      clickDeleteOfSecondRow(false);
-
-      expect(storeMock.deleteTool).not.toHaveBeenCalled();
+      expect((query('schbar-page-header button[matButton="filled"]') as HTMLButtonElement).disabled).toBe(true);
     });
   });
 });

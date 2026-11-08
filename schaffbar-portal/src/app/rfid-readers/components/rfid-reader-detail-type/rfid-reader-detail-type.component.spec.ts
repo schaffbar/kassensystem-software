@@ -76,7 +76,9 @@ describe('RfidReaderDetailTypeComponent', () => {
     const group = await loader.getHarness(MatRadioGroupHarness);
     expect(await group.getRadioButtons()).toHaveLength(Object.values(RfidReaderType).length);
     expect(await group.getCheckedValue()).toBe(RfidReaderType.GateKeeperOut);
-    expect(query('.type-option.selected .type-label')?.textContent?.trim()).toBe('rfidReaders.types.gate_keeper_out');
+    expect(query('.radio-card.selected .radio-card-label')?.textContent?.trim()).toBe(
+      'rfidReaders.types.gate_keeper_out',
+    );
     expect(query('.current-type')).toBeNull();
   });
 

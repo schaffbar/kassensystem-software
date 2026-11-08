@@ -340,6 +340,43 @@ body {
   );
 }
 
+// an option of a mat-radio-group as a card: `<mat-radio-button class="radio-card" [class.selected]="…">` with a
+// `radio-card-text` inside (`radio-card-label`, optional `radio-card-description`); the border width stays the same
+// when selected, so nothing shifts
+.radio-card {
+  display: block;
+  padding: 4px 14px 4px 4px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+
+  &:hover {
+    border-color: var(--text-3);
+  }
+
+  &.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+}
+
+.radio-card-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.radio-card-label {
+  font-weight: 600;
+}
+
+.radio-card-description {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
 // IDs, MAC and IP addresses, socket names
 .mono {
   font-family: var(--font-mono);

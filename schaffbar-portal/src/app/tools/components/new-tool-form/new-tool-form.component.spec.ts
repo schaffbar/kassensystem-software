@@ -7,7 +7,7 @@ import { MatButtonHarness } from '@angular/material/button/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
 import { MatInputHarness } from '@angular/material/input/testing';
-import { MatSelectHarness } from '@angular/material/select/testing';
+import { MatRadioGroupHarness } from '@angular/material/radio/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
@@ -47,10 +47,9 @@ describe('NewToolFormComponent', () => {
     await input.setValue(name);
   }
 
-  async function selectOption(index: number, text: string): Promise<void> {
-    const selects = await loader.getAllHarnesses(MatSelectHarness);
-    await selects[index].open();
-    await selects[index].clickOptions({ text });
+  async function choose(group: 'area' | 'requirement', label: RegExp): Promise<void> {
+    const radioGroup = await loader.getHarness(MatRadioGroupHarness.with({ selector: `.${group}-options` }));
+    await radioGroup.checkRadioButton({ label });
   }
 
   async function clickSave(): Promise<void> {
@@ -60,17 +59,51 @@ describe('NewToolFormComponent', () => {
   }
 
   async function nameErrors(): Promise<string[]> {
-    const nameField = await loader.getHarness(MatFormFieldHarness.with({ floatingLabelText: /name/ }));
+    const nameField = await loader.getHarness(MatFormFieldHarness.with({ selector: ':has(#name)' }));
     return nameField.getTextErrors();
   }
+
+  it('should show the dialog header with title and hint', () => {
+    expect(fixture.nativeElement.querySelector('schbar-form-dialog-header h2').textContent.trim()).toBe(
+      'tools.dialogs.addTool.title',
+    );
+    expect(fixture.nativeElement.querySelector('schbar-form-dialog-header .subtitle').textContent.trim()).toBe(
+      'tools.dialogs.addTool.subtitle',
+    );
+  });
 
   it('should show required errors and not close when saving an empty form', async () => {
     await clickSave();
 
-    const formFields = await loader.getAllHarnesses(MatFormFieldHarness);
-    const errors = await Promise.all(formFields.map((field) => field.getTextErrors()));
-    expect(errors.flat().filter((error) => error === 'shared.errors.required').length).toBe(3);
+    expect(await nameErrors()).toEqual(['shared.errors.required']);
+    const choiceErrors = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.choice-error')).map((error) =>
+      error.textContent?.trim(),
+    );
+    expect(choiceErrors).toEqual(['shared.errors.required', 'shared.errors.required']);
     expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('should offer the areas and the requirements with their description as cards', () => {
+    const cards = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.requirement-options .radio-card'));
+    expect(cards.map((card) => card.querySelector('.radio-card-description')?.textContent?.trim())).toEqual([
+      'tools.certificationRequirementDescriptions.YELLOW',
+      'tools.certificationRequirementDescriptions.RED',
+    ]);
+    expect(fixture.nativeElement.querySelectorAll('.area-options .radio-card')).toHaveLength(4);
+  });
+
+  it('should limit the description to what the database holds and count the characters', async () => {
+    const description = await loader.getHarness(MatInputHarness.with({ selector: '#description' }));
+    await description.setValue('x'.repeat(256));
+    await clickSave();
+
+    const field = await loader.getHarness(MatFormFieldHarness.with({ selector: ':has(#description)' }));
+    expect(await field.getTextErrors()).toEqual(['shared.errors.maxLength']);
+    expect(dialogRef.close).not.toHaveBeenCalled();
+
+    await description.setValue('Hobelbank');
+    await fixture.whenStable();
+    expect(await field.getTextHints()).toEqual(['9 / 255']);
   });
 
   it('should reject a name that already exists (case-insensitive)', async () => {
@@ -94,8 +127,8 @@ describe('NewToolFormComponent', () => {
 
   it('should close the dialog with the create command', async () => {
     await setName('Drechselbank');
-    await selectOption(0, 'tools.areas.HOLZ');
-    await selectOption(1, 'tools.certificationRequirements.RED');
+    await choose('area', /tools\.areas\.HOLZ/);
+    await choose('requirement', /tools\.certificationRequirements\.RED/);
 
     await clickSave();
 

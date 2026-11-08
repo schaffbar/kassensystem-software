@@ -1,47 +1,148 @@
-.tool-list-header {
+:host {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// the page header brings its own margin
+schbar-page-header {
+  margin-bottom: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
+
+  .search-field {
+    flex: 1 1 280px;
+  }
+}
+
+.area-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 164px;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--text-3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 1rem;
+  gap: 8px;
 }
 
-.tool-list-header__title {
+// a long name wraps (hyphenated, `lang="de"`) instead of pushing the state badge out of the card
+.card-name {
+  min-width: 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.card-head schbar-status-badge {
+  flex: 0 0 auto;
+}
+
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-usage {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+// pushed to the bottom, so the footers of a row line up
+.card-footer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 13px;
+
+  &.no-switch-box {
+    color: var(--text-3);
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
 }
 
-.tool-list-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.tool-name {
+  display: block;
+  font-weight: 600;
 }
 
-.mat-column-certificationRequirement {
-  width: 40px;
-  text-align: center;
+.tool-area {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.hardware {
+  color: var(--text-2);
 }
 
 .mat-column-actions {
-  width: 100px;
-  text-align: center;
+  width: 56px;
+  text-align: right;
 }
 
-// transparent borders, so the rows don't shift when the hover border appears
-.mat-mdc-row .mat-mdc-cell {
-  border-bottom: 1px solid transparent;
-  border-top: 1px solid transparent;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-  border-color: currentColor;
+.no-results {
+  border: 1px dashed var(--border);
+  border-radius: 14px;
 }
 
 .load-error {
-  color: var(--mat-sys-error);
+  margin: 0;
+  color: var(--danger);
 }

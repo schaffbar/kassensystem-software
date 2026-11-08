@@ -18,6 +18,14 @@ export interface Tool {
 }
 
 // ----------------------------------------------------------------------------
+// list
+
+export interface ToolListItem extends Tool {
+  // the person who switched the tool on at the moment; null while it is free
+  usedBy: string | null;
+}
+
+// ----------------------------------------------------------------------------
 // WLAN relais
 
 export interface WlanRelaisCommands {

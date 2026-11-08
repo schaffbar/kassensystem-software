@@ -6,15 +6,20 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
+import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
 import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
-import { toTool } from './tool.mapper';
+import { toToolListItems } from './tool.mapper';
 import { ToolsStore } from './tools.store';
 
 describe('ToolsStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/tools`;
+  const activeToolsUrl = `${environment.apiBaseUrl}/api/v1/tool-dashboard/active-tools`;
   const tools = [toolFixture()];
+  const activeTools: ToolDashboardEntryApiModel[] = [
+    { toolId: 'tool-1', toolName: 'Bandsäge', customerId: 'user-1', firstName: 'Anna', lastName: 'Becker' },
+  ];
 
   let store: InstanceType<typeof ToolsStore>;
   let httpMock: HttpTestingController;
@@ -43,17 +48,21 @@ describe('ToolsStore', () => {
   }
 
   const expectLoad = (): TestRequest => httpMock.expectOne((req) => req.method === 'GET' && req.url === url);
+  const expectActiveToolsLoad = (): TestRequest =>
+    httpMock.expectOne((req) => req.method === 'GET' && req.url === activeToolsUrl);
 
   async function load(): Promise<void> {
     trigger();
     expectLoad().flush(tools);
+    expectActiveToolsLoad().flush(activeTools);
     await settle();
   }
 
-  it('should load all tools on first use', async () => {
+  it('should load all tools with the person using them on first use', async () => {
     await load();
 
-    expect(store.tools()).toEqual(tools.map(toTool));
+    expect(store.tools()).toEqual(toToolListItems(tools, activeTools));
+    expect(store.tools()[0].usedBy).toBe('Anna Becker');
     expect(store.isLoading()).toBe(false);
   });
 
@@ -63,6 +72,7 @@ describe('ToolsStore', () => {
     store.reloadTools();
     trigger();
     expectLoad().flush([]);
+    expectActiveToolsLoad().flush([]);
     await settle();
 
     expect(store.tools()).toEqual([]);
@@ -99,6 +109,7 @@ describe('ToolsStore', () => {
 
     trigger();
     expectLoad().flush([{ id: 'id-1' }]);
+    expectActiveToolsLoad().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
@@ -108,6 +119,7 @@ describe('ToolsStore', () => {
   it('should expose a load error', async () => {
     trigger();
     expectLoad().flush('boom', { status: 500, statusText: 'Server Error' });
+    expectActiveToolsLoad().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

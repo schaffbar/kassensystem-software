@@ -20,11 +20,13 @@
       [attr.aria-label]="'rfidReaders.pages.rfidReaderDetails.actions.selectType' | translate">
       @for (type of rfidReaderTypes; track type) {
         <mat-radio-button
-          class="type-option"
+          class="radio-card"
           [class.selected]="rfidReaderTypeForm.type().value() === type"
           [value]="type">
-          <span class="type-label">{{ type | rfidReaderTypeKey | translate }}</span>
-          <span class="type-description">{{ type | rfidReaderTypeDescriptionKey | translate }}</span>
+          <span class="radio-card-text">
+            <span class="radio-card-label">{{ type | rfidReaderTypeKey | translate }}</span>
+            <span class="radio-card-description">{{ type | rfidReaderTypeDescriptionKey | translate }}</span>
+          </span>
         </mat-radio-button>
       }
     </mat-radio-group>

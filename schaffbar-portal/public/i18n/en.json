@@ -260,11 +260,15 @@
     },
     "dialogs": {
       "addTool": {
-        "title": "Add New Tool",
+        "title": "Create New Tool",
         "errors": {
           "nameExists": "A tool with this name already exists."
         },
-        "confirm": "Add Tool"
+        "confirm": "Create Tool",
+        "subtitle": "Hardware (switch box, WLAN relais) is set up in the tool afterwards.",
+        "namePlaceholder": "e.g. panel saw",
+        "descriptionPlaceholder": "Work surface, suitable materials, safety notes …",
+        "optional": "(optional)"
       },
       "deleteTool": {
         "title": "Delete Tool",
@@ -320,6 +324,50 @@
       }
     },
     "pages": {
+      "toolList": {
+        "subtitle": "{{count}} tools · {{inUse}} in use",
+        "subtitleOne": "1 tool · {{inUse}} in use",
+        "search": "Search tools",
+        "searchPlaceholder": "Search tools",
+        "clearSearch": "Clear search",
+        "areaFilter": {
+          "label": "Filter by area",
+          "all": "All"
+        },
+        "views": {
+          "label": "View",
+          "cards": "Cards",
+          "list": "List"
+        },
+        "states": {
+          "inUse": "In use",
+          "free": "Free"
+        },
+        "inUseBy": "In use · {{name}}",
+        "usedBy": "Used by {{name}}",
+        "hardware": {
+          "switchBox": "Switch box · {{relais}}",
+          "switchBoxOnly": "Switch box · no WLAN relais",
+          "none": "No switch box – usage is not recorded"
+        },
+        "columns": {
+          "tool": "Tool",
+          "certificationRequirement": "Certification",
+          "state": "State",
+          "hardware": "Hardware"
+        },
+        "actions": {
+          "delete": "Delete tool …"
+        },
+        "empty": {
+          "title": "No tools yet",
+          "message": "Switch box and WLAN relais are set up in the tool after creating it."
+        },
+        "noResults": {
+          "title": "No tool found",
+          "message": "Change the search or the area."
+        }
+      },
       "toolDetails": {
         "headers": {
           "toolInformation": "Tool Information",
@@ -366,6 +414,10 @@
         "onCommand": "On Command",
         "offCommand": "Off Command"
       }
+    },
+    "certificationRequirementDescriptions": {
+      "YELLOW": "Anyone may use the tool. A certification is recommended and shown.",
+      "RED": "Only people with an active certification can unlock the tool at the switch box."
     }
   },
   "rfidTags": {

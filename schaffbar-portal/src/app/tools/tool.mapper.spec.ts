@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
 import { WlanRelaisType } from '../shared/models/wlan-relais-type';
@@ -8,6 +9,7 @@ import {
   toInstructorsRequest,
   toSetWlanRelaisRequest,
   toTool,
+  toToolListItems,
   toUpdateToolRequest,
 } from './tool.mapper';
 
@@ -30,6 +32,23 @@ describe('tool.mapper', () => {
       };
 
       expect(toTool(apiModel)).toEqual(apiModel);
+    });
+  });
+
+  describe('toToolListItems', () => {
+    it('should add the person who uses a tool right now', () => {
+      const saw = toolFixture({ id: 'tool-1', name: 'Bandsäge' });
+      const lathe = toolFixture({ id: 'tool-2', name: 'Drechselbank' });
+
+      const items = toToolListItems(
+        [saw, lathe],
+        [{ toolId: 'tool-2', toolName: 'Drechselbank', customerId: 'user-1', firstName: 'Anna', lastName: 'Becker' }],
+      );
+
+      expect(items).toEqual([
+        { ...toTool(saw), usedBy: null },
+        { ...toTool(lathe), usedBy: 'Anna Becker' },
+      ]);
     });
   });
 

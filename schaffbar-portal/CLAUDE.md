@@ -194,6 +194,11 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   - `schbar-danger-zone` – last card of a detail page with the destructive action (`danger-button`, asks first).
   - `schbar-filter-chips` – the filters of a list with counts (`[(selected)]` = id of the active filter); the counts
     ignore the search. Next to it the search: `mat-form-field` with the global class `search-field` (44px, no hint).
+  - `schbar-segmented-control` – one choice out of a few next to each other (area, cards / list), optional count and
+    icon per segment; filter chips are for a row of filters.
+- Choices with an explanation are radio cards, not a `mat-select`: `<mat-radio-button class="radio-card">` with the
+  global classes `radio-card-text`, `radio-card-label`, `radio-card-description` (reader type, tool area and
+  certification requirement).
 - Global classes for the page layout (`src/styles.scss`):
   - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
     card sets it as `host: { class: 'card' }`.

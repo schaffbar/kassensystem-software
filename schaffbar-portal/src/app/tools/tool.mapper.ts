@@ -1,3 +1,4 @@
+import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
 import {
   CreateToolRequest,
   InstructorsRequest,
@@ -11,6 +12,7 @@ import {
   RemoveToolInstructorsCommand,
   SetWlanRelaisCommand,
   Tool,
+  ToolListItem,
   UpdateToolCommand,
 } from './tool.model';
 
@@ -32,6 +34,14 @@ export function toTool(apiModel: ToolApiModel): Tool {
     offCommand: apiModel.offCommand,
     instructors: apiModel.instructors,
   };
+}
+
+// a tool is in use while the dashboard lists it as active
+export function toToolListItems(tools: ToolApiModel[], activeTools: ToolDashboardEntryApiModel[]): ToolListItem[] {
+  const usersByToolId = new Map(
+    activeTools.map((activeTool) => [activeTool.toolId, `${activeTool.firstName} ${activeTool.lastName}`]),
+  );
+  return tools.map((tool) => ({ ...toTool(tool), usedBy: usersByToolId.get(tool.id) ?? null }));
 }
 
 // ----------------------------------------------------------------------------

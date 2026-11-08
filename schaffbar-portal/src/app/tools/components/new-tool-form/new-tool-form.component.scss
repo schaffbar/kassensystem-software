@@ -3,3 +3,47 @@
 form {
   display: contents;
 }
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+.area-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.requirement-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.optional {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+// a textarea is higher than the 44px of the compact fields
+.description-field textarea {
+  min-height: 72px;
+}
+
+.choice-error {
+  margin: 8px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
