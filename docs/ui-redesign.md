@@ -478,8 +478,13 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
 4. [ ] **Seiten** in der Reihenfolge RFID-Lesegeräte → RFID-Tags → Werkzeuge → Benutzer → Übersicht: Tabellen, Karten
    und Formulare im neuen Design, Tabs wie im Entwurf benannt, Übersicht mit den zwei vorhandenen Widgets als Karten.
    Refresh-Buttons bleiben. Fest eingetragene Farben in Komponenten-Styles durch Tokens ersetzen.
-   - [x] RFID-Lesegeräte: Liste mit Seitenkopf, Tabelle als Karte (mobil scrollbar), ⋯-Menü (Details, Löschen) statt
-     rotem Button, leere Liste, Typ „Nicht festgelegt“ als Badge, MAC in Mono. Paginator überall auf Deutsch.
+   - [x] RFID-Lesegeräte: Liste wie im Prototyp – Suche (Name, MAC, Socket, Werkzeug), Filter-Chips mit Anzahl
+     (Alle, Eingang & Theke, Schaltboxen, Nicht zugeordnet), Karten für Eingang, Ausgang & Theke, Tabelle der
+     Schaltboxen mit verlinktem Werkzeug bzw. „Nicht zugeordnet“, ⋯-Menü (Details, Löschen), leere Liste und „Kein
+     Lesegerät gefunden“. Zusätzlich zum Prototyp: Abschnitt „Neue Geräte – Typ festlegen“ für Geräte ohne Typ;
+     „Nicht zugeordnet“ zählt auch diese (noch nicht eingerichtet), nicht nur Schaltboxen ohne Werkzeug.
+     Ohne Backend noch offen: Offline-Hinweis, Filter „Offline“, Online-Status und „Zuletzt gesehen“, „Werkzeug
+     zuordnen …“ aus der Liste. Paginator überall auf Deutsch.
      Details wie im Prototyp: Kopf mit Icon, Typ-Badge, MAC, „Bearbeiten“ und ⋯-Menü; Geräteinformationen als Liste
      mit Kopier-Button und Dialog „Lesegerät bearbeiten“ (Formatprüfung Socket-Name, Hinweis bei geändertem
      Socket-Namen); Gerätetyp mit Beschreibung und Auswahlkarten; Gefahrenzone mit „Lesegerät löschen …“.
@@ -508,7 +513,7 @@ Jede ist eine eigene Aufgabe nach Phase 1.
 | Bestätigungsdialoge: Titel als Frage, Folgen erklären, Häkchen oder Namen eintippen, gesperrter Zustand mit nächstem Schritt | teils (Sperren) |
 | `UserMultiSelect` für Einweisungen und Einweiser (siehe unten) | nein |
 | Werkzeuge: Umschalter Karten/Liste, nach Bereich gruppieren, Bereichsfilter | nein |
-| Filter-Chips in den Listen (z. B. „Ohne RFID-Tag“, „Unter 18“) | teils |
+| Filter-Chips in den Listen (z. B. „Ohne RFID-Tag“, „Unter 18“) – Baustein `schbar-filter-chips` gibt es, eingesetzt bei den Lesegeräten | teils |
 | Neue Dialoge: Benutzer in einem Dialog bearbeiten, Tag manuell erfassen, Werkzeug vom Lesegerät aus zuordnen, … | teils |
 | „Braucht Aufmerksamkeit“, Kennzahlen, Online-Status, Lese-Protokoll, Zahlungsart, … | ja |
 

@@ -433,7 +433,29 @@
     },
     "pages": {
       "rfidReaderList": {
-        "subtitle": "{{count}} in total",
+        "subtitle": "{{count}} devices · New devices appear automatically as soon as they connect",
+        "subtitleOne": "1 device · New devices appear automatically as soon as they connect",
+        "search": "Search readers",
+        "searchPlaceholder": "Name, MAC address, socket or tool",
+        "clearSearch": "Clear search",
+        "filters": {
+          "label": "Filter",
+          "all": "All",
+          "desk": "Entrance & counter",
+          "switchBox": "Switch boxes",
+          "unassigned": "Unassigned"
+        },
+        "sections": {
+          "new": "New devices – set the type",
+          "desk": "Entrance, exit & counter",
+          "switchBox": "Switch boxes at tools"
+        },
+        "tool": "Tool",
+        "unassigned": "Unassigned",
+        "noResults": {
+          "title": "No reader found",
+          "message": "Change the search or the filter."
+        },
         "empty": {
           "title": "No readers yet",
           "message": "Readers appear here automatically as soon as they connect to the server."

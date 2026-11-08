@@ -10,6 +10,32 @@ export interface RfidReader {
 }
 
 // ----------------------------------------------------------------------------
+// list
+
+// the tool a switch box switches
+export interface AssignedTool {
+  id: string;
+  name: string;
+}
+
+export interface RfidReaderListItem extends RfidReader {
+  assignedTool: AssignedTool | null;
+}
+
+// where a reader appears in the list: new ones without type, at the gates and the counter, at a tool
+export type RfidReaderGroup = 'new' | 'desk' | 'switchBox';
+
+export function rfidReaderGroup(type: RfidReaderType | null): RfidReaderGroup {
+  if (!type) return 'new';
+  return type === RfidReaderType.SwitchBox ? 'switchBox' : 'desk';
+}
+
+// not set up yet: a reader without type does nothing, a switch box without tool switches nothing
+export function isUnassigned(rfidReader: RfidReaderListItem): boolean {
+  return !rfidReader.type || (rfidReader.type === RfidReaderType.SwitchBox && !rfidReader.assignedTool);
+}
+
+// ----------------------------------------------------------------------------
 // commands
 
 export interface UpdateRfidReaderCommand {

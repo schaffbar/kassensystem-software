@@ -7,12 +7,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
 import { RfidReaderApiModel } from '../shared/api/rfid-readers/rfid-reader.api-model';
+import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
 import { RfidReaderType } from '../shared/models/rfid-reader-type';
-import { toRfidReader } from './rfid-reader.mapper';
+import { toRfidReaderListItems } from './rfid-reader.mapper';
 import { RfidReadersStore } from './rfid-readers.store';
 
 describe('RfidReadersStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
+  const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
+  const tools = [toolFixture({ id: 'tool-1', name: 'Bandsäge', rfidReaderId: 'id-1' })];
   const entities: RfidReaderApiModel[] = [
     {
       id: 'id-1',
@@ -52,17 +55,20 @@ describe('RfidReadersStore', () => {
   }
 
   const expectLoad = (): TestRequest => httpMock.expectOne((req) => req.method === 'GET' && req.url === url);
+  const expectToolsLoad = (): TestRequest => httpMock.expectOne((req) => req.method === 'GET' && req.url === toolsUrl);
 
   async function load(): Promise<void> {
     trigger();
     expectLoad().flush(entities);
+    expectToolsLoad().flush(tools);
     await settle();
   }
 
-  it('should load all entries on first use', async () => {
+  it('should load all entries with their tools on first use', async () => {
     await load();
 
-    expect(store.rfidReaders()).toEqual(entities.map(toRfidReader));
+    expect(store.rfidReaders()).toEqual(toRfidReaderListItems(entities, tools));
+    expect(store.rfidReaders()[0].assignedTool).toEqual({ id: 'tool-1', name: 'Bandsäge' });
     expect(store.isLoading()).toBe(false);
   });
 
@@ -72,6 +78,7 @@ describe('RfidReadersStore', () => {
     store.reloadRfidReaders();
     trigger();
     expectLoad().flush([]);
+    expectToolsLoad().flush([]);
     await settle();
 
     expect(store.rfidReaders()).toEqual([]);
@@ -88,7 +95,7 @@ describe('RfidReadersStore', () => {
 
     expectLoad().flush([entities[1]]);
     await settle();
-    expect(store.rfidReaders()).toEqual([toRfidReader(entities[1])]);
+    expect(store.rfidReaders()).toEqual(toRfidReaderListItems([entities[1]], tools));
     expect(store.deleteRfidReader.isPending()).toBe(false);
   });
 
@@ -97,15 +104,27 @@ describe('RfidReadersStore', () => {
 
     trigger();
     expectLoad().flush([{ id: 'id-1' }]);
+    expectToolsLoad().flush(tools);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
     expect(store.rfidReaders()).toEqual([]);
   });
 
+  it('should show the readers without tools when the tools fail to load, but report the error', async () => {
+    trigger();
+    expectLoad().flush(entities);
+    expectToolsLoad().flush('boom', { status: 500, statusText: 'Server Error' });
+    await settle();
+
+    expect(store.hasLoadError()).toBe(true);
+    expect(store.rfidReaders().map((rfidReader) => rfidReader.assignedTool)).toEqual([null, null]);
+  });
+
   it('should expose a load error', async () => {
     trigger();
     expectLoad().flush('boom', { status: 500, statusText: 'Server Error' });
+    expectToolsLoad().flush(tools);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

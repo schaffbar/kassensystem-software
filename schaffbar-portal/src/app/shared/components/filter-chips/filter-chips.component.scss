@@ -1,0 +1,43 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// the active filter in the navy of the sidebar, so it stands out without a second accent color
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--text-3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  &.selected {
+    border-color: var(--nav);
+    background: var(--nav);
+    color: var(--nav-text-active);
+  }
+}
+
+.count {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}

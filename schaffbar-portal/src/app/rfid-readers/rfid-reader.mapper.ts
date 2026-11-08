@@ -5,7 +5,14 @@ import {
   RfidReaderApiModel,
   UpdateRfidReaderRequest,
 } from '../shared/api/rfid-readers/rfid-reader.api-model';
-import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from './rfid-reader.model';
+import { ToolApiModel } from '../shared/api/tools/tool.api-model';
+import {
+  AssignedTool,
+  ChangeRfidReaderTypeCommand,
+  RfidReader,
+  RfidReaderListItem,
+  UpdateRfidReaderCommand,
+} from './rfid-reader.model';
 
 // ----------------------------------------------------------------------------
 // API model → feature model
@@ -19,6 +26,21 @@ export function toRfidReader(apiModel: RfidReaderApiModel): RfidReader {
     socketName: apiModel.socketName,
     createdAt: parseISO(apiModel.createdAt),
   };
+}
+
+// a switch box gets the tool whose `rfidReaderId` points to it
+export function toRfidReaderListItems(rfidReaders: RfidReaderApiModel[], tools: ToolApiModel[]): RfidReaderListItem[] {
+  const toolsByRfidReaderId = new Map(
+    tools.filter((tool) => tool.rfidReaderId).map((tool) => [tool.rfidReaderId, toAssignedTool(tool)]),
+  );
+  return rfidReaders.map((rfidReader) => ({
+    ...toRfidReader(rfidReader),
+    assignedTool: toolsByRfidReaderId.get(rfidReader.id) ?? null,
+  }));
+}
+
+function toAssignedTool(tool: ToolApiModel): AssignedTool {
+  return { id: tool.id, name: tool.name };
 }
 
 // ----------------------------------------------------------------------------

@@ -433,7 +433,29 @@
     },
     "pages": {
       "rfidReaderList": {
-        "subtitle": "{{count}} insgesamt",
+        "subtitle": "{{count}} Geräte · Neue Geräte erscheinen automatisch, sobald sie sich verbinden",
+        "subtitleOne": "1 Gerät · Neue Geräte erscheinen automatisch, sobald sie sich verbinden",
+        "search": "Lesegeräte durchsuchen",
+        "searchPlaceholder": "Name, MAC-Adresse, Socket oder Werkzeug",
+        "clearSearch": "Suche leeren",
+        "filters": {
+          "label": "Filter",
+          "all": "Alle",
+          "desk": "Eingang & Theke",
+          "switchBox": "Schaltboxen",
+          "unassigned": "Nicht zugeordnet"
+        },
+        "sections": {
+          "new": "Neue Geräte – Typ festlegen",
+          "desk": "Eingang, Ausgang & Theke",
+          "switchBox": "Schaltboxen an Werkzeugen"
+        },
+        "tool": "Werkzeug",
+        "unassigned": "Nicht zugeordnet",
+        "noResults": {
+          "title": "Kein Lesegerät gefunden",
+          "message": "Suchbegriff oder Filter anpassen."
+        },
         "empty": {
           "title": "Noch keine Lesegeräte",
           "message": "Lesegeräte erscheinen hier automatisch, sobald sie sich mit dem Server verbinden."

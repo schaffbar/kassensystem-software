@@ -328,6 +328,18 @@ body {
   }
 }
 
+// search above a list: compact like the filter chips next to it, with `subscriptSizing="dynamic"` (no hint)
+.search-field {
+  @include mat.form-field-overrides(
+    (
+      container-height: 44px,
+      container-vertical-padding: 10px,
+      container-text-size: 14px,
+      outlined-outline-color: var(--border),
+    )
+  );
+}
+
 // IDs, MAC and IP addresses, socket names
 .mono {
   font-family: var(--font-mono);

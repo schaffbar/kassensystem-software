@@ -1,0 +1,11 @@
+@for (chip of filterChips(); track chip.id) {
+  <button
+    type="button"
+    class="chip"
+    [class.selected]="chip.id === selected()"
+    [attr.aria-pressed]="chip.id === selected()"
+    (click)="selected.set(chip.id)">
+    {{ chip.label }}
+    <span class="count">{{ chip.count }}</span>
+  </button>
+}

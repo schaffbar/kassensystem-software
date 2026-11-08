@@ -192,6 +192,8 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
     `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
   - `schbar-empty-state` – instead of an empty table or list.
   - `schbar-danger-zone` – last card of a detail page with the destructive action (`danger-button`, asks first).
+  - `schbar-filter-chips` – the filters of a list with counts (`[(selected)]` = id of the active filter); the counts
+    ignore the search. Next to it the search: `mat-form-field` with the global class `search-field` (44px, no hint).
 - Global classes for the page layout (`src/styles.scss`):
   - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
     card sets it as `host: { class: 'card' }`.
