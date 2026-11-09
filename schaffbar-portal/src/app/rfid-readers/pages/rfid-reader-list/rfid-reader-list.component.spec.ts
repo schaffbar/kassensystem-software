@@ -258,5 +258,13 @@ describe('RfidReaderListComponent', () => {
 
       expect(storeMock.deleteRfidReader).not.toHaveBeenCalled();
     });
+
+    it('should not offer to delete a switch box with a tool', async () => {
+      fixture.nativeElement.querySelectorAll('tr[mat-row] schbar-row-menu button')[1].click();
+      await fixture.whenStable();
+
+      expect(document.querySelectorAll('[mat-menu-item]').length).toBe(1);
+      expect(document.querySelector('.danger-menu-item')).toBeNull();
+    });
   });
 });

@@ -39,6 +39,10 @@ export function toRfidReaderListItems(rfidReaders: RfidReaderApiModel[], tools: 
   }));
 }
 
+export function toRfidReaderListItem(rfidReader: RfidReaderApiModel, tools: ToolApiModel[]): RfidReaderListItem {
+  return toRfidReaderListItems([rfidReader], tools)[0];
+}
+
 function toAssignedTool(tool: ToolApiModel): AssignedTool {
   return { id: tool.id, name: tool.name };
 }

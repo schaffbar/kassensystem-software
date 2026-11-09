@@ -12,10 +12,12 @@ import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { toRfidReader } from '../../rfid-reader.mapper';
+import { ToolApiModel } from '../../../shared/api/tools/tool.api-model';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 describe('RfidReaderDetailStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/rfid-readers`;
+  const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
   const reader: RfidReaderApiModel = {
     id: 'reader-1',
     macAddress: 'AA:BB',
@@ -57,10 +59,14 @@ describe('RfidReaderDetailStore', () => {
     await TestBed.inject(ApplicationRef).whenStable();
   }
 
-  async function loadReader(apiModel: RfidReaderApiModel = reader): Promise<void> {
+  const expectToolsOf = () =>
+    httpMock.expectOne((req) => req.url === toolsUrl && req.params.get('rfidReaderId') === 'reader-1');
+
+  async function loadReader(apiModel: RfidReaderApiModel = reader, tools: ToolApiModel[] = []): Promise<void> {
     store.setRfidReaderId('reader-1');
     trigger();
     httpMock.expectOne(`${url}/reader-1`).flush(apiModel);
+    expectToolsOf().flush(tools);
     await settle();
   }
 
@@ -74,8 +80,14 @@ describe('RfidReaderDetailStore', () => {
   it('should load the reader when the id is set', async () => {
     await loadReader();
 
-    expect(store.rfidReader()).toEqual(toRfidReader(reader));
+    expect(store.rfidReader()).toEqual({ ...toRfidReader(reader), assignedTool: null });
     expect(store.isLoading()).toBe(false);
+  });
+
+  it('should add the tool the switch box is assigned to', async () => {
+    await loadReader(reader, [toolFixture({ id: 'tool-1', name: 'Bandsäge', rfidReaderId: 'reader-1' })]);
+
+    expect(store.rfidReader()?.assignedTool).toEqual({ id: 'tool-1', name: 'Bandsäge' });
   });
 
   it('should reload the reader on request', async () => {
@@ -84,6 +96,7 @@ describe('RfidReaderDetailStore', () => {
     store.reloadRfidReader();
     trigger();
     httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, name: 'Reader 1 (neu)' });
+    expectToolsOf().flush([]);
     await settle();
 
     expect(store.rfidReader()?.name).toBe('Reader 1 (neu)');
@@ -149,10 +162,6 @@ describe('RfidReaderDetailStore', () => {
   });
 
   describe('canChangeRfidReaderType', () => {
-    const toolsUrl = `${environment.apiBaseUrl}/api/v1/tools`;
-    const expectToolsOf = () =>
-      httpMock.expectOne((req) => req.url === toolsUrl && req.params.get('rfidReaderId') === 'reader-1');
-
     it('should not allow it for a switch box with an assigned tool', async () => {
       await loadReader();
 
@@ -189,6 +198,7 @@ describe('RfidReaderDetailStore', () => {
     store.setRfidReaderId('reader-1');
     trigger();
     httpMock.expectOne(`${url}/reader-1`).flush({ ...reader, createdAt: 'gestern' });
+    expectToolsOf().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);
@@ -199,6 +209,7 @@ describe('RfidReaderDetailStore', () => {
     store.setRfidReaderId('reader-1');
     trigger();
     httpMock.expectOne(`${url}/reader-1`).flush('not found', { status: 404, statusText: 'Not Found' });
+    expectToolsOf().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

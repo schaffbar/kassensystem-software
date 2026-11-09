@@ -132,11 +132,13 @@
                     <mat-icon>arrow_forward</mat-icon>
                     <span>{{ 'shared.actions.details' | translate }}</span>
                   </button>
-                  <mat-divider />
-                  <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidReader(row)">
-                    <mat-icon>delete</mat-icon>
-                    <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}</span>
-                  </button>
+                  @if (canDeleteRfidReader(row)) {
+                    <mat-divider />
+                    <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidReader(row)">
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}</span>
+                    </button>
+                  }
                 </schbar-row-menu>
               </td>
             </ng-container>

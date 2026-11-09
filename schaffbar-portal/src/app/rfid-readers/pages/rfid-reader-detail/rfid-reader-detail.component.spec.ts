@@ -16,23 +16,24 @@ import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { RfidReaderDetailInfoComponent } from '../../components/rfid-reader-detail-info/rfid-reader-detail-info.component';
 import { RfidReaderDetailTypeComponent } from '../../components/rfid-reader-detail-type/rfid-reader-detail-type.component';
 import { UpdateRfidReaderFormComponent } from '../../components/update-rfid-reader-form/update-rfid-reader-form.component';
-import { ChangeRfidReaderTypeCommand, RfidReader, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { ChangeRfidReaderTypeCommand, RfidReaderListItem, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderDetailComponent } from './rfid-reader-detail.component';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 describe('RfidReaderDetailComponent', () => {
-  const rfidReader: RfidReader = {
+  const rfidReader: RfidReaderListItem = {
     id: 'reader-1',
     macAddress: 'AA:BB',
     type: RfidReaderType.SwitchBox,
     name: 'Reader 1',
     socketName: null,
     createdAt: new Date('2026-01-01T10:00:00Z'),
+    assignedTool: null,
   };
 
   let fixture: ComponentFixture<RfidReaderDetailComponent>;
   let storeMock: {
-    rfidReader: WritableSignal<RfidReader | null>;
+    rfidReader: WritableSignal<RfidReaderListItem | null>;
     isLoading: WritableSignal<boolean>;
     hasLoadError: WritableSignal<boolean>;
     setRfidReaderId: Mock;
@@ -212,6 +213,28 @@ describe('RfidReaderDetailComponent', () => {
       query('schbar-danger-zone button')?.click();
 
       expect(storeMock.deleteRfidReader).not.toHaveBeenCalled();
+    });
+
+    describe('switch box with a tool', () => {
+      beforeEach(async () => {
+        storeMock.rfidReader.set({ ...rfidReader, assignedTool: { id: 'tool-1', name: 'Bandsäge' } });
+        await fixture.whenStable();
+      });
+
+      it('should explain why it cannot be deleted and link to the tool', () => {
+        expect(query('schbar-danger-zone p')?.textContent?.trim()).toBe(
+          'rfidReaders.pages.rfidReaderDetails.hints.dangerZoneAssignedTool',
+        );
+        expect(query('schbar-danger-zone a')?.getAttribute('href')).toBe('/tools/tool-1');
+        expect((query('schbar-danger-zone button.danger-button') as HTMLButtonElement).disabled).toBe(true);
+      });
+
+      it('should not offer to delete it in the ⋯ menu', async () => {
+        query('schbar-row-menu button')?.click();
+        await fixture.whenStable();
+
+        expect(document.querySelector('.danger-menu-item')).toBeNull();
+      });
     });
   });
 });

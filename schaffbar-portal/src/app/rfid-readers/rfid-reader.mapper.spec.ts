@@ -6,6 +6,7 @@ import { RfidReaderType } from '../shared/models/rfid-reader-type';
 import {
   toChangeRfidReaderTypeRequest,
   toRfidReader,
+  toRfidReaderListItem,
   toRfidReaderListItems,
   toUpdateRfidReaderRequest,
 } from './rfid-reader.mapper';
@@ -56,6 +57,13 @@ describe('rfid-reader.mapper', () => {
         { ...toRfidReader(box), assignedTool: { id: 'tool-1', name: 'Bandsäge' } },
         { ...toRfidReader(freeBox), assignedTool: null },
       ]);
+    });
+
+    it('should add the tool to a single reader', () => {
+      const tools = [toolFixture({ id: 'tool-1', name: 'Bandsäge', rfidReaderId: 'box-1' })];
+
+      expect(toRfidReaderListItem(box, tools).assignedTool).toEqual({ id: 'tool-1', name: 'Bandsäge' });
+      expect(toRfidReaderListItem(freeBox, tools).assignedTool).toBeNull();
     });
   });
 

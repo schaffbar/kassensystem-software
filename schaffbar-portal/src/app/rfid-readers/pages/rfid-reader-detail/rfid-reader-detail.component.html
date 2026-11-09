@@ -39,11 +39,13 @@
         <mat-icon>edit</mat-icon>
         <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.editMenu' | translate }}</span>
       </button>
-      <mat-divider />
-      <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidReader()">
-        <mat-icon>delete</mat-icon>
-        <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}</span>
-      </button>
+      @if (canDeleteRfidReader(rfidReader)) {
+        <mat-divider />
+        <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteRfidReader()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}</span>
+        </button>
+      }
     </schbar-row-menu>
   </schbar-page-header>
 
@@ -52,10 +54,22 @@
     <schbar-rfid-reader-detail-type
       [rfidReaderDetailType]="rfidReader"
       (typeChangeRequested)="changeRfidReaderType($event)" />
-    <schbar-danger-zone [message]="'rfidReaders.pages.rfidReaderDetails.hints.dangerZone' | translate">
-      <button matButton="outlined" type="button" class="danger-button" (click)="deleteRfidReader()">
-        {{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}
-      </button>
-    </schbar-danger-zone>
+    @if (rfidReader.assignedTool; as tool) {
+      <schbar-danger-zone
+        [message]="'rfidReaders.pages.rfidReaderDetails.hints.dangerZoneAssignedTool' | translate: { tool: tool.name }">
+        <a matButton="outlined" [routerLink]="[toolsLink, tool.id]">
+          {{ 'rfidReaders.pages.rfidReaderDetails.actions.openTool' | translate }}
+        </a>
+        <button matButton="outlined" type="button" class="danger-button" disabled>
+          {{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}
+        </button>
+      </schbar-danger-zone>
+    } @else {
+      <schbar-danger-zone [message]="'rfidReaders.pages.rfidReaderDetails.hints.dangerZone' | translate">
+        <button matButton="outlined" type="button" class="danger-button" (click)="deleteRfidReader()">
+          {{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}
+        </button>
+      </schbar-danger-zone>
+    }
   </div>
 }

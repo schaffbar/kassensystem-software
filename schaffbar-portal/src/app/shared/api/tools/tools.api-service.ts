@@ -38,6 +38,16 @@ export class ToolsApiService {
     );
   }
 
+  toolsByRfidReaderResource(rfidReaderId: () => string | null): HttpResourceRef<ToolApiModel[] | undefined> {
+    return httpResource(
+      () => {
+        const id = rfidReaderId();
+        return id ? { url: TOOLS_API_URL, params: { rfidReaderId: id } } : undefined;
+      },
+      { parse: parseWith(z.array(toolSchema), 'GET /tools?rfidReaderId') },
+    );
+  }
+
   getToolsByRfidReader(rfidReaderId: string): Observable<ToolApiModel[]> {
     return this.http
       .get<unknown>(TOOLS_API_URL, { params: { rfidReaderId } })

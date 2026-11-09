@@ -668,7 +668,8 @@
         },
         "hints": {
           "rfidReaderType": "Legt fest, was beim Auflegen eines Tags passiert.",
-          "dangerZone": "Entfernt das Gerät aus dem System. Verbindet es sich erneut, erscheint es wieder als neues Gerät."
+          "dangerZone": "Entfernt das Gerät aus dem System. Verbindet es sich erneut, erscheint es wieder als neues Gerät.",
+          "dangerZoneAssignedTool": "Das Lesegerät ist dem Werkzeug „{{tool}}“ zugeordnet. Löschen lässt es sich erst, wenn die Schaltbox dort im Tab „Hardware“ getrennt wurde."
         },
         "actions": {
           "edit": "Bearbeiten",
@@ -678,7 +679,8 @@
           "selectType": "Gerätetyp wählen",
           "copyMacAddress": "MAC-Adresse kopieren",
           "macAddressCopied": "MAC-Adresse kopiert",
-          "delete": "Lesegerät löschen …"
+          "delete": "Lesegerät löschen …",
+          "openTool": "Zum Werkzeug"
         }
       }
     },

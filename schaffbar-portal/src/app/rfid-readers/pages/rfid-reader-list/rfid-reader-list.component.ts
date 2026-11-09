@@ -24,7 +24,13 @@ import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.c
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
-import { DeleteRfidReaderCommand, isUnassigned, rfidReaderGroup, RfidReaderListItem } from '../../rfid-reader.model';
+import {
+  canDeleteRfidReader,
+  DeleteRfidReaderCommand,
+  isUnassigned,
+  rfidReaderGroup,
+  RfidReaderListItem,
+} from '../../rfid-reader.model';
 import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReadersStore } from '../../rfid-readers.store';
@@ -78,6 +84,7 @@ export class RfidReaderListComponent {
 
   protected readonly switchBoxColumns = ['name', 'tool', 'macAddress', 'socketName', 'actions'];
   protected readonly toolsLink = `/${ROUTE.TOOLS}`;
+  protected readonly canDeleteRfidReader = canDeleteRfidReader;
 
   protected readonly rfidReadersCount = computed(() => this.store.rfidReaders().length);
   protected readonly subtitleKey = computed(() =>
@@ -143,6 +150,8 @@ export class RfidReaderListComponent {
   }
 
   protected deleteRfidReader(rfidReader: RfidReaderListItem): void {
+    if (!canDeleteRfidReader(rfidReader)) return;
+
     this.confirmDeleteDialog
       .open({
         title: 'rfidReaders.dialogs.deleteRfidReader.title',

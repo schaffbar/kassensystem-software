@@ -252,11 +252,10 @@ Gelten für alle Seiten und Dialoge:
 | Löschen eines Werkzeugs sperren, solange es läuft | Regel im Backend |
 | Schaltbox trennen sperren, solange das Werkzeug läuft | Regel im Backend |
 | „Relais vorher ausschalten“ beim Entfernen | Neu |
-| Nur Eingewiesene als Einweiser zulassen (falls gewollt) | Regel im Backend |
 
 ### Annahmen prüfen – Werkzeuge
 
-- **Nur eingewiesene Personen können Einweiser werden.** Der Dialog filtert so, das lässt sich abschalten.
+- ~~Nur eingewiesene Personen können Einweiser werden.~~ Entschieden 09.11.2026: nein, jede Person kann Einweiser werden. Der Filter „Nur Personen mit aktiver Einweisung“ im Dialog ist nur eine Hilfe.
 - „Pflicht“ bedeutet: Ohne aktive Einweisung gibt die Schaltbox nicht frei. „Empfohlen“: jeder darf, Hinweis wird
   angezeigt. Stimmt das mit der Logik der Schaltbox überein?
 - Ohne Schaltbox wird die Nutzung nicht erfasst – aus dem Datenmodell abgeleitet.
@@ -398,9 +397,8 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
 | Benutzer nicht löschen, solange eine Sitzung offen ist | Benutzer |
 | Werkzeug nicht löschen, solange es läuft | Werkzeuge |
 | Schaltbox nicht trennen, solange das Werkzeug läuft | Werkzeuge, Lesegeräte |
-| Nur Eingewiesene als Einweiser (falls gewollt) | Werkzeuge |
 | Typwechsel einer Schaltbox mit Werkzeug verbieten | Lesegeräte |
-| Lesegerät mit Werkzeug nicht löschen | Lesegeräte |
+| Lesegerät mit Werkzeug nicht löschen – **umgesetzt** (`RfidReaderDelete`, 09.11.2026) | Lesegeräte |
 | Name und Socket-Name von Lesegeräten eindeutig | Lesegeräte |
 | Werkzeugname eindeutig (Fehlermeldung `nameExists` existiert schon) | Werkzeuge |
 
@@ -416,7 +414,7 @@ Sortiert nach Art. „Neu“ = gibt es heute nicht, „Erweiterung“ = bestehen
 - [ ] „Sitzung beenden“ schaltet laufende Werkzeuge automatisch aus
 - [ ] „Pflicht“ = Schaltbox gibt ohne aktive Einweisung nicht frei; „Empfohlen“ = jeder darf
 - [ ] Ohne Schaltbox wird die Nutzung nicht erfasst
-- [ ] Nur eingewiesene Personen können Einweiser werden
+- [x] Nur eingewiesene Personen können Einweiser werden – nein, jede Person (09.11.2026)
 - [ ] Löschen/Trennen während laufender Nutzung sperren
 - [ ] „Rückgabe ausstehend“ entsteht nur, wenn „Tor Ausgang“ offline war
 - [ ] Tag-ID-Format: 8 oder 14 Hex-Zeichen
@@ -487,7 +485,8 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      zuordnen …“ aus der Liste. Paginator überall auf Deutsch.
      Details wie im Prototyp: Kopf mit Icon, Typ-Badge, MAC, „Bearbeiten“ und ⋯-Menü; Geräteinformationen als Liste
      mit Kopier-Button und Dialog „Lesegerät bearbeiten“ (Formatprüfung Socket-Name, Hinweis bei geändertem
-     Socket-Namen); Gerätetyp mit Beschreibung und Auswahlkarten; Gefahrenzone mit „Lesegerät löschen …“.
+     Socket-Namen); Gerätetyp mit Beschreibung und Auswahlkarten; Gefahrenzone mit „Lesegerät löschen …“ – bei einer Schaltbox mit Werkzeug gesperrt, mit Hinweis und
+     „Zum Werkzeug“; in den ⋯-Menüs fehlt „Löschen“ dann (Backend lehnt es ebenfalls ab).
      Formular-Dialoge wie im Prototyp: Kopf mit Untertitel und Schließen-X, Linien oben und unten, „Änderungen
      speichern“ (`schbar-form-dialog-header`, Klasse `form-dialog`) – die übrigen Formular-Dialoge folgen mit ihren
      Seiten.

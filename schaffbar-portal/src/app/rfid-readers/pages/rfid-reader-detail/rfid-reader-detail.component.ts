@@ -1,5 +1,6 @@
 import { Component, DestroyRef, inject, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,7 +26,12 @@ import {
   UpdateRfidReaderDialogData,
   UpdateRfidReaderFormComponent,
 } from '../../components/update-rfid-reader-form/update-rfid-reader-form.component';
-import { ChangeRfidReaderTypeCommand, DeleteRfidReaderCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import {
+  canDeleteRfidReader,
+  ChangeRfidReaderTypeCommand,
+  DeleteRfidReaderCommand,
+  UpdateRfidReaderCommand,
+} from '../../rfid-reader.model';
 import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
@@ -46,6 +52,7 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
     MatIconModule,
     MatMenuModule,
     MatProgressBarModule,
+    RouterLink,
     TranslatePipe,
     RfidReaderTypeKeyPipe,
     RfidReaderTypeIconPipe,
@@ -63,6 +70,8 @@ export class RfidReaderDetailComponent {
   readonly id = input.required<string>();
 
   protected readonly rfidReadersLink = `/${ROUTE.RFID_READERS}`;
+  protected readonly toolsLink = `/${ROUTE.TOOLS}`;
+  protected readonly canDeleteRfidReader = canDeleteRfidReader;
 
   constructor() {
     this.detailsStore.setRfidReaderId(this.id);
@@ -111,7 +120,7 @@ export class RfidReaderDetailComponent {
 
   protected deleteRfidReader(): void {
     const rfidReader = this.detailsStore.rfidReader();
-    if (!rfidReader) return;
+    if (!rfidReader || !canDeleteRfidReader(rfidReader)) return;
 
     this.confirmDeleteDialog
       .open({

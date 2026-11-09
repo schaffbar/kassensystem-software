@@ -35,6 +35,11 @@ export function isUnassigned(rfidReader: RfidReaderListItem): boolean {
   return !rfidReader.type || (rfidReader.type === RfidReaderType.SwitchBox && !rfidReader.assignedTool);
 }
 
+// a switch box is disconnected at its tool first – otherwise the tool would point to a reader that no longer exists
+export function canDeleteRfidReader(rfidReader: RfidReaderListItem): boolean {
+  return !rfidReader.assignedTool;
+}
+
 // ----------------------------------------------------------------------------
 // commands
 

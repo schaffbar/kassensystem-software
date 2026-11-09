@@ -9,7 +9,11 @@ import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-rea
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { mutation } from '../../../shared/state/mutation';
-import { toChangeRfidReaderTypeRequest, toRfidReader, toUpdateRfidReaderRequest } from '../../rfid-reader.mapper';
+import {
+  toChangeRfidReaderTypeRequest,
+  toRfidReaderListItem,
+  toUpdateRfidReaderRequest,
+} from '../../rfid-reader.mapper';
 import { ChangeRfidReaderTypeCommand, DeleteRfidReaderCommand, UpdateRfidReaderCommand } from '../../rfid-reader.model';
 
 interface RfidReaderDetailState {
@@ -20,19 +24,25 @@ export const RfidReaderDetailStore = signalStore(
   withState<RfidReaderDetailState>({ rfidReaderId: null }),
   withProps((store) => {
     const rfidReadersApi = inject(RfidReadersApiService);
+    const toolsApi = inject(ToolsApiService);
     return {
       _rfidReadersApi: rfidReadersApi,
-      _toolsApi: inject(ToolsApiService),
+      _toolsApi: toolsApi,
       _router: inject(Router),
-      // (re)loads whenever the id changes
+      // both (re)load whenever the id changes; the tool tells whether the reader may be deleted
       _rfidReaderResource: rfidReadersApi.rfidReaderResource(store.rfidReaderId),
+      _toolsResource: toolsApi.toolsByRfidReaderResource(store.rfidReaderId),
     };
   }),
-  withComputed(({ _rfidReaderResource }) => ({
+  withComputed(({ _rfidReaderResource, _toolsResource }) => ({
     // hasValue() stays true while reloading, so the page keeps showing the reader instead of flickering
-    rfidReader: computed(() => (_rfidReaderResource.hasValue() ? toRfidReader(_rfidReaderResource.value()) : null)),
-    isLoading: computed(() => _rfidReaderResource.isLoading()),
-    hasLoadError: computed(() => !!_rfidReaderResource.error()),
+    rfidReader: computed(() =>
+      _rfidReaderResource.hasValue()
+        ? toRfidReaderListItem(_rfidReaderResource.value(), _toolsResource.hasValue() ? _toolsResource.value() : [])
+        : null,
+    ),
+    isLoading: computed(() => _rfidReaderResource.isLoading() || _toolsResource.isLoading()),
+    hasLoadError: computed(() => !!_rfidReaderResource.error() || !!_toolsResource.error()),
   })),
   withMethods((store) => ({
     setRfidReaderId: signalMethod<string>((rfidReaderId) => {
@@ -40,6 +50,7 @@ export const RfidReaderDetailStore = signalStore(
     }),
     reloadRfidReader(): void {
       store._rfidReaderResource.reload();
+      store._toolsResource.reload();
     },
     // a switch box keeps its type while a tool is assigned to it – the tool would lose its reader
     canChangeRfidReaderType(): Observable<boolean> {

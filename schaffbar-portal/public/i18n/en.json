@@ -668,7 +668,8 @@
         },
         "hints": {
           "rfidReaderType": "Defines what happens when a tag is placed on the reader.",
-          "dangerZone": "Removes the device from the system. If it connects again, it appears as a new device."
+          "dangerZone": "Removes the device from the system. If it connects again, it appears as a new device.",
+          "dangerZoneAssignedTool": "The reader is assigned to the tool “{{tool}}”. It can only be deleted once the switch box has been disconnected there in the “Hardware” tab."
         },
         "actions": {
           "edit": "Edit",
@@ -678,7 +679,8 @@
           "selectType": "Select device type",
           "copyMacAddress": "Copy MAC address",
           "macAddressCopied": "MAC address copied",
-          "delete": "Delete RFID Reader …"
+          "delete": "Delete RFID Reader …",
+          "openTool": "Go to tool"
         }
       }
     },
