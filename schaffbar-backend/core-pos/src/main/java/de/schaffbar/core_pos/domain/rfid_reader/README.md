@@ -42,6 +42,24 @@
 | R-2 | `macAddress` must not be blank                                                                   | Bean Validation                                                          |
 | R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it | `ChangeRfidReaderType` use case                                          |
 
+## Open Rules
+
+Rules the portal already follows or the UI redesign plans, but the backend does not enforce yet. When one is
+implemented, move it to "Business Rules / Invariants".
+
+### Enforced only in the portal
+
+| #   | Rule                                                                               | Status                                                                                                                   |
+|-----|------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| R-4 | A socket name contains only lowercase letters, digits and hyphens (`^[a-z0-9-]+$`) | Portal: checked only when the socket name changes – existing names like "Socket 43" stay valid. Backend accepts anything |
+
+### Planned (not implemented yet)
+
+| #   | Rule                                                                                                    | Status                                                                                                              |
+|-----|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| R-5 | A reader that is assigned to a tool cannot be deleted (or deleting it clears the tool's `rfidReaderId`) | Neither portal nor backend. `tool.rfid_reader_id` has no foreign key, the tool keeps pointing to the deleted reader |
+| R-6 | Reader names are unique                                                                                 | Planned duplicate check in "Lesegerät bearbeiten"                                                                   |
+
 ## Domain Events
 
 | Event                      | Payload              |

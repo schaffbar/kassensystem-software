@@ -39,6 +39,24 @@ return `List<SchaffbarEvent>`.
 | TC-3 | Only valid state transitions: ACTIVE→PAUSED, PAUSED→ACTIVE, ACTIVE/PAUSED→REVOKED                    | `ToolCertification.pause()`, `reactivate()`, `revoke()` — throw `InvalidCertificationStateTransitionException` |
 | TC-4 | Batch certification supports partial success with error report                                       | `CertifyCustomersForTool` use case — catches exceptions per customer, returns `BatchCertificationResult`       |
 
+## Open Rules
+
+Rules the portal already follows or the UI redesign plans, but the backend does not enforce yet. When one is
+implemented, move it to "Business Rules / Invariants".
+
+### Enforced only in the portal
+
+| #    | Rule                                                                        | Status                                                                                                       |
+|------|-----------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| TC-5 | Instructors of a tool are not certified for it – they need no certification | Portal: `certifiableUsers` in `tool-detail.store.ts` leaves them out. `CertifyCustomersForTool` accepts them |
+
+### Planned (not implemented yet)
+
+| #    | Rule                                                                     | Status                                                                                      |
+|------|--------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| TC-6 | The date of the certification can be set when certifying (default today) | `certifiedAt` is always the current time; `CertifyCustomersForTool` takes no date            |
+| TC-7 | A reason when pausing (optional) and revoking (required)                 | No field yet                                                                                |
+
 ## Domain Events
 
 | Event                            | Payload                            |

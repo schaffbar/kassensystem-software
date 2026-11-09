@@ -39,6 +39,17 @@
 | TA-7 | Customer must exist before requesting assignment                                        | `CustomerRequestRfidTagAssignment` use case                                                               |
 | TA-8 | RFID tag must exist before it can be assigned                                           | `CustomerAssignRfidTag` use case                                                                          |
 
+## Open Rules
+
+Rules the portal already follows or the UI redesign plans, but the backend does not enforce yet. When one is
+implemented, move it to "Business Rules / Invariants".
+
+### Planned (not implemented yet)
+
+| #    | Rule                                                                                   | Status                                              |
+|------|----------------------------------------------------------------------------------------|-----------------------------------------------------|
+| TA-9 | Unassigning can deactivate the tag at the same time (lost tag) instead of releasing it | New option for unassigning; needs RT-4 in `RfidTag` |
+
 ## Domain Events
 
 | Event                           | Payload             |
