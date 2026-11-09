@@ -60,9 +60,6 @@
         <a matButton="outlined" [routerLink]="[toolsLink, tool.id]">
           {{ 'rfidReaders.pages.rfidReaderDetails.actions.openTool' | translate }}
         </a>
-        <button matButton="outlined" type="button" class="danger-button" disabled>
-          {{ 'rfidReaders.pages.rfidReaderDetails.actions.delete' | translate }}
-        </button>
       </schbar-danger-zone>
     } @else {
       <schbar-danger-zone [message]="'rfidReaders.pages.rfidReaderDetails.hints.dangerZone' | translate">

@@ -226,7 +226,7 @@ describe('RfidReaderDetailComponent', () => {
           'rfidReaders.pages.rfidReaderDetails.hints.dangerZoneAssignedTool',
         );
         expect(query('schbar-danger-zone a')?.getAttribute('href')).toBe('/tools/tool-1');
-        expect((query('schbar-danger-zone button.danger-button') as HTMLButtonElement).disabled).toBe(true);
+        expect(query('schbar-danger-zone button')).toBeNull();
       });
 
       it('should not offer to delete it in the ⋯ menu', async () => {
