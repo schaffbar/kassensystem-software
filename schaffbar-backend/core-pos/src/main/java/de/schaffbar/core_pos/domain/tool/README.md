@@ -69,11 +69,6 @@ implemented, move it to "Business Rules / Invariants".
 | T-18 | Removing the WLAN relais can switch it off first ("Relais vorher ausschalten", on by default) | New option for clearing the WLAN relais. The portal only asks for confirmation            |
 | T-19 | Test the connection to the WLAN relais ("Verbindung testen")                                  | New endpoint                                                                              |
 
-### To decide
-
-- Only persons with an active certification for the tool can become instructors? The portal's "Einweiser hinzufügen"
-  dialog filters this way by default, but the filter can be switched off. `ToolAddInstructors` accepts anyone.
-
 ## Domain Events
 
 | Event                         | Payload                                             |

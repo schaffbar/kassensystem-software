@@ -43,7 +43,7 @@ public class RfidReaderChangeType {
     private void verifyNoToolAssigned(RfidReaderId rfidReaderId) {
         this.toolService.getTool(rfidReaderId) //
                 .ifPresent(_ -> {
-                    throw new RfidReaderHasToolAssignedException(rfidReaderId);
+                    throw RfidReaderHasToolAssignedException.changeType(rfidReaderId);
                 });
     }
 

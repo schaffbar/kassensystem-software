@@ -41,6 +41,7 @@
 | R-1 | `macAddress` must be unique across all RFID readers                                              | DB unique constraint, **TODO** in `RfidReaderService.createRfidReader()` |
 | R-2 | `macAddress` must not be blank                                                                   | Bean Validation                                                          |
 | R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it | `ChangeRfidReaderType` use case                                          |
+| R-5 | An RFID reader that is assigned to a tool cannot be deleted                                      | `RfidReaderDelete` use case                                              |
 
 ## Open Rules
 
@@ -55,10 +56,9 @@ implemented, move it to "Business Rules / Invariants".
 
 ### Planned (not implemented yet)
 
-| #   | Rule                                                                                                    | Status                                                                                                              |
-|-----|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| R-5 | A reader that is assigned to a tool cannot be deleted (or deleting it clears the tool's `rfidReaderId`) | Neither portal nor backend. `tool.rfid_reader_id` has no foreign key, the tool keeps pointing to the deleted reader |
-| R-6 | Reader names are unique                                                                                 | Planned duplicate check in "Lesegerät bearbeiten"                                                                   |
+| #   | Rule                    | Status                                            |
+|-----|-------------------------|---------------------------------------------------|
+| R-6 | Reader names are unique | Planned duplicate check in "Lesegerät bearbeiten" |
 
 ## Domain Events
 
