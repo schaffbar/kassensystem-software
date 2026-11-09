@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
 import { AgeGroup } from '../shared/models/age-group';
+import { RfidTagAssignmentStatus } from '../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
 import {
   toCreateCustomerRequest,
   toUpdateCustomerAddressRequest,
   toUpdateCustomerContactRequest,
   toUpdateCustomerRequest,
   toUser,
+  toUserListItems,
 } from './user.mapper';
 
 describe('user.mapper', () => {
@@ -32,6 +35,41 @@ describe('user.mapper', () => {
         createdAt: new Date('2026-01-01T10:00:00Z'),
         updatedAt: new Date('2026-01-01T10:00:00Z'),
       });
+    });
+  });
+
+  describe('toUserListItems', () => {
+    it('should add the tag of the assignment and whether the user is in the workshop', () => {
+      const max = customerFixture({ id: 'user-1' });
+      const erika = customerFixture({ id: 'user-2', firstName: 'Erika' });
+      const otto = customerFixture({ id: 'user-3', firstName: 'Otto' });
+      const assignment = {
+        id: 'assignment-1',
+        customerId: 'user-1',
+        assignmentType: RfidTagAssignmentType.Fixed,
+        status: RfidTagAssignmentStatus.Assigned,
+        rfidTagId: '04A31F9C',
+        assignmentDate: '2026-01-02T10:00:00Z',
+      };
+      const waiting = {
+        ...assignment,
+        id: 'assignment-2',
+        customerId: 'user-2',
+        assignmentType: RfidTagAssignmentType.Temporary,
+        status: RfidTagAssignmentStatus.WaitingForAssignment,
+        rfidTagId: null,
+        assignmentDate: null,
+      };
+      const activeUser = { customerId: 'user-3', firstName: 'Otto', lastName: 'M', entryTime: '2026-01-03T09:00:00Z' };
+
+      const items = toUserListItems([max, erika, otto], [assignment, waiting], [activeUser]);
+
+      expect(items.map(({ rfidTag, inWorkshop }) => ({ rfidTag, inWorkshop }))).toEqual([
+        { rfidTag: { assignmentType: RfidTagAssignmentType.Fixed, rfidTagId: '04A31F9C' }, inWorkshop: false },
+        { rfidTag: { assignmentType: RfidTagAssignmentType.Temporary, rfidTagId: null }, inWorkshop: false },
+        { rfidTag: null, inWorkshop: true },
+      ]);
+      expect(items[0]).toMatchObject(toUser(max));
     });
   });
 

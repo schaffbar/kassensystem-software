@@ -42,6 +42,29 @@
 | C-3 | Address must always be present and valid                | `@NotNull` on embedded `CustomerAddress`               |
 | C-4 | Customer must not be deleted if assigned to an RFID tag | **TODO** — noted in `CustomerService.deleteCustomer()` |
 
+## Open Rules
+
+Rules the portal already follows or the UI redesign plans, but the backend does not enforce yet. When one is
+implemented, move it to "Business Rules / Invariants". Deleting needs a concept first (TODO in
+`CustomerService.deleteCustomer()`).
+
+### Enforced only in the portal
+
+| #   | Rule                                                                                                     | Status                                                                                                                                           |
+|-----|----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| C-5 | A customer with an open workshop session cannot be deleted – the session still has to be closed and paid | Portal: checks `GET /workshop-sessions/{customerId}/active` before asking (`canDeleteUser` in `users.store.ts`). `CustomerDelete` does not check |
+| C-6 | `email` is a valid e-mail address                                                                        | Portal: `email()` validator. Backend: only `@NotBlank`                                                                                           |
+| C-7 | `postalCode` has exactly 5 characters                                                                    | Portal: `validatePostalCode`. Backend: only `@NotBlank`                                                                                          |
+| C-8 | `dateOfBirth` lies within the last 100 years and before the current year                                 | Portal: `validateDateOfBirth`. Backend: only `@NotNull`                                                                                          |
+
+### Planned (not implemented yet)
+
+| #    | Rule                                                                              | Status                                                                                                                             |
+|------|-----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| C-9  | Deleting a customer deletes their tool certifications                             | Today the foreign key `fk_tool_certification_customer` rejects the delete → database error (500) for everyone with a certification |
+| C-10 | Deleting a customer removes their RFID tag assignment, the tag becomes free again | Today the assignment stays and points to the deleted customer. Contradicts C-4 – decide which one applies                          |
+| C-11 | Paid sessions stay for the accounting when a customer is deleted                  | Sessions and usages have no foreign key and stay, but nothing defines what they show without the customer                          |
+
 ## Domain Events
 
 | Event                      | Payload                |

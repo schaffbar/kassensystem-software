@@ -113,7 +113,6 @@
     "title": "Users",
     "actions": {
       "addUser": "Add User",
-      "search": "Search",
       "assignTempRfidTag": "Assign Temporary RFID Tag",
       "assignFixedRfidTag": "Assign Fixed RFID Tag",
       "unassignRfidTag": "Unassign RFID Tag",
@@ -127,10 +126,18 @@
     "dialogs": {
       "addNewUser": {
         "title": "Add New User",
+        "subtitle": "All fields without “optional” are required.",
         "headers": {
-          "contactInformation": "Contact Information",
-          "billingInformation": "Billing Information"
+          "person": "Person",
+          "contact": "Contact",
+          "billingAddress": "Billing address"
         },
+        "optional": "(optional)",
+        "dateOfBirthPlaceholder": "DD.MM.YYYY",
+        "checkOneField": "Please check 1 field",
+        "checkFields": "Please check {{count}} fields",
+        "duplicate": "There is already {{name}} ({{email}}). Is it the same person?",
+        "openProfile": "Open profile",
         "confirm": "Add User"
       },
       "editUser": {
@@ -138,8 +145,9 @@
       },
       "deleteUser": {
         "title": "Delete User",
-        "message": "Are you sure you want to delete this user?",
-        "confirm": "Delete User"
+        "message": "The profile is removed permanently. This cannot be undone.",
+        "confirm": "Delete User",
+        "openSession": "{{name}} still has an open session. The user can only be deleted once the session has been closed and paid."
       },
       "certifications": {
         "pauseCertification": {
@@ -194,7 +202,7 @@
         "clubMember": "Club Member",
         "rfidTags": {
           "fixed": "Fixed",
-          "temporary": "Temporary",
+          "temporary": "Loan tag",
           "waiting": "Waiting",
           "noRfidTag": "No RFID Tag"
         },
@@ -234,6 +242,42 @@
           "noOpenSession": "No open session for this user.",
           "runningUsage": "The session can only be closed once all workshop and tool usages have ended."
         }
+      },
+      "userList": {
+        "subtitle": "{{count}} registered · {{inWorkshop}} in the workshop right now",
+        "search": "Search users",
+        "searchPlaceholder": "Name, email or RFID tag number",
+        "clearSearch": "Clear search",
+        "filters": {
+          "label": "Filter",
+          "all": "All",
+          "inWorkshop": "In the workshop",
+          "clubMembers": "Club members",
+          "temporaryRfidTag": "With loan tag"
+        },
+        "columns": {
+          "name": "Name",
+          "ageGroup": "Age group",
+          "rfidTag": "RFID tag",
+          "lastVisit": "Last visit"
+        },
+        "member": "Member",
+        "rfidTag": {
+          "waiting": "Waiting for tag"
+        },
+        "inWorkshop": "In the workshop",
+        "actions": {
+          "profile": "Open profile",
+          "delete": "Delete user …"
+        },
+        "empty": {
+          "title": "No users yet",
+          "message": "Add new users with “Add user”."
+        },
+        "noResults": {
+          "title": "No users found",
+          "message": "Change the search or the filter – or add a new user."
+        }
       }
     },
     "shared": {
@@ -244,7 +288,7 @@
         "clubMember": "Club Member",
         "email": "Email",
         "phone": "Phone",
-        "addressLine1": "Address",
+        "addressLine1": "Street and house number",
         "addressLine2": "Address Line 2",
         "postalCode": "Postal Code",
         "city": "City",

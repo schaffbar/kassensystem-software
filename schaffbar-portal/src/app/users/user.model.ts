@@ -1,4 +1,5 @@
 import { AgeGroup } from '../shared/models/age-group';
+import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
 
 export interface User {
   id: string;
@@ -20,6 +21,27 @@ export interface UserAddress {
   postalCode: string;
   city: string;
   country: string;
+}
+
+// ----------------------------------------------------------------------------
+// list
+
+export interface UserListItem extends User {
+  // null = no tag and none requested
+  rfidTag: UserRfidTag | null;
+  // entered the workshop and has not left yet
+  inWorkshop: boolean;
+}
+
+export interface UserRfidTag {
+  assignmentType: RfidTagAssignmentType;
+  // null while the user waits for a tag at the counter
+  rfidTagId: string | null;
+}
+
+// a loan tag goes back at the counter when leaving – who still has one at the end of the day has not returned it
+export function hasTemporaryRfidTag(user: UserListItem): boolean {
+  return !!user.rfidTag?.rfidTagId && user.rfidTag.assignmentType === RfidTagAssignmentType.Temporary;
 }
 
 // ----------------------------------------------------------------------------

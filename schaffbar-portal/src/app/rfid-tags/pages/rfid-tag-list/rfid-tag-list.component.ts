@@ -32,7 +32,7 @@ import {
   UnassignRfidTagCommand,
 } from '../../rfid-tag.model';
 import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
-import { RfidTagIdPipe } from '../../rfid-tag-id.pipe';
+import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { RfidTagsStore } from '../../rfid-tags.store';
 
 type RfidTagFilter = 'all' | RfidTagState;

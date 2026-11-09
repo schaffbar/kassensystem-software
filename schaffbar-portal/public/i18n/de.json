@@ -113,7 +113,6 @@
     "title": "Benutzer",
     "actions": {
       "addUser": "Benutzer hinzufügen",
-      "search": "Suchen",
       "assignTempRfidTag": "Temporäres RFID-Tag zuweisen",
       "assignFixedRfidTag": "Festes RFID-Tag zuweisen",
       "unassignRfidTag": "RFID-Tag entfernen",
@@ -127,10 +126,18 @@
     "dialogs": {
       "addNewUser": {
         "title": "Neuen Benutzer hinzufügen",
+        "subtitle": "Alle Felder ohne „optional“ sind Pflicht.",
         "headers": {
-          "contactInformation": "Kontaktinformationen",
-          "billingInformation": "Rechnungsinformationen"
+          "person": "Person",
+          "contact": "Kontakt",
+          "billingAddress": "Rechnungsadresse"
         },
+        "optional": "(optional)",
+        "dateOfBirthPlaceholder": "TT.MM.JJJJ",
+        "checkOneField": "Bitte 1 Feld prüfen",
+        "checkFields": "Bitte {{count}} Felder prüfen",
+        "duplicate": "Es gibt bereits {{name}} ({{email}}). Ist es dieselbe Person?",
+        "openProfile": "Profil öffnen",
         "confirm": "Benutzer hinzufügen"
       },
       "editUser": {
@@ -138,8 +145,9 @@
       },
       "deleteUser": {
         "title": "Benutzer löschen",
-        "message": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
-        "confirm": "Benutzer löschen"
+        "message": "Das Profil wird dauerhaft entfernt. Das lässt sich nicht rückgängig machen.",
+        "confirm": "Benutzer löschen",
+        "openSession": "{{name}} hat noch eine offene Sitzung. Löschen geht erst, wenn die Sitzung beendet und abgerechnet ist."
       },
       "certifications": {
         "pauseCertification": {
@@ -194,7 +202,7 @@
         "clubMember": "Vereinsmitglied",
         "rfidTags": {
           "fixed": "Fest",
-          "temporary": "Temporär",
+          "temporary": "Leihtag",
           "waiting": "Warten",
           "noRfidTag": "Kein RFID-Tag"
         },
@@ -234,6 +242,42 @@
           "noOpenSession": "Keine offene Sitzung für diesen Benutzer.",
           "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
         }
+      },
+      "userList": {
+        "subtitle": "{{count}} registriert · {{inWorkshop}} gerade in der Werkstatt",
+        "search": "Benutzer suchen",
+        "searchPlaceholder": "Name, E-Mail oder RFID-Tag-Nummer",
+        "clearSearch": "Suche leeren",
+        "filters": {
+          "label": "Filter",
+          "all": "Alle",
+          "inWorkshop": "In der Werkstatt",
+          "clubMembers": "Vereinsmitglieder",
+          "temporaryRfidTag": "Mit Leihtag"
+        },
+        "columns": {
+          "name": "Name",
+          "ageGroup": "Altersgruppe",
+          "rfidTag": "RFID-Tag",
+          "lastVisit": "Zuletzt da"
+        },
+        "member": "Mitglied",
+        "rfidTag": {
+          "waiting": "Wartet auf Tag"
+        },
+        "inWorkshop": "In der Werkstatt",
+        "actions": {
+          "profile": "Profil öffnen",
+          "delete": "Benutzer löschen …"
+        },
+        "empty": {
+          "title": "Noch keine Benutzer",
+          "message": "Neue Benutzer über „Benutzer hinzufügen“ anlegen."
+        },
+        "noResults": {
+          "title": "Keine Benutzer gefunden",
+          "message": "Suchbegriff oder Filter anpassen – oder einen neuen Benutzer anlegen."
+        }
       }
     },
     "shared": {
@@ -244,10 +288,10 @@
         "clubMember": "Vereinsmitglied",
         "email": "E-Mail",
         "phone": "Telefon",
-        "addressLine1": "Adresse",
+        "addressLine1": "Straße und Hausnummer",
         "addressLine2": "Adresszusatz",
         "postalCode": "Postleitzahl",
-        "city": "Stadt",
+        "city": "Ort",
         "country": "Land"
       }
     }

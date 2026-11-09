@@ -1,16 +1,14 @@
-<div class="user-list-header">
-  <div class="user-list-header__title">
-    <h1>{{ 'users.title' | translate }} ({{ usersCount() }})</h1>
-    <button matIconButton (click)="reloadUsers()">
-      <mat-icon>refresh</mat-icon>
-    </button>
-  </div>
-  <div class="user-list-header__actions">
-    <button matButton="filled" [disabled]="store.createUser.isPending()" (click)="createUser()">
-      {{ 'users.actions.addUser' | translate }}
-    </button>
-  </div>
-</div>
+<schbar-page-header
+  [title]="'users.title' | translate"
+  [subtitle]="'users.pages.userList.subtitle' | translate: subtitleParams()">
+  <button matIconButton type="button" [attr.aria-label]="'shared.actions.reload' | translate" (click)="reloadUsers()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+  <button matButton="filled" type="button" [disabled]="store.createUser.isPending()" (click)="createUser()">
+    <mat-icon>person_add</mat-icon>
+    {{ 'users.actions.addUser' | translate }}
+  </button>
+</schbar-page-header>
 
 @if (store.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
@@ -19,62 +17,141 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
-<mat-form-field class="user-list-filter">
-  <mat-label>{{ 'users.actions.search' | translate }}</mat-label>
-  <input
-    #searchInput
-    id="search"
-    matInput
-    placeholder="Ex. Max"
-    [value]="searchText()"
-    (input)="searchUsers(searchInput.value)" />
-  @if (searchText()) {
-    <button matSuffix matIconButton type="button" aria-label="Clear search" (click)="clearSearch()">
-      <mat-icon>close</mat-icon>
-    </button>
-  } @else {
-    <mat-icon matSuffix>search</mat-icon>
-  }
-</mat-form-field>
-
-<div class="mat-elevation-z2">
-  <table mat-table [dataSource]="dataSource()" matSort>
-    <ng-container matColumnDef="lastName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'users.shared.userProperties.lastName' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.lastName }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="firstName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        {{ 'users.shared.userProperties.firstName' | translate }}
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.firstName }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>{{ 'shared.table.actionsColumn' | translate }}</th>
-      <td mat-cell *matCellDef="let row">
-        <button class="danger-button" matIconButton type="button" (click)="deleteUser($event, row)">
-          <mat-icon>delete</mat-icon>
+@if (isEmpty()) {
+  <schbar-empty-state
+    class="table-card"
+    icon="group"
+    [title]="'users.pages.userList.empty.title' | translate"
+    [message]="'users.pages.userList.empty.message' | translate" />
+} @else {
+  <div class="list">
+    <mat-form-field class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #searchInput
+        matInput
+        type="search"
+        [attr.aria-label]="'users.pages.userList.search' | translate"
+        [placeholder]="'users.pages.userList.searchPlaceholder' | translate"
+        [value]="searchText()"
+        (input)="searchUsers(searchInput.value)" />
+      @if (searchText()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          [attr.aria-label]="'users.pages.userList.clearSearch' | translate"
+          (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
         </button>
-      </td>
-    </ng-container>
+      }
+    </mat-form-field>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      mat-row
-      class="clickable-row"
-      (click)="openUserDetail(row)"
-      *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+    <schbar-filter-chips
+      [label]="'users.pages.userList.filters.label' | translate"
+      [filterChips]="filterChips()"
+      [(selected)]="filter" />
 
-  <mat-paginator
-    #paginator
-    [length]="usersCount()"
-    [pageIndex]="0"
-    [pageSize]="15"
-    [pageSizeOptions]="[5, 10, 15, 20]"
-    aria-label="Select page" />
-</div>
+    @if (hasNoResults()) {
+      <schbar-empty-state
+        class="no-results"
+        icon="search_off"
+        [title]="'users.pages.userList.noResults.title' | translate"
+        [message]="'users.pages.userList.noResults.message' | translate" />
+    }
+
+    <!-- hidden instead of removed, so that the paginator stays connected to the data source -->
+    <div class="table-card" [hidden]="hasNoResults()">
+      <div class="table-scroll">
+        <table mat-table [dataSource]="dataSource()">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>{{ 'users.pages.userList.columns.name' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="user">
+                <span class="avatar" aria-hidden="true">{{ row.firstName[0] }}{{ row.lastName[0] }}</span>
+                <div class="user-text">
+                  <span class="user-name">
+                    {{ row.firstName }} {{ row.lastName }}
+                    @if (row.clubMember) {
+                      <span class="member-badge">{{ 'users.pages.userList.member' | translate }}</span>
+                    }
+                  </span>
+                  <span class="user-email">{{ row.email }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="ageGroup">
+            <th mat-header-cell *matHeaderCellDef>{{ 'users.pages.userList.columns.ageGroup' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="age-group">{{ row.ageGroup | ageGroupKey | translate }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="rfidTag">
+            <th mat-header-cell *matHeaderCellDef>{{ 'users.pages.userList.columns.rfidTag' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              @if (row.rfidTag; as rfidTag) {
+                @if (rfidTag.rfidTagId) {
+                  <span class="rfid-tag" [class.temporary]="rfidTag.assignmentType === temporary">
+                    {{ rfidTag.assignmentType | rfidTagAssignmentTypeKey | translate }} ·
+                    <span class="mono">{{ rfidTag.rfidTagId | rfidTagId }}</span>
+                  </span>
+                } @else {
+                  <span class="rfid-tag waiting">
+                    <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+                    {{ 'users.pages.userList.rfidTag.waiting' | translate }}
+                  </span>
+                }
+              } @else {
+                <span class="rfid-tag none">{{ null | orDash }}</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="inWorkshop">
+            <th mat-header-cell *matHeaderCellDef>{{ 'users.pages.userList.columns.lastVisit' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              @if (row.inWorkshop) {
+                <schbar-status-badge tone="success" icon="login">
+                  {{ 'users.pages.userList.inWorkshop' | translate }}
+                </schbar-status-badge>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>
+              <span class="cdk-visually-hidden">{{ 'shared.table.actionsColumn' | translate }}</span>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <schbar-row-menu
+                [label]="'shared.actions.rowMenu' | translate: { name: row.firstName + ' ' + row.lastName }">
+                <button mat-menu-item type="button" (click)="openUserDetail(row)">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ 'users.pages.userList.actions.profile' | translate }}</span>
+                </button>
+                <mat-divider />
+                <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteUser(row)">
+                  <mat-icon>delete</mat-icon>
+                  <span>{{ 'users.pages.userList.actions.delete' | translate }}</span>
+                </button>
+              </schbar-row-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            class="clickable-row"
+            *matRowDef="let row; columns: displayedColumns"
+            (click)="openUserDetail(row)"></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSize]="15"
+        [pageSizeOptions]="[15, 30, 50]"
+        [attr.aria-label]="'shared.paginator.label' | translate" />
+    </div>
+  </div>
+}

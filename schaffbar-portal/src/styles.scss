@@ -228,11 +228,18 @@ body {
     font-weight: 600;
   }
 
-  // hint and error flush with the label above instead of indented like the text in the field, and as far from the
-  // field as the label – there is no override token for this padding
+  // hint and error flush with the label above instead of indented like the text in the field – there is no override
+  // token for this padding
   .mat-mdc-form-field-hint-wrapper,
   .mat-mdc-form-field-error-wrapper {
-    padding: 6px 0 0;
+    padding: 0;
+  }
+
+  // as far from the field as the label; on the hint and the error themselves, so a field without them stays as high
+  // as its input
+  .mat-mdc-form-field-hint,
+  .mat-mdc-form-field-error {
+    margin-top: 6px;
   }
 
   // Material starts hint and error with an empty inline-block, so a line break in the template before the text

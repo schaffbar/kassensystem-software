@@ -1,7 +1,7 @@
 import { HttpClient, HttpResourceRef, httpResource } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { API_URL } from '../api-url';
 import { parseWith } from '../parse';
@@ -26,6 +26,12 @@ export class WorkshopSessionsApiService {
       },
       { parse: parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/active') },
     );
+  }
+
+  getActiveWorkshopSession(customerId: string): Observable<WorkshopSessionApiModel | null> {
+    return this.http
+      .get<unknown>(`${WORKSHOP_SESSIONS_API_URL}/${customerId}/active`)
+      .pipe(map(parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/active')));
   }
 
   // --------------------------------------------------------------------------

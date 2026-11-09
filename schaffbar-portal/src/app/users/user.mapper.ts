@@ -8,6 +8,8 @@ import {
   UpdateCustomerContactRequest,
   UpdateCustomerRequest,
 } from '../shared/api/customers/customer.api-model';
+import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
+import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
 import {
   CreateUserCommand,
   UpdateUserAddressCommand,
@@ -15,6 +17,8 @@ import {
   UpdateUserContactCommand,
   User,
   UserAddress,
+  UserListItem,
+  UserRfidTag,
 } from './user.model';
 
 const ISO_DATE = 'yyyy-MM-dd';
@@ -47,6 +51,28 @@ function toUserAddress(apiModel: CustomerAddressApiModel): UserAddress {
     city: apiModel.city,
     country: apiModel.country,
   };
+}
+
+// the tag comes from the user's assignment, the presence from the workshop dashboard
+export function toUserListItems(
+  customers: CustomerApiModel[],
+  assignments: RfidTagAssignmentApiModel[],
+  activeUsers: WorkshopDashboardEntryApiModel[],
+): UserListItem[] {
+  const assignmentsByCustomerId = new Map(assignments.map((assignment) => [assignment.customerId, assignment]));
+  const activeCustomerIds = new Set(activeUsers.map((activeUser) => activeUser.customerId));
+  return customers.map((customer) => {
+    const assignment = assignmentsByCustomerId.get(customer.id);
+    return {
+      ...toUser(customer),
+      rfidTag: assignment ? toUserRfidTag(assignment) : null,
+      inWorkshop: activeCustomerIds.has(customer.id),
+    };
+  });
+}
+
+function toUserRfidTag(assignment: RfidTagAssignmentApiModel): UserRfidTag {
+  return { assignmentType: assignment.assignmentType, rfidTagId: assignment.rfidTagId };
 }
 
 // ----------------------------------------------------------------------------

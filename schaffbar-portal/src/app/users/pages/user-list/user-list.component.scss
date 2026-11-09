@@ -1,46 +1,113 @@
-.user-list-header {
+:host {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.user-list-header__title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+// the page header brings its own margin
+schbar-page-header {
+  margin-bottom: 0;
 }
 
-.user-list-header__actions {
+.list {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.user-list-filter {
+.user {
   display: flex;
-  max-width: 500px;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.member-badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.user-email {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.age-group {
+  color: var(--text-2);
+}
+
+.rfid-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  white-space: nowrap;
+
+  &.temporary {
+    color: var(--info);
+    font-weight: 500;
+  }
+
+  // waits at the counter: someone has to act, so it is highlighted
+  &.waiting {
+    color: var(--warn);
+    font-weight: 600;
+  }
+
+  // no tag is normal for someone who is not in the workshop
+  &.none {
+    color: var(--text-3);
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
 }
 
 .mat-column-actions {
-  width: 100px;
-  text-align: center;
+  width: 56px;
+  text-align: right;
 }
 
-// transparent borders, so the rows don't shift when the hover border appears
-.mat-mdc-row .mat-mdc-cell {
-  border-bottom: 1px solid transparent;
-  border-top: 1px solid transparent;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-  border-color: currentColor;
+.no-results {
+  border: 1px dashed var(--border);
+  border-radius: 14px;
 }
 
 .load-error {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }
