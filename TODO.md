@@ -5,6 +5,7 @@
 
 ## Important
 
+- [Backend] Delete user when user is waiting for assignment or rfid tag is assigned
 - [Backend] Is it problem when we delete RFID reader during operation (exmaple Switch Box)
 - [Backend] RFID-Tag löschen nur ohne Zuweisung: `RfidTagService.deleteRfidTag` prüft das nicht (TODO im Code), und `rfid_tag_assignment.rfid_tag_id` hat keinen Fremdschlüssel. Ein zugewiesener Tag lässt sich löschen, die Zuweisung zeigt danach auf einen Tag, den es nicht mehr gibt (Person bekommt keinen neuen Tag, bis die Zuweisung aufgehoben ist; wird der Tag neu registriert, gehört er wieder der alten Person). Ablehnen mit `409` – das Portal bietet „Tag löschen“ für zugewiesene Tags schon nicht mehr an
 - [Feature] WaitingForAssignment auch im Portal stoppen

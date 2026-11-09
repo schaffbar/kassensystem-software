@@ -548,15 +548,16 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      ohne Tag ein Strich – ohne Tag ist normal, wer nicht in der Werkstatt ist) und „In der Werkstatt“ (aus `GET
      /workshop-dashboard/active-users`), ⋯-Menü (Profil öffnen, Benutzer löschen …). Löschen fragt vorher `GET
      /workshop-sessions/{id}/active` – bei offener Sitzung ein Hinweis statt des Dialogs. Dialog „Neuen Benutzer
-     hinzufügen“ als Formular-Dialog mit Abschnitten Person / Kontakt / Rechnungsadresse, „Bitte N Felder prüfen“ nach
-     dem Absenden und Hinweis auf einen möglichen Doppeleintrag (gleicher Name oder gleiche E-Mail, mit Link zum Profil
-     – nur im Portal, aus der geladenen Liste). Ohne Backend noch offen: Anzahl Einweisungen, „Zuletzt da“ (die Spalte
-     zeigt nur „In der Werkstatt“), die Sortierauswahl (erst mit „Zuletzt da“ sinnvoll – nach einem unsichtbaren Wert
-     wie dem Registrierdatum zu sortieren verwirrt, Entscheidung 09.11.2026), serverseitige Suche und Paginierung,
-     Löschkonzept (siehe customer-README). Noch nicht im ⋯-Menü: „Bearbeiten …“, „RFID-Tag zuweisen …“, „Sitzung beenden
-     …“ – die Dialoge kommen mit der Detailseite. Weggelassen: Altersgruppe im Dialog (die Grenzen kennt nur das
-     Backend) und „Anlegen & RFID-Tag zuweisen“. Nebenbei: Hinweise und Fehler unter Feldern mit Label darüber stehen
-     6px unter dem Feld (nur, wenn es sie gibt).
+     hinzufügen“ als Formular-Dialog ohne Überschrift „Person“ (Name und Geburtsdatum sind ohne sie klar, Entscheidung
+     09.11.2026), Abschnitte Kontakt / Rechnungsadresse. „Bitte N Felder prüfen“ nach dem Absenden und Hinweis auf einen
+     möglichen Doppeleintrag (gleicher Name oder gleiche E-Mail, mit Link zum Profil – nur im Portal, aus der geladenen
+     Liste). Ohne Backend noch offen: Anzahl Einweisungen, „Zuletzt da“ (die Spalte zeigt nur „In der Werkstatt“), die
+     Sortierauswahl (erst mit „Zuletzt da“ sinnvoll – nach einem unsichtbaren Wert wie dem Registrierdatum zu sortieren
+     verwirrt, Entscheidung 09.11.2026), serverseitige Suche und Paginierung, Löschkonzept (siehe customer-README). Noch
+     nicht im ⋯-Menü: „Bearbeiten …“, „RFID-Tag zuweisen …“, „Sitzung beenden …“ – die Dialoge kommen mit der
+     Detailseite. Weggelassen: Altersgruppe im Dialog (die Grenzen kennt nur das Backend) und „Anlegen & RFID-Tag
+     zuweisen“. Nebenbei: Hinweise und Fehler unter Feldern mit Label darüber stehen 6px unter dem Feld (nur, wenn es
+     sie gibt).
    - [ ] Benutzer – Detailseite
    - [ ] Übersicht
 

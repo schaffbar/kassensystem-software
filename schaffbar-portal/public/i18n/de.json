@@ -128,7 +128,6 @@
         "title": "Neuen Benutzer hinzufügen",
         "subtitle": "Alle Felder ohne „optional“ sind Pflicht.",
         "headers": {
-          "person": "Person",
           "contact": "Kontakt",
           "billingAddress": "Rechnungsadresse"
         },

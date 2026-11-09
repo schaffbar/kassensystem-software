@@ -27,56 +27,53 @@
       </p>
     }
 
-    <fieldset>
-      <legend>{{ 'users.dialogs.addNewUser.headers.person' | translate }}</legend>
-      <div class="fields">
-        <div>
-          <label class="field-label" for="firstName">{{ 'users.shared.userProperties.firstName' | translate }}</label>
-          <mat-form-field class="full-width" subscriptSizing="dynamic">
-            <input id="firstName" matInput autocomplete="given-name" [formField]="userForm.firstName" />
-            <mat-error>
-              <schbar-field-error [field]="userForm.firstName" label="users.shared.userProperties.firstName" />
-            </mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <label class="field-label" for="lastName">{{ 'users.shared.userProperties.lastName' | translate }}</label>
-          <mat-form-field class="full-width" subscriptSizing="dynamic">
-            <input id="lastName" matInput autocomplete="family-name" [formField]="userForm.lastName" />
-            <mat-error>
-              <schbar-field-error [field]="userForm.lastName" label="users.shared.userProperties.lastName" />
-            </mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <label class="field-label" for="dateOfBirth">
-            {{ 'users.shared.userProperties.dateOfBirth' | translate }}
-          </label>
-          <mat-form-field class="full-width" subscriptSizing="dynamic">
-            <input
-              id="dateOfBirth"
-              matInput
-              [placeholder]="'users.dialogs.addNewUser.dateOfBirthPlaceholder' | translate"
-              [formField]="userForm.dateOfBirth"
-              [min]="dateOfBirthLimits.min"
-              [max]="dateOfBirthLimits.max"
-              [matDatepicker]="picker" />
-            <mat-datepicker-toggle matIconSuffix [for]="picker" />
-            <mat-datepicker #picker startView="multi-year" />
-            <mat-error>
-              <schbar-field-error [field]="userForm.dateOfBirth" label="users.shared.userProperties.dateOfBirth" />
-            </mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <!-- keeps the checkbox at the height of the fields next to it, which have a label above -->
-          <span class="field-label" aria-hidden="true">&nbsp;</span>
-          <mat-checkbox class="checkbox-card" [formField]="userForm.clubMember">
-            {{ 'users.shared.userProperties.clubMember' | translate }}
-          </mat-checkbox>
-        </div>
+    <div class="fields">
+      <div>
+        <label class="field-label" for="firstName">{{ 'users.shared.userProperties.firstName' | translate }}</label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input id="firstName" matInput autocomplete="given-name" [formField]="userForm.firstName" />
+          <mat-error>
+            <schbar-field-error [field]="userForm.firstName" label="users.shared.userProperties.firstName" />
+          </mat-error>
+        </mat-form-field>
       </div>
-    </fieldset>
+      <div>
+        <label class="field-label" for="lastName">{{ 'users.shared.userProperties.lastName' | translate }}</label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input id="lastName" matInput autocomplete="family-name" [formField]="userForm.lastName" />
+          <mat-error>
+            <schbar-field-error [field]="userForm.lastName" label="users.shared.userProperties.lastName" />
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <label class="field-label" for="dateOfBirth">
+          {{ 'users.shared.userProperties.dateOfBirth' | translate }}
+        </label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input
+            id="dateOfBirth"
+            matInput
+            [placeholder]="'users.dialogs.addNewUser.dateOfBirthPlaceholder' | translate"
+            [formField]="userForm.dateOfBirth"
+            [min]="dateOfBirthLimits.min"
+            [max]="dateOfBirthLimits.max"
+            [matDatepicker]="picker" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker startView="multi-year" />
+          <mat-error>
+            <schbar-field-error [field]="userForm.dateOfBirth" label="users.shared.userProperties.dateOfBirth" />
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <!-- keeps the checkbox at the height of the fields next to it, which have a label above -->
+        <span class="field-label" aria-hidden="true">&nbsp;</span>
+        <mat-checkbox class="checkbox-card" [formField]="userForm.clubMember">
+          {{ 'users.shared.userProperties.clubMember' | translate }}
+        </mat-checkbox>
+      </div>
+    </div>
 
     <fieldset>
       <legend>{{ 'users.dialogs.addNewUser.headers.contact' | translate }}</legend>
