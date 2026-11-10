@@ -17,7 +17,7 @@ import { StatusBadgeComponent } from '../../../shared/components/status-badge/st
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { openUpdateToolForm } from './open-update-tool-form';
-import { DeleteToolCommand } from '../../tool.model';
+import { canDeleteTool, DeleteToolCommand } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
 import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 import { ToolDetailTabCertificationsComponent } from './tool-detail-tab-certifications/tool-detail-tab-certifications.component';
@@ -61,10 +61,15 @@ export class ToolDetailComponent {
   protected readonly toolsLink = `/${ROUTE.TOOLS}`;
   protected readonly selectedTab = signal(0);
 
-  // the person using the tool right now – the tool list knows it from the active tools
-  protected readonly usedBy = computed(
-    () => this.toolsStore.tools().find((tool) => tool.id === this.detailsStore.tool()?.id)?.usedBy ?? null,
+  // the tool list knows from the active tools who is using the tool right now
+  private readonly toolListItem = computed(
+    () => this.toolsStore.tools().find((tool) => tool.id === this.detailsStore.tool()?.id) ?? null,
   );
+  protected readonly usedBy = computed(() => this.toolListItem()?.usedBy ?? null);
+  protected readonly canDeleteTool = computed(() => {
+    const tool = this.toolListItem();
+    return !tool || canDeleteTool(tool);
+  });
 
   constructor() {
     this.detailsStore.setToolId(this.id);
@@ -100,7 +105,7 @@ export class ToolDetailComponent {
 
   protected deleteTool(): void {
     const tool = this.detailsStore.tool();
-    if (!tool) return;
+    if (!tool || !this.canDeleteTool()) return;
 
     this.confirmDeleteDialog
       .open({

@@ -20,6 +20,7 @@ import { ToolInstructorsComponent } from '../../../components/tool-instructors/t
 import { UpdateToolFormComponent } from '../../../components/update-tool-form/update-tool-form.component';
 import { AddToolInstructorsCommand, Tool, UpdateToolCommand } from '../../../tool.model';
 import { ToolsStore } from '../../../tools.store';
+import { DangerZoneComponent } from '../../../../shared/components/danger-zone/danger-zone.component';
 import { InstructorCandidate, ToolInstructor } from '../../../user.model';
 import { ToolDetailStore } from '../tool-detail.store';
 import { ToolDetailTabInfoComponent } from './tool-detail-tab-info.component';
@@ -171,5 +172,23 @@ describe('ToolDetailTabInfoComponent', () => {
       toolId: 'tool-1',
       instructorIds: ['user-1'],
     });
+  });
+
+  it('should delete the tool from the danger zone below both columns', () => {
+    const deleteRequested = vi.fn();
+    fixture.componentInstance.deleteRequested.subscribe(deleteRequested);
+
+    expect(child(DangerZoneComponent).message()).toBe('tools.pages.toolDetails.hints.dangerZone');
+    fixture.nativeElement.querySelector(':scope > schbar-danger-zone .danger-button').click();
+
+    expect(deleteRequested).toHaveBeenCalledOnce();
+  });
+
+  it('should explain instead of deleting while somebody uses the tool', async () => {
+    fixture.componentRef.setInput('usedBy', 'Anna Becker');
+    await fixture.whenStable();
+
+    expect(child(DangerZoneComponent).message()).toBe('tools.pages.toolDetails.hints.dangerZoneInUse');
+    expect(fixture.nativeElement.querySelector('schbar-danger-zone button')).toBeNull();
   });
 });

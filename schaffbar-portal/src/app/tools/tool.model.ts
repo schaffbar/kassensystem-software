@@ -25,6 +25,11 @@ export interface ToolListItem extends Tool {
   usedBy: string | null;
 }
 
+// a running tool is not deleted – the person using it would lose the end of their usage (T-17, only in the portal)
+export function canDeleteTool(tool: ToolListItem): boolean {
+  return !tool.usedBy;
+}
+
 // ----------------------------------------------------------------------------
 // hardware
 

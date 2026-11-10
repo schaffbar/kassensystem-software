@@ -396,8 +396,8 @@
         "optional": "(optional)"
       },
       "deleteTool": {
-        "title": "Delete Tool",
-        "message": "Are you sure you want to delete this tool?",
+        "title": "Delete tool?",
+        "message": "The tool is deleted permanently with all its certifications. This cannot be undone.",
         "confirm": "Delete Tool"
       },
       "clearRfidReader": {
@@ -575,6 +575,10 @@
           "addInstructors": "Add instructors",
           "removeInstructor": "Remove …",
           "removeInstructorLabel": "Remove {{name}} as instructor"
+        },
+        "hints": {
+          "dangerZone": "Deletes the tool with all its certifications permanently. This cannot be undone.",
+          "dangerZoneInUse": "{{name}} is using the tool right now. It can be deleted once it has been switched off."
         },
         "properties": {
           "activeCertifications": "Active certifications"

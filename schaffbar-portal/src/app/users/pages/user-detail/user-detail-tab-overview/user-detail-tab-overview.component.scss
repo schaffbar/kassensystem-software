@@ -1,4 +1,11 @@
-// contact and tag on the left, certifications and danger zone on the right – one column on narrow screens
+// contact and tag on the left, certifications on the right – one column on narrow screens; the danger zone below
+// both, over the full width
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .overview {
   display: flex;
   flex-wrap: wrap;

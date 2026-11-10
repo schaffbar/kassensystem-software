@@ -190,7 +190,10 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
   - `schbar-row-menu` – the ⋯ menu of a table row instead of action buttons; destructive entries come last after a
     `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
   - `schbar-empty-state` – instead of an empty table or list.
-  - `schbar-danger-zone` – last card of a detail page with the destructive action (`danger-button`, asks first).
+  - `schbar-danger-zone` – every detail page that can delete its entity has one: the last card of the first tab (or
+    of the page without tabs), over the full width below all columns, with the destructive action (`danger-button`,
+    asks first). The ⋯ menu of the header offers the same. When a rule forbids it, the card explains why instead of
+    the button and the menu hides the entry (open session of a user, tool in use, reader assigned to a tool).
   - `schbar-filter-chips` – the filters of a list with counts (`[(selected)]` = id of the active filter); the counts
     ignore the search. Next to it the search: `mat-form-field` with the global class `search-field` (44px, no hint).
   - `schbar-toggle-chip` – a single filter that is on or off (`[(pressed)]`, optional icon and count), e.g.

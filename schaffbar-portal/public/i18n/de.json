@@ -396,8 +396,8 @@
         "optional": "(optional)"
       },
       "deleteTool": {
-        "title": "Werkzeug löschen",
-        "message": "Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?",
+        "title": "Werkzeug löschen?",
+        "message": "Das Werkzeug wird mit allen Einweisungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.",
         "confirm": "Werkzeug löschen"
       },
       "clearRfidReader": {
@@ -575,6 +575,10 @@
           "addInstructors": "Einweiser hinzufügen",
           "removeInstructor": "Entfernen …",
           "removeInstructorLabel": "{{name}} als Einweiser entfernen"
+        },
+        "hints": {
+          "dangerZone": "Löscht das Werkzeug mit allen Einweisungen dauerhaft. Das lässt sich nicht rückgängig machen.",
+          "dangerZoneInUse": "{{name}} benutzt das Werkzeug gerade. Löschen geht erst, wenn es wieder ausgeschaltet ist."
         },
         "properties": {
           "activeCertifications": "Aktive Einweisungen"

@@ -586,7 +586,11 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      (heute: entfernen, dann zuweisen), Tag-Anfrage abbrechen, beim Entfernen „freigeben oder deaktivieren“, Grund bei
      Pausieren/Entziehen, Bestätigungshäkchen beim Löschen und das Löschen selbst bei vorhandenen Einweisungen
      (customer-README C-9), Live-Dauer im Banner. „Bearbeiten“, „RFID-Tag zuweisen …“ und „Sitzung beenden …“ gibt es
-     vorerst nur auf der Detailseite, nicht im ⋯-Menü der Liste (Entscheidung 10.11.2026).
+     vorerst nur auf der Detailseite, nicht im ⋯-Menü der Liste (Entscheidung 10.11.2026). Gefahrenzone auf allen
+     Detailseiten einheitlich (Entscheidung 10.11.2026): letzte Karte des ersten Tabs über die volle Breite unter allen
+     Spalten – beim Benutzer aus der rechten Spalte darunter verschoben, beim Werkzeug neu im Tab „Details“ (im Prototyp
+     fehlt sie dort); solange jemand das Werkzeug benutzt, erklärt sie das statt zu löschen, und das ⋯-Menü blendet
+     „Werkzeug löschen …“ aus (tool-README T-17, nur im Portal).
    - [ ] Übersicht
 
 ### Spätere Aufgaben

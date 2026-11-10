@@ -55,19 +55,19 @@ implemented, move it to "Business Rules / Invariants".
 
 ### Enforced only in the portal
 
-| #    | Rule                                                                                                                                      | Status                                                                                                                                        |
-|------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| T-14 | The RFID reader (switch box) cannot be cleared while the tool is in use – the session of the person using it would not be closed properly | Portal: "Schaltbox trennen" disabled with a hint (`canClearRfidReader` in `tool.model.ts`). `ToolClearRfidReader` does not check              |
-| T-15 | Tool names are unique case-insensitively (extends T-2)                                                                                    | Portal: `validateUniqueToolName` compares in lower case. `ToolRepository.findByName` is case-sensitive, "Kreissäge" and "kreissäge" both pass |
-| T-16 | `description` has at most 255 characters                                                                                                  | Portal: `maxLength(255)`. Column is `VARCHAR(255)`, no `@Size` on the commands → database error (500)                                         |
+| #    | Rule                                                                                                                                      | Status                                                                                                                                                                          |
+|------|-------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| T-14 | The RFID reader (switch box) cannot be cleared while the tool is in use – the session of the person using it would not be closed properly | Portal: "Schaltbox trennen" disabled with a hint (`canClearRfidReader` in `tool.model.ts`). `ToolClearRfidReader` does not check                                                |
+| T-15 | Tool names are unique case-insensitively (extends T-2)                                                                                    | Portal: `validateUniqueToolName` compares in lower case. `ToolRepository.findByName` is case-sensitive, "Kreissäge" and "kreissäge" both pass                                   |
+| T-16 | `description` has at most 255 characters                                                                                                  | Portal: `maxLength(255)`. Column is `VARCHAR(255)`, no `@Size` on the commands → database error (500)                                                                           |
+| T-17 | A tool cannot be deleted while it is in use – the usage of the person using it would not be ended properly                                | Portal: danger zone and ⋯ menu offer no delete while somebody uses the tool (`canDeleteTool` in `tool.model.ts`). `ToolDelete` deletes certifications and tool without checking |
 
 ### Planned (not implemented yet)
 
-| #    | Rule                                                                                          | Status                                                                                    |
-|------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| T-17 | A tool cannot be deleted while it is in use                                                   | Neither portal nor backend. `ToolDelete` deletes certifications and tool without checking |
-| T-18 | Removing the WLAN relais can switch it off first ("Relais vorher ausschalten", on by default) | New option for clearing the WLAN relais. The portal only asks for confirmation            |
-| T-19 | Test the connection to the WLAN relais ("Verbindung testen")                                  | New endpoint                                                                              |
+| #    | Rule                                                                                          | Status                                                                         |
+|------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| T-18 | Removing the WLAN relais can switch it off first ("Relais vorher ausschalten", on by default) | New option for clearing the WLAN relais. The portal only asks for confirmation |
+| T-19 | Test the connection to the WLAN relais ("Verbindung testen")                                  | New endpoint                                                                   |
 
 ## Domain Events
 

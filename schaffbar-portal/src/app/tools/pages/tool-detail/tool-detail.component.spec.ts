@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
@@ -45,11 +45,13 @@ describe('ToolDetailComponent', () => {
     deleteTool: Mock;
   };
   let reloadTools: Mock;
+  let toolsInList: WritableSignal<ToolListItem[]>;
   let openDialog: Mock;
   let openConfirmDelete: Mock;
 
   beforeEach(async () => {
     reloadTools = vi.fn();
+    toolsInList = signal([tool]);
     openDialog = vi.fn();
     openConfirmDelete = vi.fn();
     detailsStoreMock = {
@@ -87,7 +89,7 @@ describe('ToolDetailComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideTranslateService(),
-        { provide: ToolsStore, useValue: { tools: signal([tool]), reloadTools } },
+        { provide: ToolsStore, useValue: { tools: toolsInList, reloadTools } },
         { provide: MatDialog, useValue: { open: openDialog } },
         { provide: ConfirmDeleteDialogService, useValue: { open: openConfirmDelete } },
       ],
@@ -166,6 +168,8 @@ describe('ToolDetailComponent', () => {
   });
 
   it('should delete the tool from the ⋯ menu after confirmation', async () => {
+    toolsInList.set([{ ...tool, usedBy: null }]);
+    await fixture.whenStable();
     openConfirmDelete.mockReturnValue(of(true));
 
     query('schbar-row-menu button')?.click();
@@ -173,6 +177,26 @@ describe('ToolDetailComponent', () => {
     document.querySelector<HTMLElement>('.danger-menu-item')?.click();
 
     expect(openConfirmDelete).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ entity: 'Bandsäge' }));
+    expect(detailsStoreMock.deleteTool).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1' });
+  });
+
+  it('should not offer to delete a tool in use and tell the details tab who uses it', async () => {
+    query('schbar-row-menu button')?.click();
+    await fixture.whenStable();
+
+    expect(document.querySelector('.danger-menu-item')).toBeNull();
+    expect(fixture.debugElement.query(By.directive(ToolDetailTabInfoComponent)).componentInstance.usedBy()).toBe(
+      'Anna Becker',
+    );
+  });
+
+  it('should delete the tool from the danger zone of the details tab after confirmation', async () => {
+    toolsInList.set([{ ...tool, usedBy: null }]);
+    await fixture.whenStable();
+    openConfirmDelete.mockReturnValue(of(true));
+
+    fixture.debugElement.query(By.directive(ToolDetailTabInfoComponent)).componentInstance.deleteRequested.emit();
+
     expect(detailsStoreMock.deleteTool).toHaveBeenCalledExactlyOnceWith({ toolId: 'tool-1' });
   });
 

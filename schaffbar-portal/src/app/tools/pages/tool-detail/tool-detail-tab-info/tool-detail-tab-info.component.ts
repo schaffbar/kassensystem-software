@@ -1,7 +1,11 @@
-import { Component, computed, inject, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
+import { DangerZoneComponent } from '../../../../shared/components/danger-zone/danger-zone.component';
 import { DIALOG_WIDTH, FORM_DIALOG_CONFIG } from '../../../../shared/dialogs/dialog-constants';
 import {
   AddToolInstructorsDialogData,
@@ -22,15 +26,27 @@ import { ToolDetailStore } from '../tool-detail.store';
   selector: 'schbar-tool-detail-tab-info',
   templateUrl: './tool-detail-tab-info.component.html',
   styleUrl: './tool-detail-tab-info.component.scss',
-  imports: [ToolDetailInfoComponent, ToolInstructorsComponent, ToolHardwareSummaryComponent],
+  imports: [
+    MatButtonModule,
+    TranslatePipe,
+    DangerZoneComponent,
+    ToolDetailInfoComponent,
+    ToolInstructorsComponent,
+    ToolHardwareSummaryComponent,
+  ],
 })
 export class ToolDetailTabInfoComponent {
   protected readonly detailsStore = inject(ToolDetailStore);
   private readonly toolsStore = inject(ToolsStore);
   private readonly dialog = inject(MatDialog);
 
+  // the person using the tool right now – the page knows it from the tool list; null while it is free
+  readonly usedBy = input<string | null>(null);
+
   // the hardware is configured in its own tab, which the page switches to
   readonly hardwareConfigurationRequested = output<void>();
+  // the page deletes the tool – its ⋯ menu offers the same
+  readonly deleteRequested = output<void>();
 
   protected readonly toolDetailInfo = computed(() => {
     const tool = this.detailsStore.tool();

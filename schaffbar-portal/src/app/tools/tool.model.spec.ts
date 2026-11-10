@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { WlanRelaisType } from '../shared/models/wlan-relais-type';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
-import { canClearRfidReader, isHardwareSetUp, Tool, wlanRelaisCommands } from './tool.model';
+import { canClearRfidReader, canDeleteTool, isHardwareSetUp, Tool, wlanRelaisCommands } from './tool.model';
 
 describe('wlanRelaisCommands', () => {
   it('should fill in the IP address of the relais', () => {
@@ -72,5 +72,10 @@ describe('canClearRfidReader', () => {
 
   it('should not allow it while somebody uses the tool', () => {
     expect(canClearRfidReader({ ...tool, usedBy: 'Anna Becker' })).toBe(false);
+  });
+
+  it('should delete only a tool that nobody uses', () => {
+    expect(canDeleteTool({ ...tool, usedBy: null })).toBe(true);
+    expect(canDeleteTool({ ...tool, usedBy: 'Anna Becker' })).toBe(false);
   });
 });

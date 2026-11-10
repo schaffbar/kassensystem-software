@@ -30,11 +30,13 @@
         <mat-icon>edit</mat-icon>
         <span>{{ 'tools.pages.toolDetails.actions.editMenu' | translate }}</span>
       </button>
-      <mat-divider />
-      <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteTool()">
-        <mat-icon>delete</mat-icon>
-        <span>{{ 'tools.pages.toolDetails.actions.delete' | translate }}</span>
-      </button>
+      @if (canDeleteTool()) {
+        <mat-divider />
+        <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteTool()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'tools.pages.toolDetails.actions.delete' | translate }}</span>
+        </button>
+      }
     </schbar-row-menu>
   </schbar-page-header>
 
@@ -46,7 +48,10 @@
     (selectedIndexChange)="selectedTab.set($event)">
     <mat-tab [label]="'tools.tabGroups.toolDetails.detailsTab' | translate">
       <div class="tab-content">
-        <schbar-tool-detail-tab-info (hardwareConfigurationRequested)="showHardware()" />
+        <schbar-tool-detail-tab-info
+          [usedBy]="usedBy()"
+          (hardwareConfigurationRequested)="showHardware()"
+          (deleteRequested)="deleteTool()" />
       </div>
     </mat-tab>
     <mat-tab>

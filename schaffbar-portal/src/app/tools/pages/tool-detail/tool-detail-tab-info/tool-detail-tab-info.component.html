@@ -1,18 +1,30 @@
 @if (detailsStore.tool(); as tool) {
-  <div class="main">
-    @if (toolDetailInfo(); as info) {
-      <schbar-tool-detail-info [toolDetailInfo]="info" (editRequested)="editTool()" />
+  <div class="columns">
+    <div class="main">
+      @if (toolDetailInfo(); as info) {
+        <schbar-tool-detail-info [toolDetailInfo]="info" (editRequested)="editTool()" />
+      }
+      <schbar-tool-instructors
+        [toolId]="tool.id"
+        [instructors]="detailsStore.instructors()"
+        (addRequested)="addToolInstructors()"
+        (instructorsRemoved)="removeToolInstructors($event)" />
+    </div>
+    @if (toolHardwareSummary(); as hardware) {
+      <schbar-tool-hardware-summary
+        class="side"
+        [toolHardwareSummary]="hardware"
+        (configureRequested)="hardwareConfigurationRequested.emit()" />
     }
-    <schbar-tool-instructors
-      [toolId]="tool.id"
-      [instructors]="detailsStore.instructors()"
-      (addRequested)="addToolInstructors()"
-      (instructorsRemoved)="removeToolInstructors($event)" />
   </div>
-  @if (toolHardwareSummary(); as hardware) {
-    <schbar-tool-hardware-summary
-      class="side"
-      [toolHardwareSummary]="hardware"
-      (configureRequested)="hardwareConfigurationRequested.emit()" />
+
+  @if (usedBy(); as user) {
+    <schbar-danger-zone [message]="'tools.pages.toolDetails.hints.dangerZoneInUse' | translate: { name: user }" />
+  } @else {
+    <schbar-danger-zone [message]="'tools.pages.toolDetails.hints.dangerZone' | translate">
+      <button matButton="outlined" type="button" class="danger-button" (click)="deleteRequested.emit()">
+        {{ 'tools.pages.toolDetails.actions.delete' | translate }}
+      </button>
+    </schbar-danger-zone>
   }
 }

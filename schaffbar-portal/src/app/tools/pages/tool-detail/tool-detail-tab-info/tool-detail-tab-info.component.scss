@@ -1,5 +1,12 @@
-// two columns like the prototype: information and instructors, next to them the hardware; one column on a phone
+// two columns like the prototype: information and instructors, next to them the hardware; one column on a phone –
+// the danger zone below both, over the full width
 :host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.columns {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
