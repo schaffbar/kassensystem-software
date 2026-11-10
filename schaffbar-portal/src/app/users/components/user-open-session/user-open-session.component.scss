@@ -50,8 +50,35 @@ dd {
   font-variant-numeric: tabular-nums;
 }
 
-.item {
+// a stay in bold, the tools used during it indented below
+.stay-row .item {
   font-weight: 600;
+}
+
+.tool-row {
+  td {
+    color: var(--text-2);
+  }
+
+  .item {
+    padding-left: 40px;
+  }
+}
+
+h3 {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool-totals dd {
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .number {

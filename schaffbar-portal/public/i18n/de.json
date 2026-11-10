@@ -315,11 +315,12 @@
       },
       "openSession": {
         "headers": {
-          "usages": "Werkstatt und Werkzeuge in dieser Sitzung",
+          "usages": "Werkstattbesuche und Werkzeuge in dieser Sitzung",
           "summary": "Zusammenfassung",
           "workshopTime": "Werkstattzeit",
           "workshopUnits": "Werkstatt-Einheiten",
-          "toolUnits": "Werkzeug-Einheiten"
+          "toolUnits": "Werkzeug-Einheiten",
+          "perTool": "Pro Werkzeug"
         },
         "workshop": "Werkstatt",
         "running": "läuft",
@@ -327,7 +328,8 @@
         "empty": {
           "title": "Keine offene Sitzung",
           "message": "Eine Sitzung beginnt beim Betreten der Werkstatt und endet mit dem Abrechnen."
-        }
+        },
+        "toolTotal": "{{usages}}× · {{minutes}} min · {{units}} Einh."
       },
       "userList": {
         "subtitle": "{{count}} registriert · {{inWorkshop}} gerade in der Werkstatt",

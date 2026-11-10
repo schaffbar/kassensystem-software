@@ -13,29 +13,30 @@ registerLocaleData(localeDe);
 describe('UserOpenSessionComponent', () => {
   const at = (hours: number, minutes: number) => new Date(2026, 10, 9, hours, minutes);
   const session: UserOpenSessionViewModel = {
-    usages: [
+    stays: [
       {
         id: 'w-1',
-        kind: 'workshop',
-        toolName: null,
-        startTime: at(14, 5),
-        endTime: null,
-        durationInMinutes: null,
-        units: null,
+        startTime: at(17, 49),
+        endTime: at(19, 4),
+        durationInMinutes: 75,
+        units: 2,
+        toolUsages: [
+          {
+            id: 'k-1',
+            toolName: 'Kreissäge',
+            startTime: at(17, 50),
+            endTime: at(17, 54),
+            durationInMinutes: 4,
+            units: 1,
+          },
+        ],
       },
-      {
-        id: 't-1',
-        kind: 'tool',
-        toolName: 'Bandsäge',
-        startTime: at(14, 12),
-        endTime: at(14, 31),
-        durationInMinutes: 19,
-        units: 1,
-      },
+      { id: 'w-2', startTime: at(19, 49), endTime: null, durationInMinutes: null, units: null, toolUsages: [] },
     ],
-    workshopMinutes: 83,
-    workshopUnits: 2,
-    toolUnits: 3,
+    workshopMinutes: 100,
+    workshopUnits: 3,
+    toolUnits: 1,
+    tools: [{ toolId: 'tool-1', toolName: 'Kreissäge', usages: 1, minutes: 4, units: 1 }],
   };
 
   let fixture: ComponentFixture<UserOpenSessionComponent>;
@@ -61,18 +62,31 @@ describe('UserOpenSessionComponent', () => {
     );
   }
 
-  it('should list the usages with "running" and dashes for values that do not exist yet', () => {
+  it('should list each stay with the tools used during it indented below', () => {
     expect(rows()).toEqual([
-      ['users.pages.openSession.workshop', '14:05', 'users.pages.openSession.running', '–', '–'],
-      ['Bandsäge', '14:12', '14:31', 'users.pages.openSession.minutes', '1'],
+      ['users.pages.openSession.workshop', '17:49', '19:04', 'users.pages.openSession.minutes', '2'],
+      ['Kreissäge', '17:50', '17:54', 'users.pages.openSession.minutes', '1'],
+      ['users.pages.openSession.workshop', '19:49', 'users.pages.openSession.running', '–', '–'],
     ]);
+    const classes = [...fixture.nativeElement.querySelectorAll('tr.mat-mdc-row')].map((row: HTMLElement) =>
+      row.classList.contains('tool-row') ? 'tool' : 'stay',
+    );
+    expect(classes).toEqual(['stay', 'tool', 'stay']);
   });
 
   it('should show the totals', () => {
     const text = (selector: string) => fixture.nativeElement.querySelector(selector).textContent.trim();
 
     expect(text('.workshop-minutes')).toBe('users.pages.openSession.minutes');
-    expect(text('.workshop-units')).toBe('2');
-    expect(text('.tool-units')).toBe('3');
+    expect(text('.workshop-units')).toBe('3');
+    expect(text('.tool-units')).toBe('1');
+  });
+
+  it('should show the totals of each tool', () => {
+    const lines = [...fixture.nativeElement.querySelectorAll('.tool-totals div')].map((line: HTMLElement) =>
+      line.textContent!.replace(/\s+/g, ' ').trim(),
+    );
+
+    expect(lines).toEqual(['Kreissäge users.pages.openSession.toolTotal']);
   });
 });

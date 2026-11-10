@@ -315,11 +315,12 @@
       },
       "openSession": {
         "headers": {
-          "usages": "Workshop and tools in this session",
+          "usages": "Workshop stays and tools in this session",
           "summary": "Summary",
           "workshopTime": "Workshop time",
           "workshopUnits": "Workshop units",
-          "toolUnits": "Tool units"
+          "toolUnits": "Tool units",
+          "perTool": "Per tool"
         },
         "workshop": "Workshop",
         "running": "running",
@@ -327,7 +328,8 @@
         "empty": {
           "title": "No open session",
           "message": "A session starts when entering the workshop and ends with billing."
-        }
+        },
+        "toolTotal": "{{usages}}× · {{minutes}} min · {{units}} units"
       },
       "userList": {
         "subtitle": "{{count}} registered · {{inWorkshop}} in the workshop right now",

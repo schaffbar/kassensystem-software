@@ -572,18 +572,20 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      „Tag entfernen …“; wartend mit „Zuweisung anzeigen“; ohne Tag „RFID-Tag zuweisen …“), Einweisungen als Liste mit
      Bereich, Datum, Einweiser, Status und ⋯-Menü (Pausieren, Reaktivieren, Entziehen, Löschen – wie auf der
      Werkzeugseite), Gefahrenzone (bei offener Sitzung Hinweis und „Zur offenen Sitzung“ statt Löschen). Tab
-     Einweisungen: dieselben Einträge als Tabelle mit Anforderung. Tab Offene Sitzung: Werkstatt- und Werkzeugnutzungen
-     nach Startzeit („läuft“ statt Ende) und Zusammenfassung (Werkstattzeit, Werkstatt- und Werkzeug-Einheiten). Dialog
-     „Benutzer bearbeiten“: Person, Kontakt und Adresse in einem Formular, Zähler „N ungespeicherte Änderungen“,
-     Speichern erst mit Änderung; gespeichert werden nur die geänderten Teile. Dialog „RFID-Tag zuweisen“ in drei
-     Schritten (Art wählen als Auswahlkarten, Tag an das Lesegerät an der Theke halten, fertig): die Seite fragt die
-     wartende Zuweisung alle 2 Sekunden ab, der Dialog springt von selbst auf „Tag zugewiesen“ (Entscheidung
-     09.11.2026); geschlossen bleibt die Anfrage bestehen. Dialog „Sitzung beenden & abrechnen“ mit Kopf (Name,
-     eingecheckt um), Posten mit Zeit, Dauer und Einheiten. Bereich- und Anforderungs-Bausteine (`toolAreaKey`,
-     `certificationRequirementKey`, `certification-requirement-badge`) liegen jetzt in `shared/`, die Texte unter
-     `shared.toolAreas` / `shared.certificationRequirements`. Ohne Backend noch offen: Betrag und Zahlungsart beim
-     Abrechnen, Bestätigungsschritt „Sitzung abgeschlossen“, laufende Werkzeuge automatisch ausschalten, Tag ersetzen
-     (heute: entfernen, dann zuweisen), Tag-Anfrage abbrechen, beim Entfernen „freigeben oder deaktivieren“, Grund bei
+     Einweisungen: dieselben Einträge als Tabelle mit Anforderung. Tab Offene Sitzung: Zeitleiste pro Werkstattbesuch –
+     die Besuchszeile fett, darunter eingerückt die Werkzeuge, die in diesem Besuch gestartet wurden, nach Startzeit
+     statt nach Werkzeug gruppiert („läuft“ statt Ende); Zusammenfassung mit Werkstattzeit, Werkstatt- und
+     Werkzeug-Einheiten und „Pro Werkzeug“ (Anzahl, Minuten, Einheiten) (Entscheidung 11.11.2026). Dialog „Benutzer
+     bearbeiten“: Person, Kontakt und Adresse in einem Formular, Zähler „N ungespeicherte Änderungen“, Speichern erst
+     mit Änderung; gespeichert werden nur die geänderten Teile. Dialog „RFID-Tag zuweisen“ in drei Schritten (Art wählen
+     als Auswahlkarten, Tag an das Lesegerät an der Theke halten, fertig): die Seite fragt die wartende Zuweisung alle 2
+     Sekunden ab, der Dialog springt von selbst auf „Tag zugewiesen“ (Entscheidung 09.11.2026); geschlossen bleibt die
+     Anfrage bestehen. Dialog „Sitzung beenden & abrechnen“ mit Kopf (Name, eingecheckt um), Posten mit Zeit, Dauer und
+     Einheiten. Bereich- und Anforderungs-Bausteine (`toolAreaKey`, `certificationRequirementKey`,
+     `certification-requirement-badge`) liegen jetzt in `shared/`, die Texte unter `shared.toolAreas` /
+     `shared.certificationRequirements`. Ohne Backend noch offen: Betrag und Zahlungsart beim Abrechnen,
+     Bestätigungsschritt „Sitzung abgeschlossen“, laufende Werkzeuge automatisch ausschalten, Tag ersetzen (heute:
+     entfernen, dann zuweisen), Tag-Anfrage abbrechen, beim Entfernen „freigeben oder deaktivieren“, Grund bei
      Pausieren/Entziehen, Bestätigungshäkchen beim Löschen und das Löschen selbst bei vorhandenen Einweisungen
      (customer-README C-9), Live-Dauer im Banner. „Bearbeiten“, „RFID-Tag zuweisen …“ und „Sitzung beenden …“ gibt es
      vorerst nur auf der Detailseite, nicht im ⋯-Menü der Liste (Entscheidung 10.11.2026). Gefahrenzone auf allen
