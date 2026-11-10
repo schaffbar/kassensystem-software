@@ -39,18 +39,23 @@
         }
       },
       "closeSession": {
-        "title": "Sitzung beenden",
+        "title": "Sitzung beenden & abrechnen",
+        "subtitle": "{{name}} · eingecheckt um {{time}}",
         "message": "Die Sitzung wird mit diesen Summen abgerechnet und als bezahlt abgeschlossen. Das kann nicht rückgängig gemacht werden.",
-        "workshopTime": "Werkstattzeit",
-        "minutes": "Minuten",
+        "summary": "Zusammenfassung",
+        "item": "Posten",
+        "time": "Zeit",
+        "duration": "Dauer",
         "units": "Einheiten",
+        "workshop": "Werkstatt",
+        "now": "jetzt",
+        "minutes": "{{minutes}} min",
         "actions": {
-          "confirm": "Sitzung beenden",
-          "cancel": "Abbrechen"
+          "confirm": "Beenden & abrechnen"
         },
         "messages": {
           "noOpenSession": "Keine offene Sitzung für diesen Benutzer.",
-          "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
+          "runningUsage": "Abrechnen geht erst, wenn die Person am Ausgang ausgecheckt hat und kein Werkzeug mehr läuft."
         }
       }
     },
@@ -58,6 +63,16 @@
       "ACTIVE": "Aktiv",
       "PAUSED": "Pausiert",
       "REVOKED": "Entzogen"
+    },
+    "certificationRequirements": {
+      "YELLOW": "Einweisung empfohlen",
+      "RED": "Einweisung Pflicht"
+    },
+    "toolAreas": {
+      "HOLZ": "Holz",
+      "METALL": "Metall",
+      "KREATIV": "Kreativ",
+      "FABLAB": "FabLab"
     },
     "pageHeader": {
       "breadcrumbs": "Brotkrümelnavigation"
@@ -113,20 +128,24 @@
     "title": "Benutzer",
     "actions": {
       "addUser": "Benutzer hinzufügen",
-      "assignTempRfidTag": "Temporäres RFID-Tag zuweisen",
-      "assignFixedRfidTag": "Festes RFID-Tag zuweisen",
-      "unassignRfidTag": "RFID-Tag entfernen",
-      "closeSession": "Sitzung beenden",
-      "toolCertifications": {
-        "pause": "Einweisung pausieren",
-        "reactivate": "Einweisung reaktivieren",
-        "revoke": "Einweisung entziehen"
-      }
+      "closeSession": "Sitzung beenden & abrechnen"
+    },
+    "menu": {
+      "profile": "Profil öffnen",
+      "edit": "Bearbeiten",
+      "assignRfidTag": "RFID-Tag zuweisen …",
+      "closeSession": "Sitzung beenden …",
+      "delete": "Benutzer löschen …"
     },
     "dialogs": {
       "addNewUser": {
         "title": "Neuen Benutzer hinzufügen",
         "subtitle": "Alle Felder ohne „optional“ sind Pflicht.",
+        "duplicate": "Es gibt bereits {{name}} ({{email}}). Ist es dieselbe Person?",
+        "openProfile": "Profil öffnen",
+        "confirm": "Benutzer hinzufügen"
+      },
+      "userForm": {
         "headers": {
           "contact": "Kontakt",
           "billingAddress": "Rechnungsadresse"
@@ -134,13 +153,14 @@
         "optional": "(optional)",
         "dateOfBirthPlaceholder": "TT.MM.JJJJ",
         "checkOneField": "Bitte 1 Feld prüfen",
-        "checkFields": "Bitte {{count}} Felder prüfen",
-        "duplicate": "Es gibt bereits {{name}} ({{email}}). Ist es dieselbe Person?",
-        "openProfile": "Profil öffnen",
-        "confirm": "Benutzer hinzufügen"
+        "checkFields": "Bitte {{count}} Felder prüfen"
       },
       "editUser": {
-        "title": "Benutzer bearbeiten"
+        "title": "Benutzer bearbeiten",
+        "subtitle": "{{name}} · registriert am {{date}}",
+        "noChanges": "Keine Änderungen",
+        "oneChange": "1 ungespeicherte Änderung",
+        "changes": "{{count}} ungespeicherte Änderungen"
       },
       "deleteUser": {
         "title": "Benutzer löschen",
@@ -150,49 +170,78 @@
       },
       "certifications": {
         "pauseCertification": {
-          "title": "Einweisung pausieren",
-          "message": "Sind Sie sicher, dass Sie diese Einweisung pausieren möchten?",
+          "title": "Einweisung pausieren?",
+          "message": "Die Person kann das Werkzeug vorübergehend nicht freischalten. Die Einweisung bleibt erhalten und kann jederzeit reaktiviert werden.",
           "confirm": "Einweisung pausieren"
         },
         "reactivateCertification": {
-          "title": "Einweisung reaktivieren",
-          "message": "Sind Sie sicher, dass Sie diese Einweisung reaktivieren möchten?",
+          "title": "Einweisung reaktivieren?",
+          "message": "Die Person kann das Werkzeug sofort wieder freischalten.",
           "confirm": "Einweisung reaktivieren"
         },
         "revokeCertification": {
-          "title": "Einweisung entziehen",
-          "message": "Sind Sie sicher, dass Sie diese Einweisung entziehen möchten?",
+          "title": "Einweisung entziehen?",
+          "message": "Die Person darf das Werkzeug nicht mehr nutzen. Für eine erneute Nutzung ist eine neue Einweisung nötig.",
           "confirm": "Einweisung entziehen"
+        },
+        "deleteCertification": {
+          "title": "Einweisung löschen?",
+          "message": "Nur für Fehleinträge: Der Eintrag wird vollständig entfernt. Wer das Werkzeug nicht mehr nutzen darf, bekommt die Einweisung besser entzogen.",
+          "confirm": "Einweisung löschen"
         }
       },
       "unassignRfidTag": {
-        "title": "RFID-Tag entfernen",
-        "message": "Sind Sie sicher, dass Sie den RFID-Tag dieses Benutzers entfernen möchten?",
-        "confirm": "RFID-Tag entfernen"
+        "title": "RFID-Tag entfernen?",
+        "message": "Der Tag wird wieder frei und kann jemand anderem zugewiesen werden.",
+        "confirm": "Tag entfernen"
+      },
+      "assignRfidTag": {
+        "title": "RFID-Tag zuweisen",
+        "subtitle": "für {{name}}",
+        "steps": {
+          "label": "Schritte",
+          "choose": "Art wählen",
+          "wait": "Tag auflegen",
+          "done": "Fertig"
+        },
+        "question": "Welche Art von Tag?",
+        "descriptions": {
+          "TEMPORARY": "Nur für diesen Besuch. Wird beim Gehen an der Theke zurückgegeben.",
+          "FIXED": "Gehört der Person dauerhaft, z. B. für Vereinsmitglieder und Stammgäste."
+        },
+        "confirm": "Weiter – Tag auflegen",
+        "waiting": {
+          "title": "{{type}} an das Lesegerät an der Theke halten",
+          "requesting": "Tag wird angefordert …",
+          "message": "Sobald der Tag erkannt wird, ist er {{name}} zugewiesen. Der Dialog kann geschlossen werden – die Anfrage bleibt bestehen."
+        },
+        "done": {
+          "title": "Tag zugewiesen",
+          "message": "gehört jetzt {{name}} ({{type}}).",
+          "close": "Fertig"
+        }
       }
     },
     "tables": {
       "openSession": {
-        "durationColumn": "Dauer (min)",
-        "unitsUsedColumn": "Einheiten",
-        "workshopUsage": {
-          "entryTimeColumn": "Eingangszeit",
-          "exitTimeColumn": "Ausgangszeit"
-        },
-        "toolUsage": {
-          "startTimeColumn": "Startzeit",
-          "endTimeColumn": "Endzeit"
-        }
+        "itemColumn": "Posten",
+        "startColumn": "Start",
+        "endColumn": "Ende",
+        "durationColumn": "Dauer",
+        "unitsUsedColumn": "Einheiten"
       },
       "toolCertifications": {
         "toolNameColumn": "Werkzeug",
-        "statusColumn": "Status",
-        "certifiedAtColumn": "Eingewiesen am"
+        "requirementColumn": "Anforderung",
+        "certifiedAtColumn": "Eingewiesen am",
+        "certifiedByColumn": "Einweiser",
+        "statusColumn": "Status"
       }
     },
     "tabGroups": {
       "userDetails": {
-        "detailsTab": "Details",
+        "overviewTab": "Übersicht",
+        "certificationsTab": "Einweisungen",
         "openSessionTab": "Offene Sitzung"
       }
     },
@@ -201,45 +250,84 @@
         "clubMember": "Vereinsmitglied",
         "rfidTags": {
           "fixed": "Fest",
-          "temporary": "Leihtag",
-          "waiting": "Warten",
-          "noRfidTag": "Kein RFID-Tag"
+          "temporary": "Leihtag"
         },
         "ageGroup": {
           "under_16": "Unter 16",
           "under_18": "Unter 18",
           "adult": "Erwachsener"
         }
-      },
-      "openSession": {
-        "toolUsage": {
-          "active": "Aktiv"
-        }
       }
     },
     "pages": {
       "userDetails": {
-        "headers": {
-          "contactInformation": "Kontaktinformationen",
+        "registeredOn": "Registriert am {{date}}",
+        "session": {
+          "label": "Laufende Sitzung",
+          "inWorkshopSince": "In der Werkstatt seit {{time}}",
+          "runningTool": "Nutzt gerade {{tool}} seit {{time}}",
+          "checkedOut": "Ausgecheckt um {{time}} – bereit zum Abrechnen",
+          "closeAfterCheckout": "Abrechnen geht erst nach dem Auschecken am Ausgang.",
+          "closeAfterToolStopped": "Abrechnen geht erst, wenn kein Werkzeug mehr läuft."
+        },
+        "contact": {
+          "title": "Kontakt & Adresse",
           "address": "Adresse",
+          "bornOn": "Geboren am {{date}}"
+        },
+        "rfidTag": {
+          "title": "RFID-Tag",
+          "assignedOn": "zugewiesen am {{date}}",
+          "holdToReader": "an das Lesegerät an der Theke halten",
+          "showAssignment": "Zuweisung anzeigen",
+          "none": "Kein RFID-Tag zugewiesen.",
+          "assign": "RFID-Tag zuweisen …",
+          "unassign": "Tag entfernen …"
+        },
+        "headers": {
           "toolCertifications": "Einweisungen"
         },
-        "messages": {
-          "noCertifications": "Keine Einweisungen für diesen Benutzer vorhanden."
+        "certifications": {
+          "counts": {
+            "ACTIVE": "{{count}} aktiv",
+            "PAUSED": "{{count}} pausiert",
+            "REVOKED": "{{count}} entzogen"
+          },
+          "certifiedOn": "eingewiesen am {{date}}",
+          "certifiedOnBy": "eingewiesen am {{date}} von {{name}}",
+          "actions": {
+            "pause": "Pausieren …",
+            "reactivate": "Reaktivieren …",
+            "revoke": "Entziehen …",
+            "delete": "Löschen …"
+          },
+          "empty": {
+            "title": "Noch keine Einweisungen",
+            "message": "Einweisungen tragen die Einweiser auf der Seite des Werkzeugs ein."
+          }
+        },
+        "hints": {
+          "dangerZone": "Löscht das Profil dauerhaft. Das lässt sich nicht rückgängig machen.",
+          "dangerZoneOpenSession": "Solange eine Sitzung offen ist, lässt sich der Benutzer nicht löschen. Zuerst die Sitzung beenden und abrechnen."
+        },
+        "actions": {
+          "openSession": "Zur offenen Sitzung"
         }
       },
       "openSession": {
         "headers": {
+          "usages": "Werkstatt und Werkzeuge in dieser Sitzung",
+          "summary": "Zusammenfassung",
           "workshopTime": "Werkstattzeit",
-          "toolUsage": "Werkzeugnutzung",
-          "total": "Werkstattzeit gesamt",
-          "totalDurationSuffix": "Minuten",
-          "totalUnitsSuffix": "Einheiten"
+          "workshopUnits": "Werkstatt-Einheiten",
+          "toolUnits": "Werkzeug-Einheiten"
         },
-        "messages": {
-          "noSlots": "Keine Zeitslots für diese Sitzung verfügbar.",
-          "noOpenSession": "Keine offene Sitzung für diesen Benutzer.",
-          "runningUsage": "Die Sitzung kann erst beendet werden, wenn alle Werkstatt- und Werkzeugnutzungen beendet sind."
+        "workshop": "Werkstatt",
+        "running": "läuft",
+        "minutes": "{{minutes}} min",
+        "empty": {
+          "title": "Keine offene Sitzung",
+          "message": "Eine Sitzung beginnt beim Betreten der Werkstatt und endet mit dem Abrechnen."
         }
       },
       "userList": {
@@ -265,10 +353,6 @@
           "waiting": "Wartet auf Tag"
         },
         "inWorkshop": "In der Werkstatt",
-        "actions": {
-          "profile": "Profil öffnen",
-          "delete": "Benutzer löschen …"
-        },
         "empty": {
           "title": "Noch keine Benutzer",
           "message": "Neue Benutzer über „Benutzer hinzufügen“ anlegen."
@@ -394,16 +478,6 @@
       "SHELLY_1": "Shelly 1",
       "SHELLY_2": "Shelly 2",
       "SHELLY_PRO": "Shelly Pro"
-    },
-    "areas": {
-      "HOLZ": "Holz",
-      "METALL": "Metall",
-      "KREATIV": "Kreativ",
-      "FABLAB": "FabLab"
-    },
-    "certificationRequirements": {
-      "YELLOW": "Einweisung empfohlen",
-      "RED": "Einweisung Pflicht"
     },
     "tabGroups": {
       "toolDetails": {

@@ -1,0 +1,56 @@
+@let assignment = userRfidTagCard().assignment;
+
+<div class="card-header">
+  <h2>{{ 'users.pages.userDetails.rfidTag.title' | translate }}</h2>
+</div>
+
+@if (assignment) {
+  @switch (assignment.status) {
+    @case (RfidTagAssignmentStatus.Assigned) {
+      <div class="tag assigned">
+        <mat-icon aria-hidden="true">sell</mat-icon>
+        <div class="tag-text">
+          <span class="tag-id mono">{{ assignment.rfidTagId ?? '' | rfidTagId }}</span>
+          <span class="tag-detail">
+            {{ assignment.assignmentType | rfidTagAssignmentTypeKey | translate }} ·
+            {{
+              'users.pages.userDetails.rfidTag.assignedOn'
+                | translate: { date: assignment.assignmentDate | date: 'mediumDate' | orDash }
+            }}
+          </span>
+        </div>
+      </div>
+      <div class="actions">
+        <button matButton="outlined" type="button" class="danger-button" (click)="unassignRfidTag()">
+          {{ 'users.pages.userDetails.rfidTag.unassign' | translate }}
+        </button>
+      </div>
+    }
+    @case (RfidTagAssignmentStatus.WaitingForAssignment) {
+      <div class="tag waiting">
+        <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+        <div class="tag-text">
+          <span class="tag-title">{{ 'users.pages.userList.rfidTag.waiting' | translate }}</span>
+          <span class="tag-detail">
+            {{ assignment.assignmentType | rfidTagAssignmentTypeKey | translate }} ·
+            {{ 'users.pages.userDetails.rfidTag.holdToReader' | translate }}
+          </span>
+        </div>
+      </div>
+      <div class="actions">
+        <button matButton="outlined" type="button" (click)="assignmentRequested.emit()">
+          {{ 'users.pages.userDetails.rfidTag.showAssignment' | translate }}
+        </button>
+      </div>
+    }
+    @default never;
+  }
+} @else {
+  <p class="no-tag">{{ 'users.pages.userDetails.rfidTag.none' | translate }}</p>
+  <div class="actions">
+    <button matButton="outlined" type="button" (click)="assignmentRequested.emit()">
+      <mat-icon>add</mat-icon>
+      {{ 'users.pages.userDetails.rfidTag.assign' | translate }}
+    </button>
+  </div>
+}

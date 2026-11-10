@@ -1,0 +1,78 @@
+@let session = userOpenSession();
+
+<section class="table-card usages" aria-labelledby="usages-title">
+  <h2 id="usages-title">{{ 'users.pages.openSession.headers.usages' | translate }}</h2>
+  <div class="table-scroll">
+    <table mat-table [dataSource]="session.usages">
+      <ng-container matColumnDef="item">
+        <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.itemColumn' | translate }}</th>
+        <td mat-cell *matCellDef="let usage" class="item">
+          @if (usage.kind === 'workshop') {
+            {{ 'users.pages.openSession.workshop' | translate }}
+          } @else {
+            {{ usage.toolName | orDash }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="startTime">
+        <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.startColumn' | translate }}</th>
+        <td mat-cell *matCellDef="let usage">{{ usage.startTime | date: 'shortTime' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="endTime">
+        <th mat-header-cell *matHeaderCellDef>{{ 'users.tables.openSession.endColumn' | translate }}</th>
+        <td mat-cell *matCellDef="let usage">
+          @if (usage.endTime) {
+            {{ usage.endTime | date: 'shortTime' }}
+          } @else {
+            <span class="running">{{ 'users.pages.openSession.running' | translate }}</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef class="number">
+          {{ 'users.tables.openSession.durationColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let usage" class="number">
+          @if (usage.durationInMinutes !== null) {
+            {{ 'users.pages.openSession.minutes' | translate: { minutes: usage.durationInMinutes } }}
+          } @else {
+            {{ null | orDash }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="units">
+        <th mat-header-cell *matHeaderCellDef class="number">
+          {{ 'users.tables.openSession.unitsUsedColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let usage" class="number">{{ usage.units | orDash }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+</section>
+
+<section class="card summary" aria-labelledby="summary-title">
+  <h2 id="summary-title">{{ 'users.pages.openSession.headers.summary' | translate }}</h2>
+  <dl>
+    <div>
+      <dt>{{ 'users.pages.openSession.headers.workshopTime' | translate }}</dt>
+      <dd class="workshop-minutes">
+        {{ 'users.pages.openSession.minutes' | translate: { minutes: session.workshopMinutes } }}
+      </dd>
+    </div>
+    <div>
+      <dt>{{ 'users.pages.openSession.headers.workshopUnits' | translate }}</dt>
+      <dd class="workshop-units">{{ session.workshopUnits }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'users.pages.openSession.headers.toolUnits' | translate }}</dt>
+      <dd class="tool-units">{{ session.toolUnits }}</dd>
+    </div>
+  </dl>
+</section>

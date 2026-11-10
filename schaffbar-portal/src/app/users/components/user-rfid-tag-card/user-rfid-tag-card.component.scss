@@ -1,0 +1,65 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-header {
+  margin-bottom: 0;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+
+  mat-icon {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+
+  &.assigned mat-icon {
+    color: var(--accent-text);
+  }
+
+  &.waiting mat-icon {
+    color: var(--warn);
+  }
+}
+
+.tag-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tag-id {
+  font-size: 17px;
+  letter-spacing: 0.06em;
+}
+
+.tag-title {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.tag-detail {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.no-tag {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1,0 +1,49 @@
+@let session = userSessionBanner();
+
+<section class="banner" [attr.aria-label]="'users.pages.userDetails.session.label' | translate">
+  <div class="status">
+    <span class="dot" [class.pulse]="session.inWorkshop" aria-hidden="true"></span>
+    <div class="text">
+      <span class="title">
+        {{
+          'users.pages.userDetails.session.inWorkshopSince' | translate: { time: session.startTime | date: 'shortTime' }
+        }}
+      </span>
+      @if (session.runningTool; as tool) {
+        <span class="detail running-tool">
+          {{
+            'users.pages.userDetails.session.runningTool'
+              | translate: { tool: tool.name | orDash, time: tool.startTime | date: 'shortTime' }
+          }}
+        </span>
+      } @else if (session.checkedOutAt; as checkedOutAt) {
+        <span class="detail checked-out">
+          {{ 'users.pages.userDetails.session.checkedOut' | translate: { time: checkedOutAt | date: 'shortTime' } }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="action">
+    <button
+      class="close-button"
+      matButton="filled"
+      type="button"
+      [disabled]="!session.canClose"
+      [attr.aria-describedby]="session.canClose ? null : 'close-session-hint'"
+      (click)="closeRequested.emit()">
+      <mat-icon>logout</mat-icon>
+      {{ 'users.actions.closeSession' | translate }}
+    </button>
+    @if (!session.canClose) {
+      <span id="close-session-hint" class="hint">
+        {{
+          (session.inWorkshop
+            ? 'users.pages.userDetails.session.closeAfterCheckout'
+            : 'users.pages.userDetails.session.closeAfterToolStopped'
+          ) | translate
+        }}
+      </span>
+    }
+  </div>
+</section>

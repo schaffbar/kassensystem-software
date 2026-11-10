@@ -14,9 +14,9 @@ import { CertificationRequirement } from '../../../shared/models/certification-r
 import { ToolArea } from '../../../shared/models/tool-area';
 import { CreateToolCommand } from '../../tool.model';
 import { TOOL_DESCRIPTION_MAX_LENGTH, validateToolDescription, validateUniqueToolName } from '../../tool.validators';
-import { CertificationRequirementBadgeComponent } from '../certification-requirement-badge/certification-requirement-badge.component';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 
 // all tools – for the unique name check
 export interface ExistingToolViewModel {

@@ -1,81 +1,146 @@
-<div class="certifications-section">
-  <h3>{{ 'users.pages.userDetails.headers.toolCertifications' | translate }}</h3>
+@if (variant() === 'card') {
+  <div class="card-header list-header">
+    <h2>{{ 'users.pages.userDetails.headers.toolCertifications' | translate }}</h2>
+    @if (statusCounts().length > 0) {
+      <span class="status-counts">
+        @for (statusCount of statusCounts(); track statusCount.key; let last = $last) {
+          {{ statusCount.key | translate: { count: statusCount.count } }}
+          @if (!last) {
+            ·
+          }
+        }
+      </span>
+    }
+  </div>
+}
 
-  @if (certifications().length > 0) {
-    <div class="table-container">
-      <table mat-table [dataSource]="certifications()" class="mat-elevation-z8">
-        <ng-container matColumnDef="toolName">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'users.tables.toolCertifications.toolNameColumn' | translate }}
-          </th>
-          <td mat-cell *matCellDef="let cert">{{ cert.toolName | orDash }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'users.tables.toolCertifications.statusColumn' | translate }}
-          </th>
-          <td mat-cell *matCellDef="let cert">
-            <schbar-certification-status-badge [status]="cert.status" />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="certifiedAt">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'users.tables.toolCertifications.certifiedAtColumn' | translate }}
-          </th>
-          <td mat-cell *matCellDef="let cert">{{ cert.certifiedAt | date: 'mediumDate' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>{{ 'shared.table.actionsColumn' | translate }}</th>
-          <td mat-cell *matCellDef="let row">
-            @let cert = asCertification(row);
-            @switch (cert.status) {
-              @case (CertificationStatus.Active) {
-                <button
-                  class="danger-button"
-                  matIconButton
-                  [title]="'users.actions.toolCertifications.pause' | translate"
-                  (click)="pauseCertification(cert)">
-                  <mat-icon>pause_circle</mat-icon>
-                </button>
-                <button
-                  class="danger-button"
-                  matIconButton
-                  [title]="'users.actions.toolCertifications.revoke' | translate"
-                  (click)="revokeCertification(cert)">
-                  <mat-icon>block</mat-icon>
-                </button>
-              }
-              @case (CertificationStatus.Paused) {
-                <button
-                  matIconButton
-                  [title]="'users.actions.toolCertifications.reactivate' | translate"
-                  (click)="reactivateCertification(cert)">
-                  <mat-icon>play_circle</mat-icon>
-                </button>
-                <button
-                  class="danger-button"
-                  matIconButton
-                  [title]="'users.actions.toolCertifications.revoke' | translate"
-                  (click)="revokeCertification(cert)">
-                  <mat-icon>block</mat-icon>
-                </button>
-              }
-              @case (CertificationStatus.Revoked) {
-                <!-- a revoked certification has no actions -->
-              }
-              @default never;
+@if (rows().length === 0) {
+  <schbar-empty-state
+    icon="verified_user"
+    [title]="'users.pages.userDetails.certifications.empty.title' | translate"
+    [message]="'users.pages.userDetails.certifications.empty.message' | translate" />
+} @else if (variant() === 'card') {
+  <ul class="certification-list">
+    @for (row of rows(); track row.toolId) {
+      <li>
+        <div class="certification-text">
+          <span class="tool-name">{{ row.toolName | orDash }}</span>
+          <span class="certification-detail">
+            @if (row.area) {
+              {{ row.area | toolAreaKey | translate }} ·
             }
-          </td>
-        </ng-container>
+            @if (row.certifierName) {
+              {{
+                'users.pages.userDetails.certifications.certifiedOnBy'
+                  | translate: { date: row.certifiedAt | date: 'mediumDate', name: row.certifierName }
+              }}
+            } @else {
+              {{
+                'users.pages.userDetails.certifications.certifiedOn'
+                  | translate: { date: row.certifiedAt | date: 'mediumDate' }
+              }}
+            }
+          </span>
+        </div>
+        <schbar-certification-status-badge [status]="row.status" />
+        <ng-container *ngTemplateOutlet="rowMenu; context: { $implicit: row }" />
+      </li>
+    }
+  </ul>
+} @else {
+  <div class="table-scroll">
+    <table mat-table [dataSource]="rows()">
+      <ng-container matColumnDef="tool">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'users.tables.toolCertifications.toolNameColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="tool-cell">
+            <span class="tool-name">{{ row.toolName | orDash }}</span>
+            @if (row.area) {
+              <span class="certification-detail">{{ row.area | toolAreaKey | translate }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    </div>
-  } @else {
-    <p>{{ 'users.pages.userDetails.messages.noCertifications' | translate }}</p>
-  }
-</div>
+      <ng-container matColumnDef="requirement">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'users.tables.toolCertifications.requirementColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          @if (row.certificationRequirement) {
+            <schbar-certification-requirement-badge [certificationRequirement]="row.certificationRequirement" />
+          } @else {
+            {{ null | orDash }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="certifiedAt">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'users.tables.toolCertifications.certifiedAtColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let row" class="secondary">{{ row.certifiedAt | date: 'mediumDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="certifiedBy">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'users.tables.toolCertifications.certifiedByColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let row" class="secondary">{{ row.certifierName | orDash }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'users.tables.toolCertifications.statusColumn' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <schbar-certification-status-badge [status]="row.status" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>
+          <span class="cdk-visually-hidden">{{ 'shared.table.actionsColumn' | translate }}</span>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <ng-container *ngTemplateOutlet="rowMenu; context: { $implicit: row }" />
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+}
+
+<ng-template #rowMenu let-row>
+  <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: row.toolName ?? '' }">
+    @if (row.canPause) {
+      <button mat-menu-item type="button" (click)="pauseToolCertification(row)">
+        <mat-icon>pause_circle</mat-icon>
+        <span>{{ 'users.pages.userDetails.certifications.actions.pause' | translate }}</span>
+      </button>
+    }
+    @if (row.canReactivate) {
+      <button mat-menu-item type="button" (click)="reactivateToolCertification(row)">
+        <mat-icon>play_circle</mat-icon>
+        <span>{{ 'users.pages.userDetails.certifications.actions.reactivate' | translate }}</span>
+      </button>
+    }
+    @if (row.canPause || row.canReactivate) {
+      <mat-divider />
+    }
+    @if (row.canRevoke) {
+      <button mat-menu-item type="button" class="danger-menu-item" (click)="revokeToolCertification(row)">
+        <mat-icon>block</mat-icon>
+        <span>{{ 'users.pages.userDetails.certifications.actions.revoke' | translate }}</span>
+      </button>
+    }
+    <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteToolCertification(row)">
+      <mat-icon>delete</mat-icon>
+      <span>{{ 'users.pages.userDetails.certifications.actions.delete' | translate }}</span>
+    </button>
+  </schbar-row-menu>
+</ng-template>

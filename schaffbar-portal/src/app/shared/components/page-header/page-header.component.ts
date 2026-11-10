@@ -24,5 +24,7 @@ export class PageHeaderComponent {
   readonly subtitle = input<string | null>(null);
   // Material icon in a navy tile in front of the title (detail pages)
   readonly icon = input<string | null>(null);
+  // initials in a round navy avatar instead of the icon (a person)
+  readonly avatar = input<string | null>(null);
   readonly breadcrumbs = input<BreadcrumbViewModel[]>([]);
 }

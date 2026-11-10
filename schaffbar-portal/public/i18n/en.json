@@ -39,18 +39,23 @@
         }
       },
       "closeSession": {
-        "title": "Close session",
+        "title": "Close & bill session",
+        "subtitle": "{{name}} · checked in at {{time}}",
         "message": "The session will be billed with these totals and closed as paid. This cannot be undone.",
-        "workshopTime": "Workshop time",
-        "minutes": "Minutes",
+        "summary": "Summary",
+        "item": "Item",
+        "time": "Time",
+        "duration": "Duration",
         "units": "Units",
+        "workshop": "Workshop",
+        "now": "now",
+        "minutes": "{{minutes}} min",
         "actions": {
-          "confirm": "Close session",
-          "cancel": "Cancel"
+          "confirm": "Close & bill"
         },
         "messages": {
           "noOpenSession": "No open session for this user.",
-          "runningUsage": "The session can only be closed once all workshop and tool usages have ended."
+          "runningUsage": "Billing is possible once the person has checked out at the exit and no tool is running."
         }
       }
     },
@@ -58,6 +63,16 @@
       "ACTIVE": "Active",
       "PAUSED": "Paused",
       "REVOKED": "Revoked"
+    },
+    "certificationRequirements": {
+      "YELLOW": "Certification recommended",
+      "RED": "Certification required"
+    },
+    "toolAreas": {
+      "HOLZ": "Wood",
+      "METALL": "Metal",
+      "KREATIV": "Creative",
+      "FABLAB": "FabLab"
     },
     "pageHeader": {
       "breadcrumbs": "Breadcrumbs"
@@ -113,20 +128,24 @@
     "title": "Users",
     "actions": {
       "addUser": "Add User",
-      "assignTempRfidTag": "Assign Temporary RFID Tag",
-      "assignFixedRfidTag": "Assign Fixed RFID Tag",
-      "unassignRfidTag": "Unassign RFID Tag",
-      "closeSession": "Close Session",
-      "toolCertifications": {
-        "pause": "Pause Certification",
-        "reactivate": "Reactivate Certification",
-        "revoke": "Revoke Certification"
-      }
+      "closeSession": "Close & bill session"
+    },
+    "menu": {
+      "profile": "Open profile",
+      "edit": "Edit",
+      "assignRfidTag": "Assign RFID tag …",
+      "closeSession": "Close session …",
+      "delete": "Delete user …"
     },
     "dialogs": {
       "addNewUser": {
         "title": "Add New User",
         "subtitle": "All fields without “optional” are required.",
+        "duplicate": "There is already {{name}} ({{email}}). Is it the same person?",
+        "openProfile": "Open profile",
+        "confirm": "Add User"
+      },
+      "userForm": {
         "headers": {
           "contact": "Contact",
           "billingAddress": "Billing address"
@@ -134,13 +153,14 @@
         "optional": "(optional)",
         "dateOfBirthPlaceholder": "DD.MM.YYYY",
         "checkOneField": "Please check 1 field",
-        "checkFields": "Please check {{count}} fields",
-        "duplicate": "There is already {{name}} ({{email}}). Is it the same person?",
-        "openProfile": "Open profile",
-        "confirm": "Add User"
+        "checkFields": "Please check {{count}} fields"
       },
       "editUser": {
-        "title": "Edit User"
+        "title": "Edit user",
+        "subtitle": "{{name}} · registered on {{date}}",
+        "noChanges": "No changes",
+        "oneChange": "1 unsaved change",
+        "changes": "{{count}} unsaved changes"
       },
       "deleteUser": {
         "title": "Delete User",
@@ -150,50 +170,79 @@
       },
       "certifications": {
         "pauseCertification": {
-          "title": "Pause Certification",
-          "message": "Are you sure you want to pause this certification?",
-          "confirm": "Pause Certification"
+          "title": "Pause certification?",
+          "message": "The person temporarily cannot unlock the tool. The certification is kept and can be reactivated at any time.",
+          "confirm": "Pause certification"
         },
         "reactivateCertification": {
-          "title": "Reactivate Certification",
-          "message": "Are you sure you want to reactivate this certification?",
-          "confirm": "Reactivate Certification"
+          "title": "Reactivate certification?",
+          "message": "The person can unlock the tool again right away.",
+          "confirm": "Reactivate certification"
         },
         "revokeCertification": {
-          "title": "Revoke Certification",
-          "message": "Are you sure you want to revoke this certification?",
-          "confirm": "Revoke Certification"
+          "title": "Revoke certification?",
+          "message": "The person may no longer use the tool. Using it again requires a new certification.",
+          "confirm": "Revoke certification"
+        },
+        "deleteCertification": {
+          "title": "Delete certification?",
+          "message": "Only for wrong entries: the entry is removed completely. Someone who may no longer use the tool should have the certification revoked instead.",
+          "confirm": "Delete certification"
         }
       },
       "unassignRfidTag": {
-        "title": "Unassign RFID Tag",
-        "message": "Are you sure you want to unassign the RFID tag of this user?",
-        "confirm": "Unassign RFID Tag"
+        "title": "Remove RFID tag?",
+        "message": "The tag becomes free again and can be assigned to someone else.",
+        "confirm": "Remove tag"
+      },
+      "assignRfidTag": {
+        "title": "Assign RFID tag",
+        "subtitle": "for {{name}}",
+        "steps": {
+          "label": "Steps",
+          "choose": "Choose type",
+          "wait": "Hold tag",
+          "done": "Done"
+        },
+        "question": "Which type of tag?",
+        "descriptions": {
+          "TEMPORARY": "Only for this visit. Returned at the counter when leaving.",
+          "FIXED": "Belongs to the person permanently, e.g. for club members and regulars."
+        },
+        "confirm": "Next – hold tag",
+        "waiting": {
+          "title": "Hold the {{type}} to the reader at the counter",
+          "requesting": "Requesting tag …",
+          "message": "As soon as the tag is recognized, it is assigned to {{name}}. The dialog can be closed – the request stays active."
+        },
+        "done": {
+          "title": "Tag assigned",
+          "message": "now belongs to {{name}} ({{type}}).",
+          "close": "Done"
+        }
       }
     },
     "tables": {
       "openSession": {
-        "durationColumn": "Duration (min)",
-        "unitsUsedColumn": "Units",
-        "workshopUsage": {
-          "entryTimeColumn": "Entry Time",
-          "exitTimeColumn": "Exit Time"
-        },
-        "toolUsage": {
-          "startTimeColumn": "Start Time",
-          "endTimeColumn": "End Time"
-        }
+        "itemColumn": "Item",
+        "startColumn": "Start",
+        "endColumn": "End",
+        "durationColumn": "Duration",
+        "unitsUsedColumn": "Units"
       },
       "toolCertifications": {
         "toolNameColumn": "Tool",
-        "statusColumn": "Status",
-        "certifiedAtColumn": "Certified At"
+        "requirementColumn": "Requirement",
+        "certifiedAtColumn": "Certified on",
+        "certifiedByColumn": "Instructor",
+        "statusColumn": "Status"
       }
     },
     "tabGroups": {
       "userDetails": {
-        "detailsTab": "Details",
-        "openSessionTab": "Open Session"
+        "overviewTab": "Overview",
+        "certificationsTab": "Certifications",
+        "openSessionTab": "Open session"
       }
     },
     "chips": {
@@ -201,45 +250,84 @@
         "clubMember": "Club Member",
         "rfidTags": {
           "fixed": "Fixed",
-          "temporary": "Loan tag",
-          "waiting": "Waiting",
-          "noRfidTag": "No RFID Tag"
+          "temporary": "Loan tag"
         },
         "ageGroup": {
           "under_16": "Under 16",
           "under_18": "Under 18",
           "adult": "Adult"
         }
-      },
-      "openSession": {
-        "toolUsage": {
-          "active": "Active"
-        }
       }
     },
     "pages": {
       "userDetails": {
-        "headers": {
-          "contactInformation": "Contact Information",
-          "address": "Address",
-          "toolCertifications": "Tool Certifications"
+        "registeredOn": "Registered on {{date}}",
+        "session": {
+          "label": "Current session",
+          "inWorkshopSince": "In the workshop since {{time}}",
+          "runningTool": "Using {{tool}} since {{time}}",
+          "checkedOut": "Checked out at {{time}} – ready to bill",
+          "closeAfterCheckout": "Billing is possible after checking out at the exit.",
+          "closeAfterToolStopped": "Billing is possible once no tool is running."
         },
-        "messages": {
-          "noCertifications": "No certifications for this user."
+        "contact": {
+          "title": "Contact & address",
+          "address": "Address",
+          "bornOn": "Born on {{date}}"
+        },
+        "rfidTag": {
+          "title": "RFID tag",
+          "assignedOn": "assigned on {{date}}",
+          "holdToReader": "hold it to the reader at the counter",
+          "showAssignment": "Show assignment",
+          "none": "No RFID tag assigned.",
+          "assign": "Assign RFID tag …",
+          "unassign": "Remove tag …"
+        },
+        "headers": {
+          "toolCertifications": "Certifications"
+        },
+        "certifications": {
+          "counts": {
+            "ACTIVE": "{{count}} active",
+            "PAUSED": "{{count}} paused",
+            "REVOKED": "{{count}} revoked"
+          },
+          "certifiedOn": "certified on {{date}}",
+          "certifiedOnBy": "certified on {{date}} by {{name}}",
+          "actions": {
+            "pause": "Pause …",
+            "reactivate": "Reactivate …",
+            "revoke": "Revoke …",
+            "delete": "Delete …"
+          },
+          "empty": {
+            "title": "No certifications yet",
+            "message": "Instructors add certifications on the page of the tool."
+          }
+        },
+        "hints": {
+          "dangerZone": "Deletes the profile permanently. This cannot be undone.",
+          "dangerZoneOpenSession": "The user cannot be deleted while a session is open. Close and bill the session first."
+        },
+        "actions": {
+          "openSession": "Go to open session"
         }
       },
       "openSession": {
         "headers": {
-          "workshopTime": "Workshop Time",
-          "toolUsage": "Tool Usage",
-          "total": "Workshop Time Total",
-          "totalDurationSuffix": "Minutes",
-          "totalUnitsSuffix": "Units"
+          "usages": "Workshop and tools in this session",
+          "summary": "Summary",
+          "workshopTime": "Workshop time",
+          "workshopUnits": "Workshop units",
+          "toolUnits": "Tool units"
         },
-        "messages": {
-          "noSlots": "No slots available for this session.",
-          "noOpenSession": "No open session for this user.",
-          "runningUsage": "The session can only be closed once all workshop and tool usages have ended."
+        "workshop": "Workshop",
+        "running": "running",
+        "minutes": "{{minutes}} min",
+        "empty": {
+          "title": "No open session",
+          "message": "A session starts when entering the workshop and ends with billing."
         }
       },
       "userList": {
@@ -265,10 +353,6 @@
           "waiting": "Waiting for tag"
         },
         "inWorkshop": "In the workshop",
-        "actions": {
-          "profile": "Open profile",
-          "delete": "Delete user …"
-        },
         "empty": {
           "title": "No users yet",
           "message": "Add new users with “Add user”."
@@ -394,16 +478,6 @@
       "SHELLY_1": "Shelly 1",
       "SHELLY_2": "Shelly 2",
       "SHELLY_PRO": "Shelly Pro"
-    },
-    "areas": {
-      "HOLZ": "Wood",
-      "METALL": "Metal",
-      "KREATIV": "Creative",
-      "FABLAB": "FabLab"
-    },
-    "certificationRequirements": {
-      "YELLOW": "Certification recommended",
-      "RED": "Certification required"
     },
     "tabGroups": {
       "toolDetails": {

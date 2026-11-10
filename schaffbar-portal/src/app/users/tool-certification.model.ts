@@ -9,6 +9,18 @@ export interface ToolCertification {
   certifiedBy: string | null;
 }
 
+export function canPauseToolCertification(status: ToolCertificationStatus): boolean {
+  return status === ToolCertificationStatus.Active;
+}
+
+export function canReactivateToolCertification(status: ToolCertificationStatus): boolean {
+  return status === ToolCertificationStatus.Paused;
+}
+
+export function canRevokeToolCertification(status: ToolCertificationStatus): boolean {
+  return status !== ToolCertificationStatus.Revoked;
+}
+
 // ----------------------------------------------------------------------------
 // commands
 
@@ -23,6 +35,11 @@ export interface ReactivateToolCertificationCommand {
 }
 
 export interface RevokeToolCertificationCommand {
+  userId: string;
+  toolId: string;
+}
+
+export interface DeleteToolCertificationCommand {
   userId: string;
   toolId: string;
 }

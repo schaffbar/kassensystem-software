@@ -8,8 +8,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
 import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
-import { CertificationRequirementBadgeComponent } from '../certification-requirement-badge/certification-requirement-badge.component';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 
 export interface ToolDetailInfoViewModel {
   description: string | null;

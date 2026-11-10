@@ -1,0 +1,37 @@
+@if (detailsStore.user(); as user) {
+  <div class="overview">
+    <div class="side">
+      <schbar-user-contact-card [userContactCard]="user" (editRequested)="editUser()" />
+      @if (rfidTagCard(); as card) {
+        <schbar-user-rfid-tag-card
+          [userRfidTagCard]="card"
+          (assignmentRequested)="assignRfidTag()"
+          (rfidTagUnassigned)="unassignRfidTag($event)" />
+      }
+    </div>
+
+    <div class="main">
+      <schbar-user-tool-certifications
+        variant="card"
+        [certifications]="certificationRows()"
+        (certificationPaused)="pauseToolCertification($event)"
+        (certificationReactivated)="reactivateToolCertification($event)"
+        (certificationRevoked)="revokeToolCertification($event)"
+        (certificationDeleted)="deleteToolCertification($event)" />
+
+      @if (detailsStore.canDeleteUser()) {
+        <schbar-danger-zone [message]="'users.pages.userDetails.hints.dangerZone' | translate">
+          <button matButton="outlined" type="button" class="danger-button" (click)="deleteUser()">
+            {{ 'users.menu.delete' | translate }}
+          </button>
+        </schbar-danger-zone>
+      } @else {
+        <schbar-danger-zone [message]="'users.pages.userDetails.hints.dangerZoneOpenSession' | translate">
+          <button matButton="outlined" type="button" (click)="openSessionRequested.emit()">
+            {{ 'users.pages.userDetails.actions.openSession' | translate }}
+          </button>
+        </schbar-danger-zone>
+      }
+    </div>
+  </div>
+}

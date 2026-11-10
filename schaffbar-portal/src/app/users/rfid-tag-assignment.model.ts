@@ -10,6 +10,11 @@ export interface RfidTagAssignment {
   assignmentDate: Date | null;
 }
 
+// requested, but the tag has not been held to the reader at the counter yet
+export function isWaitingForRfidTag(assignment: RfidTagAssignment | null): boolean {
+  return assignment?.status === RfidTagAssignmentStatus.WaitingForAssignment;
+}
+
 // ----------------------------------------------------------------------------
 // commands
 

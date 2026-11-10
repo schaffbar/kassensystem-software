@@ -15,11 +15,11 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
-import { CertificationRequirementBadgeComponent } from '../../components/certification-requirement-badge/certification-requirement-badge.component';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { openUpdateToolForm } from './open-update-tool-form';
 import { DeleteToolCommand } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 import { ToolDetailTabCertificationsComponent } from './tool-detail-tab-certifications/tool-detail-tab-certifications.component';
 import { ToolDetailTabConfigurationComponent } from './tool-detail-tab-configuration/tool-detail-tab-configuration.component';
 import { ToolDetailTabInfoComponent } from './tool-detail-tab-info/tool-detail-tab-info.component';

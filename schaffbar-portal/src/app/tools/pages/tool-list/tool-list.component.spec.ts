@@ -129,7 +129,7 @@ describe('ToolListComponent', () => {
 
   describe('cards', () => {
     it('should group the tools by area, sorted by name', () => {
-      expect(texts('.section-title')).toEqual(['tools.areas.HOLZ · 2', 'tools.areas.FABLAB · 1']);
+      expect(texts('.section-title')).toEqual(['shared.toolAreas.HOLZ · 2', 'shared.toolAreas.FABLAB · 1']);
       expect(texts('.card-name')).toEqual(['Drechselbank', 'Kreissäge', 'Lasercutter']);
     });
 
@@ -223,10 +223,10 @@ describe('ToolListComponent', () => {
 
       expect(texts('.area-filter button')).toEqual([
         'tools.pages.toolList.areaFilter.all 3',
-        'tools.areas.HOLZ 2',
-        'tools.areas.METALL 0',
-        'tools.areas.KREATIV 0',
-        'tools.areas.FABLAB 1',
+        'shared.toolAreas.HOLZ 2',
+        'shared.toolAreas.METALL 0',
+        'shared.toolAreas.KREATIV 0',
+        'shared.toolAreas.FABLAB 1',
       ]);
     });
 

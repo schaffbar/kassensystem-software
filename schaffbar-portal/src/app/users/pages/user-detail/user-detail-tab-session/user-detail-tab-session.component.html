@@ -1,36 +1,9 @@
-@if (detailsStore.openSession(); as openSession) {
-  @if (openSession.workshopUsages.length > 0) {
-    <schbar-workshop-usage-summary class="workshop-usage-container" [workshopUsageSummary]="openSession" />
-
-    @if (openSession.toolUsageSummaries.length > 0) {
-      <div class="tool-usage-container">
-        <h2>{{ 'users.pages.openSession.headers.toolUsage' | translate }}</h2>
-
-        @for (summary of openSession.toolUsageSummaries; track summary.toolId) {
-          <schbar-tool-usage-summary [toolUsageSummary]="summary" />
-        }
-      </div>
-    }
-
-    <div class="close-session">
-      <button
-        class="close-button"
-        matButton="filled"
-        type="button"
-        [disabled]="detailsStore.hasRunningUsage() || detailsStore.closeWorkshopSession.isPending()"
-        (click)="closeWorkshopSession()">
-        {{ 'users.actions.closeSession' | translate }}
-      </button>
-      @if (detailsStore.hasRunningUsage()) {
-        <p class="running-usage-hint">
-          <mat-icon>info</mat-icon>
-          {{ 'users.pages.openSession.messages.runningUsage' | translate }}
-        </p>
-      }
-    </div>
-  } @else {
-    <p>{{ 'users.pages.openSession.messages.noSlots' | translate }}</p>
-  }
+@if (openSession(); as session) {
+  <schbar-user-open-session [userOpenSession]="session" />
 } @else {
-  <p>{{ 'users.pages.openSession.messages.noOpenSession' | translate }}</p>
+  <schbar-empty-state
+    class="card"
+    icon="event_available"
+    [title]="'users.pages.openSession.empty.title' | translate"
+    [message]="'users.pages.openSession.empty.message' | translate" />
 }

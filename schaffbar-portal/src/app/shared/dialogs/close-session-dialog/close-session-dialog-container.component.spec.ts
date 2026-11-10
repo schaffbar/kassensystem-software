@@ -43,6 +43,7 @@ describe('CloseSessionDialogContainerComponent', () => {
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CloseSessionDialogContainerComponent);
     fixture.componentRef.setInput('customerId', 'user-1');
+    fixture.componentRef.setInput('userName', 'Max Mustermann');
     // whenStable() would wait for the pending request forever
     fixture.detectChanges();
   });
@@ -66,14 +67,37 @@ describe('CloseSessionDialogContainerComponent', () => {
     expect(modal().isLoading()).toBe(false);
   });
 
-  it('should pass the session on as view model', async () => {
+  it('should pass the name and the session with its times on as view model', async () => {
+    await respond(session({ running: false }));
+
+    expect(modal().userName()).toBe('Max Mustermann');
+    expect(modal().viewModel()).toEqual({
+      startTime: new Date('2026-10-31T10:00:00Z'),
+      workshop: {
+        startTime: new Date('2026-10-31T10:00:00Z'),
+        endTime: new Date('2026-10-31T11:00:00Z'),
+        minutes: 60,
+        units: 10,
+      },
+      tools: [
+        {
+          toolId: 'tool-1',
+          name: 'Bandsäge',
+          startTime: new Date('2026-10-31T10:05:00Z'),
+          endTime: new Date('2026-10-31T10:36:00Z'),
+          minutes: 31,
+          units: 6,
+        },
+      ],
+      hasRunningUsage: false,
+    });
+  });
+
+  it('should pass a running stay on without end time', async () => {
     await respond(session({ running: true }));
 
-    expect(modal().viewModel()).toEqual({
-      workshop: { minutes: 60, units: 10 },
-      tools: [{ toolId: 'tool-1', name: 'Bandsäge', minutes: 31, units: 6 }],
-      hasRunningUsage: true,
-    });
+    expect(modal().viewModel()?.workshop.endTime).toBeNull();
+    expect(modal().viewModel()?.hasRunningUsage).toBe(true);
   });
 
   it('should pass null on when there is no open session', async () => {

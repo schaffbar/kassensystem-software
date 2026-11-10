@@ -1,0 +1,7 @@
+<schbar-user-tool-certifications
+  variant="table"
+  [certifications]="certificationRows()"
+  (certificationPaused)="pauseToolCertification($event)"
+  (certificationReactivated)="reactivateToolCertification($event)"
+  (certificationRevoked)="revokeToolCertification($event)"
+  (certificationDeleted)="deleteToolCertification($event)" />

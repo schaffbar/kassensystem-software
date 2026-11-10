@@ -37,6 +37,16 @@ export interface ToolUsage {
   unitsUsed: number | null;
 }
 
+// entered and not checked out at the exit yet
+export function isInWorkshop(session: WorkshopSession): boolean {
+  return session.workshopUsages.some((usage) => usage.exitTime === null);
+}
+
+// the backend closes a session only when nothing runs any more (WS-5) – so only after checking out at the exit
+export function canCloseWorkshopSession(session: WorkshopSession): boolean {
+  return !hasRunningUsage(session);
+}
+
 export function hasRunningUsage(session: WorkshopSession): boolean {
   return (
     session.workshopUsages.some((usage) => usage.exitTime === null) ||

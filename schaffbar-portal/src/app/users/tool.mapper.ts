@@ -8,5 +8,7 @@ export function toTool(apiModel: ToolApiModel): Tool {
   return {
     id: apiModel.id,
     name: apiModel.name,
+    area: apiModel.area,
+    certificationRequirement: apiModel.certificationRequirement,
   };
 }

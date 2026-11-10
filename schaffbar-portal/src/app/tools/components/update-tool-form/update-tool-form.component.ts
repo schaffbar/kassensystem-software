@@ -16,8 +16,8 @@ import { ToolArea } from '../../../shared/models/tool-area';
 import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
 import { UpdateToolCommand } from '../../tool.model';
 import { TOOL_DESCRIPTION_MAX_LENGTH, validateToolDescription, validateUniqueToolName } from '../../tool.validators';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
-import { CertificationRequirementBadgeComponent } from '../certification-requirement-badge/certification-requirement-badge.component';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 
 export interface UpdateToolViewModel {
   id: string;

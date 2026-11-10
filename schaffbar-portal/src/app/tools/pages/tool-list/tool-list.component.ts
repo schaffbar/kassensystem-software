@@ -27,11 +27,11 @@ import { ToggleChipComponent } from '../../../shared/components/toggle-chip/togg
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH, FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog-constants';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { CertificationRequirementBadgeComponent } from '../../components/certification-requirement-badge/certification-requirement-badge.component';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { NewToolDialogData, NewToolFormComponent } from '../../components/new-tool-form/new-tool-form.component';
 import { CreateToolCommand, DeleteToolCommand, isHardwareSetUp, ToolListItem } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
-import { ToolAreaKeyPipe } from '../../tool-area-key.pipe';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 import { WlanRelaisTypeKeyPipe } from '../../wlan-relais-type-key.pipe';
 
 const ALL_AREAS = 'all';
@@ -210,5 +210,5 @@ export class ToolListComponent {
 // helper
 
 function toAreaKey(area: ToolArea): string {
-  return `tools.areas.${area}`;
+  return `shared.toolAreas.${area}`;
 }

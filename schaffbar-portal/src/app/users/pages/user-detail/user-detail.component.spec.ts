@@ -1,19 +1,22 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 
-import { MatDialog } from '@angular/material/dialog';
+import { MatTabGroup } from '@angular/material/tabs';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AgeGroup } from '../../../shared/models/age-group';
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
-import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
-import { UserDetailHeaderComponent } from '../../components/user-detail-header/user-detail-header.component';
-import { UpdateUserCommand, User } from '../../user.model';
-import { UserDetailTabInfoComponent } from './user-detail-tab-info/user-detail-tab-info.component';
+import { WorkshopSessionStatus } from '../../../shared/models/workshop-session-status';
+import { UserSessionBannerComponent } from '../../components/user-session-banner/user-session-banner.component';
+import { RfidTagAssignment } from '../../rfid-tag-assignment.model';
+import { User } from '../../user.model';
+import { WorkshopSession } from '../../workshop-session.model';
+import { UserDetailDialogsService } from './user-detail-dialogs.service';
 import { UserDetailComponent } from './user-detail.component';
 import { UserDetailStore } from './user-detail.store';
 
@@ -24,7 +27,7 @@ describe('UserDetailComponent', () => {
     lastName: 'Mustermann',
     dateOfBirth: new Date(1990, 0, 31),
     ageGroup: AgeGroup.Adult,
-    clubMember: false,
+    clubMember: true,
     email: 'max@example.org',
     phone: null,
     address: {
@@ -34,100 +37,250 @@ describe('UserDetailComponent', () => {
       city: 'Berlin',
       country: 'Deutschland',
     },
-    createdAt: new Date('2026-01-01T10:00:00Z'),
-    updatedAt: new Date('2026-01-01T10:00:00Z'),
+    createdAt: new Date(2026, 0, 1),
+    updatedAt: new Date(2026, 0, 1),
   };
+  const assignment: RfidTagAssignment = {
+    id: 'a-1',
+    customerId: 'user-1',
+    rfidTagId: '04A31F9C',
+    assignmentType: RfidTagAssignmentType.Fixed,
+    status: RfidTagAssignmentStatus.Assigned,
+    assignmentDate: new Date(2026, 1, 3),
+  };
+  // checked in at 14:05, used the band saw until 14:31, checked out at 16:30
+  const session: WorkshopSession = {
+    id: 'session-1',
+    customerId: 'user-1',
+    startTime: new Date(2026, 10, 9, 14, 5),
+    closeTime: null,
+    status: WorkshopSessionStatus.Open,
+    workshopUsages: [
+      {
+        id: 'w-1',
+        entryTime: new Date(2026, 10, 9, 14, 5),
+        exitTime: new Date(2026, 10, 9, 16, 30),
+        durationInMinutes: 145,
+        unitsUsed: 3,
+      },
+    ],
+    totalWorkshopDurationInMinutes: 145,
+    totalWorkshopUnits: 3,
+    toolUsageSummaries: [
+      {
+        toolId: 'tool-1',
+        toolName: 'Bandsäge',
+        active: false,
+        totalDurationInMinutes: 26,
+        totalUnits: 1,
+        usages: [
+          {
+            id: 't-1',
+            startTime: new Date(2026, 10, 9, 14, 5),
+            endTime: new Date(2026, 10, 9, 14, 31),
+            durationInMinutes: 26,
+            unitsUsed: 1,
+          },
+        ],
+      },
+    ],
+  };
+
   let fixture: ComponentFixture<UserDetailComponent>;
-  let assignRfidTag: Mock;
-  let updateUser: Mock;
-  let openDialog: Mock;
+  let storeMock: {
+    isLoading: WritableSignal<boolean>;
+    hasLoadError: WritableSignal<boolean>;
+    user: WritableSignal<User | null>;
+    rfidTagAssignment: WritableSignal<RfidTagAssignment | null>;
+    openSession: WritableSignal<WorkshopSession | null>;
+    canCloseWorkshopSession: WritableSignal<boolean>;
+    canDeleteUser: WritableSignal<boolean>;
+    isWaitingForRfidTag: WritableSignal<boolean>;
+    toolCertifications: WritableSignal<[]>;
+    tools: WritableSignal<[]>;
+    userNames: WritableSignal<Map<string, string>>;
+    setUserId: Mock;
+    pollRfidTagAssignment: Mock;
+    reloadUser: Mock;
+  };
+  let dialogsMock: { editUser: Mock; assignRfidTag: Mock; closeWorkshopSession: Mock; deleteUser: Mock };
+
+  async function create(tab?: string): Promise<void> {
+    fixture = TestBed.createComponent(UserDetailComponent);
+    fixture.componentRef.setInput('id', 'user-1');
+    if (tab) fixture.componentRef.setInput('tab', tab);
+    await fixture.whenStable();
+  }
 
   beforeEach(async () => {
-    assignRfidTag = vi.fn();
-    updateUser = vi.fn();
-    openDialog = vi.fn();
-    const storeMock = {
+    storeMock = {
       isLoading: signal(false),
       hasLoadError: signal(false),
       user: signal(user),
-      rfidTagAssignment: signal(null),
-      // read by the tabs
+      rfidTagAssignment: signal(assignment),
+      openSession: signal(null),
+      canCloseWorkshopSession: signal(false),
+      canDeleteUser: signal(true),
+      isWaitingForRfidTag: signal(false),
       toolCertifications: signal([]),
       tools: signal([]),
-      openSession: signal(null),
+      userNames: signal(new Map()),
       setUserId: vi.fn(),
-      assignRfidTag,
-      updateUser,
+      pollRfidTagAssignment: vi.fn(),
+      reloadUser: vi.fn(),
     };
+    dialogsMock = { editUser: vi.fn(), assignRfidTag: vi.fn(), closeWorkshopSession: vi.fn(), deleteUser: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [UserDetailComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslateService(),
-        { provide: MatDialog, useValue: { open: openDialog } },
-      ],
+      providers: [provideZonelessChangeDetection(), provideTranslateService(), provideRouter([])],
     })
       .overrideComponent(UserDetailComponent, {
-        set: { providers: [{ provide: UserDetailStore, useValue: storeMock }] },
+        set: {
+          providers: [
+            { provide: UserDetailStore, useValue: storeMock },
+            { provide: UserDetailDialogsService, useValue: dialogsMock },
+          ],
+        },
       })
       .compileComponents();
+  });
 
-    fixture = TestBed.createComponent(UserDetailComponent);
-    fixture.componentRef.setInput('id', 'user-1');
+  afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
+
+  function query<T extends HTMLElement = HTMLElement>(selector: string): T | null {
+    return fixture.nativeElement.querySelector(selector);
+  }
+
+  function texts(selector: string): string[] {
+    return [...fixture.nativeElement.querySelectorAll(selector)].map((element: HTMLElement) =>
+      element.textContent!.replace(/\s+/g, ' ').trim(),
+    );
+  }
+
+  async function openMenu(): Promise<string[]> {
+    query('schbar-row-menu button')?.click();
     await fixture.whenStable();
+    return [...document.querySelectorAll('.mat-mdc-menu-item')].map((item) => item.textContent!.trim());
+  }
+
+  it('should load the user and follow a requested tag', async () => {
+    await create();
+
+    expect(storeMock.setUserId).toHaveBeenCalled();
+    expect(storeMock.pollRfidTagAssignment).toHaveBeenCalledWith(storeMock.isWaitingForRfidTag);
   });
 
-  it('should pass the user to the header and execute its commands', () => {
-    const header: UserDetailHeaderComponent = fixture.debugElement.query(
-      By.directive(UserDetailHeaderComponent),
+  it('should show name, initials and the badges in the header', async () => {
+    await create();
+
+    expect(query('h1')?.textContent).toBe('Max Mustermann');
+    expect(query('.avatar')?.textContent).toBe('MM');
+    expect(texts('schbar-status-badge')).toEqual([
+      'users.chips.userDetails.ageGroup.adult',
+      'verified users.chips.userDetails.clubMember',
+      'sell users.chips.userDetails.rfidTags.fixed · 04A3 1F9C',
+    ]);
+    expect(query('.registered')?.textContent?.trim()).toBe('users.pages.userDetails.registeredOn');
+  });
+
+  it('should show a waiting tag as warning and offer no tag while a tag is assigned', async () => {
+    storeMock.rfidTagAssignment.set({ ...assignment, status: RfidTagAssignmentStatus.WaitingForAssignment });
+    await create();
+
+    expect(texts('schbar-status-badge.tone-warn')).toEqual(['hourglass_top users.pages.userList.rfidTag.waiting']);
+    expect(await openMenu()).not.toContain('sellusers.menu.assignRfidTag');
+  });
+
+  it('should open the dialogs from the header and its menu', async () => {
+    storeMock.rfidTagAssignment.set(null);
+    storeMock.canCloseWorkshopSession.set(true);
+    await create();
+
+    query<HTMLButtonElement>('schbar-page-header .actions > button')?.click();
+    expect(dialogsMock.editUser).toHaveBeenCalledTimes(1);
+
+    expect(await openMenu()).toEqual([
+      'editusers.menu.edit',
+      'sellusers.menu.assignRfidTag',
+      'logoutusers.menu.closeSession',
+      'deleteusers.menu.delete',
+    ]);
+    const items = document.querySelectorAll<HTMLElement>('.mat-mdc-menu-item');
+    items[1].click();
+    items[2].click();
+    items[3].click();
+    expect(dialogsMock.assignRfidTag).toHaveBeenCalledTimes(1);
+    expect(dialogsMock.closeWorkshopSession).toHaveBeenCalledTimes(1);
+    expect(dialogsMock.deleteUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not offer to delete a user with an open session', async () => {
+    storeMock.canDeleteUser.set(false);
+    await create();
+
+    expect(await openMenu()).toEqual(['editusers.menu.edit']);
+  });
+
+  it('should show the banner only with an open session and close it from there', async () => {
+    await create();
+    expect(query('schbar-user-session-banner')).toBeNull();
+
+    storeMock.openSession.set(session);
+    await fixture.whenStable();
+    const banner: UserSessionBannerComponent = fixture.debugElement.query(
+      By.directive(UserSessionBannerComponent),
     ).componentInstance;
-    expect(header.userDetailHeader()).toBe(user);
-    expect(header.rfidTagAssignment()).toBeNull();
+    expect(banner.userSessionBanner()).toEqual({
+      startTime: session.startTime,
+      inWorkshop: false,
+      runningTool: null,
+      checkedOutAt: new Date(2026, 10, 9, 16, 30),
+      canClose: true,
+    });
 
-    header.rfidTagAssigned.emit({ userId: 'user-1', assignmentType: RfidTagAssignmentType.Fixed });
+    banner.closeRequested.emit();
+    expect(dialogsMock.closeWorkshopSession).toHaveBeenCalledTimes(1);
+  });
 
-    expect(assignRfidTag).toHaveBeenCalledExactlyOnceWith({
-      userId: 'user-1',
-      assignmentType: RfidTagAssignmentType.Fixed,
+  it('should show the running tool while the user is in the workshop', async () => {
+    const running = new Date(2026, 10, 9, 14, 40);
+    storeMock.openSession.set({
+      ...session,
+      workshopUsages: [{ ...session.workshopUsages[0], exitTime: null, durationInMinutes: null, unitsUsed: null }],
+      toolUsageSummaries: [
+        {
+          ...session.toolUsageSummaries[0],
+          active: true,
+          usages: [{ id: 't-2', startTime: running, endTime: null, durationInMinutes: null, unitsUsed: null }],
+        },
+      ],
+    });
+    await create();
+
+    const banner: UserSessionBannerComponent = fixture.debugElement.query(
+      By.directive(UserSessionBannerComponent),
+    ).componentInstance;
+    expect(banner.userSessionBanner()).toEqual({
+      startTime: session.startTime,
+      inWorkshop: true,
+      runningTool: { name: 'Bandsäge', startTime: running },
+      checkedOutAt: null,
+      canClose: false,
     });
   });
 
-  it('should render the info tab', () => {
-    expect(fixture.debugElement.query(By.directive(UserDetailTabInfoComponent))).not.toBeNull();
+  it('should open the session tab from the route', async () => {
+    await create('open-session');
+
+    expect(fixture.debugElement.query(By.directive(MatTabGroup)).componentInstance.selectedIndex).toBe(2);
   });
 
-  describe('update', () => {
-    const command: UpdateUserCommand = {
-      userId: 'user-1',
-      firstName: 'Maximilian',
-      lastName: 'Mustermann',
-      dateOfBirth: new Date(1990, 0, 31),
-      clubMember: true,
-    };
+  it('should reload everything', async () => {
+    await create();
 
-    function requestEdit(result: UpdateUserCommand | undefined): void {
-      openDialog.mockReturnValue({ afterClosed: () => of(result) });
-      const header: UserDetailHeaderComponent = fixture.debugElement.query(
-        By.directive(UserDetailHeaderComponent),
-      ).componentInstance;
-      header.editRequested.emit();
-    }
+    query<HTMLButtonElement>('button[aria-label="shared.actions.reload"]')?.click();
 
-    it('should open the form with the user and update the user', () => {
-      requestEdit(command);
-
-      expect(openDialog).toHaveBeenCalledExactlyOnceWith(
-        UpdateUserFormComponent,
-        expect.objectContaining({ data: { user }, disableClose: true }),
-      );
-      expect(updateUser).toHaveBeenCalledExactlyOnceWith(command);
-    });
-
-    it('should not update the user when the form is cancelled', () => {
-      requestEdit(undefined);
-
-      expect(updateUser).not.toHaveBeenCalled();
-    });
+    expect(storeMock.reloadUser).toHaveBeenCalledTimes(1);
   });
 });

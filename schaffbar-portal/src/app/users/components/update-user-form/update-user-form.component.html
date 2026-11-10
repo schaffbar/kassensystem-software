@@ -1,59 +1,179 @@
-<h2 mat-dialog-title>{{ 'users.dialogs.editUser.title' | translate }}</h2>
+<schbar-form-dialog-header
+  [title]="'users.dialogs.editUser.title' | translate"
+  [subtitle]="
+    'users.dialogs.editUser.subtitle'
+      | translate: { name: user.firstName + ' ' + user.lastName, date: user.createdAt | date: 'mediumDate' }
+  " />
 
 <form [formRoot]="userForm" (submit)="saveUser()">
   <mat-dialog-content>
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'users.shared.userProperties.firstName' | translate }}</mat-label>
-          <input id="firstName" matInput [formField]="userForm.firstName" />
+    @if (invalidFieldsCount(); as count) {
+      <p class="summary" role="alert">
+        <mat-icon aria-hidden="true">error</mat-icon>
+        {{
+          (count === 1 ? 'users.dialogs.userForm.checkOneField' : 'users.dialogs.userForm.checkFields')
+            | translate: { count }
+        }}
+      </p>
+    }
+
+    <div class="fields">
+      <div>
+        <label class="field-label" for="firstName">{{ 'users.shared.userProperties.firstName' | translate }}</label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input id="firstName" matInput autocomplete="given-name" [formField]="userForm.firstName" />
           <mat-error>
             <schbar-field-error [field]="userForm.firstName" label="users.shared.userProperties.firstName" />
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'users.shared.userProperties.lastName' | translate }}</mat-label>
-          <input id="lastName" matInput [formField]="userForm.lastName" />
+      <div>
+        <label class="field-label" for="lastName">{{ 'users.shared.userProperties.lastName' | translate }}</label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
+          <input id="lastName" matInput autocomplete="family-name" [formField]="userForm.lastName" />
           <mat-error>
             <schbar-field-error [field]="userForm.lastName" label="users.shared.userProperties.lastName" />
           </mat-error>
         </mat-form-field>
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-col">
-        <mat-form-field class="full-width">
-          <mat-label>{{ 'users.shared.userProperties.dateOfBirth' | translate }}</mat-label>
+      <div>
+        <label class="field-label" for="dateOfBirth">
+          {{ 'users.shared.userProperties.dateOfBirth' | translate }}
+        </label>
+        <mat-form-field class="full-width" subscriptSizing="dynamic">
           <input
             id="dateOfBirth"
             matInput
+            [placeholder]="'users.dialogs.userForm.dateOfBirthPlaceholder' | translate"
             [formField]="userForm.dateOfBirth"
             [min]="dateOfBirthLimits.min"
             [max]="dateOfBirthLimits.max"
             [matDatepicker]="picker" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker startView="multi-year" />
           <mat-error>
             <schbar-field-error [field]="userForm.dateOfBirth" label="users.shared.userProperties.dateOfBirth" />
           </mat-error>
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker startView="multi-year" />
         </mat-form-field>
       </div>
-      <div class="form-col">
-        <mat-checkbox [formField]="userForm.clubMember">
+      <div>
+        <!-- keeps the checkbox at the height of the fields next to it, which have a label above -->
+        <span class="field-label" aria-hidden="true">&nbsp;</span>
+        <mat-checkbox class="checkbox-card" [formField]="userForm.clubMember">
           {{ 'users.shared.userProperties.clubMember' | translate }}
         </mat-checkbox>
       </div>
     </div>
+
+    <fieldset>
+      <legend>{{ 'users.dialogs.userForm.headers.contact' | translate }}</legend>
+      <div class="fields">
+        <div>
+          <label class="field-label" for="email">{{ 'users.shared.userProperties.email' | translate }}</label>
+          <mat-form-field class="full-width" subscriptSizing="dynamic">
+            <input id="email" matInput type="email" autocomplete="email" [formField]="userForm.email" />
+            <mat-error>
+              <schbar-field-error [field]="userForm.email" label="users.shared.userProperties.email" />
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div>
+          <label class="field-label" for="phone">
+            {{ 'users.shared.userProperties.phone' | translate }}
+            <span class="optional">{{ 'users.dialogs.userForm.optional' | translate }}</span>
+          </label>
+          <mat-form-field class="full-width" subscriptSizing="dynamic">
+            <input id="phone" matInput type="tel" autocomplete="tel" [formField]="userForm.phone" />
+          </mat-form-field>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ 'users.dialogs.userForm.headers.billingAddress' | translate }}</legend>
+      <div class="address">
+        <div>
+          <label class="field-label" for="addressLine1">
+            {{ 'users.shared.userProperties.addressLine1' | translate }}
+          </label>
+          <mat-form-field class="full-width" subscriptSizing="dynamic">
+            <input id="addressLine1" matInput autocomplete="address-line1" [formField]="userForm.addressLine1" />
+            <mat-error>
+              <schbar-field-error [field]="userForm.addressLine1" label="users.shared.userProperties.addressLine1" />
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div>
+          <label class="field-label" for="addressLine2">
+            {{ 'users.shared.userProperties.addressLine2' | translate }}
+            <span class="optional">{{ 'users.dialogs.userForm.optional' | translate }}</span>
+          </label>
+          <mat-form-field class="full-width" subscriptSizing="dynamic">
+            <input id="addressLine2" matInput autocomplete="address-line2" [formField]="userForm.addressLine2" />
+          </mat-form-field>
+        </div>
+        <div class="city-fields">
+          <div>
+            <label class="field-label" for="postalCode">
+              {{ 'users.shared.userProperties.postalCode' | translate }}
+            </label>
+            <mat-form-field class="full-width" subscriptSizing="dynamic">
+              <input
+                id="postalCode"
+                matInput
+                inputmode="numeric"
+                autocomplete="postal-code"
+                [formField]="userForm.postalCode" />
+              <mat-hint align="end">{{ userForm.postalCode().value().length }} / {{ postalCodeLength }}</mat-hint>
+              <mat-error>
+                <schbar-field-error [field]="userForm.postalCode" label="users.shared.userProperties.postalCode" />
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <label class="field-label" for="city">{{ 'users.shared.userProperties.city' | translate }}</label>
+            <mat-form-field class="full-width" subscriptSizing="dynamic">
+              <input id="city" matInput autocomplete="address-level2" [formField]="userForm.city" />
+              <mat-error>
+                <schbar-field-error [field]="userForm.city" label="users.shared.userProperties.city" />
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <label class="field-label" for="country">{{ 'users.shared.userProperties.country' | translate }}</label>
+            <mat-form-field class="full-width" subscriptSizing="dynamic">
+              <input id="country" matInput autocomplete="country-name" [formField]="userForm.country" />
+              <mat-error>
+                <schbar-field-error [field]="userForm.country" label="users.shared.userProperties.country" />
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </fieldset>
   </mat-dialog-content>
 
   <mat-dialog-actions>
+    <span class="changes" role="status">
+      @switch (changedFieldsCount()) {
+        @case (0) {
+          {{ 'users.dialogs.editUser.noChanges' | translate }}
+        }
+        @case (1) {
+          <span class="changes-dot" aria-hidden="true"></span>
+          {{ 'users.dialogs.editUser.oneChange' | translate }}
+        }
+        @default {
+          <span class="changes-dot" aria-hidden="true"></span>
+          {{ 'users.dialogs.editUser.changes' | translate: { count: changedFieldsCount() } }}
+        }
+      }
+    </span>
     <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
       {{ 'shared.actions.cancel' | translate }}
     </button>
-    <button matButton="filled" type="submit">
-      {{ 'shared.actions.save' | translate }}
+    <button matButton="filled" type="submit" [disabled]="changedFieldsCount() === 0">
+      {{ 'shared.actions.saveChanges' | translate }}
     </button>
   </mat-dialog-actions>
 </form>

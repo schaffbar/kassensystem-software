@@ -10,7 +10,12 @@ import { BreadcrumbViewModel, PageHeaderComponent } from './page-header.componen
 @Component({
   imports: [PageHeaderComponent],
   template: `
-    <schbar-page-header [title]="title()" [subtitle]="subtitle()" [icon]="icon()" [breadcrumbs]="breadcrumbs()">
+    <schbar-page-header
+      [title]="title()"
+      [subtitle]="subtitle()"
+      [icon]="icon()"
+      [avatar]="avatar()"
+      [breadcrumbs]="breadcrumbs()">
       <span pageHeaderMeta>Aktiv</span>
       <button type="button">Bearbeiten</button>
     </schbar-page-header>
@@ -20,6 +25,7 @@ class HostComponent {
   readonly title = signal('Bandsäge');
   readonly subtitle = signal<string | null>(null);
   readonly icon = signal<string | null>(null);
+  readonly avatar = signal<string | null>(null);
   readonly breadcrumbs = signal<BreadcrumbViewModel[]>([]);
 }
 
@@ -56,6 +62,15 @@ describe('PageHeaderComponent', () => {
     await fixture.whenStable();
 
     expect(query('.icon-tile mat-icon')?.textContent).toBe('sensors');
+  });
+
+  it('should show the initials of a person instead of the icon', async () => {
+    fixture.componentInstance.icon.set('sensors');
+    fixture.componentInstance.avatar.set('AB');
+    await fixture.whenStable();
+
+    expect(query('.avatar')?.textContent).toBe('AB');
+    expect(query('.icon-tile mat-icon')).toBeNull();
   });
 
   it('should show the subtitle', async () => {

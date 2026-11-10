@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,6 +15,7 @@ import { ToolCertificationApiModel } from '../../../shared/api/tool-certificatio
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { toToolCertification } from '../../tool-certification.mapper';
 import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
+import { toTool } from '../../tool.mapper';
 import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
 import { toUser } from '../../user.mapper';
 import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
@@ -53,16 +55,23 @@ describe('UserDetailStore', () => {
       toolId: 'tool-1',
       status: ToolCertificationStatus.Active,
       certifiedAt: '2026-01-01T10:00:00Z',
-      certifiedBy: null,
+      certifiedBy: 'instructor-1',
     },
   ];
+  const instructor = customerFixture({ id: 'instructor-1', firstName: 'Paula', lastName: 'Richter' });
 
   let store: InstanceType<typeof UserDetailStore>;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), UserDetailStore],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        UserDetailStore,
+      ],
     });
     store = TestBed.inject(UserDetailStore);
     httpMock = TestBed.inject(HttpTestingController);
@@ -71,6 +80,7 @@ describe('UserDetailStore', () => {
   afterEach(() => {
     httpMock.verify();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   // lets the resources react to signal changes and send their requests
@@ -92,6 +102,9 @@ describe('UserDetailStore', () => {
   const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/active`);
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
   const expectTools = () => expectGet(`${api}/tools`);
+  const expectUsers = () => expectGet(`${api}/customers`);
+  const expectPut = (path: string): TestRequest =>
+    httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}${path}`);
 
   async function loadUser(
     options: { assignments?: RfidTagAssignmentApiModel[]; session?: WorkshopSessionApiModel | null } = {},
@@ -103,17 +116,19 @@ describe('UserDetailStore', () => {
     expectSession().flush(options.session === undefined ? session : options.session);
     expectCertifications().flush(certifications);
     expectTools().flush([toolFixture()]);
+    expectUsers().flush([user, instructor]);
     await settle();
   }
 
-  it('should load only the tools without an id', async () => {
+  it('should load only tools and users without an id', async () => {
     trigger();
 
     expectTools().flush([toolFixture()]);
+    expectUsers().flush([user, instructor]);
     httpMock.expectNone(() => true);
     await settle();
     expect(store.user()).toBeNull();
-    expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
+    expect(store.tools()).toEqual([toTool(toolFixture())]);
   });
 
   it('should load user, assignment, open session and certifications when the id is set', async () => {
@@ -122,9 +137,12 @@ describe('UserDetailStore', () => {
     expect(store.user()).toEqual(toUser(user));
     expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
     expect(store.openSession()).toEqual(toWorkshopSession(session));
-    expect(store.hasRunningUsage()).toBe(false);
+    expect(store.canCloseWorkshopSession()).toBe(true);
+    expect(store.canDeleteUser()).toBe(false);
+    expect(store.isWaitingForRfidTag()).toBe(false);
     expect(store.toolCertifications()).toEqual(certifications.map(toToolCertification));
-    expect(store.tools()).toEqual([{ id: 'tool-1', name: 'Bandsäge' }]);
+    expect(store.tools()).toEqual([toTool(toolFixture())]);
+    expect(store.userNames().get('instructor-1')).toBe('Paula Richter');
     expect(store.hasLoadError()).toBe(false);
   });
 
@@ -133,11 +151,12 @@ describe('UserDetailStore', () => {
 
     expect(store.rfidTagAssignment()).toBeNull();
     expect(store.openSession()).toBeNull();
-    expect(store.hasRunningUsage()).toBe(false);
+    expect(store.canCloseWorkshopSession()).toBe(false);
+    expect(store.canDeleteUser()).toBe(true);
     expect(store.hasLoadError()).toBe(false);
   });
 
-  it('should detect a running workshop usage', async () => {
+  it('should not close the session while the user is in the workshop', async () => {
     const running = workshopSessionFixture({
       workshopUsages: [workshopUsageFixture({ exitTime: null, durationInMinutes: null, unitsUsed: null })],
       toolUsageSummaries: [],
@@ -145,29 +164,37 @@ describe('UserDetailStore', () => {
 
     await loadUser({ session: running });
 
-    expect(store.hasRunningUsage()).toBe(true);
+    expect(store.canCloseWorkshopSession()).toBe(false);
   });
 
-  it('should detect an active tool usage', async () => {
+  it('should not close the session while a tool is running', async () => {
     const running = workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ active: true })] });
 
     await loadUser({ session: running });
 
-    expect(store.hasRunningUsage()).toBe(true);
+    expect(store.canCloseWorkshopSession()).toBe(false);
   });
 
-  it('should send user, contact and address without the id and reload the user', async () => {
+  // the saved user: Max Mustermann, 31.01.1990, no member, max@example.org, Hauptstraße 1, 12345 Berlin
+  const unchanged = {
+    userId: 'user-1',
+    firstName: 'Max',
+    lastName: 'Mustermann',
+    dateOfBirth: new Date(1990, 0, 31),
+    clubMember: false,
+    email: 'max@example.org',
+    addressLine1: 'Hauptstraße 1',
+    postalCode: '12345',
+    city: 'Berlin',
+    country: 'Deutschland',
+  };
+
+  it('should only send the person when only the person changed and reload the user', async () => {
     await loadUser();
 
-    store.updateUser({
-      userId: 'user-1',
-      firstName: 'Moritz',
-      lastName: 'Mustermann',
-      dateOfBirth: new Date(1990, 0, 31),
-      clubMember: true,
-    });
+    store.updateUser({ ...unchanged, firstName: 'Moritz', clubMember: true });
     trigger();
-    const update = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1`);
+    const update = expectPut('/customers/user-1');
     expect(update.request.body).toEqual({
       firstName: 'Moritz',
       lastName: 'Mustermann',
@@ -176,27 +203,23 @@ describe('UserDetailStore', () => {
     });
     update.flush(null);
     trigger();
+
     expectUser().flush(user);
     await settle();
+  });
 
-    store.updateUserContact({ userId: 'user-1', email: 'max@example.org' });
+  it('should send contact and address one after the other when both changed', async () => {
+    await loadUser();
+
+    store.updateUser({ ...unchanged, phone: '0123', addressLine1: 'Hauptstraße 2' });
     trigger();
-    const contact = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1/contact`);
-    expect(contact.request.body).toEqual({ email: 'max@example.org', phone: null });
+    const contact = expectPut('/customers/user-1/contact');
+    expect(contact.request.body).toEqual({ email: 'max@example.org', phone: '0123' });
+    // the address waits for the contact
+    httpMock.expectNone(`${api}/customers/user-1/address`);
     contact.flush(null);
-    trigger();
-    expectUser().flush(user);
-    await settle();
 
-    store.updateUserAddress({
-      userId: 'user-1',
-      addressLine1: 'Hauptstraße 2',
-      postalCode: '12345',
-      city: 'Berlin',
-      country: 'Deutschland',
-    });
-    trigger();
-    const address = httpMock.expectOne((req) => req.method === 'PUT' && req.url === `${api}/customers/user-1/address`);
+    const address = expectPut('/customers/user-1/address');
     expect(address.request.body).toEqual({
       addressLine1: 'Hauptstraße 2',
       addressLine2: null,
@@ -206,8 +229,21 @@ describe('UserDetailStore', () => {
     });
     address.flush(null);
     trigger();
+
     expectUser().flush(user);
     await settle();
+  });
+
+  it('should go back to the user list after deleting the user', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await loadUser({ session: null });
+
+    store.deleteUser({ userId: 'user-1' });
+    trigger();
+    httpMock.expectOne((req) => req.method === 'DELETE' && req.url === `${api}/customers/user-1`).flush(null);
+    await settle();
+
+    expect(navigate).toHaveBeenCalledWith(['users']);
   });
 
   it('should only reload the assignment after assigning an RFID tag', async () => {
@@ -274,6 +310,46 @@ describe('UserDetailStore', () => {
     expect(store.toolCertifications()).toEqual([]);
   });
 
+  it('should reload the assignment every 2 seconds while the tag is waiting, without showing a load', async () => {
+    // only the interval of the poll – whenStable needs real timeouts
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const waiting = { ...assignment, status: RfidTagAssignmentStatus.WaitingForAssignment, rfidTagId: null };
+    await loadUser({ assignments: [waiting] });
+    TestBed.runInInjectionContext(() => store.pollRfidTagAssignment(store.isWaitingForRfidTag));
+    trigger();
+
+    vi.advanceTimersByTime(2000);
+    trigger();
+    const reload = expectAssignment();
+    expect(store.isLoading()).toBe(false);
+    reload.flush([assignment]);
+    await settle();
+    trigger();
+
+    // assigned: no more requests
+    vi.advanceTimersByTime(4000);
+    trigger();
+    httpMock.expectNone(() => true);
+    expect(store.isWaitingForRfidTag()).toBe(false);
+  });
+
+  it('should only reload the certifications after deleting one', async () => {
+    await loadUser();
+
+    store.deleteToolCertification({ userId: 'user-1', toolId: 'tool-1' });
+    trigger();
+    httpMock
+      .expectOne(
+        (req) => req.method === 'DELETE' && req.url === `${api}/tool-certifications/customers/user-1/tools/tool-1`,
+      )
+      .flush(null);
+    trigger();
+
+    expectCertifications().flush([]);
+    await settle();
+    expect(store.toolCertifications()).toEqual([]);
+  });
+
   it('should expose a load error for a session that does not match the schema', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -291,6 +367,7 @@ describe('UserDetailStore', () => {
     expectSession().flush(null);
     expectCertifications().flush([]);
     expectTools().flush([]);
+    expectUsers().flush([]);
     await settle();
 
     expect(store.hasLoadError()).toBe(true);

@@ -35,17 +35,18 @@ describe('CloseSessionDialogService', () => {
     httpMock.verify();
   });
 
-  it('should open the dialog with the customer id as input', () => {
-    service.open('user-1').subscribe();
+  it('should open the dialog with customer id and name as inputs', () => {
+    service.open('user-1', 'Max Mustermann').subscribe();
     TestBed.tick();
 
     const [dialogRef] = TestBed.inject(MatDialog).openDialogs;
     expect(dialogRef.componentInstance).toBeInstanceOf(CloseSessionDialogContainerComponent);
+    expect(dialogRef.componentInstance.userName()).toBe('Max Mustermann');
     httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/active`).flush(null);
   });
 
   it('should emit true when the dialog is confirmed', async () => {
-    const result = firstValueFrom(service.open('user-1'));
+    const result = firstValueFrom(service.open('user-1', 'Max Mustermann'));
     TestBed.tick();
     httpMock.expectOne(() => true).flush(null);
 
@@ -55,7 +56,7 @@ describe('CloseSessionDialogService', () => {
   });
 
   it('should emit false when the dialog is closed otherwise', async () => {
-    const result = firstValueFrom(service.open('user-1'));
+    const result = firstValueFrom(service.open('user-1', 'Max Mustermann'));
     TestBed.tick();
     httpMock.expectOne(() => true).flush(null);
 

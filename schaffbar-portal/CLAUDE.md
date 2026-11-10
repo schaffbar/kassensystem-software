@@ -141,7 +141,6 @@ export class UserContactComponent {
   (`src/styles.scss`).
 - A detail page shows its values read-only in a card (`<dl>`, see "Design system") and edits them in a form dialog
   opened by "Bearbeiten" – no inline edit form in the card (`rfid-reader-detail-info` + `update-rfid-reader-form`).
-  The remaining inline forms (`user-contact`, `user-address`) are converted with the user page.
 - Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in
   `app.config.ts`; tests of components with a datepicker add `provideDateAdapter()` to their providers). Typing
   (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
@@ -258,6 +257,11 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
   focus on the first field instead of the close button, `disableClose`). A form inside a card (the hardware tab of a tool) gets the same compact fields
   and `field-label` with the global class `compact-form` on the `<form>`. Confirmations stay centered, without header
   line and close button.
+- **The same dialogs from several places of a page** (header, ⋯ menu, banner, tabs): a page service
+  `<page>-dialogs.service.ts` (`@Service({ autoProvided: false })`, provided by the page next to its store) opens them
+  and passes the result to the store (`user-detail-dialogs.service.ts`). A form dialog that follows store state while
+  it is open gets the signals with `inputBinding` and sends its command with `outputBinding` instead of closing
+  (`assign-rfid-tag-dialog`: waits until the tag has been held to the reader).
 - **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
   `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is
   `Result | undefined` – no hand-written types in `subscribe`.

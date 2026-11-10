@@ -1,0 +1,35 @@
+@let contact = userContactCard();
+
+<div class="card-header">
+  <h2>{{ 'users.pages.userDetails.contact.title' | translate }}</h2>
+  <button matButton type="button" (click)="editRequested.emit()">
+    {{ 'shared.actions.edit' | translate }}
+  </button>
+</div>
+
+<ul class="contact-list">
+  <li class="email">
+    <mat-icon [attr.aria-label]="'users.shared.userProperties.email' | translate">mail</mat-icon>
+    <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+  </li>
+  <li class="phone">
+    <mat-icon [attr.aria-label]="'users.shared.userProperties.phone' | translate">call</mat-icon>
+    <span>{{ contact.phone | orDash }}</span>
+  </li>
+  <li class="address">
+    <mat-icon [attr.aria-label]="'users.pages.userDetails.contact.address' | translate">location_on</mat-icon>
+    <span>
+      {{ contact.address.addressLine1 }}<br />
+      @if (contact.address.addressLine2) {
+        {{ contact.address.addressLine2 }}<br />
+      }
+      {{ contact.address.postalCode }} {{ contact.address.city }}, {{ contact.address.country }}
+    </span>
+  </li>
+  <li class="date-of-birth">
+    <mat-icon aria-hidden="true">calendar_today</mat-icon>
+    <span>
+      {{ 'users.pages.userDetails.contact.bornOn' | translate: { date: contact.dateOfBirth | date: 'mediumDate' } }}
+    </span>
+  </li>
+</ul>

@@ -96,7 +96,7 @@ describe('NewUserFormComponent', () => {
     for (const id of ['firstName', 'lastName', 'dateOfBirth', 'email', 'addressLine1', 'postalCode', 'city']) {
       expect(await errors(id)).toEqual(['shared.errors.required']);
     }
-    expect(text('.summary')).toBe('error users.dialogs.addNewUser.checkFields');
+    expect(text('.summary')).toBe('error users.dialogs.userForm.checkFields');
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
@@ -105,7 +105,7 @@ describe('NewUserFormComponent', () => {
     await fillRequiredFields();
     await setValue('city', '');
 
-    expect(text('.summary')).toBe('error users.dialogs.addNewUser.checkOneField');
+    expect(text('.summary')).toBe('error users.dialogs.userForm.checkOneField');
 
     await setValue('city', 'Berlin');
 

@@ -1,17 +1,29 @@
-import { DatePipe } from '@angular/common';
-import { Component, inject, input, output } from '@angular/core';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, inject, input, output } from '@angular/core';
 
-import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { CertificationStatusBadgeComponent } from '../../../shared/components/certification-status-badge/certification-status-badge.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
+import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { CertificationRequirement } from '../../../shared/models/certification-requirement';
+import { ToolArea } from '../../../shared/models/tool-area';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 import {
+  canPauseToolCertification,
+  canReactivateToolCertification,
+  canRevokeToolCertification,
+  DeleteToolCertificationCommand,
   PauseToolCertificationCommand,
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
@@ -20,93 +32,139 @@ import {
 export interface UserToolCertificationRowViewModel {
   customerId: string;
   toolId: string;
-  // null if the tool has been deleted
+  // tool fields are null if the tool has been deleted
   toolName: string | null;
+  area: ToolArea | null;
+  certificationRequirement: CertificationRequirement | null;
+  // null if unknown or the instructor has been deleted
+  certifierName: string | null;
   status: ToolCertificationStatus;
   certifiedAt: Date;
 }
+
+// card: a compact list on the overview tab · table: all columns on the certifications tab
+export type UserToolCertificationsVariant = 'card' | 'table';
 
 @Component({
   selector: 'schbar-user-tool-certifications',
   templateUrl: './user-tool-certifications.component.html',
   styleUrl: './user-tool-certifications.component.scss',
   imports: [
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    CertificationStatusBadgeComponent,
     DatePipe,
+    NgTemplateOutlet,
+    MatDividerModule,
+    MatIconModule,
+    MatMenuModule,
+    MatTableModule,
     TranslatePipe,
     OrDashPipe,
+    ToolAreaKeyPipe,
+    CertificationRequirementBadgeComponent,
+    CertificationStatusBadgeComponent,
+    EmptyStateComponent,
+    RowMenuComponent,
   ],
+  host: { class: 'table-card' },
 })
 export class UserToolCertificationsComponent {
   private readonly confirmActionDialog = inject(ConfirmActionDialogService);
+  private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
 
   readonly certifications = input.required<UserToolCertificationRowViewModel[]>();
+  readonly variant = input<UserToolCertificationsVariant>('table');
 
   readonly certificationPaused = output<PauseToolCertificationCommand>();
   readonly certificationReactivated = output<ReactivateToolCertificationCommand>();
   readonly certificationRevoked = output<RevokeToolCertificationCommand>();
+  readonly certificationDeleted = output<DeleteToolCertificationCommand>();
 
-  protected readonly displayedColumns: string[] = ['toolName', 'status', 'certifiedAt', 'actions'];
-  protected readonly CertificationStatus = ToolCertificationStatus;
+  protected readonly displayedColumns = ['tool', 'requirement', 'certifiedAt', 'certifiedBy', 'status', 'actions'];
 
-  // mat-table rows are typed as `any`; restores the type so `@default never` can check the status
-  protected readonly asCertification = (row: UserToolCertificationRowViewModel): UserToolCertificationRowViewModel =>
-    row;
+  protected readonly rows = computed(() =>
+    this.certifications()
+      .map((certification) => ({
+        ...certification,
+        canPause: canPauseToolCertification(certification.status),
+        canReactivate: canReactivateToolCertification(certification.status),
+        canRevoke: canRevokeToolCertification(certification.status),
+      }))
+      .sort((a, b) => (a.toolName ?? '').localeCompare(b.toolName ?? '', 'de')),
+  );
+
+  // "3 aktiv · 1 pausiert" – only the statuses that occur
+  protected readonly statusCounts = computed(() =>
+    STATUS_ORDER.map((status) => ({
+      key: `users.pages.userDetails.certifications.counts.${status}`,
+      count: this.certifications().filter((certification) => certification.status === status).length,
+    })).filter(({ count }) => count > 0),
+  );
 
   // --------------------------------------------------------------------------
   // actions
 
-  protected pauseCertification(cert: UserToolCertificationRowViewModel): void {
-    this.confirmActionDialog
+  protected pauseToolCertification(certification: UserToolCertificationRowViewModel): void {
+    const command: PauseToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'pauseCertification', true, () => this.certificationPaused.emit(command));
+  }
+
+  protected reactivateToolCertification(certification: UserToolCertificationRowViewModel): void {
+    const command: ReactivateToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'reactivateCertification', false, () => this.certificationReactivated.emit(command));
+  }
+
+  protected revokeToolCertification(certification: UserToolCertificationRowViewModel): void {
+    const command: RevokeToolCertificationCommand = toCommand(certification);
+    this.confirm(certification, 'revokeCertification', true, () => this.certificationRevoked.emit(command));
+  }
+
+  protected deleteToolCertification(certification: UserToolCertificationRowViewModel): void {
+    this.confirmDeleteDialog
       .open({
-        title: 'users.dialogs.certifications.pauseCertification.title',
-        message: 'users.dialogs.certifications.pauseCertification.message',
-        entity: cert.toolName ?? undefined,
-        confirmLabel: 'users.dialogs.certifications.pauseCertification.confirm',
-        destructive: true,
+        title: 'users.dialogs.certifications.deleteCertification.title',
+        message: 'users.dialogs.certifications.deleteCertification.message',
+        confirmLabel: 'users.dialogs.certifications.deleteCertification.confirm',
+        entity: certification.toolName ?? undefined,
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          const command: PauseToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
-          this.certificationPaused.emit(command);
+          const command: DeleteToolCertificationCommand = toCommand(certification);
+          this.certificationDeleted.emit(command);
         }
       });
   }
 
-  protected reactivateCertification(cert: UserToolCertificationRowViewModel): void {
-    this.confirmActionDialog
-      .open({
-        title: 'users.dialogs.certifications.reactivateCertification.title',
-        message: 'users.dialogs.certifications.reactivateCertification.message',
-        entity: cert.toolName ?? undefined,
-        confirmLabel: 'users.dialogs.certifications.reactivateCertification.confirm',
-        destructive: false,
-      })
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          const command: ReactivateToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
-          this.certificationReactivated.emit(command);
-        }
-      });
-  }
+  // --------------------------------------------------------------------------
+  // helper
 
-  protected revokeCertification(cert: UserToolCertificationRowViewModel): void {
+  private confirm(
+    certification: UserToolCertificationRowViewModel,
+    dialog: 'pauseCertification' | 'reactivateCertification' | 'revokeCertification',
+    destructive: boolean,
+    onConfirmed: () => void,
+  ): void {
     this.confirmActionDialog
       .open({
-        title: 'users.dialogs.certifications.revokeCertification.title',
-        message: 'users.dialogs.certifications.revokeCertification.message',
-        entity: cert.toolName ?? undefined,
-        confirmLabel: 'users.dialogs.certifications.revokeCertification.confirm',
-        destructive: true,
+        title: `users.dialogs.certifications.${dialog}.title`,
+        message: `users.dialogs.certifications.${dialog}.message`,
+        confirmLabel: `users.dialogs.certifications.${dialog}.confirm`,
+        entity: certification.toolName ?? undefined,
+        destructive,
       })
       .subscribe((confirmed) => {
-        if (confirmed) {
-          const command: RevokeToolCertificationCommand = { userId: cert.customerId, toolId: cert.toolId };
-          this.certificationRevoked.emit(command);
-        }
+        if (confirmed) onConfirmed();
       });
   }
 }
+
+// ----------------------------------------------------------------------------
+// mappers
+
+// all commands of a certification name it by the user and the tool
+function toCommand(certification: UserToolCertificationRowViewModel): { userId: string; toolId: string } {
+  return { userId: certification.customerId, toolId: certification.toolId };
+}
+
+// ----------------------------------------------------------------------------
+// helper
+
+const STATUS_ORDER = [ToolCertificationStatus.Active, ToolCertificationStatus.Paused, ToolCertificationStatus.Revoked];

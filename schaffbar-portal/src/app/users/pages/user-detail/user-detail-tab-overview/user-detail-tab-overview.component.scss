@@ -1,0 +1,23 @@
+// contact and tag on the left, certifications and danger zone on the right – one column on narrow screens
+.overview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.side,
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.side {
+  flex: 1 1 340px;
+}
+
+.main {
+  flex: 2 1 480px;
+}

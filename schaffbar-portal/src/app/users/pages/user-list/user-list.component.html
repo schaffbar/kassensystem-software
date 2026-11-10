@@ -128,12 +128,12 @@
                 [label]="'shared.actions.rowMenu' | translate: { name: row.firstName + ' ' + row.lastName }">
                 <button mat-menu-item type="button" (click)="openUserDetail(row)">
                   <mat-icon>person</mat-icon>
-                  <span>{{ 'users.pages.userList.actions.profile' | translate }}</span>
+                  <span>{{ 'users.menu.profile' | translate }}</span>
                 </button>
                 <mat-divider />
                 <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteUser(row)">
                   <mat-icon>delete</mat-icon>
-                  <span>{{ 'users.pages.userList.actions.delete' | translate }}</span>
+                  <span>{{ 'users.menu.delete' | translate }}</span>
                 </button>
               </schbar-row-menu>
             </td>

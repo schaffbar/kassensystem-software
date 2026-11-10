@@ -121,8 +121,8 @@ describe('ToolDetailComponent', () => {
   it('should show the name with area, requirement and the person using it, and link back to the list', () => {
     expect(texts('h1')).toEqual(['Bandsäge']);
     expect(texts('.meta .label')).toEqual([
-      'tools.areas.HOLZ',
-      'tools.certificationRequirements.RED',
+      'shared.toolAreas.HOLZ',
+      'shared.certificationRequirements.RED',
       'tools.pages.toolList.inUseBy',
     ]);
     expect(query('.breadcrumbs a')?.getAttribute('href')).toBe('/tools');

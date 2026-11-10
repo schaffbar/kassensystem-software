@@ -6,28 +6,96 @@
 }
 
 @if (detailsStore.user(); as user) {
-  <schbar-user-detail-header
-    [userDetailHeader]="user"
-    [rfidTagAssignment]="detailsStore.rfidTagAssignment()"
-    (editRequested)="updateUser()"
-    (reloadRequested)="reloadUser()"
-    (rfidTagAssigned)="assignRfidTag($event)"
-    (rfidTagUnassigned)="unassignRfidTag($event)" />
+  @let assignment = detailsStore.rfidTagAssignment();
+
+  <schbar-page-header
+    [avatar]="initials()"
+    [title]="userName()"
+    [breadcrumbs]="[{ label: 'users.title' | translate, link: usersLink }]">
+    <schbar-status-badge pageHeaderMeta tone="neutral">{{
+      user.ageGroup | ageGroupKey | translate
+    }}</schbar-status-badge>
+    @if (user.clubMember) {
+      <schbar-status-badge pageHeaderMeta tone="success" icon="verified">
+        {{ 'users.chips.userDetails.clubMember' | translate }}
+      </schbar-status-badge>
+    }
+    <!-- one element per @if – content projection does not reach into nested control flow -->
+    @if (assignment?.status === RfidTagAssignmentStatus.WaitingForAssignment) {
+      <schbar-status-badge pageHeaderMeta tone="warn" icon="hourglass_top">
+        {{ 'users.pages.userList.rfidTag.waiting' | translate }}
+      </schbar-status-badge>
+    } @else if (assignment?.rfidTagId; as rfidTagId) {
+      <schbar-status-badge pageHeaderMeta tone="neutral" icon="sell">
+        {{ assignment!.assignmentType | rfidTagAssignmentTypeKey | translate }} ·
+        <span class="mono">{{ rfidTagId | rfidTagId }}</span>
+      </schbar-status-badge>
+    }
+    <span pageHeaderMeta class="registered">
+      {{ 'users.pages.userDetails.registeredOn' | translate: { date: user.createdAt | date: 'mediumDate' } }}
+    </span>
+
+    <button matButton="outlined" type="button" (click)="editUser()">
+      <mat-icon>edit</mat-icon>
+      {{ 'shared.actions.edit' | translate }}
+    </button>
+    <button matIconButton type="button" [attr.aria-label]="'shared.actions.reload' | translate" (click)="reloadUser()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <schbar-row-menu [label]="'shared.actions.rowMenu' | translate: { name: userName() }">
+      <button mat-menu-item type="button" (click)="editUser()">
+        <mat-icon>edit</mat-icon>
+        <span>{{ 'users.menu.edit' | translate }}</span>
+      </button>
+      @if (!assignment) {
+        <button mat-menu-item type="button" (click)="assignRfidTag()">
+          <mat-icon>sell</mat-icon>
+          <span>{{ 'users.menu.assignRfidTag' | translate }}</span>
+        </button>
+      }
+      @if (detailsStore.canCloseWorkshopSession()) {
+        <button mat-menu-item type="button" (click)="closeWorkshopSession()">
+          <mat-icon>logout</mat-icon>
+          <span>{{ 'users.menu.closeSession' | translate }}</span>
+        </button>
+      }
+      @if (detailsStore.canDeleteUser()) {
+        <mat-divider />
+        <button mat-menu-item type="button" class="danger-menu-item" (click)="deleteUser()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'users.menu.delete' | translate }}</span>
+        </button>
+      }
+    </schbar-row-menu>
+  </schbar-page-header>
+
+  @if (sessionBanner(); as banner) {
+    <schbar-user-session-banner [userSessionBanner]="banner" (closeRequested)="closeWorkshopSession()" />
+  }
 
   <mat-tab-group
     mat-stretch-tabs="false"
-    mat-align-tabs="center"
+    mat-align-tabs="start"
     dynamicHeight
-    [selectedIndex]="selectedTabIndex()"
-    (selectedIndexChange)="selectedTabIndex.set($event)">
-    <mat-tab [label]="'users.tabGroups.userDetails.detailsTab' | translate">
+    [selectedIndex]="selectedTab()"
+    (selectedIndexChange)="selectedTab.set($event)">
+    <mat-tab [label]="'users.tabGroups.userDetails.overviewTab' | translate">
       <div class="tab-content">
-        <schbar-user-detail-tab-info />
+        <schbar-user-detail-tab-overview (openSessionRequested)="showOpenSession()" />
+      </div>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        {{ 'users.tabGroups.userDetails.certificationsTab' | translate }}
+        <span class="tab-count">{{ detailsStore.toolCertifications().length }}</span>
+      </ng-template>
+      <div class="tab-content">
+        <schbar-user-detail-tab-certifications />
       </div>
     </mat-tab>
     <mat-tab [label]="'users.tabGroups.userDetails.openSessionTab' | translate">
       <div class="tab-content">
-        <schbar-user-detail-tab-session [userId]="user.id" />
+        <schbar-user-detail-tab-session />
       </div>
     </mat-tab>
   </mat-tab-group>

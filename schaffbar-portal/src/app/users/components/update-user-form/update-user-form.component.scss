@@ -3,3 +3,93 @@
 form {
   display: contents;
 }
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0 0 12px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.address {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.city-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+// as high as the fields next to it
+.checkbox-card {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.optional {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.summary {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+
+  mat-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// unsaved changes, left of the buttons
+.changes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.changes-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+}

@@ -1,3 +1,5 @@
+import { isSameDay } from 'date-fns';
+
 import { AgeGroup } from '../shared/models/age-group';
 import { RfidTagAssignmentType } from '../shared/models/rfid-tag-assignment-type';
 
@@ -45,6 +47,33 @@ export function hasTemporaryRfidTag(user: UserListItem): boolean {
 }
 
 // ----------------------------------------------------------------------------
+// update – only the parts that changed are sent
+
+export function hasPersonChanged(user: User, command: UpdateUserCommand): boolean {
+  return (
+    user.firstName !== command.firstName ||
+    user.lastName !== command.lastName ||
+    !isSameDay(user.dateOfBirth, command.dateOfBirth) ||
+    user.clubMember !== command.clubMember
+  );
+}
+
+export function hasContactChanged(user: User, command: UpdateUserCommand): boolean {
+  return user.email !== command.email || (user.phone ?? undefined) !== command.phone;
+}
+
+export function hasAddressChanged(user: User, command: UpdateUserCommand): boolean {
+  const { address } = user;
+  return (
+    address.addressLine1 !== command.addressLine1 ||
+    (address.addressLine2 ?? undefined) !== command.addressLine2 ||
+    address.postalCode !== command.postalCode ||
+    address.city !== command.city ||
+    address.country !== command.country
+  );
+}
+
+// ----------------------------------------------------------------------------
 // commands
 
 export interface CreateUserCommand {
@@ -61,22 +90,15 @@ export interface CreateUserCommand {
   country: string;
 }
 
+// person, contact and address in one dialog – the backend saves them with three endpoints (see hasPersonChanged …)
 export interface UpdateUserCommand {
   userId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: Date;
   clubMember: boolean;
-}
-
-export interface UpdateUserContactCommand {
-  userId: string;
   email: string;
   phone?: string;
-}
-
-export interface UpdateUserAddressCommand {
-  userId: string;
   addressLine1: string;
   addressLine2?: string;
   postalCode: string;

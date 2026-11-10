@@ -1,6 +1,13 @@
 @let currentViewModel = viewModel();
 
-<h2 mat-dialog-title>{{ 'shared.dialogs.closeSession.title' | translate }}</h2>
+<schbar-form-dialog-header
+  [title]="'shared.dialogs.closeSession.title' | translate"
+  [subtitle]="
+    currentViewModel
+      ? ('shared.dialogs.closeSession.subtitle'
+        | translate: { name: userName(), time: currentViewModel.startTime | date: 'shortTime' })
+      : userName()
+  " />
 
 <mat-dialog-content>
   @if (isLoading()) {
@@ -11,37 +18,46 @@
     <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
   } @else if (!currentViewModel) {
     <p class="hint">
-      <mat-icon>info</mat-icon>
+      <mat-icon aria-hidden="true">info</mat-icon>
       {{ 'shared.dialogs.closeSession.messages.noOpenSession' | translate }}
     </p>
-  } @else if (currentViewModel.hasRunningUsage) {
-    <p class="hint running-usage">
-      <mat-icon>warning</mat-icon>
-      {{ 'shared.dialogs.closeSession.messages.runningUsage' | translate }}
-    </p>
   } @else {
-    <p>{{ 'shared.dialogs.closeSession.message' | translate }}</p>
+    @if (currentViewModel.hasRunningUsage) {
+      <p class="hint running-usage" role="status">
+        <mat-icon aria-hidden="true">warning</mat-icon>
+        {{ 'shared.dialogs.closeSession.messages.runningUsage' | translate }}
+      </p>
+    } @else {
+      <p class="message">{{ 'shared.dialogs.closeSession.message' | translate }}</p>
+    }
 
     <table class="totals">
+      <caption>
+        {{
+          'shared.dialogs.closeSession.summary' | translate
+        }}
+      </caption>
       <thead>
         <tr>
-          <th></th>
-          <th class="number">{{ 'shared.dialogs.closeSession.minutes' | translate }}</th>
-          <th class="number">{{ 'shared.dialogs.closeSession.units' | translate }}</th>
+          <th scope="col">{{ 'shared.dialogs.closeSession.item' | translate }}</th>
+          <th scope="col">{{ 'shared.dialogs.closeSession.time' | translate }}</th>
+          <th scope="col" class="number">{{ 'shared.dialogs.closeSession.duration' | translate }}</th>
+          <th scope="col" class="number">{{ 'shared.dialogs.closeSession.units' | translate }}</th>
         </tr>
       </thead>
       <tbody>
-        <tr class="workshop-total">
-          <th scope="row">{{ 'shared.dialogs.closeSession.workshopTime' | translate }}</th>
-          <td class="number">{{ currentViewModel.workshop.minutes }}</td>
-          <td class="number">{{ currentViewModel.workshop.units }}</td>
-        </tr>
+        <ng-container
+          *ngTemplateOutlet="
+            row;
+            context: {
+              $implicit: currentViewModel.workshop,
+              name: 'shared.dialogs.closeSession.workshop' | translate,
+              rowClass: 'workshop-total',
+            }
+          " />
         @for (tool of currentViewModel.tools; track tool.toolId) {
-          <tr class="tool-total">
-            <th scope="row">{{ tool.name | orDash }}</th>
-            <td class="number">{{ tool.minutes }}</td>
-            <td class="number">{{ tool.units }}</td>
-          </tr>
+          <ng-container
+            *ngTemplateOutlet="row; context: { $implicit: tool, name: tool.name | orDash, rowClass: 'tool-total' }" />
         }
       </tbody>
     </table>
@@ -50,9 +66,26 @@
 
 <mat-dialog-actions>
   <button matButton="outlined" type="button" cdkFocusInitial (click)="cancelled.emit()">
-    {{ 'shared.dialogs.closeSession.actions.cancel' | translate }}
+    {{ 'shared.actions.cancel' | translate }}
   </button>
   <button matButton="filled" type="button" [disabled]="!canClose()" (click)="confirmed.emit()">
+    <mat-icon>logout</mat-icon>
     {{ 'shared.dialogs.closeSession.actions.confirm' | translate }}
   </button>
 </mat-dialog-actions>
+
+<ng-template #row let-item let-name="name" let-rowClass="rowClass">
+  <tr [class]="rowClass">
+    <th scope="row">{{ name }}</th>
+    <td class="time">
+      {{ item.startTime | date: 'shortTime' }} –
+      @if (item.endTime) {
+        {{ item.endTime | date: 'shortTime' }}
+      } @else {
+        {{ 'shared.dialogs.closeSession.now' | translate }}
+      }
+    </td>
+    <td class="number">{{ 'shared.dialogs.closeSession.minutes' | translate: { minutes: item.minutes } }}</td>
+    <td class="number">{{ item.units }}</td>
+  </tr>
+</ng-template>

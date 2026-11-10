@@ -1,0 +1,98 @@
+@let assignment = rfidTagAssignment();
+@let currentStep = step();
+
+<schbar-form-dialog-header
+  [title]="'users.dialogs.assignRfidTag.title' | translate"
+  [subtitle]="'users.dialogs.assignRfidTag.subtitle' | translate: { name: userName() }" />
+
+<ol class="steps" [attr.aria-label]="'users.dialogs.assignRfidTag.steps.label' | translate">
+  @for (step of steps; track step.step; let index = $index) {
+    <li [class.reached]="index <= stepIndex()" [attr.aria-current]="index === stepIndex() ? 'step' : null">
+      <span class="bar" aria-hidden="true"></span>
+      {{ step.labelKey | translate }}
+    </li>
+  }
+</ol>
+
+@switch (currentStep) {
+  @case ('choose') {
+    <form [formRoot]="assignmentForm" (submit)="requestRfidTag()">
+      <mat-dialog-content>
+        <fieldset>
+          <legend>{{ 'users.dialogs.assignRfidTag.question' | translate }}</legend>
+          <mat-radio-group class="type-options" [formField]="assignmentForm.assignmentType">
+            @for (option of assignmentTypes; track option.type) {
+              <mat-radio-button
+                class="radio-card"
+                [class.selected]="assignmentForm.assignmentType().value() === option.type"
+                [value]="option.type">
+                <span class="radio-card-text">
+                  <span class="radio-card-label">{{ option.type | rfidTagAssignmentTypeKey | translate }}</span>
+                  <span class="radio-card-description">{{ option.descriptionKey | translate }}</span>
+                </span>
+              </mat-radio-button>
+            }
+          </mat-radio-group>
+        </fieldset>
+      </mat-dialog-content>
+
+      <mat-dialog-actions>
+        <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
+          {{ 'shared.actions.cancel' | translate }}
+        </button>
+        <button matButton="filled" type="submit">
+          {{ 'users.dialogs.assignRfidTag.confirm' | translate }}
+        </button>
+      </mat-dialog-actions>
+    </form>
+  }
+  @case ('wait') {
+    <mat-dialog-content>
+      <div class="result" role="status" aria-live="polite">
+        <span class="reader-icon" aria-hidden="true"><mat-icon>sensors</mat-icon></span>
+        <span class="result-title">
+          @if (assignment) {
+            {{
+              'users.dialogs.assignRfidTag.waiting.title'
+                | translate: { type: (assignment.assignmentType | rfidTagAssignmentTypeKey | translate) }
+            }}
+          } @else {
+            {{ 'users.dialogs.assignRfidTag.waiting.requesting' | translate }}
+          }
+        </span>
+        <span class="result-text">
+          {{ 'users.dialogs.assignRfidTag.waiting.message' | translate: { name: userName() } }}
+        </span>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="center">
+      <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
+        {{ 'shared.actions.close' | translate }}
+      </button>
+    </mat-dialog-actions>
+  }
+  @case ('done') {
+    <mat-dialog-content>
+      <div class="result" role="status">
+        <span class="done-icon" aria-hidden="true"><mat-icon>check</mat-icon></span>
+        <span class="result-title">{{ 'users.dialogs.assignRfidTag.done.title' | translate }}</span>
+        @if (assignment) {
+          <span class="result-text">
+            <span class="mono tag-id">{{ assignment.rfidTagId ?? '' | rfidTagId }}</span>
+            {{
+              'users.dialogs.assignRfidTag.done.message'
+                | translate
+                  : { name: userName(), type: (assignment.assignmentType | rfidTagAssignmentTypeKey | translate) }
+            }}
+          </span>
+        }
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="center">
+      <button matButton="filled" type="button" [mat-dialog-close]="undefined">
+        {{ 'users.dialogs.assignRfidTag.done.close' | translate }}
+      </button>
+    </mat-dialog-actions>
+  }
+  @default never;
+}

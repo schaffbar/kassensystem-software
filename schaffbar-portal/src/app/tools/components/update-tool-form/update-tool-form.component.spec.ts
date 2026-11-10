@@ -109,7 +109,7 @@ describe('UpdateToolFormComponent', () => {
   it('should explain the impact only when the requirement is changed', async () => {
     expect(query('.requirement-impact')).toBeNull();
 
-    await chooseRequirement(/tools\.certificationRequirements\.RED/);
+    await chooseRequirement(/shared\.certificationRequirements\.RED/);
 
     expect(query('.requirement-impact span')?.textContent?.trim()).toBe('tools.dialogs.editTool.impactToRed');
   });

@@ -10,16 +10,7 @@ import {
 } from '../shared/api/customers/customer.api-model';
 import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
-import {
-  CreateUserCommand,
-  UpdateUserAddressCommand,
-  UpdateUserCommand,
-  UpdateUserContactCommand,
-  User,
-  UserAddress,
-  UserListItem,
-  UserRfidTag,
-} from './user.model';
+import { CreateUserCommand, UpdateUserCommand, User, UserAddress, UserListItem, UserRfidTag } from './user.model';
 
 const ISO_DATE = 'yyyy-MM-dd';
 
@@ -103,14 +94,14 @@ export function toUpdateCustomerRequest(command: UpdateUserCommand): UpdateCusto
   };
 }
 
-export function toUpdateCustomerContactRequest(command: UpdateUserContactCommand): UpdateCustomerContactRequest {
+export function toUpdateCustomerContactRequest(command: UpdateUserCommand): UpdateCustomerContactRequest {
   return {
     email: command.email,
     phone: command.phone ?? null,
   };
 }
 
-export function toUpdateCustomerAddressRequest(command: UpdateUserAddressCommand): UpdateCustomerAddressRequest {
+export function toUpdateCustomerAddressRequest(command: UpdateUserCommand): UpdateCustomerAddressRequest {
   return {
     addressLine1: command.addressLine1,
     addressLine2: command.addressLine2 ?? null,

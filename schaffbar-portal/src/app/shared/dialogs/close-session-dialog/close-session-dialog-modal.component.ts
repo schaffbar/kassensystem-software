@@ -1,3 +1,4 @@
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -8,20 +9,50 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../pipes/or-dash.pipe';
+import { FormDialogHeaderComponent } from '../form-dialog-header/form-dialog-header.component';
 
 export interface CloseSessionDialogViewModel {
-  workshop: { minutes: number; units: number };
-  tools: { toolId: string; name: string | null; minutes: number; units: number }[];
+  // first entry of the session
+  startTime: Date;
+  workshop: CloseSessionItemViewModel;
+  tools: CloseSessionToolViewModel[];
   hasRunningUsage: boolean;
+}
+
+export interface CloseSessionItemViewModel {
+  startTime: Date;
+  // null while running
+  endTime: Date | null;
+  minutes: number;
+  units: number;
+}
+
+export interface CloseSessionToolViewModel extends CloseSessionItemViewModel {
+  toolId: string;
+  // null if the tool has been deleted
+  name: string | null;
 }
 
 @Component({
   selector: 'schbar-close-session-dialog-modal',
   templateUrl: './close-session-dialog-modal.component.html',
   styleUrl: './close-session-dialog-modal.component.scss',
-  imports: [MatButtonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule, TranslatePipe, OrDashPipe],
+  imports: [
+    DatePipe,
+    NgTemplateOutlet,
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    TranslatePipe,
+    OrDashPipe,
+    FormDialogHeaderComponent,
+  ],
+  host: { class: 'form-dialog' },
 })
 export class CloseSessionDialogModalComponent {
+  // translated – the subtitle names the person
+  readonly userName = input.required<string>();
   readonly isLoading = input(false);
   readonly hasLoadError = input(false);
   // null: there is no open session (any more)

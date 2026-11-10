@@ -1,11 +1,52 @@
-.certifications-section {
-  margin-top: 1rem;
+:host {
+  display: block;
+}
 
-  .table-container {
-    overflow-x: auto;
-  }
+.list-header {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 16px 20px;
+}
 
-  table {
-    width: 100%;
+.status-counts {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.certification-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 60px;
+    box-sizing: border-box;
+    padding: 10px 12px 10px 20px;
+    border-top: 1px solid var(--border);
   }
+}
+
+.certification-text,
+.tool-cell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tool-name {
+  font-weight: 600;
+}
+
+.certification-detail {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.secondary {
+  color: var(--text-2);
 }

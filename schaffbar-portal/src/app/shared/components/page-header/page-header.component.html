@@ -14,7 +14,9 @@
 
 <div class="title-row">
   <div class="title-with-icon">
-    @if (icon(); as currentIcon) {
+    @if (avatar(); as initials) {
+      <span class="icon-tile avatar" aria-hidden="true">{{ initials }}</span>
+    } @else if (icon(); as currentIcon) {
       <span class="icon-tile" aria-hidden="true">
         <mat-icon>{{ currentIcon }}</mat-icon>
       </span>

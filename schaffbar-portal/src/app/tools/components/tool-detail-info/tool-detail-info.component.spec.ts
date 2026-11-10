@@ -35,8 +35,8 @@ describe('ToolDetailInfoComponent', () => {
 
   it('should show description, area, requirement and active certifications', () => {
     expect(text('.description')).toBe('Schnittbreite 40 cm');
-    expect(text('.area')).toBe('tools.areas.FABLAB');
-    expect(text('schbar-certification-requirement-badge .label')).toBe('tools.certificationRequirements.RED');
+    expect(text('.area')).toBe('shared.toolAreas.FABLAB');
+    expect(text('schbar-certification-requirement-badge .label')).toBe('shared.certificationRequirements.RED');
     expect(text('.active-certifications')).toBe('tools.pages.toolDetails.persons');
   });
 

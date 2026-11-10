@@ -8,7 +8,7 @@
       <p class="summary" role="alert">
         <mat-icon aria-hidden="true">error</mat-icon>
         {{
-          (count === 1 ? 'users.dialogs.addNewUser.checkOneField' : 'users.dialogs.addNewUser.checkFields')
+          (count === 1 ? 'users.dialogs.userForm.checkOneField' : 'users.dialogs.userForm.checkFields')
             | translate: { count }
         }}
       </p>
@@ -54,7 +54,7 @@
           <input
             id="dateOfBirth"
             matInput
-            [placeholder]="'users.dialogs.addNewUser.dateOfBirthPlaceholder' | translate"
+            [placeholder]="'users.dialogs.userForm.dateOfBirthPlaceholder' | translate"
             [formField]="userForm.dateOfBirth"
             [min]="dateOfBirthLimits.min"
             [max]="dateOfBirthLimits.max"
@@ -76,7 +76,7 @@
     </div>
 
     <fieldset>
-      <legend>{{ 'users.dialogs.addNewUser.headers.contact' | translate }}</legend>
+      <legend>{{ 'users.dialogs.userForm.headers.contact' | translate }}</legend>
       <div class="fields">
         <div>
           <label class="field-label" for="email">{{ 'users.shared.userProperties.email' | translate }}</label>
@@ -90,7 +90,7 @@
         <div>
           <label class="field-label" for="phone">
             {{ 'users.shared.userProperties.phone' | translate }}
-            <span class="optional">{{ 'users.dialogs.addNewUser.optional' | translate }}</span>
+            <span class="optional">{{ 'users.dialogs.userForm.optional' | translate }}</span>
           </label>
           <mat-form-field class="full-width" subscriptSizing="dynamic">
             <input id="phone" matInput type="tel" autocomplete="tel" [formField]="userForm.phone" />
@@ -100,7 +100,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>{{ 'users.dialogs.addNewUser.headers.billingAddress' | translate }}</legend>
+      <legend>{{ 'users.dialogs.userForm.headers.billingAddress' | translate }}</legend>
       <div class="address">
         <div>
           <label class="field-label" for="addressLine1">
@@ -116,7 +116,7 @@
         <div>
           <label class="field-label" for="addressLine2">
             {{ 'users.shared.userProperties.addressLine2' | translate }}
-            <span class="optional">{{ 'users.dialogs.addNewUser.optional' | translate }}</span>
+            <span class="optional">{{ 'users.dialogs.userForm.optional' | translate }}</span>
           </label>
           <mat-form-field class="full-width" subscriptSizing="dynamic">
             <input id="addressLine2" matInput autocomplete="address-line2" [formField]="userForm.addressLine2" />

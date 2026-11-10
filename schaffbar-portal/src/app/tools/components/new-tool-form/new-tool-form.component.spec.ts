@@ -127,8 +127,8 @@ describe('NewToolFormComponent', () => {
 
   it('should close the dialog with the create command', async () => {
     await setName('Drechselbank');
-    await choose('area', /tools\.areas\.HOLZ/);
-    await choose('requirement', /tools\.certificationRequirements\.RED/);
+    await choose('area', /shared\.toolAreas\.HOLZ/);
+    await choose('requirement', /shared\.certificationRequirements\.RED/);
 
     await clickSave();
 

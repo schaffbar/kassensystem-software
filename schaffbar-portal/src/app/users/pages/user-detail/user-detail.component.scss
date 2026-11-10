@@ -1,7 +1,28 @@
+schbar-user-session-banner {
+  display: block;
+  margin-bottom: 20px;
+}
+
 .tab-content {
-  padding: 1rem;
+  padding: 20px 0;
+}
+
+// number of certifications next to the tab label, like in the prototype
+.tab-count {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.registered {
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .load-error {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }

@@ -1,40 +1,59 @@
-import { Component, inject, input } from '@angular/core';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, computed, inject } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { CloseSessionDialogService } from '../../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
-import { ToolUsageSummaryComponent } from '../../../components/tool-usage-summary/tool-usage-summary.component';
-import { WorkshopUsageSummaryComponent } from '../../../components/workshop-usage-summary/workshop-usage-summary.component';
-import { CloseWorkshopSessionCommand } from '../../../workshop-session.model';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import {
+  UserOpenSessionComponent,
+  UserOpenSessionViewModel,
+  UserSessionUsageRowViewModel,
+} from '../../../components/user-open-session/user-open-session.component';
+import { WorkshopSession } from '../../../workshop-session.model';
 import { UserDetailStore } from '../user-detail.store';
 
 @Component({
   selector: 'schbar-user-detail-tab-session',
   templateUrl: './user-detail-tab-session.component.html',
-  styleUrl: './user-detail-tab-session.component.scss',
-  imports: [MatButtonModule, MatIconModule, TranslatePipe, ToolUsageSummaryComponent, WorkshopUsageSummaryComponent],
+  imports: [TranslatePipe, EmptyStateComponent, UserOpenSessionComponent],
 })
 export class UserDetailTabSessionComponent {
   protected readonly detailsStore = inject(UserDetailStore);
-  private readonly closeSessionDialog = inject(CloseSessionDialogService);
 
-  readonly userId = input.required<string>();
+  protected readonly openSession = computed(() => {
+    const session = this.detailsStore.openSession();
+    return session ? toUserOpenSessionViewModel(session) : null;
+  });
+}
 
-  // --------------------------------------------------------------------------
-  // actions
+// ----------------------------------------------------------------------------
+// mappers
 
-  protected closeWorkshopSession(): void {
-    this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {
-      if (confirmed) {
-        const command: CloseWorkshopSessionCommand = { userId: this.userId() };
-        this.detailsStore.closeWorkshopSession(command);
-      } else {
-        // the dialog loaded the session itself and may have shown a newer state than the page
-        this.detailsStore.reloadOpenSession();
-      }
-    });
-  }
+// stays in the workshop and uses of tools in the order they started
+function toUserOpenSessionViewModel(session: WorkshopSession): UserOpenSessionViewModel {
+  const workshopUsages: UserSessionUsageRowViewModel[] = session.workshopUsages.map((usage) => ({
+    id: usage.id,
+    kind: 'workshop',
+    toolName: null,
+    startTime: usage.entryTime,
+    endTime: usage.exitTime,
+    durationInMinutes: usage.durationInMinutes,
+    units: usage.unitsUsed,
+  }));
+  const toolUsages: UserSessionUsageRowViewModel[] = session.toolUsageSummaries.flatMap((summary) =>
+    summary.usages.map((usage) => ({
+      id: usage.id,
+      kind: 'tool',
+      toolName: summary.toolName,
+      startTime: usage.startTime,
+      endTime: usage.endTime,
+      durationInMinutes: usage.durationInMinutes,
+      units: usage.unitsUsed,
+    })),
+  );
+  return {
+    usages: [...workshopUsages, ...toolUsages].sort((a, b) => a.startTime.getTime() - b.startTime.getTime()),
+    workshopMinutes: session.totalWorkshopDurationInMinutes,
+    workshopUnits: session.totalWorkshopUnits,
+    toolUnits: session.toolUsageSummaries.reduce((sum, summary) => sum + summary.totalUnits, 0),
+  };
 }

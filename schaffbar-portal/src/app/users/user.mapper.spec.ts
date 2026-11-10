@@ -12,6 +12,7 @@ import {
   toUser,
   toUserListItems,
 } from './user.mapper';
+import { UpdateUserCommand } from './user.model';
 
 describe('user.mapper', () => {
   describe('toUser', () => {
@@ -103,40 +104,40 @@ describe('user.mapper', () => {
     });
   });
 
-  describe('toUpdateCustomerRequest', () => {
-    it('should send the date of birth as ISO date and no id', () => {
-      expect(
-        toUpdateCustomerRequest({
-          userId: 'user-1',
-          firstName: 'Max',
-          lastName: 'Mustermann',
-          dateOfBirth: new Date(1985, 2, 15),
-          clubMember: false,
-        }),
-      ).toEqual({ firstName: 'Max', lastName: 'Mustermann', dateOfBirth: '1985-03-15', clubMember: false });
-    });
-  });
+  // one command for the edit dialog – each request takes its part of it
+  const update: UpdateUserCommand = {
+    userId: 'user-1',
+    firstName: 'Max',
+    lastName: 'Mustermann',
+    dateOfBirth: new Date(1985, 2, 15),
+    clubMember: false,
+    email: 'max@example.org',
+    addressLine1: 'Hauptstraße 1',
+    postalCode: '12345',
+    city: 'Berlin',
+    country: 'Deutschland',
+  };
 
-  describe('toUpdateCustomerContactRequest', () => {
-    it('should send a missing phone as null and no id', () => {
-      expect(toUpdateCustomerContactRequest({ userId: 'user-1', email: 'max@example.org' })).toEqual({
-        email: 'max@example.org',
-        phone: null,
+  describe('toUpdateCustomerRequest', () => {
+    it('should send only the person, the date of birth as ISO date and no id', () => {
+      expect(toUpdateCustomerRequest(update)).toEqual({
+        firstName: 'Max',
+        lastName: 'Mustermann',
+        dateOfBirth: '1985-03-15',
+        clubMember: false,
       });
     });
   });
 
+  describe('toUpdateCustomerContactRequest', () => {
+    it('should send only the contact, a missing phone as null and no id', () => {
+      expect(toUpdateCustomerContactRequest(update)).toEqual({ email: 'max@example.org', phone: null });
+    });
+  });
+
   describe('toUpdateCustomerAddressRequest', () => {
-    it('should send a missing second address line as null and no id', () => {
-      expect(
-        toUpdateCustomerAddressRequest({
-          userId: 'user-1',
-          addressLine1: 'Hauptstraße 1',
-          postalCode: '12345',
-          city: 'Berlin',
-          country: 'Deutschland',
-        }),
-      ).toEqual({
+    it('should send only the address, a missing second address line as null and no id', () => {
+      expect(toUpdateCustomerAddressRequest(update)).toEqual({
         addressLine1: 'Hauptstraße 1',
         addressLine2: null,
         postalCode: '12345',
