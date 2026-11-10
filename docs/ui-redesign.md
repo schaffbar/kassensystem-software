@@ -554,37 +554,39 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      möglichen Doppeleintrag (gleicher Name oder gleiche E-Mail, mit Link zum Profil – nur im Portal, aus der geladenen
      Liste). Ohne Backend noch offen: Anzahl Einweisungen, „Zuletzt da“ (die Spalte zeigt nur „In der Werkstatt“), die
      Sortierauswahl (erst mit „Zuletzt da“ sinnvoll – nach einem unsichtbaren Wert wie dem Registrierdatum zu sortieren
-     verwirrt, Entscheidung 09.11.2026), serverseitige Suche und Paginierung, Löschkonzept (siehe customer-README). Noch
-     nicht im ⋯-Menü: „Bearbeiten …“, „RFID-Tag zuweisen …“, „Sitzung beenden …“ – die Dialoge kommen mit der
-     Detailseite. Weggelassen: Altersgruppe im Dialog (die Grenzen kennt nur das Backend) und „Anlegen & RFID-Tag
-     zuweisen“. Nebenbei: Hinweise und Fehler unter Feldern mit Label darüber stehen 6px unter dem Feld (nur, wenn es
-     sie gibt).
+     verwirrt, Entscheidung 09.11.2026), serverseitige Suche und Paginierung, Löschkonzept (siehe customer-README).
+     „Bearbeiten“, „RFID-Tag zuweisen …“ und „Sitzung beenden …“ bleiben vorerst auf der Detailseite (Entscheidung
+     10.11.2026). Den Löschen-Eintrag kann die Liste nicht vorab ausblenden wie die Detailseite – dafür fehlt ein
+     Endpunkt mit allen offenen Sitzungen. Weggelassen: Altersgruppe im Dialog (die Grenzen kennt nur das Backend) und
+     „Anlegen & RFID-Tag zuweisen“. Nebenbei: Hinweise und Fehler unter Feldern mit Label darüber stehen 6px unter dem
+     Feld (nur, wenn es sie gibt).
    - [x] Benutzer – Detailseite: wie im Prototyp – Kopf mit Avatar (Initialen), Altersgruppe, „Vereinsmitglied“,
      Tag-Badge („Fest · 04A3 1F9C“ oder „Wartet auf Tag“), „Registriert am“, „Bearbeiten“, Neu laden und ⋯-Menü
      (Bearbeiten, RFID-Tag zuweisen … nur ohne Tag, Sitzung beenden … nur wenn abrechenbar, Benutzer löschen … nur ohne
-     offene Sitzung). Banner bei offener Sitzung: „In der Werkstatt seit …“ ab dem ersten Betreten, darunter das
-     laufende Werkzeug oder „Ausgecheckt um … – bereit zum Abrechnen“; „Sitzung beenden & abrechnen“ ist gesperrt,
-     solange die Person eingecheckt ist oder ein Werkzeug läuft, mit Hinweis warum (Entscheidung 09.11.2026 – das
-     Backend lässt es sonst nicht zu, WS-5). Tabs Übersicht / Einweisungen (Anzahl) / Offene Sitzung. Übersicht: Karte
-     „Kontakt & Adresse“ (nur lesen, „Bearbeiten“ öffnet den Dialog – die Inline-Formulare sind weg), Karte „RFID-Tag“
-     (Tag mit Art und Datum und „Tag entfernen …“; wartend mit „Zuweisung anzeigen“; ohne Tag „RFID-Tag zuweisen …“),
-     Einweisungen als Liste mit Bereich, Datum, Einweiser, Status und ⋯-Menü (Pausieren, Reaktivieren, Entziehen,
-     Löschen – wie auf der Werkzeugseite), Gefahrenzone (bei offener Sitzung Hinweis und „Zur offenen Sitzung“ statt
-     Löschen). Tab Einweisungen: dieselben Einträge als Tabelle mit Anforderung. Tab Offene Sitzung: Werkstatt- und
-     Werkzeugnutzungen nach Startzeit („läuft“ statt Ende) und Zusammenfassung (Werkstattzeit, Werkstatt- und
-     Werkzeug-Einheiten). Dialog „Benutzer bearbeiten“: Person, Kontakt und Adresse in einem Formular, Zähler
-     „N ungespeicherte Änderungen“, Speichern erst mit Änderung; gespeichert werden nur die geänderten Teile.
-     Dialog „RFID-Tag zuweisen“ in drei Schritten (Art wählen als Auswahlkarten, Tag an das Lesegerät an der Theke
-     halten, fertig): die Seite fragt die wartende Zuweisung alle 2 Sekunden ab, der Dialog springt von selbst auf
-     „Tag zugewiesen“ (Entscheidung 09.11.2026); geschlossen bleibt die Anfrage bestehen. Dialog „Sitzung beenden &
-     abrechnen“ mit Kopf (Name, eingecheckt um), Posten mit Zeit, Dauer und Einheiten. Bereich- und
-     Anforderungs-Bausteine (`toolAreaKey`, `certificationRequirementKey`, `certification-requirement-badge`) liegen
-     jetzt in `shared/`, die Texte unter `shared.toolAreas` / `shared.certificationRequirements`. Ohne Backend noch
-     offen: Betrag und Zahlungsart beim Abrechnen, Bestätigungsschritt „Sitzung abgeschlossen“, laufende Werkzeuge
-     automatisch ausschalten, Tag ersetzen (heute: entfernen, dann zuweisen), Tag-Anfrage abbrechen, beim Entfernen
-     „freigeben oder deaktivieren“, Grund bei Pausieren/Entziehen, Bestätigungshäkchen beim Löschen und das Löschen
-     selbst bei vorhandenen Einweisungen (customer-README C-9), Live-Dauer im Banner. Noch nicht im ⋯-Menü der Liste:
-     „Bearbeiten“, „RFID-Tag zuweisen …“, „Sitzung beenden …“.
+     offene Sitzung). Banner bei offener Sitzung, eine flache Zeile über den Tabs: „In der Werkstatt seit …“ ab dem
+     ersten Betreten, daneben „Ausgecheckt um … – bereit zum Abrechnen“ oder warum noch nicht abgerechnet werden kann –
+     ohne das laufende Werkzeug aus dem Prototyp (Entscheidung 10.11.2026); „Sitzung beenden & abrechnen“ ist gesperrt,
+     solange die Person eingecheckt ist oder ein Werkzeug läuft (Entscheidung 09.11.2026 – das Backend lässt es sonst
+     nicht zu, WS-5). Tabs Übersicht / Einweisungen (Anzahl) / Offene Sitzung. Übersicht: Karte „Kontakt & Adresse“ (nur
+     lesen, „Bearbeiten“ öffnet den Dialog – die Inline-Formulare sind weg), Karte „RFID-Tag“ (Tag mit Art und Datum und
+     „Tag entfernen …“; wartend mit „Zuweisung anzeigen“; ohne Tag „RFID-Tag zuweisen …“), Einweisungen als Liste mit
+     Bereich, Datum, Einweiser, Status und ⋯-Menü (Pausieren, Reaktivieren, Entziehen, Löschen – wie auf der
+     Werkzeugseite), Gefahrenzone (bei offener Sitzung Hinweis und „Zur offenen Sitzung“ statt Löschen). Tab
+     Einweisungen: dieselben Einträge als Tabelle mit Anforderung. Tab Offene Sitzung: Werkstatt- und Werkzeugnutzungen
+     nach Startzeit („läuft“ statt Ende) und Zusammenfassung (Werkstattzeit, Werkstatt- und Werkzeug-Einheiten). Dialog
+     „Benutzer bearbeiten“: Person, Kontakt und Adresse in einem Formular, Zähler „N ungespeicherte Änderungen“,
+     Speichern erst mit Änderung; gespeichert werden nur die geänderten Teile. Dialog „RFID-Tag zuweisen“ in drei
+     Schritten (Art wählen als Auswahlkarten, Tag an das Lesegerät an der Theke halten, fertig): die Seite fragt die
+     wartende Zuweisung alle 2 Sekunden ab, der Dialog springt von selbst auf „Tag zugewiesen“ (Entscheidung
+     09.11.2026); geschlossen bleibt die Anfrage bestehen. Dialog „Sitzung beenden & abrechnen“ mit Kopf (Name,
+     eingecheckt um), Posten mit Zeit, Dauer und Einheiten. Bereich- und Anforderungs-Bausteine (`toolAreaKey`,
+     `certificationRequirementKey`, `certification-requirement-badge`) liegen jetzt in `shared/`, die Texte unter
+     `shared.toolAreas` / `shared.certificationRequirements`. Ohne Backend noch offen: Betrag und Zahlungsart beim
+     Abrechnen, Bestätigungsschritt „Sitzung abgeschlossen“, laufende Werkzeuge automatisch ausschalten, Tag ersetzen
+     (heute: entfernen, dann zuweisen), Tag-Anfrage abbrechen, beim Entfernen „freigeben oder deaktivieren“, Grund bei
+     Pausieren/Entziehen, Bestätigungshäkchen beim Löschen und das Löschen selbst bei vorhandenen Einweisungen
+     (customer-README C-9), Live-Dauer im Banner. „Bearbeiten“, „RFID-Tag zuweisen …“ und „Sitzung beenden …“ gibt es
+     vorerst nur auf der Detailseite, nicht im ⋯-Menü der Liste (Entscheidung 10.11.2026).
    - [ ] Übersicht
 
 ### Spätere Aufgaben

@@ -125,14 +125,10 @@ export class UserDetailComponent {
 
 function toUserSessionBannerViewModel(session: WorkshopSession): UserSessionBannerViewModel {
   const inWorkshop = isInWorkshop(session);
-  const runningUsage = session.toolUsageSummaries
-    .flatMap((summary) => summary.usages.map((usage) => ({ name: summary.toolName, usage })))
-    .find(({ usage }) => usage.endTime === null);
   const exitTimes = session.workshopUsages.flatMap((usage) => (usage.exitTime ? [usage.exitTime.getTime()] : []));
   return {
     startTime: session.startTime,
     inWorkshop,
-    runningTool: runningUsage ? { name: runningUsage.name, startTime: runningUsage.usage.startTime } : null,
     checkedOutAt: !inWorkshop && exitTimes.length > 0 ? new Date(Math.max(...exitTimes)) : null,
     canClose: canCloseWorkshopSession(session),
   };

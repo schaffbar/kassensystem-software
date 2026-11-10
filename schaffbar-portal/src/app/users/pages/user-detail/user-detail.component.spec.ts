@@ -234,7 +234,6 @@ describe('UserDetailComponent', () => {
     expect(banner.userSessionBanner()).toEqual({
       startTime: session.startTime,
       inWorkshop: false,
-      runningTool: null,
       checkedOutAt: new Date(2026, 10, 9, 16, 30),
       canClose: true,
     });
@@ -243,18 +242,10 @@ describe('UserDetailComponent', () => {
     expect(dialogsMock.closeWorkshopSession).toHaveBeenCalledTimes(1);
   });
 
-  it('should show the running tool while the user is in the workshop', async () => {
-    const running = new Date(2026, 10, 9, 14, 40);
+  it('should lock closing while the user is in the workshop', async () => {
     storeMock.openSession.set({
       ...session,
       workshopUsages: [{ ...session.workshopUsages[0], exitTime: null, durationInMinutes: null, unitsUsed: null }],
-      toolUsageSummaries: [
-        {
-          ...session.toolUsageSummaries[0],
-          active: true,
-          usages: [{ id: 't-2', startTime: running, endTime: null, durationInMinutes: null, unitsUsed: null }],
-        },
-      ],
     });
     await create();
 
@@ -264,7 +255,6 @@ describe('UserDetailComponent', () => {
     expect(banner.userSessionBanner()).toEqual({
       startTime: session.startTime,
       inWorkshop: true,
-      runningTool: { name: 'Bandsäge', startTime: running },
       checkedOutAt: null,
       canClose: false,
     });

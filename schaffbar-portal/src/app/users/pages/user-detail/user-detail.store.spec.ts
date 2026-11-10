@@ -318,7 +318,8 @@ describe('UserDetailStore', () => {
     TestBed.runInInjectionContext(() => store.pollRfidTagAssignment(store.isWaitingForRfidTag));
     trigger();
 
-    vi.advanceTimersByTime(2000);
+    // the next tick of the poll, without depending on the exact milliseconds of the fake clock
+    vi.advanceTimersToNextTimer();
     trigger();
     const reload = expectAssignment();
     expect(store.isLoading()).toBe(false);
@@ -326,11 +327,10 @@ describe('UserDetailStore', () => {
     await settle();
     trigger();
 
-    // assigned: no more requests
-    vi.advanceTimersByTime(4000);
-    trigger();
-    httpMock.expectNone(() => true);
+    // assigned: the poll has stopped
     expect(store.isWaitingForRfidTag()).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+    httpMock.expectNone(() => true);
   });
 
   it('should only reload the certifications after deleting one', async () => {

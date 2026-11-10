@@ -265,7 +265,6 @@
         "session": {
           "label": "Laufende Sitzung",
           "inWorkshopSince": "In der Werkstatt seit {{time}}",
-          "runningTool": "Nutzt gerade {{tool}} seit {{time}}",
           "checkedOut": "Ausgecheckt um {{time}} – bereit zum Abrechnen",
           "closeAfterCheckout": "Abrechnen geht erst nach dem Auschecken am Ausgang.",
           "closeAfterToolStopped": "Abrechnen geht erst, wenn kein Werkzeug mehr läuft."

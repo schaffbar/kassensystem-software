@@ -265,7 +265,6 @@
         "session": {
           "label": "Current session",
           "inWorkshopSince": "In the workshop since {{time}}",
-          "runningTool": "Using {{tool}} since {{time}}",
           "checkedOut": "Checked out at {{time}} – ready to bill",
           "closeAfterCheckout": "Billing is possible after checking out at the exit.",
           "closeAfterToolStopped": "Billing is possible once no tool is running."

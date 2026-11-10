@@ -1,28 +1,22 @@
 @use '@angular/material' as mat;
 
+// one line above the tabs – the status at a glance, not a card
 .banner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 8px 12px;
+  padding: 8px 8px 8px 16px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--accent-soft);
-}
-
-.status {
-  display: flex;
-  align-items: center;
-  gap: 14px;
 }
 
 // green while in the workshop, grey after checking out – the text says the same
 .dot {
   flex: none;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--text-3);
 
@@ -44,26 +38,28 @@
   }
 }
 
+.status {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 12px;
+}
+
 .text {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 0;
 }
 
 .title {
-  font-size: 16px;
   font-weight: 700;
 }
 
 .detail {
   color: var(--text-2);
-}
-
-.action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  font-size: 13px;
 }
 
 // the navy of the sidebar like in the prototype – the main action of the page, but not the neon green of saving
@@ -72,14 +68,6 @@
     (
       filled-container-color: var(--nav),
       filled-label-text-color: var(--nav-text-active),
-      filled-container-height: 44px,
     )
   );
-}
-
-.hint {
-  max-width: 320px;
-  color: var(--text-2);
-  font-size: 13px;
-  text-align: right;
 }

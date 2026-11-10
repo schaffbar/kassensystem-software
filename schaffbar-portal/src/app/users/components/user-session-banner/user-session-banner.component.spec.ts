@@ -10,7 +10,6 @@ describe('UserSessionBannerComponent', () => {
   const inWorkshop: UserSessionBannerViewModel = {
     startTime: new Date(2026, 10, 9, 14, 5),
     inWorkshop: true,
-    runningTool: { name: 'Drechselbank', startTime: new Date(2026, 10, 9, 14, 40) },
     checkedOutAt: null,
     canClose: false,
   };
@@ -34,11 +33,10 @@ describe('UserSessionBannerComponent', () => {
     return fixture.nativeElement.querySelector(selector);
   }
 
-  it('should show the running tool and lock closing while the user is in the workshop', async () => {
+  it('should lock closing while the user is in the workshop and say why', async () => {
     await render(inWorkshop);
 
     expect(query('.title')?.textContent?.trim()).toBe('users.pages.userDetails.session.inWorkshopSince');
-    expect(query('.running-tool')).not.toBeNull();
     expect(query('.dot')?.classList).toContain('pulse');
     expect(query<HTMLButtonElement>('.close-button')?.disabled).toBe(true);
     expect(query('.close-button')?.getAttribute('aria-describedby')).toBe('close-session-hint');
@@ -59,7 +57,6 @@ describe('UserSessionBannerComponent', () => {
     await render({
       ...inWorkshop,
       inWorkshop: false,
-      runningTool: null,
       checkedOutAt: new Date(2026, 10, 9, 16, 30),
       canClose: true,
     });
