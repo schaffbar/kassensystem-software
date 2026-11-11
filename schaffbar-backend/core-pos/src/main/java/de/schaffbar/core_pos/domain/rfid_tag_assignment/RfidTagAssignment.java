@@ -108,10 +108,12 @@ class RfidTagAssignment {
         return List.of(RfidTagAssignmentEventFactory.rfidTagAssigned(this));
     }
 
+    // TODO: remove Events suffix
     public List<SchaffbarEvent> unassignEvents() {
         return List.of(RfidTagAssignmentEventFactory.rfidTagUnassigned(this));
     }
 
+    // TODO: remove Events suffix
     public List<SchaffbarEvent> cancelEvents() {
         return List.of(RfidTagAssignmentEventFactory.rfidTagAssignmentCancelled(this));
     }

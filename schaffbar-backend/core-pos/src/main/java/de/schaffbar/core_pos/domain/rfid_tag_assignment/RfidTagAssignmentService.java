@@ -90,6 +90,7 @@ public class RfidTagAssignmentService {
     public void unassignRfidTag(@NotNull @Valid CustomerId customerId) {
         RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomer(customerId) //
                 .filter(RfidTagAssignment::isAssigned) //
+                // TODO: implement custom exception
                 .orElseThrow(() -> new RuntimeException("No RFID tag assigned to customer [id: " + customerId.getValue() + "]"));
 
         List<SchaffbarEvent> events = assignment.unassignEvents();
