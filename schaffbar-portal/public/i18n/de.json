@@ -202,7 +202,7 @@
       },
       "deleteUser": {
         "title": "Benutzer löschen",
-        "message": "Das Profil wird dauerhaft entfernt. Das lässt sich nicht rückgängig machen.",
+        "message": "Das Profil wird dauerhaft gelöscht, mit allen Einweisungen und der Rolle als Einweiser. Ein RFID-Tag wird wieder frei. Abgerechnete Sitzungen bleiben für die Buchhaltung erhalten. Das lässt sich nicht rückgängig machen.",
         "confirm": "Benutzer löschen",
         "openSession": "{{name}} hat noch eine offene Sitzung. Löschen geht erst, wenn die Sitzung beendet und abgerechnet ist."
       },
@@ -339,7 +339,7 @@
           }
         },
         "hints": {
-          "dangerZone": "Löscht das Profil dauerhaft. Das lässt sich nicht rückgängig machen.",
+          "dangerZone": "Löscht das Profil mit allen Einweisungen dauerhaft, ein RFID-Tag wird wieder frei. Abgerechnete Sitzungen bleiben erhalten.",
           "dangerZoneOpenSession": "Solange eine Sitzung offen ist, lässt sich der Benutzer nicht löschen. Zuerst die Sitzung beenden und abrechnen."
         },
         "actions": {

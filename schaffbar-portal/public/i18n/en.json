@@ -202,7 +202,7 @@
       },
       "deleteUser": {
         "title": "Delete User",
-        "message": "The profile is removed permanently. This cannot be undone.",
+        "message": "The profile is deleted permanently, with all certifications and the role as instructor. An RFID tag becomes free again. Paid sessions stay for the accounting. This cannot be undone.",
         "confirm": "Delete User",
         "openSession": "{{name}} still has an open session. The user can only be deleted once the session has been closed and paid."
       },
@@ -339,7 +339,7 @@
           }
         },
         "hints": {
-          "dangerZone": "Deletes the profile permanently. This cannot be undone.",
+          "dangerZone": "Deletes the profile with all certifications permanently, an RFID tag becomes free again. Paid sessions stay.",
           "dangerZoneOpenSession": "The user cannot be deleted while a session is open. Close and bill the session first."
         },
         "actions": {
