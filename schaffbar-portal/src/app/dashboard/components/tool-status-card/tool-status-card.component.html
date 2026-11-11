@@ -1,0 +1,48 @@
+<div class="header">
+  <div class="title-row">
+    <h2>{{ 'dashboard.toolStatus.title' | translate }}</h2>
+    <span class="in-use">
+      {{ 'dashboard.toolStatus.inUse' | translate: { count: inUseCount(), total: toolStatuses().length } }}
+    </span>
+  </div>
+  <schbar-segmented-control
+    [label]="'dashboard.toolStatus.areaFilter' | translate"
+    [segments]="areaSegments()"
+    [(selected)]="area" />
+</div>
+
+@if (shownTools().length === 0) {
+  <schbar-empty-state icon="handyman" [title]="'dashboard.toolStatus.empty' | translate" />
+} @else {
+  <ul>
+    @for (tool of shownTools(); track tool.toolId) {
+      <li>
+        <a [routerLink]="[toolsLink, tool.toolId]">
+          <span class="tool">
+            <span class="name">{{ tool.name }}</span>
+            <span class="meta">
+              {{ tool.area | toolAreaKey | translate }}
+              @if (tool.usedBy) {
+                · {{ tool.usedBy }}
+              }
+            </span>
+          </span>
+          @if (tool.usedBy) {
+            <schbar-status-badge tone="info" icon="play_circle">
+              {{ 'dashboard.toolStatus.statuses.inUse' | translate }}
+            </schbar-status-badge>
+          } @else {
+            <schbar-status-badge tone="success" icon="check_circle">
+              {{ 'dashboard.toolStatus.statuses.free' | translate }}
+            </schbar-status-badge>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+}
+
+<a class="all-tools" [routerLink]="toolsLink">
+  {{ 'dashboard.toolStatus.showAll' | translate: { count: toolStatuses().length } }}
+  <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+</a>

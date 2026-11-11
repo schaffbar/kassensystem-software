@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { AgeGroup } from '../shared/models/age-group';
+import { AgeGroup } from '../models/age-group';
 
 /**
  * Translation key of an age group.
@@ -10,6 +10,6 @@ import { AgeGroup } from '../shared/models/age-group';
 @Pipe({ name: 'ageGroupKey' })
 export class AgeGroupKeyPipe implements PipeTransform {
   transform(ageGroup: AgeGroup): string {
-    return `users.chips.userDetails.ageGroup.${ageGroup.toLowerCase()}`;
+    return `shared.ageGroups.${ageGroup.toLowerCase()}`;
   }
 }

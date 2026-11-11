@@ -593,7 +593,19 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      Spalten – beim Benutzer aus der rechten Spalte darunter verschoben, beim Werkzeug neu im Tab „Details“ (im Prototyp
      fehlt sie dort); solange jemand das Werkzeug benutzt, erklärt sie das statt zu löschen, und das ⋯-Menü blendet
      „Werkzeug löschen …“ aus (tool-README T-17, nur im Portal).
-   - [ ] Übersicht
+   - [x] Übersicht: wie im Prototyp, soweit es Daten gibt – Kopf mit Datum und „aktualisiert um …“, die Seite lädt sich
+     jede Minute selbst neu (ohne Fortschrittsbalken) und per Button (Entscheidung 11.11.2026). Block „Braucht
+     Aufmerksamkeit“ nur, wenn es etwas gibt: RFID-Lesegeräte ohne Typ und Werkzeuge ohne Schaltbox oder WLAN-Relais –
+     bei einem Eintrag mit Link direkt dorthin, bei mehreren mit den ersten Namen und Link zur Liste (Entscheidung
+     11.11.2026; „eingecheckt ohne Tag“ nicht, „Lesegerät offline“ fehlt im Backend). Zwei Kennzahlen: „In der
+     Werkstatt“ mit „davon N unter 18“ und „Werkzeuge in Benutzung N / gesamt“ mit den Namen – „Check-ins heute“ und
+     „Lesegeräte online“ kommen erst mit dem Backend (Entscheidung 11.11.2026). Liste „In der Werkstatt“: am längsten da
+     zuerst, Initialen, Name, Altersgruppe · Vereinsmitglied, Badge mit dem laufenden Werkzeug, Dauer (tickt jede
+     Minute) und „seit“, jede Zeile führt zum Profil. „Werkzeugstatus“: Bereichsfilter mit Anzahl, laufende Werkzeuge
+     zuerst, „In Benutzung“ mit Name oder „Frei“, höchstens 8 Einträge und „Alle N Werkzeuge anzeigen“.
+     Altersgruppen-Pipe und -Texte liegen jetzt in `shared/` (`shared.ageGroups`). Weggelassen: globale Suche und
+     „Benutzer hinzufügen“ im Kopf, „Offline“-Status von Werkzeugen, Dauer der Werkzeugnutzung (die aktiven Werkzeuge
+     haben keine Startzeit), Statusbox „Werkstatt geöffnet“ und DE/EN in der Seitenleiste.
 
 ### Spätere Aufgaben
 

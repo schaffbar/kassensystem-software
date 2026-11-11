@@ -1,9 +1,33 @@
-.dashboard-widgets {
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
 
+// who is in the workshop next to the tools – one column on narrow screens
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.active-users {
+  flex: 3 1 440px;
+  min-width: 0;
+}
+
+.tool-status {
+  flex: 2 1 380px;
+  min-width: 0;
+}
+
 .load-error {
-  color: var(--mat-sys-error);
+  color: var(--danger);
 }

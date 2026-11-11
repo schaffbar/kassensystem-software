@@ -148,9 +148,9 @@ describe('UserListComponent', () => {
     expect(texts('.user-email')).toEqual(['erika@example.org', 'max@example.org', 'otto@example.org']);
     expect(texts('.member-badge')).toEqual(['users.pages.userList.member']);
     expect(texts('.age-group')).toEqual([
-      'users.chips.userDetails.ageGroup.under_16',
-      'users.chips.userDetails.ageGroup.adult',
-      'users.chips.userDetails.ageGroup.under_18',
+      'shared.ageGroups.under_16',
+      'shared.ageGroups.adult',
+      'shared.ageGroups.under_18',
     ]);
     expect(texts('.rfid-tag')).toEqual([
       'hourglass_top users.pages.userList.rfidTag.waiting',

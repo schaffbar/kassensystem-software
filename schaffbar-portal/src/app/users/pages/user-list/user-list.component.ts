@@ -30,7 +30,7 @@ import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignmen
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { SNACKBAR_DURATION_MS } from '../../../shared/snack-bar/snack-bar-constants';
-import { AgeGroupKeyPipe } from '../../age-group-key.pipe';
+import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
 import { NewUserDialogData, NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
 import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
 import { CreateUserCommand, DeleteUserCommand, hasTemporaryRfidTag, UserListItem } from '../../user.model';

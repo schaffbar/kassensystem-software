@@ -177,7 +177,7 @@ describe('UserDetailComponent', () => {
     expect(query('h1')?.textContent).toBe('Max Mustermann');
     expect(query('.avatar')?.textContent).toBe('MM');
     expect(texts('schbar-status-badge')).toEqual([
-      'users.chips.userDetails.ageGroup.adult',
+      'shared.ageGroups.adult',
       'verified users.chips.userDetails.clubMember',
       'sell users.chips.userDetails.rfidTags.fixed · 04A3 1F9C',
     ]);

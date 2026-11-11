@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
 import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
-import { toActiveTool, toActiveUser, toTool } from './dashboard.mapper';
+import { AgeGroup } from '../shared/models/age-group';
+import { ToolArea } from '../shared/models/tool-area';
+import { toActiveTool, toActiveUser, toRfidReader, toTool, toUser } from './dashboard.mapper';
 
 describe('dashboard.mapper', () => {
   describe('toActiveUser', () => {
@@ -37,8 +40,41 @@ describe('dashboard.mapper', () => {
   });
 
   describe('toTool', () => {
-    it('should take only id and name from the API model', () => {
-      expect(toTool(toolFixture({ id: 'tool-1', name: 'Bandsäge' }))).toEqual({ id: 'tool-1', name: 'Bandsäge' });
+    it('should take name, area and hardware from the API model', () => {
+      expect(
+        toTool(toolFixture({ id: 'tool-1', name: 'Bandsäge', rfidReaderId: 'reader-1', ipAddress: '10.0.0.1' })),
+      ).toEqual({
+        id: 'tool-1',
+        name: 'Bandsäge',
+        area: ToolArea.Holz,
+        rfidReaderId: 'reader-1',
+        wlanRelaisType: null,
+      });
+    });
+  });
+
+  describe('toUser', () => {
+    it('should take only age group and membership besides the id', () => {
+      expect(toUser(customerFixture({ ageGroup: AgeGroup.Under18, clubMember: true }))).toEqual({
+        id: 'user-1',
+        ageGroup: AgeGroup.Under18,
+        clubMember: true,
+      });
+    });
+  });
+
+  describe('toRfidReader', () => {
+    it('should take name, MAC address and type', () => {
+      expect(
+        toRfidReader({
+          id: 'reader-1',
+          macAddress: 'AA:BB',
+          type: null,
+          name: null,
+          socketName: 'socket-1',
+          createdAt: '2026-01-01T10:00:00Z',
+        }),
+      ).toEqual({ id: 'reader-1', name: null, macAddress: 'AA:BB', type: null });
     });
   });
 });

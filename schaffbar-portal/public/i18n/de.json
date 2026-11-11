@@ -64,6 +64,11 @@
       "PAUSED": "Pausiert",
       "REVOKED": "Entzogen"
     },
+    "ageGroups": {
+      "under_16": "Unter 16",
+      "under_18": "Unter 18",
+      "adult": "Erwachsener"
+    },
     "certificationRequirements": {
       "YELLOW": "Einweisung empfohlen",
       "RED": "Einweisung Pflicht"
@@ -106,22 +111,54 @@
   },
   "dashboard": {
     "title": "Übersicht",
-    "widgets": {
-      "activeUsers": {
-        "title": "Aktive Benutzer in der Werkstatt",
-        "table": {
-          "name": "Name",
-          "entryTime": "Eintrittszeit",
-          "duration": "Dauer"
+    "subtitleUpdated": "{{date}} · aktualisiert um {{time}}",
+    "attention": {
+      "title": "Braucht Aufmerksamkeit ({{count}})",
+      "rfidReadersWithoutType": {
+        "one": "Das RFID-Lesegerät „{{name}}“ hat noch keinen Typ und tut nichts, bis es eingerichtet ist.",
+        "other": "{{count}} RFID-Lesegeräte haben noch keinen Typ und tun nichts, bis sie eingerichtet sind: {{names}}",
+        "link": {
+          "one": "Einrichten",
+          "other": "Lesegeräte ansehen"
         }
       },
-      "activeTools": {
-        "title": "Werkzeugstatus",
-        "table": {
-          "name": "Name",
-          "user": "Benutzer"
+      "toolsWithoutHardware": {
+        "one": "„{{name}}“ lässt sich nicht per RFID freischalten – Schaltbox oder WLAN-Relais fehlt.",
+        "other": "{{count}} Werkzeuge lassen sich nicht per RFID freischalten – Schaltbox oder WLAN-Relais fehlt: {{names}}",
+        "link": {
+          "one": "Hardware einrichten",
+          "other": "Werkzeuge ansehen"
         }
       }
+    },
+    "stats": {
+      "label": "Kennzahlen",
+      "inWorkshop": "In der Werkstatt",
+      "minors": "davon {{count}} unter 18",
+      "toolsInUse": "Werkzeuge in Benutzung"
+    },
+    "activeUsers": {
+      "title": "In der Werkstatt",
+      "clubMember": "Vereinsmitglied",
+      "durationHours": "{{hours}} h {{minutes}} min",
+      "durationMinutes": "{{minutes}} min",
+      "since": "seit {{time}}",
+      "empty": {
+        "title": "Gerade ist niemand in der Werkstatt",
+        "message": "Wer am Eingang eincheckt, erscheint hier."
+      }
+    },
+    "toolStatus": {
+      "title": "Werkzeugstatus",
+      "inUse": "{{count}} von {{total}} in Benutzung",
+      "areaFilter": "Nach Bereich filtern",
+      "allAreas": "Alle",
+      "statuses": {
+        "inUse": "In Benutzung",
+        "free": "Frei"
+      },
+      "empty": "Keine Werkzeuge in diesem Bereich",
+      "showAll": "Alle {{count}} Werkzeuge anzeigen"
     }
   },
   "users": {
@@ -251,11 +288,6 @@
         "rfidTags": {
           "fixed": "Fest",
           "temporary": "Leihtag"
-        },
-        "ageGroup": {
-          "under_16": "Unter 16",
-          "under_18": "Unter 18",
-          "adult": "Erwachsener"
         }
       }
     },

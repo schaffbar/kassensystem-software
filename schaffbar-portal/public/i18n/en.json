@@ -64,6 +64,11 @@
       "PAUSED": "Paused",
       "REVOKED": "Revoked"
     },
+    "ageGroups": {
+      "under_16": "Under 16",
+      "under_18": "Under 18",
+      "adult": "Adult"
+    },
     "certificationRequirements": {
       "YELLOW": "Certification recommended",
       "RED": "Certification required"
@@ -105,23 +110,55 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
-    "widgets": {
-      "activeUsers": {
-        "title": "Active Users in Workshop",
-        "table": {
-          "name": "Name",
-          "entryTime": "Entry Time",
-          "duration": "Duration"
+    "title": "Overview",
+    "subtitleUpdated": "{{date}} · updated at {{time}}",
+    "attention": {
+      "title": "Needs attention ({{count}})",
+      "rfidReadersWithoutType": {
+        "one": "The RFID reader “{{name}}” has no type yet and does nothing until it is set up.",
+        "other": "{{count}} RFID readers have no type yet and do nothing until they are set up: {{names}}",
+        "link": {
+          "one": "Set up",
+          "other": "View readers"
         }
       },
-      "activeTools": {
-        "title": "Tool Status",
-        "table": {
-          "name": "Name",
-          "user": "User"
+      "toolsWithoutHardware": {
+        "one": "“{{name}}” cannot be unlocked by RFID – switch box or WLAN relais missing.",
+        "other": "{{count}} tools cannot be unlocked by RFID – switch box or WLAN relais missing: {{names}}",
+        "link": {
+          "one": "Set up hardware",
+          "other": "View tools"
         }
       }
+    },
+    "stats": {
+      "label": "Key figures",
+      "inWorkshop": "In the workshop",
+      "minors": "{{count}} of them under 18",
+      "toolsInUse": "Tools in use"
+    },
+    "activeUsers": {
+      "title": "In the workshop",
+      "clubMember": "Club member",
+      "durationHours": "{{hours}} h {{minutes}} min",
+      "durationMinutes": "{{minutes}} min",
+      "since": "since {{time}}",
+      "empty": {
+        "title": "Nobody is in the workshop right now",
+        "message": "Whoever checks in at the entrance appears here."
+      }
+    },
+    "toolStatus": {
+      "title": "Tool status",
+      "inUse": "{{count}} of {{total}} in use",
+      "areaFilter": "Filter by area",
+      "allAreas": "All",
+      "statuses": {
+        "inUse": "In use",
+        "free": "Free"
+      },
+      "empty": "No tools in this area",
+      "showAll": "Show all {{count}} tools"
     }
   },
   "users": {
@@ -251,11 +288,6 @@
         "rfidTags": {
           "fixed": "Fixed",
           "temporary": "Loan tag"
-        },
-        "ageGroup": {
-          "under_16": "Under 16",
-          "under_18": "Under 18",
-          "adult": "Adult"
         }
       }
     },

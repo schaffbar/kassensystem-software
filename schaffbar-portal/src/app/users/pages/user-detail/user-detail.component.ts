@@ -16,7 +16,7 @@ import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.c
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
 import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
-import { AgeGroupKeyPipe } from '../../age-group-key.pipe';
+import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
 import {
   UserSessionBannerComponent,
   UserSessionBannerViewModel,

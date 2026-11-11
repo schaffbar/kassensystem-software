@@ -1,5 +1,3 @@
-<h1>{{ 'dashboard.title' | translate }}</h1>
-
 @if (store.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
 }
@@ -7,10 +5,46 @@
   <p class="load-error">{{ 'shared.errors.loadFailed' | translate }}</p>
 }
 
-<div class="dashboard-widgets">
-  <schbar-active-users-widget
-    [activeUsers]="store.activeUsers()"
-    (reloadRequested)="reloadActiveUsers()"
-    (userSelected)="openUserSession($event)" />
-  <schbar-active-tools-widget [toolStatuses]="toolStatuses()" (reloadRequested)="reloadActiveTools()" />
+<schbar-page-header
+  [title]="'dashboard.title' | translate"
+  [subtitle]="
+    store.updatedAt()
+      ? ('dashboard.subtitleUpdated'
+        | translate: { date: today | date: 'fullDate', time: store.updatedAt() | date: 'shortTime' })
+      : (today | date: 'fullDate')
+  ">
+  <button
+    matIconButton
+    type="button"
+    [attr.aria-label]="'shared.actions.reload' | translate"
+    (click)="reloadDashboard()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</schbar-page-header>
+
+<div class="dashboard">
+  @if (attentionItems().length > 0) {
+    <schbar-dashboard-attention [items]="attentionItems()" />
+  }
+
+  <section class="stats" [attr.aria-label]="'dashboard.stats.label' | translate">
+    <schbar-stat-tile
+      [label]="'dashboard.stats.inWorkshop' | translate"
+      [value]="store.activeUsers().length"
+      [detail]="
+        store.minorsInWorkshopCount() > 0
+          ? ('dashboard.stats.minors' | translate: { count: store.minorsInWorkshopCount() })
+          : null
+      " />
+    <schbar-stat-tile
+      [label]="'dashboard.stats.toolsInUse' | translate"
+      [value]="store.activeTools().length"
+      [total]="store.tools().length"
+      [detail]="toolsInUse() || null" />
+  </section>
+
+  <div class="columns">
+    <schbar-active-users-card class="active-users" [activeUsers]="activeUserRows()" />
+    <schbar-tool-status-card class="tool-status" [toolStatuses]="toolStatuses()" [areaSegments]="areaSegments()" />
+  </div>
 </div>

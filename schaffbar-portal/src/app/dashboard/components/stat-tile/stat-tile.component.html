@@ -1,0 +1,10 @@
+<span class="label">{{ label() }}</span>
+<span class="value">
+  {{ value() }}
+  @if (total() !== null) {
+    <span class="total">/ {{ total() }}</span>
+  }
+</span>
+@if (detail(); as currentDetail) {
+  <span class="detail">{{ currentDetail }}</span>
+}
