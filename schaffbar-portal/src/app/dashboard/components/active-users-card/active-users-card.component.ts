@@ -9,7 +9,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { differenceInMinutes } from 'date-fns';
 import { interval, map } from 'rxjs';
 
-import { ROUTE } from '../../../app.routes';
+import { ROUTE, USER_DETAIL_TAB } from '../../../app.routes';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { AgeGroup } from '../../../shared/models/age-group';
@@ -48,6 +48,8 @@ export class ActiveUsersCardComponent {
   readonly activeUsers = input.required<ActiveUserRowViewModel[]>();
 
   protected readonly usersLink = `/${ROUTE.USERS}`;
+  // at the counter the session of a person is what matters – the profile opens on it
+  protected readonly openSessionTab = { tab: USER_DETAIL_TAB.OPEN_SESSION };
 
   // ticks every minute, so the durations stay up to date (the interval ends with the component)
   private readonly now = toSignal(interval(DURATION_REFRESH_MS).pipe(map(() => new Date())), {

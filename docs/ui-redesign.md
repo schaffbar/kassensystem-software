@@ -601,7 +601,8 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      Werkstatt“ mit „davon N unter 18“ und „Werkzeuge in Benutzung N / gesamt“ mit den Namen – „Check-ins heute“ und
      „Lesegeräte online“ kommen erst mit dem Backend (Entscheidung 11.11.2026). Liste „In der Werkstatt“: am längsten da
      zuerst, Initialen, Name, Altersgruppe · Vereinsmitglied, Badge mit dem laufenden Werkzeug, Dauer (tickt jede
-     Minute) und „seit“, jede Zeile führt zum Profil. „Werkzeugstatus“: Bereichsfilter mit Anzahl, laufende Werkzeuge
+     Minute) und „seit“, jede Zeile führt zum Tab „Offene Sitzung“ des Profils. Beide Listen nebeneinander je halb so
+     breit (im Prototyp 60/40; Entscheidung 11.11.2026). „Werkzeugstatus“: Bereichsfilter mit Anzahl, laufende Werkzeuge
      zuerst, „In Benutzung“ mit Name oder „Frei“, höchstens 8 Einträge und „Alle N Werkzeuge anzeigen“.
      Altersgruppen-Pipe und -Texte liegen jetzt in `shared/` (`shared.ageGroups`). Weggelassen: globale Suche und
      „Benutzer hinzufügen“ im Kopf, „Offline“-Status von Werkzeugen, Dauer der Werkzeugnutzung (die aktiven Werkzeuge

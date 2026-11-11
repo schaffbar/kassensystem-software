@@ -14,7 +14,7 @@
   <ul>
     @for (user of rows(); track user.customerId) {
       <li>
-        <a [routerLink]="[usersLink, user.customerId]">
+        <a [routerLink]="[usersLink, user.customerId]" [queryParams]="openSessionTab">
           <span class="avatar" aria-hidden="true">{{ user.initials }}</span>
           <span class="person">
             <span class="name">{{ user.firstName }} {{ user.lastName }}</span>

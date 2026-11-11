@@ -83,11 +83,11 @@ describe('ActiveUsersCardComponent', () => {
     ]);
   });
 
-  it('should link each person to the profile', async () => {
+  it('should link each person to the open session in the profile', async () => {
     fixture.componentRef.setInput('activeUsers', [anna]);
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('li a').getAttribute('href')).toBe('/users/user-1');
+    expect(fixture.nativeElement.querySelector('li a').getAttribute('href')).toBe('/users/user-1?tab=open-session');
   });
 
   it('should show an empty state when nobody is in the workshop', async () => {
