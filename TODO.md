@@ -52,12 +52,10 @@
 - [Feature] Test connection to shelly
 - [Backend] Implement new interfaces for device
 - [Feature] Assignment und Unassignment von fixen RFID tags
+- [Feature] Jahresabo (vom 1.1 oder vom Tag wo es gakauft wurde)
+
 - [Backend] Open Telemetry
 - [PostgreSql] init.sql Add indexes
-
-## Question
-
-- [Question] Jahresabo vom 1.1 oder vom Tag wo es gakauft wurde
 
 ## Production
 
