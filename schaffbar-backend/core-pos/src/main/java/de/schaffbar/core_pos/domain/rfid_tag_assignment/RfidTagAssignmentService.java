@@ -3,13 +3,6 @@ package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 import java.util.List;
 import java.util.Optional;
 
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
-import de.schaffbar.core_pos.shared.exception.NoWaitingAssingmentException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.RfidTagId;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.exception.NoWaitingAssingmentException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Slf4j
 @Service
@@ -97,6 +98,20 @@ public class RfidTagAssignmentService {
         saveOutboxEvents(events);
 
         log.info("Unassigned RFID tag from customer {} and published events {}", customerId, events);
+    }
+
+    @Transactional
+    public void cancelRfidTagAssignmentRequest(@NotNull @Valid CustomerId customerId) {
+        RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomer(customerId) //
+                .filter(RfidTagAssignment::isWaitingForAssignment) //
+                .orElseThrow(() -> new RuntimeException("No RFID tag assignment requested for customer [id: " + customerId.getValue() + "]"));
+
+        List<SchaffbarEvent> events = assignment.cancelEvents();
+        this.rfidTagAssignmentRepository.delete(assignment);
+
+        saveOutboxEvents(events);
+
+        log.info("Cancelled RFID tag assignment request of customer {} and published events {}", customerId, events);
     }
 
     // ------------------------------------------------------------------------

@@ -6,10 +6,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
-import de.schaffbar.core_pos.shared.id.RfidTagId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +19,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -91,6 +92,10 @@ class RfidTagAssignment {
         return RfidTagAssignmentStatus.ASSIGNED == this.status;
     }
 
+    public boolean isWaitingForAssignment() {
+        return RfidTagAssignmentStatus.WAITING_FOR_ASSIGNMENT == this.status;
+    }
+
     // ------------------------------------------------------------------------
     // command
 
@@ -105,6 +110,10 @@ class RfidTagAssignment {
 
     public List<SchaffbarEvent> unassignEvents() {
         return List.of(RfidTagAssignmentEventFactory.rfidTagUnassigned(this));
+    }
+
+    public List<SchaffbarEvent> cancelEvents() {
+        return List.of(RfidTagAssignmentEventFactory.rfidTagAssignmentCancelled(this));
     }
 
 }

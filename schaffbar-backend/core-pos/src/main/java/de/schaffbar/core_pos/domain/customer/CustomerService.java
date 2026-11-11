@@ -3,6 +3,15 @@ package de.schaffbar.core_pos.domain.customer;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
@@ -13,14 +22,6 @@ import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
@@ -99,9 +100,6 @@ public class CustomerService {
     public void deleteCustomer(@NotNull @Valid CustomerId id) {
         CustomerView customerView = getCustomer(id) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(id));
-
-        // TODO: Deletion concept needed
-        // TODO: check if customer is assigned to a RFID tag before deleting, ...
 
         this.customerRepository.deleteById(customerView.id().getValue());
 

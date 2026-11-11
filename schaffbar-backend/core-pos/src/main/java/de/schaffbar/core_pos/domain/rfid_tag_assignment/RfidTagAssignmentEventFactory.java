@@ -1,9 +1,10 @@
 package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
-import de.schaffbar.core_pos.shared.event.EventType;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import de.schaffbar.core_pos.shared.event.EventType;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class RfidTagAssignmentEventFactory {
@@ -13,6 +14,13 @@ final class RfidTagAssignmentEventFactory {
         payload.validate();
 
         return SchaffbarEvent.rfidTagAssignmentEvent(EventType.RFID_TAG_ASSIGNMENT_REQUESTED, assignment.getId(), payload);
+    }
+
+    static SchaffbarEvent rfidTagAssignmentCancelled(RfidTagAssignment assignment) {
+        var payload = RfidTagAssignmentPayloadMapper.MAPPER.toRfidTagAssignmentCancelledPayload(assignment);
+        payload.validate();
+
+        return SchaffbarEvent.rfidTagAssignmentEvent(EventType.RFID_TAG_ASSIGNMENT_CANCELLED, assignment.getId(), payload);
     }
 
     static SchaffbarEvent rfidTagAssigned(RfidTagAssignment assignment) {

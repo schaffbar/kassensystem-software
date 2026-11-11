@@ -57,6 +57,7 @@ public enum EventType {
     // RFID tag assignment
 
     RFID_TAG_ASSIGNMENT_REQUESTED, //
+    RFID_TAG_ASSIGNMENT_CANCELLED, //
     RFID_TAG_ASSIGNED, //
     RFID_TAG_UNASSIGNED, //
 

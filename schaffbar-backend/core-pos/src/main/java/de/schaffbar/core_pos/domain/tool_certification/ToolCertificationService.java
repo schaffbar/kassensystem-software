@@ -3,6 +3,17 @@ package de.schaffbar.core_pos.domain.tool_certification;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
@@ -12,16 +23,6 @@ import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolExcepti
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
@@ -131,6 +132,23 @@ public class ToolCertificationService {
         saveOutboxEvents(events);
 
         log.info("Deleted {} tool certifications for tool {} and published events {}", certifications.size(), toolId, events);
+    }
+
+    @Transactional
+    public void deleteAllByCustomerId(@NotNull @Valid CustomerId customerId) {
+        List<ToolCertification> certifications = this.toolCertificationRepository.findByCustomerId(customerId.getValue());
+        if (certifications.isEmpty()) {
+            return;
+        }
+
+        List<SchaffbarEvent> events = certifications.stream() //
+                .map(ToolCertificationEventFactory::toolCertificationDeleted) //
+                .toList();
+
+        this.toolCertificationRepository.deleteAllByCustomerId(customerId.getValue());
+        saveOutboxEvents(events);
+
+        log.info("Deleted {} tool certifications of customer {} and published events {}", certifications.size(), customerId, events);
     }
 
     // ------------------------------------------------------------------------

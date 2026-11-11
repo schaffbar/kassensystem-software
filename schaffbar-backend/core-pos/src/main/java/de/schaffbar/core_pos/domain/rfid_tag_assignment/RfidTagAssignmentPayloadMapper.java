@@ -1,11 +1,13 @@
 package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
-import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignedPayload;
-import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignmentRequestedPayload;
-import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagUnassignedPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignmentCancelledPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignmentRequestedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagUnassignedPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface RfidTagAssignmentPayloadMapper {
@@ -16,6 +18,8 @@ interface RfidTagAssignmentPayloadMapper {
     // mapper
 
     RfidTagAssignmentRequestedPayload toRfidTagAssignmentRequestedPayload(RfidTagAssignment assignment);
+
+    RfidTagAssignmentCancelledPayload toRfidTagAssignmentCancelledPayload(RfidTagAssignment assignment);
 
     RfidTagAssignedPayload toRfidTagAssignedPayload(RfidTagAssignment assignment);
 
