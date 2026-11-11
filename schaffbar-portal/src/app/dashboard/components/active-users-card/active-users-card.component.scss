@@ -82,7 +82,9 @@ a {
 
 .time {
   display: flex;
-  flex: 0 0 92px;
+  flex: none;
+  min-width: 92px;
+  white-space: nowrap;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
@@ -91,6 +93,12 @@ a {
 
 .duration {
   font-weight: 600;
+}
+
+// since an earlier day: the badge says it, the time shows the date in the color of the badge
+.overnight .duration,
+.overnight .since {
+  color: var(--warn);
 }
 
 .since {
@@ -102,15 +110,21 @@ a {
   color: var(--text-3);
 }
 
-// the tool badge wraps below the name instead of squeezing it
-@media (max-width: 599.98px) {
-  a {
-    flex-wrap: wrap;
-  }
+// below name and age group, so they never squeeze the name
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
 
-  schbar-status-badge {
-    order: 1;
-    margin-left: 52px;
+// on a phone the date of an earlier day wraps, the badges need the room
+@media (max-width: 599.98px) {
+  .time {
+    min-width: 0;
+    max-width: 96px;
+    text-align: right;
+    white-space: normal;
   }
 
   .chevron {

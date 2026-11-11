@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 
 import { MatTableModule } from '@angular/material/table';
@@ -6,6 +5,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
+import { TimeWithDayPipe } from '../../../shared/pipes/time-with-day.pipe';
 
 export interface UserOpenSessionViewModel {
   // the stays in the workshop, oldest first
@@ -49,7 +49,7 @@ export interface UserSessionToolTotalViewModel {
   selector: 'schbar-user-open-session',
   templateUrl: './user-open-session.component.html',
   styleUrl: './user-open-session.component.scss',
-  imports: [DatePipe, MatTableModule, TranslatePipe, OrDashPipe],
+  imports: [MatTableModule, TranslatePipe, OrDashPipe, TimeWithDayPipe],
 })
 export class UserOpenSessionComponent {
   readonly userOpenSession = input.required<UserOpenSessionViewModel>();

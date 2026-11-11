@@ -4,7 +4,7 @@ import { AgeGroup } from '../shared/models/age-group';
 import { RfidReaderType } from '../shared/models/rfid-reader-type';
 import { ToolArea } from '../shared/models/tool-area';
 import { WlanRelaisType } from '../shared/models/wlan-relais-type';
-import { isHardwareSetUp, isMinor, needsRfidReaderType, Tool } from './dashboard.model';
+import { hasStayedOvernight, isHardwareSetUp, isMinor, needsRfidReaderType, Tool } from './dashboard.model';
 
 describe('dashboard.model', () => {
   const tool: Tool = {
@@ -32,5 +32,17 @@ describe('dashboard.model', () => {
     expect(isMinor({ id: 'user-1', ageGroup: AgeGroup.Under16, clubMember: false })).toBe(true);
     expect(isMinor({ id: 'user-1', ageGroup: AgeGroup.Under18, clubMember: false })).toBe(true);
     expect(isMinor({ id: 'user-1', ageGroup: AgeGroup.Adult, clubMember: false })).toBe(false);
+  });
+
+  it('should find somebody who checked in on an earlier day', () => {
+    const activeUser = {
+      customerId: 'user-1',
+      firstName: 'Max',
+      lastName: 'M',
+      entryTime: new Date(2026, 10, 10, 23, 30),
+    };
+
+    expect(hasStayedOvernight(activeUser, new Date(2026, 10, 11, 0, 15))).toBe(true);
+    expect(hasStayedOvernight(activeUser, new Date(2026, 10, 10, 23, 59))).toBe(false);
   });
 });

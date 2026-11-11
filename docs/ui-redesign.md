@@ -606,7 +606,10 @@ Funktionen. Danach sieht jede vorhandene Seite aus wie im Entwurf, nur ohne die 
      zuerst, „In Benutzung“ mit Name oder „Frei“, höchstens 8 Einträge und „Alle N Werkzeuge anzeigen“.
      Altersgruppen-Pipe und -Texte liegen jetzt in `shared/` (`shared.ageGroups`). Weggelassen: globale Suche und
      „Benutzer hinzufügen“ im Kopf, „Offline“-Status von Werkzeugen, Dauer der Werkzeugnutzung (die aktiven Werkzeuge
-     haben keine Startzeit), Statusbox „Werkstatt geöffnet“ und DE/EN in der Seitenleiste.
+     haben keine Startzeit), Statusbox „Werkstatt geöffnet“ und DE/EN in der Seitenleiste. Wer seit einem früheren Tag
+     eingecheckt ist, bekommt das Badge „Nicht ausgecheckt“ und die Zeit in Warnfarbe; Zeiten der Sitzung zeigen überall
+     (Übersicht, Banner und Tab „Offene Sitzung“ des Profils, Dialog „Sitzung beenden“) das Datum, wenn sie nicht von
+     heute sind (Pipe `timeWithDay`, Entscheidung 11.11.2026).
 
 ### Spätere Aufgaben
 

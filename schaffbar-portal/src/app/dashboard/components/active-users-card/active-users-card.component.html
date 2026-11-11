@@ -29,11 +29,20 @@
                 {{ 'dashboard.activeUsers.clubMember' | translate }}
               }
             </span>
+            @if (user.stayedOvernight || user.toolName) {
+              <span class="badges">
+                @if (user.stayedOvernight) {
+                  <schbar-status-badge tone="warn" icon="warning">
+                    {{ 'dashboard.activeUsers.notCheckedOut' | translate }}
+                  </schbar-status-badge>
+                }
+                @if (user.toolName) {
+                  <schbar-status-badge tone="info" icon="play_circle">{{ user.toolName }}</schbar-status-badge>
+                }
+              </span>
+            }
           </span>
-          @if (user.toolName) {
-            <schbar-status-badge tone="info" icon="play_circle">{{ user.toolName }}</schbar-status-badge>
-          }
-          <span class="time">
+          <span class="time" [class.overnight]="user.stayedOvernight">
             <span class="duration">
               @if (user.duration.hours > 0) {
                 {{ 'dashboard.activeUsers.durationHours' | translate: user.duration }}
@@ -42,7 +51,7 @@
               }
             </span>
             <span class="since">
-              {{ 'dashboard.activeUsers.since' | translate: { time: user.entryTime | date: 'shortTime' } }}
+              {{ 'dashboard.activeUsers.since' | translate: { time: user.entryTime | timeWithDay } }}
             </span>
           </span>
           <mat-icon class="chevron" aria-hidden="true">chevron_right</mat-icon>

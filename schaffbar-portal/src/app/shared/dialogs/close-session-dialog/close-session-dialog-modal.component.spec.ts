@@ -9,7 +9,7 @@ import { MatButtonHarness } from '@angular/material/button/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CloseSessionDialogModalComponent, CloseSessionDialogViewModel } from './close-session-dialog-modal.component';
 
@@ -34,6 +34,8 @@ describe('CloseSessionDialogModalComponent', () => {
   let loader: HarnessLoader;
 
   beforeEach(async () => {
+    // the times of the test data are of "today" – only the clock, the timers stay real
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 10, 9, 22, 0) });
     await TestBed.configureTestingModule({
       imports: [CloseSessionDialogModalComponent],
       providers: [
@@ -60,6 +62,8 @@ describe('CloseSessionDialogModalComponent', () => {
     fixture.componentRef.setInput('viewModel', inputs.viewModel);
     await fixture.whenStable();
   }
+
+  afterEach(() => vi.useRealTimers());
 
   function query(selector: string): HTMLElement | null {
     return fixture.nativeElement.querySelector(selector);

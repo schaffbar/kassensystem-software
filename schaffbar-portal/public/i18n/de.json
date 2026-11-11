@@ -146,7 +146,8 @@
       "empty": {
         "title": "Gerade ist niemand in der Werkstatt",
         "message": "Wer am Eingang eincheckt, erscheint hier."
-      }
+      },
+      "notCheckedOut": "Nicht ausgecheckt"
     },
     "toolStatus": {
       "title": "Werkzeugstatus",

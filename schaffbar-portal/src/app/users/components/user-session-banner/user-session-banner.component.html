@@ -5,9 +5,7 @@
     <span class="dot" [class.pulse]="session.inWorkshop" aria-hidden="true"></span>
     <p class="text">
       <span class="title">
-        {{
-          'users.pages.userDetails.session.inWorkshopSince' | translate: { time: session.startTime | date: 'shortTime' }
-        }}
+        {{ 'users.pages.userDetails.session.inWorkshopSince' | translate: { time: session.startTime | timeWithDay } }}
       </span>
       @if (!session.canClose) {
         <span id="close-session-hint" class="detail">
@@ -20,7 +18,7 @@
         </span>
       } @else if (session.checkedOutAt; as checkedOutAt) {
         <span class="detail checked-out">
-          {{ 'users.pages.userDetails.session.checkedOut' | translate: { time: checkedOutAt | date: 'shortTime' } }}
+          {{ 'users.pages.userDetails.session.checkedOut' | translate: { time: checkedOutAt | timeWithDay } }}
         </span>
       }
     </p>

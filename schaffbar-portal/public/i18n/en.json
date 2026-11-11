@@ -146,7 +146,8 @@
       "empty": {
         "title": "Nobody is in the workshop right now",
         "message": "Whoever checks in at the entrance appears here."
-      }
+      },
+      "notCheckedOut": "Not checked out"
     },
     "toolStatus": {
       "title": "Tool status",

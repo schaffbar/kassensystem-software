@@ -4,7 +4,7 @@ import { LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideTranslateService } from '@ngx-translate/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UserOpenSessionComponent, UserOpenSessionViewModel } from './user-open-session.component';
 
@@ -42,6 +42,8 @@ describe('UserOpenSessionComponent', () => {
   let fixture: ComponentFixture<UserOpenSessionComponent>;
 
   beforeEach(async () => {
+    // the times of the test data are of "today" – only the clock, the timers stay real
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 10, 9, 22, 0) });
     TestBed.configureTestingModule({
       imports: [UserOpenSessionComponent],
       providers: [
@@ -55,6 +57,8 @@ describe('UserOpenSessionComponent', () => {
     fixture.componentRef.setInput('userOpenSession', session);
     await fixture.whenStable();
   });
+
+  afterEach(() => vi.useRealTimers());
 
   function rows(): string[][] {
     return [...fixture.nativeElement.querySelectorAll('tr.mat-mdc-row')].map((row: HTMLElement) =>
@@ -72,6 +76,16 @@ describe('UserOpenSessionComponent', () => {
       row.classList.contains('tool-row') ? 'tool' : 'stay',
     );
     expect(classes).toEqual(['stay', 'tool', 'stay']);
+  });
+
+  it('should add the date to the times of a stay that began on an earlier day', async () => {
+    fixture.componentRef.setInput('userOpenSession', {
+      ...session,
+      stays: [{ ...session.stays[1], startTime: new Date(2026, 10, 8, 19, 49) }],
+    });
+    await fixture.whenStable();
+
+    expect(rows()[0][1]).toBe('08.11.26, 19:49');
   });
 
   it('should show the totals', () => {

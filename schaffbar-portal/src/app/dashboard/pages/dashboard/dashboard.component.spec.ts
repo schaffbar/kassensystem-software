@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
 import { provideTranslateService } from '@ngx-translate/core';
+import { startOfDay, subHours } from 'date-fns';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AgeGroup } from '../../../shared/models/age-group';
@@ -35,9 +36,11 @@ describe('DashboardComponent', () => {
   const activeTools: ActiveTool[] = [
     { toolId: 'tool-1', toolName: 'Bandsäge', customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann' },
   ];
+  // Max since this morning, Lena since yesterday evening – she has not checked out
+  const today = new Date();
   const activeUsers: ActiveUser[] = [
-    { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: new Date(2026, 10, 11, 14, 5) },
-    { customerId: 'user-2', firstName: 'Lena', lastName: 'Klein', entryTime: new Date(2026, 10, 11, 15, 0) },
+    { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: startOfDay(today) },
+    { customerId: 'user-2', firstName: 'Lena', lastName: 'Klein', entryTime: subHours(startOfDay(today), 4) },
   ];
   const users: User[] = [
     { id: 'user-1', ageGroup: AgeGroup.Adult, clubMember: true },
@@ -132,10 +135,10 @@ describe('DashboardComponent', () => {
     ]);
   });
 
-  it('should join age group, membership and tool into the people in the workshop', () => {
+  it('should join age group, membership and tool into the people in the workshop and find who stayed overnight', () => {
     expect(child(ActiveUsersCardComponent).activeUsers()).toEqual([
-      { ...activeUsers[0], ageGroup: AgeGroup.Adult, clubMember: true, toolName: 'Bandsäge' },
-      { ...activeUsers[1], ageGroup: AgeGroup.Under16, clubMember: false, toolName: null },
+      { ...activeUsers[0], ageGroup: AgeGroup.Adult, clubMember: true, toolName: 'Bandsäge', stayedOvernight: false },
+      { ...activeUsers[1], ageGroup: AgeGroup.Under16, clubMember: false, toolName: null, stayedOvernight: true },
     ]);
   });
 

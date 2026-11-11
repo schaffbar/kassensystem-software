@@ -1,3 +1,5 @@
+import { isSameDay } from 'date-fns';
+
 import { AgeGroup } from '../shared/models/age-group';
 import { RfidReaderType } from '../shared/models/rfid-reader-type';
 import { ToolArea } from '../shared/models/tool-area';
@@ -57,4 +59,9 @@ export function needsRfidReaderType(rfidReader: RfidReader): boolean {
 
 export function isMinor(user: User): boolean {
   return user.ageGroup !== AgeGroup.Adult;
+}
+
+// a stay never lasts over night – who checked in on an earlier day has not checked out at the exit
+export function hasStayedOvernight(activeUser: ActiveUser, today: Date): boolean {
+  return !isSameDay(activeUser.entryTime, today);
 }

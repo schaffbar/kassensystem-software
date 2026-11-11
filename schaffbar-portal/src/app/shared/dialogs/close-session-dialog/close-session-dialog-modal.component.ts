@@ -1,4 +1,4 @@
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OrDashPipe } from '../../pipes/or-dash.pipe';
+import { TimeWithDayPipe } from '../../pipes/time-with-day.pipe';
 import { FormDialogHeaderComponent } from '../form-dialog-header/form-dialog-header.component';
 
 export interface CloseSessionDialogViewModel {
@@ -38,7 +39,6 @@ export interface CloseSessionToolViewModel extends CloseSessionItemViewModel {
   templateUrl: './close-session-dialog-modal.component.html',
   styleUrl: './close-session-dialog-modal.component.scss',
   imports: [
-    DatePipe,
     NgTemplateOutlet,
     MatButtonModule,
     MatDialogModule,
@@ -46,6 +46,7 @@ export interface CloseSessionToolViewModel extends CloseSessionItemViewModel {
     MatProgressSpinnerModule,
     TranslatePipe,
     OrDashPipe,
+    TimeWithDayPipe,
     FormDialogHeaderComponent,
   ],
   host: { class: 'form-dialog' },

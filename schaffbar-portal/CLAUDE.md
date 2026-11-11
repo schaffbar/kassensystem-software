@@ -211,6 +211,9 @@ The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
     screens). The row that opens the detail page is a `clickable-row`; its ⋯ menu offers "Details" as well, because
     a row cannot be reached with the keyboard.
   - `mono` for IDs, MAC and IP addresses; `mono-field` on a `mat-form-field` that shows one.
+- Times that may lie on an earlier day (check-in, session, usages) use the pipe `timeWithDay`
+  (`src/app/shared/pipes/time-with-day.pipe.ts`): `17:50` today, `10.11.26, 17:50` otherwise – not `date: 'shortTime'`,
+  a session of yesterday must not look like one of today.
 - Every `matIconButton` has a translated `aria-label` (`shared.actions.reload`, `shared.actions.edit`, …).
 
 ## Components

@@ -5,7 +5,7 @@
   [subtitle]="
     currentViewModel
       ? ('shared.dialogs.closeSession.subtitle'
-        | translate: { name: userName(), time: currentViewModel.startTime | date: 'shortTime' })
+        | translate: { name: userName(), time: currentViewModel.startTime | timeWithDay })
       : userName()
   " />
 
@@ -78,9 +78,9 @@
   <tr [class]="rowClass">
     <th scope="row">{{ name }}</th>
     <td class="time">
-      {{ item.startTime | date: 'shortTime' }} –
+      {{ item.startTime | timeWithDay }} –
       @if (item.endTime) {
-        {{ item.endTime | date: 'shortTime' }}
+        {{ item.endTime | timeWithDay }}
       } @else {
         {{ 'shared.dialogs.closeSession.now' | translate }}
       }

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -14,6 +13,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { AgeGroup } from '../../../shared/models/age-group';
 import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
+import { TimeWithDayPipe } from '../../../shared/pipes/time-with-day.pipe';
 
 const DURATION_REFRESH_MS = 60_000;
 
@@ -27,6 +27,8 @@ export interface ActiveUserRowViewModel {
   clubMember: boolean;
   // the tool the person has switched on; null if none
   toolName: string | null;
+  // checked in on an earlier day and not checked out since
+  stayedOvernight: boolean;
 }
 
 @Component({
@@ -34,11 +36,11 @@ export interface ActiveUserRowViewModel {
   templateUrl: './active-users-card.component.html',
   styleUrl: './active-users-card.component.scss',
   imports: [
-    DatePipe,
     RouterLink,
     MatIconModule,
     TranslatePipe,
     AgeGroupKeyPipe,
+    TimeWithDayPipe,
     EmptyStateComponent,
     StatusBadgeComponent,
   ],

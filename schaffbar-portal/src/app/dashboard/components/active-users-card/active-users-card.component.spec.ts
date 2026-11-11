@@ -22,6 +22,7 @@ describe('ActiveUsersCardComponent', () => {
     ageGroup: AgeGroup.Adult,
     clubMember: true,
     toolName: 'Drechselbank',
+    stayedOvernight: false,
   };
   const max: ActiveUserRowViewModel = {
     customerId: 'user-2',
@@ -31,6 +32,7 @@ describe('ActiveUsersCardComponent', () => {
     ageGroup: AgeGroup.Under18,
     clubMember: false,
     toolName: null,
+    stayedOvernight: false,
   };
 
   let fixture: ComponentFixture<ActiveUsersCardComponent>;
@@ -81,6 +83,19 @@ describe('ActiveUsersCardComponent', () => {
         'dashboard.activeUsers.since',
       ],
     ]);
+  });
+
+  it('should mark somebody who checked in on an earlier day and has not checked out', async () => {
+    fixture.componentRef.setInput('activeUsers', [
+      { ...max, entryTime: new Date(2026, 10, 10, 17, 50), stayedOvernight: true },
+    ]);
+    await fixture.whenStable();
+
+    const row: HTMLElement = fixture.nativeElement.querySelector('li a');
+    expect(row.querySelector('schbar-status-badge')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+      'warning dashboard.activeUsers.notCheckedOut',
+    );
+    expect(row.querySelector('.time')!.classList).toContain('overnight');
   });
 
   it('should link each person to the open session in the profile', async () => {

@@ -26,7 +26,7 @@ import {
   ToolStatusCardComponent,
   ToolStatusRowViewModel,
 } from '../../components/tool-status-card/tool-status-card.component';
-import { ActiveTool, ActiveUser, RfidReader, Tool, User } from '../../dashboard.model';
+import { ActiveTool, ActiveUser, hasStayedOvernight, RfidReader, Tool, User } from '../../dashboard.model';
 import { DashboardStore } from '../../dashboard.store';
 
 // the overview stays open at the counter – it reloads itself
@@ -66,7 +66,7 @@ export class DashboardComponent {
   );
 
   protected readonly activeUserRows = computed(() =>
-    toActiveUserRowViewModels(this.store.activeUsers(), this.store.users(), this.store.activeTools()),
+    toActiveUserRowViewModels(this.store.activeUsers(), this.store.users(), this.store.activeTools(), new Date()),
   );
 
   protected readonly toolStatuses = computed(() =>
@@ -142,6 +142,7 @@ function toActiveUserRowViewModels(
   activeUsers: ActiveUser[],
   users: User[],
   activeTools: ActiveTool[],
+  today: Date,
 ): ActiveUserRowViewModel[] {
   const usersById = new Map(users.map((user) => [user.id, user]));
   const toolNamesByUserId = new Map(activeTools.map((activeTool) => [activeTool.customerId, activeTool.toolName]));
@@ -155,6 +156,7 @@ function toActiveUserRowViewModels(
       ageGroup: user?.ageGroup ?? null,
       clubMember: user?.clubMember ?? false,
       toolName: toolNamesByUserId.get(activeUser.customerId) ?? null,
+      stayedOvernight: hasStayedOvernight(activeUser, today),
     };
   });
 }
