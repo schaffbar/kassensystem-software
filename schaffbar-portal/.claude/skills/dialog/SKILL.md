@@ -268,16 +268,21 @@ Rules:
 ## Caller
 
 ```ts
+// user-detail-dialogs.service.ts – the header, its menu and the banner of the user page open it
 private readonly closeSessionDialog = inject(CloseSessionDialogService);
+private readonly store = inject(UserDetailStore);
 
-protected closeWorkshopSession(): void {
-  this.closeSessionDialog.open(this.userId()).subscribe((confirmed) => {
+closeWorkshopSession(): void {
+  const user = this.store.user();
+  if (!user) return;
+
+  this.closeSessionDialog.open(user.id, `${user.firstName} ${user.lastName}`).subscribe((confirmed) => {
     if (confirmed) {
-      const command: CloseWorkshopSessionCommand = { userId: this.userId() };
-      this.detailsStore.closeWorkshopSession(command);
+      const command: CloseWorkshopSessionCommand = { userId: user.id };
+      this.store.closeWorkshopSession(command);
     } else {
       // the dialog loaded the session itself and may have shown a newer state than the page
-      this.detailsStore.reloadOpenSession();
+      this.store.reloadOpenSession();
     }
   });
 }
