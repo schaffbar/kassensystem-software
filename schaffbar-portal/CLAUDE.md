@@ -256,5 +256,7 @@ dialogs, timers, locale, pitfalls: skill `testing` (`.claude/skills/testing/SKIL
 
 - Every change comes with its specs; before handing over: `npx ng test --watch=false`, `npx ng lint`,
   `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
+- A UI change is also looked at in the browser on desktop and phone, without writing to the database: skill
+  `verify-ui`.
 - Specs expect translation keys, not texts; dates in test data are local (`new Date(2026, 10, 9, 14, 5)`) or relative
   to now.

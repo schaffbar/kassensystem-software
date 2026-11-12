@@ -14,7 +14,8 @@ Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbart
   `schaffbar-backend/core-pos` mit `mvn -q test` (es gibt kein `mvnw`).
 - Portal: Konventionen in `schaffbar-portal/CLAUDE.md`, Prüfungen `npx ng test --watch=false`, `npx ng lint`,
   `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
-- Im Browser nichts in der Datenbank ändern: Playwright mit `page.route`, alles außer `GET` abfangen.
+- Im Browser nichts in der Datenbank ändern: Skill `verify-ui` (Playwright mit `page.route`, alles außer `GET`
+  abfangen).
 
 ## S – Skills
 
@@ -35,7 +36,7 @@ Stand:
   und den Skills `component` und `dialog` ersetzt (`user-contact` u. a. gibt es seit der Detailseite nicht mehr)
 - [x] `testing` – 12.11.2026; `CLAUDE.md` hat einen kurzen Abschnitt „Tests“, die Skills `api`, `component` und
   `dialog` verweisen darauf
-- [ ] `verify-ui`
+- [x] `verify-ui` – 12.11.2026
 - [ ] `backend-rule`
 
 Später, wenn mehr Formulare kommen: `forms` (Signal Forms, kompakte Felder, Zähler „N ungespeicherte Änderungen“,
