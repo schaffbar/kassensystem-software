@@ -10,7 +10,7 @@ Every component is one of these:
 | Kind            | Where                                                                | Example                                           |
 | --------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
 | **smart**       | `src/app/<feature>/pages/<name>/`                                    | `tool-detail`, `user-list`, `dashboard`           |
-| **dumb**        | `src/app/<feature>/components/<name>/`, `src/app/shared/components/` | `user-contact`, `tool-wlan-relais`, `field-error` |
+| **dumb**        | `src/app/<feature>/components/<name>/`, `src/app/shared/components/` | `user-contact-card`, `tool-wlan-relais`, `field-error` |
 | **form dialog** | `src/app/<feature>/components/<name>-form/`                          | `new-tool-form`, `update-user-form`               |
 | shell           | `app.component`, `src/app/core/`                                     | `navigation`, `not-found`                         |
 
@@ -24,9 +24,11 @@ Reference implementations:
 
 - smart with tabs: [tool-detail/](../../../src/app/tools/pages/tool-detail/) – the page as frame, three tab
   components with mappings and command handlers, a spec per tab
-- smart, small: [dashboard/](../../../src/app/dashboard/pages/dashboard/) – one mapping, navigation on an output
-- dumb with a ViewModel: [tool-wlan-relais/](../../../src/app/tools/components/tool-wlan-relais/)
-- dumb with a form and a ViewModel: [user-contact/](../../../src/app/users/components/user-contact/)
+- smart, small: [dashboard/](../../../src/app/dashboard/pages/dashboard/) – mappings that join store data, links in
+  the dumb children
+- dumb with a ViewModel the page fills with the feature model directly: [user-contact-card/](../../../src/app/users/components/user-contact-card/)
+- dumb with a ViewModel, a confirmation and a command: [user-rfid-tag-card/](../../../src/app/users/components/user-rfid-tag-card/)
+- dumb with a form (`linkedSignal` from the input) and a ViewModel: [tool-wlan-relais/](../../../src/app/tools/components/tool-wlan-relais/)
 - dumb with a main and a further ViewModel: [tool-rfid-reader-assignment/](../../../src/app/tools/components/tool-rfid-reader-assignment/)
 - dumb with further ViewModels only (rows, options) and a plain id: [tool-certifications/](../../../src/app/tools/components/tool-certifications/)
 
@@ -66,7 +68,7 @@ Rules:
   before `@Component`. Not in the feature model, not in a file of its own, not in the store.
 - **Names**:
   - The **main ViewModel** is named after the component: `<ComponentName>ViewModel`, its input
-    `<componentName>` – `user-contact` → `UserContactViewModel`, `userContact`; `tool-detail-info` →
+    `<componentName>` – `user-contact-card` → `UserContactCardViewModel`, `userContactCard`; `tool-detail-info` →
     `ToolDetailInfoViewModel`, `toolDetailInfo`. Never after the entity it happens to come from (`tool`, `user`).
   - A **modal of a shared dialog** follows skill `dialog` instead: input `viewModel`, type `<Name>DialogViewModel`
     (`ConfirmDeleteDialogViewModel`, `CloseSessionDialogViewModel`) – the service binds it by that name.
@@ -82,8 +84,8 @@ Rules:
   `shared/models`. **No feature model type inside a ViewModel** – otherwise the coupling comes back through the
   back door.
 - No ids "for later" that the component doesn't use – but the ids the component needs for its commands are part of
-  the ViewModel (`UserContactViewModel.id` for `UpdateUserContactCommand`).
-- Not to be confused with the **form model** (`ContactFormModel`): local, not exported, describes what is edited
+  the ViewModel (`UserRfidTagCardViewModel.userId` for `UnassignRfidTagCommand`).
+- Not to be confused with the **form model** (`WlanRelaisFormModel`): local, not exported, describes what is edited
   (CLAUDE.md "Forms"). The ViewModel describes what comes in.
 - The store never imports a ViewModel – it doesn't know the components. It may provide feature-model lists that a
   rule or several children need (`instructors`, reused as `certifiers`; `certifiableUsers`) – the page passes them
@@ -102,26 +104,26 @@ Rules:
 A method called from a template is named for **what it does**, an output for **what happened** in the component:
 
 ```
-dumb:   (click)="saveContact()"            saveContact() { … this.contactChanged.emit(command); }
-smart:  (contactChanged)="updateUserContact($event)"
-                                           updateUserContact(command) { this.detailsStore.updateUserContact(command); }
+dumb:   (click)="unassignRfidTag()"        unassignRfidTag() { … this.rfidTagUnassigned.emit(command); }
+smart:  (rfidTagUnassigned)="unassignRfidTag($event)"
+                                           unassignRfidTag(command) { this.detailsStore.unassignRfidTag(command); }
 ```
 
 | What                                    | Name                                                       | Examples                                                                    |
 | --------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------- |
-| method in a dumb component              | verb + object of the UI step                               | `editContact`, `discardContactChanges`, `saveContact`, `pauseCertification` |
-| method in a page / tab for a command    | the name of the store method it calls                      | `updateUserContact`, `pauseToolCertification`, `assignRfidTag`              |
-| method in a page opening a dialog first | the action the dialog leads to                             | `createTool`, `deleteTool`, `updateUser`, `changeRfidReaderType`            |
-| navigation                              | `open` + target                                            | `openToolDetail`, `openUserSession`                                         |
-| output                                  | object + participle – the event, from the component's view | `contactChanged`, `certificationPaused`, `rfidTagAssigned`, `editRequested` |
+| method in a dumb component              | verb + object of the UI step                               | `saveWlanRelais`, `discardWlanRelaisChanges`, `pauseToolCertification`      |
+| method in a page / tab for a command    | the name of the store method it calls                      | `unassignRfidTag`, `pauseToolCertification`, `updateTool`                   |
+| method in a page opening a dialog first | the action the dialog leads to                             | `createTool`, `deleteTool`, `editUser`, `changeRfidReaderType`              |
+| navigation                              | `open` + target                                            | `openToolDetail`, `showOpenSession` (switches a tab)                        |
+| output                                  | object + participle – the event, from the component's view | `rfidTagUnassigned`, `certificationPaused`, `editRequested`                 |
 
-- Always with an object – `saveContact()`, not `save()`: one rule without exceptions, readable in the template, and a
+- Always with an object – `saveWlanRelais()`, not `save()`: one rule without exceptions, readable in the template, and a
   search finds exactly one place.
 - No `on…` prefix (it names the trigger, not the action), no `…Dialog` suffix (the dialog is part of the action).
 - An output is never named like a method of the same class – that is why outputs are events and methods verbs.
 - Outputs of shared dialogs stay `confirmed` / `cancelled` (skill `dialog`).
 - A mapping function (pure, after the class) is `to` + the exact target type, plural for a list:
-  `toContactFormModel`, `toToolCertificationRowViewModels` – like the mappers of a feature (`toTool`).
+  `toWlanRelaisFormModel`, `toToolCertificationRowViewModels` – like the mappers of a feature (`toTool`).
 
 ## Smart component
 
@@ -194,11 +196,11 @@ Rules:
   that only renames.
 - Output handlers pass the command on to a store method (`mutation()`), nothing else. Commands are built by the dumb
   child; the page only builds one when the action starts in the page itself – e.g. after its own confirmation
-  dialog (`DeleteToolCommand` in `tool-list`, `CloseWorkshopSessionCommand` in `user-detail-tab-session`).
+  dialog (`DeleteToolCommand` in `tool-list`, `CloseWorkshopSessionCommand` in `user-detail-dialogs.service`).
 - **Template**: layout (header, loading bar, load error, tabs, grid) plus child components. Markup without state of
   its own may stay in the page – e.g. the `mat-table` of a list page, whose `MatSort`/`MatPaginator` it holds via
   `viewChild`. Extract a dumb component when a part has its own UI state or a form, is used twice, or switches on
-  business states (the user header with chips and RFID tag buttons per `RfidTagAssignmentStatus`).
+  business states (the RFID tag card per `RfidTagAssignmentStatus`).
 - No pass-through components: a component that only forwards inputs and outputs to its children is dissolved, the
   page renders the children itself.
 
@@ -209,18 +211,22 @@ component** in the page's folder:
 
 ```
 users/pages/user-detail/
-  user-detail.component.*        frame
+  user-detail.component.*            frame
   user-detail.store.ts
-  user-detail-tab-info/          UserDetailTabInfoComponent      schbar-user-detail-tab-info
-  user-detail-tab-session/       UserDetailTabSessionComponent   schbar-user-detail-tab-session
+  user-detail-dialogs.service.ts     dialogs opened by the header and several tabs (skill `dialog`)
+  user-detail-tab-overview/          UserDetailTabOverviewComponent        schbar-user-detail-tab-overview
+  user-detail-tab-certifications/    UserDetailTabCertificationsComponent  schbar-user-detail-tab-certifications
+  user-detail-tab-session/           UserDetailTabSessionComponent         schbar-user-detail-tab-session
 ```
 
 - Name `<page>-tab-<name>` – the tab folders stay together and visibly belong to their page.
 - It injects the **page's store** (`providers: [UserDetailStore]` on the page), so it only works inside its page. For
   its part it does what a page does: fills the ViewModels of its dumb children, handles their outputs, opens its
   dialogs.
-- Inputs: only the ids it needs for its own commands or dialogs (`userId` for the close session dialog); data comes
-  from the store.
+- Inputs: only what the page knows and the store doesn't (`usedBy` of `tool-detail-tab-info`, from the tool list);
+  data comes from the store. Outputs for what belongs to the page: `openSessionRequested` of
+  `user-detail-tab-overview` switches the tab, `deleteRequested` of `tool-detail-tab-info` deletes via the header's
+  flow.
 - Every tab gets a tab component, also one with a single child – no exceptions.
 - The page keeps what belongs to the whole page: the header and its actions, the selected tab (`tab` query
   parameter).
@@ -230,58 +236,58 @@ users/pages/user-detail/
 ## Dumb component
 
 ```ts
-export interface UserContactViewModel {
-  id: string;
-  email: string;
-  phone: string | null;
-}
-
-interface ContactFormModel {
-  email: string;
-  phone: string;
+export interface UserRfidTagCardViewModel {
+  userId: string;
+  userName: string;
+  // null = no tag and none requested
+  assignment: {
+    assignmentType: RfidTagAssignmentType;
+    status: RfidTagAssignmentStatus;
+    rfidTagId: string | null;
+    assignmentDate: Date | null;
+  } | null;
 }
 
 @Component({
-  selector: 'schbar-user-contact',
-  templateUrl: './user-contact.component.html',
-  styleUrl: './user-contact.component.scss',
-  imports: [FormField, FormRoot, FieldErrorComponent, MatInputModule, MatButtonModule, MatIconModule, TranslatePipe],
+  selector: 'schbar-user-rfid-tag-card',
+  templateUrl: './user-rfid-tag-card.component.html',
+  styleUrl: './user-rfid-tag-card.component.scss',
+  imports: [DatePipe, MatButtonModule, MatIconModule, TranslatePipe, OrDashPipe, RfidTagIdPipe, RfidTagAssignmentTypeKeyPipe],
+  host: { class: 'card' },
 })
-export class UserContactComponent {
-  readonly userContact = input.required<UserContactViewModel>();
+export class UserRfidTagCardComponent {
+  private readonly confirmActionDialog = inject(ConfirmActionDialogService);
 
-  readonly contactChanged = output<UpdateUserContactCommand>();
+  readonly userRfidTagCard = input.required<UserRfidTagCardViewModel>();
 
-  protected readonly isEditing = signal(false);
-
-  // follows the userContact input
-  private readonly model = linkedSignal(() => toContactFormModel(this.userContact()));
-
-  protected readonly contactForm = form(this.model, (schema) => { … });
+  // opens the dialog that requests a tag – the page decides how
+  readonly assignmentRequested = output<void>();
+  readonly rfidTagUnassigned = output<UnassignRfidTagCommand>();
 
   // --------------------------------------------------------------------------
   // actions
 
-  protected saveContact(): void {
-    submit(this.contactForm, async () => {
-      const { email, phone } = this.model();
-      const command: UpdateUserContactCommand = { id: this.userContact().id, email, phone: phone || undefined };
-      this.contactChanged.emit(command);
-      this.isEditing.set(false);
-    });
+  protected unassignRfidTag(): void {
+    const { userId, userName } = this.userRfidTagCard();
+    this.confirmActionDialog
+      .open({ title: …, message: …, entity: userName, confirmLabel: …, destructive: true })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const command: UnassignRfidTagCommand = { userId };
+          this.rfidTagUnassigned.emit(command);
+        }
+      });
   }
-}
-
-// ----------------------------------------------------------------------------
-// mappers
-
-function toContactFormModel(userContact: UserContactViewModel): ContactFormModel {
-  return { email: userContact.email, phone: userContact.phone ?? '' };
 }
 ```
 
-The page passes the `User` directly – it has all fields of `UserContactViewModel`:
-`<schbar-user-contact [userContact]="user" (contactChanged)="updateUserContact($event)" />`.
+The ViewModel combines the user and the assignment, so the tab maps it in a `computed` with
+`toUserRfidTagCardViewModel(user, assignment)` after its class. Where the feature model has all fields, the page
+passes it directly: `<schbar-user-contact-card [userContactCard]="user" (editRequested)="editUser()" />`.
+
+A dumb component with a form keeps the form model local and follows its input with `linkedSignal`
+([tool-wlan-relais](../../../src/app/tools/components/tool-wlan-relais/tool-wlan-relais.component.ts):
+`model = linkedSignal(() => toWlanRelaisFormModel(this.toolWlanRelais()))`).
 
 Rules:
 
@@ -300,8 +306,8 @@ Rules:
   (`existingTools = input.required<ExistingToolViewModel[]>()` for `validateUniqueToolName`), not from a store.
 - Filtering by what the user typed (autocomplete search text) is UI logic and stays in the component.
 - Every output for a backend change emits a **command** (CLAUDE.md "Commands"). Outputs without a backend change
-  (`editRequested`, `reloadRequested`, `userSelected`) emit `void` or the id.
-- Local UI state in signals (`isEditing`, `searchText`, `selectedUsers`), form models local (CLAUDE.md "Forms"),
+  (`editRequested`, `assignmentRequested`, `openSessionRequested`) emit `void` or the id.
+- Local UI state in signals (`isEditing`, `searchText`, `selectedUsers`, the area filter of `tool-status-card`), form models local (CLAUDE.md "Forms"),
   pure helpers after the class.
 
 ## Testing
@@ -312,11 +318,12 @@ Dumb component – ViewModel in, command out, no store:
   datepicker). Nothing to mock – except a confirmation service:
   `{ provide: ConfirmActionDialogService, useValue: { open: vi.fn(() => of(true)) } }`.
 - Test data is a **complete ViewModel literal** – no `as User` cast, no fields the component doesn't read:
-  `const userContact: UserContactViewModel = { id: 'user-1', email: 'max@example.com', phone: null };`
-- `fixture.componentRef.setInput('userContact', userContact)`, `await fixture.whenStable()`; subscribe a `vi.fn()` to each
+  `const assigned: UserRfidTagCardViewModel = { userId: 'user-1', userName: 'Max Mustermann', assignment: { … } };`
+- `fixture.componentRef.setInput('userRfidTagCard', assigned)`, `await fixture.whenStable()`; subscribe a `vi.fn()` to each
   output and expect the command (`toHaveBeenCalledExactlyOnceWith({ id: 'user-1', … })`).
 - Material harnesses for fields and buttons (`MatInputHarness`, `MatButtonHarness`) –
-  see [user-contact.component.spec.ts](../../../src/app/users/components/user-contact/user-contact.component.spec.ts).
+  see [update-user-form.component.spec.ts](../../../src/app/users/components/update-user-form/update-user-form.component.spec.ts).
+  More test patterns: skill `testing`.
 
 Smart component – store mocked, children real (a tab component the same way, but it has no `providers` of its own:
 the store mock goes into the `TestBed` providers):
@@ -332,8 +339,8 @@ the store mock goes into the `TestBed` providers):
   `{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }` – the content is attached only when the
   tab animation ends.)
 - A child's output calls the store method with the command: emit it on the child instance
-  (`child(ActiveUsersWidgetComponent).userSelected.emit('user-1')` with a small `child()` helper around
-  `By.directive`, see [dashboard.component.spec.ts](../../../src/app/dashboard/pages/dashboard/dashboard.component.spec.ts))
+  (`child(UserRfidTagCardComponent).rfidTagUnassigned.emit({ userId: 'user-1' })` with a small `child()` helper
+  around `By.directive`, see [user-detail-tab-overview.component.spec.ts](../../../src/app/users/pages/user-detail/user-detail-tab-overview/user-detail-tab-overview.component.spec.ts))
   and expect the store / router call.
 - Business rules are tested in the **store spec**, not in the page.
 
