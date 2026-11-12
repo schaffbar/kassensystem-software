@@ -50,7 +50,7 @@ Files are divided by section comments – a separator line ending at column 79 (
 of the section:
 
 ```ts
-export class UserContactComponent {
+export class UserRfidTagCardComponent {
   …
   // --------------------------------------------------------------------------
   // actions
@@ -76,7 +76,7 @@ export class UserContactComponent {
 - Every action a component triggers for a change in the backend is passed on as a **command** – via `output.emit()`
   or when a dialog closes.
 - Commands are defined in the feature's `*.model.ts`, section `// commands`, named verb + entity + `Command`
-  (`UpdateToolCommand`, `UpdateUserContactCommand`, `ClearWlanRelaisCommand`).
+  (`UpdateToolCommand`, `UnassignRfidTagCommand`, `ClearWlanRelaisCommand`).
 - **The command contains the id(s)** of the affected entity. The component knows them from its input
   (e.g. `this.user().id`); parent components only pass the command on and never assemble one.
 - Component output and store method take the same command type. The store passes it on to the API service as path
@@ -96,7 +96,7 @@ export class UserContactComponent {
   `shared/api`. A dialog container loads its data with
   `httpResource` directly, without a store (see "Dialogs").
 - Store data is named after its content – `tools`, `users`, `rfidReaders` – not `entities`.
-- A store method is named like its command without `Command`: `UpdateUserContactCommand` → `updateUserContact`,
+- A store method is named like its command without `Command`: `UnassignRfidTagCommand` → `unassignRfidTag`,
   `PauseToolCertificationCommand` → `pauseToolCertification`.
 - Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
   (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
@@ -158,63 +158,25 @@ export class UserContactComponent {
   the `null` case: `{{ reader.type | rfidReaderTypeKey | translate }}` (`rfidReaders.types.switch_box`,
   `rfidReaders.types.none` for `null`). One place for the mapping, testable, and the UI never shows
   `rfidReaders.types.null`.
-- Dash or text: a dash when a value simply does not exist (yet), e.g. the end time of a running tool usage. When the
-  missing value means someone has to act, show a translated text and highlight it – e.g. a new RFID reader without
-  type: `rfidReaders.types.none` with a warning icon in error color, plus a hint in the detail view.
-
-## Buttons
-
-- Material buttons use the attribute syntax of the current API: `matButton="filled"` (main action, e.g. save),
-  `matButton="outlined"` (secondary action, e.g. cancel), `matIconButton` – not `mat-flat-button`,
-  `mat-stroked-button`, `mat-icon-button`.
-- No `color="primary|warn"` – it has no effect in the M3 theme. Destructive actions (delete, revoke, pause, unassign)
-  get the global class `danger-button` (`src/styles.scss`), which works for filled, outlined, text and icon buttons.
-- Look and feel is changed with `mat.button-overrides(...)` / `mat.icon-button-overrides(...)`, not with
-  `.mat-mdc-*` selectors and `!important`.
+- Dash or a highlighted text, badge or plain text: skill `design` ("Status, text or dash").
 
 ## Design system
 
-The design itself (colors, type, pages, dialogs): `../docs/ui-redesign.md`.
+How pages look and are laid out – tokens, building blocks, global classes, list and detail pages, phone: skill
+`design` (`.claude/skills/design/SKILL.md`). The design itself and every decision: `../docs/ui-redesign.md`.
 
-- Colors only from the tokens in `src/styles.scss` (`--text`, `--text-2`, `--surface`, `--border`, `--accent`,
-  `--danger`, …) – no hex values in component styles. Neon green `--accent` only as a surface; green text is
-  `--accent-text`.
-- Material components get their look from the `mat.*-overrides(...)` in `src/styles.scss`.
-- Building blocks in `shared/components/`; their texts are passed **translated**:
-  - `schbar-page-header` – `h1`, `subtitle`, `breadcrumbs`, `icon` (navy tile, detail pages); actions are projected,
-    status badges and further meta (e.g. the MAC address) with `pageHeaderMeta`.
-  - `schbar-status-badge` – a status as icon + text, never by color alone (`tone`: `success`, `info`, `warn`,
-    `danger`, `neutral`). An enum gets its own badge that maps it once (`certification-status-badge`,
-    `certification-requirement-badge`). Not inside a `mat-option`: `mat-select` takes the icon name into the text.
-    Without `icon` only as `neutral` for a plain property, not a status (the type in the header of a reader).
-  - `schbar-row-menu` – the ⋯ menu of a table row instead of action buttons; destructive entries come last after a
-    `<mat-divider />`, get the global class `danger-menu-item` and ask first like a `danger-button`.
-  - `schbar-empty-state` – instead of an empty table or list.
-  - `schbar-danger-zone` – every detail page that can delete its entity has one: the last card of the first tab (or
-    of the page without tabs), over the full width below all columns, with the destructive action (`danger-button`,
-    asks first). The ⋯ menu of the header offers the same. When a rule forbids it, the card explains why instead of
-    the button and the menu hides the entry (open session of a user, tool in use, reader assigned to a tool).
-  - `schbar-filter-chips` – the filters of a list with counts (`[(selected)]` = id of the active filter); the counts
-    ignore the search. Next to it the search: `mat-form-field` with the global class `search-field` (44px, no hint).
-  - `schbar-toggle-chip` – a single filter that is on or off (`[(pressed)]`, optional icon and count), e.g.
-    "Hardware einrichten" in the tool list; it looks like the filter chips (global class `chip`).
-  - `schbar-segmented-control` – one choice out of a few next to each other (area, cards / list), optional count and
-    icon per segment; filter chips are for a row of filters.
-- Choices with an explanation are radio cards, not a `mat-select`: `<mat-radio-button class="radio-card">` with the
-  global classes `radio-card-text`, `radio-card-label`, `radio-card-description` (reader type, tool area and
-  certification requirement).
-- Global classes for the page layout (`src/styles.scss`):
-  - `detail-list` on a `<dl>` – the read-only values of a card (label above value, in a wrapping grid).
-  - `card` (with `card-header`: `h2` left, actions right) – a section of a detail page; a dumb component that is one
-    card sets it as `host: { class: 'card' }`.
-  - `table-card` around a list table and its paginator, the table inside `table-scroll` (scrolls on narrow
-    screens). The row that opens the detail page is a `clickable-row`; its ⋯ menu offers "Details" as well, because
-    a row cannot be reached with the keyboard.
-  - `mono` for IDs, MAC and IP addresses; `mono-field` on a `mat-form-field` that shows one.
-- Times that may lie on an earlier day (check-in, session, usages) use the pipe `timeWithDay`
-  (`src/app/shared/pipes/time-with-day.pipe.ts`): `17:50` today, `10.11.26, 17:50` otherwise – not `date: 'shortTime'`,
-  a session of yesterday must not look like one of today.
-- Every `matIconButton` has a translated `aria-label` (`shared.actions.reload`, `shared.actions.edit`, …).
+- Colors only from the tokens in `src/styles.scss` – no hex values in component styles. Neon green `--accent` only as
+  a surface; green text is `--accent-text`.
+- Material's look only with `mat.*-overrides(...)` – no `.mat-mdc-*` selectors, no `!important`.
+- Buttons with the attribute syntax (`matButton="filled"`, `matButton="outlined"`, `matIconButton`), no `color="…"`;
+  destructive actions get `danger-button` / `danger-menu-item` and ask first (see "Dialogs").
+- Building blocks from `shared/components/` and the global classes of `src/styles.scss` instead of own copies; their
+  texts are passed translated.
+- A status is icon + text (`schbar-status-badge`), never color alone.
+- Every detail page that can delete its entity has a `schbar-danger-zone` as the last card of the first tab, over the
+  full width; when a rule forbids deleting, it explains why instead of the button.
+- Times of a session use the pipe `timeWithDay`, not `date: 'shortTime'`.
+- Every `matIconButton` has a translated `aria-label`.
 
 ## Components
 
@@ -238,9 +200,9 @@ Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL
   The store never imports a ViewModel.
 - No pass-through components. A list page may keep its own `mat-table`.
 - **Names**: a method called from a template is named for what it does – verb + object, no `on…` prefix, no
-  `…Dialog` suffix (`saveContact`, `discardContactChanges`, `deleteTool`, `openToolDetail`). A page or tab method
-  that executes a command is named like the store method it calls (`updateUserContact`). An output is the event:
-  object + participle (`contactChanged`, `certificationPaused`, `editRequested`).
+  `…Dialog` suffix (`saveWlanRelais`, `discardWlanRelaisChanges`, `deleteTool`, `openToolDetail`). A page or tab method
+  that executes a command is named like the store method it calls (`unassignRfidTag`). An output is the event:
+  object + participle (`rfidTagUnassigned`, `certificationPaused`, `editRequested`).
 - **Pages with tabs**: the page is the frame (loading, header, tab group); every tab is a smart tab component
   `<page>-tab-<name>/` in the page's folder that injects the page's store and composes dumb components.
 

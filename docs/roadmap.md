@@ -1,7 +1,7 @@
 # Roadmap nach dem UI-Redesign (Phase 1)
 
 Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbarten Reihenfolge:
-**A3 → A2 → A1 → B → C**. In einer neuen Session auf diese Datei verweisen („mach mit A2 weiter, siehe
+**A3 → S → A2 → A1 → B → C**. In einer neuen Session auf diese Datei verweisen („mach mit S weiter, siehe
 `docs/roadmap.md`“). Erledigtes abhaken und mit Datum und Commit vermerken.
 
 ## Arbeitsweise
@@ -15,6 +15,30 @@ Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbart
 - Portal: Konventionen in `schaffbar-portal/CLAUDE.md`, Prüfungen `npx ng test --watch=false`, `npx ng lint`,
   `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
 - Im Browser nichts in der Datenbank ändern: Playwright mit `page.route`, alles außer `GET` abfangen.
+
+## S – Skills
+
+Wissen aus Phase 1 als Skills festhalten (`schaffbar-portal/.claude/skills/<name>/SKILL.md`, Vorbild: `api`,
+`component`, `dialog`) – `CLAUDE.md` behält je Thema nur die harte Regel in einer Zeile und verweist auf den Skill.
+Agents können die Skills später nutzen. Reihenfolge:
+
+| Skill | Inhalt | Aus `CLAUDE.md` |
+| --- | --- | --- |
+| `design` | Designsystem und Seitenaufbau: Listenseite (Kopf, Filter-Chips + Suche, `table-card`, ⋯-Menü, leerer Zustand), Detailseite (Kopf mit Meta-Badges, Tabs, Spalten, Gefahrenzone als letzte Karte über die volle Breite), welcher Baustein wofür (Status-Badge oder Text, Strich oder Hinweis, Auswahlkarten statt Select, `timeWithDay`), Tokens und Farbregeln, Material-Overrides, Verhalten auf dem Handy (Spalten brechen um, Badges unter den Namen, kein waagerechtes Scrollen) | „Design system“, „Buttons“, Anzeige-Teil von „Missing values“ |
+| `testing` | Tests im Portal: `trigger()` / `settle()` mit `HttpTestingController` (`whenStable()` hängt bei offenen Requests), Fake-Timer nur für `setInterval` / `Date` und `advanceTimersToNextTimer`, `LOCALE_ID` `de-DE`, ⋯-Menüs im Overlay testen und aufräumen, Harnesses für Formulare (Felder mit Label darüber über ihr Input finden), Store-Mocks mit Signalen | Test-Hinweise aus „Forms“ (`provideDateAdapter()`) |
+| `verify-ui` | Änderung im Browser abnehmen: Dev-Server starten (`npx ng serve --port 4200` im Hintergrund), Playwright mit `page.route` – alles außer `GET` abbrechen, Zustände mit simulierten Antworten herstellen (offene Sitzung, wartender Tag, laufendes Werkzeug, neues Lesegerät), Screenshots Desktop 1440 und Handy 390, waagerechtes Scrollen prüfen (`scrollWidth > innerWidth`), Projektion von `pageHeaderMeta` prüfen | Zeile „Im Browser nichts in der Datenbank ändern“ der Arbeitsweise oben |
+| `backend-rule` | Regel im Backend umsetzen, direkt vor A2: Prüfung im Use Case, eigene Exception (Muster `CustomerHasOpenWorkshopSessionException`), Mockito-Test wie `CustomerDeleteTest` (ohne unnötige Stubs – Mockito-Strictness), README von „Open Rules“ nach „Business Rules“, `mvn -q test` | – (Skill im Backend: `schaffbar-backend/.claude/skills/`) |
+
+Stand:
+
+- [x] `design` – 12.11.2026; `CLAUDE.md` „Buttons“ und „Design system“ gekürzt, veraltete Beispiele in `CLAUDE.md`
+  und den Skills `component` und `dialog` ersetzt (`user-contact` u. a. gibt es seit der Detailseite nicht mehr)
+- [ ] `testing`
+- [ ] `verify-ui`
+- [ ] `backend-rule`
+
+Später, wenn mehr Formulare kommen: `forms` (Signal Forms, kompakte Felder, Zähler „N ungespeicherte Änderungen“,
+„Bitte N Felder prüfen“) – teils schon im Skill `dialog`.
 
 ## A – Backend: Regeln und Fehlermeldungen
 
