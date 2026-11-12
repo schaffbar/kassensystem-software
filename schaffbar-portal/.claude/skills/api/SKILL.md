@@ -390,6 +390,8 @@ its mutations (create, delete) reload the list resource.
 
 ## Testing
 
+General patterns (trigger/settle, harnesses, overlays, timers, locale): skill `testing`.
+
 No spec for the API service – it is tested through the store spec. Mappers get their own spec.
 
 Store spec (`HttpTestingController`):

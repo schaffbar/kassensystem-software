@@ -33,7 +33,8 @@ Stand:
 
 - [x] `design` – 12.11.2026; `CLAUDE.md` „Buttons“ und „Design system“ gekürzt, veraltete Beispiele in `CLAUDE.md`
   und den Skills `component` und `dialog` ersetzt (`user-contact` u. a. gibt es seit der Detailseite nicht mehr)
-- [ ] `testing`
+- [x] `testing` – 12.11.2026; `CLAUDE.md` hat einen kurzen Abschnitt „Tests“, die Skills `api`, `component` und
+  `dialog` verweisen darauf
 - [ ] `verify-ui`
 - [ ] `backend-rule`
 

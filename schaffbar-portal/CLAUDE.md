@@ -248,3 +248,13 @@ Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
 - **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
   form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it; Enter in a text field saves);
   destructive or irreversible confirmations put `cdkFocusInitial` on cancel.
+
+## Tests
+
+How to write and run them – store specs with `HttpTestingController`, page and component specs, harnesses, menus,
+dialogs, timers, locale, pitfalls: skill `testing` (`.claude/skills/testing/SKILL.md`).
+
+- Every change comes with its specs; before handing over: `npx ng test --watch=false`, `npx ng lint`,
+  `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
+- Specs expect translation keys, not texts; dates in test data are local (`new Date(2026, 10, 9, 14, 5)`) or relative
+  to now.

@@ -298,6 +298,8 @@ closeWorkshopSession(): void {
 
 ## Testing
 
+General patterns (trigger/settle, harnesses, overlays, timers, locale): skill `testing`.
+
 Modal – a presentational component, set inputs, subscribe to outputs:
 
 - `fixture.componentRef.setInput('viewModel', …)`, then `await fixture.whenStable()`.
