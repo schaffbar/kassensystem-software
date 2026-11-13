@@ -1,8 +1,8 @@
 # Roadmap nach dem UI-Redesign (Phase 1)
 
 Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbarten Reihenfolge:
-**A3 → S → A2 → A1 → B → C**, danach **P** (Agenten-Pipeline). In einer neuen Session auf diese Datei verweisen („mach mit S weiter, siehe
-`docs/roadmap.md`“). Erledigtes abhaken und mit Datum und Commit vermerken.
+**A3 → S → K (mit A1) → A2 → B → C**, danach **P** (Agenten-Pipeline). In einer neuen Session auf diese Datei
+verweisen („mach mit K weiter, siehe `docs/roadmap.md`“). Erledigtes abhaken und mit Datum und Commit vermerken.
 
 ## Arbeitsweise
 
@@ -27,7 +27,6 @@ Agents können die Skills später nutzen. Reihenfolge:
 | `design` | Designsystem und Seitenaufbau: Listenseite (Kopf, Filter-Chips + Suche, `table-card`, ⋯-Menü, leerer Zustand), Detailseite (Kopf mit Meta-Badges, Tabs, Spalten, Gefahrenzone als letzte Karte über die volle Breite), welcher Baustein wofür (Status-Badge oder Text, Strich oder Hinweis, Auswahlkarten statt Select, `timeWithDay`), Tokens und Farbregeln, Material-Overrides, Verhalten auf dem Handy (Spalten brechen um, Badges unter den Namen, kein waagerechtes Scrollen) | „Design system“, „Buttons“, Anzeige-Teil von „Missing values“ |
 | `testing` | Tests im Portal: `trigger()` / `settle()` mit `HttpTestingController` (`whenStable()` hängt bei offenen Requests), Fake-Timer nur für `setInterval` / `Date` und `advanceTimersToNextTimer`, `LOCALE_ID` `de-DE`, ⋯-Menüs im Overlay testen und aufräumen, Harnesses für Formulare (Felder mit Label darüber über ihr Input finden), Store-Mocks mit Signalen | Test-Hinweise aus „Forms“ (`provideDateAdapter()`) |
 | `verify-ui` | Änderung im Browser abnehmen: Dev-Server starten (`npx ng serve --port 4200` im Hintergrund), Playwright mit `page.route` – alles außer `GET` abbrechen, Zustände mit simulierten Antworten herstellen (offene Sitzung, wartender Tag, laufendes Werkzeug, neues Lesegerät), Screenshots Desktop 1440 und Handy 390, waagerechtes Scrollen prüfen (`scrollWidth > innerWidth`), Projektion von `pageHeaderMeta` prüfen | Zeile „Im Browser nichts in der Datenbank ändern“ der Arbeitsweise oben |
-| `backend-rule` | Regel im Backend umsetzen, direkt vor A2: Prüfung im Use Case, eigene Exception (Muster `CustomerHasOpenWorkshopSessionException`), Mockito-Test wie `CustomerDeleteTest` (ohne unnötige Stubs – Mockito-Strictness), README von „Open Rules“ nach „Business Rules“, `mvn -q test` | – (Skill im Backend: `schaffbar-backend/.claude/skills/`) |
 
 Stand:
 
@@ -45,11 +44,13 @@ Stand:
   Regeln je eine Zeile, Definition of Done, Kommentar-Regel (nur was der Code nicht sagt, keine JSDoc, die den Namen
   wiederholt), Übersetzungen (Schlüsselschema, immer `de` und `en`, kein „du“/„Sie“); npm-Script `check` für die
   fünf Prüfungen
-- [ ] Memory aufräumen: Kommentar-Regel steht dann im Repo, „Seite nach dem Artboard“ im Skill `design`, die
-  `shared/api`-Migration ist erledigt – die drei Einträge löschen
-- [ ] Backend-`CLAUDE.md` (Aggregate mit README-Regeln, Use Cases gegen Services, Views, Outbox-Events, Flyway,
-  Mockito-Tests, `mvn` ohne Wrapper)
-- [ ] `backend-rule`
+- [x] Memory aufräumen – 13.11.2026 (OpenAPI-Codegenerierung nach B übernommen): Kommentar-Regel steht dann im Repo,
+  „Seite nach dem Artboard“ im Skill `design`, die `shared/api`-Migration ist erledigt – die drei Einträge löschen
+- [x] Backend-`CLAUDE.md` – 13.11.2026: `schaffbar-backend/CLAUDE.md` (Befehle, Architektur mit Verweis auf
+  `ddd-overview.md`, Regeln, Code-Stil, Tests, Definition of Done); in `ddd-overview.md` / `ddd-uebersicht.md` Links,
+  fehlendes Event und erledigte TODOs korrigiert
+- Die Backend-Skills (statt `backend-rule`) entstehen am Ende von K aus dem vereinheitlichten Code (Entscheidung
+  13.11.2026).
 
 Später, wenn mehr Formulare kommen: `forms` (Signal Forms, kompakte Felder, Zähler „N ungespeicherte Änderungen“,
 „Bitte N Felder prüfen“) – teils schon im Skill `dialog`.
@@ -65,7 +66,7 @@ Rollen (Subagents in `.claude/agents/*.md`), bewusst wenige – jede Übergabe v
 | Rolle | Macht | Lädt | Ergebnis |
 | --- | --- | --- | --- |
 | Spec (Anforderung + Design) | Issue, Prototyp-Artboard, Backend und `docs/` lesen, Lücken und Widersprüche finden, Fragen stellen statt raten | `design`, `feature`, Glossar | Spezifikation mit offenen Fragen und Vorschlägen |
-| Implementation (mit Doku) | Code, Specs und Prüfungen nach den Skills, Entscheidungen in `ui-redesign.md` / READMEs | `feature`, `api`, `component`, `dialog`, `design`, `testing`, `backend-rule` | Branch mit Änderungen |
+| Implementation (mit Doku) | Code, Specs und Prüfungen nach den Skills, Entscheidungen in `ui-redesign.md` / READMEs | `feature`, `api`, `component`, `dialog`, `design`, `testing`, Backend-Skills aus K, `business-rule` | Branch mit Änderungen |
 | Verify | im Browser abnehmen, Zustände simulieren | `verify-ui` | Bericht mit Screenshots |
 | Review | den Diff gegen `CLAUDE.md` und die Skills prüfen – ohne die Begründung des Autors | alle Skills | Befunde |
 
@@ -83,6 +84,26 @@ Stufen:
 5. [ ] CI mit Backend und Testdaten (Docker Compose mit Seed) – Verify braucht ein laufendes Backend; lokal lief es
    gegen die echte Datenbank mit abgefangenen Schreibzugriffen, in CI geht das nicht.
 6. [ ] GitHub: Claude Code Action, ausgelöst durch ein Label am Issue; Ergebnisse als Kommentare und PR.
+
+## K – Backend-Konsistenz
+
+Das Backend ist nicht so einheitlich wie das Portal. Agents kopieren, was sie im Code vorfinden – deshalb zuerst
+vereinheitlichen, dann die Skills aus dem Ergebnis schreiben (wie im Portal: Piloten, Regeln, dann Skill `api`).
+Entscheidung 13.11.2026.
+
+1. [x] **Bestandsaufnahme** (13.11.2026) in `backend-consistency.md`: Funde nach Kategorien (Struktur, Namen,
+   Exceptions und Fehlerantworten, Transaktionen und Events, Validierung, API-Modelle, Tests) – heute, Vorschlag,
+   zu entscheiden.
+2. [x] **Konventionen entscheiden** (13.11.2026) – mit Datum in `backend-consistency.md`.
+3. [ ] **Pilot** an einem kleinen Aggregat (z. B. `rfid_reader`): alles auf den Zielzustand, inklusive Problems API (A1)
+   für seine Exceptions und Tests.
+4. [ ] **Ausrollen** Aggregat für Aggregat.
+5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
+   Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
+   (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
+   Erklärung im Portal.
+
+Danach A2 mit den Skills – vielleicht als erster Versuch der Pipeline (P).
 
 ## A – Backend: Regeln und Fehlermeldungen
 
@@ -117,7 +138,7 @@ und einen Test schreiben. Bis A1 kommen die Exceptions noch als `500` an.
 
 Vorher klären: C-6 bis C-8 lehnen bestehende Datensätze nicht ab, die die Regel verletzen – nur neue und geänderte.
 
-### A1 – Problems API
+### A1 – Problems API (wird Teil von K)
 
 - Backend: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions als `409` / `400` mit
   verständlichem `detail` statt `500` – alle aus A2 und die vorhandenen (`ToolNameAlreadyUsedException`,
@@ -137,6 +158,7 @@ Vorher klären: C-6 bis C-8 lehnen bestehende Datensätze nicht ab, die die Rege
 | Dunkel-Modus | Tokens sind mit `light-dark()` vorbereitet, Umschalter fehlt, alle Seiten prüfen |
 | Tab-Leiste unten auf dem Handy | statt Menü-Button, Prototyp „Übersicht – Mobil“ |
 | Sprachumschalter DE/EN | in der Seitenleiste |
+| API-Code generieren | später gewünscht (Entscheidung 03.11.2026): OpenAPI aus dem Backend (springdoc), daraus Schemas und Services (orval oder hey-api) – ersetzt die handgeschriebenen `*.api-model.ts`; braucht Backend-Arbeit |
 | `ui-redesign.md` aufräumen | Abschnitt „Noch nicht umgesetzt“ ist veraltet (altes Theme, alte Tabs, rote Löschen-Buttons) |
 
 ## C – Backend-Funktionen für das Portal
