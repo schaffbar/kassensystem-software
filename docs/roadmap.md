@@ -1,7 +1,7 @@
 # Roadmap nach dem UI-Redesign (Phase 1)
 
 Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbarten Reihenfolge:
-**A3 → S → A2 → A1 → B → C**. In einer neuen Session auf diese Datei verweisen („mach mit S weiter, siehe
+**A3 → S → A2 → A1 → B → C**, danach **P** (Agenten-Pipeline). In einer neuen Session auf diese Datei verweisen („mach mit S weiter, siehe
 `docs/roadmap.md`“). Erledigtes abhaken und mit Datum und Commit vermerken.
 
 ## Arbeitsweise
@@ -37,10 +37,52 @@ Stand:
 - [x] `testing` – 12.11.2026; `CLAUDE.md` hat einen kurzen Abschnitt „Tests“, die Skills `api`, `component` und
   `dialog` verweisen darauf
 - [x] `verify-ui` – 12.11.2026
+- [x] Root-`CLAUDE.md`: Projekt, Repo-Plan, Sprachen, Glossar UI ↔ Code – 13.11.2026
+- [ ] Skill `feature` aus `api` herauslösen: Aufbau eines Features (Ordner, Importregeln, eigenes Modell pro Feature,
+  Commands, Mapper, Store mit `mutation` und Polling, Geschäftsregeln im Modell); `api` behält nur `shared/api`,
+  `component` nur das Innere einer Komponente
+- [ ] Portal-`CLAUDE.md` schlank (~120 Zeilen): wozu das Portal da ist, Befehle, Tabelle „Aufgabe → Skill“, harte
+  Regeln je eine Zeile, Definition of Done, Kommentar-Regel (nur was der Code nicht sagt, keine JSDoc, die den Namen
+  wiederholt), Übersetzungen (Schlüsselschema, immer `de` und `en`, kein „du“/„Sie“); npm-Script `check` für die
+  fünf Prüfungen
+- [ ] Memory aufräumen: Kommentar-Regel steht dann im Repo, „Seite nach dem Artboard“ im Skill `design`, die
+  `shared/api`-Migration ist erledigt – die drei Einträge löschen
+- [ ] Backend-`CLAUDE.md` (Aggregate mit README-Regeln, Use Cases gegen Services, Views, Outbox-Events, Flyway,
+  Mockito-Tests, `mvn` ohne Wrapper)
 - [ ] `backend-rule`
 
 Später, wenn mehr Formulare kommen: `forms` (Signal Forms, kompakte Felder, Zähler „N ungespeicherte Änderungen“,
 „Bitte N Felder prüfen“) – teils schon im Skill `dialog`.
+
+## P – Agenten-Pipeline
+
+Ziel: Für ein Issue, das Piotr annimmt (z. B. per Label), läuft der Weg von der Anforderung bis zum Pull Request mit
+Agents. Skills sind das Wissen („wie macht man X hier“), Agents die Rollen mit Auftrag, Werkzeugen und Rechten –
+mehrere Rollen nutzen dieselben Skills. Voraussetzung ist S.
+
+Rollen (Subagents in `.claude/agents/*.md`), bewusst wenige – jede Übergabe verliert Wissen:
+
+| Rolle | Macht | Lädt | Ergebnis |
+| --- | --- | --- | --- |
+| Spec (Anforderung + Design) | Issue, Prototyp-Artboard, Backend und `docs/` lesen, Lücken und Widersprüche finden, Fragen stellen statt raten | `design`, `feature`, Glossar | Spezifikation mit offenen Fragen und Vorschlägen |
+| Implementation (mit Doku) | Code, Specs und Prüfungen nach den Skills, Entscheidungen in `ui-redesign.md` / READMEs | `feature`, `api`, `component`, `dialog`, `design`, `testing`, `backend-rule` | Branch mit Änderungen |
+| Verify | im Browser abnehmen, Zustände simulieren | `verify-ui` | Bericht mit Screenshots |
+| Review | den Diff gegen `CLAUDE.md` und die Skills prüfen – ohne die Begründung des Autors | alle Skills | Befunde |
+
+Haltepunkte für Piotr: nach der Spec (Fragen beantworten, freigeben) und vor dem Merge. Die wertvollsten Momente im
+Redesign waren Entscheidungen (Banner trotz WS-5, Leihtag-Filter, Löschkonzept) – die darf kein Agent allein treffen.
+Übergaben nur über Dateien, Issue und PR, nicht über Chat-Verlauf.
+
+Stufen:
+
+1. [ ] Rollen als Subagents beschreiben (`.claude/agents/spec.md`, `implement.md`, `verify.md`, `review.md`).
+2. [ ] Lokal an einem kleinen, klar abgegrenzten Issue ausprobieren – eine Regel aus A2.
+3. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
+   Piotr (Ausnahme zu „nie committen“ in `CLAUDE.md`, nur für die Pipeline).
+4. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
+5. [ ] CI mit Backend und Testdaten (Docker Compose mit Seed) – Verify braucht ein laufendes Backend; lokal lief es
+   gegen die echte Datenbank mit abgefangenen Schreibzugriffen, in CI geht das nicht.
+6. [ ] GitHub: Claude Code Action, ausgelöst durch ein Label am Issue; Ergebnisse als Kommentare und PR.
 
 ## A – Backend: Regeln und Fehlermeldungen
 
