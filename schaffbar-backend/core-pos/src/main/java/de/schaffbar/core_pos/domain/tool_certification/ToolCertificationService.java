@@ -15,8 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CertificationAlreadyExistsException;
 import de.schaffbar.core_pos.shared.exception.CertificationPermanentlyRevokedException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
@@ -32,7 +31,7 @@ public class ToolCertificationService {
 
     private final @NonNull ToolCertificationRepository toolCertificationRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -70,7 +69,7 @@ public class ToolCertificationService {
         this.toolCertificationRepository.save(certification);
 
         List<SchaffbarEvent> events = List.of(ToolCertificationEventFactory.toolCertificationCreated(certification));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Created tool certification for customer {} on tool {} and published events {}", command.customerId(), command.toolId(), events);
     }
@@ -80,7 +79,7 @@ public class ToolCertificationService {
         ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.pause();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Paused tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
@@ -90,7 +89,7 @@ public class ToolCertificationService {
         ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.reactivate();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Reactivated tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
@@ -100,7 +99,7 @@ public class ToolCertificationService {
         ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.revoke();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Revoked tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
@@ -110,7 +109,7 @@ public class ToolCertificationService {
         ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = List.of(ToolCertificationEventFactory.toolCertificationDeleted(certification));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         this.toolCertificationRepository.delete(certification);
 
@@ -129,7 +128,7 @@ public class ToolCertificationService {
                 .toList();
 
         this.toolCertificationRepository.deleteAllByToolId(toolId.getValue());
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted {} tool certifications for tool {} and published events {}", certifications.size(), toolId, events);
     }
@@ -146,7 +145,7 @@ public class ToolCertificationService {
                 .toList();
 
         this.toolCertificationRepository.deleteAllByCustomerId(customerId.getValue());
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted {} tool certifications of customer {} and published events {}", certifications.size(), customerId, events);
     }
@@ -167,14 +166,6 @@ public class ToolCertificationService {
                     }
                     throw new CertificationAlreadyExistsException(customerId, toolId);
                 });
-    }
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
 }

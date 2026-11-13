@@ -6,8 +6,7 @@ import java.util.Optional;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +25,7 @@ public class WorkshopSessionService {
 
     private final @NonNull WorkshopSessionRepository workshopSessionRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -49,7 +48,7 @@ public class WorkshopSessionService {
         WorkshopSession savedWorkshopSession = this.workshopSessionRepository.save(workshopSession);
         List<SchaffbarEvent> events = List.of(WorkshopSessionEventFactory.workshopSessionStarted(savedWorkshopSession));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Started workshop session for customer {} and published events {}", customerId, events);
     }
@@ -60,7 +59,7 @@ public class WorkshopSessionService {
                 .orElseThrow(() -> new RuntimeException("No workshop session found for customer [id: " + customerId + "]")); // TODO: use proper exception
 
         List<SchaffbarEvent> events = session.close(workshopTotal, toolTotal);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal,
                 toolTotal, events);
@@ -75,14 +74,6 @@ public class WorkshopSessionService {
 
     private void throwHasAlreadyOpenWorkshopSession(WorkshopSession session) {
         throw new RuntimeException("Customer [id: " + session.getCustomerId() + "] has already open workshop session");
-    }
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
 }

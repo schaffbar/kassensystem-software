@@ -24,8 +24,7 @@ import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyUsingToolException;
 import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
 import de.schaffbar.core_pos.shared.exception.ToolAlreadyInUseByAnotherCustomerException;
@@ -44,7 +43,7 @@ public class ToolUsageService {
 
     private final @NonNull ToolUsageRepository toolUsageRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -101,7 +100,7 @@ public class ToolUsageService {
         ToolUsage savedToolUsage = this.toolUsageRepository.save(toolUsage);
 
         List<SchaffbarEvent> events = List.of(ToolUsageEventFactory.toolUsageStarted(savedToolUsage));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Started tool usage for customer {} on tool {} and published events {}", command.customerId(), command.toolId(), events);
     }
@@ -112,7 +111,7 @@ public class ToolUsageService {
                 .orElseThrow(() -> new ToolNotInUseByCustomerException(customerId, toolId));
 
         List<SchaffbarEvent> events = usage.stop();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Stopped tool usage for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
@@ -130,21 +129,13 @@ public class ToolUsageService {
                 .flatMap(List::stream) //
                 .toList();
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Stopped all tool usages for customer {} and published events {}", customerId, events);
     }
 
     // ------------------------------------------------------------------------
     // helper
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
-    }
 
     private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId customerId) {
         this.toolUsageRepository.findActiveByToolId(toolId) //

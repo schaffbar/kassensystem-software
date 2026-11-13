@@ -18,8 +18,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerComm
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
@@ -31,7 +30,7 @@ public class CustomerService {
 
     private final @NonNull CustomerRepository customerRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -56,7 +55,7 @@ public class CustomerService {
         Customer savedCustomer = this.customerRepository.save(customer);
         List<SchaffbarEvent> events = List.of(CustomerEventFactory.customerCreated(savedCustomer));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Created customer with id {} and published events {}", savedCustomer.getId(), events);
 
@@ -69,7 +68,7 @@ public class CustomerService {
                 .map(customer -> customer.update(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(command.id()));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated customer with id {} and published events {}", command.id(), events);
     }
@@ -80,7 +79,7 @@ public class CustomerService {
                 .map(customer -> customer.updateContact(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(command.id()));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated contact of customer with id {} and published events {}", command.id(), events);
     }
@@ -91,7 +90,7 @@ public class CustomerService {
                 .map(customer -> customer.updateAddress(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(command.id()));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated address of customer with id {} and published events {}", command.id(), events);
     }
@@ -104,21 +103,9 @@ public class CustomerService {
         this.customerRepository.deleteById(customerView.id().getValue());
 
         List<SchaffbarEvent> events = List.of(CustomerEventFactory.customerDeleted(id));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted customer with id {} and published events {}", id, events);
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    // TODO: DRY: this method is duplicated in multiple services, maybe move to a common base class or utility class?
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
 }

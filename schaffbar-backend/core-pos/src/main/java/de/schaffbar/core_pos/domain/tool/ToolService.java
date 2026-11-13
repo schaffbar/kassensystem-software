@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
@@ -38,7 +37,7 @@ public class ToolService {
 
     private final @NonNull ToolRepository toolRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -77,7 +76,7 @@ public class ToolService {
         Tool savedTool = this.toolRepository.save(tool);
 
         List<SchaffbarEvent> events = List.of(ToolEventFactory.toolCreated(savedTool));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Created tool with id {} and published events {}", savedTool.getId(), events);
 
@@ -93,7 +92,7 @@ public class ToolService {
                 .ifPresent(existing -> throwToolNameAlreadyUsedException(command.name(), existing));
 
         List<SchaffbarEvent> events = tool.update(command);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated tool with id {} and published events {}", toolId, events);
     }
@@ -107,7 +106,7 @@ public class ToolService {
                 .ifPresent(existing -> throwIpAddressAlreadyUsedException(command.ipAddress(), existing));
 
         List<SchaffbarEvent> events = tool.setWlanRelais(command);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Set WLAN relais of tool with id {} and published events {}", toolId, events);
     }
@@ -117,7 +116,7 @@ public class ToolService {
         Tool tool = findOrThrow(toolId);
 
         List<SchaffbarEvent> events = tool.clearWlanRelais();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Cleared WLAN relais of tool with id {} and published events {}", toolId, events);
     }
@@ -134,7 +133,7 @@ public class ToolService {
                 .ifPresent(existing -> throwRfidReaderAlreadyAssignedException(rfidReaderId, existing));
 
         List<SchaffbarEvent> events = tool.assignRfidReader(rfidReaderId);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Assigned RFID reader {} to tool {} and published events {}", rfidReaderId, toolId, events);
     }
@@ -144,7 +143,7 @@ public class ToolService {
         Tool tool = findOrThrow(toolId);
 
         List<SchaffbarEvent> events = tool.clearRfidReader();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Cleared RFID reader from tool {} and published events {}", toolId, events);
     }
@@ -154,7 +153,7 @@ public class ToolService {
         Tool tool = findOrThrow(toolId);
 
         List<SchaffbarEvent> events = tool.addInstructors(instructorIds);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Added instructors {} to tool {} and published events {}", instructorIds, toolId, events);
     }
@@ -164,7 +163,7 @@ public class ToolService {
         Tool tool = findOrThrow(toolId);
 
         List<SchaffbarEvent> events = tool.removeInstructors(instructorIds);
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Removed instructors {} from tool {} and published events {}", instructorIds, toolId, events);
     }
@@ -176,7 +175,7 @@ public class ToolService {
         this.toolRepository.deleteById(toolId.getValue());
 
         List<SchaffbarEvent> events = List.of(ToolEventFactory.toolDeleted(toolId));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted tool with id {} and published events {}", toolId, events);
     }
@@ -187,14 +186,6 @@ public class ToolService {
     private Tool findOrThrow(ToolId toolId) {
         return this.toolRepository.findById(toolId.getValue()) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
-    }
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
     private void throwToolNameAlreadyUsedException(String name, Tool existingTool) {

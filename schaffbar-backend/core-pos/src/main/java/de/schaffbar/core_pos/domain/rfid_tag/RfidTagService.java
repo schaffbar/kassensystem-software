@@ -6,8 +6,7 @@ import java.util.Optional;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import jakarta.validation.Valid;
@@ -27,7 +26,7 @@ public class RfidTagService {
 
     private final @NonNull RfidTagRepository rfidTagRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -54,7 +53,7 @@ public class RfidTagService {
         RfidTag savedRfidTag = this.rfidTagRepository.save(rfidTag);
         List<SchaffbarEvent> events = List.of(RfidTagEventFactory.rfidTagCreated(savedRfidTag));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Created RFID tag with id {} and published events {}", savedRfidTag.getId(), events);
 
@@ -72,20 +71,9 @@ public class RfidTagService {
         this.rfidTagRepository.deleteById(rfidTag.id().getValue());
 
         List<SchaffbarEvent> events = List.of(RfidTagEventFactory.rfidTagDeleted(id));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted RFID tag with id {} and published events {}", id, events);
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
 }

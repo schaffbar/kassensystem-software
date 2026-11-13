@@ -7,8 +7,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidRea
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -30,7 +29,7 @@ public class RfidReaderService {
 
     private final @NonNull RfidReaderRepository rfidReaderRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -63,7 +62,7 @@ public class RfidReaderService {
         RfidReader savedRfidReader = this.rfidReaderRepository.save(rfidReader);
         List<SchaffbarEvent> events = List.of(RfidReaderEventFactory.rfidReaderCreated(savedRfidReader));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Created RFID reader with id {} and published events {}", savedRfidReader.getId(), events);
 
@@ -76,7 +75,7 @@ public class RfidReaderService {
                 .map(rfidReader -> rfidReader.update(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated RFID reader with id {} and published events {}", command.id(), events);
     }
@@ -87,7 +86,7 @@ public class RfidReaderService {
                 .map(rfidReader -> rfidReader.changeType(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Updated type of RFID reader with id {} and published events {}", command.id(), events);
     }
@@ -100,21 +99,13 @@ public class RfidReaderService {
         this.rfidReaderRepository.deleteById(rfidReader.id().getValue());
 
         List<SchaffbarEvent> events = List.of(RfidReaderEventFactory.rfidReaderDeleted(id));
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Deleted RFID reader with id {} and published events {}", id, events);
     }
 
     // ------------------------------------------------------------------------
     // helper
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
-    }
 
     private void throwMacAddressAlreadyUsedException(MacAddress macAddress, RfidReader existingRfidReader) {
         throw new MacAddressAlreadyUsedException(macAddress, existingRfidReader.getId());

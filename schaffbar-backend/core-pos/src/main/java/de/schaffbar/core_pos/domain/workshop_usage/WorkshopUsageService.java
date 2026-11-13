@@ -19,8 +19,7 @@ import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUs
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -34,7 +33,7 @@ public class WorkshopUsageService {
 
     private final @NonNull WorkshopUsageRepository workshopUsageRepository;
 
-    private final @NonNull OutboxEventRepository outboxEventRepository;
+    private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
@@ -74,7 +73,7 @@ public class WorkshopUsageService {
         WorkshopUsage savedWorkshopUsage = this.workshopUsageRepository.save(workshopUsage);
         List<SchaffbarEvent> events = List.of(WorkshopUsageEventFactory.workshopUsageEntered(savedWorkshopUsage));
 
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Customer {} entered workshop and published events {}", customerId, events);
     }
@@ -85,7 +84,7 @@ public class WorkshopUsageService {
                 .orElseThrow(() -> new NoActiveWorkshopUsageFoundException(customerId));
 
         List<SchaffbarEvent> events = usage.exit();
-        saveOutboxEvents(events);
+        this.outboxEventStore.save(events);
 
         log.info("Customer {} left workshop and published events {}", customerId, events);
     }
@@ -100,14 +99,6 @@ public class WorkshopUsageService {
 
     private void throwCustomerIsAlreadyInWorkshop(WorkshopUsage workshopUsage) {
         throw new UserAlreadyInWorkshopException(workshopUsage.getCustomerId());
-    }
-
-    private void saveOutboxEvents(List<SchaffbarEvent> events) {
-        List<OutboxEvent> outboxEvents = events.stream() //
-                .map(OutboxEvent::of) //
-                .toList();
-
-        this.outboxEventRepository.saveAll(outboxEvents);
     }
 
 }
