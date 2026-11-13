@@ -291,4 +291,4 @@ Component specs use feature models (`createdAt: new Date(…)`) and never API mo
       no JSDoc
 - [ ] No component, page or pipe imports `shared/api` (`npx ng lint`)
 - [ ] Store spec: complete API-model test data, body checks, schema-error test
-- [ ] Feature side done (skill `feature`), checks of `CLAUDE.md` "Tests" pass
+- [ ] Feature side done (skill `feature`), `npm run check` passes

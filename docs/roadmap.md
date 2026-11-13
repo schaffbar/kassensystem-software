@@ -12,8 +12,7 @@ Offene Aufgaben nach Phase 1 des Redesigns (`ui-redesign.md`), in der vereinbart
   die umgesetzt ist, wandert von „Open Rules“ nach „Business Rules / Invariants“.
 - Backend: Use Cases in `use_case/`, Tests mit Mockito wie `CustomerDeleteTest`, ausführen aus
   `schaffbar-backend/core-pos` mit `mvn -q test` (es gibt kein `mvnw`).
-- Portal: Konventionen in `schaffbar-portal/CLAUDE.md`, Prüfungen `npx ng test --watch=false`, `npx ng lint`,
-  `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
+- Portal: Konventionen und Definition of Done in `schaffbar-portal/CLAUDE.md`, alle Prüfungen mit `npm run check`.
 - Im Browser nichts in der Datenbank ändern: Skill `verify-ui` (Playwright mit `page.route`, alles außer `GET`
   abfangen).
 
@@ -42,7 +41,7 @@ Stand:
   auf `feature`): Aufbau eines Features (Ordner, Importregeln, eigenes Modell pro Feature,
   Commands, Mapper, Store mit `mutation` und Polling, Geschäftsregeln im Modell); `api` behält nur `shared/api`,
   `component` nur das Innere einer Komponente
-- [ ] Portal-`CLAUDE.md` schlank (~120 Zeilen): wozu das Portal da ist, Befehle, Tabelle „Aufgabe → Skill“, harte
+- [x] Portal-`CLAUDE.md` schlank – 13.11.2026 (262 → ~150 Zeilen, `npm run check`) (~120 Zeilen): wozu das Portal da ist, Befehle, Tabelle „Aufgabe → Skill“, harte
   Regeln je eine Zeile, Definition of Done, Kommentar-Regel (nur was der Code nicht sagt, keine JSDoc, die den Namen
   wiederholt), Übersetzungen (Schlüsselschema, immer `de` und `en`, kein „du“/„Sie“); npm-Script `check` für die
   fünf Prüfungen

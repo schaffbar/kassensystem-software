@@ -1,262 +1,148 @@
-# Code conventions
+# schaffbar-portal
 
-## Folders
-
-- `src/app/shared/api/<resource>/` – everything about the backend API, one folder per backend controller:
-  `<x>.api-model.ts` (named after the backend `XApiModel.java`: zod schemas, `…ApiModel`, `…Request`) and
-  `<resource>.api-service.ts` (`…ApiService`).
-- `src/app/<feature>/` – the feature's own model (`<entity>.model.ts`: interfaces and commands), the mapper
-  (`<entity>.mapper.ts`: API model → feature model, command → request), the list store (`<entities>.store.ts`),
-  validators (`<entity>.validators.ts`), `pages/` (a detail store and the tab components next to their page:
-  `pages/<entity>-detail/<entity>-detail.store.ts`, `pages/<entity>-detail/<entity>-detail-tab-<name>/`) and
-  `components/`. No `shared/` folder inside a feature.
-- A backend resource used by several features gives each feature its **own** model and mapper (on purpose, not a
-  shared feature model): `tools/tool-certification.model.ts` and `users/tool-certification.model.ts`,
-  each with the commands of its feature.
-- `src/app/shared/models/` – only shared vocabulary that API models and features both use: enums (one file per enum,
-  e.g. `rfid-reader-type.ts`). No entities, no commands.
-- Only stores, mappers and dialog containers import from `shared/api`; pages and pipes use feature models, dumb
-  components their own ViewModels (see "Components"; `shared/api` enforced by ESLint).
-- A feature imports only from itself and `shared/`; `shared/` imports from no feature (both enforced by ESLint,
-  `import/no-restricted-paths` – a new feature folder is added to its list in `eslint.config.js`). Data of another
-  resource is loaded by the feature's own store (skill `feature`).
-
-## Services
-
-- App-wide services are declared with `@Service()` (Angular 22), not `@Injectable({ providedIn: 'root' })`.
-  Dependencies come from `inject()` – `@Service` classes cannot use constructor injection.
-- A service that must not be provided automatically (only via a `providers` list) uses
-  `@Service({ autoProvided: false })`.
-- Signal stores keep `signalStore({ providedIn: 'root' }, …)` – that is NgRx, not a decorator.
-
-## Helper functions vs. private methods
-
-- **Pure functions** (no `this`, no signals, no injected services – the result depends only on the parameters) are
-  module-level functions, **not exported**, and placed **after the class**.
-  Examples: `toWlanRelaisFormModel(tool)`, `relevantValues(model)` in `tool-wlan-relais.component.ts`,
-  `toErrorMessage(error)` in `field-error.component.ts`.
-- A mapping function is named `to` + the exact target type, plural for a list – like the mappers of a feature
-  (`toTool`, `toUpdateToolRequest`): `toContactFormModel`, `toToolCertificationRowViewModels`.
-- **Everything that needs `this`** (component state, signals, forms, services) is a `private` method in the
-  `// helper` section at the end of the class.
-
-Why: an unexported function is private to the file (stronger than TypeScript's `private`), shows at a glance that it
-has no state, and can be used anywhere without caring about `this`. The class itself only contains what belongs to the
-component (inputs, outputs, signals, handlers).
-
-## File sections
-
-Files are divided by section comments – a separator line ending at column 79 (the indentation counts), then the name
-of the section:
-
-```ts
-export class UserRfidTagCardComponent {
-  …
-  // --------------------------------------------------------------------------
-  // actions
-  …
-}
-
-// ----------------------------------------------------------------------------
-// mappers
-```
-
-- Components, in this order: (no header) injected services, inputs, outputs, signals, form, `computed`, constructor
-  → `// actions` (methods the template calls) → `// helper` (`private` methods); after the class `// mappers`
-  (`to…` functions) → `// helper` (other pure functions).
-- Mappers (`*.mapper.ts`): `// API model → feature model` → `// command → request`.
-- API models (`*.api-model.ts`): (no header) schemas and `…ApiModel` types → `// requests`.
-- Feature models (`*.model.ts`): (no header) the model → further sections by content (`// WLAN relais` in
-  `tool.model.ts`) → `// commands` last.
-- API services: `// queries` → `// commands`.
-- A section only exists when it has content.
+The staff portal of the SchaffBar workshop: people, their RFID tags, certifications and open sessions, tools with
+their hardware, RFID tags and readers, and an overview of who is in the workshop. Angular 22 (zoneless, signals,
+signal forms), Angular Material M3, NgRx signal store, ngx-translate, zod. Project overview, glossary (UI ↔ code) and
+git rules: `../CLAUDE.md`.
 
 ## Commands
 
-- Every action a component triggers for a change in the backend is passed on as a **command** – via `output.emit()`
-  or when a dialog closes.
-- Commands are defined in the feature's `*.model.ts`, section `// commands`, named verb + entity + `Command`
-  (`UpdateToolCommand`, `UnassignRfidTagCommand`, `ClearWlanRelaisCommand`).
-- **The command contains the id(s)** of the affected entity. The component knows them from its input
-  (e.g. `this.user().id`); parent components only pass the command on and never assemble one.
-- Component output and store method take the same command type. The store passes it on to the API service as path
-  variables + `…Request` (mapper `to…Request`) – no command types in `shared/api` (skill `api`).
-- Also for a single id: `ClearWlanRelaisCommand { toolId }`, not `string`.
-- The id field is always named after its entity – `toolId`, `rfidReaderId` – never just `id`, also when the command
-  changes that entity itself: `UpdateToolCommand { toolId, … }`.
-- Form models (`<Name>FormModel`, e.g. `ToolFormModel`) stay local in the component – they describe what is edited,
-  the command describes what is sent to the backend.
+```bash
+npm start                                    # dev server on http://localhost:4200, backend on http://127.0.0.1:5000
+npm run check                                # lint, prettier, spec types, all tests, build – before handing over
+npx ng test --watch=false --include 'src/app/users/**/*.spec.ts'   # one folder (glob ends in .spec.ts)
+```
 
-## Stores
+## Skills
 
-- Data that is displayed is loaded with `httpResource` (created by the service, e.g. `toolResource(id)`) inside the
-  signal store. A one-off check at the time of an action (e.g. `getToolsByRfidReader` before changing the reader
-  type) stays a plain `HttpClient` observable – it is no state of the page. The store wraps it and returns what the
-  component needs (`canChangeRfidReaderType(): Observable<boolean>`), because components never import
-  `shared/api`. A dialog container loads its data with
-  `httpResource` directly, without a store (see "Dialogs").
-- Store data is named after its content – `tools`, `users`, `rfidReaders` – not `entities`.
-- A store method is named like its command without `Command`: `UnassignRfidTagCommand` → `unassignRfidTag`,
-  `PauseToolCertificationCommand` → `pauseToolCertification`.
-- Every backend change is a store method built with `mutation<Command>({ request, onSuccess, onError? })`
-  (`src/app/shared/state/mutation.ts`): double-click protection, its own `isPending` (`store.createTool.isPending()`),
-  `onSuccess` usually reloads the affected resource. Errors are shown by the error interceptor; the callbacks must not
-  throw.
-- List stores and detail stores are built the same way: resource(s) in `withProps`, `withComputed` for the data
-  (`hasValue() ? value() : …`), `isLoading`, `hasLoadError`, a `reload…()` method and the mutations. No
-  `withEntities`, no `rxMethod` for loading, no `onInit` hook.
-- `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is kept only as an example of a custom
-  store feature – it is not used anywhere.
+The rules below are the short form; the skills have the details, skeletons, references and tests. Load the skill
+before working on its topic.
 
-## Subscriptions
+| Task | Skill |
+| --- | --- |
+| where code belongs, feature folders, import boundaries, feature model, commands, mappers, stores, polling | `feature` |
+| an endpoint: zod schema, `…ApiModel`, `…Request`, API service, fixtures | `api` |
+| a page or component: smart / dumb, ViewModel, names, tabs | `component` |
+| a dialog: shared dialog, confirmation, form dialog, page dialog service | `dialog` |
+| how it looks: tokens, building blocks, list / detail page, status vs. dash, phone | `design` |
+| writing or fixing specs | `testing` |
+| looking at a change in the browser without touching the database | `verify-ui` |
 
-- `subscribe()` only on observables that complete by themselves: `dialogRef.afterClosed()`, the `open()` of the
-  dialog services, a one-off `HttpClient` call (`canChangeRfidReaderType`). They need no unsubscribe – they end after one
-  value.
-- Observables that never complete (`interval`, `BreakpointObserver`, `valueChanges`, router events) are never
-  subscribed by hand: `toSignal()` in a component, `rxMethod` / `mutation()` in a store – both end with their
-  injector.
-- `takeUntilDestroyed(this.destroyRef)` when a callback must not run after the page was left – e.g. an HTTP check
-  that opens a dialog (`changeRfidReaderType` in `rfid-reader-detail`). Dialogs close themselves on navigation
-  (`closeOnNavigation`), their callbacks then get `undefined` / `false` and do nothing.
+## Code
 
-## Forms
+- **Structure:** a feature imports only from itself and `shared/`; `shared/` imports no feature; only stores, mappers
+  and dialog containers import `shared/api` (all enforced by ESLint). `shared/models` holds enums only. Each feature
+  has its own model of another resource's data and loads it in its own store.
+- **Services:** `@Service()` (Angular 22), not `@Injectable({ providedIn: 'root' })`; dependencies via `inject()`.
+  Only via a `providers` list: `@Service({ autoProvided: false })`. Signal stores keep
+  `signalStore({ providedIn: 'root' }, …)`.
+- **Pure functions** (no `this`, no signals, no injected services) are module-level, **not exported**, **after the
+  class**; mapping functions are named `to` + the exact target type, plural for a list
+  (`toToolCertificationRowViewModels`). Everything that needs `this` is a `private` method in the `// helper` section
+  at the end of the class.
+- **File sections:** a separator line ending at column 79 (indentation counts), then the section name:
 
-- Every form that saves data has a `<form [formRoot]="xyzForm" (submit)="saveXyz()">`; `saveXyz()` calls
-  `submit(this.xyzForm, async () => …)`.
-- A field that only filters (search text, autocomplete) is no form: a plain `signal('')` set by `(input)`.
-- The submit button names the action: a dialog that creates something says what it creates
-  (`users.dialogs.addNewUser.confirm` → "Benutzer hinzufügen"), a dialog that changes something existing says
-  "Änderungen speichern" (`shared.actions.saveChanges`), a form on a page "Speichern" (`shared.actions.save`).
-  Cancel is always `shared.actions.cancel`.
-- Inside such a `<form>` the save button is `type="submit"` and **every other button is `type="button"`** – a button
-  without `type` submits the form, so e.g. "cancel" would save.
-- The result of `saveXyz()` is built as an explicitly typed variable before it is passed on – for readability, even
-  where `dialogRef.close()` / `output.emit()` would infer the type:
-  `const command: CreateToolCommand = { … }; this.dialogRef.close(command);`
-- Form layout uses the global classes from `src/styles.scss`: `form-row` (a row of fields), `form-col` (columns share
-  the width), `form-actions` (button bar, right-aligned), `full-width` – no copies of `.row`/`.col` in component
-  styles.
-- Form fields that only display a value and are never editable get the global class `readonly-field`
-  (`src/styles.scss`).
-- A detail page shows its values read-only in a card (`<dl>`, see "Design system") and edits them in a form dialog
-  opened by "Bearbeiten" – no inline edit form in the card (`rfid-reader-detail-info` + `update-rfid-reader-form`).
-- Dates: the Material datepicker uses the date-fns adapter with the German locale (`provideDateAdapter()` in
-  `app.config.ts`; tests of components with a datepicker add `provideDateAdapter()` to their providers). Typing
-  (`31.1.1990`) and picking both work, so date inputs have no `readonly` attribute – `[formField]` would override it
-  anyway. A date field in a form model is `Date | null`; ISO strings from the backend are converted with `parseISO`.
+  ```ts
+  export class UserRfidTagCardComponent {
+    …
+    // --------------------------------------------------------------------------
+    // actions
+  }
 
-## Missing values
+  // ----------------------------------------------------------------------------
+  // mappers
+  ```
 
-- Fields the backend can send as `null` are typed `| null` in the model (`type: RfidReaderType | null`), so the
-  compiler forces the template to handle the case.
-- A missing value is displayed with the `orDash` pipe (`src/app/shared/pipes/or-dash.pipe.ts`), not with `?? '-'` or
-  `x ? … : '-'` in the template: `{{ usage.unitsUsed | orDash }}`, `{{ usage.endTime | date: 'medium' | orDash }}`.
-  Only for display (tables, `readonly-field`) – editable form fields stay empty, otherwise the dash ends up in the
-  command.
-- The translation key of an enum value is built by a small pure pipe of the feature, not in the template – including
-  the `null` case: `{{ reader.type | rfidReaderTypeKey | translate }}` (`rfidReaders.types.switch_box`,
-  `rfidReaders.types.none` for `null`). One place for the mapping, testable, and the UI never shows
-  `rfidReaders.types.null`.
-- Dash or a highlighted text, badge or plain text: skill `design` ("Status, text or dash").
-
-## Design system
-
-How pages look and are laid out – tokens, building blocks, global classes, list and detail pages, phone: skill
-`design` (`.claude/skills/design/SKILL.md`). The design itself and every decision: `../docs/ui-redesign.md`.
-
-- Colors only from the tokens in `src/styles.scss` – no hex values in component styles. Neon green `--accent` only as
-  a surface; green text is `--accent-text`.
-- Material's look only with `mat.*-overrides(...)` – no `.mat-mdc-*` selectors, no `!important`.
-- Buttons with the attribute syntax (`matButton="filled"`, `matButton="outlined"`, `matIconButton`), no `color="…"`;
-  destructive actions get `danger-button` / `danger-menu-item` and ask first (see "Dialogs").
-- Building blocks from `shared/components/` and the global classes of `src/styles.scss` instead of own copies; their
-  texts are passed translated.
-- A status is icon + text (`schbar-status-badge`), never color alone.
-- Every detail page that can delete its entity has a `schbar-danger-zone` as the last card of the first tab, over the
-  full width; when a rule forbids deleting, it explains why instead of the button.
-- Times of a session use the pipe `timeWithDay`, not `date: 'shortTime'`.
-- Every `matIconButton` has a translated `aria-label`.
+  Components: (no header) injected services, inputs, outputs, signals, form, `computed`, constructor → `// actions`
+  → `// helper`; after the class `// mappers` → `// helper`. Mappers: `// API model → feature model` →
+  `// command → request`. API models: schemas → `// requests`. Feature models: model → sections by content →
+  `// commands` last. API services: `// queries` → `// commands`. A section only exists when it has content.
+- **Comments only for what the code can't say** – why, a non-obvious rule, what `null` means. No class comments, no
+  JSDoc that repeats a name or signature; a method that seems to need one gets a better name.
+- **Commands** carry the ids named after their entity (`toolId`, never `id`), are built by the component that knows
+  the ids as a typed variable and passed on unchanged by pages; every backend change is a store `mutation<Command>`
+  (skill `feature`).
+- **Subscriptions:** `subscribe()` only on observables that complete (`afterClosed()`, dialog services, one-off
+  checks); never on `interval` / `valueChanges` / router events – `toSignal()` in a component, `rxMethod` in a store.
 
 ## Components
 
-Details, skeletons and tests: skill `component` (`.claude/skills/component/SKILL.md`).
+- **Smart** (`<feature>/pages/`): store, `Router`, `MatDialog`, dialog services; layout plus child components; output
+  handlers pass the command on to a store method.
+- **Dumb** (`<feature>/components/`, `shared/components/`): only `input()` / `output()` and local UI state; injects
+  nothing except dialog data/ref in a form dialog and the confirmation services (ESLint).
+- Business rules live in the feature model or the store, never in a component; a dumb component gets its data
+  decided and combined.
+- Every dumb component exports its input type `<ComponentName>ViewModel` (input `<componentName>`) from its own file –
+  exactly the fields it reads, no feature model type inside.
+- Names: template methods verb + object (`saveWlanRelais`, `deleteTool`), no `on…`, no `…Dialog`; a page method that
+  executes a command is named like the store method; outputs are events (`rfidTagUnassigned`, `editRequested`).
+- A page with tabs is the frame; every tab is a smart `<page>-tab-<name>/` component that injects the page's store.
 
-- **Smart** (`<feature>/pages/`): knows where data comes from and where commands go – injects its store(s),
-  `Router`, `MatDialog`, dialog services, `MatSnackBar`. Template: layout plus child components; output handlers only
-  pass the command on to a store method.
-- **Dumb** (`<feature>/components/`, `shared/components/`): only `input()` / `output()` and local UI state (form,
-  edit mode, search text). Injects nothing – except `MAT_DIALOG_DATA` / `MatDialogRef` in a form dialog and
-  `ConfirmDeleteDialogService` / `ConfirmActionDialogService` for a confirmation. No store, `Router`, `MatDialog`,
-  `MatSnackBar`, `HttpClient` (enforced by ESLint).
-- Business rules live in the store or the feature model, never in a component. A dumb component gets its data
-  decided and combined – no filter by a rule (`assignableRfidReaders`), no join of lists (`userName` in the row).
-- **ViewModel**: every dumb component exports its input type from its own file: `<ComponentName>ViewModel`, input
-  `<componentName>`, with exactly the fields it reads and no feature model type inside (enums from `shared/models`
-  are fine). Further ViewModels (rows, options) are named after their content. Only one or two ids / plain values →
-  no ViewModel.
-- The page fills the ViewModel: it passes the feature model directly when that has all fields (structural typing,
-  checked by `strictTemplates`), otherwise it maps in a `computed` with a pure `to<Name>ViewModel()` after the class.
-  The store never imports a ViewModel.
-- No pass-through components. A list page may keep its own `mat-table`.
-- **Names**: a method called from a template is named for what it does – verb + object, no `on…` prefix, no
-  `…Dialog` suffix (`saveWlanRelais`, `discardWlanRelaisChanges`, `deleteTool`, `openToolDetail`). A page or tab method
-  that executes a command is named like the store method it calls (`unassignRfidTag`). An output is the event:
-  object + participle (`rfidTagUnassigned`, `certificationPaused`, `editRequested`).
-- **Pages with tabs**: the page is the frame (loading, header, tab group); every tab is a smart tab component
-  `<page>-tab-<name>/` in the page's folder that injects the page's store and composes dumb components.
+## Forms
+
+- A form that saves data: `<form [formRoot]="xyzForm" (submit)="saveXyz()">`, `saveXyz()` calls `submit(…)`. A field
+  that only filters (search) is no form – a plain `signal('')`.
+- Inside a `<form>` the save button is `type="submit"`, **every other button `type="button"`** (otherwise cancel
+  saves).
+- The submit button names the action: create → what is created ("Benutzer hinzufügen"), edit in a dialog →
+  `shared.actions.saveChanges`, a form on a page → `shared.actions.save`; cancel is always `shared.actions.cancel`.
+- Form models (`<Name>FormModel`) stay local in the component. A date field is `Date | null`; the datepicker uses the
+  date-fns adapter with the German locale, typing (`31.1.1990`) and picking both work – no `readonly`.
+- Layout with the global classes `form-row`, `form-col`, `form-actions`, `full-width`, `readonly-field`; compact fields
+  with the label above in form dialogs and `compact-form` (skill `dialog`).
+- A detail page shows values read-only in a card and edits them in a form dialog opened by "Bearbeiten".
+
+## Missing values
+
+- Fields the backend can send as `null` are `| null` in the model, so the template has to handle them.
+- A missing value is shown with the `orDash` pipe, not `?? '-'` – only for display; editable fields stay empty.
+- An enum's translation key comes from a small pure pipe (`rfidReaderTypeKey`), including the `null` case – never
+  built in the template.
+- Dash, highlighted hint, badge or plain text: skill `design` ("Status, text or dash").
+
+## Design
+
+- Colors only from the tokens in `src/styles.scss` – no hex values; neon green `--accent` only as a surface, green
+  text is `--accent-text`.
+- Material's look only with `mat.*-overrides(...)` – no `.mat-mdc-*` selectors, no `!important`.
+- Buttons with the attribute syntax (`matButton="filled"`, `matButton="outlined"`, `matIconButton`), no `color`;
+  every `matIconButton` has a translated `aria-label`.
+- Building blocks from `shared/components/` and the global classes instead of own copies; a status is icon + text
+  (`schbar-status-badge`), never color alone.
+- Every detail page that can delete its entity ends its first tab with `schbar-danger-zone` over the full width; a
+  rule that forbids deleting is explained there instead of the button.
+- Times of a session use `timeWithDay`, not `date: 'shortTime'`.
 
 ## Dialogs
 
-Details, skeletons and tests: skill `dialog` (`.claude/skills/dialog/SKILL.md`).
+- Shared dialogs (`shared/dialogs/<name>-dialog/`): modal + service (+ container when it loads data); they return
+  yes/no and import nothing from a feature – the caller builds the command.
+- Form dialogs (`<feature>/components/<name>-form/`): close themselves with the command,
+  `[mat-dialog-close]="undefined"` on cancel, `host: { class: 'form-dialog' }`, opened with `...FORM_DIALOG_CONFIG`.
+- The same dialogs from several places of a page: a page service `<page>-dialogs.service.ts`.
+- `MatDialog.open<Component, Data, Result>` always typed; `minWidth: DIALOG_WIDTH.…`, `disableClose: true`.
+- **Every `danger-button` / `danger-menu-item` asks first** – delete via `ConfirmDeleteDialogService`, everything else
+  via `ConfirmActionDialogService` (`destructive: true`). The confirm button names the action as verb + object
+  ("Benutzer löschen", key `<feature>.dialogs.<action>.confirm`); cancel first, `cdkFocusInitial` on cancel only for
+  destructive confirmations.
 
-- **Shared dialogs** (`src/app/shared/dialogs/<name>-dialog/`) consist of a **modal** (`<name>-dialog-modal`: the
-  whole dialog UI with inputs – a view model, loading state – and outputs only, no `MAT_DIALOG_DATA` /
-  `[mat-dialog-close]` / `dialogRef`) and a **service** with one method `open(…)`. If the dialog has to load data, a
-  **container** (`<name>-dialog-container`) gets the ids as `input.required()`, loads with the resource of the API
-  service directly, maps the API model to the view model and closes `dialogRef` on the modal's outputs; otherwise the service connects the modal itself via
-  `bindings: [inputBinding(…), outputBinding(…)]`.
-- **Form dialogs** (`<feature>/components/<name>-form/`) are opened directly by one page and close themselves:
-  `dialogRef.close(command)` on save, `[mat-dialog-close]="undefined"` on cancel (not `mat-dialog-close` without a
-  value – that closes with `''`). They look like the prototype: `host: { class: 'form-dialog' }` (lines below the
-  header and above the buttons), `<schbar-form-dialog-header [title] [subtitle]>` instead of `mat-dialog-title` (title,
-  subtitle naming the entity, close button), compact fields with the label above (`<label class="field-label"
-  for="…">` instead of `mat-label`), and the page opens them with `...FORM_DIALOG_CONFIG` (at the top of the window,
-  focus on the first field instead of the close button, `disableClose`). A form inside a card (the hardware tab of a tool) gets the same compact fields
-  and `field-label` with the global class `compact-form` on the `<form>`. Confirmations stay centered, without header
-  line and close button.
-- **The same dialogs from several places of a page** (header, ⋯ menu, banner, tabs): a page service
-  `<page>-dialogs.service.ts` (`@Service({ autoProvided: false })`, provided by the page next to its store) opens them
-  and passes the result to the store (`user-detail-dialogs.service.ts`). A form dialog that follows store state while
-  it is open gets the signals with `inputBinding` and sends its command with `outputBinding` instead of closing
-  (`assign-rfid-tag-dialog`: waits until the tag has been held to the reader).
-- **Options**: `minWidth: DIALOG_WIDTH.small | medium | large` (`src/app/shared/dialogs/dialog-constants.ts`) and
-  `disableClose: true`. `MatDialog.open<Component, Data, Result>` is always typed, so `afterClosed()` is
-  `Result | undefined` – no hand-written types in `subscribe`.
-- **Shared dialogs return yes/no** (or a result type of their own) and import nothing from a feature – no feature
-  model, no command. The caller builds the command from its inputs and passes it to its store's `mutation()`; if the
-  dialog loaded data itself, the caller reloads also on cancel.
-- **Confirmations** (`true`/`false`): deleting goes through `ConfirmDeleteDialogService.open(viewModel)` (always
-  `danger-button`), every other action (pause, revoke, clear, …) through `ConfirmActionDialogService.open(viewModel)`
-  with `destructive: true | false`.
-- **The confirm button names the action as verb + object** (`confirmLabel`, required in both dialogs): "Benutzer
-  löschen", "Einweisung pausieren" – not "Löschen" or "OK". Users often read only the button, and similar actions
-  (delete vs. revoke a certification) must stay apart. The key is the caller's: `<feature>.dialogs.<action>.confirm`.
-- **Every button with `danger-button` asks first** – delete through `ConfirmDeleteDialogService`, everything else
-  (unassign, remove, clear, pause, revoke) through `ConfirmActionDialogService` with `destructive: true`. No red
-  button acts directly.
-- **Buttons**: cancel first (`matButton="outlined"`), then confirm; every button `type="button"` (except submit in a
-  form). **Focus**: form dialogs have no `cdkFocusInitial` (the first field gets it; Enter in a text field saves);
-  destructive or irreversible confirmations put `cdkFocusInitial` on cancel.
+## Translations
 
-## Tests
+- Every text through ngx-translate, in `public/i18n/de.json` **and** `en.json` – always both, same keys.
+- Keys by place: `<feature>.pages.<page>.…`, `<feature>.dialogs.<action>.{title,message,confirm}`, `<feature>.menu.…`;
+  what several features use under `shared.…` (`shared.actions.save`, `shared.toolAreas.HOLZ`). An unused key is
+  removed.
+- German texts address nobody directly – no "du", no "Sie": "Tag an das Lesegerät an der Theke halten", "Bitte 2
+  Felder prüfen". Terms as in the glossary (`../CLAUDE.md`).
 
-How to write and run them – store specs with `HttpTestingController`, page and component specs, harnesses, menus,
-dialogs, timers, locale, pitfalls: skill `testing` (`.claude/skills/testing/SKILL.md`).
+## Definition of done
 
-- Every change comes with its specs; before handing over: `npx ng test --watch=false`, `npx ng lint`,
-  `npx prettier --check src public`, `npx tsc -p tsconfig.spec.json --noEmit`, `npx ng build`.
-- A UI change is also looked at in the browser on desktop and phone, without writing to the database: skill
-  `verify-ui`.
-- Specs expect translation keys, not texts; dates in test data are local (`new Date(2026, 10, 9, 14, 5)`) or relative
-  to now.
+1. The change follows the rules above and its skills; specs for new or changed behaviour (skill `testing`).
+2. `npm run check` passes.
+3. A UI change is looked at on desktop and phone without writing to the database (skill `verify-ui`).
+4. Decisions with their date in `../docs/ui-redesign.md`; a rule the portal checks for the backend in the aggregate's
+   `README.md` ("Enforced only in the portal"); backend gaps in `../docs/backend-features.md`; a finished task ticked
+   off in `../docs/roadmap.md`.
+5. Nothing committed (`../CLAUDE.md`).
+6. The report says what was checked and what was not.

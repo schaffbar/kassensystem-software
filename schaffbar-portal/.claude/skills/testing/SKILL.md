@@ -10,7 +10,9 @@ from `vitest` itself. What to test where (store vs. page vs. dumb component) is 
 skill `dialog`; this skill is the how.
 
 ```bash
-npx ng test --watch=false                                          # all
+npm run check                                                      # everything before handing over: lint, prettier,
+                                                                   # spec types, all tests, build
+npx ng test --watch=false                                          # all tests
 npx ng test --watch=false --include 'src/app/users/**/*.spec.ts'   # a folder – always end the glob in .spec.ts,
                                                                    # 'src/app/users/**' also picks up html/scss
 npx tsc -p tsconfig.spec.json --noEmit                             # type check of the specs (ng test reports less)

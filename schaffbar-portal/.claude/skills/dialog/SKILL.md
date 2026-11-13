@@ -135,6 +135,8 @@ stay apart. It is the caller's translation key, next to title and message: `user
 dialog too. Inside the modal a conditional focus is bound as an attribute:
 `[attr.cdkFocusInitial]="destructive ? '' : null"`.
 
+A confirmation looks different from a form dialog on purpose: centered, without header line and close button – a question, not a form.
+
 ## Container (only if the dialog loads data)
 
 ```ts
@@ -199,7 +201,7 @@ Rules:
   as the getter: `activeWorkshopSessionResource(this.customerId)`. The container holds the resource directly, **no store** –
   it is a single resource that lives exactly as long as the dialog. It loads on every open, so the data is current.
 - The resource holds the **API model**; the container maps it straight to the view model with a pure, unexported
-  function after the class (`to<Name>ViewModel`, see CLAUDE.md "Helper functions"). There is no feature model in
+  function after the class (`to<Name>ViewModel`, see CLAUDE.md "Code"). There is no feature model in
   between – the dialog belongs to no feature. Logic the view model needs (`hasRunningUsage`) is computed there too,
   even if a feature has the same function on its own model.
 - `hasValue() ? value() : null` – a load error must not throw in the template.
@@ -289,7 +291,7 @@ closeWorkshopSession(): void {
 ```
 
 - The caller passes what it has (ids, texts), subscribes and – on `true` – **builds the command** from its own inputs
-  (CLAUDE.md "Commands": the component that knows the ids builds the command) and hands it to its store's
+  (skill `feature`, "Commands": the component that knows the ids builds the command) and hands it to its store's
   `mutation()`, which reloads on success.
 - If the dialog loaded data itself, the caller reloads its own data **also on cancel** – the dialog may have shown a
   newer state than the page.
@@ -363,7 +365,9 @@ from CLAUDE.md "Forms" and closes itself:
       …
     </mat-dialog-content>
     <mat-dialog-actions>
-      <button matButton="outlined" type="button" [mat-dialog-close]="undefined">{{ 'shared.actions.cancel' | translate }}</button>
+      <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
+        {{ 'shared.actions.cancel' | translate }}
+      </button>
       <button matButton="filled" type="submit">{{ 'shared.actions.saveChanges' | translate }}</button>
     </mat-dialog-actions>
   </form>

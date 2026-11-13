@@ -42,7 +42,7 @@ Reference implementations:
 | the input type of a dumb component                             | **ViewModel in the dumb component's file**                             |
 | filling the ViewModel (pass through or map)                    | smart component                                                        |
 | navigation, opening a feature dialog, snackbar                 | smart component                                                        |
-| building a command                                             | the component that knows the ids (CLAUDE.md "Commands") – usually dumb |
+| building a command                                             | the component that knows the ids (skill `feature`) – usually dumb    |
 | form state, edit mode, search text, selection, focus           | dumb component                                                         |
 | formatting for display (duration, dash, enum key)              | dumb component / pipe                                                  |
 
@@ -94,7 +94,7 @@ Rules:
   `{ rfidReader: ChangeRfidReaderTypeViewModel }`.
   Data the dialog has to follow while it is open comes as a `Signal` of the ViewModel – the page passes the store
   signal itself (`NewToolDialogData { existingTools: Signal<ExistingToolViewModel[]> }`, `this.store.tools`).
-- Outputs: a feature component keeps emitting the **commands** of its feature (CLAUDE.md "Commands"). A component in
+- Outputs: a feature component keeps emitting the **commands** of its feature (skill `feature`). A component in
   `shared/` imports no feature (ESLint), so its outputs emit `void` or a result type of its own (skill `dialog`).
   A feature component needed by a second feature moves to `shared/components/` and switches its outputs then.
 - Never an API model as input (ESLint).
@@ -305,7 +305,7 @@ Rules:
   instead of `allUsers` + a `userNameMap`). Data for a validator comes as an input too
   (`existingTools = input.required<ExistingToolViewModel[]>()` for `validateUniqueToolName`), not from a store.
 - Filtering by what the user typed (autocomplete search text) is UI logic and stays in the component.
-- Every output for a backend change emits a **command** (CLAUDE.md "Commands"). Outputs without a backend change
+- Every output for a backend change emits a **command** (skill `feature`). Outputs without a backend change
   (`editRequested`, `assignmentRequested`, `openSessionRequested`) emit `void` or the id.
 - Local UI state in signals (`isEditing`, `searchText`, `selectedUsers`, the area filter of `tool-status-card`), form models local (CLAUDE.md "Forms"),
   pure helpers after the class.
@@ -363,7 +363,6 @@ the store mock goes into the `TestBed` providers):
 - [ ] Page with tabs: frame only; every tab a tab component `<page>-tab-<name>/` in the page's folder
 - [ ] Specs: dumb with complete ViewModel literals, smart with mocked store incl. the mapping, rules in the store
       spec
-- [ ] Sections: `// actions`, `// helper` in the class; `// mappers`, `// helper` after it (CLAUDE.md "File
-      sections")
+- [ ] Sections: `// actions`, `// helper` in the class; `// mappers`, `// helper` after it (CLAUDE.md "Code")
 - [ ] Comments only where the code can't say it
 - [ ] `npx ng build`, `npx ng lint`, `npx ng test --watch=false`, `npx prettier --check "src/**/*.{ts,html,scss}"`

@@ -128,7 +128,8 @@ When the portal checks a rule the backend does not enforce yet, it goes into the
 ### Commands
 
 - Every backend change a component triggers is a **command**, emitted by `output()` or returned when a dialog
-  closes; the page only passes it on.
+  closes; the page only passes it on. Component output and store method take the same command type; the store turns
+  it into path variables + `…Request` – no command types in `shared/api`.
 - Named verb + entity + `Command` (`UpdateToolCommand`, `UnassignRfidTagCommand`), defined in the model, section
   `// commands`.
 - **It contains the id(s)**, named after the entity – `toolId`, `rfidReaderId`, never `id`, also when the command
@@ -245,6 +246,8 @@ export const RfidReaderDetailStore = signalStore(
   Its `isLoading` then counts only the first load (`resource.status() === 'loading'`), so the progress bar does not
   flicker on every poll.
 - No `withEntities`, no `rxMethod` for loading, no `onInit` hook. The store never imports a ViewModel.
+- `withRequestStatus` (`src/app/shared/state/request-status.feature.ts`) is only an example of a custom store
+  feature – it is not used anywhere.
 - Sections of `withMethods` blocks by topic with a comment (`// mutations of the certifications – reload the
   certifications on success`).
 
