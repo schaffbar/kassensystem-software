@@ -136,7 +136,7 @@ mat-tab-group        mat-stretch-tabs="false" mat-align-tabs="start", count in t
 - **Editing:** values are read-only in a card (`detail-list` or a list with icons); "Bearbeiten" opens a form dialog.
 - **Dialogs opened from several places** (header, menu, banner, tabs): a page service (skill `dialog`).
 - **Live data:** a page that stays open (overview, a waiting RFID tag) reloads with `rxMethod` + `interval`, and its
-  `isLoading` only counts the first load, so the progress bar does not flicker (skill `api`).
+  `isLoading` only counts the first load, so the progress bar does not flicker (skill `feature`).
 
 ## Overview
 

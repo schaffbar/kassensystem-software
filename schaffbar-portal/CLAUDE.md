@@ -19,7 +19,7 @@
   components their own ViewModels (see "Components"; `shared/api` enforced by ESLint).
 - A feature imports only from itself and `shared/`; `shared/` imports from no feature (both enforced by ESLint,
   `import/no-restricted-paths` – a new feature folder is added to its list in `eslint.config.js`). Data of another
-  resource is loaded by the feature's own store (skill `api`).
+  resource is loaded by the feature's own store (skill `feature`).
 
 ## Services
 

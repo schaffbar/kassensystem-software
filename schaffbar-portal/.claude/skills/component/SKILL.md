@@ -36,7 +36,7 @@ Reference implementations:
 
 | Concern                                                        | Where                                                                  |
 | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| loading, reloading, backend changes                            | store (skill `api`), called by the smart component                     |
+| loading, reloading, backend changes                            | store (skill `feature`), called by the smart component                 |
 | business rules (which readers are assignable, who may certify) | store `withComputed` / feature model function                          |
 | matching two sources (is the reader used by another tool?)     | page mapping (`to…ViewModel`) – a join, not a rule                     |
 | the input type of a dumb component                             | **ViewModel in the dumb component's file**                             |

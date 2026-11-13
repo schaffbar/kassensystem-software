@@ -38,7 +38,8 @@ Stand:
   `dialog` verweisen darauf
 - [x] `verify-ui` – 12.11.2026
 - [x] Root-`CLAUDE.md`: Projekt, Repo-Plan, Sprachen, Glossar UI ↔ Code – 13.11.2026
-- [ ] Skill `feature` aus `api` herauslösen: Aufbau eines Features (Ordner, Importregeln, eigenes Modell pro Feature,
+- [x] Skill `feature` aus `api` herauslösen – 13.11.2026 (`api` 445 → 294 Zeilen, Verweise auf Store/Modell/Mapper zeigen
+  auf `feature`): Aufbau eines Features (Ordner, Importregeln, eigenes Modell pro Feature,
   Commands, Mapper, Store mit `mutation` und Polling, Geschäftsregeln im Modell); `api` behält nur `shared/api`,
   `component` nur das Innere einer Komponente
 - [ ] Portal-`CLAUDE.md` schlank (~120 Zeilen): wozu das Portal da ist, Befehle, Tabelle „Aufgabe → Skill“, harte
