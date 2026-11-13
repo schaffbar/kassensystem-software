@@ -121,16 +121,16 @@ in einer `README.md` innerhalb des jeweiligen Pakets. So bleibt die Dokumentatio
 
 | #    | Aggregat                                      | Paket                                                      | Identität                    | README                                                                                                                |
 |------|-----------------------------------------------|------------------------------------------------------------|------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| 3.1  | Customer (Kunde)                              | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/customer/README.md)                                       |
-| 3.2  | Tool (Werkzeug)                               | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/tool/README.md)                                               |
-| 3.3  | RfidReader (RFID-Lesegerät)                   | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/rfid_reader/README.md)                                 |
-| 3.4  | RfidTag (RFID-Chip)                           | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag/README.md)                                       |
-| 3.5  | RfidTagAssignment (RFID-Chip-Zuordnung)       | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag_assignment/README.md)                 |
-| 3.6  | RfidTagAssignmentHistory (Zuordnungshistorie) | `de.schaffbar.core_pos.domain.rfid_tag_assignment_history` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment_history/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag_assignment_history/README.md) |
-| 3.7  | WorkshopSession (Werkstatt-Sitzung)           | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/workshop_session/README.md)                       |
-| 3.8  | WorkshopUsage (Werkstatt-Nutzung)             | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/workshop_usage/README.md)                           |
-| 3.9  | ToolUsage (Werkzeugnutzung)                   | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/tool_usage/README.md)                                   |
-| 3.10 | ToolCertification (Werkzeug-Einweisung)       | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/tool_certification/README.md)                   |
+| 3.1  | Customer (Kunde)                              | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                                       |
+| 3.2  | Tool (Werkzeug)                               | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                                               |
+| 3.3  | RfidReader (RFID-Lesegerät)                   | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                                 |
+| 3.4  | RfidTag (RFID-Chip)                           | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                                       |
+| 3.5  | RfidTagAssignment (RFID-Chip-Zuordnung)       | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md)                 |
+| 3.6  | RfidTagAssignmentHistory (Zuordnungshistorie) | `de.schaffbar.core_pos.domain.rfid_tag_assignment_history` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment_history/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment_history/README.md) |
+| 3.7  | WorkshopSession (Werkstatt-Sitzung)           | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)                       |
+| 3.8  | WorkshopUsage (Werkstatt-Nutzung)             | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)                           |
+| 3.9  | ToolUsage (Werkzeugnutzung)                   | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                                   |
+| 3.10 | ToolCertification (Werkzeug-Einweisung)       | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)                   |
 
 ---
 
@@ -138,6 +138,9 @@ in einer `README.md` innerhalb des jeweiligen Pakets. So bleibt die Dokumentatio
 
 Anwendungsfälle befinden sich im Paket `use_case` und **orchestrieren Operationen über mehrere Aggregate hinweg**. Sie
 sind der einzige Ort, an dem aggregatübergreifende Koordination stattfindet.
+
+Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use_case/` (eine Klasse pro Aktion, z. B.
+`CustomerDelete`, `RfidReaderDelete`, `ToolClearRfidReader`).
 
 | Anwendungsfall                     | Beschreibung                                                                                                                                                                                  | Beteiligte Aggregate                                               |
 |------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
@@ -230,7 +233,7 @@ EventFactory.einEreignis(aggregat)
 | ToolCertification | `TOOL_CERTIFICATION_CREATED`, `TOOL_CERTIFICATION_PAUSED`, `TOOL_CERTIFICATION_REACTIVATED`, `TOOL_CERTIFICATION_REVOKED`, `TOOL_CERTIFICATION_DELETED`                                                           |
 | RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_DELETED`                                                                                                                                               |
 | RfidTag           | `RFID_TAG_CREATED`, `RFID_TAG_DELETED`                                                                                                                                                                            |
-| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                                                       |
+| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                                                       |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |
 | WorkshopUsage     | `WORKSHOP_USAGE_ENTERED`, `WORKSHOP_USAGE_LEFT`                                                                                                                                                                   |
 
@@ -240,11 +243,9 @@ EventFactory.einEreignis(aggregat)
 
 | Stelle                                 | Beschreibung                                                                                                           |
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `CustomerService.deleteCustomer()`     | Löschkonzept erforderlich — RFID-Chip-Zuordnung vor dem Löschen prüfen                                                 |
 | `RfidReaderService.createRfidReader()` | Prüfung auf doppelte MAC-Adresse bei Erstellung                                                                        |
 | `RfidTagAssignment.assignRfidTag()`    | Validieren, dass die Zuordnung im Status `WAITING_FOR_ASSIGNMENT` ist                                                  |
 | `EnterWorkshop.process()`              | ~~Prüfen, ob der Kunde ein gültiges Zertifikat zum Betreten hat~~ — gelöst über Einweisungsprüfung in `StartToolUsage` |
-| `CloseSession.process()`               | Ausstehende Werkstattnutzungen vor dem Schließen prüfen                                                                |
 | `WorkshopUsage`                        | Umbenennung zu `WorkshopSlot` oder `UsageSlot` erwägen                                                                 |
 | `RfidTagAssignmentHistory`             | Umbenennung des ID-Typs zu `RfidTagAssignmentHistoryId` erwägen                                                        |
 | `RfidTagCommands.CreateRfidTagCommand` | `rfidTagId` auf `RfidTagId`-Wertobjekt umstellen                                                                       |

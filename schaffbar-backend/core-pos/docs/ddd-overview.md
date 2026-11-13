@@ -118,16 +118,16 @@ inside its package. This keeps the documentation close to the code it describes.
 
 | #    | Aggregate                | Package                                                    | Identity                     | README                                                                                                                |
 |------|--------------------------|------------------------------------------------------------|------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| 3.1  | Customer                 | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/customer/README.md)                                       |
-| 3.2  | Tool                     | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/tool/README.md)                                               |
-| 3.3  | RfidReader               | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/rfid_reader/README.md)                                 |
-| 3.4  | RfidTag                  | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag/README.md)                                       |
-| 3.5  | RfidTagAssignment        | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag_assignment/README.md)                 |
-| 3.6  | RfidTagAssignmentHistory | `de.schaffbar.core_pos.domain.rfid_tag_assignment_history` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment_history/README.md](../src/main/java/de/schaffbar/core_pos/rfid_tag_assignment_history/README.md) |
-| 3.7  | WorkshopSession          | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/workshop_session/README.md)                       |
-| 3.8  | WorkshopUsage            | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/workshop_usage/README.md)                           |
-| 3.9  | ToolUsage                | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/tool_usage/README.md)                                   |
-| 3.10 | ToolCertification        | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/tool_certification/README.md)                   |
+| 3.1  | Customer                 | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                                       |
+| 3.2  | Tool                     | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                                               |
+| 3.3  | RfidReader               | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                                 |
+| 3.4  | RfidTag                  | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                                       |
+| 3.5  | RfidTagAssignment        | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md)                 |
+| 3.6  | RfidTagAssignmentHistory | `de.schaffbar.core_pos.domain.rfid_tag_assignment_history` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment_history/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment_history/README.md) |
+| 3.7  | WorkshopSession          | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)                       |
+| 3.8  | WorkshopUsage            | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)                           |
+| 3.9  | ToolUsage                | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                                   |
+| 3.10 | ToolCertification        | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)                   |
 
 ---
 
@@ -135,6 +135,9 @@ inside its package. This keeps the documentation close to the code it describes.
 
 Use cases live in the `use_case` package and **orchestrate operations across multiple aggregates**. They are the only
 place where cross-aggregate coordination happens.
+
+The table shows the main ones – the full list is the package `use_case/` (one class per action, e.g. `CustomerDelete`,
+`RfidReaderDelete`, `ToolClearRfidReader`).
 
 | Use Case                           | Description                                                                                                                                                                    | Aggregates Involved                                                |
 |------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
@@ -227,7 +230,7 @@ EventFactory.someEvent(aggregate)
 | ToolCertification | `TOOL_CERTIFICATION_CREATED`, `TOOL_CERTIFICATION_PAUSED`, `TOOL_CERTIFICATION_REACTIVATED`, `TOOL_CERTIFICATION_REVOKED`, `TOOL_CERTIFICATION_DELETED`                                                           |
 | RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_DELETED`                                                                                                                                               |
 | RfidTag           | `RFID_TAG_CREATED`, `RFID_TAG_DELETED`                                                                                                                                                                            |
-| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                                                       |
+| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                                                       |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |
 | WorkshopUsage     | `WORKSHOP_USAGE_ENTERED`, `WORKSHOP_USAGE_LEFT`                                                                                                                                                                   |
 
@@ -237,11 +240,9 @@ EventFactory.someEvent(aggregate)
 
 | Location                               | Description                                                                                                |
 |----------------------------------------|------------------------------------------------------------------------------------------------------------|
-| `CustomerService.deleteCustomer()`     | Deletion concept needed — check RFID tag assignment before deleting                                        |
 | `RfidReaderService.createRfidReader()` | Check for duplicate MAC address on creation                                                                |
 | `RfidTagAssignment.assignRfidTag()`    | Validate that assignment is in `WAITING_FOR_ASSIGNMENT` state                                              |
 | `EnterWorkshop.process()`              | ~~Check if customer has a valid certificate to enter~~ — resolved via `StartToolUsage` certification check |
-| `CloseSession.process()`               | Check for pending workshop usages before closing                                                           |
 | `WorkshopUsage`                        | Consider renaming to `WorkshopSlot` or `UsageSlot`                                                         |
 | `RfidTagAssignmentHistory`             | Consider renaming ID type to `RfidTagAssignmentHistoryId`                                                  |
 | `RfidTagCommands.CreateRfidTagCommand` | Switch `rfidTagId` to `RfidTagId` value object                                                             |
