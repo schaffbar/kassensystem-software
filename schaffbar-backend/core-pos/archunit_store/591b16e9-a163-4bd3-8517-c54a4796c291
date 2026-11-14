@@ -1,0 +1,2 @@
+de.schaffbar.core_pos.domain.rfid_tag_assignment_history.RfidTagAssignmentHistory has no RfidTagAssignmentHistoryEventFactory
+de.schaffbar.core_pos.domain.rfid_tag_assignment_history.RfidTagAssignmentHistory has no RfidTagAssignmentHistoryPayloadMapper
