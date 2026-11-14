@@ -301,6 +301,9 @@ Das bleibt so und kommt so in die Skills:
 | E12 | Formatregeln an den Commands | ja | 13.11.2026: ja |
 | E13 | ArchUnit im Pilot | ja | 13.11.2026: ja |
 | E14 | Datenbanktests mit Testcontainers | später (nach K) | 13.11.2026: später |
+| E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja |
+| E16 | `rfid_tag_assignment_history` hängt von `rfid_tag_assignment` ab (Typ, View) | Historie ins Paket `rfid_tag_assignment` ziehen | 15.11.2026: beim Rollout von `rfid_tag_assignment` entscheiden |
+| E17 | Abfragen der Controller | eine ReadFacade pro Ressource (`ToolReadFacade`, …) mit `@Transactional(readOnly = true)`; Controller kennen nur Use Cases und ReadFacades; das Dashboard wird zur ReadFacade | offen |
 
 ## Pilot (K3)
 
