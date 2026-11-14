@@ -304,6 +304,9 @@ Das bleibt so und kommt so in die Skills:
 | E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja |
 | E16 | `rfid_tag_assignment_history` hängt von `rfid_tag_assignment` ab (Typ, View) | Historie ins Paket `rfid_tag_assignment` ziehen | 15.11.2026: beim Rollout von `rfid_tag_assignment` entscheiden |
 | E17 | Abfragen der Controller | eine ReadFacade pro Ressource (`ToolReadFacade`, …) mit `@Transactional(readOnly = true)`; Controller kennen nur Use Cases und ReadFacades; das Dashboard wird zur ReadFacade | offen |
+| E18 | Value Objects als Feld in Commands und Views | immer `@NotNull @Valid` (optional: nur `@Valid`) | 15.11.2026: ja |
+| E19 | Id des eigenen Aggregats bei einer Änderung | im Command als `id`, Referenzen als `<aggregat>Id` | 15.11.2026: ja |
+| E20 | Namen der Service-Commands | Verb + Aggregat (`pauseToolCertification`, `startToolUsage`) | 15.11.2026: ja |
 
 ## Pilot (K3)
 
