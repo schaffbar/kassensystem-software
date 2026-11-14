@@ -1,0 +1,387 @@
+---
+name: aggregate
+description: How an aggregate of the core-pos backend (Spring Boot, JPA, MapStruct, Lombok) is built in `domain/<aggregate>/` – the aggregate root entity, *Commands, *EventFactory, *PayloadMapper, *Repository, *Service and *Views, which rule lives where (entity, service or use case), domain events and the outbox, value objects, the aggregate README, and the ArchUnit tests that enforce part of it. Use when adding or changing an aggregate, an entity, a command, a domain event, a repository query, a service method or a view, when adding a business rule to the domain, or when reviewing any of these or an ArchUnit failure in DomainArchitectureTest.
+---
+
+# Aggregates in core-pos
+
+An aggregate is a folder in `core-pos/src/main/java/de/schaffbar/core_pos/domain/` – `customer`, `tool`,
+`rfid_reader`, … It owns its table, its state changes and its events. Nothing outside the folder sees the entity:
+others get **views** from the service, and changes come in as **commands** or value objects.
+
+Everything that needs a second aggregate is a **use case** in `use_case/`; the REST controller and its API model live in
+`domain/<aggregate>/web/`. Project rules, commands and the Definition of Done: `schaffbar-backend/CLAUDE.md`.
+
+Reference implementation: `domain/rfid_reader/` – small, complete, and the pilot of the backend consistency work
+(`docs/backend-consistency.md`).
+
+## Folder
+
+```
+domain/<aggregate>/
+  <Aggregate>.java                 aggregate root (@Entity)                     always
+  <Aggregate>Commands.java         command records                              optional
+  <Aggregate>EventFactory.java     creates the domain events                    always
+  <Aggregate>PayloadMapper.java    entity → event payload (MapStruct)           always
+  <Aggregate>Repository.java       Spring Data repository                       always
+  <Aggregate>Service.java          queries and commands of the aggregate        always
+  <Aggregate>Views.java            view records + entity → view (MapStruct)     always
+  <Enum>.java, @Embeddable          types of the aggregate (RfidReaderType, CustomerAddress)
+  README.md                        attributes, rules, events
+  web/                             controller + API model, only when the portal calls it
+```
+
+Nothing else: no `*Helper`, `*Utils`, `*Manager`. Something that does not fit one of these is either part of one of
+them, a use case, or in `shared/`.
+
+## Where a rule lives
+
+| The rule needs | Lives in | Example |
+| --- | --- | --- |
+| one field's format | Bean Validation on the command (`@NotBlank`, `@Size`, `@Email`, `@Pattern`) | postal code has 5 characters |
+| the aggregate's own state | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
+| other rows of the same aggregate | the service command | MAC address is unique |
+| a second aggregate | a use case | a reader assigned to a tool cannot be deleted |
+
+A violated rule throws a dedicated exception from `shared/exception/` that extends `BusinessRuleViolationException`
+(→ `409` with a `code` the portal translates) or uses `ResourceNotFoundException` (→ `404`). Every rule gets a row in
+the README.
+
+## Aggregate root
+
+```java
+@Getter
+@Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
+@Entity
+@Table(name = "RFID_READER", schema = "SCHAFFBAR")
+class RfidReader {
+
+    @Id
+    private UUID id;
+
+    @NotBlank
+    @Column(unique = true)
+    private String macAddress;
+
+    @Enumerated(EnumType.STRING)
+    private RfidReaderType type;
+
+    @NotNull
+    private Instant createdAt;
+
+    @NotNull
+    @Version
+    private Instant updatedAt;
+
+    // ------------------------------------------------------------------------
+    // static constructor
+
+    public static RfidReader of(MacAddress macAddress) {
+        RfidReader rfidReader = new RfidReader();
+        rfidReader.setId(RfidReaderId.random().getValue());
+        rfidReader.setMacAddress(macAddress.getValue());
+        rfidReader.setCreatedAt(Instant.now());
+
+        return rfidReader;
+    }
+
+    // ------------------------------------------------------------------------
+    // query
+
+    public RfidReaderId getId() {
+        return RfidReaderId.of(this.id);
+    }
+
+    // ------------------------------------------------------------------------
+    // command
+
+    public List<SchaffbarEvent> changeType(ChangeRfidReaderTypeCommand command) {
+        setType(command.type());
+
+        return List.of(RfidReaderEventFactory.rfidReaderTypeChanged(this));
+    }
+
+}
+```
+
+- **Package-private class** – only its own service sees it; everyone else gets views.
+- **No public constructor.** The protected no-args constructor is for JPA; an aggregate is created by
+  `public static <Aggregate> of(…)`, which takes a command or value objects, sets a new id (`<Aggregate>Id.random()`)
+  and `createdAt`. The creation event is created by the service after saving.
+- **Fields store raw values**: the id and references to other aggregates as `UUID` (or `String` for RFID tags), value
+  objects as their value, enums with `@Enumerated(EnumType.STRING)`. Constraints on the fields (`@NotNull`,
+  `@NotBlank`) mirror the migration. Every entity has `@Version private Instant updatedAt`.
+- **Getters are public, setters private** (Lombok `@Getter`, `@Setter(AccessLevel.PRIVATE)`).
+- **`getId()` and every getter of a reference return the value object**, never `UUID` or `String`:
+  `getCustomerId()` → `CustomerId.of(this.customerId)`; an optional reference returns `null` when unset
+  (`getCertifiedBy()`).
+- **Further public methods are queries or commands.** A query starts with `get`, `is` or `has` and may take parameters
+  (`isInstructor(CustomerId)`, `getBillableDurationUntil(Instant)`). A command changes the state through the private
+  setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
+  checks the rules that need only the aggregate's own state and throws their exception
+  (`ToolCertification.pause()`).
+- Sections `// static constructor`, `// query`, `// command`, `// helper`.
+
+## Commands
+
+```java
+public interface RfidReaderCommands {
+
+    @Builder
+    @Validated
+    record ChangeRfidReaderTypeCommand( //
+            @NotNull @Valid RfidReaderId id, //
+            @NotNull RfidReaderType type //
+    ) {}
+
+}
+```
+
+- **Optional.** A command is worth it when a change carries more than one or two values. A change with one or two
+  value objects takes them directly (`createRfidReader(MacAddress)`, `deleteRfidReader(RfidReaderId)`). When no change
+  of an aggregate needs a command, it has no `*Commands`.
+- `public interface <Aggregate>Commands` with one nested record per command, named after the change:
+  `CreateCustomerCommand`, `UpdateCustomerContactCommand`, `ChangeRfidReaderTypeCommand`, `SetWlanRelaisCommand`.
+- Every record has `@Builder` and `@Validated`.
+- **The own aggregate's id is `id`** (as in the entity and the view), a reference to another aggregate is
+  `<aggregate>Id` (`customerId`, `toolId`) – both as value objects, never `UUID` or `String`.
+- **Every field is validated:** a value object `@NotNull @Valid` (optional: only `@Valid`), a required string
+  `@NotBlank`, other required fields `@NotNull`, formats `@Size`, `@Email`, `@Pattern`. A field without annotation is
+  optional. The service validates the command with `@NotNull @Valid`.
+
+## EventFactory
+
+```java
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+final class RfidReaderEventFactory {
+
+    static SchaffbarEvent rfidReaderTypeChanged(RfidReader rfidReader) {
+        var payload = RfidReaderPayloadMapper.MAPPER.toRfidReaderTypeChangedPayload(rfidReader);
+        payload.validate();
+
+        return SchaffbarEvent.rfidReaderEvent(EventType.RFID_READER_TYPE_CHANGED, rfidReader.getId(), payload);
+    }
+
+    static SchaffbarEvent rfidReaderDeleted(RfidReaderId rfidReaderId) {
+        var payload = new RfidReaderDeletedPayload(rfidReaderId);
+        payload.validate();
+
+        return SchaffbarEvent.rfidReaderEvent(EventType.RFID_READER_DELETED, rfidReaderId, payload);
+    }
+
+}
+```
+
+- **The only place where events are created.** `final`, package-private, private no-args constructor, only static
+  methods named `<aggregate><PastTense>` (`toolCertificationPaused`).
+- Each method builds the payload – with the PayloadMapper from the entity, or `new …Payload(id)` when it only carries
+  ids – **validates it right after building it** (`payload.validate()`), and creates the event with the
+  aggregate's factory method `SchaffbarEvent.<aggregate>Event(EventType, id, payload)`.
+- Called by the entity's commands and by the service for create and delete.
+
+**A new event:**
+
+1. Constant in `shared/event/EventType`.
+2. Payload record in `shared/event/payload/<Aggregate>EventPayload` – nested in the interface, implements it, fields
+   validated like a command. Payloads may use the enums and value objects of their aggregate.
+3. Method in the PayloadMapper (when mapped from the entity).
+4. Method in the EventFactory.
+5. Row in the README's "Domain Events".
+
+## PayloadMapper
+
+```java
+@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
+interface RfidReaderPayloadMapper {
+
+    RfidReaderPayloadMapper MAPPER = Mappers.getMapper(RfidReaderPayloadMapper.class);
+
+    // ------------------------------------------------------------------------
+    // mapper
+
+    RfidReaderTypeChangedPayload toRfidReaderTypeChangedPayload(RfidReader rfidReader);
+
+}
+```
+
+Package-private interface, `@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)` – a payload field the entity cannot
+fill breaks the build instead of being `null` in the event. One method `to<Payload>(<Aggregate>)` per payload.
+
+## Repository
+
+```java
+@Repository
+interface ToolRepository extends JpaRepository<Tool, UUID> {
+
+    Optional<Tool> findByName(String name);
+
+    List<Tool> findByRfidReaderId(UUID rfidReaderId);
+
+    default Optional<Tool> findByRfidReaderId(RfidReaderId rfidReaderId) {
+        List<Tool> tools = findByRfidReaderId(rfidReaderId.getValue());
+        if (tools.size() > 1) {
+            throw new IllegalStateException("More than one tool with RFID reader [id: " + rfidReaderId.getValue() + "]");
+        }
+        return tools.stream().findFirst();
+    }
+
+}
+```
+
+- **Package-private interface** extending `JpaRepository<Aggregate, UUID>` (`String` for RFID tags), `@Repository`.
+- Spring Data derives queries from methods with raw types. **For every method that takes a raw id (`UUID`) there is a
+  `default` method with the same name that takes the value objects** and calls it with `getValue()`. The service only
+  calls the value object variants (and the inherited `findById(id.getValue())`, `deleteById(…)`).
+- A query for one row that the database returns as a list checks "at most one" in the default method; more than one
+  is broken data → `IllegalStateException`.
+
+## Service
+
+```java
+@Slf4j
+@Service
+@Validated
+@RequiredArgsConstructor
+public class RfidReaderService {
+
+    private final @NonNull RfidReaderRepository rfidReaderRepository;
+
+    private final @NonNull OutboxEventStore outboxEventStore;
+
+    // ------------------------------------------------------------------------
+    // query
+
+    public Optional<RfidReaderView> getRfidReader(@NotNull @Valid RfidReaderId id) {
+        return this.rfidReaderRepository.findById(id.getValue()) //
+                .map(RfidReaderViews.MAPPER::toRfidReaderView);
+    }
+
+    // ------------------------------------------------------------------------
+    // command
+
+    @Transactional
+    public void changeRfidReaderType(@NotNull @Valid ChangeRfidReaderTypeCommand command) {
+        List<SchaffbarEvent> events = this.rfidReaderRepository.findById(command.id().getValue()) //
+                .map(rfidReader -> rfidReader.changeType(command)) //
+                .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));
+
+        this.outboxEventStore.save(events);
+
+        log.info("Updated type of RFID reader with id {} and published events {}", command.id(), events);
+    }
+
+}
+```
+
+- `@Slf4j @Service @Validated @RequiredArgsConstructor`, `public class <Aggregate>Service`. Dependencies are
+  `private final @NonNull` fields: **its own repository and the `OutboxEventStore` – never another service or a use
+  case.** (The read models in `domain/dashboard/` are the only services that read other services.)
+- **Public queries and public commands, everything else `private`** (helpers like `throwMacAddressAlreadyUsedException`,
+  `findByCustomerAndToolOrThrow` in `// helper`).
+- **Input is a command or value objects**, never a raw `UUID` or `String`; every object parameter is validated
+  (`@NotNull @Valid`, `@NotEmpty` for lists).
+- **Queries** are named `get…` and return views – `Optional<View>`, `List<View>` – or a plain answer (`boolean`,
+  value object). Never an entity, also not inside `Optional` or `List`. They map with `<Aggregate>Views.MAPPER`.
+- **Commands** are named verb + aggregate (`createTool`, `changeRfidReaderType`, `pauseToolCertification`),
+  `@Transactional` (Spring's), and return `void` – only a create returns the new id. The flow:
+  - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)`;
+  - check the rules that need other rows of the aggregate (uniqueness);
+  - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete:
+    `deleteById` + the deleted event);
+  - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all;
+  - `log.info("<What happened> … and published events {}", id, events)`.
+- A loaded entity needs no `save` after a command – JPA writes the change at commit.
+
+## Views
+
+```java
+@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
+public interface RfidReaderViews {
+
+    RfidReaderViews MAPPER = Mappers.getMapper(RfidReaderViews.class);
+
+    // ------------------------------------------------------------------------
+    // mapper
+
+    RfidReaderView toRfidReaderView(RfidReader rfidReader);
+
+    // ------------------------------------------------------------------------
+    // views
+
+    @Builder
+    @Validated
+    record RfidReaderView( //
+            @NotNull @Valid RfidReaderId id, //
+            @NotBlank String macAddress, //
+            RfidReaderType type, //
+            String name, //
+            @NotNull Instant createdAt //
+    ) {}
+
+}
+```
+
+- **The only form in which the aggregate leaves its package.** `public interface <Aggregate>Views`, which is itself the
+  MapStruct mapper: `@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)` and `MAPPER`, then `// mapper` and
+  `// views`.
+- One record `<Aggregate>View` (and nested parts like `CustomerAddressView`), each with `@Builder` and `@Validated`.
+- Ids and references as value objects, fields validated like a command: the annotations say which values can be
+  missing – the API model and the portal's zod schema follow them.
+
+## Value objects
+
+Ids and checked values live in `shared/id/` (`CustomerId`, `RfidTagId`, `MacAddress`, `IpAddress`):
+`@Value(staticConstructor = "of")`, the value as `@JsonValue` field, a private `@JsonCreator` constructor that checks
+the value (`ValueObjectAssert`), `random()` for UUID ids. They check themselves when created – a value object that
+exists is valid.
+
+## README
+
+Each aggregate has a `README.md`: aggregate root and identity, attributes (field, type, constraints), enums, commands,
+**Business Rules / Invariants** (`#`, rule, where it is enforced), **Open Rules** (enforced only in the portal /
+planned) and **Domain Events**. Changed together with the code: a new rule, event or field is a new row; implementing
+an open rule moves it to "Business Rules".
+
+## Code style
+
+- `this.` for fields; `//` at the end of a line in a call chain or a record header (keeps the formatter from joining
+  lines).
+- Section separators `// ------…` (ending at column 79, indentation counts) followed by the section name, as in the
+  examples.
+- Comments only for what the code can't say; no JavaDoc that repeats a name.
+
+## Not everywhere yet
+
+The rules above are the target. Some code predates them and is fixed aggregate by aggregate (roadmap K4) – **follow
+this skill, not the code next to you.** Known deviations:
+
+- `jakarta.transaction.Transactional` in some services → Spring's; queries get `@Transactional(readOnly = true)` (E9).
+- `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
+- Repository default methods with other names (`findByCustomer`, `findActiveByCustomerId`) or missing
+  (`ToolCertificationRepository`); services calling the `UUID` variants.
+- Short command names in `ToolCertificationService` (`create`, `pause`), `startUsage`, `enterWorkshop`.
+- Value objects without `@Valid` in commands and views; `RfidTagCommands` with a `String` id.
+- `rfid_tag_assignment_history`: no events, depends on `rfid_tag_assignment` (E16).
+
+The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
+
+## Tests that enforce it
+
+Most of these rules are checked by the ArchUnit tests in `core-pos/src/test/java/de/schaffbar/core_pos/architecture/`
+(`DomainArchitectureTest`, `DependencyArchitectureTest`, …) – part of `mvn -q test`. Rules with known violations are
+frozen: only new violations fail; a fixed one disappears from `archunit_store/` on the next run – keep that change.
+Never add a violation to the store to make a build pass. A rule in this skill and its ArchUnit rule change together.
+
+## Checklist
+
+- [ ] Only the known building blocks in the folder; entity package-private, created by `of(…)`.
+- [ ] Every state change is an entity command returning its events from the EventFactory.
+- [ ] Ids and references are value objects everywhere outside the entity's fields and the repository's derived queries.
+- [ ] Commands and views validated field by field; `@Builder` + `@Validated`.
+- [ ] Service: own repository + `OutboxEventStore` only; queries return views; commands `@Transactional`, save their
+      events, log them.
+- [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test.
+- [ ] New event: EventType, payload, mapper, factory, README.
+- [ ] README updated; `mvn -q test` passes.

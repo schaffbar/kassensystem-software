@@ -21,6 +21,17 @@ The backend runs on port 5000 (`/api/v1/...`) against PostgreSQL: either `infras
 the running backend or touch its database** – it says what needs a restart. Requests for manual testing: the Bruno
 collection in `core-pos/api/`.
 
+## Skills
+
+The rules below are the short form; the skills in `.claude/skills/` have all of them, with examples. Load the skill
+before working on its topic.
+
+| Task                                                                                                            | Skill       |
+| --------------------------------------------------------------------------------------------------------------- | ----------- |
+| an aggregate in `domain/<aggregate>/`: entity, commands, events, repository, service, views, where a rule lives | `aggregate` |
+
+Skills for use cases, error handling, the REST API and tests follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
+
 ## Architecture
 
 The structure of an aggregate, the use cases, read models, value objects and events: `core-pos/docs/ddd-overview.md`
@@ -42,8 +53,8 @@ core_pos/
 - **An aggregate changes only itself.** A service validates, calls the entity's command method and saves the entity
   together with its events. Everything that needs a second aggregate – a check, a cleanup, an orchestration – is a
   **use case** in `use_case/`; services never call each other – except the read models in `domain/dashboard/`,
-  which only read. A controller calls a service for its own aggregate and
-  a use case for everything else.
+  which only read. **Every change goes through a use case**, also when it only forwards to one service (E2 in
+  `../docs/backend-consistency.md`); a controller reads through the services (ReadFacade: E17, open).
 - **Every state change produces events.** Command methods of the entity return `List<SchaffbarEvent>`, the service
   saves them to the outbox in the same transaction. A new event: `EventType`, payload record in
   `shared/event/payload/`, method in the `*PayloadMapper` and the `*EventFactory`, row in the README's "Domain Events".
@@ -54,8 +65,10 @@ core_pos/
   that enforces it) and "Open Rules" (enforced only in the portal / planned). Implementing a rule moves it from
   "Open Rules" to "Business Rules" – the same change.
 - **A violated rule throws a dedicated exception** in `shared/exception/` (`CustomerHasOpenWorkshopSessionException`),
-  English message with the ids, static factories for variants (`RfidReaderHasToolAssignedException.delete(id)`).
-  There is no `@ControllerAdvice` yet – exceptions reach the portal as `500` (Problems API: `docs/roadmap.md`, A1).
+  English message with the ids, static factories for variants (`RfidReaderHasToolAssignedException.delete(id)`). It
+  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates) or is a
+  `ResourceNotFoundException` (→ `404`); `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible
+  states (broken data) are an `IllegalStateException` (→ `500`). Many exceptions do not have a base class yet (E8).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`
   – never edit an applied one. `ddl-auto: validate`: entity and migration must match.
 - **The API is a contract with the portal.** A field's nullability is its Bean Validation (`@NotNull`, `@NotBlank`)
@@ -71,8 +84,8 @@ core_pos/
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
 - Style of the surrounding code: `this.` for fields, `//` at the end of a line in a call chain or record header (keeps
   the formatter from joining lines), section comments `// ------…` + `// query` / `// command` / `// helper`.
-- `@Transactional` is mixed today (`jakarta.transaction` and Spring's) – follow the file you change; the choice is
-  open (`../TODO.md`).
+- `@Transactional` is Spring's (`org.springframework.transaction.annotation`), `readOnly = true` on queries (E9) –
+  older code still uses `jakarta.transaction`; change it when you touch the class.
 - Comments only for what the code can't say (why, a non-obvious rule); no JavaDoc that repeats a name or signature.
 
 ## Tests
@@ -84,6 +97,9 @@ core_pos/
   `<Entity>_<Method>Test` (`ToolUsage_GetBillableDurationTest`, `WorkshopSession_CloseTest`).
 - Mockito runs strict: a stub a test does not use fails it – stub per test, not in a shared `@BeforeEach`.
 - Test data for views: `builder/ViewBuilder.java`, records via their Lombok builders.
+- **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`). Rules with known violations are frozen
+  in `core-pos/archunit_store/`: only new violations fail, fixed ones leave the store – keep that change, never add a
+  violation to make the build pass.
 - There are no tests with a Spring context or a database: repository queries, migrations and the mapping are not
   covered – say so when a change depends on them.
 

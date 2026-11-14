@@ -9,7 +9,7 @@ Staff run it at the counter with the portal.
 | Folder | What |
 | --- | --- |
 | `schaffbar-portal/` | the staff portal – Angular 22, Material M3, NgRx signal store; own `CLAUDE.md` and skills in `.claude/skills/` |
-| `schaffbar-backend/core-pos/` | the backend – Spring Boot 3.5, Java 25, PostgreSQL with Flyway; one aggregate per folder in `domain/` with a `README.md` of its rules, use cases in `use_case/`; Bruno collection in `api/`, DDD overview in `docs/` |
+| `schaffbar-backend/core-pos/` | the backend – Spring Boot 3.5, Java 25, PostgreSQL with Flyway; one aggregate per folder in `domain/` with a `README.md` of its rules, use cases in `use_case/`; Bruno collection in `api/`, DDD overview in `docs/`; `CLAUDE.md` and skills in `schaffbar-backend/` |
 | `infrastructure/` | `docker-compose.yml` and the database init |
 | `docs/` | `ui-redesign.md` (design and every portal decision with its date), `backend-features.md` (what the portal still needs from the backend), `roadmap.md` (open tasks), setup notes (`playwright-wsl.md`, …) |
 | `TODO.md` | loose tasks and ideas of the maintainer |
