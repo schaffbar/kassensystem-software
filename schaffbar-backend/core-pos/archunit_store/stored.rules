@@ -1,5 +1,5 @@
 #
-#Sun Nov 15 15:35:06 CET 2026
+#Sun Nov 15 15:43:05 CET 2026
 classes\ that\ aggregates\ should\ have\ a\ *Service,\ *Repository,\ *Views,\ *EventFactory\ and\ *PayloadMapper\ named\ after\ it=591b16e9-a163-4bd3-8517-c54a4796c291
 classes\ that\ reside\ in\ a\ package\ '..domain..'\ and\ have\ simple\ name\ ending\ with\ 'Repository'\ should\ have\ a\ default\ method\ of\ the\ same\ name\ taking\ value\ objects\ for\ every\ method\ taking\ a\ UUID=1461000c-ef31-48ed-b809-7a0b0ffe6311
 classes\ that\ reside\ in\ a\ package\ '..domain..'\ and\ reside\ outside\ of\ packages\ ['..domain..web..',\ '..domain.dashboard..']\ and\ are\ top\ level\ classes\ should\ be\ an\ aggregate,\ an\ embeddable,\ an\ enum\ or\ a\ building\ block\ (*Commands,\ *Service,\ \u2026),\ because\ an\ agent\ should\ not\ invent\ a\ *Helper\ or\ *Manager\ \u2013\ every\ kind\ of\ class\ has\ its\ place=e9671ff9-079c-4e62-a3b0-298d7e028f90
@@ -11,4 +11,4 @@ methods\ that\ are\ declared\ in\ classes\ that\ services,\ use\ cases\ and\ rea
 methods\ that\ are\ declared\ in\ classes\ that\ services,\ use\ cases\ and\ read\ facades\ should\ not\ be\ annotated\ with\ @Transactional\ and\ should\ not\ be\ annotated\ with\ @Transactional,\ because\ the\ transaction\ comes\ with\ @Query\ or\ @Command\ \u2013\ one\ place\ to\ change\ it\ (E21)=46cad4cf-0029-4051-aeaa-6ceb1a73f5ef
 no\ classes\ should\ throw\ generic\ exceptions,\ because\ a\ violated\ rule\ has\ its\ own\ exception,\ a\ bug\ is\ an\ IllegalStateException\ (E8)=360302a7-c930-414a-b245-a8242c8673fa
 no\ classes\ that\ domain\ services\ should\ call\ method\ where\ a\ repository\ method\ taking\ a\ UUID,\ because\ the\ service\ works\ with\ CustomerId,\ ToolId,\ \u2026\ \u2013\ the\ raw\ UUID\ stays\ in\ the\ repository=f83d6057-c02b-4248-b24e-2bec0743677a
-no\ classes\ that\ reside\ in\ a\ package\ '..domain..web..'\ should\ call\ method\ where\ a\ writing\ @Transactional\ method\ of\ a\ domain\ service,\ because\ every\ change\ goes\ through\ a\ use\ case\ (E2\ in\ docs/backend-consistency.md)=3a2b1dac-f407-4e61-af85-be7250c47b5e
+no\ classes\ that\ reside\ in\ a\ package\ '..domain..web..'\ should\ depend\ on\ classes\ that\ domain\ services,\ because\ changes\ go\ through\ use\ cases,\ queries\ through\ the\ controller's\ read\ facade\ (E2,\ E17)=267df985-55ef-4312-9f27-793652ac81ab

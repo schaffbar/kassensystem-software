@@ -1,6 +1,8 @@
 package de.schaffbar.core_pos.architecture;
 
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
+import static com.tngtech.archunit.base.DescribedPredicate.and;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -26,7 +28,8 @@ import de.schaffbar.core_pos.shared.cqrs.Query;
 class QueryCommandArchitectureTest {
 
     private static final DescribedPredicate<JavaClass> SERVICES_USE_CASES_AND_READ_FACADES = DOMAIN_SERVICE //
-            .or(resideInAnyPackage(USE_CASE, READ_FACADE)) //
+            .or(resideInAPackage(USE_CASE)) //
+            .or(and(resideInAPackage(READ_FACADE), simpleNameEndingWith("ReadFacade"))) //
             .as("services, use cases and read facades");
 
     @ArchTest

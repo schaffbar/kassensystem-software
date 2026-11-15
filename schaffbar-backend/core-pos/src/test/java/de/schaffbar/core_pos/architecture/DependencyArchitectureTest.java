@@ -4,13 +4,11 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.READ_FACADE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WRITE_TRANSACTION;
 
-import com.tngtech.archunit.base.DescribedPredicate;
-import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -21,10 +19,6 @@ import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 
 @AnalyzeClasses(packages = ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class DependencyArchitectureTest {
-
-    private static final DescribedPredicate<JavaMethodCall> WRITING_SERVICE_METHOD = DescribedPredicate.describe(
-            "a writing @Transactional method of a domain service", //
-            call -> DOMAIN_SERVICE.test(call.getTargetOwner()) && call.getTarget().resolveMember().map(WRITE_TRANSACTION::test).orElse(false));
 
     // ------------------------------------------------------------------------
     // aggregates
@@ -39,8 +33,8 @@ class DependencyArchitectureTest {
     static final ArchRule domainDoesNotUseUseCases = noClasses() //
             .that().resideInAPackage(DOMAIN) //
             .and().resideOutsideOfPackage(WEB) //
-            .should().dependOnClassesThat().resideInAPackage(USE_CASE) //
-            .because("use cases orchestrate the aggregates, not the other way round");
+            .should().dependOnClassesThat().resideInAnyPackage(USE_CASE, READ_FACADE) //
+            .because("use cases and read facades use the aggregates, not the other way round");
 
     @ArchTest
     static final ArchRule domainDoesNotKnowTheApi = noClasses() //
@@ -53,10 +47,10 @@ class DependencyArchitectureTest {
     // controllers
 
     @ArchTest
-    static final ArchRule controllersChangeStateOnlyThroughUseCases = freeze(noClasses() //
+    static final ArchRule controllersKnowOnlyUseCasesAndReadFacades = freeze(noClasses() //
             .that().resideInAPackage(WEB) //
-            .should().callMethodWhere(WRITING_SERVICE_METHOD) //
-            .because("every change goes through a use case (E2 in docs/backend-consistency.md)"));
+            .should().dependOnClassesThat(DOMAIN_SERVICE) //
+            .because("changes go through use cases, queries through the controller's read facade (E2, E17)"));
 
     // ------------------------------------------------------------------------
     // events
