@@ -42,6 +42,7 @@ them, a use case, or in `shared/`.
 | the aggregate's own state | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
 | other rows of the same aggregate | the service command | MAC address is unique |
 | a second aggregate | a use case | a reader assigned to a tool cannot be deleted |
+| a referenced aggregate exists | a use case, before the change; for a list, all entries first | the customers of a batch certification exist |
 
 A violated rule throws a dedicated exception from `shared/exception/` that extends `BusinessRuleViolationException`
 (→ `409` with a `code` the portal translates) or uses `ResourceNotFoundException` (→ `404`). Every rule gets a row in
@@ -108,20 +109,22 @@ class RfidReader {
 
 - **Package-private class** – only its own service sees it; everyone else gets views.
 - **No public constructor.** The protected no-args constructor is for JPA; an aggregate is created by
-  `public static <Aggregate> of(…)`, which takes a command or value objects, sets a new id (`<Aggregate>Id.random()`)
-  and `createdAt`. The creation event is created by the service after saving.
+  `public static <Aggregate> of(…)`, which takes a command or value objects, sets a new id
+  (`<Aggregate>Id.random().getValue()`, not `UUID.randomUUID()`) and `createdAt`, and returns the entity – the creation
+  event is created by the service after saving.
 - **Fields store raw values**: the id and references to other aggregates as `UUID` (or `String` for RFID tags), value
   objects as their value, enums with `@Enumerated(EnumType.STRING)`. Constraints on the fields (`@NotNull`,
   `@NotBlank`) mirror the migration. Every entity has `@Version private Instant updatedAt`.
 - **Getters are public, setters private** (Lombok `@Getter`, `@Setter(AccessLevel.PRIVATE)`).
 - **`getId()` and every getter of a reference return the value object**, never `UUID` or `String`:
   `getCustomerId()` → `CustomerId.of(this.customerId)`; an optional reference returns `null` when unset
-  (`getCertifiedBy()`).
+  (`getCertifiedBy()`). The own id is always `getId()`, never `get<Aggregate>Id()`.
 - **Further public methods are queries or commands.** A query starts with `get`, `is` or `has` and may take parameters
   (`isInstructor(CustomerId)`, `getBillableDurationUntil(Instant)`). A command changes the state through the private
   setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
   checks the rules that need only the aggregate's own state and throws their exception
   (`ToolCertification.pause()`).
+- Null checks with `nonNull(…)` / `isNull(…)` (static import from `java.util.Objects`), not `!= null` / `== null`.
 - Sections `// static constructor`, `// query`, `// command`, `// helper`.
 
 ## Commands
@@ -150,6 +153,8 @@ public interface RfidReaderCommands {
 - **Every field is validated:** a value object `@NotNull @Valid` (optional: only `@Valid`), a required string
   `@NotBlank`, other required fields `@NotNull`, formats `@Size`, `@Email`, `@Pattern`. A field without annotation is
   optional. The service validates the command with `@NotNull @Valid`.
+- A change of several entries at once takes a list, not one call per entry:
+  `@NotEmpty List<@NotNull @Valid CustomerId> customerIds` (`addInstructors`, `removeInstructors`).
 
 ## EventFactory
 
@@ -180,6 +185,8 @@ final class RfidReaderEventFactory {
   ids – **validates it right after building it** (`payload.validate()`), and creates the event with the
   aggregate's factory method `SchaffbarEvent.<aggregate>Event(EventType, id, payload)`.
 - Called by the entity's commands and by the service for create and delete.
+- **Every action with its own meaning has its own event** – `TOOL_WLAN_RELAIS_SET` and `TOOL_WLAN_RELAIS_CLEARED`, not
+  one `TOOL_WLAN_RELAIS_UPDATED` for both.
 
 **A new event:**
 
@@ -207,7 +214,9 @@ interface RfidReaderPayloadMapper {
 ```
 
 Package-private interface, `@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)` – a payload field the entity cannot
-fill breaks the build instead of being `null` in the event. One method `to<Payload>(<Aggregate>)` per payload.
+fill breaks the build instead of being `null` in the event. One method `to<Payload>(<Aggregate>)` per payload. Payload
+and entity getters share the value objects, so no conversion is needed; a `default` method only where a type really
+differs.
 
 ## Repository
 
@@ -287,7 +296,9 @@ public class RfidReaderService {
 - **Commands** are named verb + aggregate (`createTool`, `changeRfidReaderType`, `pauseToolCertification`),
   `@Transactional` (Spring's), and return `void` – only a create returns the new id. The flow:
   - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)`;
-  - check the rules that need other rows of the aggregate (uniqueness);
+  - check the rules that need other rows of the aggregate (uniqueness) – with a private `throw…` helper, no
+    `throw new` inside a lambda:
+    `findByMacAddress(…).ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing))`;
   - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete:
     `deleteById` + the deleted event);
   - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all;
@@ -344,10 +355,32 @@ Each aggregate has a `README.md`: aggregate root and identity, attributes (field
 planned) and **Domain Events**. Changed together with the code: a new rule, event or field is a new row; implementing
 an open rule moves it to "Business Rules".
 
+## A new aggregate
+
+Besides the folder, a new aggregate touches `shared/`, the migrations and the docs – in this order:
+
+1. **Id** in `shared/id/`: `<Aggregate>Id` like `ToolId` (`@Value(staticConstructor = "of")`, `@JsonValue`, private
+   `@JsonCreator` constructor, `random()`, `sameValueAs(…)`), plus its value in `ValueObjectAssert.ValueObject`.
+2. **Converter** in `shared/util/`: `StringTo<ValueObject>Converter implements Converter<String, …>` (`@Component`) for
+   every value object used as `@PathVariable` or `@RequestParam` – ids and others (`MacAddress`, `IpAddress`).
+3. **Events** in `shared/event/`: a value in `AggregateType`, the event types in `EventType`, the payload interface
+   `<Aggregate>EventPayload` in `payload/`, and the factory method `SchaffbarEvent.<aggregate>Event(EventType,
+   <Aggregate>Id, <Aggregate>EventPayload)`.
+4. **Exceptions** in `shared/exception/`: a `Resource` value and a factory in `ResourceNotFoundException`; the rule
+   exceptions of the aggregate.
+5. **The folder** (above): enums, commands, entity, repository, payload mapper, event factory, views, service, README.
+6. **Migration** `core-pos/src/main/resources/db/migration/V<next>__<aggregate>.sql`: `CREATE TABLE
+   schaffbar.<aggregate> (…)` with primary key, constraints and indexes, then
+   `GRANT ALL ON TABLE schaffbar.<aggregate> TO schadmin;`. **No foreign keys** – not to other aggregates (they are
+   checked in use cases) and not inside the aggregate either (`@ElementCollection` tables are managed by JPA).
+7. **Use cases, controller and API model** – `schaffbar-backend/CLAUDE.md` until their skills exist.
+8. **Docs**: the README of the aggregate; in `core-pos/docs/ddd-overview.md` and `ddd-uebersicht.md` the domain
+   overview, the aggregate catalog (link to the README), the use cases, value objects and the event list.
+
 ## Code style
 
-- `this.` for fields; `//` at the end of a line in a call chain or a record header (keeps the formatter from joining
-  lines).
+- Formatting and import order: `schaffbar-backend/CLAUDE.md` ("Formatting").
+- `this.` for fields; `//` at the end of a line in a call chain or a record header, one element per line.
 - Section separators `// ------…` (ending at column 79, indentation counts) followed by the section name, as in the
   examples.
 - Comments only for what the code can't say; no JavaDoc that repeats a name.
