@@ -14,8 +14,8 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERV
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_TAKING_UUID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.RETURNS_EVENTS;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.TRANSACTIONAL;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WRITE_TRANSACTION;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondition;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.hasBuilder;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.isNestedIn;
@@ -286,7 +286,7 @@ class DomainArchitectureTest {
     static final ArchRule serviceCommandsReturnNothingOrTheNewId = methods() //
             .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
             .and().arePublic() //
-            .and(TRANSACTIONAL) //
+            .and(WRITE_TRANSACTION) //
             .should(methodCondition("return void or the id of a created aggregate",
                     method -> method.getRawReturnType().getName().equals("void") || isValueObject(method.getRawReturnType())));
 
@@ -294,7 +294,7 @@ class DomainArchitectureTest {
     static final ArchRule serviceCommandsSaveTheirEvents = freeze(methods() //
             .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
             .and().arePublic() //
-            .and(TRANSACTIONAL) //
+            .and(WRITE_TRANSACTION) //
             .should(methodCondition("save the events with OutboxEventStore.save(…)", method -> method.getMethodCallsFromSelf().stream() //
                     .anyMatch(call -> call.getTargetOwner().isEquivalentTo(OutboxEventStore.class)))));
 

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
@@ -13,6 +12,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -26,7 +26,7 @@ public class RfidReaderChangeType {
 
     private final @NonNull ToolService toolService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid ChangeRfidReaderTypeCommand command) {
         RfidReaderView rfidReader = this.rfidReaderService.getRfidReader(command.id()) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));

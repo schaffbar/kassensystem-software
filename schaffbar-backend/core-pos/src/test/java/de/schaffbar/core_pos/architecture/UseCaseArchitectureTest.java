@@ -13,8 +13,9 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.shared.cqrs.Command;
 
 @AnalyzeClasses(packages = ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class UseCaseArchitectureTest {
@@ -35,11 +36,11 @@ class UseCaseArchitectureTest {
             .because("a use case is one action");
 
     @ArchTest
-    static final ArchRule useCasesAreSpringTransactions = freeze(methods() //
+    static final ArchRule useCasesAreCommands = freeze(methods() //
             .that().areDeclaredInClassesThat().resideInAPackage(USE_CASE) //
             .and().haveName("process") //
-            .should().beAnnotatedWith(Transactional.class) //
-            .because("the use case is the transaction of the action (E9 in docs/backend-consistency.md)"));
+            .should().beAnnotatedWith(Command.class) //
+            .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)"));
 
     @ArchTest
     static final ArchRule useCasesAreNamedAfterTheirAggregate = freeze(classes() //

@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 
 @Service
 @Validated
@@ -18,7 +18,7 @@ public class RfidReaderUpdate {
 
     private final @NonNull RfidReaderService rfidReaderService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid UpdateRfidReaderCommand command) {
         this.rfidReaderService.updateRfidReader(command);
     }

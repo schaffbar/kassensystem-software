@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
@@ -19,7 +19,7 @@ public class RfidReaderCreate {
 
     private final @NonNull RfidReaderService rfidReaderService;
 
-    @Transactional
+    @Command
     public RfidReaderId process(@NotNull @Valid MacAddress macAddress) {
         return this.rfidReaderService.createRfidReader(macAddress);
     }

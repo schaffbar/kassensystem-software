@@ -5,9 +5,9 @@ import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.TRANSACTIONAL;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WRITE_TRANSACTION;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
@@ -22,14 +22,18 @@ import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 @AnalyzeClasses(packages = ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class DependencyArchitectureTest {
 
+    private static final DescribedPredicate<JavaMethodCall> WRITING_SERVICE_METHOD = DescribedPredicate.describe(
+            "a writing @Transactional method of a domain service", //
+            call -> DOMAIN_SERVICE.test(call.getTargetOwner()) && call.getTarget().resolveMember().map(WRITE_TRANSACTION::test).orElse(false));
+
+    // ------------------------------------------------------------------------
+    // aggregates
+
     @ArchTest
     static final ArchRule servicesDoNotCallEachOther = noClasses() //
             .that(DOMAIN_SERVICE) //
             .should().dependOnClassesThat(DOMAIN_SERVICE) //
             .because("an aggregate changes only itself – everything with a second aggregate is a use case");
-
-    // ------------------------------------------------------------------------
-    // aggregates
 
     @ArchTest
     static final ArchRule domainDoesNotUseUseCases = noClasses() //
@@ -45,6 +49,18 @@ class DependencyArchitectureTest {
             .should().dependOnClassesThat().resideInAPackage(WEB) //
             .because("the API models are a contract with the portal, the domain must not depend on it");
 
+    // ------------------------------------------------------------------------
+    // controllers
+
+    @ArchTest
+    static final ArchRule controllersChangeStateOnlyThroughUseCases = freeze(noClasses() //
+            .that().resideInAPackage(WEB) //
+            .should().callMethodWhere(WRITING_SERVICE_METHOD) //
+            .because("every change goes through a use case (E2 in docs/backend-consistency.md)"));
+
+    // ------------------------------------------------------------------------
+    // events
+
     @ArchTest
     static final ArchRule onlyTheOutboxEventStoreSavesOutboxEvents = noClasses() //
             .that().doNotHaveFullyQualifiedName(OutboxEventStore.class.getName()) //
@@ -52,7 +68,7 @@ class DependencyArchitectureTest {
             .because("events are saved in the transaction of the aggregate change (OutboxEventStore)");
 
     // ------------------------------------------------------------------------
-    // controllers
+    // shared
 
     @ArchTest
     static final ArchRule sharedDoesNotDependOnFeatures = noClasses() //
@@ -61,21 +77,5 @@ class DependencyArchitectureTest {
             .and().resideOutsideOfPackage("..shared.event.payload..") //
             .should().dependOnClassesThat().resideInAnyPackage(DOMAIN, USE_CASE, "..device..") //
             .because("shared is used by everyone and knows no feature");
-
-    // ------------------------------------------------------------------------
-    // events
-
-    private static final DescribedPredicate<JavaMethodCall> TRANSACTIONAL_SERVICE_METHOD = DescribedPredicate.describe(
-            "a @Transactional method of a domain service", //
-            call -> DOMAIN_SERVICE.test(call.getTargetOwner()) && call.getTarget().resolveMember().map(TRANSACTIONAL::test).orElse(false));
-
-    // ------------------------------------------------------------------------
-    // shared
-
-    @ArchTest
-    static final ArchRule controllersChangeStateOnlyThroughUseCases = freeze(noClasses() //
-            .that().resideInAPackage(WEB) //
-            .should().callMethodWhere(TRANSACTIONAL_SERVICE_METHOD) //
-            .because("every change goes through a use case (E2 in docs/backend-consistency.md)"));
 
 }

@@ -23,7 +23,10 @@ import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import jakarta.persistence.Entity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 
 final class ArchitectureSupport {
@@ -49,9 +52,12 @@ final class ArchitectureSupport {
             resideOutsideOfPackage(DASHBOARD)) //
             .as("domain services");
 
-    static final DescribedPredicate<JavaMethod> TRANSACTIONAL = DescribedPredicate.describe("@Transactional", //
-            method -> method.isAnnotatedWith(org.springframework.transaction.annotation.Transactional.class) || method.isAnnotatedWith(
-                    jakarta.transaction.Transactional.class));
+    static final String READ_FACADE = "..read_facade..";
+
+    // also the older @Transactional without @Command (jakarta's or Spring's without readOnly) until the rollout
+    static final DescribedPredicate<JavaMethod> WRITE_TRANSACTION = DescribedPredicate.describe("a @Command (writing transaction)", //
+            method -> method.isAnnotatedWith(Command.class) || method.isAnnotatedWith(jakarta.transaction.Transactional.class) || method.isAnnotatedWith(
+                    Transactional.class) && !isReadOnlyTransaction(method));
 
     static final DescribedPredicate<JavaMethod> RETURNS_EVENTS = DescribedPredicate.describe("return List<SchaffbarEvent>",
             method -> isListOf(method.getReturnType(), SchaffbarEvent.class));
@@ -72,6 +78,16 @@ final class ArchitectureSupport {
 
     static boolean isUuid(JavaClass javaClass) {
         return javaClass.isEquivalentTo(UUID.class);
+    }
+
+    static boolean isReadOnlyTransaction(JavaMethod method) {
+        if (method.isAnnotatedWith(Query.class)) {
+            return true;
+        }
+        return method.tryGetAnnotationOfType(Transactional.class.getName()) //
+                .flatMap(transactional -> transactional.get("readOnly")) //
+                .map(Boolean.TRUE::equals) //
+                .orElse(false);
     }
 
     static boolean isStatic(JavaMethod method) {

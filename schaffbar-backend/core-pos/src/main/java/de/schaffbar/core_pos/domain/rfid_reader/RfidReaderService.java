@@ -9,12 +9,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
@@ -35,17 +36,20 @@ public class RfidReaderService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<RfidReaderView> getRfidReaders() {
         return this.rfidReaderRepository.findAll().stream() //
                 .map(RfidReaderViews.MAPPER::toRfidReaderView) //
                 .toList();
     }
 
+    @Query
     public Optional<RfidReaderView> getRfidReader(@NotNull @Valid RfidReaderId id) {
         return this.rfidReaderRepository.findById(id.getValue()) //
                 .map(RfidReaderViews.MAPPER::toRfidReaderView);
     }
 
+    @Query
     public Optional<RfidReaderView> getRfidReader(@NotNull @Valid MacAddress macAddress) {
         return this.rfidReaderRepository.findByMacAddress(macAddress.getValue()) //
                 .map(RfidReaderViews.MAPPER::toRfidReaderView);
@@ -54,7 +58,7 @@ public class RfidReaderService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
+    @Command
     public RfidReaderId createRfidReader(@NotNull @Valid MacAddress macAddress) {
         this.rfidReaderRepository.findByMacAddress(macAddress.getValue()) //
                 .ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing));
@@ -70,7 +74,7 @@ public class RfidReaderService {
         return savedRfidReader.getId();
     }
 
-    @Transactional
+    @Command
     public void updateRfidReader(@NotNull @Valid UpdateRfidReaderCommand command) {
         List<SchaffbarEvent> events = this.rfidReaderRepository.findById(command.id().getValue()) //
                 .map(rfidReader -> rfidReader.update(command)) //
@@ -81,7 +85,7 @@ public class RfidReaderService {
         log.info("Updated RFID reader with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
+    @Command
     public void changeRfidReaderType(@NotNull @Valid ChangeRfidReaderTypeCommand command) {
         List<SchaffbarEvent> events = this.rfidReaderRepository.findById(command.id().getValue()) //
                 .map(rfidReader -> rfidReader.changeType(command)) //
@@ -92,7 +96,7 @@ public class RfidReaderService {
         log.info("Updated type of RFID reader with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
+    @Command
     public void deleteRfidReader(@NotNull @Valid RfidReaderId id) {
         RfidReaderView rfidReader = getRfidReader(id) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(id));
