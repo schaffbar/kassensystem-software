@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { errorInterceptor } from './error.interceptor';
@@ -59,6 +59,72 @@ describe('errorInterceptor', () => {
     httpMock.expectOne('/api/tools/tool-1').flush('conflict', { status: 409, statusText: 'Conflict' });
 
     expect(snackBar.open).toHaveBeenCalledWith('shared.errors.saveFailed', 'shared.actions.close', expect.anything());
+  });
+
+  describe('with a problem detail from the backend', () => {
+    beforeEach(() => {
+      const translate = TestBed.inject(TranslateService);
+      translate.setTranslation('de', {
+        shared: {
+          errors: {
+            RFID_READER_HAS_TOOL_ASSIGNED: 'Das Lesegerät ist einem Werkzeug zugewiesen.',
+            RESOURCE_NOT_FOUND: 'Der Eintrag existiert nicht (mehr).',
+          },
+        },
+      });
+      translate.use('de');
+    });
+
+    it('should show the translation of the code', () => {
+      http.delete('/api/rfid-readers/reader-1').subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne('/api/rfid-readers/reader-1')
+        .flush(
+          { status: 409, detail: 'Cannot delete RFID reader …', code: 'RFID_READER_HAS_TOOL_ASSIGNED' },
+          { status: 409, statusText: 'Conflict' },
+        );
+
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Das Lesegerät ist einem Werkzeug zugewiesen.',
+        'shared.actions.close',
+        expect.anything(),
+      );
+    });
+
+    it('should show "not found" for a missing entry when loading', () => {
+      http.get('/api/rfid-readers/reader-1').subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne('/api/rfid-readers/reader-1')
+        .flush({ status: 404, code: 'RESOURCE_NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Der Eintrag existiert nicht (mehr).',
+        'shared.actions.close',
+        expect.anything(),
+      );
+    });
+
+    it('should fall back to "save failed" for a code the portal does not translate yet', () => {
+      http.put('/api/tools/tool-1', {}).subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne('/api/tools/tool-1')
+        .flush({ status: 409, code: 'TOOL_NAME_ALREADY_USED' }, { status: 409, statusText: 'Conflict' });
+
+      expect(snackBar.open).toHaveBeenCalledWith('shared.errors.saveFailed', 'shared.actions.close', expect.anything());
+    });
+
+    it('should ignore a code that is not a problem code', () => {
+      http.put('/api/tools/tool-1', {}).subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne('/api/tools/tool-1')
+        .flush({ status: 409, code: 'actions.close' }, { status: 409, statusText: 'Conflict' });
+
+      expect(snackBar.open).toHaveBeenCalledWith('shared.errors.saveFailed', 'shared.actions.close', expect.anything());
+    });
   });
 
   it('should show "server unreachable" when there is no response', () => {
