@@ -311,6 +311,7 @@ Das bleibt so und kommt so in die Skills:
 | E22 | Testebenen | jede Regel auf der niedrigsten Ebene getestet, die sie vollständig beweist: Value Object/Entity (ohne Mocks), **Service (Mockito für Repository und Outbox, echte Entity und EventFactory)**, Use Case (Mockito), Controller (Standalone-MockMvc), Integration – Akzeptanz (Regel oder Ablauf über alle Schichten) und technisch (Repository, Transaktion, Outbox, Migration), ArchUnit | 15.11.2026: ja |
 | E23 | Integrationstests aufbauen und benennen | Fixture als Test-Bean (`SchaffbarFixture`) mit `given` / Auslöser / `then`, `Scenario` mit Zufallswerten statt Aufräumen, eigene Annotation `@IntegrationTest`; eine Klasse pro Aggregat oder Ablauf (`RfidReaderAcceptanceTest`), eine Methode pro Regel mit ihrer Nummer (`r3_…`) | 15.11.2026: Fixture und `@IntegrationTest` ja, Benennung im Pilot zeigen |
 | E24 | Testcontainers | ein Container `postgres:16.3` für den ganzen Testlauf, Flyway migriert einmal, `@ServiceConnection`; läuft in `mvn test` (kein eigenes Failsafe-Ziel, solange es schnell genug ist) | 15.11.2026: ja |
+| E25 | Value Objects einheitlich | Interface `ValueObject<T>` mit `sameValueAs` als Default-Methode (Typparameter verhindert Vergleiche über Typen hinweg); `random()` nur für UUID-Ids – Werte von Geräten (`MacAddress`, `RfidTagId`, `IpAddress`) erfindet das System nie, Tests nehmen `RandomValues`; Enum für Fehlermeldungen heißt `ValueObjectName`; geprüft von `ValueObjectArchitectureTest` | 15.11.2026: ja |
 
 ## Pilot (K3)
 
