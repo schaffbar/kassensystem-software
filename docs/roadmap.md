@@ -105,6 +105,8 @@ Entscheidung 13.11.2026.
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
    Erklärung im Portal.
+   - [x] `backend-testing` – 16.11.2026: Testebenen, Benennung, Integrationstests mit Testcontainers und
+     `SchaffbarFixture`, Pilot `RfidReaderAcceptanceTest`
 
 Danach A2 mit den Skills – vielleicht als erster Versuch der Pipeline (P).
 
