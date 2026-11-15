@@ -300,7 +300,7 @@ Das bleibt so und kommt so in die Skills:
 | E11 | `CertifyCustomersForTool` | alles oder nichts | 13.11.2026: ja |
 | E12 | Formatregeln an den Commands | ja | 13.11.2026: ja |
 | E13 | ArchUnit im Pilot | ja | 13.11.2026: ja |
-| E14 | Datenbanktests mit Testcontainers | später (nach K) | 13.11.2026: später |
+| E14 | Datenbanktests mit Testcontainers | später (nach K) | 13.11.2026: später – 15.11.2026 geändert: **jetzt, vor dem Rollout** (E22–E24) |
 | E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja |
 | E16 | `rfid_tag_assignment_history` hängt von `rfid_tag_assignment` ab (Typ, View) | Historie ins Paket `rfid_tag_assignment` ziehen | 15.11.2026: beim Rollout von `rfid_tag_assignment` entscheiden |
 | E17 | Abfragen der Controller | eine ReadFacade pro Controller in `read_facade/` neben `use_case/` (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`), `@Transactional(readOnly = true)`, auch wenn sie nur weiterreicht; Controller kennen nur Use Cases und ReadFacades; die Dashboard-Services werden ReadFacades, Controller und API-Modell ziehen nach `dashboard/web/` – in `domain/` liegen nur Aggregate | 15.11.2026: ja |
@@ -308,6 +308,9 @@ Das bleibt so und kommt so in die Skills:
 | E19 | Id des eigenen Aggregats bei einer Änderung | im Command als `id`, Referenzen als `<aggregat>Id` | 15.11.2026: ja |
 | E20 | Namen der Service-Commands | Verb + Aggregat (`pauseToolCertification`, `startToolUsage`) | 15.11.2026: ja |
 | E21 | Lesen und Schreiben im Code kennzeichnen | eigene Annotationen `@Query` (= `@Transactional(readOnly = true)`) und `@Command` (= `@Transactional`) in `shared/cqrs/`; jede öffentliche Methode von Services, Use Cases und Read Facades hat genau eine davon, kein direktes `@Transactional` mehr – Erweiterungen (Timeout, Logging) an einer Stelle | 15.11.2026: ja |
+| E22 | Testebenen | jede Regel auf der niedrigsten Ebene getestet, die sie vollständig beweist: Value Object/Entity (ohne Mocks), **Service (Mockito für Repository und Outbox, echte Entity und EventFactory)**, Use Case (Mockito), Controller (Standalone-MockMvc), Integration – Akzeptanz (Regel oder Ablauf über alle Schichten) und technisch (Repository, Transaktion, Outbox, Migration), ArchUnit | 15.11.2026: ja |
+| E23 | Integrationstests aufbauen und benennen | Fixture als Test-Bean (`SchaffbarFixture`) mit `given` / Auslöser / `then`, `Scenario` mit Zufallswerten statt Aufräumen, eigene Annotation `@IntegrationTest`; eine Klasse pro Aggregat oder Ablauf (`RfidReaderAcceptanceTest`), eine Methode pro Regel mit ihrer Nummer (`r3_…`) | 15.11.2026: Fixture und `@IntegrationTest` ja, Benennung im Pilot zeigen |
+| E24 | Testcontainers | ein Container `postgres:16.3` für den ganzen Testlauf, Flyway migriert einmal, `@ServiceConnection`; läuft in `mvn test` (kein eigenes Failsafe-Ziel, solange es schnell genug ist) | 15.11.2026: ja |
 
 ## Pilot (K3)
 
