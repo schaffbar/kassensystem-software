@@ -303,7 +303,7 @@ Das bleibt so und kommt so in die Skills:
 | E14 | Datenbanktests mit Testcontainers | später (nach K) | 13.11.2026: später |
 | E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja |
 | E16 | `rfid_tag_assignment_history` hängt von `rfid_tag_assignment` ab (Typ, View) | Historie ins Paket `rfid_tag_assignment` ziehen | 15.11.2026: beim Rollout von `rfid_tag_assignment` entscheiden |
-| E17 | Abfragen der Controller | eine ReadFacade pro Ressource (`ToolReadFacade`, …) mit `@Transactional(readOnly = true)`; Controller kennen nur Use Cases und ReadFacades; das Dashboard wird zur ReadFacade | offen |
+| E17 | Abfragen der Controller | eine ReadFacade pro Controller in `read_facade/` neben `use_case/` (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`), `@Transactional(readOnly = true)`, auch wenn sie nur weiterreicht; Controller kennen nur Use Cases und ReadFacades; die Dashboard-Services werden ReadFacades, Controller und API-Modell ziehen nach `dashboard/web/` – in `domain/` liegen nur Aggregate | 15.11.2026: ja |
 | E18 | Value Objects als Feld in Commands und Views | immer `@NotNull @Valid` (optional: nur `@Valid`) | 15.11.2026: ja |
 | E19 | Id des eigenen Aggregats bei einer Änderung | im Command als `id`, Referenzen als `<aggregat>Id` | 15.11.2026: ja |
 | E20 | Namen der Service-Commands | Verb + Aggregat (`pauseToolCertification`, `startToolUsage`) | 15.11.2026: ja |
@@ -311,6 +311,12 @@ Das bleibt so und kommt so in die Skills:
 ## Pilot (K3)
 
 `rfid_reader` mit `RfidReaderCreate`, `-Update`, `-ChangeType`, `-Delete` und `RfidReaderController`: klein, hat
-schon einen Use-Case-Test und eine Exception mit Factories. Im Pilot: `@ControllerAdvice` mit `ProblemDetail` (A1) für
-seine Exceptions, Spring-Transaktionen, Outbox-Komponente, ArchUnit-Grundgerüst, Portal-Interceptor zeigt den
-übersetzten Code. Der `DeviceController` (legt Lesegeräte an) kommt erst im Rollout dran.
+schon einen Use-Case-Test und eine Exception mit Factories.
+
+Schon erledigt (Unterbau): `ApiExceptionHandler` mit `ProblemDetail` (A1), `BusinessRuleViolationException`,
+`OutboxEventStore`, ArchUnit mit Freeze-Store, Spotless, Skill `aggregate`.
+
+Im Pilot noch: die Exceptions von `rfid_reader` mit Basisklasse und Code, Spring-`@Transactional` mit `readOnly`,
+`RfidReaderReadFacade` (E17) samt ArchUnit-Regeln für Read Facades, Controller aufräumen (Rückgabetypen, `@Valid`),
+`MacAddress` prüft das Format, Tests der Use Cases, Portal-Interceptor zeigt den übersetzten Code. Der
+`DeviceController` (legt Lesegeräte an) kommt erst im Rollout dran.
