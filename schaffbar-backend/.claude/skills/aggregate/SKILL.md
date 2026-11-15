@@ -372,10 +372,36 @@ public interface RfidReaderViews {
 
 ## Value objects
 
-Ids and checked values live in `shared/id/` (`CustomerId`, `RfidTagId`, `MacAddress`, `IpAddress`):
-`@Value(staticConstructor = "of")`, the value as `@JsonValue` field, a private `@JsonCreator` constructor that checks
-the value (`ValueObjectAssert`), `random()` for UUID ids. They check themselves when created – a value object that
-exists is valid.
+Ids and checked values live in `shared/id/` (`CustomerId`, `RfidTagId`, `MacAddress`, `IpAddress`), and every class
+there is one:
+
+```java
+@Value(staticConstructor = "of")
+public class ToolId implements ValueObject<ToolId> {
+
+    @JsonValue
+    UUID value;
+
+    @JsonCreator
+    private ToolId(UUID id) {
+        ValueObjectAssert.notNull(id, ValueObjectName.TOOL_ID);
+        this.value = id;
+    }
+
+    public static ToolId random() {
+        return ToolId.of(UUID.randomUUID());
+    }
+
+}
+```
+
+- **`implements ValueObject<Self>`:** `sameValueAs(…)` comes from the interface – never written again; the type
+  parameter makes `toolId.sameValueAs(customerId)` a compile error.
+- **They check themselves when created** in the private `@JsonCreator` constructor (`ValueObjectAssert` with the
+  object's own `ValueObjectName`) – a value object that exists is valid.
+- **`random()` only for UUID ids** – the entity's `of(…)` creates its id with it. A value that comes from a device
+  (`MacAddress`, `RfidTagId`, `IpAddress`) has none: our system never invents one. Tests take random values from
+  `RandomValues` in the test sources.
 
 ## README
 
@@ -388,8 +414,8 @@ an open rule moves it to "Business Rules".
 
 Besides the folder, a new aggregate touches `shared/`, the migrations and the docs – in this order:
 
-1. **Id** in `shared/id/`: `<Aggregate>Id` like `ToolId` (`@Value(staticConstructor = "of")`, `@JsonValue`, private
-   `@JsonCreator` constructor, `random()`, `sameValueAs(…)`), plus its value in `ValueObjectAssert.ValueObject`.
+1. **Id** in `shared/id/`: `<Aggregate>Id` like `ToolId` (section "Value objects"), plus its name in
+   `ValueObjectAssert.ValueObjectName`.
 2. **Converter** in `shared/util/`: `StringTo<ValueObject>Converter implements Converter<String, …>` (`@Component`) for
    every value object used as `@PathVariable` or `@RequestParam` – ids and others (`MacAddress`, `IpAddress`).
 3. **Events** in `shared/event/`: a value in `AggregateType`, the event types in `EventType`, the payload interface
@@ -435,7 +461,7 @@ The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
 ## Tests that enforce it
 
 Most of these rules are checked by the ArchUnit tests in `core-pos/src/test/java/de/schaffbar/core_pos/architecture/`
-(`DomainArchitectureTest`, `DependencyArchitectureTest`, …) – part of `mvn -q test`. Rules with known violations are
+(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`. Rules with known violations are
 frozen: only new violations fail; a fixed one disappears from `archunit_store/` on the next run – keep that change.
 Never add a violation to the store to make a build pass. A rule in this skill and its ArchUnit rule change together.
 
