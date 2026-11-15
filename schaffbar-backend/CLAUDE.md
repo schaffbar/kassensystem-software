@@ -27,11 +27,12 @@ collection in `core-pos/api/`.
 The rules below are the short form; the skills in `.claude/skills/` have all of them, with examples. Load the skill
 before working on its topic.
 
-| Task                                                                                                            | Skill       |
-| --------------------------------------------------------------------------------------------------------------- | ----------- |
-| an aggregate in `domain/<aggregate>/`: entity, commands, events, repository, service, views, where a rule lives | `aggregate` |
+| Task                                                                                                            | Skill             |
+| --------------------------------------------------------------------------------------------------------------- | ----------------- |
+| an aggregate in `domain/<aggregate>/`: entity, commands, events, repository, service, views, where a rule lives | `aggregate`       |
+| tests: which level proves what, naming, service / use case / controller tests, integration fixture, ArchUnit    | `backend-testing` |
 
-Skills for use cases, error handling, the REST API and tests follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
+Skills for use cases, error handling and the REST API follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
 
 ## Architecture
 
@@ -170,18 +171,18 @@ them with `mvn -q spotless:apply`, the rest of the style is not checked.
 
 ## Tests
 
-- JUnit 5, Mockito (`@ExtendWith(MockitoExtension.class)`, `@Mock`, `@InjectMocks`), AssertJ.
-- **A use case** is tested with mocked services: one test per path – allowed, each rejection with its exception, the
-  order of side effects where it matters (`InOrder`) – see `use_case/CustomerDeleteTest.java`.
-- **Entity logic** (billing, state transitions) is tested on the entity without mocks, one class per method:
-  `<Entity>_<Method>Test` (`ToolUsage_GetBillableDurationTest`, `WorkshopSession_CloseTest`).
-- Mockito runs strict: a stub a test does not use fails it – stub per test, not in a shared `@BeforeEach`.
-- Test data for views: `builder/ViewBuilder.java`, records via their Lombok builders.
-- **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`). Rules with known violations are frozen
-  in `core-pos/archunit_store/`: only new violations fail, fixed ones leave the store – keep that change, never add a
-  violation to make the build pass.
-- There are no tests with a Spring context or a database: repository queries, migrations and the mapping are not
-  covered – say so when a change depends on them.
+Skill `backend-testing` has all rules; the short form:
+
+- **Each rule on the lowest level that proves it completely:** value object / entity (no mocks), service (Mockito for
+  repository and outbox, real entity and EventFactory), use case (mocked services, one test per path), controller
+  (standalone MockMvc), integration, ArchUnit.
+- **A rule whose check reads the database** also gets an acceptance test `r<number>_…` in
+  `integration/<Aggregate>AcceptanceTest`: `@IntegrationTest`, `SchaffbarFixture` (`given()` / `api()` / `then()`),
+  random values from `Scenario`, no cleanup. One PostgreSQL container (Testcontainers) for the whole run – `mvn test`
+  needs Docker; the real database is never touched.
+- A rejection is checked with its exception, its `code` and that nothing happened. Mockito runs strict – stub per test.
+- **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`); frozen violations live in
+  `core-pos/archunit_store/` – never add one to make the build pass.
 
 ## Definition of done
 
