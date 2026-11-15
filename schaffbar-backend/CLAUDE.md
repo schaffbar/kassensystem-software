@@ -83,7 +83,7 @@ core_pos/
 
 - One class per action in `use_case/`, named `<Aggregate><Action>` (`RfidReaderChangeType`, `ToolAddInstructors`) –
   also for a plain create, update or delete, so every controller looks the same.
-- `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` with Spring's `@Transactional`.
+- `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` annotated `@Command`.
 - Checks that a referenced aggregate exists (`customerService.getCustomer(id).orElseThrow(() ->
   ResourceNotFoundException.customer(id))`) – for a list all entries before the change –, then the rules with a second
   aggregate, then the service call(s). A batch is all or nothing (E11).
@@ -92,7 +92,7 @@ core_pos/
 
 - One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
   `WorkshopDashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
-  `@Transactional(readOnly = true)`.
+  `@Query` on every public method.
 - Public methods are queries (`get…`) and return views – of one aggregate, or a view of its own that combines several
   (`WorkshopDashboardViews`, next to the facade). It reads services (any number) and never changes anything.
 
@@ -116,8 +116,10 @@ core_pos/
   `private final @NonNull` fields; public methods validate their parameters (`@NotNull @Valid CustomerId customerId`).
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
 - `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`.
-- `@Transactional` is Spring's (`org.springframework.transaction.annotation`), `readOnly = true` on queries (E9) –
-  older code still uses `jakarta.transaction`; change it when you touch the class.
+- **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`, E21): they
+  bring the transaction (`@Query` = `@Transactional(readOnly = true)`, `@Command` = `@Transactional`), so these
+  classes never use `@Transactional` themselves. Spring Data's `@Query` belongs only to repositories. Older code still
+  has `@Transactional` (also jakarta's) – replace it when you touch the class.
 - Comments only for what the code can't say (why, a non-obvious rule); no JavaDoc that repeats a name or signature.
 
 ### Formatting

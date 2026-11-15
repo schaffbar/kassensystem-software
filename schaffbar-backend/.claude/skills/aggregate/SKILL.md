@@ -284,6 +284,7 @@ public class RfidReaderService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public Optional<RfidReaderView> getRfidReader(@NotNull @Valid RfidReaderId id) {
         return this.rfidReaderRepository.findById(id.getValue()) //
                 .map(RfidReaderViews.MAPPER::toRfidReaderView);
@@ -292,7 +293,7 @@ public class RfidReaderService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
+    @Command
     public void changeRfidReaderType(@NotNull @Valid ChangeRfidReaderTypeCommand command) {
         List<SchaffbarEvent> events = this.rfidReaderRepository.findById(command.id().getValue()) //
                 .map(rfidReader -> rfidReader.changeType(command)) //
@@ -313,10 +314,16 @@ public class RfidReaderService {
   `findByCustomerAndToolOrThrow` in `// helper`).
 - **Input is a command or value objects**, never a raw `UUID` or `String`; every object parameter is validated
   (`@NotNull @Valid`, `@NotEmpty` for lists).
-- **Queries** are named `get…` and return views – `Optional<View>`, `List<View>` – or a plain answer (`boolean`,
-  value object). Never an entity, also not inside `Optional` or `List`. They map with `<Aggregate>Views.MAPPER`.
+- **Every public method is `@Query` or `@Command`** (`de.schaffbar.core_pos.shared.cqrs` – not Spring Data's
+  `@Query`). They bring the transaction: `@Query` is `@Transactional(readOnly = true)`, `@Command` is
+  `@Transactional`. A service never uses `@Transactional` itself – what all queries or all commands need is added to
+  the annotation, in one place.
+- **Queries** (`@Query`) are named `get…` (`is…` / `has…` for a yes/no answer) and return views – `Optional<View>`,
+  `List<View>` – or a plain answer (`boolean`, value object), never `void`. Never an entity, also not inside
+  `Optional` or `List`. They map with `<Aggregate>Views.MAPPER`. Called from a use case they join its writing
+  transaction.
 - **Commands** are named verb + aggregate (`createTool`, `changeRfidReaderType`, `pauseToolCertification`),
-  `@Transactional` (Spring's), and return `void` – only a create returns the new id. The flow:
+  `@Command`, and return `void` – only a create returns the new id. The flow:
   - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)`;
   - check the rules that need other rows of the aggregate (uniqueness) – with a private `throw…` helper, no
     `throw new` inside a lambda:
@@ -412,7 +419,8 @@ Besides the folder, a new aggregate touches `shared/`, the migrations and the do
 The rules above are the target. Some code predates them and is fixed aggregate by aggregate (roadmap K4) – **follow
 this skill, not the code next to you.** Known deviations:
 
-- `jakarta.transaction.Transactional` in some services → Spring's; queries get `@Transactional(readOnly = true)` (E9).
+- `@Transactional` (Spring's or jakarta's) instead of `@Query` / `@Command`, queries without any transaction (E9,
+  E21) – only `rfid_reader` is converted.
 - `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
 - Repository default methods with other names (`findByCustomer`, `findActiveByCustomerId`) or missing
   (`ToolCertificationRepository`); services calling the `UUID` variants.
@@ -437,7 +445,7 @@ Never add a violation to the store to make a build pass. A rule in this skill an
 - [ ] Every state change is an entity command returning its events from the EventFactory.
 - [ ] Ids and references are value objects everywhere outside the entity's fields and the repository's derived queries.
 - [ ] Commands and views validated field by field; `@Builder` + `@Validated`.
-- [ ] Service: own repository + `OutboxEventStore` only; queries return views; commands `@Transactional`, save their
+- [ ] Service: own repository + `OutboxEventStore` only; queries `@Query` returning views; commands `@Command`, save their
       events, log them.
 - [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test.
 - [ ] New event: EventType, payload, mapper, factory, README.
