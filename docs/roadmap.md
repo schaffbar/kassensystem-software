@@ -95,9 +95,12 @@ Entscheidung 13.11.2026.
    Exceptions und Fehlerantworten, Transaktionen und Events, Validierung, API-Modelle, Tests) – heute, Vorschlag,
    zu entscheiden.
 2. [x] **Konventionen entscheiden** (13.11.2026) – mit Datum in `backend-consistency.md`.
-3. [ ] **Pilot** an einem kleinen Aggregat (z. B. `rfid_reader`): alles auf den Zielzustand, inklusive Problems API (A1)
-   für seine Exceptions und Tests.
-4. [ ] **Ausrollen** Aggregat für Aggregat.
+3. [x] **Pilot** an `rfid_reader` (15.11.2026): Exceptions mit Basisklasse und Code, `@Query` / `@Command`,
+   `RfidReaderReadFacade`, Controller aufgeräumt (Filter liefert Liste), `MacAddress` prüft das Format, Tests;
+   Unterbau `ApiExceptionHandler`, `OutboxEventStore`, ArchUnit mit Freeze-Store, Spotless, Skill `aggregate`; Portal
+   zeigt den übersetzten Code. Details: `backend-consistency.md`, Abschnitt „Pilot (K3)“.
+4. [ ] **Ausrollen** Aggregat für Aggregat – die Arbeitsliste ist der Freeze-Store `core-pos/archunit_store/`;
+   dazu der `DeviceController` (E4) und das Dashboard als Read Facades (E17).
 5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
@@ -138,15 +141,18 @@ und einen Test schreiben. Bis A1 kommen die Exceptions noch als `500` an.
 
 Vorher klären: C-6 bis C-8 lehnen bestehende Datensätze nicht ab, die die Regel verletzen – nur neue und geänderte.
 
-### A1 – Problems API (wird Teil von K)
+### A1 – Problems API (Teil von K) – Grundlage erledigt
 
-- Backend: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions als `409` / `400` mit
-  verständlichem `detail` statt `500` – alle aus A2 und die vorhandenen (`ToolNameAlreadyUsedException`,
-  `RfidReaderHasToolAssignedException`, `CustomerHasOpenWorkshopSessionException`, …). Meldungen auf Deutsch oder ein
-  stabiler Fehlercode, den das Portal übersetzt – entscheiden.
-- Portal: der Fehler-Interceptor zeigt `detail` (oder den übersetzten Code) statt der allgemeinen Meldung.
-- Danach werden reine Vorab-Prüfungen im Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines
-  Lesegeräts, `canDeleteUser` in der Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
+Erledigt am 15.11.2026 mit dem Pilot (K3):
+
+- Backend: `ApiExceptionHandler` mit `ProblemDetail` (RFC 9457) – `404` / `409` mit stabilem `code`, `400`, `500`
+  ohne Details (E7, E8). Exceptions von `rfid_reader` haben schon eine Basisklasse und einen Code.
+- Portal: der Fehler-Interceptor zeigt die Übersetzung `shared.errors.<CODE>`, sonst die allgemeine Meldung.
+
+Noch offen (im Rollout, K4): die übrigen 25 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
+Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
+Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines Lesegeräts, `canDeleteUser` in der
+Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
 
 ## B – Frontend ohne Backend
 

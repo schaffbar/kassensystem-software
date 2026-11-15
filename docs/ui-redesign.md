@@ -642,7 +642,10 @@ angleichen (TODO „refactor tool instructor“), dann beide zu einer Komponente
 **Backend** parallel, in dieser Reihenfolge:
 
 1. **Problems API** (TODO.md) – ohne verständliche `409`-Meldungen lassen sich gesperrte Aktionen und die neuen Regeln
-   nicht sauber anzeigen.
+   nicht sauber anzeigen. Grundlage erledigt am 15.11.2026 (Roadmap A1): Das Backend schickt bei `404` / `409` einen
+   stabilen `code`, der Fehler-Interceptor zeigt dessen Übersetzung `shared.errors.<CODE>` in der Snackbar, sonst die
+   allgemeine Meldung. Ein Text erklärt, was die Aktion sperrt und was zu tun ist; `detail` (englisch) wird nie
+   gezeigt. Bisher übersetzt: `RESOURCE_NOT_FOUND`, `RFID_READER_HAS_TOOL_ASSIGNED`, `MAC_ADDRESS_ALREADY_USED`.
 2. **Online-Status/Heartbeat** für Lesegeräte – davon hängen Übersicht, Lesegeräte und Werkzeug-Hardware ab.
 3. Die übrigen Punkte aus der [Gesamtliste](#backend-lücken--gesamtliste).
 
