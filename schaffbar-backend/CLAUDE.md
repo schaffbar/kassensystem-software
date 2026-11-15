@@ -69,7 +69,8 @@ core_pos/
   "Open Rules" to "Business Rules" – the same change.
 - **A violated rule throws a dedicated exception** in `shared/exception/` (`CustomerHasOpenWorkshopSessionException`),
   English message with the ids, static factories for variants (`RfidReaderHasToolAssignedException.delete(id)`). It
-  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates) or is a
+  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates: `public static final
+  String CODE`, the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants) or is a
   `ResourceNotFoundException` (→ `404`); `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible
   states (broken data) are an `IllegalStateException` (→ `500`). Many exceptions do not have a base class yet (E8).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`

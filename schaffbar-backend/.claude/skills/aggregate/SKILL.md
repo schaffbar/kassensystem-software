@@ -45,8 +45,30 @@ them, a use case, or in `shared/`.
 | a referenced aggregate exists | a use case, before the change; for a list, all entries first | the customers of a batch certification exist |
 
 A violated rule throws a dedicated exception from `shared/exception/` that extends `BusinessRuleViolationException`
-(→ `409` with a `code` the portal translates) or uses `ResourceNotFoundException` (→ `404`). Every rule gets a row in
-the README.
+(→ `409`) or uses `ResourceNotFoundException` (→ `404`). Every rule gets a row in the README.
+
+```java
+public class MacAddressAlreadyUsedException extends BusinessRuleViolationException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private static final String MESSAGE = "MAC address '%s' is already used by RFID reader [id: %s]";
+
+    public static final String CODE = "MAC_ADDRESS_ALREADY_USED";
+
+    public MacAddressAlreadyUsedException(MacAddress macAddress, RfidReaderId rfidReaderId) {
+        super(CODE, String.format(MESSAGE, macAddress.getValue(), rfidReaderId.getValue()));
+    }
+
+}
+```
+
+- The **message** is English with the ids – for the log, the portal never shows it.
+- The **code** is part of the API: the portal shows its translation (`shared.errors.<CODE>` in `de.json` and
+  `en.json`). `public static final String CODE`, the class name in UPPER_SNAKE_CASE without `Exception`; one code per
+  class – variants from static factories (`RfidReaderHasToolAssignedException.delete(id)`, `.changeType(id)`) share it,
+  so its translation fits all of them. A new or renamed code needs the portal's translation in the same change.
 
 ## Aggregate root
 
