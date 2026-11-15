@@ -49,7 +49,8 @@ class RfidReaderDeleteTest {
         when(this.toolService.getTool(this.rfidReaderId)).thenReturn(Optional.of(mock(ToolView.class)));
 
         assertThatThrownBy(() -> this.rfidReaderDelete.process(this.rfidReaderId)) //
-                .isInstanceOf(RfidReaderHasToolAssignedException.class);
+                .isInstanceOf(RfidReaderHasToolAssignedException.class) //
+                .hasFieldOrPropertyWithValue("code", RfidReaderHasToolAssignedException.CODE);
 
         verify(this.rfidReaderService, never()).deleteRfidReader(any());
     }
