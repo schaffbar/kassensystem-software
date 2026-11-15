@@ -16,7 +16,7 @@ public interface RfidReaderEventPayload extends EventPayload {
 
     record RfidReaderUpdatedPayload( //
             @Valid @NotNull RfidReaderId id, //
-            @NotNull String type, //
+            String type, //
             String name, //
             String socketName //
     ) implements RfidReaderEventPayload {}
