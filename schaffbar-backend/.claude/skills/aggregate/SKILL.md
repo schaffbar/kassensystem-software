@@ -286,7 +286,7 @@ public class RfidReaderService {
 
 - `@Slf4j @Service @Validated @RequiredArgsConstructor`, `public class <Aggregate>Service`. Dependencies are
   `private final @NonNull` fields: **its own repository and the `OutboxEventStore` – never another service or a use
-  case.** (The read models in `domain/dashboard/` are the only services that read other services.)
+  case or a read facade.** Use cases (changes) and read facades (queries) call the services, never the other way round.
 - **Public queries and public commands, everything else `private`** (helpers like `throwMacAddressAlreadyUsedException`,
   `findByCustomerAndToolOrThrow` in `// helper`).
 - **Input is a command or value objects**, never a raw `UUID` or `String`; every object parameter is validated
@@ -397,6 +397,8 @@ this skill, not the code next to you.** Known deviations:
 - Short command names in `ToolCertificationService` (`create`, `pause`), `startUsage`, `enterWorkshop`.
 - Value objects without `@Valid` in commands and views; `RfidTagCommands` with a `String` id.
 - `rfid_tag_assignment_history`: no events, depends on `rfid_tag_assignment` (E16).
+- Controllers read the services directly; `domain/dashboard/` still holds services that read other services – both
+  become read facades (E17).
 
 The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
 

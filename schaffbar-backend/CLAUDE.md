@@ -43,8 +43,10 @@ The structure of an aggregate, the use cases, read models, value objects and eve
 core_pos/
   domain/<aggregate>/   entity (aggregate root), *Commands, *Service, *Repository (package-private), *Views,
                         *EventFactory, *PayloadMapper, enums, README.md, web/ (*Controller, *ApiModel)
-  domain/dashboard/     read models across aggregates (who is in the workshop, which tools run)
-  use_case/             one class per action that touches more than one aggregate (`CustomerDelete`, `CloseSession`)
+  use_case/             one class per change (`RfidReaderCreate`, `CustomerDelete`, `CloseSession`)
+  read_facade/          one class per controller for its queries (`RfidReaderReadFacade`, `WorkshopDashboardReadFacade`)
+  dashboard/web/        controllers of the overview (who is in the workshop, which tools run)
+                        – until the rollout still `domain/dashboard/` with services instead of read facades (E17)
   device/               endpoints the readers and switch boxes call (`/device/init`, `/counter`, `/card`)
   shared/               event + outbox, exceptions, id value objects, billing (`BillableDuration`)
 ```
@@ -53,9 +55,9 @@ core_pos/
 
 - **An aggregate changes only itself.** A service validates, calls the entity's command method and saves the entity
   together with its events. Everything that needs a second aggregate – a check, a cleanup, an orchestration – is a
-  **use case** in `use_case/`; services never call each other – except the read models in `domain/dashboard/`,
-  which only read. **Every change goes through a use case**, also when it only forwards to one service (E2 in
-  `../docs/backend-consistency.md`); a controller reads through the services (ReadFacade: E17, open).
+  **use case** in `use_case/`; services never call each other. **A controller knows only use cases and read
+  facades:** every change goes through a use case, every query through the controller's read facade – also when it
+  only forwards to one service (E2, E17 in `../docs/backend-consistency.md`).
 - **Every state change produces events.** Command methods of the entity return `List<SchaffbarEvent>`, the service
   saves them to the outbox in the same transaction. A new event: `EventType`, payload record in
   `shared/event/payload/`, method in the `*PayloadMapper` and the `*EventFactory`, row in the README's "Domain Events".
@@ -85,10 +87,18 @@ core_pos/
   ResourceNotFoundException.customer(id))`) – for a list all entries before the change –, then the rules with a second
   aggregate, then the service call(s). A batch is all or nothing (E11).
 
+### Read facades (until their skill)
+
+- One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
+  `WorkshopDashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
+  `@Transactional(readOnly = true)`.
+- Public methods are queries (`get…`) and return views – of one aggregate, or a view of its own that combines several
+  (`WorkshopDashboardViews`, next to the facade). It reads services (any number) and never changes anything.
+
 ### Controller and API model (until the skill `rest-api`)
 
 - `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
-  `/api/v1/<aggregate-in-kebab-case>`. Commands call a use case, queries the service.
+  `/api/v1/<aggregate-in-kebab-case>`. Commands call a use case, queries its read facade – never a service.
 - **An endpoint is a query or a command**, never both (no "get or create").
 - `@PathVariable` and `@RequestParam` are value objects (`@PathVariable RfidReaderId rfidReaderId`), never `UUID` or
   `String` converted by hand – each needs its `StringTo<ValueObject>Converter` in `shared/util/`. An optional filter is
