@@ -185,6 +185,21 @@ General:
   `errorInterceptor` shows HTTP errors, `mutation()` keeps the store alive). No `HttpHeaders` / `Content-Type`.
 - No unused methods – an endpoint the portal doesn't call gets no method.
 
+### Errors from the backend
+
+`core/http/error.interceptor.ts` shows every failed request in a snackbar; nothing else in the portal handles HTTP
+errors.
+
+- A rule the backend rejects comes as a problem detail (RFC 9457) with a stable `code`: `409` for a violated rule
+  (`RFID_READER_HAS_TOOL_ASSIGNED`), `404` with `RESOURCE_NOT_FOUND`. The interceptor shows the translation
+  `shared.errors.<CODE>`.
+- **A new code from the backend gets its text in `de.json` and `en.json` in the same change** (backend skill
+  `aggregate`, "Where a rule lives"). The text explains what blocks the action and what to do – it fits every action
+  that can hit it (deleting and changing the type of a reader share one code).
+- Without a code, or for a code without translation, the message depends on the request: `loadFailed` (GET),
+  `saveFailed` (others), `serverUnreachable` (no response).
+- `detail` is English and meant for the log – never shown.
+
 ### Queries → `httpResource` + `parseWith`
 
 - Name: `<entity>Resource` / `<entities>Resource` / `<entities>By<Filter>Resource` with the full entity name
