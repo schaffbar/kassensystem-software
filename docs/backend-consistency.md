@@ -307,6 +307,7 @@ Das bleibt so und kommt so in die Skills:
 | E18 | Value Objects als Feld in Commands und Views | immer `@NotNull @Valid` (optional: nur `@Valid`) | 15.11.2026: ja |
 | E19 | Id des eigenen Aggregats bei einer Änderung | im Command als `id`, Referenzen als `<aggregat>Id` | 15.11.2026: ja |
 | E20 | Namen der Service-Commands | Verb + Aggregat (`pauseToolCertification`, `startToolUsage`) | 15.11.2026: ja |
+| E21 | Lesen und Schreiben im Code kennzeichnen | eigene Annotationen `@Query` (= `@Transactional(readOnly = true)`) und `@Command` (= `@Transactional`) in `shared/cqrs/`; jede öffentliche Methode von Services, Use Cases und Read Facades hat genau eine davon, kein direktes `@Transactional` mehr – Erweiterungen (Timeout, Logging) an einer Stelle | 15.11.2026: ja |
 
 ## Pilot (K3)
 
