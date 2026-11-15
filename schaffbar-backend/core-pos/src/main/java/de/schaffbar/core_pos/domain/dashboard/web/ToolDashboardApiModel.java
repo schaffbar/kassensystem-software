@@ -2,13 +2,14 @@ package de.schaffbar.core_pos.domain.dashboard.web;
 
 import java.util.UUID;
 
-import de.schaffbar.core_pos.domain.dashboard.ToolDashboardViews.ToolDashboardEntryView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.dashboard.ToolDashboardViews.ToolDashboardEntryView;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ToolDashboardApiModel {

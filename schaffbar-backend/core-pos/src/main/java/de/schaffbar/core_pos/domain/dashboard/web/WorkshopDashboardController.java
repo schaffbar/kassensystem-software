@@ -2,8 +2,6 @@ package de.schaffbar.core_pos.domain.dashboard.web;
 
 import java.util.List;
 
-import de.schaffbar.core_pos.domain.dashboard.WorkshopDashboardService;
-import de.schaffbar.core_pos.domain.dashboard.web.WorkshopDashboardApiModel.WorkshopDashboardEntryApiDto;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -12,6 +10,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.schaffbar.core_pos.domain.dashboard.WorkshopDashboardService;
+import de.schaffbar.core_pos.domain.dashboard.web.WorkshopDashboardApiModel.WorkshopDashboardEntryApiDto;
 
 @Validated
 @RestController

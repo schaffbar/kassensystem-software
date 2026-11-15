@@ -1,5 +1,7 @@
 package de.schaffbar.core_pos.shared.web;
 
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,8 +10,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import de.schaffbar.core_pos.shared.exception.BusinessRuleViolationException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Turns exceptions into RFC 9457 problem details. Only {@code 404} and {@code 409} carry a {@code code} – those are
@@ -40,7 +40,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler({ ConstraintViolationException.class, IllegalArgumentException.class })
+    @ExceptionHandler({ConstraintViolationException.class, IllegalArgumentException.class})
     ProblemDetail handleInvalidInput(RuntimeException exception) {
         log.info(exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());

@@ -1,9 +1,10 @@
 package de.schaffbar.core_pos.domain.workshop_usage;
 
-import de.schaffbar.core_pos.shared.event.EventType;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import de.schaffbar.core_pos.shared.event.EventType;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class WorkshopUsageEventFactory {

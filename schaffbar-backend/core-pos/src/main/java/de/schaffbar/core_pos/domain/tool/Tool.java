@@ -9,16 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException;
-import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.IpAddress;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -37,6 +27,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException;
+import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

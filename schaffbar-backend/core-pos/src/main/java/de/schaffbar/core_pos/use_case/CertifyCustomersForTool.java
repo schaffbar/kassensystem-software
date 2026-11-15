@@ -3,16 +3,6 @@ package de.schaffbar.core_pos.use_case;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.schaffbar.core_pos.domain.customer.CustomerService;
-import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
-import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool.ToolService;
-import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult;
-import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult.BatchCertificationError;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +11,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.customer.CustomerService;
+import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult;
+import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult.BatchCertificationError;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
+import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @Slf4j
 @Service

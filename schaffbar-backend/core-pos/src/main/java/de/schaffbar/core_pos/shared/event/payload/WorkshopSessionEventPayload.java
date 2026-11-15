@@ -2,28 +2,29 @@ package de.schaffbar.core_pos.shared.event.payload;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.EventPayload;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 public interface WorkshopSessionEventPayload extends EventPayload {
 
-	record WorkshopSessionStartedPayload( //
-			@Valid @NotNull WorkshopSessionId id, //
-			@Valid @NotNull CustomerId customerId, //
-			@NotNull Instant startTime //
-	) implements WorkshopSessionEventPayload {}
+    record WorkshopSessionStartedPayload( //
+            @Valid @NotNull WorkshopSessionId id, //
+            @Valid @NotNull CustomerId customerId, //
+            @NotNull Instant startTime //
+    ) implements WorkshopSessionEventPayload {}
 
-	record WorkshopSessionClosedPayload( //
-			@Valid @NotNull WorkshopSessionId id, //
-			@Valid @NotNull CustomerId customerId, //
-			@NotNull Instant startTime, //
-			@NotNull Instant closeTime, //
-			@Valid @NotNull BillingTotal workshopTotal, //
-			@Valid @NotNull BillingTotal toolTotal //
-	) implements WorkshopSessionEventPayload {}
+    record WorkshopSessionClosedPayload( //
+            @Valid @NotNull WorkshopSessionId id, //
+            @Valid @NotNull CustomerId customerId, //
+            @NotNull Instant startTime, //
+            @NotNull Instant closeTime, //
+            @Valid @NotNull BillingTotal workshopTotal, //
+            @Valid @NotNull BillingTotal toolTotal //
+    ) implements WorkshopSessionEventPayload {}
 
 }

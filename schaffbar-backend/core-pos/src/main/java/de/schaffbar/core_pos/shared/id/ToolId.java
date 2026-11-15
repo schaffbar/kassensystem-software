@@ -6,8 +6,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
 import lombok.Value;
+
+import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
 
 @Value(staticConstructor = "of")
 public class ToolId {

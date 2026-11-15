@@ -55,6 +55,17 @@ import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 @AnalyzeClasses(packages = ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class DomainArchitectureTest {
 
+    private static final List<String> REQUIRED_BUILDING_BLOCKS = List.of( //
+            "Service", "Repository", "Views", "EventFactory", "PayloadMapper");
+
+    private static final List<String> BUILDING_BLOCKS = List.of( //
+            "Commands", "Service", "Repository", "Views", "EventFactory", "PayloadMapper");
+
+    private static final Set<String> OBJECT_METHODS = Set.of("toString", "equals", "hashCode");
+
+    // ------------------------------------------------------------------------
+    // aggregate package
+
     @ArchTest
     static final ArchRule aggregatesHaveAllBuildingBlocks = freeze(classes() //
             .that(AGGREGATE) //
@@ -69,14 +80,14 @@ class DomainArchitectureTest {
                     DomainArchitectureTest::isAggregatePackageMember)) //
             .because("an agent should not invent a *Helper or *Manager – every kind of class has its place"));
 
+    // ------------------------------------------------------------------------
+    // aggregate
+
     @ArchTest
     static final ArchRule aggregatesAreNotPublic = classes() //
             .that(AGGREGATE) //
             .should().notBePublic() //
             .because("only the own service sees the aggregate – everyone else gets views");
-
-    // ------------------------------------------------------------------------
-    // aggregate package
 
     @ArchTest
     static final ArchRule aggregatesHaveNoPublicConstructor = constructors() //
@@ -89,9 +100,6 @@ class DomainArchitectureTest {
             .that(AGGREGATE) //
             .should(classCondition("have a static factory of(…) returning the aggregate", aggregate -> aggregate.getMethods().stream() //
                     .anyMatch(method -> method.getName().equals("of") && isStatic(method) && method.getRawReturnType().equals(aggregate))));
-
-    // ------------------------------------------------------------------------
-    // aggregate
 
     @ArchTest
     static final ArchRule aggregatesChangeStateOnlyThroughCommands = methods() //
@@ -123,6 +131,9 @@ class DomainArchitectureTest {
             .and().arePublic() //
             .should(methodCondition("return something other than UUID", method -> !isUuid(method.getRawReturnType())));
 
+    // ------------------------------------------------------------------------
+    // commands
+
     @ArchTest
     static final ArchRule commandsArePublicInterfaces = classes() //
             .that().resideInAPackage(DOMAIN) //
@@ -142,9 +153,6 @@ class DomainArchitectureTest {
             .and().haveSimpleNameEndingWith("Command") //
             .should(classCondition("have a builder() (Lombok @Builder)", ArchitectureSupport::hasBuilder));
 
-    // ------------------------------------------------------------------------
-    // commands
-
     @ArchTest
     static final ArchRule commandsAreValidated = classes() //
             .that().resideInAPackage(DOMAIN) //
@@ -156,6 +164,9 @@ class DomainArchitectureTest {
             .that().areDeclaredInClassesThat().resideInAPackage(DOMAIN) //
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("Command") //
             .should().notHaveRawType(UUID.class);
+
+    // ------------------------------------------------------------------------
+    // event factory
 
     @ArchTest
     static final ArchRule eventFactoriesAreFinalAndNotPublic = classes() //
@@ -177,9 +188,6 @@ class DomainArchitectureTest {
             .should().callMethodWhere(DescribedPredicate.describe("a SchaffbarEvent.…Event(…) factory", //
                     call -> call.getTargetOwner().isEquivalentTo(SchaffbarEvent.class) && call.getName().endsWith("Event")));
 
-    // ------------------------------------------------------------------------
-    // event factory
-
     @ArchTest
     static final ArchRule eventFactoryMethodsValidateThePayload = methods() //
             .that().areDeclaredInClassesThat().resideInAPackage(DOMAIN) //
@@ -187,6 +195,9 @@ class DomainArchitectureTest {
             .and().haveRawReturnType(SchaffbarEvent.class) //
             .should(methodCondition("validate the payload and create the event with SchaffbarEvent.…Event(…)",
                     method -> callsPayloadValidate(method) && callsSchaffbarEventFactory(method)));
+
+    // ------------------------------------------------------------------------
+    // payload mapper
 
     @ArchTest
     static final ArchRule payloadMappersArePackagePrivateInterfaces = classes() //
@@ -203,6 +214,9 @@ class DomainArchitectureTest {
             .should(classCondition("be a @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)", DomainArchitectureTest::failsOnUnmappedTargets)) //
             .because("a new field of the aggregate must not get lost in a view or an event");
 
+    // ------------------------------------------------------------------------
+    // repository
+
     @ArchTest
     static final ArchRule repositoriesArePackagePrivateInterfaces = classes() //
             .that().resideInAPackage(DOMAIN) //
@@ -210,9 +224,6 @@ class DomainArchitectureTest {
             .should().beInterfaces() //
             .andShould().notBePublic() //
             .because("only the service of the aggregate reads and writes it");
-
-    // ------------------------------------------------------------------------
-    // payload mapper
 
     @ArchTest
     static final ArchRule repositoryMethodsTakingUuidsHaveAValueObjectVariant = freeze(classes() //
@@ -227,7 +238,7 @@ class DomainArchitectureTest {
             .because("the service works with CustomerId, ToolId, … – the raw UUID stays in the repository"));
 
     // ------------------------------------------------------------------------
-    // repository
+    // service
 
     @ArchTest
     static final ArchRule servicesArePublicAndValidated = classes() //
@@ -248,9 +259,6 @@ class DomainArchitectureTest {
             .and().areNotPublic() //
             .should().bePrivate() //
             .because("a service has public queries and commands, everything else is private");
-
-    // ------------------------------------------------------------------------
-    // service
 
     @ArchTest
     static final ArchRule servicesTakeCommandsOrValueObjects = methods() //
@@ -290,6 +298,9 @@ class DomainArchitectureTest {
             .should(methodCondition("save the events with OutboxEventStore.save(…)", method -> method.getMethodCallsFromSelf().stream() //
                     .anyMatch(call -> call.getTargetOwner().isEquivalentTo(OutboxEventStore.class)))));
 
+    // ------------------------------------------------------------------------
+    // views
+
     @ArchTest
     static final ArchRule viewsArePublicInterfaces = classes() //
             .that().resideInAPackage(DOMAIN) //
@@ -311,9 +322,6 @@ class DomainArchitectureTest {
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("View") //
             .should().notHaveRawType(UUID.class);
 
-    // ------------------------------------------------------------------------
-    // views
-
     @ArchTest
     static final ArchRule viewsMapTheAggregateWithMapStruct = classes() //
             .that().resideInAPackage(DOMAIN) //
@@ -321,14 +329,6 @@ class DomainArchitectureTest {
             .and().haveSimpleNameEndingWith("Views") //
             .should().beAnnotatedWith(Mapper.class) //
             .because("the views interface is the MapStruct mapper from the aggregate to its views");
-
-    private static final List<String> REQUIRED_BUILDING_BLOCKS = List.of( //
-            "Service", "Repository", "Views", "EventFactory", "PayloadMapper");
-
-    private static final List<String> BUILDING_BLOCKS = List.of( //
-            "Commands", "Service", "Repository", "Views", "EventFactory", "PayloadMapper");
-
-    private static final Set<String> OBJECT_METHODS = Set.of("toString", "equals", "hashCode");
 
     // ------------------------------------------------------------------------
     // helper

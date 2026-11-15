@@ -2,13 +2,13 @@ package de.schaffbar.core_pos.shared.event.outbox;
 
 import java.util.List;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor

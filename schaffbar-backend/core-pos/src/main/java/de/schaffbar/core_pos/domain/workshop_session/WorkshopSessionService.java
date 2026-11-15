@@ -3,11 +3,6 @@ package de.schaffbar.core_pos.domain.workshop_session;
 import java.util.List;
 import java.util.Optional;
 
-import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
-import de.schaffbar.core_pos.shared.billing.BillingTotal;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
-import de.schaffbar.core_pos.shared.id.CustomerId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -16,6 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @Slf4j
 @Service
@@ -61,8 +62,7 @@ public class WorkshopSessionService {
         List<SchaffbarEvent> events = session.close(workshopTotal, toolTotal);
         this.outboxEventStore.save(events);
 
-        log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal,
-                toolTotal, events);
+        log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal, toolTotal, events);
     }
 
     // ------------------------------------------------------------------------

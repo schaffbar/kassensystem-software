@@ -3,15 +3,16 @@ package de.schaffbar.core_pos.domain.rfid_tag_assignment.web;
 import java.time.Instant;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface RfidTagAssignmentApiModel {

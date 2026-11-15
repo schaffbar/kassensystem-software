@@ -5,27 +5,6 @@ import static java.util.Objects.nonNull;
 import java.net.URI;
 import java.util.List;
 
-import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolService;
-import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.CreateToolRequestBody;
-import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.InstructorsRequestBody;
-import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.SetWlanRelaisRequestBody;
-import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.ToolApiDto;
-import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.UpdateToolRequestBody;
-import de.schaffbar.core_pos.use_case.ToolAddInstructors;
-import de.schaffbar.core_pos.use_case.ToolAssignRfidReader;
-import de.schaffbar.core_pos.use_case.ToolClearRfidReader;
-import de.schaffbar.core_pos.use_case.ToolClearWlanRelais;
-import de.schaffbar.core_pos.use_case.ToolCreate;
-import de.schaffbar.core_pos.use_case.ToolDelete;
-import de.schaffbar.core_pos.use_case.ToolRemoveInstructors;
-import de.schaffbar.core_pos.use_case.ToolSetWlanRelais;
-import de.schaffbar.core_pos.use_case.ToolUpdate;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -42,6 +21,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.CreateToolRequestBody;
+import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.InstructorsRequestBody;
+import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.SetWlanRelaisRequestBody;
+import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.ToolApiDto;
+import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.UpdateToolRequestBody;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.use_case.ToolAddInstructors;
+import de.schaffbar.core_pos.use_case.ToolAssignRfidReader;
+import de.schaffbar.core_pos.use_case.ToolClearRfidReader;
+import de.schaffbar.core_pos.use_case.ToolClearWlanRelais;
+import de.schaffbar.core_pos.use_case.ToolCreate;
+import de.schaffbar.core_pos.use_case.ToolDelete;
+import de.schaffbar.core_pos.use_case.ToolRemoveInstructors;
+import de.schaffbar.core_pos.use_case.ToolSetWlanRelais;
+import de.schaffbar.core_pos.use_case.ToolUpdate;
 
 @Validated
 @RestController

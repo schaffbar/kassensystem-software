@@ -3,10 +3,6 @@ package de.schaffbar.core_pos.shared.event.outbox;
 import java.time.Instant;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.shared.event.AggregateType;
-import de.schaffbar.core_pos.shared.event.EventType;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent.EventVersion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,6 +16,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.shared.event.AggregateType;
+import de.schaffbar.core_pos.shared.event.EventType;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent.EventVersion;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

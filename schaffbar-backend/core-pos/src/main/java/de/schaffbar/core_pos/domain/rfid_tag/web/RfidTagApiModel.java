@@ -1,13 +1,14 @@
 package de.schaffbar.core_pos.domain.rfid_tag.web;
 
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
-import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
+import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
+import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface RfidTagApiModel extends ValueObjectMapper {

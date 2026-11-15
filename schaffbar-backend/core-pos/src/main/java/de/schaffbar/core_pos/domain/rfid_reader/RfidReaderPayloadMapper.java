@@ -1,11 +1,12 @@
 package de.schaffbar.core_pos.domain.rfid_reader;
 
-import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderCreatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderTypeChangedPayload;
-import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderUpdatedPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderTypeChangedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderUpdatedPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface RfidReaderPayloadMapper {

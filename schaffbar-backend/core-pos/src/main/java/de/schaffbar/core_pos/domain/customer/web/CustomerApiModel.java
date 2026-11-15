@@ -4,13 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
-import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
-import de.schaffbar.core_pos.shared.id.CustomerId;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
@@ -18,6 +11,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
+import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface CustomerApiModel {

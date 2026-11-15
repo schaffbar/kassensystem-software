@@ -3,18 +3,6 @@ package de.schaffbar.core_pos.domain.tool.web;
 import java.util.List;
 import java.util.Set;
 
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.IpAddress;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
-import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
-import de.schaffbar.core_pos.domain.tool.ToolArea;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
-import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,6 +10,19 @@ import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
+import de.schaffbar.core_pos.domain.tool.ToolArea;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ToolApiModel extends ValueObjectMapper {

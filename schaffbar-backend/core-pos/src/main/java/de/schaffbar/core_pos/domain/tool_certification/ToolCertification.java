@@ -6,12 +6,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.exception.InvalidCertificationStateTransitionException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolCertificationId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,6 +18,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.exception.InvalidCertificationStateTransitionException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ToolCertificationId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

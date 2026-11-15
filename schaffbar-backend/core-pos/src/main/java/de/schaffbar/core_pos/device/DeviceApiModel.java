@@ -5,10 +5,11 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
-import de.schaffbar.core_pos.shared.id.RfidTagId;
 import lombok.AccessLevel;
 import lombok.Builder;
+
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 public interface DeviceApiModel {
 

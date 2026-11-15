@@ -3,7 +3,6 @@ package de.schaffbar.core_pos.domain.dashboard.web;
 import java.time.Instant;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.domain.dashboard.WorkshopDashboardViews.WorkshopDashboardEntryView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -11,6 +10,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.dashboard.WorkshopDashboardViews.WorkshopDashboardEntryView;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface WorkshopDashboardApiModel {

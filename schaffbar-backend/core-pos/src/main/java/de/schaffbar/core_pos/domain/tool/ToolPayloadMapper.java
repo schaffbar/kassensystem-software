@@ -1,11 +1,12 @@
 package de.schaffbar.core_pos.domain.tool;
 
-import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolCreatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolUpdatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolWlanRelaisSetPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolUpdatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolWlanRelaisSetPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface ToolPayloadMapper {

@@ -4,19 +4,6 @@ import static java.util.Objects.nonNull;
 
 import java.util.List;
 
-import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolCertificationId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
-import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.BatchCertifyRequestBody;
-import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.ToolCertificationApiDto;
-import de.schaffbar.core_pos.use_case.CertifyCustomersForTool;
-import de.schaffbar.core_pos.use_case.DeleteToolCertification;
-import de.schaffbar.core_pos.use_case.PauseToolCertification;
-import de.schaffbar.core_pos.use_case.ReactivateToolCertification;
-import de.schaffbar.core_pos.use_case.RevokeToolCertification;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -33,6 +20,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
+import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.BatchCertifyRequestBody;
+import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.ToolCertificationApiDto;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ToolCertificationId;
+import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.use_case.CertifyCustomersForTool;
+import de.schaffbar.core_pos.use_case.DeleteToolCertification;
+import de.schaffbar.core_pos.use_case.PauseToolCertification;
+import de.schaffbar.core_pos.use_case.ReactivateToolCertification;
+import de.schaffbar.core_pos.use_case.RevokeToolCertification;
 
 @Validated
 @RestController

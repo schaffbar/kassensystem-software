@@ -1,13 +1,14 @@
 package de.schaffbar.core_pos.domain.tool_certification;
 
-import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationDeletedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationCreatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationPausedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationReactivatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationRevokedPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationDeletedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationPausedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationReactivatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationRevokedPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface ToolCertificationPayloadMapper {

@@ -1,13 +1,14 @@
 package de.schaffbar.core_pos.domain.customer;
 
-import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerAddressChangedPayload;
-import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerContactChangedPayload;
-import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerCreatedPayload;
-import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerUpdatedPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerAddressChangedPayload;
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerContactChangedPayload;
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerUpdatedPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface CustomerPayloadMapper {

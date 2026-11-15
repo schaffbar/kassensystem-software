@@ -1,11 +1,12 @@
 package de.schaffbar.core_pos.domain.rfid_tag;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.payload.RfidTagEventPayload.RfidTagDeletedPayload;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class RfidTagEventFactory {

@@ -1,10 +1,11 @@
 package de.schaffbar.core_pos.domain.workshop_session;
 
-import de.schaffbar.core_pos.shared.event.payload.WorkshopSessionEventPayload.WorkshopSessionClosedPayload;
-import de.schaffbar.core_pos.shared.event.payload.WorkshopSessionEventPayload.WorkshopSessionStartedPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.shared.event.payload.WorkshopSessionEventPayload.WorkshopSessionClosedPayload;
+import de.schaffbar.core_pos.shared.event.payload.WorkshopSessionEventPayload.WorkshopSessionStartedPayload;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 interface WorkshopSessionPayloadMapper {

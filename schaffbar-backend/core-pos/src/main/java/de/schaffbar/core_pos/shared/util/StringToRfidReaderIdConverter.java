@@ -2,9 +2,10 @@ package de.schaffbar.core_pos.shared.util;
 
 import java.util.UUID;
 
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
+
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 @Component
 public class StringToRfidReaderIdConverter implements Converter<String, RfidReaderId> {

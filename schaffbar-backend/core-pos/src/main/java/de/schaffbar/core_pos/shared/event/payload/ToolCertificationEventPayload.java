@@ -2,13 +2,14 @@ package de.schaffbar.core_pos.shared.event.payload;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationStatus;
 import de.schaffbar.core_pos.shared.event.EventPayload;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationStatus;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 public interface ToolCertificationEventPayload extends EventPayload {
 

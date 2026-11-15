@@ -5,20 +5,6 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import java.util.List;
 import java.util.Optional;
 
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
-import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
-import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
-import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.IpAddress;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
-import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
+import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @Slf4j
 @Service

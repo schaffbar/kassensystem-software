@@ -1,13 +1,14 @@
 package de.schaffbar.core_pos.domain.customer;
 
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.domain.ExceptionThrowingTestController;
 import de.schaffbar.core_pos.domain.ExceptionThrowingTestController.TestRuleViolationException;
-import jakarta.servlet.ServletException;
 
 class ApiExceptionHandlerTest {
 

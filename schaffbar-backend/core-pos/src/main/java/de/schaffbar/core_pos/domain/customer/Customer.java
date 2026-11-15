@@ -5,12 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
-import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.id.CustomerId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -22,6 +16,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
+import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

@@ -2,17 +2,18 @@ package de.schaffbar.core_pos.domain.rfid_reader.web;
 
 import java.time.Instant;
 
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface RfidReaderApiModel extends ValueObjectMapper {

@@ -2,6 +2,9 @@ package de.schaffbar.core_pos.domain;
 
 import java.util.Set;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,9 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import de.schaffbar.core_pos.shared.exception.BusinessRuleViolationException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 // lives in domain/ because ApiExceptionHandler only advises the controllers there (see ApiExceptionHandlerTest)
 @RestController
@@ -54,8 +54,7 @@ public class ExceptionThrowingTestController {
     // ------------------------------------------------------------------------
     // helper
 
-    public record TestRequestBody(@NotBlank String name) {
-    }
+    public record TestRequestBody(@NotBlank String name) {}
 
     public static class TestRuleViolationException extends BusinessRuleViolationException {
 

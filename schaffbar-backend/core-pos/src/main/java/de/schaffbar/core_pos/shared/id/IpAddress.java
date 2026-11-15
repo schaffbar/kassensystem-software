@@ -4,8 +4,9 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
 import lombok.Value;
+
+import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
 
 @Value(staticConstructor = "of")
 public class IpAddress {

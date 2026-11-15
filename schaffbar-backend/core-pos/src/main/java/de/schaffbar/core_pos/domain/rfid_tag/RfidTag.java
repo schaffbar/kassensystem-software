@@ -2,8 +2,6 @@ package de.schaffbar.core_pos.domain.rfid_tag;
 
 import java.time.Instant;
 
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
-import de.schaffbar.core_pos.shared.id.RfidTagId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -14,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)

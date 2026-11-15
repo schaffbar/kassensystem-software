@@ -2,6 +2,9 @@ package de.schaffbar.core_pos.domain.tool;
 
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolDeletedPayload;
@@ -13,8 +16,6 @@ import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolWlanRelai
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class ToolEventFactory {
