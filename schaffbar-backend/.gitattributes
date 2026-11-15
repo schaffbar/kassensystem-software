@@ -1,0 +1,2 @@
+# LF in the repository and in every checkout, whatever core.autocrlf says (Spotless checks it for Java)
+* text=auto eol=lf
