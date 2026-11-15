@@ -36,12 +36,13 @@
 
 ## Business Rules / Invariants
 
-| #   | Rule                                                                                             | Enforced in                                                              |
-|-----|--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| R-1 | `macAddress` must be unique across all RFID readers                                              | DB unique constraint, **TODO** in `RfidReaderService.createRfidReader()` |
-| R-2 | `macAddress` must not be blank                                                                   | Bean Validation                                                          |
-| R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it | `ChangeRfidReaderType` use case                                          |
-| R-5 | An RFID reader that is assigned to a tool cannot be deleted                                      | `RfidReaderDelete` use case                                              |
+| #   | Rule                                                                                                     | Enforced in                                                                                            |
+|-----|----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| R-1 | `macAddress` must be unique across all RFID readers                                                      | `RfidReaderService.createRfidReader()` (`MacAddressAlreadyUsedException`, `409`), DB unique constraint |
+| R-2 | `macAddress` must not be blank                                                                           | `MacAddress` value object, Bean Validation                                                             |
+| R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it         | `ChangeRfidReaderType` use case                                                                        |
+| R-5 | An RFID reader that is assigned to a tool cannot be deleted                                              | `RfidReaderDelete` use case                                                                            |
+| R-7 | `macAddress` has the format `34:CD:B0:D3:A9:30` (six hex pairs, colons); lower case is stored upper case | `MacAddress` value object (`400`)                                                                      |
 
 ## Open Rules
 
