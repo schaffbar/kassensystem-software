@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 public final class ThenFixture {
@@ -42,7 +43,7 @@ public final class ThenFixture {
         expectProblem(this.api.getRfidReader(rfidReaderId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
     }
 
-    public void expectRfidReaderCount(String macAddress, int count) {
+    public void expectRfidReaderCount(MacAddress macAddress, int count) {
         MvcTestResult result = this.api.getRfidReaders(macAddress);
 
         assertThat(result).hasStatus(HttpStatus.OK);

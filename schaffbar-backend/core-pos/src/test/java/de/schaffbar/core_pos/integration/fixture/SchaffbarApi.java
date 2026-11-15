@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -27,14 +28,19 @@ public final class SchaffbarApi {
     // ------------------------------------------------------------------------
     // RFID readers
 
-    public MvcTestResult getRfidReaders(String macAddress) {
-        return this.mvc.get().uri("/api/v1/rfid-readers").param("macAddress", macAddress).exchange();
+    public MvcTestResult getRfidReaders(MacAddress macAddress) {
+        return this.mvc.get().uri("/api/v1/rfid-readers").param("macAddress", macAddress.getValue()).exchange();
     }
 
     public MvcTestResult getRfidReader(RfidReaderId rfidReaderId) {
         return this.mvc.get().uri("/api/v1/rfid-readers/{rfidReaderId}", rfidReaderId.getValue()).exchange();
     }
 
+    public MvcTestResult createRfidReader(MacAddress macAddress) {
+        return createRfidReader(macAddress.getValue());
+    }
+
+    // as typed in by hand, also in a format MacAddress does not accept
     public MvcTestResult createRfidReader(String macAddress) {
         return this.mvc.post().uri("/api/v1/rfid-readers") //
                 .contentType(MediaType.APPLICATION_JSON) //

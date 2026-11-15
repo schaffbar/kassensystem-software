@@ -15,43 +15,43 @@ public class ValueObjectAssert {
 
     static final String POSITIVE_ERROR_MESSAGE = "The value of %s must be positive";
 
-    public static void notNull(Object value, ValueObject valueObject) {
+    public static void notNull(Object value, ValueObjectName valueObjectName) {
         if (isNull(value)) {
-            throw new IllegalArgumentException(notNullMessage(valueObject));
+            throw new IllegalArgumentException(notNullMessage(valueObjectName));
         }
     }
 
-    public static void notBlank(String value, ValueObject valueObject) {
+    public static void notBlank(String value, ValueObjectName valueObjectName) {
         if (isBlank(value)) {
-            throw new IllegalArgumentException(notBlankMessage(valueObject));
+            throw new IllegalArgumentException(notBlankMessage(valueObjectName));
         }
     }
 
-    public static void positive(long value, ValueObject valueObject) {
+    public static void positive(long value, ValueObjectName valueObjectName) {
         if (value <= 0) {
-            throw new IllegalArgumentException(positiveMessage(valueObject));
+            throw new IllegalArgumentException(positiveMessage(valueObjectName));
         }
     }
 
-    public static void positive(int value, ValueObject valueObject) {
+    public static void positive(int value, ValueObjectName valueObjectName) {
         if (value <= 0) {
-            throw new IllegalArgumentException(positiveMessage(valueObject));
+            throw new IllegalArgumentException(positiveMessage(valueObjectName));
         }
     }
 
     // ------------------------------------------------------------------------
     // helper
 
-    static String notNullMessage(ValueObject valueObject) {
-        return String.format(NULL_ERROR_MESSAGE, valueObject.getValue());
+    static String notNullMessage(ValueObjectName valueObjectName) {
+        return String.format(NULL_ERROR_MESSAGE, valueObjectName.getValue());
     }
 
-    static String notBlankMessage(ValueObject valueObject) {
-        return String.format(BLANK_ERROR_MESSAGE, valueObject.getValue());
+    static String notBlankMessage(ValueObjectName valueObjectName) {
+        return String.format(BLANK_ERROR_MESSAGE, valueObjectName.getValue());
     }
 
-    static String positiveMessage(ValueObject valueObject) {
-        return String.format(POSITIVE_ERROR_MESSAGE, valueObject.getValue());
+    static String positiveMessage(ValueObjectName valueObjectName) {
+        return String.format(POSITIVE_ERROR_MESSAGE, valueObjectName.getValue());
     }
 
     // ------------------------------------------------------------------------
@@ -59,7 +59,7 @@ public class ValueObjectAssert {
 
     @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public enum ValueObject {
+    public enum ValueObjectName {
 
         CUSTOMER_ID("customer id"), //
         TOOL_ID("tool id"), //
@@ -69,6 +69,8 @@ public class ValueObjectAssert {
         RFID_TAG_ID("rfid tag id"), //
         RFID_TAG_ASSIGNMENT_ID("rfid tag assignment id"), //
         TOOL_CERTIFICATION_ID("tool certification id"), //
+        WORKSHOP_SESSION_ID("workshop session id"), //
+        WORKSHOP_USAGE_ID("workshop usage id"), //
         IP_ADDRESS("ip address");
 
         private final String value;

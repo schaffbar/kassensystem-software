@@ -1,37 +1,27 @@
 package de.schaffbar.core_pos.shared.id;
 
-import static java.util.Objects.isNull;
-
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Value;
 
-import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
+import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObjectName;
 
 @Value(staticConstructor = "of")
-public class RfidReaderId {
+public class RfidReaderId implements ValueObject<RfidReaderId> {
 
     @JsonValue
     UUID value;
 
     @JsonCreator
     private RfidReaderId(UUID id) {
-        ValueObjectAssert.notNull(id, ValueObject.RFID_READER_ID);
+        ValueObjectAssert.notNull(id, ValueObjectName.RFID_READER_ID);
         this.value = id;
     }
 
     public static RfidReaderId random() {
         return new RfidReaderId(UUID.randomUUID());
-    }
-
-    public boolean sameValueAs(RfidReaderId other) {
-        if (isNull(other)) {
-            return false;
-        }
-
-        return this.value.equals(other.value);
     }
 
 }

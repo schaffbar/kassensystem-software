@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
+import de.schaffbar.core_pos.shared.id.ValueObject;
 
 final class ArchitectureSupport {
 
@@ -73,7 +74,15 @@ final class ArchitectureSupport {
     // predicates
 
     static boolean isValueObject(JavaClass javaClass) {
-        return javaClass.getPackageName().equals(ROOT + ".shared.id");
+        return javaClass.isAssignableTo(ValueObject.class);
+    }
+
+    static boolean hasUuidValue(JavaClass javaClass) {
+        return javaClass.tryGetField("value").map(field -> isUuid(field.getRawType())).orElse(false);
+    }
+
+    static boolean hasRandom(JavaClass javaClass) {
+        return javaClass.getMethods().stream().anyMatch(method -> method.getName().equals("random") && isStatic(method) && method.getRawParameterTypes().isEmpty());
     }
 
     static boolean isUuid(JavaClass javaClass) {

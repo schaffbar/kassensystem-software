@@ -1,34 +1,24 @@
 package de.schaffbar.core_pos.shared.id;
 
-import static java.util.Objects.isNull;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Value;
 
-import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObject;
+import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObjectName;
 
 @Value(staticConstructor = "of")
-public class IpAddress {
+public class IpAddress implements ValueObject<IpAddress> {
 
     @JsonValue
     String value;
 
     @JsonCreator
     private IpAddress(String ipAddress) {
-        ValueObjectAssert.notBlank(ipAddress, ValueObject.IP_ADDRESS);
+        ValueObjectAssert.notBlank(ipAddress, ValueObjectName.IP_ADDRESS);
         if (!isValidIpv4(ipAddress)) {
             throw new IllegalArgumentException("Invalid IP address format: " + ipAddress);
         }
         this.value = ipAddress;
-    }
-
-    public boolean sameValueAs(IpAddress other) {
-        if (isNull(other)) {
-            return false;
-        }
-
-        return this.value.equals(other.value);
     }
 
     // ------------------------------------------------------------------------
