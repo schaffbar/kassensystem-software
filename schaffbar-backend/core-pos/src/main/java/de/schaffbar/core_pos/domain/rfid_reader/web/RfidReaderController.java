@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.rfid_reader.web.RfidReaderApiModel.ChangeRfidReaderTypeRequestBody;
 import de.schaffbar.core_pos.domain.rfid_reader.web.RfidReaderApiModel.CreateRfidReaderRequestBody;
 import de.schaffbar.core_pos.domain.rfid_reader.web.RfidReaderApiModel.RfidReaderApiDto;
@@ -58,20 +59,18 @@ public class RfidReaderController {
     // query
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getRfidReaders(@RequestParam(name = "macAddress", required = false) MacAddress macAddress) {
-        if (nonNull(macAddress)) {
-            return getRfidReaderByMacAddress(macAddress);
-        }
+    public ResponseEntity<List<RfidReaderApiDto>> getRfidReaders(@RequestParam(required = false) @Valid MacAddress macAddress) {
+        List<RfidReaderView> rfidReaders = nonNull(macAddress) //
+                ? this.rfidReaderReadFacade.getRfidReader(macAddress).stream().toList() //
+                : this.rfidReaderReadFacade.getRfidReaders();
 
-        List<RfidReaderApiDto> rfidReaders = this.rfidReaderReadFacade.getRfidReaders().stream() //
+        return ResponseEntity.ok(rfidReaders.stream() //
                 .map(RfidReaderApiModel.MAPPER::toRfidReaderApiDto) //
-                .toList();
-
-        return ResponseEntity.ok(rfidReaders);
+                .toList());
     }
 
     @GetMapping(value = "/{rfidReaderId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RfidReaderApiDto> getRfidReader(@PathVariable @NotNull RfidReaderId rfidReaderId) {
+    public ResponseEntity<RfidReaderApiDto> getRfidReader(@PathVariable @NotNull @Valid RfidReaderId rfidReaderId) {
         RfidReaderApiDto rfidReader = this.rfidReaderReadFacade.getRfidReader(rfidReaderId) //
                 .map(RfidReaderApiModel.MAPPER::toRfidReaderApiDto) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(rfidReaderId));
@@ -83,17 +82,16 @@ public class RfidReaderController {
     // command
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createRfidReader(@RequestBody @NotNull @Valid CreateRfidReaderRequestBody requestBody) {
-        MacAddress macAddress = MacAddress.of(requestBody.macAddress());
-        RfidReaderId rfidReaderId = this.rfidReaderCreate.process(macAddress);
+    public ResponseEntity<Void> createRfidReader(@RequestBody @NotNull @Valid CreateRfidReaderRequestBody requestBody) {
+        RfidReaderId rfidReaderId = this.rfidReaderCreate.process(requestBody.macAddress());
         URI location = URI.create("/api/v1/rfid-readers/" + rfidReaderId.getValue());
 
         return ResponseEntity.created(location).build();
     }
 
     @PutMapping(value = "/{rfidReaderId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateRfidReader( //
-            @PathVariable @NotNull RfidReaderId rfidReaderId, //
+    public ResponseEntity<Void> updateRfidReader( //
+            @PathVariable @NotNull @Valid RfidReaderId rfidReaderId, //
             @RequestBody @NotNull @Valid UpdateRfidReaderRequestBody requestBody //
     ) {
         UpdateRfidReaderCommand command = RfidReaderApiModel.MAPPER.toRfidReaderCommand(rfidReaderId, requestBody);
@@ -104,7 +102,7 @@ public class RfidReaderController {
 
     @PatchMapping(value = "/{rfidReaderId}/type", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> changeRfidReaderType( //
-            @PathVariable @NotNull RfidReaderId rfidReaderId, //
+            @PathVariable @NotNull @Valid RfidReaderId rfidReaderId, //
             @RequestBody @NotNull @Valid ChangeRfidReaderTypeRequestBody requestBody //
     ) {
         ChangeRfidReaderTypeCommand command = RfidReaderApiModel.MAPPER.toChangeRfidReaderTypeCommand(rfidReaderId, requestBody);
@@ -114,21 +112,10 @@ public class RfidReaderController {
     }
 
     @DeleteMapping(value = "/{rfidReaderId}")
-    public ResponseEntity<Void> deleteRfidReader(@PathVariable @NotNull RfidReaderId rfidReaderId) {
+    public ResponseEntity<Void> deleteRfidReader(@PathVariable @NotNull @Valid RfidReaderId rfidReaderId) {
         this.rfidReaderDelete.process(rfidReaderId);
 
         return ResponseEntity.noContent().build();
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    private ResponseEntity<RfidReaderApiDto> getRfidReaderByMacAddress(MacAddress macAddress) {
-        RfidReaderApiDto rfidReader = this.rfidReaderReadFacade.getRfidReader(macAddress) //
-                .map(RfidReaderApiModel.MAPPER::toRfidReaderApiDto) //
-                .orElseThrow(() -> ResourceNotFoundException.rfidReader(macAddress));
-
-        return ResponseEntity.ok(rfidReader);
     }
 
 }
