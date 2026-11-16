@@ -106,8 +106,11 @@ Entscheidung 13.11.2026.
    - [x] `rfid_tag` – 16.11.2026: ohne `CreateRfidTagCommand` (E1), `RfidTagReadFacade`, Use Cases `RfidTagCreate` /
      `RfidTagDelete`; RT-3 (zugewiesener Tag nicht löschbar) jetzt im Backend, neu RT-5 (Tag nur einmal registriert);
      Codes `RFID_TAG_ASSIGNED_TO_CUSTOMER`, `RFID_TAG_ALREADY_REGISTERED` im Portal übersetzt; Akzeptanztest
-   - [ ] `rfid_tag_assignment` mit Historie (E16 entscheiden)
-   - [ ] `customer` mit seinen Use Cases (Tags, `CustomerDelete`)
+   - [x] `rfid_tag_assignment` mit Historie – 16.11.2026: Historie als innere Entity (E16), jede Änderung mit Event
+     (E26, `RFID_TAG_UNASSIGNED` trägt den Historien-Eintrag); fünf Exceptions mit Code statt `RuntimeException`, TA-4
+     in der Entity; Read Facades für Zuweisungen und Historie; die drei Tag-Use-Cases von `customer` gleich mit;
+     Befehle antworten `204`; Akzeptanztest
+   - [ ] `customer` mit seinen Use Cases (`CustomerDelete`, Anlegen, Bearbeiten)
    - [ ] `tool` (ggf. in zwei Commits: Aggregat und Service, dann Use Cases)
    - [ ] `tool_certification` (Use Cases umbenennen: `ToolCertificationPause` …)
    - [ ] Werkstattablauf: `workshop_usage` + `workshop_session` (`EnterWorkshop`, `LeaveWorkshop`, `CloseSession`),

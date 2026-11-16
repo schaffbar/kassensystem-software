@@ -123,11 +123,10 @@ inside its package. This keeps the documentation close to the code it describes.
 | 3.3  | RfidReader               | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                                 |
 | 3.4  | RfidTag                  | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                                       |
 | 3.5  | RfidTagAssignment        | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md)                 |
-| 3.6  | RfidTagAssignmentHistory | `de.schaffbar.core_pos.domain.rfid_tag_assignment_history` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment_history/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment_history/README.md) |
-| 3.7  | WorkshopSession          | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)                       |
-| 3.8  | WorkshopUsage            | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)                           |
-| 3.9  | ToolUsage                | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                                   |
-| 3.10 | ToolCertification        | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)                   |
+| 3.6  | WorkshopSession          | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)                       |
+| 3.7  | WorkshopUsage            | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)                           |
+| 3.8  | ToolUsage                | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                                   |
+| 3.9  | ToolCertification        | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)                   |
 
 ---
 
@@ -153,7 +152,7 @@ The table shows the main ones – the full list is the package `use_case/` (one 
 | `DeleteToolCertification`          | Deletes an erroneously created tool certification.                                                                                                                             | ToolCertification                                                  |
 | `CustomerRequestRfidTagAssignment` | Initiates RFID tag assignment process for a customer.                                                                                                                          | Customer, RfidTagAssignment                                        |
 | `CustomerAssignRfidTag`            | Completes RFID tag assignment by linking tag to pending assignment.                                                                                                            | RfidTag, RfidTagAssignment                                         |
-| `CustomerUnassignRfidTag`          | Removes RFID tag from customer, moves record to history.                                                                                                                       | Customer, RfidTagAssignment, RfidTagAssignmentHistory              |
+| `CustomerUnassignRfidTag`          | Removes RFID tag from customer, moves record to history.                                                                                                                       | Customer, RfidTagAssignment                             |
 | `ToolCreate`                       | Creates a tool with optional RFID reader validation (must be SWITCH_BOX).                                                                                                      | RfidReader, Tool                                                   |
 | `ToolAssignRfidReader`             | Assigns an RFID reader to a tool (reader must be SWITCH_BOX).                                                                                                                  | RfidReader, Tool                                                   |
 | `RfidReaderChangeType`             | Changes the type of an RFID reader. If current type is SWITCH_BOX and a tool is assigned → error.                                                                              | RfidReader, Tool                                                   |
@@ -241,10 +240,8 @@ EventFactory.someEvent(aggregate)
 
 | Location                            | Description                                                                                                |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `RfidTagAssignment.assignRfidTag()` | Validate that assignment is in `WAITING_FOR_ASSIGNMENT` state                                              |
 | `EnterWorkshop.process()`           | ~~Check if customer has a valid certificate to enter~~ — resolved via `StartToolUsage` certification check |
 | `WorkshopUsage`                     | Consider renaming to `WorkshopSlot` or `UsageSlot`                                                         |
-| `RfidTagAssignmentHistory`          | Consider renaming ID type to `RfidTagAssignmentHistoryId`                                                  |
 | `*Service.saveOutboxEvents()`       | DRY — method is duplicated in all services, extract to base class or utility                               |
 | `WorkshopSessionService`            | Naming inconsistency — use either "active" or "open" session consistently                                  |
 | `EventType`                         | Consider renaming `WORKSHOP_USAGE_ENTERED` / `LEFT` to `WORKSHOP_ENTERED` / `EXITED`                       |
