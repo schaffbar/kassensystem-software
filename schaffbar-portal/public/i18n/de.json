@@ -15,7 +15,12 @@
       "RFID_READER_HAS_TOOL_ASSIGNED": "Das Lesegerät ist einem Werkzeug als Schaltbox zugewiesen – zuerst die Schaltbox vom Werkzeug trennen.",
       "MAC_ADDRESS_ALREADY_USED": "Die MAC-Adresse gehört schon zu einem anderen Lesegerät.",
       "RFID_TAG_ALREADY_REGISTERED": "Der RFID-Tag ist schon registriert.",
-      "RFID_TAG_ASSIGNED_TO_CUSTOMER": "Der RFID-Tag ist einer Person zugewiesen – zuerst die Zuweisung aufheben."
+      "RFID_TAG_ASSIGNED_TO_CUSTOMER": "Der RFID-Tag ist einer Person zugewiesen – zuerst die Zuweisung aufheben.",
+      "CUSTOMER_HAS_RFID_TAG_ASSIGNMENT": "Die Person hat schon einen RFID-Tag oder wartet auf einen.",
+      "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Eine andere Person wartet noch auf ihren Tag – zuerst deren Tag an das Lesegerät an der Theke halten.",
+      "RFID_TAG_ALREADY_ASSIGNED": "Der RFID-Tag ist schon einer anderen Person zugewiesen.",
+      "NO_RFID_TAG_ASSIGNMENT_WAITING": "Niemand wartet auf einen Tag.",
+      "NO_RFID_TAG_ASSIGNED": "Der Person ist kein RFID-Tag zugewiesen."
     },
     "actions": {
       "close": "Schließen",
