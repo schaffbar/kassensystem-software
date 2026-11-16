@@ -1,39 +1,56 @@
 package de.schaffbar.core_pos.shared.id;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+// fixed values on purpose: the formats are what this test is about
 class MacAddressTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "34:CD:B0:D3:8F:0C", "34:CD:B0:D3:A9:30", "34:CD:B0:D3:95:C0", "34:CD:B0:D3:7F:74" })
-    void of_readerAddress_isKept(String macAddress) {
-        assertThat(MacAddress.of(macAddress).getValue()).isEqualTo(macAddress);
+    void of_readerAddress_isKept(String readerAddress) {
+        // when
+        MacAddress macAddress = MacAddress.of(readerAddress);
+
+        // then
+        assertThat(macAddress.getValue()).isEqualTo(readerAddress);
     }
 
     @Test
     void of_lowerCase_isStoredUpperCase() {
-        assertThat(MacAddress.of("34:cd:b0:d3:a9:30")).isEqualTo(MacAddress.of("34:CD:B0:D3:A9:30"));
+        // when
+        MacAddress macAddress = MacAddress.of("34:cd:b0:d3:a9:30");
+
+        // then
+        assertThat(macAddress).isEqualTo(MacAddress.of("34:CD:B0:D3:A9:30"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "34-CD-B0-D3-A9-30", "34CDB0D3A930", "34:CD:B0:D3:A9", "34:CD:B0:D3:A9:30:11", "34:CD:B0:D3:A9:3G", " 34:CD:B0:D3:A9:30" })
-    void of_otherFormat_isRejected(String macAddress) {
-        assertThatThrownBy(() -> MacAddress.of(macAddress)) //
+    void of_otherFormat_isRejected(String otherFormat) {
+        // when
+        Throwable thrown = catchThrowable(() -> MacAddress.of(otherFormat));
+
+        // then
+        assertThat(thrown) //
                 .isInstanceOf(IllegalArgumentException.class) //
-                .hasMessageContaining(macAddress);
+                .hasMessageContaining(otherFormat);
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { "   " })
-    void of_blank_isRejected(String macAddress) {
-        assertThatThrownBy(() -> MacAddress.of(macAddress)).isInstanceOf(IllegalArgumentException.class);
+    void of_blank_isRejected(String blank) {
+        // when
+        Throwable thrown = catchThrowable(() -> MacAddress.of(blank));
+
+        // then
+        assertThat(thrown).isInstanceOf(IllegalArgumentException.class);
     }
 
 }

@@ -11,24 +11,31 @@ class BillingTotalTest {
 
     @Test
     void isZeroWithoutUsages() {
-        assertThat(BillingTotal.of(List.of())).isEqualTo(BillingTotal.ZERO);
+        // when
+        BillingTotal actual = BillingTotal.of(List.of());
+
+        // then
+        assertThat(actual).isEqualTo(BillingTotal.ZERO);
     }
 
     @Test
     void sumsTheRoundedValuesOfEachUsage() {
-        // 7 min (2 units) + 31 min (6 units)
+        // given – 7 min (2 units) + 31 min (6 units)
         List<BillableDuration> durations = List.of( //
                 BillableDuration.of(Duration.ofMinutes(6).plusSeconds(1)), //
                 BillableDuration.of(Duration.ofMinutes(30).plusSeconds(10)) //
         );
 
-        assertThat(BillingTotal.of(durations)).isEqualTo(new BillingTotal(38, 8));
+        // when
+        BillingTotal actual = BillingTotal.of(durations);
+
+        // then
+        assertThat(actual).isEqualTo(new BillingTotal(38, 8));
     }
 
     @Test
     void roundsEveryUsageOnItsOwn() {
-        // given
-        // 3 × 1 s: each counts as 1 min and 1 unit – rounding the summed up 3 s once would give 1 min and 1 unit
+        // given – 3 × 1 s: each counts as 1 min and 1 unit; rounding the summed up 3 s once would give 1 min and 1 unit
         BillableDuration oneSecond = BillableDuration.of(Duration.ofSeconds(1));
 
         // when

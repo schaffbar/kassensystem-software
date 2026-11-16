@@ -16,8 +16,10 @@ class QueryAndCommandTest {
 
     @Test
     void query_isAReadOnlyTransaction() throws Exception {
+        // when
         TransactionAttribute attribute = transactionAttributeOf("query");
 
+        // then
         assertThat(attribute).isNotNull();
         assertThat(attribute.isReadOnly()).isTrue();
         assertThat(attribute.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -25,8 +27,10 @@ class QueryAndCommandTest {
 
     @Test
     void command_isAWritingTransaction() throws Exception {
+        // when
         TransactionAttribute attribute = transactionAttributeOf("command");
 
+        // then
         assertThat(attribute).isNotNull();
         assertThat(attribute.isReadOnly()).isFalse();
         assertThat(attribute.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRED);

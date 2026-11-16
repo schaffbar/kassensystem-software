@@ -1,7 +1,7 @@
 package de.schaffbar.core_pos.shared.billing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,9 +26,12 @@ class BillableDurationTest {
     })
     void roundsUpToFullMinutes(long seconds, long expectedMinutes) {
         // given
-        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(seconds));
+        Duration duration = Duration.ofSeconds(seconds);
 
-        // when / then
+        // when
+        BillableDuration billableDuration = BillableDuration.of(duration);
+
+        // then
         assertThat(billableDuration.getMinutes()).isEqualTo(expectedMinutes);
     }
 
@@ -45,18 +48,24 @@ class BillableDurationTest {
     })
     void countsOneUnitPerStartedSixMinutes(long seconds, long expectedUnits) {
         // given
-        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(seconds));
+        Duration duration = Duration.ofSeconds(seconds);
 
-        // when / then
+        // when
+        BillableDuration billableDuration = BillableDuration.of(duration);
+
+        // then
         assertThat(billableDuration.getUnits()).isEqualTo(expectedUnits);
     }
 
     @Test
     void ignoresFractionsOfASecond() {
         // given
-        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(60, 999_999_999));
+        Duration duration = Duration.ofSeconds(60, 999_999_999);
 
-        // when / then
+        // when
+        BillableDuration billableDuration = BillableDuration.of(duration);
+
+        // then
         assertThat(billableDuration.getMinutes()).isEqualTo(1);
     }
 
@@ -76,14 +85,23 @@ class BillableDurationTest {
 
     @Test
     void rejectsNegativeDuration() {
-        assertThatThrownBy(() -> BillableDuration.of(Duration.ofSeconds(-1))) //
-                .isInstanceOf(IllegalArgumentException.class);
+        // given
+        Duration negative = Duration.ofSeconds(-1);
+
+        // when
+        Throwable thrown = catchThrowable(() -> BillableDuration.of(negative));
+
+        // then
+        assertThat(thrown).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void rejectsNull() {
-        assertThatThrownBy(() -> BillableDuration.of(null)) //
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        Throwable thrown = catchThrowable(() -> BillableDuration.of(null));
+
+        // then
+        assertThat(thrown).isInstanceOf(IllegalArgumentException.class);
     }
 
 }

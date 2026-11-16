@@ -1,12 +1,14 @@
 package de.schaffbar.core_pos.domain;
 
 import java.util.Set;
+import java.util.UUID;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,11 +25,9 @@ import de.schaffbar.core_pos.shared.id.RfidReaderId;
 @RequestMapping("/test")
 public class ExceptionThrowingTestController {
 
-    public static final RfidReaderId RFID_READER_ID = RfidReaderId.random();
-
-    @GetMapping("/not-found")
-    void notFound() {
-        throw ResourceNotFoundException.rfidReader(RFID_READER_ID);
+    @GetMapping("/not-found/{rfidReaderId}")
+    void notFound(@PathVariable UUID rfidReaderId) {
+        throw ResourceNotFoundException.rfidReader(RfidReaderId.of(rfidReaderId));
     }
 
     @GetMapping("/rule-violation")

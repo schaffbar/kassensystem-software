@@ -1,7 +1,7 @@
 package de.schaffbar.core_pos.shared.web;
 
-import static de.schaffbar.core_pos.domain.ExceptionThrowingTestController.RFID_READER_ID;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,12 +14,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.domain.ExceptionThrowingTestController;
 import de.schaffbar.core_pos.domain.ExceptionThrowingTestController.TestRuleViolationException;
+import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 class ApiExceptionHandlerTest {
 
@@ -35,18 +37,27 @@ class ApiExceptionHandlerTest {
 
     @Test
     void resourceNotFound_is404WithCodeAndResource() throws Exception {
-        this.mockMvc.perform(get("/test/not-found")) //
-                .andExpect(status().isNotFound()) //
+        // given
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+
+        // when
+        ResultActions result = this.mockMvc.perform(get("/test/not-found/" + rfidReaderId.getValue()));
+
+        // then
+        result.andExpect(status().isNotFound()) //
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON)) //
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
                 .andExpect(jsonPath("$.resource").value("RFID_READER")) //
-                .andExpect(jsonPath("$.detail").value(containsString(RFID_READER_ID.getValue().toString())));
+                .andExpect(jsonPath("$.detail").value(containsString(rfidReaderId.getValue().toString())));
     }
 
     @Test
     void businessRuleViolation_is409WithCodeOfTheException() throws Exception {
-        this.mockMvc.perform(get("/test/rule-violation")) //
-                .andExpect(status().isConflict()) //
+        // when
+        ResultActions result = this.mockMvc.perform(get("/test/rule-violation"));
+
+        // then
+        result.andExpect(status().isConflict()) //
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON)) //
                 .andExpect(jsonPath("$.code").value(TestRuleViolationException.CODE)) //
                 .andExpect(jsonPath("$.detail").value("Test rule violated"));
@@ -54,37 +65,53 @@ class ApiExceptionHandlerTest {
 
     @Test
     void constraintViolation_is400WithoutCode() throws Exception {
-        this.mockMvc.perform(get("/test/constraint-violation")) //
-                .andExpect(status().isBadRequest()) //
+        // when
+        ResultActions result = this.mockMvc.perform(get("/test/constraint-violation"));
+
+        // then
+        result.andExpect(status().isBadRequest()) //
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON)) //
                 .andExpect(jsonPath("$.code").doesNotExist());
     }
 
     @Test
     void illegalArgument_is400() throws Exception {
-        this.mockMvc.perform(get("/test/illegal-argument")) //
-                .andExpect(status().isBadRequest()) //
+        // when
+        ResultActions result = this.mockMvc.perform(get("/test/illegal-argument"));
+
+        // then
+        result.andExpect(status().isBadRequest()) //
                 .andExpect(jsonPath("$.detail").value("Invalid MAC address"));
     }
 
     @Test
     void invalidRequestBody_is400ProblemDetail() throws Exception {
-        this.mockMvc.perform(post("/test/body").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"\"}")) //
-                .andExpect(status().isBadRequest()) //
+        // when
+        ResultActions result = this.mockMvc.perform(post("/test/body").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"\"}"));
+
+        // then
+        result.andExpect(status().isBadRequest()) //
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
 
     @Test
     void unexpectedException_is500WithoutDetailsOfTheException() throws Exception {
-        this.mockMvc.perform(get("/test/unexpected")) //
-                .andExpect(status().isInternalServerError()) //
+        // when
+        ResultActions result = this.mockMvc.perform(get("/test/unexpected"));
+
+        // then
+        result.andExpect(status().isInternalServerError()) //
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON)) //
                 .andExpect(jsonPath("$.detail").value("Unexpected error"));
     }
 
     @Test
     void controllerOutsideDomain_isNotAdvised() {
-        assertThatThrownBy(() -> this.mockMvc.perform(get("/outside"))) //
+        // when
+        Throwable thrown = catchThrowable(() -> this.mockMvc.perform(get("/outside")));
+
+        // then
+        assertThat(thrown) //
                 .isInstanceOf(ServletException.class) //
                 .hasCauseInstanceOf(TestRuleViolationException.class);
     }
