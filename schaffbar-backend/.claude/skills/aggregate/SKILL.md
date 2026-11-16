@@ -1,6 +1,6 @@
 ---
 name: aggregate
-description: How an aggregate of the core-pos backend (Spring Boot, JPA, MapStruct, Lombok) is built in `domain/<aggregate>/` – the aggregate root entity, *Commands, *EventFactory, *PayloadMapper, *Repository, *Service and *Views, which rule lives where (entity, service or use case), domain events and the outbox, value objects, the aggregate README, and the ArchUnit tests that enforce part of it. Use when adding or changing an aggregate, an entity, a command, a domain event, a repository query, a service method or a view, when adding a business rule to the domain, or when reviewing any of these or an ArchUnit failure in DomainArchitectureTest.
+description: How an aggregate of the core-pos backend (Spring Boot, JPA, MapStruct, Lombok) is built in `domain/<aggregate>/` – the aggregate root entity and inner entities, *Commands, *EventFactory, *PayloadMapper, *Repository, *Service and *Views, which rule lives where (entity, service or use case), domain events and the outbox, value objects, the aggregate README, and the ArchUnit tests that enforce part of it. Use when adding or changing an aggregate, an entity, a command, a domain event, a repository query, a service method or a view, when adding a business rule to the domain, or when reviewing any of these or an ArchUnit failure in DomainArchitectureTest.
 ---
 
 # Aggregates in core-pos
@@ -26,6 +26,7 @@ domain/<aggregate>/
   <Aggregate>Repository.java       Spring Data repository                       always
   <Aggregate>Service.java          queries and commands of the aggregate        always
   <Aggregate>Views.java            view records + entity → view (MapStruct)     always
+  <Inner>.java + <Inner>Repository  inner entity (@Entity) with its repository   optional
   <Enum>.java, @Embeddable          types of the aggregate (RfidReaderType, CustomerAddress)
   README.md                        attributes, rules, events
   web/                             controller + API model, only when the portal calls it
@@ -146,8 +147,30 @@ class RfidReader {
   setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
   checks the rules that need only the aggregate's own state and throws their exception
   (`ToolCertification.pause()`).
+- **A command is named after the change, without the aggregate's name:** a change of the aggregate itself is the
+  verb alone (`session.close()`, `certification.pause()`, `assignment.cancel()`); a change concerning something else
+  names it, and opposite changes are named as a pair (`tool.assignRfidReader()` / `clearRfidReader()`,
+  `assignment.assignRfidTag()` / `unassignRfidTag()`). Never `certification.pauseCertification()`.
 - Null checks with `nonNull(…)` / `isNull(…)` (static import from `java.util.Objects`), not `!= null` / `== null`.
 - Sections `// static constructor`, `// query`, `// command`, `// helper`.
+
+## Inner entity
+
+The aggregate root is the entity **named after its package** (`rfid_tag_assignment` → `RfidTagAssignment`). Another
+entity in the package is an **inner entity**: it belongs to the aggregate and changes only together with it –
+`RfidTagAssignmentHistory`, the entry an unassignment leaves behind (E16 in `docs/backend-consistency.md`).
+
+- Package-private like the root, created by a **package-private** `static of(…)` that the service calls, private
+  setters; it has its own package-private `<Inner>Repository`, but **no service, views, commands, event factory or
+  payload mapper** of its own – the aggregate's building blocks cover it (its view is a record in `<Aggregate>Views`).
+- **Its change is a change of the aggregate:** the service writes it in the same command, and the aggregate's event
+  describes it. `unassignRfidTag` creates the history entry with `RfidTagAssignmentHistory.of(assignment)`, passes it
+  to the entity's command `assignment.unassignRfidTag(historyEntry)`, saves it and deletes the assignment;
+  `RFID_TAG_UNASSIGNED` carries the whole history entry. One change, one event – never a second event for the inner
+  entity.
+- Its id stays inside (`UUID`, no value object) – nobody outside refers to it.
+- Use it only when the rows exist because of the aggregate and are never changed alone. Something with its own
+  lifecycle is an aggregate.
 
 ## Commands
 
@@ -330,7 +353,9 @@ public class RfidReaderService {
     `findByMacAddress(…).ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing))`;
   - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete:
     `deleteById` + the deleted event);
-  - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all;
+  - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all. **Every
+    database change produces an event** – a create, an update, a delete, the write of an inner entity; a command that
+    changes rows without an event is a bug;
   - `log.info("<What happened> … and published events {}", id, events)`.
 - A loaded entity needs no `save` after a command – JPA writes the change at commit.
 
@@ -446,14 +471,13 @@ The rules above are the target. Some code predates them and is fixed aggregate b
 this skill, not the code next to you.** Known deviations:
 
 - `@Transactional` (Spring's or jakarta's) instead of `@Query` / `@Command`, queries without any transaction (E9,
-  E21) – only `rfid_reader` is converted.
+  E21) – `rfid_reader`, `rfid_tag` and `rfid_tag_assignment` are converted.
 - `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
-- Repository default methods with other names (`findByCustomer`, `findActiveByCustomerId`) or missing
+- Repository default methods with other names (`findActiveByCustomerId`) or missing
   (`ToolCertificationRepository`); services calling the `UUID` variants.
 - Short command names in `ToolCertificationService` (`create`, `pause`), `startUsage`, `enterWorkshop`.
-- Value objects without `@Valid` in commands and views; `RfidTagCommands` with a `String` id.
-- `rfid_tag_assignment_history`: no events, depends on `rfid_tag_assignment` (E16).
-- Controllers read the services directly; `domain/dashboard/` still holds services that read other services – both
+- Value objects without `@Valid` in commands and views.
+- Controllers of the not yet converted aggregates read the services directly; `domain/dashboard/` still holds services that read other services – both
   become read facades (E17).
 
 The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
@@ -468,7 +492,8 @@ Never add a violation to the store to make a build pass. A rule in this skill an
 ## Checklist
 
 - [ ] Only the known building blocks in the folder; entity package-private, created by `of(…)`.
-- [ ] Every state change is an entity command returning its events from the EventFactory.
+- [ ] Every state change is an entity command returning its events from the EventFactory; every database change has
+      its event, an inner entity's change is in the aggregate's event.
 - [ ] Ids and references are value objects everywhere outside the entity's fields and the repository's derived queries.
 - [ ] Commands and views validated field by field; `@Builder` + `@Validated`.
 - [ ] Service: own repository + `OutboxEventStore` only; queries `@Query` returning views; commands `@Command`, save their

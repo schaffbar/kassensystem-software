@@ -34,6 +34,9 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
   the service and controller tests cover it.
 - **A new endpoint or a changed `*ApiModel`** gets controller tests: status, the JSON fields the portal reads, the
   problem code of each rejection.
+- **Every entity command and `of(…)`** gets entity tests: the success (new state, the returned event with its payload)
+  and every rejection – also an inner entity's `of(…)`. That the service test runs the same code with the real entity
+  does not replace them.
 - **A new service method** gets a service test when it does more than load, call the entity and save: a rule, a
   lookup, a cleanup – and always the event it saves.
 - **A bug** gets a test that fails without the fix, on the level where the bug was – named after the behaviour, not
@@ -137,8 +140,10 @@ void createRfidReader_rejectsAUsedMacAddress() {
 No mocks, no Spring. A value object test covers the accepted formats (with real values from the devices), the
 normalisation (`of_lowerCase_isStoredUpperCase`) and every rejection with `IllegalArgumentException`.
 
-An entity test creates the entity with `of(…)` and its commands – never with setters – and checks the new state and
-the returned events (type and payload):
+An entity test creates the entity with `of(…)` and its commands – never with setters. Per command (and for `of(…)`)
+one test for the success – the new state and the returned events (type, aggregate id and payload) – and one per
+rejection (`IllegalStateException` or the rule's exception); sections per method, an `expectSingleEvent(…)` helper
+under `// then` – see `domain/rfid_tag_assignment/RfidTagAssignmentTest`:
 
 ```java
 SchaffbarEvent event = session.close(workshopTotal, toolTotal).getFirst();
@@ -189,8 +194,9 @@ class RfidReaderServiceTest {
 }
 ```
 
-- Per command: the success path (state of the entity, the one event in the outbox) and every rejection (unknown id →
-  `ResourceNotFoundException`, a rule → its exception), each without an outbox call.
+- Per command: the success path (what the service does: saved, deleted, the one event in the outbox with its type) and
+  every rejection (unknown id → `ResourceNotFoundException`, a rule → its exception), each without an outbox call. The
+  payload is checked in the entity test, not again here.
 - A save is stubbed only where the service uses its result (`givenSaveReturnsTheReader()`: `save(any())` →
   `invocation.getArgument(0)`).
 - Queries need a test only when they do more than map (a filter, a combination).

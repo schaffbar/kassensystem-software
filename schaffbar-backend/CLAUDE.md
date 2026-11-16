@@ -42,8 +42,9 @@ The structure of an aggregate, the use cases, read models, value objects and eve
 
 ```txt
 core_pos/
-  domain/<aggregate>/   entity (aggregate root), *Commands, *Service, *Repository (package-private), *Views,
-                        *EventFactory, *PayloadMapper, enums, README.md, web/ (*Controller, *ApiModel)
+  domain/<aggregate>/   entity (aggregate root, named after the package), inner entities (`RfidTagAssignmentHistory`),
+                        *Commands, *Service, *Repository (package-private), *Views, *EventFactory, *PayloadMapper,
+                        enums, README.md, web/ (*Controller, *ApiModel)
   use_case/             one class per change (`RfidReaderCreate`, `CustomerDelete`, `CloseSession`)
   read_facade/          one class per controller for its queries (`RfidReaderReadFacade`, `WorkshopDashboardReadFacade`)
   dashboard/web/        controllers of the overview (who is in the workshop, which tools run)
