@@ -1,0 +1,15 @@
+meta {
+  name: Delete RFID tag
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{domain_url}}/api/v1/rfid-tags/:rfidTagId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  rfidTagId: 04A31F9C
+}

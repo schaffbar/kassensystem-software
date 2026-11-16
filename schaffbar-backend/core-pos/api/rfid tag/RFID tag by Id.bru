@@ -1,0 +1,15 @@
+meta {
+  name: RFID tag by Id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{domain_url}}/api/v1/rfid-tags/:rfidTagId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  rfidTagId: 04A31F9C
+}
