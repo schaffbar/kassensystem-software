@@ -30,8 +30,8 @@ final class RfidTagAssignmentEventFactory {
         return SchaffbarEvent.rfidTagAssignmentEvent(EventType.RFID_TAG_ASSIGNED, assignment.getId(), payload);
     }
 
-    static SchaffbarEvent rfidTagUnassigned(RfidTagAssignment assignment) {
-        var payload = RfidTagAssignmentPayloadMapper.MAPPER.toRfidTagUnassignedPayload(assignment);
+    static SchaffbarEvent rfidTagUnassigned(RfidTagAssignment assignment, RfidTagAssignmentHistory historyEntry) {
+        var payload = RfidTagAssignmentPayloadMapper.MAPPER.toRfidTagUnassignedPayload(assignment, historyEntry);
         payload.validate();
 
         return SchaffbarEvent.rfidTagAssignmentEvent(EventType.RFID_TAG_UNASSIGNED, assignment.getId(), payload);

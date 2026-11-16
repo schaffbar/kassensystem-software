@@ -3,11 +3,15 @@ package de.schaffbar.core_pos.builder;
 import static de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView.WorkshopSessionViewBuilder;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
+import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
+import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView.CustomerViewBuilder;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView.RfidReaderViewBuilder;
@@ -15,6 +19,8 @@ import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView.RfidTagViewBuilder;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentHistoryView;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentHistoryView.RfidTagAssignmentHistoryViewBuilder;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView.RfidTagAssignmentViewBuilder;
 import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
@@ -32,6 +38,31 @@ import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ViewBuilder {
+
+    // ------------------------------------------------------------------------
+    // customer
+
+    public static CustomerViewBuilder customerView() {
+        return customerView(CustomerId.random());
+    }
+
+    public static CustomerViewBuilder customerView(CustomerId id) {
+        return CustomerView.builder() //
+                .id(id) //
+                .firstName("Erika") //
+                .lastName("Mustermann") //
+                .dateOfBirth(LocalDate.of(1990, 1, 31)) //
+                .clubMember(false) //
+                .email("erika@example.org") //
+                .address(CustomerAddressView.builder() //
+                        .addressLine1("Hauptstraße 1") //
+                        .postalCode("12345") //
+                        .city("Berlin") //
+                        .country("DE") //
+                        .build()) //
+                .createdAt(Instant.now()) //
+                .updatedAt(Instant.now());
+    }
 
     // ------------------------------------------------------------------------
     // RFID reader
@@ -79,6 +110,15 @@ public class ViewBuilder {
                 .status(RfidTagAssignmentStatus.ASSIGNED) //
                 .rfidTagId(RandomValues.rfidTagId()) //
                 .assignmentDate(Instant.now());
+    }
+
+    public static RfidTagAssignmentHistoryViewBuilder rfidTagAssignmentHistoryView() {
+        return RfidTagAssignmentHistoryView.builder() //
+                .customerId(CustomerId.random()) //
+                .rfidTagId(RandomValues.rfidTagId()) //
+                .assignmentType(RfidTagAssignmentType.TEMPORARY) //
+                .assignmentDate(Instant.now().minusSeconds(3600)) //
+                .unassignmentDate(Instant.now());
     }
 
     // ------------------------------------------------------------------------

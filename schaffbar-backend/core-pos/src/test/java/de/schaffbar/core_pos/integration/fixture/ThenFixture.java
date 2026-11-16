@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -60,6 +61,41 @@ public final class ThenFixture {
 
     public void expectNoRfidTag(RfidTagId rfidTagId) {
         expectProblem(this.api.getRfidTag(rfidTagId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID tag assignments
+
+    public void expectRfidTagAssigned(CustomerId customerId, RfidTagId rfidTagId) {
+        MvcTestResult result = this.api.getRfidTagAssignments(customerId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$[0].status").isEqualTo("ASSIGNED");
+        assertThat(result).bodyJson().extractingPath("$[0].rfidTagId").isEqualTo(rfidTagId.getValue());
+    }
+
+    public void expectWaitingForRfidTag(CustomerId customerId) {
+        MvcTestResult result = this.api.getRfidTagAssignments(customerId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$[0].status").isEqualTo("WAITING_FOR_ASSIGNMENT");
+    }
+
+    public void expectNoRfidTagAssignment(CustomerId customerId) {
+        MvcTestResult result = this.api.getRfidTagAssignments(customerId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$").asArray().isEmpty();
+    }
+
+    public void expectHistoryEntry(CustomerId customerId, RfidTagId rfidTagId) {
+        MvcTestResult result = this.api.getRfidTagAssignmentHistory();
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$[?(@.customerId == '%s')].rfidTagId".formatted(customerId.getValue())) //
+                .asArray() //
+                .containsExactly(rfidTagId.getValue());
     }
 
 }

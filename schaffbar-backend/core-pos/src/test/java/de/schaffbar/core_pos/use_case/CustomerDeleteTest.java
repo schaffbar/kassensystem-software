@@ -27,7 +27,6 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment_history.RfidTagAssignmentHistoryService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
@@ -53,9 +52,6 @@ class CustomerDeleteTest {
     private RfidTagAssignmentService rfidTagAssignmentService;
 
     @Mock
-    private RfidTagAssignmentHistoryService rfidTagAssignmentHistoryService;
-
-    @Mock
     private ToolCertificationService toolCertificationService;
 
     @Mock
@@ -74,7 +70,7 @@ class CustomerDeleteTest {
 
         verify(this.toolCertificationService).deleteAllByCustomerId(this.customerId);
         verify(this.customerService).deleteCustomer(this.customerId);
-        verifyNoInteractions(this.rfidTagAssignmentHistoryService);
+        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
     }
 
     @Test
@@ -110,8 +106,7 @@ class CustomerDeleteTest {
 
         this.customerDelete.process(this.customerId);
 
-        InOrder order = inOrder(this.rfidTagAssignmentHistoryService, this.rfidTagAssignmentService, this.customerService);
-        order.verify(this.rfidTagAssignmentHistoryService).moveToHistory(assignment);
+        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
         order.verify(this.rfidTagAssignmentService).unassignRfidTag(this.customerId);
         order.verify(this.customerService).deleteCustomer(this.customerId);
         verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());
@@ -128,7 +123,6 @@ class CustomerDeleteTest {
 
         verify(this.rfidTagAssignmentService).cancelRfidTagAssignmentRequest(this.customerId);
         verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
-        verifyNoInteractions(this.rfidTagAssignmentHistoryService);
         verify(this.customerService).deleteCustomer(this.customerId);
     }
 

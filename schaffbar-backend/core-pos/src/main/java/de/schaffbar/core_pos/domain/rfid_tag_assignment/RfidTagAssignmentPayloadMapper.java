@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -23,6 +24,12 @@ interface RfidTagAssignmentPayloadMapper {
 
     RfidTagAssignedPayload toRfidTagAssignedPayload(RfidTagAssignment assignment);
 
-    RfidTagUnassignedPayload toRfidTagUnassignedPayload(RfidTagAssignment assignment);
+    @Mapping(target = "id", source = "assignment.id")
+    @Mapping(target = "customerId", source = "historyEntry.customerId")
+    @Mapping(target = "rfidTagId", source = "historyEntry.rfidTagId")
+    @Mapping(target = "assignmentType", source = "historyEntry.assignmentType")
+    @Mapping(target = "assignmentDate", source = "historyEntry.assignmentDate")
+    @Mapping(target = "unassignmentDate", source = "historyEntry.unassignmentDate")
+    RfidTagUnassignedPayload toRfidTagUnassignedPayload(RfidTagAssignment assignment, RfidTagAssignmentHistory historyEntry);
 
 }

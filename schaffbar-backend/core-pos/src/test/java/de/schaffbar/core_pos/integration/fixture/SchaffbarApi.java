@@ -89,6 +89,14 @@ public final class SchaffbarApi {
     // ------------------------------------------------------------------------
     // RFID tag assignments
 
+    public MvcTestResult getRfidTagAssignments(CustomerId customerId) {
+        return this.mvc.get().uri("/api/v1/rfid-tag-assignments").param("customer-id", customerId.getValue().toString()).exchange();
+    }
+
+    public MvcTestResult getRfidTagAssignmentHistory() {
+        return this.mvc.get().uri("/api/v1/rfid-tag-assignment-history").exchange();
+    }
+
     public MvcTestResult requestRfidTagAssignment(CustomerId customerId, RfidTagAssignmentType assignmentType) {
         return this.mvc.post().uri("/api/v1/rfid-tag-assignments") //
                 .contentType(MediaType.APPLICATION_JSON) //

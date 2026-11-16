@@ -24,7 +24,7 @@ class RfidTagAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario);
+        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
         CustomerId customerId = this.fixture.given().customerWithRfidTag(rfidTagId);
 
         // when
@@ -50,7 +50,7 @@ class RfidTagAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario);
+        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
 
         // when
         MvcTestResult result = this.fixture.api().createRfidTag(rfidTagId);

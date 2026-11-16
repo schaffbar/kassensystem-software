@@ -3,7 +3,7 @@ package de.schaffbar.core_pos.domain.rfid_tag_assignment.web;
 import java.time.Instant;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,7 +12,10 @@ import org.mapstruct.factory.Mappers;
 
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentHistoryView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
+import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface RfidTagAssignmentApiModel {
@@ -27,8 +30,9 @@ public interface RfidTagAssignmentApiModel {
     @Mapping(target = "rfidTagId", source = "rfidTagId.value")
     RfidTagAssignmentApiDto toRfidTagAssignmentApiDto(RfidTagAssignmentView rfidTagAssignment);
 
-    // ------------------------------------------------------------------------
-    // mapping request body to command
+    @Mapping(target = "customerId", source = "customerId.value")
+    @Mapping(target = "rfidTagId", source = "rfidTagId.value")
+    RfidTagAssignmentHistoryApiDto toRfidTagAssignmentHistoryApiDto(RfidTagAssignmentHistoryView historyEntry);
 
     // ------------------------------------------------------------------------
     // response
@@ -42,20 +46,28 @@ public interface RfidTagAssignmentApiModel {
             Instant assignmentDate //
     ) {}
 
+    record RfidTagAssignmentHistoryApiDto( //
+            @NotNull UUID customerId, //
+            @NotNull String rfidTagId, //
+            @NotNull RfidTagAssignmentType assignmentType, //
+            @NotNull Instant assignmentDate, //
+            @NotNull Instant unassignmentDate //
+    ) {}
+
     // ------------------------------------------------------------------------
     // request body
 
     record RequestRfidTagAssignmentRequestBody( //
-            @NotNull UUID customerId, //
+            @NotNull @Valid CustomerId customerId, //
             @NotNull RfidTagAssignmentType assignmentType //
     ) {}
 
     record AssignRfidTagRequestBody( //
-            @NotBlank String rfidTagId //
+            @NotNull @Valid RfidTagId rfidTagId //
     ) {}
 
     record UnassignRfidTagRequestBody( //
-            @NotNull UUID customerId //
+            @NotNull @Valid CustomerId customerId //
     ) {}
 
 }

@@ -13,8 +13,6 @@ import org.springframework.validation.annotation.Validated;
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment_history.RfidTagAssignmentHistoryService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
@@ -38,8 +36,6 @@ public class CustomerDelete {
     private final @NonNull WorkshopSessionService workshopSessionService;
 
     private final @NonNull RfidTagAssignmentService rfidTagAssignmentService;
-
-    private final @NonNull RfidTagAssignmentHistoryService rfidTagAssignmentHistoryService;
 
     private final @NonNull ToolCertificationService toolCertificationService;
 
@@ -73,17 +69,12 @@ public class CustomerDelete {
         this.rfidTagAssignmentService.getRfidTagAssignment(customerId) //
                 .ifPresent(assignment -> {
                     if (assignment.status() == RfidTagAssignmentStatus.ASSIGNED) {
-                        unassignRfidTag(assignment);
+                        this.rfidTagAssignmentService.unassignRfidTag(customerId);
                     }
                     else {
                         this.rfidTagAssignmentService.cancelRfidTagAssignmentRequest(customerId);
                     }
                 });
-    }
-
-    private void unassignRfidTag(RfidTagAssignmentView assignment) {
-        this.rfidTagAssignmentHistoryService.moveToHistory(assignment);
-        this.rfidTagAssignmentService.unassignRfidTag(assignment.customerId());
     }
 
     private void removeAsInstructor(CustomerId customerId) {

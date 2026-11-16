@@ -100,21 +100,30 @@ class RfidTagAssignment {
     // command
 
     public List<SchaffbarEvent> assignRfidTag(RfidTagId rfidTagId) {
-        // TODO: check if assignment is in the correct state
-        this.rfidTagId = rfidTagId.getValue();
-        this.status = RfidTagAssignmentStatus.ASSIGNED;
-        this.assignmentDate = Instant.now();
+        if (!isWaitingForAssignment()) {
+            throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] is not waiting for a tag");
+        }
+
+        setRfidTagId(rfidTagId.getValue());
+        setStatus(RfidTagAssignmentStatus.ASSIGNED);
+        setAssignmentDate(Instant.now());
 
         return List.of(RfidTagAssignmentEventFactory.rfidTagAssigned(this));
     }
 
-    // TODO: remove Events suffix
-    public List<SchaffbarEvent> unassignEvents() {
-        return List.of(RfidTagAssignmentEventFactory.rfidTagUnassigned(this));
+    public List<SchaffbarEvent> unassignRfidTag(RfidTagAssignmentHistory historyEntry) {
+        if (!isAssigned()) {
+            throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] has no tag to unassign");
+        }
+
+        return List.of(RfidTagAssignmentEventFactory.rfidTagUnassigned(this, historyEntry));
     }
 
-    // TODO: remove Events suffix
-    public List<SchaffbarEvent> cancelEvents() {
+    public List<SchaffbarEvent> cancel() {
+        if (!isWaitingForAssignment()) {
+            throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] is not waiting for a tag");
+        }
+
         return List.of(RfidTagAssignmentEventFactory.rfidTagAssignmentCancelled(this));
     }
 

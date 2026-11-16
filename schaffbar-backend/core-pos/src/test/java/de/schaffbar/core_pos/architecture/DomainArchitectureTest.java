@@ -11,6 +11,7 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.AGGREGATE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DASHBOARD;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.INNER_ENTITY;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_TAKING_UUID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.RETURNS_EVENTS;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
@@ -130,6 +131,46 @@ class DomainArchitectureTest {
             .that().areDeclaredInClassesThat(AGGREGATE) //
             .and().arePublic() //
             .should(methodCondition("return something other than UUID", method -> !isUuid(method.getRawReturnType())));
+
+    // ------------------------------------------------------------------------
+    // inner entity
+
+    @ArchTest
+    static final ArchRule innerEntitiesLiveNextToTheirAggregate = classes() //
+            .that(INNER_ENTITY) //
+            .should(classCondition("live in the package of an aggregate named after the package", //
+                    entity -> entity.getPackage().getClasses().stream().anyMatch(AGGREGATE))) //
+            .because("an entity that is no aggregate root belongs to the aggregate of its package");
+
+    @ArchTest
+    static final ArchRule innerEntitiesAreNotPublic = classes() //
+            .that(INNER_ENTITY) //
+            .should().notBePublic() //
+            .because("an inner entity belongs to its aggregate – only the aggregate's service sees it");
+
+    @ArchTest
+    static final ArchRule innerEntitiesAreCreatedOnlyInTheirPackage = methods() //
+            .that().areDeclaredInClassesThat(INNER_ENTITY) //
+            .and().areStatic() //
+            .should().notBePublic() //
+            .because("the aggregate's service creates the inner entity together with the aggregate's change");
+
+    @ArchTest
+    static final ArchRule innerEntitySettersArePrivate = methods() //
+            .that().areDeclaredInClassesThat(INNER_ENTITY) //
+            .and().haveNameMatching("set[A-Z].*") //
+            .should().bePrivate();
+
+    @ArchTest
+    static final ArchRule innerEntitiesHaveNoBuildingBlocksButARepository = classes() //
+            .that(INNER_ENTITY) //
+            .should(classCondition("have no *Service, *Views, *Commands, *EventFactory or *PayloadMapper of their own", //
+                    entity -> entity.getPackage().getClasses().stream() //
+                            .map(JavaClass::getSimpleName) //
+                            .noneMatch(name -> BUILDING_BLOCKS.stream() //
+                                    .filter(suffix -> !suffix.equals("Repository")) //
+                                    .anyMatch(suffix -> name.equals(entity.getSimpleName() + suffix))))) //
+            .because("its changes are changes of the aggregate: the aggregate's service, views and events cover them");
 
     // ------------------------------------------------------------------------
     // commands
@@ -334,7 +375,7 @@ class DomainArchitectureTest {
     // helper
 
     private static boolean isAggregatePackageMember(JavaClass javaClass) {
-        return AGGREGATE.test(javaClass) || javaClass.isAnnotatedWith(Embeddable.class) || javaClass.isEnum() || BUILDING_BLOCKS.stream().anyMatch(
+        return AGGREGATE.test(javaClass) || INNER_ENTITY.test(javaClass) || javaClass.isAnnotatedWith(Embeddable.class) || javaClass.isEnum() || BUILDING_BLOCKS.stream().anyMatch(
                 javaClass.getSimpleName()::endsWith) || isGeneratedByMapStruct(javaClass);
     }
 

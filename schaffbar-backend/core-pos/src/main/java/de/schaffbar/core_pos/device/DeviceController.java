@@ -50,6 +50,7 @@ import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopSessionFoundException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
+import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -303,6 +304,9 @@ public class DeviceController {
             };
 
             return CounterResponse.assignerError(message);
+        }
+        catch (NoRfidTagAssignmentWaitingException e) {
+            return CounterResponse.assignerError("RFID nicht zugewiesen");
         }
         catch (Exception e) {
             return CounterResponse.assignerError(e.getMessage());

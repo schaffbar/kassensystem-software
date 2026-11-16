@@ -15,14 +15,14 @@ interface RfidTagAssignmentRepository extends JpaRepository<RfidTagAssignment, U
 
     List<RfidTagAssignment> findByCustomerId(UUID customerId);
 
-    default Optional<RfidTagAssignment> findByCustomer(CustomerId customerId) {
+    default Optional<RfidTagAssignment> findByCustomerId(CustomerId customerId) {
         List<RfidTagAssignment> assignments = findByCustomerId(customerId.getValue());
         if (assignments.isEmpty()) {
             return Optional.empty();
         }
 
         if (assignments.size() > 1) {
-            throw new RuntimeException("More than one rfid tag assignment found");
+            throw new IllegalStateException("More than one RFID tag assignment found");
         }
 
         return Optional.of(assignments.getFirst());
@@ -30,14 +30,14 @@ interface RfidTagAssignmentRepository extends JpaRepository<RfidTagAssignment, U
 
     List<RfidTagAssignment> findByRfidTagId(String rfidTagId);
 
-    default Optional<RfidTagAssignment> findByRfidTag(RfidTagId rfidTagId) {
+    default Optional<RfidTagAssignment> findByRfidTagId(RfidTagId rfidTagId) {
         List<RfidTagAssignment> assignments = findByRfidTagId(rfidTagId.getValue());
         if (assignments.isEmpty()) {
             return Optional.empty();
         }
 
         if (assignments.size() > 1) {
-            throw new RuntimeException("More than one rfid tag assignment found");
+            throw new IllegalStateException("More than one RFID tag assignment found");
         }
 
         return Optional.of(assignments.getFirst());
@@ -52,7 +52,7 @@ interface RfidTagAssignmentRepository extends JpaRepository<RfidTagAssignment, U
         }
 
         if (assignments.size() > 1) {
-            throw new RuntimeException("More than one rfid tag assignment found");
+            throw new IllegalStateException("More than one RFID tag assignment found");
         }
 
         return Optional.of(assignments.getFirst());

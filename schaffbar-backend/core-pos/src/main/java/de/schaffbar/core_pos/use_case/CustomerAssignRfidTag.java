@@ -1,6 +1,5 @@
 package de.schaffbar.core_pos.use_case;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -9,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagService;
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -23,12 +22,12 @@ public class CustomerAssignRfidTag {
 
     private final @NonNull RfidTagAssignmentService rfidTagAssignmentService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid RfidTagId rfidTagId) {
-        RfidTagView rfidTag = this.rfidTagService.getRfidTag(rfidTagId) //
+        this.rfidTagService.getRfidTag(rfidTagId) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidTag(rfidTagId));
 
-        this.rfidTagAssignmentService.assignRfidTag(rfidTag.id());
+        this.rfidTagAssignmentService.assignRfidTag(rfidTagId);
     }
 
 }

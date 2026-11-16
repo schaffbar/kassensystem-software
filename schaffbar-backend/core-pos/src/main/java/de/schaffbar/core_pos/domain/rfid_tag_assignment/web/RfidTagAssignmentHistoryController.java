@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.domain.rfid_tag_assignment_history.web;
+package de.schaffbar.core_pos.domain.rfid_tag_assignment.web;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.schaffbar.core_pos.domain.rfid_tag_assignment_history.RfidTagAssignmentHistoryService;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment_history.web.RfidTagAssignmentHistoryApiModel.RfidTagAssignmentHistoryApiDto;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.RfidTagAssignmentHistoryApiDto;
+import de.schaffbar.core_pos.read_facade.RfidTagAssignmentHistoryReadFacade;
 
 @Validated
 @RestController
@@ -20,21 +20,18 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment_history.web.RfidTagAssig
 @RequestMapping(path = "/api/v1/rfid-tag-assignment-history")
 public class RfidTagAssignmentHistoryController {
 
-    private final @NonNull RfidTagAssignmentHistoryService rfidTagAssignmentHistoryService;
+    private final @NonNull RfidTagAssignmentHistoryReadFacade rfidTagAssignmentHistoryReadFacade;
 
     // ------------------------------------------------------------------------
     // query
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RfidTagAssignmentHistoryApiDto>> getRfidTagAssignmentHistory() {
-        List<RfidTagAssignmentHistoryApiDto> result = this.rfidTagAssignmentHistoryService.getRfidTagAssignmentHistory().stream() //
-                .map(RfidTagAssignmentHistoryApiModel.MAPPER::toRfidTagAssignmentHistoryApiDto) //
+        List<RfidTagAssignmentHistoryApiDto> result = this.rfidTagAssignmentHistoryReadFacade.getRfidTagAssignmentHistory().stream() //
+                .map(RfidTagAssignmentApiModel.MAPPER::toRfidTagAssignmentHistoryApiDto) //
                 .toList();
 
         return ResponseEntity.ok(result);
     }
-
-    // ------------------------------------------------------------------------
-    // command
 
 }

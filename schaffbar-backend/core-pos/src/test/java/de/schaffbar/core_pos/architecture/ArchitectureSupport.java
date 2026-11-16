@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.architecture;
 
 import static com.tngtech.archunit.base.DescribedPredicate.and;
+import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
@@ -42,10 +43,18 @@ final class ArchitectureSupport {
 
     static final String USE_CASE = "..use_case..";
 
+    // the aggregate root is named after its package: rfid_tag_assignment → RfidTagAssignment
     static final DescribedPredicate<JavaClass> AGGREGATE = and( //
             annotatedWith(Entity.class).forSubtype(), //
-            resideInAPackage(DOMAIN)) //
+            resideInAPackage(DOMAIN), //
+            DescribedPredicate.describe("named after its package", ArchitectureSupport::isNamedAfterItsPackage)) //
             .as("aggregates");
+
+    static final DescribedPredicate<JavaClass> INNER_ENTITY = and( //
+            annotatedWith(Entity.class).forSubtype(), //
+            resideInAPackage(DOMAIN), //
+            not(AGGREGATE)) //
+            .as("inner entities");
 
     static final DescribedPredicate<JavaClass> DOMAIN_SERVICE = and( //
             annotatedWith(Service.class).forSubtype(), //
@@ -72,6 +81,14 @@ final class ArchitectureSupport {
 
     // ------------------------------------------------------------------------
     // predicates
+
+    static boolean isNamedAfterItsPackage(JavaClass javaClass) {
+        String packageName = javaClass.getPackageName().substring(javaClass.getPackageName().lastIndexOf('.') + 1);
+        String aggregateName = Stream.of(packageName.split("_")) //
+                .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1)) //
+                .reduce("", String::concat);
+        return javaClass.getSimpleName().equals(aggregateName);
+    }
 
     static boolean isValueObject(JavaClass javaClass) {
         return javaClass.isAssignableTo(ValueObject.class);

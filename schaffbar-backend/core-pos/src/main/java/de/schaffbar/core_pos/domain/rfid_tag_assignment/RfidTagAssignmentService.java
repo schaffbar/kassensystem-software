@@ -3,7 +3,6 @@ package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -12,10 +11,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentHistoryView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
-import de.schaffbar.core_pos.shared.exception.NoWaitingAssingmentException;
+import de.schaffbar.core_pos.shared.exception.CustomerHasRfidTagAssignmentException;
+import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignedException;
+import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
+import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyAssignedException;
+import de.schaffbar.core_pos.shared.exception.RfidTagAssignmentAlreadyWaitingException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -27,39 +33,50 @@ public class RfidTagAssignmentService {
 
     private final @NonNull RfidTagAssignmentRepository rfidTagAssignmentRepository;
 
+    private final @NonNull RfidTagAssignmentHistoryRepository rfidTagAssignmentHistoryRepository;
+
     private final @NonNull OutboxEventStore outboxEventStore;
 
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<RfidTagAssignmentView> getRfidTagAssignments() {
         return this.rfidTagAssignmentRepository.findAll().stream() //
                 .map(RfidTagAssignmentViews.MAPPER::toRfidTagAssignmentView) //
                 .toList();
     }
 
+    @Query
     public Optional<RfidTagAssignmentView> getRfidTagAssignment(@NotNull @Valid CustomerId customerId) {
-        return this.rfidTagAssignmentRepository.findByCustomer(customerId) //
+        return this.rfidTagAssignmentRepository.findByCustomerId(customerId) //
                 .map(RfidTagAssignmentViews.MAPPER::toRfidTagAssignmentView);
     }
 
+    @Query
     public Optional<RfidTagAssignmentView> getRfidTagAssignment(@NotNull @Valid RfidTagId rfidTagId) {
-        return this.rfidTagAssignmentRepository.findByRfidTag(rfidTagId) //
+        return this.rfidTagAssignmentRepository.findByRfidTagId(rfidTagId) //
                 .map(RfidTagAssignmentViews.MAPPER::toRfidTagAssignmentView);
+    }
+
+    @Query
+    public List<RfidTagAssignmentHistoryView> getRfidTagAssignmentHistory() {
+        return this.rfidTagAssignmentHistoryRepository.findAll().stream() //
+                .map(RfidTagAssignmentViews.MAPPER::toRfidTagAssignmentHistoryView) //
+                .toList();
     }
 
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
+    @Command
     public void requestRfidTagAssignment(@NotNull @Valid CustomerId customerId, @NotNull RfidTagAssignmentType assignmentType) {
-        if (getRfidTagAssignment(customerId).isPresent()) {
-            throw new RuntimeException("RFID tag is already assigned to customer [id: " + customerId.getValue() + "]");
+        if (this.rfidTagAssignmentRepository.findByCustomerId(customerId).isPresent()) {
+            throw new CustomerHasRfidTagAssignmentException(customerId);
         }
 
-        if (this.rfidTagAssignmentRepository.findWaitingForAssignment().isPresent()) {
-            throw new RuntimeException("There is already a RFID tag assignment pending");
-        }
+        this.rfidTagAssignmentRepository.findWaitingForAssignment() //
+                .ifPresent(waiting -> throwRfidTagAssignmentAlreadyWaitingException(customerId, waiting));
 
         RfidTagAssignment assignment = RfidTagAssignment.of(customerId, assignmentType);
         RfidTagAssignment savedAssignment = this.rfidTagAssignmentRepository.save(assignment);
@@ -70,29 +87,44 @@ public class RfidTagAssignmentService {
         log.info("Requested RFID tag assignment for customer {} and published events {}", customerId, events);
     }
 
-    @Transactional
+    @Command
+    public void cancelRfidTagAssignmentRequest(@NotNull @Valid CustomerId customerId) {
+        RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomerId(customerId) //
+                .filter(RfidTagAssignment::isWaitingForAssignment) //
+                .orElseThrow(() -> NoRfidTagAssignmentWaitingException.forCustomer(customerId));
+
+        List<SchaffbarEvent> events = assignment.cancel();
+        this.rfidTagAssignmentRepository.delete(assignment);
+
+        this.outboxEventStore.save(events);
+
+        log.info("Cancelled RFID tag assignment request of customer {} and published events {}", customerId, events);
+    }
+
+    @Command
     public void assignRfidTag(@NotNull @Valid RfidTagId rfidTagId) {
-        if (getRfidTagAssignment(rfidTagId).isPresent()) {
-            throw new RuntimeException("RFID tag [id: " + rfidTagId.getValue() + "] already assigned");
-        }
+        this.rfidTagAssignmentRepository.findByRfidTagId(rfidTagId) //
+                .ifPresent(existing -> throwRfidTagAlreadyAssignedException(rfidTagId, existing));
 
         RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findWaitingForAssignment() //
-                .orElseThrow(() -> new NoWaitingAssingmentException(rfidTagId));
+                .orElseThrow(() -> NoRfidTagAssignmentWaitingException.forRfidTag(rfidTagId));
 
         List<SchaffbarEvent> events = assignment.assignRfidTag(rfidTagId);
+
         this.outboxEventStore.save(events);
 
         log.info("Assigned RFID tag {} and published events {}", rfidTagId, events);
     }
 
-    @Transactional
+    @Command
     public void unassignRfidTag(@NotNull @Valid CustomerId customerId) {
-        RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomer(customerId) //
+        RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomerId(customerId) //
                 .filter(RfidTagAssignment::isAssigned) //
-                // TODO: implement custom exception
-                .orElseThrow(() -> new RuntimeException("No RFID tag assigned to customer [id: " + customerId.getValue() + "]"));
+                .orElseThrow(() -> new NoRfidTagAssignedException(customerId));
 
-        List<SchaffbarEvent> events = assignment.unassignEvents();
+        RfidTagAssignmentHistory historyEntry = RfidTagAssignmentHistory.of(assignment);
+        List<SchaffbarEvent> events = assignment.unassignRfidTag(historyEntry);
+        this.rfidTagAssignmentHistoryRepository.save(historyEntry);
         this.rfidTagAssignmentRepository.delete(assignment);
 
         this.outboxEventStore.save(events);
@@ -100,18 +132,15 @@ public class RfidTagAssignmentService {
         log.info("Unassigned RFID tag from customer {} and published events {}", customerId, events);
     }
 
-    @Transactional
-    public void cancelRfidTagAssignmentRequest(@NotNull @Valid CustomerId customerId) {
-        RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomer(customerId) //
-                .filter(RfidTagAssignment::isWaitingForAssignment) //
-                .orElseThrow(() -> new RuntimeException("No RFID tag assignment requested for customer [id: " + customerId.getValue() + "]"));
+    // ------------------------------------------------------------------------
+    // helper
 
-        List<SchaffbarEvent> events = assignment.cancelEvents();
-        this.rfidTagAssignmentRepository.delete(assignment);
+    private void throwRfidTagAssignmentAlreadyWaitingException(CustomerId customerId, RfidTagAssignment waiting) {
+        throw new RfidTagAssignmentAlreadyWaitingException(customerId, waiting.getCustomerId());
+    }
 
-        this.outboxEventStore.save(events);
-
-        log.info("Cancelled RFID tag assignment request of customer {} and published events {}", customerId, events);
+    private void throwRfidTagAlreadyAssignedException(RfidTagId rfidTagId, RfidTagAssignment existing) {
+        throw new RfidTagAlreadyAssignedException(rfidTagId, existing.getCustomerId());
     }
 
 }

@@ -23,6 +23,8 @@ public interface RfidTagAssignmentViews {
 
     RfidTagAssignmentView toRfidTagAssignmentView(RfidTagAssignment rfidTagAssignment);
 
+    RfidTagAssignmentHistoryView toRfidTagAssignmentHistoryView(RfidTagAssignmentHistory historyEntry);
+
     // ------------------------------------------------------------------------
     // views
 
@@ -35,6 +37,16 @@ public interface RfidTagAssignmentViews {
             @NotNull RfidTagAssignmentStatus status, //
             RfidTagId rfidTagId, //
             Instant assignmentDate //
+    ) {}
+
+    @Builder
+    @Validated
+    record RfidTagAssignmentHistoryView( //
+            @NotNull CustomerId customerId, //
+            @NotNull RfidTagId rfidTagId, //
+            @NotNull RfidTagAssignmentType assignmentType, //
+            @NotNull Instant assignmentDate, //
+            @NotNull Instant unassignmentDate //
     ) {}
 
 }

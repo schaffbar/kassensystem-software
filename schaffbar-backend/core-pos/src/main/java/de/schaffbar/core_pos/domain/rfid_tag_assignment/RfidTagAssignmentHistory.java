@@ -1,6 +1,4 @@
-package de.schaffbar.core_pos.domain.rfid_tag_assignment_history;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
+package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,12 +18,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
+// inner entity of RfidTagAssignment: written by its unassignment, never changed
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -61,13 +57,13 @@ class RfidTagAssignmentHistory {
     // ------------------------------------------------------------------------
     // static constructor
 
-    public static RfidTagAssignmentHistory of(RfidTagAssignmentView activeRfidTagAssignment) {
+    static RfidTagAssignmentHistory of(RfidTagAssignment assignment) {
         RfidTagAssignmentHistory result = new RfidTagAssignmentHistory();
-        result.setId(RfidTagAssignmentId.random().getValue()); // FIXME: change to RfidTagAssignmentHistoryId ???
-        result.setCustomerId(activeRfidTagAssignment.customerId().getValue());
-        result.setRfidTagId(activeRfidTagAssignment.rfidTagId().getValue());
-        result.setAssignmentType(activeRfidTagAssignment.assignmentType());
-        result.setAssignmentDate(activeRfidTagAssignment.assignmentDate());
+        result.setId(UUID.randomUUID());
+        result.setCustomerId(assignment.getCustomerId().getValue());
+        result.setRfidTagId(assignment.getRfidTagId().getValue());
+        result.setAssignmentType(assignment.getAssignmentType());
+        result.setAssignmentDate(assignment.getAssignmentDate());
         result.setUnassignmentDate(Instant.now());
 
         return result;
@@ -76,24 +72,12 @@ class RfidTagAssignmentHistory {
     // ------------------------------------------------------------------------
     // query
 
-    // FIXME: change to RfidTagAssignmentHistoryId ???
-    public RfidTagAssignmentId getId() {
-        return RfidTagAssignmentId.of(this.id);
-    }
-
     public CustomerId getCustomerId() {
         return CustomerId.of(this.customerId);
     }
 
     public RfidTagId getRfidTagId() {
-        if (isBlank(this.rfidTagId)) {
-            return null;
-        }
-
         return RfidTagId.of(this.rfidTagId);
     }
-
-    // ------------------------------------------------------------------------
-    // command
 
 }

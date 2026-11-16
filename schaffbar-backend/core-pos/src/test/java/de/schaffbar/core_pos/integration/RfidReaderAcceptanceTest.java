@@ -27,7 +27,7 @@ class RfidReaderAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        this.fixture.given().rfidReader(scenario);
+        this.fixture.given().rfidReader(scenario.macAddress());
 
         // when – lower case is the same address (R-7)
         MvcTestResult result = this.fixture.api().createRfidReader(scenario.macAddress().getValue().toLowerCase());
@@ -42,7 +42,7 @@ class RfidReaderAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        RfidReaderId switchBox = this.fixture.given().switchBox(scenario);
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
         ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
 
         // when
@@ -68,7 +68,7 @@ class RfidReaderAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        RfidReaderId switchBox = this.fixture.given().switchBox(scenario);
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
         ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
 
         // when

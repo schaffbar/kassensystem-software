@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.domain.rfid_tag_assignment_history;
+package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
 import java.util.UUID;
 
