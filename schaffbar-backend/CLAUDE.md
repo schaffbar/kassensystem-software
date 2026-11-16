@@ -40,7 +40,7 @@ The structure of an aggregate, the use cases, read models, value objects and eve
 (German: `ddd-uebersicht.md`). The rules of each aggregate: the `README.md` in its package
 (`core-pos/src/main/java/de/schaffbar/core_pos/domain/<aggregate>/README.md`).
 
-```
+```txt
 core_pos/
   domain/<aggregate>/   entity (aggregate root), *Commands, *Service, *Repository (package-private), *Views,
                         *EventFactory, *PayloadMapper, enums, README.md, web/ (*Controller, *ApiModel)
@@ -70,8 +70,8 @@ core_pos/
   "Open Rules" to "Business Rules" – the same change.
 - **A violated rule throws a dedicated exception** in `shared/exception/` (`CustomerHasOpenWorkshopSessionException`),
   English message with the ids, static factories for variants (`RfidReaderHasToolAssignedException.delete(id)`). It
-  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates: `public static final
-  String CODE`, the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants) or is a
+  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates: `public static final String CODE`,
+  the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants) or is a
   `ResourceNotFoundException` (→ `404`); `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible
   states (broken data) are an `IllegalStateException` (→ `500`). Many exceptions do not have a base class yet (E8).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`
@@ -85,8 +85,8 @@ core_pos/
 - One class per action in `use_case/`, named `<Aggregate><Action>` (`RfidReaderChangeType`, `ToolAddInstructors`) –
   also for a plain create, update or delete, so every controller looks the same.
 - `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` annotated `@Command`.
-- Checks that a referenced aggregate exists (`customerService.getCustomer(id).orElseThrow(() ->
-  ResourceNotFoundException.customer(id))`) – for a list all entries before the change –, then the rules with a second
+- Checks that a referenced aggregate exists (`customerService.getCustomer(id).orElseThrow(() -> ResourceNotFoundException.customer(id))`) –
+  for a list all entries before the change –, then the rules with a second
   aggregate, then the service call(s). A batch is all or nothing (E11).
 
 ### Read facades (until their skill)
@@ -146,6 +146,7 @@ them with `mvn -q spotless:apply`, the rest of the style is not checked.
   ```
 
   No unused imports.
+
 - **Line length 160.** The formatter does not keep line breaks: it joins lines up to 160 characters. A `//` at the end
   of a line keeps a call chain or a record header wrapped – one element per line:
 

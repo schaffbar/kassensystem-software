@@ -29,7 +29,9 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
 - **A rule whose check reads the database** – a second aggregate, a uniqueness, a lookup by something other than the
   id – also gets an **acceptance test**: `r<number>_…` in `integration/<Aggregate>AcceptanceTest`. A rule that lives
   completely in a value object or the entity (R-2, R-7 of `rfid_reader`) does not.
-- **A new use case** gets its use case test (every path) and, if it has a rule, the acceptance test above.
+- **A new use case** gets its use case test (every path) and, if it has a rule, the acceptance test above. A use case
+  that only forwards to one service (`RfidReaderCreate`, `RfidTagCreate`) has one path and needs no test of its own –
+  the service and controller tests cover it.
 - **A new endpoint or a changed `*ApiModel`** gets controller tests: status, the JSON fields the portal reads, the
   problem code of each rejection.
 - **A new service method** gets a service test when it does more than load, call the entity and save: a rule, a
