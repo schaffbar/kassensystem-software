@@ -1,6 +1,6 @@
 ---
 name: backend-testing
-description: How the core-pos backend (Spring Boot, JUnit 5, Mockito, AssertJ, Testcontainers, ArchUnit) is tested – the test levels (value object and entity, service, use case, controller, integration as acceptance and technical test, architecture), which level proves which rule, where a test lives and how it is named, the integration test setup with @IntegrationTest, SchaffbarFixture (given / api / then), Scenario and RandomValues, and how to run the tests. Use when writing, fixing or reviewing a backend test, when adding a business rule or a use case that needs tests, when extending the integration fixture, when a test needs a database or Docker, or when deciding which kind of test a change needs.
+description: How the core-pos backend (Spring Boot, JUnit 5, Mockito, AssertJ, Testcontainers, ArchUnit) is tested – the test levels (value object and entity, service, use case, controller, integration as acceptance and technical test, architecture), which level proves which rule, where a test lives and how it is named, the structure of a test (given / when / then, given… and expect… methods), test data (CommandBuilder, ViewBuilder, RandomValues, no data in fields), the integration test setup with @IntegrationTest, SchaffbarFixture (given / api / then), Scenario and RandomValues, and how to run the tests. Use when writing, fixing or reviewing a backend test, when adding a business rule or a use case that needs tests, when extending the integration fixture, when a test needs a database or Docker, or when deciding which kind of test a change needs.
 ---
 
 # Tests in core-pos
@@ -52,22 +52,81 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
   tests one (`process` of a use case, `<Entity>_<Method>Test`): `rejectsReaderAssignedToTool`. Acceptance:
   `r<number>_<the rule as a sentence>` (`r5_aReaderAssignedToAToolCannotBeDeleted`), the number from the README.
 
+## Structure of a test
+
+Every test reads as `// given` – `// when` – `// then`, also a short one; `// given` is left out only when the test
+prepares nothing. The test itself stays short: what a step means is in the name of a `given…` or `expect…` method.
+
+```java
+@Test
+void createRfidReader_rejectsAUsedMacAddress() {
+    // given
+    MacAddress macAddress = RandomValues.macAddress();
+    givenReaderWith(macAddress);
+
+    // when
+    Throwable thrown = catchThrowable(() -> this.rfidReaderService.createRfidReader(macAddress));
+
+    // then
+    assertThat(thrown) //
+            .isInstanceOf(MacAddressAlreadyUsedException.class) //
+            .hasFieldOrPropertyWithValue("code", MacAddressAlreadyUsedException.CODE);
+    expectNothingSaved();
+}
+```
+
+- **An exception is caught under `// when`** with `catchThrowable(…)` and checked under `// then` – not
+  `assertThatThrownBy`, which mixes both. A controller test keeps the `ResultActions` of `perform(…)` and calls
+  `andExpect` under `// then`.
+- **A stub that sets up a state is a `given…` method** named after the state: `givenReader()`, `givenUnknownReader()`
+  (returns the id), `givenReaderWith(macAddress)`, `givenNoToolWith(rfidReaderId)`, `givenSaveReturnsTheReader()`. It
+  takes what it needs as parameters and returns what the test needs next. No `when(…)` in the test itself.
+- **A verification that says what happened (or did not) is an `expect…` method** as soon as it is more than one line
+  or appears in more than one test: `expectSavedEvent(type, id)`, `expectNothingSaved()`, `expectNoEvent()`,
+  `expectTypeNotChanged()`. A single assertion on the result of this test stays in the test (`assertThat(rfidReader
+  .getType()).isEqualTo(command.type())`).
+- **The class is in sections** (`// ---…` line + name): the tests grouped by the method under test (`// createRfidReader`,
+  `// updateRfidReader`, …) when the class tests several, then `// given` with the `given…` methods, `// then` with the
+  `expect…` methods, `// helper` for anything else. A section only exists when it has content.
+
+## Test data
+
+- **Every test creates its own data** – ids, values, commands, views are local variables of the test (or created in
+  its `given…` methods), never fields of the class. Everything a test uses is visible in it; fields are only the mocks,
+  captors, the class under test and infrastructure like `MockMvc`.
+- **Commands come from `builder/CommandBuilder`** – never `XyzCommand.builder()` in a test. It has two methods per
+  command, both returning the Lombok builder with valid defaults: `updateRfidReaderCommand()` (random id) and
+  `updateRfidReaderCommand(rfidReaderId)`. The test changes only what matters to it and asserts against the command,
+  not against copied literals:
+
+  ```java
+  UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).build();
+  …
+  assertThat(rfidReader.getName()).isEqualTo(command.name());
+
+  ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReaderId).type(RfidReaderType.GATE_KEEPER_IN).build();
+  ```
+
+  A new command gets its two methods there, in the section of its aggregate.
+- **Random values wherever the value itself is not the subject:** ids with `XyzId.random()`, device values from
+  `builder/RandomValues` (`RandomValues.macAddress()`) – value objects of devices have no `random()` (skill
+  `aggregate`, "Value objects"). A fixed value only where the test is about it: the formats in `MacAddressTest`, an
+  invalid input (`"34-CD-B0-D3-A9-30"`). Integration tests take theirs from `Scenario` (below).
+- **Views come from `builder/ViewBuilder`**, the same way – never `XyzView.builder()` and never `mock(XyzView.class)`
+  in a test. Two methods per view with valid defaults (`rfidReaderView()`, `rfidReaderView(rfidReaderId)`,
+  `toolView()`, `toolView(toolId)`), or one named after a state (`openWorkshopSessionView()`); the test sets what it
+  is about: `rfidReaderView().type(RfidReaderType.SWITCH_BOX).build()`, `toolView().rfidReaderId(rfidReaderId).build()`.
+  A new view gets its methods there.
+
 ## Common
 
-- JUnit 5, AssertJ (`assertThat`, `assertThatThrownBy`), Mockito with `@ExtendWith(MockitoExtension.class)`, `@Mock`,
-  `@InjectMocks`, `@Captor`. `this.` for fields, as in the main code; sections `// ---…` per method under test and
-  `// helper` at the end.
-- **Mockito runs strict:** a stub a test does not use fails it – stub per test or in a helper the test calls
-  (`givenReader()`), never in a shared `@BeforeEach`.
+- JUnit 5, AssertJ (`assertThat`, `catchThrowable`), Mockito with `@ExtendWith(MockitoExtension.class)`, `@Mock`,
+  `@InjectMocks`, `@Captor`. `this.` for fields, as in the main code.
+- **Mockito runs strict:** a stub a test does not use fails it – stub per test in its `given…` methods, never in a
+  shared `@BeforeEach`.
 - **A rejection is checked completely:** the exception type, its `code` for a `BusinessRuleViolationException`
   (`.hasFieldOrPropertyWithValue("code", RfidReaderHasToolAssignedException.CODE)`), and that nothing happened –
   `verify(…, never())`, `verifyNoInteractions(this.outboxEventStore)`.
-- `// given`, `// when`, `// then` where a test has more than one step; a test with one call and one assertion does
-  without.
-- Unit tests use fixed, readable values (`MacAddress.of("34:CD:B0:D3:A9:30")`); integration tests random ones
-  (`Scenario`, below). Views: `builder/ViewBuilder` or the records' Lombok builders. A random device value (MAC
-  address, later RFID tag id) comes from `builder/RandomValues` – value objects of devices have no `random()` (skill
-  `aggregate`, "Value objects").
 - Parameterized tests for a list of inputs with the same result (`@ParameterizedTest`, `@ValueSource`,
   `@NullAndEmptySource`) – `MacAddressTest`.
 
@@ -110,30 +169,38 @@ class RfidReaderServiceTest {
 
     @Test
     void changeRfidReaderType_setsTheTypeAndSavesTheEvent() {
+        // given
         RfidReader rfidReader = givenReader();
-        …
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReader.getId()).build();
+
+        // when
         this.rfidReaderService.changeRfidReaderType(command);
 
-        assertThat(rfidReader.getType()).isEqualTo(RfidReaderType.SWITCH_BOX);
+        // then
+        assertThat(rfidReader.getType()).isEqualTo(command.type());
         expectSavedEvent(EventType.RFID_READER_TYPE_CHANGED, rfidReader.getId());
     }
 
-    // helper: givenReader() stubs findById with a real RfidReader.of(…);
-    // expectSavedEvent(…) captures the list saved to the outbox and checks type and aggregate id
+    // given: givenReader() stubs findById with a real RfidReader.of(…), givenUnknownReader(), …
+    // then: expectSavedEvent(…) captures the list saved to the outbox and checks type and aggregate id;
+    //       expectNothingSaved(), expectNoEvent()
 }
 ```
 
 - Per command: the success path (state of the entity, the one event in the outbox) and every rejection (unknown id →
   `ResourceNotFoundException`, a rule → its exception), each without an outbox call.
-- A save is stubbed only where the service uses its result (`save(any())` → `invocation.getArgument(0)`).
+- A save is stubbed only where the service uses its result (`givenSaveReturnsTheReader()`: `save(any())` →
+  `invocation.getArgument(0)`).
 - Queries need a test only when they do more than map (a filter, a combination).
 
 ## Use case
 
-Mockito for the services; one test per path – see `use_case/RfidReaderDeleteTest`, `CustomerDeleteTest`:
+Mockito for the services; one test per path – see `use_case/RfidReaderChangeTypeTest`, `RfidReaderDeleteTest`:
 
-- allowed: the service call happens (`verify(this.rfidReaderService).deleteRfidReader(id)`);
-- each rejection: exception and code, and the change does **not** happen (`never()`);
+- the state of the other aggregates as `given…` methods (`givenReaderOfType(SWITCH_BOX)`, `givenTool()`,
+  `givenNoTool()`);
+- allowed: the service call happens (`expectTypeChanged()` → `verify(this.rfidReaderService).changeRfidReaderType(command)`);
+- each rejection: exception and code, and the change does **not** happen (`expectTypeNotChanged()` → `never()`);
 - the order of side effects where it matters (`InOrder`: first clean up, then delete).
 
 ## Controller
@@ -270,8 +337,19 @@ mvn clean test                                 # after "Unable to create test cl
 
 The whole run takes about 25 seconds, the container start about 10 of them.
 
+## Not everywhere yet
+
+The tests of `rfid_reader` and the integration tests follow this skill. The older tests (`CustomerDeleteTest`,
+`CloseSessionTest`, the entity, billing and `shared` tests) still use fixed values, test data in fields,
+`mock(XyzView.class)`, `assertThatThrownBy`, stubs in the test and partly no `// given` / `// when` / `// then` – they
+are changed with the rollout of their aggregate (K4). Copy from the `rfid_reader` tests, not from them.
+
 ## Checklist
 
+- [ ] `// given` / `// when` / `// then` in every test; stubs in `given…`, verifications in `expect…` methods,
+      sections `// given` and `// then`; exceptions with `catchThrowable`.
+- [ ] Commands from `CommandBuilder`, views from `ViewBuilder`; no test data in fields; values random (`RandomValues`,
+      `XyzId.random()`) unless the value is the subject.
 - [ ] Each changed rule tested where it is enforced: allowed and every rejection, with exception code and "nothing
       happened".
 - [ ] A rule that reads the database: `r<number>_…` in its acceptance test, both sides.
