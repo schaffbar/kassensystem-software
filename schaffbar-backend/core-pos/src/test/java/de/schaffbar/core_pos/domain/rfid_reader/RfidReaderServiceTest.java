@@ -1,7 +1,9 @@
 package de.schaffbar.core_pos.domain.rfid_reader;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.changeRfidReaderTypeCommand;
+import static de.schaffbar.core_pos.builder.CommandBuilder.updateRfidReaderCommand;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -19,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
 import de.schaffbar.core_pos.shared.event.EventType;
@@ -31,8 +34,6 @@ import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 @ExtendWith(MockitoExtension.class)
 class RfidReaderServiceTest {
-
-    private static final MacAddress MAC_ADDRESS = MacAddress.of("34:CD:B0:D3:A9:30");
 
     @Mock
     private RfidReaderRepository rfidReaderRepository;
@@ -51,31 +52,32 @@ class RfidReaderServiceTest {
 
     @Test
     void createRfidReader_savesTheReaderAndItsCreatedEvent() {
-        when(this.rfidReaderRepository.findByMacAddress(MAC_ADDRESS.getValue())).thenReturn(Optional.empty());
-        when(this.rfidReaderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        // given
+        MacAddress macAddress = RandomValues.macAddress();
+        givenNoReaderWith(macAddress);
+        givenSaveReturnsTheReader();
 
-        RfidReaderId rfidReaderId = this.rfidReaderService.createRfidReader(MAC_ADDRESS);
+        // when
+        RfidReaderId rfidReaderId = this.rfidReaderService.createRfidReader(macAddress);
 
-        verify(this.outboxEventStore).save(this.events.capture());
-        assertThat(this.events.getValue()) //
-                .singleElement() //
-                .satisfies(event -> {
-                    assertThat(event.getType()).isEqualTo(EventType.RFID_READER_CREATED);
-                    assertThat(event.getAggregateId()).isEqualTo(rfidReaderId.getValue().toString());
-                });
+        // then
+        expectSavedEvent(EventType.RFID_READER_CREATED, rfidReaderId);
     }
 
     @Test
     void createRfidReader_rejectsAUsedMacAddress() {
-        RfidReader existing = RfidReader.of(MAC_ADDRESS);
-        when(this.rfidReaderRepository.findByMacAddress(MAC_ADDRESS.getValue())).thenReturn(Optional.of(existing));
+        // given
+        MacAddress macAddress = RandomValues.macAddress();
+        givenReaderWith(macAddress);
 
-        assertThatThrownBy(() -> this.rfidReaderService.createRfidReader(MAC_ADDRESS)) //
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderService.createRfidReader(macAddress));
+
+        // then
+        assertThat(thrown) //
                 .isInstanceOf(MacAddressAlreadyUsedException.class) //
                 .hasFieldOrPropertyWithValue("code", MacAddressAlreadyUsedException.CODE);
-
-        verify(this.rfidReaderRepository, never()).save(any());
-        verifyNoInteractions(this.outboxEventStore);
+        expectNothingSaved();
     }
 
     // ------------------------------------------------------------------------
@@ -83,29 +85,31 @@ class RfidReaderServiceTest {
 
     @Test
     void updateRfidReader_ofANewReaderWithoutType_changesNameAndSocketNameAndSavesTheEvent() {
+        // given
         RfidReader rfidReader = givenReader();
-        UpdateRfidReaderCommand command = UpdateRfidReaderCommand.builder() //
-                .id(rfidReader.getId()) //
-                .name("Theke") //
-                .socketName("socket-43") //
-                .build();
+        UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).build();
 
+        // when
         this.rfidReaderService.updateRfidReader(command);
 
-        assertThat(rfidReader.getName()).isEqualTo("Theke");
-        assertThat(rfidReader.getSocketName()).isEqualTo("socket-43");
+        // then
+        assertThat(rfidReader.getName()).isEqualTo(command.name());
+        assertThat(rfidReader.getSocketName()).isEqualTo(command.socketName());
         expectSavedEvent(EventType.RFID_READER_UPDATED, rfidReader.getId());
     }
 
     @Test
     void updateRfidReader_rejectsAnUnknownReader() {
-        RfidReaderId unknown = RfidReaderId.random();
-        when(this.rfidReaderRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
+        // given
+        RfidReaderId unknown = givenUnknownReader();
+        UpdateRfidReaderCommand command = updateRfidReaderCommand(unknown).build();
 
-        assertThatThrownBy(() -> this.rfidReaderService.updateRfidReader(UpdateRfidReaderCommand.builder().id(unknown).build())) //
-                .isInstanceOf(ResourceNotFoundException.class);
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderService.updateRfidReader(command));
 
-        verifyNoInteractions(this.outboxEventStore);
+        // then
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectNoEvent();
     }
 
     // ------------------------------------------------------------------------
@@ -113,28 +117,30 @@ class RfidReaderServiceTest {
 
     @Test
     void changeRfidReaderType_setsTheTypeAndSavesTheEvent() {
+        // given
         RfidReader rfidReader = givenReader();
-        ChangeRfidReaderTypeCommand command = ChangeRfidReaderTypeCommand.builder() //
-                .id(rfidReader.getId()) //
-                .type(RfidReaderType.SWITCH_BOX) //
-                .build();
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReader.getId()).build();
 
+        // when
         this.rfidReaderService.changeRfidReaderType(command);
 
-        assertThat(rfidReader.getType()).isEqualTo(RfidReaderType.SWITCH_BOX);
+        // then
+        assertThat(rfidReader.getType()).isEqualTo(command.type());
         expectSavedEvent(EventType.RFID_READER_TYPE_CHANGED, rfidReader.getId());
     }
 
     @Test
     void changeRfidReaderType_rejectsAnUnknownReader() {
-        RfidReaderId unknown = RfidReaderId.random();
-        when(this.rfidReaderRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
-        ChangeRfidReaderTypeCommand command = ChangeRfidReaderTypeCommand.builder().id(unknown).type(RfidReaderType.SWITCH_BOX).build();
+        // given
+        RfidReaderId unknown = givenUnknownReader();
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(unknown).build();
 
-        assertThatThrownBy(() -> this.rfidReaderService.changeRfidReaderType(command)) //
-                .isInstanceOf(ResourceNotFoundException.class);
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderService.changeRfidReaderType(command));
 
-        verifyNoInteractions(this.outboxEventStore);
+        // then
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectNoEvent();
     }
 
     // ------------------------------------------------------------------------
@@ -142,34 +148,62 @@ class RfidReaderServiceTest {
 
     @Test
     void deleteRfidReader_deletesTheReaderAndSavesTheEvent() {
+        // given
         RfidReader rfidReader = givenReader();
 
+        // when
         this.rfidReaderService.deleteRfidReader(rfidReader.getId());
 
+        // then
         verify(this.rfidReaderRepository).deleteById(rfidReader.getId().getValue());
         expectSavedEvent(EventType.RFID_READER_DELETED, rfidReader.getId());
     }
 
     @Test
     void deleteRfidReader_rejectsAnUnknownReader() {
-        RfidReaderId unknown = RfidReaderId.random();
-        when(this.rfidReaderRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
+        // given
+        RfidReaderId unknown = givenUnknownReader();
 
-        assertThatThrownBy(() -> this.rfidReaderService.deleteRfidReader(unknown)) //
-                .isInstanceOf(ResourceNotFoundException.class);
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderService.deleteRfidReader(unknown));
 
+        // then
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
         verify(this.rfidReaderRepository, never()).deleteById(any());
-        verifyNoInteractions(this.outboxEventStore);
+        expectNoEvent();
     }
 
     // ------------------------------------------------------------------------
-    // helper
+    // given
 
     private RfidReader givenReader() {
-        RfidReader rfidReader = RfidReader.of(MAC_ADDRESS);
+        RfidReader rfidReader = RfidReader.of(RandomValues.macAddress());
         when(this.rfidReaderRepository.findById(rfidReader.getId().getValue())).thenReturn(Optional.of(rfidReader));
+
         return rfidReader;
     }
+
+    private RfidReaderId givenUnknownReader() {
+        RfidReaderId unknown = RfidReaderId.random();
+        when(this.rfidReaderRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private void givenReaderWith(MacAddress macAddress) {
+        when(this.rfidReaderRepository.findByMacAddress(macAddress.getValue())).thenReturn(Optional.of(RfidReader.of(macAddress)));
+    }
+
+    private void givenNoReaderWith(MacAddress macAddress) {
+        when(this.rfidReaderRepository.findByMacAddress(macAddress.getValue())).thenReturn(Optional.empty());
+    }
+
+    private void givenSaveReturnsTheReader() {
+        when(this.rfidReaderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
 
     private void expectSavedEvent(EventType type, RfidReaderId rfidReaderId) {
         verify(this.outboxEventStore).save(this.events.capture());
@@ -179,6 +213,15 @@ class RfidReaderServiceTest {
                     assertThat(event.getType()).isEqualTo(type);
                     assertThat(event.getAggregateId()).isEqualTo(rfidReaderId.getValue().toString());
                 });
+    }
+
+    private void expectNothingSaved() {
+        verify(this.rfidReaderRepository, never()).save(any());
+        expectNoEvent();
+    }
+
+    private void expectNoEvent() {
+        verifyNoInteractions(this.outboxEventStore);
     }
 
 }

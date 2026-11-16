@@ -1,14 +1,16 @@
 package de.schaffbar.core_pos.use_case;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static de.schaffbar.core_pos.builder.CommandBuilder.changeRfidReaderTypeCommand;
+import static de.schaffbar.core_pos.builder.ViewBuilder.rfidReaderView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -22,20 +24,12 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
-import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 @ExtendWith(MockitoExtension.class)
 class RfidReaderChangeTypeTest {
-
-    private final RfidReaderId rfidReaderId = RfidReaderId.random();
-
-    private final ChangeRfidReaderTypeCommand command = ChangeRfidReaderTypeCommand.builder() //
-            .id(this.rfidReaderId) //
-            .type(RfidReaderType.GATE_KEEPER_IN) //
-            .build();
 
     @Mock
     private RfidReaderService rfidReaderService;
@@ -48,57 +42,97 @@ class RfidReaderChangeTypeTest {
 
     @Test
     void rejectsUnknownReader() {
-        when(this.rfidReaderService.getRfidReader(this.rfidReaderId)).thenReturn(Optional.empty());
+        // given
+        RfidReaderId unknown = givenUnknownReader();
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(unknown).build();
 
-        assertThatThrownBy(() -> this.rfidReaderChangeType.process(this.command)) //
-                .isInstanceOf(ResourceNotFoundException.class);
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderChangeType.process(command));
 
-        verify(this.rfidReaderService, never()).changeRfidReaderType(any());
+        // then
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectTypeNotChanged();
     }
 
     @Test
     void changesReaderThatIsNoSwitchBox_withoutLookingForTools() {
-        givenReaderOfType(RfidReaderType.RFID_TAG_ASSIGNER);
+        // given
+        RfidReaderId rfidReaderId = givenReaderOfType(RfidReaderType.RFID_TAG_ASSIGNER);
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReaderId).type(RfidReaderType.GATE_KEEPER_IN).build();
 
-        this.rfidReaderChangeType.process(this.command);
+        // when
+        this.rfidReaderChangeType.process(command);
 
-        verify(this.rfidReaderService).changeRfidReaderType(this.command);
+        // then
+        expectTypeChanged(command);
         verifyNoInteractions(this.toolService);
     }
 
     @Test
     void changesSwitchBoxWithoutTool() {
-        givenReaderOfType(RfidReaderType.SWITCH_BOX);
-        when(this.toolService.getTool(this.rfidReaderId)).thenReturn(Optional.empty());
+        // given
+        RfidReaderId rfidReaderId = givenReaderOfType(RfidReaderType.SWITCH_BOX);
+        givenNoToolWith(rfidReaderId);
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReaderId).type(RfidReaderType.GATE_KEEPER_IN).build();
 
-        this.rfidReaderChangeType.process(this.command);
+        // when
+        this.rfidReaderChangeType.process(command);
 
-        verify(this.rfidReaderService).changeRfidReaderType(this.command);
+        // then
+        expectTypeChanged(command);
     }
 
     @Test
     void rejectsSwitchBoxAssignedToTool() {
-        givenReaderOfType(RfidReaderType.SWITCH_BOX);
-        when(this.toolService.getTool(this.rfidReaderId)).thenReturn(Optional.of(mock(ToolView.class)));
+        // given
+        RfidReaderId rfidReaderId = givenReaderOfType(RfidReaderType.SWITCH_BOX);
+        givenToolWith(rfidReaderId);
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReaderId).type(RfidReaderType.GATE_KEEPER_IN).build();
 
-        assertThatThrownBy(() -> this.rfidReaderChangeType.process(this.command)) //
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderChangeType.process(command));
+
+        // then
+        assertThat(thrown) //
                 .isInstanceOf(RfidReaderHasToolAssignedException.class) //
                 .hasFieldOrPropertyWithValue("code", RfidReaderHasToolAssignedException.CODE);
-
-        verify(this.rfidReaderService, never()).changeRfidReaderType(any());
+        expectTypeNotChanged();
     }
 
     // ------------------------------------------------------------------------
-    // helper
+    // given
 
-    private void givenReaderOfType(RfidReaderType type) {
-        RfidReaderView rfidReader = RfidReaderView.builder() //
-                .id(this.rfidReaderId) //
-                .macAddress("34:CD:B0:D3:A9:30") //
-                .type(type) //
-                .createdAt(Instant.now()) //
-                .build();
-        when(this.rfidReaderService.getRfidReader(this.rfidReaderId)).thenReturn(Optional.of(rfidReader));
+    private RfidReaderId givenReaderOfType(RfidReaderType type) {
+        RfidReaderView rfidReader = rfidReaderView().type(type).build();
+        when(this.rfidReaderService.getRfidReader(rfidReader.id())).thenReturn(Optional.of(rfidReader));
+
+        return rfidReader.id();
+    }
+
+    private RfidReaderId givenUnknownReader() {
+        RfidReaderId unknown = RfidReaderId.random();
+        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private void givenToolWith(RfidReaderId rfidReaderId) {
+        when(this.toolService.getTool(rfidReaderId)).thenReturn(Optional.of(toolView().rfidReaderId(rfidReaderId).build()));
+    }
+
+    private void givenNoToolWith(RfidReaderId rfidReaderId) {
+        when(this.toolService.getTool(rfidReaderId)).thenReturn(Optional.empty());
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectTypeChanged(ChangeRfidReaderTypeCommand command) {
+        verify(this.rfidReaderService).changeRfidReaderType(command);
+    }
+
+    private void expectTypeNotChanged() {
+        verify(this.rfidReaderService, never()).changeRfidReaderType(any());
     }
 
 }

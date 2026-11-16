@@ -1,8 +1,9 @@
 package de.schaffbar.core_pos.use_case;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,14 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
-import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 @ExtendWith(MockitoExtension.class)
 class RfidReaderDeleteTest {
-
-    private final RfidReaderId rfidReaderId = RfidReaderId.random();
 
     @Mock
     private RfidReaderService rfidReaderService;
@@ -37,22 +35,42 @@ class RfidReaderDeleteTest {
 
     @Test
     void deletesReaderWithoutTool() {
-        when(this.toolService.getTool(this.rfidReaderId)).thenReturn(Optional.empty());
+        // given
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+        givenNoToolWith(rfidReaderId);
 
-        this.rfidReaderDelete.process(this.rfidReaderId);
+        // when
+        this.rfidReaderDelete.process(rfidReaderId);
 
-        verify(this.rfidReaderService).deleteRfidReader(this.rfidReaderId);
+        // then
+        verify(this.rfidReaderService).deleteRfidReader(rfidReaderId);
     }
 
     @Test
     void rejectsReaderAssignedToTool() {
-        when(this.toolService.getTool(this.rfidReaderId)).thenReturn(Optional.of(mock(ToolView.class)));
+        // given
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+        givenToolWith(rfidReaderId);
 
-        assertThatThrownBy(() -> this.rfidReaderDelete.process(this.rfidReaderId)) //
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderDelete.process(rfidReaderId));
+
+        // then
+        assertThat(thrown) //
                 .isInstanceOf(RfidReaderHasToolAssignedException.class) //
                 .hasFieldOrPropertyWithValue("code", RfidReaderHasToolAssignedException.CODE);
-
         verify(this.rfidReaderService, never()).deleteRfidReader(any());
+    }
+
+    // ------------------------------------------------------------------------
+    // given
+
+    private void givenToolWith(RfidReaderId rfidReaderId) {
+        when(this.toolService.getTool(rfidReaderId)).thenReturn(Optional.of(toolView().rfidReaderId(rfidReaderId).build()));
+    }
+
+    private void givenNoToolWith(RfidReaderId rfidReaderId) {
+        when(this.toolService.getTool(rfidReaderId)).thenReturn(Optional.empty());
     }
 
 }
