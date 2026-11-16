@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
 public final class GivenFixture {
@@ -34,6 +37,38 @@ public final class GivenFixture {
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return rfidReaderId;
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID tags
+
+    public RfidTagId rfidTag(Scenario scenario) {
+        MvcTestResult result = this.api.createRfidTag(scenario.rfidTagId());
+        assertThat(result).hasStatus(HttpStatus.CREATED);
+
+        return scenario.rfidTagId();
+    }
+
+    // ------------------------------------------------------------------------
+    // customers
+
+    public CustomerId customer() {
+        MvcTestResult result = this.api.createCustomer();
+        assertThat(result).hasStatus(HttpStatus.CREATED);
+
+        return CustomerId.of(SchaffbarApi.createdId(result));
+    }
+
+    public CustomerId customerWithRfidTag(RfidTagId rfidTagId) {
+        CustomerId customerId = customer();
+
+        MvcTestResult requested = this.api.requestRfidTagAssignment(customerId, RfidTagAssignmentType.FIXED);
+        assertThat(requested).hasStatus(HttpStatus.OK);
+
+        MvcTestResult assigned = this.api.assignRfidTag(rfidTagId);
+        assertThat(assigned).hasStatus(HttpStatus.OK);
+
+        return customerId;
     }
 
     // ------------------------------------------------------------------------

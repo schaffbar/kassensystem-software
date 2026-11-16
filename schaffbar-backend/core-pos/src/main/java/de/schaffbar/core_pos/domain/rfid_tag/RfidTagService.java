@@ -9,14 +9,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Slf4j
@@ -32,12 +33,14 @@ public class RfidTagService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<RfidTagView> getRfidTags() {
         return this.rfidTagRepository.findAll().stream() //
                 .map(RfidTagViews.MAPPER::toRfidTagView) //
                 .toList();
     }
 
+    @Query
     public Optional<RfidTagView> getRfidTag(@NotNull @Valid RfidTagId id) {
         return this.rfidTagRepository.findById(id.getValue()) //
                 .map(RfidTagViews.MAPPER::toRfidTagView);
@@ -46,11 +49,13 @@ public class RfidTagService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
-    public RfidTagId createRfidTag(@NotNull @Valid CreateRfidTagCommand command) {
-        // TODO: check if rfidTag with given id already exists
+    @Command
+    public RfidTagId createRfidTag(@NotNull @Valid RfidTagId id) {
+        if (this.rfidTagRepository.existsById(id.getValue())) {
+            throw new RfidTagAlreadyRegisteredException(id);
+        }
 
-        RfidTag rfidTag = RfidTag.of(command);
+        RfidTag rfidTag = RfidTag.of(id);
         RfidTag savedRfidTag = this.rfidTagRepository.save(rfidTag);
         List<SchaffbarEvent> events = List.of(RfidTagEventFactory.rfidTagCreated(savedRfidTag));
 
@@ -61,17 +66,14 @@ public class RfidTagService {
         return savedRfidTag.getId();
     }
 
-    @Transactional
+    @Command
     public void deleteRfidTag(@NotNull @Valid RfidTagId id) {
         RfidTagView rfidTag = getRfidTag(id) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidTag(id));
 
-        // TODO: check if RFID tag is assigned to a customer before deleting
-        // TODO: maybe force delete in some cases?
-
         this.rfidTagRepository.deleteById(rfidTag.id().getValue());
-
         List<SchaffbarEvent> events = List.of(RfidTagEventFactory.rfidTagDeleted(id));
+
         this.outboxEventStore.save(events);
 
         log.info("Deleted RFID tag with id {} and published events {}", id, events);

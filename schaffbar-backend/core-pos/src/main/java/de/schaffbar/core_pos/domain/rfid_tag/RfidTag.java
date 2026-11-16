@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Getter
@@ -39,9 +38,9 @@ class RfidTag {
     // ------------------------------------------------------------------------
     // static constructor
 
-    public static RfidTag of(CreateRfidTagCommand command) {
+    public static RfidTag of(RfidTagId rfidTagId) {
         RfidTag rfidTag = new RfidTag();
-        rfidTag.setId(command.rfidTagId());
+        rfidTag.setId(rfidTagId.getValue());
         rfidTag.setActive(true);
         rfidTag.setCreatedAt(Instant.now());
 

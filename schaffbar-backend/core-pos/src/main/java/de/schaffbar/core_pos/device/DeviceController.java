@@ -32,7 +32,6 @@ import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
-import de.schaffbar.core_pos.domain.rfid_tag.RfidTagCommands.CreateRfidTagCommand;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagService;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
@@ -272,8 +271,7 @@ public class DeviceController {
             return CounterResponse.registerError("RFID bereits vorhanden!");
         }
         else {
-            CreateRfidTagCommand command = new CreateRfidTagCommand(rfid.getValue());
-            this.rfidTagService.createRfidTag(command);
+            this.rfidTagService.createRfidTag(rfid);
 
             return CounterResponse.registerOk();
         }

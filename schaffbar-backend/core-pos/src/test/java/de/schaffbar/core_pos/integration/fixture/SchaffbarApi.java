@@ -8,8 +8,11 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
 public final class SchaffbarApi {
@@ -61,6 +64,72 @@ public final class SchaffbarApi {
 
     public MvcTestResult deleteRfidReader(RfidReaderId rfidReaderId) {
         return this.mvc.delete().uri("/api/v1/rfid-readers/{rfidReaderId}", rfidReaderId.getValue()).exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID tags
+
+    public MvcTestResult getRfidTag(RfidTagId rfidTagId) {
+        return this.mvc.get().uri("/api/v1/rfid-tags/{rfidTagId}", rfidTagId.getValue()).exchange();
+    }
+
+    public MvcTestResult createRfidTag(RfidTagId rfidTagId) {
+        return this.mvc.post().uri("/api/v1/rfid-tags") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "rfidTagId": "%s" }
+                        """.formatted(rfidTagId.getValue())) //
+                .exchange();
+    }
+
+    public MvcTestResult deleteRfidTag(RfidTagId rfidTagId) {
+        return this.mvc.delete().uri("/api/v1/rfid-tags/{rfidTagId}", rfidTagId.getValue()).exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID tag assignments
+
+    public MvcTestResult requestRfidTagAssignment(CustomerId customerId, RfidTagAssignmentType assignmentType) {
+        return this.mvc.post().uri("/api/v1/rfid-tag-assignments") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "customerId": "%s", "assignmentType": "%s" }
+                        """.formatted(customerId.getValue(), assignmentType.name())) //
+                .exchange();
+    }
+
+    public MvcTestResult assignRfidTag(RfidTagId rfidTagId) {
+        return this.mvc.put().uri("/api/v1/rfid-tag-assignments/assign") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "rfidTagId": "%s" }
+                        """.formatted(rfidTagId.getValue())) //
+                .exchange();
+    }
+
+    public MvcTestResult unassignRfidTag(CustomerId customerId) {
+        return this.mvc.put().uri("/api/v1/rfid-tag-assignments/unassign") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "customerId": "%s" }
+                        """.formatted(customerId.getValue())) //
+                .exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // customers
+
+    public MvcTestResult createCustomer() {
+        return this.mvc.post().uri("/api/v1/customers") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        {
+                          "firstName": "Erika", "lastName": "Mustermann", "dateOfBirth": "1990-01-31", "clubMember": false,
+                          "email": "erika@example.org", "phone": null,
+                          "addressLine1": "Hauptstraße 1", "addressLine2": null, "postalCode": "12345", "city": "Berlin", "country": "DE"
+                        }
+                        """) //
+                .exchange();
     }
 
     // ------------------------------------------------------------------------

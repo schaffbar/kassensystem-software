@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 public final class ThenFixture {
 
@@ -48,6 +49,17 @@ public final class ThenFixture {
 
         assertThat(result).hasStatus(HttpStatus.OK);
         assertThat(result).bodyJson().extractingPath("$").asArray().hasSize(count);
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID tags
+
+    public void expectRfidTag(RfidTagId rfidTagId) {
+        assertThat(this.api.getRfidTag(rfidTagId)).hasStatus(HttpStatus.OK);
+    }
+
+    public void expectNoRfidTag(RfidTagId rfidTagId) {
+        expectProblem(this.api.getRfidTag(rfidTagId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
     }
 
 }

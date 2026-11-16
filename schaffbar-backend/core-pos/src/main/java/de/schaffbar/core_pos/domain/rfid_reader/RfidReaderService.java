@@ -102,8 +102,8 @@ public class RfidReaderService {
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(id));
 
         this.rfidReaderRepository.deleteById(rfidReader.id().getValue());
-
         List<SchaffbarEvent> events = List.of(RfidReaderEventFactory.rfidReaderDeleted(id));
+
         this.outboxEventStore.save(events);
 
         log.info("Deleted RFID reader with id {} and published events {}", id, events);
