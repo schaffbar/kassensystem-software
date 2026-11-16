@@ -100,7 +100,8 @@ Entscheidung 13.11.2026.
    Unterbau `ApiExceptionHandler`, `OutboxEventStore`, ArchUnit mit Freeze-Store, Spotless, Skill `aggregate`; Portal
    zeigt den übersetzten Code. Details: `backend-consistency.md`, Abschnitt „Pilot (K3)“.
 4. [ ] **Ausrollen** Aggregat für Aggregat – die Arbeitsliste ist der Freeze-Store `core-pos/archunit_store/`;
-   dazu der `DeviceController` (E4) und das Dashboard als Read Facades (E17).
+   dazu der `DeviceController` (E4) und das Dashboard als Read Facades (E17); die Tests des Aggregats nach dem
+   Skill `backend-testing` (Abschnitt „Not everywhere yet“).
 5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
