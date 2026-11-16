@@ -1,0 +1,21 @@
+meta {
+  name: Unassign RFID tag
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{domain_url}}/api/v1/rfid-tag-assignments/unassign
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customerId": "788779c4-bd97-450d-b655-e4814caa2e73"
+  }
+}

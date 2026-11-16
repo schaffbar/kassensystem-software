@@ -1,0 +1,22 @@
+meta {
+  name: Request RFID tag assignment
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{domain_url}}/api/v1/rfid-tag-assignments
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customerId": "788779c4-bd97-450d-b655-e4814caa2e73",
+    "assignmentType": "FIXED"
+  }
+}

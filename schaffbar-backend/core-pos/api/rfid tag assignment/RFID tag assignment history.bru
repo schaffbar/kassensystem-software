@@ -1,0 +1,15 @@
+meta {
+  name: RFID tag assignment history
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{domain_url}}/api/v1/rfid-tag-assignment-history
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
