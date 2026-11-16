@@ -45,7 +45,7 @@ für nachgelagerte Konsumenten.
 Jedes Aggregat in diesem Projekt folgt einer einheitlichen internen Struktur. Dieser Abschnitt dokumentiert das Muster,
 damit jedes Modul leicht verständlich und erweiterbar ist.
 
-```
+```txt
 <aggregat_name>/
 │
 ├── <Aggregat>.java               # Aggregat-Root (Entität)
@@ -66,7 +66,7 @@ damit jedes Modul leicht verständlich und erweiterbar ist.
 ### Komponentenverantwortlichkeiten
 
 | Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                                   |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Aggregat-Root**         | Kapselt Zustand und Invarianten. Alle Mutationen erfolgen über Command-Methoden, die `List<SchaffbarEvent>` zurückgeben. Statische `of(...)`-Fabrik für die Erstellung gibt ein `*WithEvents`-Record zurück, das die Entität und ihre Erstellungsereignisse enthält. |
 | **Commands**              | Unveränderliche Java-`record`-Typen mit Bean-Validation-Annotationen. Gruppiert in einem `*Commands`-Interface.                                                                                                                                                      |
 | **Service**               | Validiert Existenz, erzwingt Eindeutigkeitsconstraints (aggregatübergreifende Prüfungen), delegiert an das Aggregat-Root, persistiert Entität und Outbox-Events in einer einzigen `@Transactional`-Grenze.                                                           |
@@ -119,8 +119,8 @@ class
 Die detaillierte Dokumentation jedes Aggregats (Attribute, Kommandos, Geschäftsregeln, Domänenereignisse) befindet sich
 in einer `README.md` innerhalb des jeweiligen Pakets. So bleibt die Dokumentation nah am Code, den sie beschreibt.
 
-| #    | Aggregat                                      | Paket                                                      | Identität                    | README                                                                                                                |
-|------|-----------------------------------------------|------------------------------------------------------------|------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| #    | Aggregat                                      | Paket                                                      | Identität                    | README                                                                                                                       |
+| ---- | --------------------------------------------- | ---------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | 3.1  | Customer (Kunde)                              | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                                       |
 | 3.2  | Tool (Werkzeug)                               | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                                               |
 | 3.3  | RfidReader (RFID-Lesegerät)                   | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                                 |
@@ -143,7 +143,7 @@ Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use
 `CustomerDelete`, `RfidReaderDelete`, `ToolClearRfidReader`).
 
 | Anwendungsfall                     | Beschreibung                                                                                                                                                                                  | Beteiligte Aggregate                                               |
-|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `EnterWorkshop`                    | Kunde betritt die Werkstatt. Erstellt eine Sitzung falls keine existiert, dann erstellt einen Nutzungseintrag.                                                                                | WorkshopSession, WorkshopUsage                                     |
 | `LeaveWorkshop`                    | Kunde verlässt die Werkstatt. Stoppt alle aktiven Werkzeugnutzungen, dann erfasst Austrittszeit.                                                                                              | WorkshopSession, WorkshopUsage, ToolUsage                          |
 | `CloseSession`                     | Schließt die Werkstatt-Sitzung eines Kunden (als PAID markieren).                                                                                                                             | Customer, WorkshopSession                                          |
@@ -159,14 +159,15 @@ Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use
 | `CustomerUnassignRfidTag`          | Entfernt den RFID-Chip vom Kunden, verschiebt den Datensatz in die Historie.                                                                                                                  | Customer, RfidTagAssignment, RfidTagAssignmentHistory              |
 | `ToolCreate`                       | Erstellt ein Werkzeug mit optionaler RFID-Lesegerät-Validierung (muss SWITCH_BOX sein).                                                                                                       | RfidReader, Tool                                                   |
 | `ToolAssignRfidReader`             | Ordnet ein RFID-Lesegerät einem Werkzeug zu (Lesegerät muss SWITCH_BOX sein).                                                                                                                 | RfidReader, Tool                                                   |
-| `ChangeRfidReaderType`             | Ändert den Typ eines RFID-Lesegeräts. Wenn aktueller Typ SWITCH_BOX und Werkzeug zugeordnet → Fehler.                                                                                         | RfidReader, Tool                                                   |
+| `RfidReaderChangeType`             | Ändert den Typ eines RFID-Lesegeräts. Wenn aktueller Typ SWITCH_BOX und Werkzeug zugeordnet → Fehler.                                                                                         | RfidReader, Tool                                                   |
+| `RfidTagDelete`                    | Löscht einen RFID-Tag – abgelehnt, solange er einer Person zugewiesen ist.                                                                                                                    | RfidTag, RfidTagAssignment                                         |
 
 ---
 
 ## 5. Lesemodelle (Query Services)
 
 | Dienst                     | Endpunkt-Konzept       | Beschreibung                                                                                                                                                   |
-|----------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `WorkshopDashboardService` | Aktive Werkstattnutzer | Aggregatübergreifende Abfrage, die aktive `WorkshopUsage`-Einträge mit `Customer`-Daten kombiniert, um anzuzeigen, wer sich aktuell in der Werkstatt befindet. |
 
 Die `WorkshopDashboardEntryView` liefert:
@@ -180,7 +181,7 @@ Die `WorkshopDashboardEntryView` liefert:
 Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
 
 | Wertobjekt            | Umschließt | Verwendet für                     |
-|-----------------------|------------|-----------------------------------|
+| --------------------- | ---------- | --------------------------------- |
 | `CustomerId`          | `UUID`     | Kundenidentität                   |
 | `ToolId`              | `UUID`     | Werkzeugidentität                 |
 | `ToolUsageId`         | `UUID`     | Werkzeugnutzungsidentität         |
@@ -206,7 +207,7 @@ Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
 
 ### Ereignisfluss
 
-```
+```txt
 Command-Methode (Aggregat-Root)
   └── Gibt List<SchaffbarEvent> zurück
         └── Service speichert in OutboxEventRepository
@@ -216,7 +217,7 @@ Command-Methode (Aggregat-Root)
 
 ### Muster zur Ereigniserstellung
 
-```
+```txt
 EventFactory.einEreignis(aggregat)
   ├── PayloadMapper.MAPPER.zuPayload(aggregat)         // MapStruct-Mapping
   ├── payload.validate()                                 // Bean Validation
@@ -226,14 +227,14 @@ EventFactory.einEreignis(aggregat)
 ### Vollständige Ereignisliste
 
 | Aggregat          | Ereignistyp                                                                                                                                                                                                       |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Customer          | `CUSTOMER_CREATED`, `CUSTOMER_UPDATED`, `CUSTOMER_CONTACT_CHANGED`, `CUSTOMER_ADDRESS_CHANGED`, `CUSTOMER_DELETED`                                                                                                |
 | Tool              | `TOOL_CREATED`, `TOOL_UPDATED`, `TOOL_WLAN_RELAIS_SET`, `TOOL_WLAN_RELAIS_CLEARED`, `TOOL_RFID_READER_ASSIGNED`, `TOOL_RFID_READER_CLEARED`, `TOOL_INSTRUCTORS_ADDED`, `TOOL_INSTRUCTORS_REMOVED`, `TOOL_DELETED` |
 | ToolUsage         | `TOOL_USAGE_STARTED`, `TOOL_USAGE_STOPPED`                                                                                                                                                                        |
 | ToolCertification | `TOOL_CERTIFICATION_CREATED`, `TOOL_CERTIFICATION_PAUSED`, `TOOL_CERTIFICATION_REACTIVATED`, `TOOL_CERTIFICATION_REVOKED`, `TOOL_CERTIFICATION_DELETED`                                                           |
 | RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_DELETED`                                                                                                                                               |
 | RfidTag           | `RFID_TAG_CREATED`, `RFID_TAG_DELETED`                                                                                                                                                                            |
-| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                                                       |
+| RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                      |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |
 | WorkshopUsage     | `WORKSHOP_USAGE_ENTERED`, `WORKSHOP_USAGE_LEFT`                                                                                                                                                                   |
 
@@ -241,14 +242,12 @@ EventFactory.einEreignis(aggregat)
 
 ## Anhang: Bekannte TODOs und offene Designfragen
 
-| Stelle                                 | Beschreibung                                                                                                           |
-|----------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `RfidReaderService.createRfidReader()` | Prüfung auf doppelte MAC-Adresse bei Erstellung                                                                        |
-| `RfidTagAssignment.assignRfidTag()`    | Validieren, dass die Zuordnung im Status `WAITING_FOR_ASSIGNMENT` ist                                                  |
-| `EnterWorkshop.process()`              | ~~Prüfen, ob der Kunde ein gültiges Zertifikat zum Betreten hat~~ — gelöst über Einweisungsprüfung in `StartToolUsage` |
-| `WorkshopUsage`                        | Umbenennung zu `WorkshopSlot` oder `UsageSlot` erwägen                                                                 |
-| `RfidTagAssignmentHistory`             | Umbenennung des ID-Typs zu `RfidTagAssignmentHistoryId` erwägen                                                        |
-| `RfidTagCommands.CreateRfidTagCommand` | `rfidTagId` auf `RfidTagId`-Wertobjekt umstellen                                                                       |
-| `*Service.saveOutboxEvents()`          | DRY — Methode ist in allen Services dupliziert, in Basisklasse oder Hilfsklasse extrahieren                            |
-| `WorkshopSessionService`               | Namensinkonsistenz — einheitlich entweder „active" oder „open" für Sitzungen verwenden                                 |
-| `EventType`                            | Umbenennung von `WORKSHOP_USAGE_ENTERED` / `LEFT` zu `WORKSHOP_ENTERED` / `EXITED` erwägen                             |
+| Stelle                              | Beschreibung                                                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `RfidTagAssignment.assignRfidTag()` | Validieren, dass die Zuordnung im Status `WAITING_FOR_ASSIGNMENT` ist                                                  |
+| `EnterWorkshop.process()`           | ~~Prüfen, ob der Kunde ein gültiges Zertifikat zum Betreten hat~~ — gelöst über Einweisungsprüfung in `StartToolUsage` |
+| `WorkshopUsage`                     | Umbenennung zu `WorkshopSlot` oder `UsageSlot` erwägen                                                                 |
+| `RfidTagAssignmentHistory`          | Umbenennung des ID-Typs zu `RfidTagAssignmentHistoryId` erwägen                                                        |
+| `*Service.saveOutboxEvents()`       | DRY — Methode ist in allen Services dupliziert, in Basisklasse oder Hilfsklasse extrahieren                            |
+| `WorkshopSessionService`            | Namensinkonsistenz — einheitlich entweder „active" oder „open" für Sitzungen verwenden                                 |
+| `EventType`                         | Umbenennung von `WORKSHOP_USAGE_ENTERED` / `LEFT` zu `WORKSHOP_ENTERED` / `EXITED` erwägen                             |

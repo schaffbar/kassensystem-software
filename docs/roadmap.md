@@ -101,7 +101,18 @@ Entscheidung 13.11.2026.
    zeigt den übersetzten Code. Details: `backend-consistency.md`, Abschnitt „Pilot (K3)“.
 4. [ ] **Ausrollen** Aggregat für Aggregat – die Arbeitsliste ist der Freeze-Store `core-pos/archunit_store/`;
    dazu der `DeviceController` (E4) und das Dashboard als Read Facades (E17); die Tests des Aggregats nach dem
-   Skill `backend-testing` (Abschnitt „Not everywhere yet“).
+   Skill `backend-testing` (Abschnitt „Not everywhere yet“). Reihenfolge von außen nach innen (16.11.2026) – wer
+   wenig aufruft, zuerst; der Werkstattablauf hängt an allem und kommt zuletzt:
+   - [x] `rfid_tag` – 16.11.2026: ohne `CreateRfidTagCommand` (E1), `RfidTagReadFacade`, Use Cases `RfidTagCreate` /
+     `RfidTagDelete`; RT-3 (zugewiesener Tag nicht löschbar) jetzt im Backend, neu RT-5 (Tag nur einmal registriert);
+     Codes `RFID_TAG_ASSIGNED_TO_CUSTOMER`, `RFID_TAG_ALREADY_REGISTERED` im Portal übersetzt; Akzeptanztest
+   - [ ] `rfid_tag_assignment` mit Historie (E16 entscheiden)
+   - [ ] `customer` mit seinen Use Cases (Tags, `CustomerDelete`)
+   - [ ] `tool` (ggf. in zwei Commits: Aggregat und Service, dann Use Cases)
+   - [ ] `tool_certification` (Use Cases umbenennen: `ToolCertificationPause` …)
+   - [ ] Werkstattablauf: `workshop_usage` + `workshop_session` (`EnterWorkshop`, `LeaveWorkshop`, `CloseSession`),
+     `tool_usage` (`StartToolUsage`, `StopToolUsage`), `DeviceController` (E4), Übersicht als Read Facades (E17),
+     Akzeptanztest Einchecken bis Abrechnen
 5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur

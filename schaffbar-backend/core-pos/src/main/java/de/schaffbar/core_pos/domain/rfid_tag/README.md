@@ -15,27 +15,26 @@
 
 ## Commands
 
-| Command                | Fields             |
-|------------------------|--------------------|
-| `CreateRfidTagCommand` | rfidTagId (String) |
+No command records – both changes take only the id (E1):
+
+| Change | Input                                |
+|--------|--------------------------------------|
+| create | rfidTagId (`RfidTagId` value object) |
+| delete | rfidTagId (`RfidTagId` value object) |
 
 ## Business Rules / Invariants
 
-| #    | Rule                                 | Enforced in                                     |
-|------|--------------------------------------|-------------------------------------------------|
-| RT-1 | RFID Tag ID must not be blank        | `@NotBlank` on `CreateRfidTagCommand.rfidTagId` |
-| RT-2 | Newly created tags are always active | `RfidTag.of()` sets `active = true`             |
+| #    | Rule                                                                 | Enforced in                                                                   |
+|------|----------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| RT-1 | RFID Tag ID must not be blank                                        | `RfidTagId` value object, Bean Validation                                     |
+| RT-2 | Newly created tags are always active                                 | `RfidTag.of()` sets `active = true`                                           |
+| RT-3 | An assigned RFID tag cannot be deleted – it must be unassigned first | `RfidTagDelete` use case (`RfidTagAssignedToCustomerException`, `409`)        |
+| RT-5 | A tag (hardware id) is registered only once                          | `RfidTagService.createRfidTag()` (`RfidTagAlreadyRegisteredException`, `409`) |
 
 ## Open Rules
 
 Rules the portal already follows or the UI redesign plans, but the backend does not enforce yet. When one is
 implemented, move it to "Business Rules / Invariants".
-
-### Enforced only in the portal
-
-| #    | Rule                                                                                     | Status                                                                                                                                                              |
-|------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| RT-3 | An assigned RFID tag cannot be deleted – it must be unassigned first (reject with `409`) | Portal: "Tag löschen" only without assignment (`canDeleteRfidTag`). `RfidTagService.deleteRfidTag` has a TODO, `rfid_tag_assignment.rfid_tag_id` has no foreign key |
 
 ### Planned (not implemented yet)
 
