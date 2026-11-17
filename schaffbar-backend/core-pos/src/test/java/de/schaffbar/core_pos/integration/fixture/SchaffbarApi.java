@@ -2,13 +2,6 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
 
-import java.util.UUID;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -21,22 +14,14 @@ import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.support.Json;
 
 public final class SchaffbarApi {
-
-    private static final ObjectMapper JSON = new ObjectMapper() //
-            .registerModule(new JavaTimeModule()) //
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final MockMvcTester mvc;
 
     SchaffbarApi(MockMvcTester mvc) {
         this.mvc = mvc;
-    }
-
-    static UUID createdId(MvcTestResult result) {
-        String location = result.getResponse().getHeader(HttpHeaders.LOCATION);
-        return UUID.fromString(location.substring(location.lastIndexOf('/') + 1));
     }
 
     // ------------------------------------------------------------------------
@@ -150,7 +135,7 @@ public final class SchaffbarApi {
     public MvcTestResult createCustomer(CreateCustomerCommand command) {
         return this.mvc.post().uri("/api/v1/customers") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)) //
+                .content(Json.write(command)) //
                 .exchange();
     }
 
@@ -229,18 +214,6 @@ public final class SchaffbarApi {
                         { "DEVUSECASE": "test", "MACADDR": "%s", "RFID": "%s" }
                         """.formatted(macAddress.getValue(), rfidTagId.getValue())) //
                 .exchange();
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    private String json(Object body) {
-        try {
-            return JSON.writeValueAsString(body);
-        }
-        catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
 }

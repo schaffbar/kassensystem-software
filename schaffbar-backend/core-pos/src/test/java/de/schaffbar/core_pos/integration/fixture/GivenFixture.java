@@ -2,6 +2,9 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
@@ -28,7 +31,7 @@ public final class GivenFixture {
         MvcTestResult result = this.api.createRfidReader(macAddress);
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
-        return RfidReaderId.of(SchaffbarApi.createdId(result));
+        return RfidReaderId.of(createdId(result));
     }
 
     public RfidReaderId rfidReader(MacAddress macAddress, RfidReaderType type) {
@@ -61,7 +64,7 @@ public final class GivenFixture {
         MvcTestResult result = this.api.createCustomer();
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
-        return CustomerId.of(SchaffbarApi.createdId(result));
+        return CustomerId.of(createdId(result));
     }
 
     public CustomerId customerWaitingForRfidTag() {
@@ -105,7 +108,7 @@ public final class GivenFixture {
         MvcTestResult result = this.api.createTool(scenario.toolName());
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
-        return ToolId.of(SchaffbarApi.createdId(result));
+        return ToolId.of(createdId(result));
     }
 
     public CustomerId instructor(ToolId toolId) {
@@ -130,6 +133,14 @@ public final class GivenFixture {
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return toolId;
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private UUID createdId(MvcTestResult result) {
+        String location = result.getResponse().getHeader(HttpHeaders.LOCATION);
+        return UUID.fromString(location.substring(location.lastIndexOf('/') + 1));
     }
 
 }
