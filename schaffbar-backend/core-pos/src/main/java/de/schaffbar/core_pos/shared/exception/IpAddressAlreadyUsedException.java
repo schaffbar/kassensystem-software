@@ -5,15 +5,17 @@ import java.io.Serial;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
-public class IpAddressAlreadyUsedException extends RuntimeException {
+public class IpAddressAlreadyUsedException extends BusinessRuleViolationException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private static final String MESSAGE = "IP address '%s' is already used by tool [id: %s]";
 
+    public static final String CODE = "IP_ADDRESS_ALREADY_USED";
+
     public IpAddressAlreadyUsedException(IpAddress ipAddress, ToolId toolId) {
-        super(String.format(MESSAGE, ipAddress.getValue(), toolId.getValue()), null);
+        super(CODE, String.format(MESSAGE, ipAddress.getValue(), toolId.getValue()));
     }
 
 }
