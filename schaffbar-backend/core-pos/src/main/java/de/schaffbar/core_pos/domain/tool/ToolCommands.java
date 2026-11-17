@@ -7,6 +7,7 @@ import lombok.Builder;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.id.IpAddress;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 public interface ToolCommands {
 
@@ -22,6 +23,7 @@ public interface ToolCommands {
     @Builder
     @Validated
     record UpdateToolCommand( //
+            @NotNull @Valid ToolId id, //
             @NotBlank String name, //
             String description, //
             @NotNull ToolArea area, //
@@ -31,6 +33,7 @@ public interface ToolCommands {
     @Builder
     @Validated
     record SetWlanRelaisCommand( //
+            @NotNull @Valid ToolId id, //
             @NotNull WlanRelaisType wlanRelaisType, //
             @NotNull @Valid IpAddress ipAddress //
     ) {}

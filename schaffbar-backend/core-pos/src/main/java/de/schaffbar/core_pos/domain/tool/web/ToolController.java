@@ -116,8 +116,8 @@ public class ToolController {
             @PathVariable @NotNull @Valid ToolId toolId, //
             @RequestBody @NotNull @Valid UpdateToolRequestBody requestBody //
     ) {
-        UpdateToolCommand command = ToolApiModel.MAPPER.toUpdateToolCommand(requestBody);
-        this.toolUpdate.process(toolId, command);
+        UpdateToolCommand command = ToolApiModel.MAPPER.toUpdateToolCommand(toolId, requestBody);
+        this.toolUpdate.process(command);
 
         return ResponseEntity.noContent().build();
     }
@@ -144,8 +144,8 @@ public class ToolController {
             @PathVariable @NotNull @Valid ToolId toolId, //
             @RequestBody @NotNull @Valid SetWlanRelaisRequestBody requestBody //
     ) {
-        SetWlanRelaisCommand command = ToolApiModel.MAPPER.toSetWlanRelaisCommand(requestBody);
-        this.toolSetWlanRelais.process(toolId, command);
+        SetWlanRelaisCommand command = ToolApiModel.MAPPER.toSetWlanRelaisCommand(toolId, requestBody);
+        this.toolSetWlanRelais.process(command);
 
         return ResponseEntity.noContent().build();
     }

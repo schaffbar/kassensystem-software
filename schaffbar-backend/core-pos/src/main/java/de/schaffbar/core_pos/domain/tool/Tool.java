@@ -148,6 +148,10 @@ class Tool {
     }
 
     public List<SchaffbarEvent> assignRfidReader(RfidReaderId rfidReaderId) {
+        if (rfidReaderId.sameValueAs(getRfidReaderId())) {
+            return List.of();
+        }
+
         setRfidReaderId(rfidReaderId.getValue());
 
         return List.of(ToolEventFactory.toolRfidReaderAssigned(getId(), rfidReaderId));

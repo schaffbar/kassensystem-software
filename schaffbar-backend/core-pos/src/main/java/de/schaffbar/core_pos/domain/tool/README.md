@@ -24,11 +24,11 @@
 
 ## Commands
 
-| Command                 | Fields                                             |
-|-------------------------|----------------------------------------------------|
-| `CreateToolCommand`     | name, description, area, certificationRequirement  |
-| `UpdateToolCommand`     | name, description, area, certificationRequirement  |
-| `SetWlanRelaisCommand`  | wlanRelaisType, ipAddress                          |
+| Command                | Fields                                                |
+|------------------------|-------------------------------------------------------|
+| `CreateToolCommand`    | name, description, area, certificationRequirement     |
+| `UpdateToolCommand`    | id, name, description, area, certificationRequirement |
+| `SetWlanRelaisCommand` | id, wlanRelaisType, ipAddress                         |
 
 ## Business Rules / Invariants
 
@@ -41,7 +41,7 @@
 | T-5  | When `wlanRelaisType` is set, `ipAddress` is required                                                                                   | `SetWlanRelaisCommand` — Bean Validation `@NotNull`                  |
 | T-6  | WLAN-Relais commands (`httpStartCommand`, `onCommand`, `offCommand`) are derived from the `WlanRelaisType` template — not user-settable | `Tool.setWlanRelais()`                                               |
 | T-7  | Clearing WLAN-Relais resets all relais-related fields to null                                                                           | `Tool.clearWlanRelais()`                                             |
-| T-8  | If assigning an RFID reader that is already assigned to the same tool → no-op (idempotent)                                              | `ToolService.assignRfidReader()`                                     |
+| T-8  | If assigning an RFID reader that is already assigned to the same tool → no-op (idempotent)                                              | `Tool.assignRfidReader()` (no event)                                 |
 | T-9  | Only RFID readers of type `SWITCH_BOX` can be assigned to tools                                                                         | `ToolAssignRfidReader` use case                                      |
 | T-10 | `area` and `certificationRequirement` are mandatory and set at creation                                                                 | Bean Validation `@NotNull`                                           |
 | T-11 | `area` and `certificationRequirement` can only be changed together with name and description via `UpdateToolCommand`                    | `Tool.update()`, `UpdateToolCommand`                                 |

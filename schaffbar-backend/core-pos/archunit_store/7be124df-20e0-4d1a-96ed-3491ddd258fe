@@ -15,5 +15,3 @@ Method <de.schaffbar.core_pos.use_case.ToolClearWlanRelais.process(de.schaffbar.
 Method <de.schaffbar.core_pos.use_case.ToolCreate.process(de.schaffbar.core_pos.domain.tool.ToolCommands$CreateToolCommand)> is not annotated with @Command in (ToolCreate.java:24)
 Method <de.schaffbar.core_pos.use_case.ToolDelete.process(de.schaffbar.core_pos.shared.id.ToolId)> is not annotated with @Command in (ToolDelete.java:26)
 Method <de.schaffbar.core_pos.use_case.ToolRemoveInstructors.process(de.schaffbar.core_pos.shared.id.ToolId, java.util.List)> is not annotated with @Command in (ToolRemoveInstructors.java:31)
-Method <de.schaffbar.core_pos.use_case.ToolSetWlanRelais.process(de.schaffbar.core_pos.shared.id.ToolId, de.schaffbar.core_pos.domain.tool.ToolCommands$SetWlanRelaisCommand)> is not annotated with @Command in (ToolSetWlanRelais.java:24)
-Method <de.schaffbar.core_pos.use_case.ToolUpdate.process(de.schaffbar.core_pos.shared.id.ToolId, de.schaffbar.core_pos.domain.tool.ToolCommands$UpdateToolCommand)> is not annotated with @Command in (ToolUpdate.java:24)

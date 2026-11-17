@@ -18,8 +18,19 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidRea
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand.UpdateRfidReaderCommandBuilder;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
+import de.schaffbar.core_pos.domain.tool.ToolArea;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand.CreateToolCommandBuilder;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand.SetWlanRelaisCommandBuilder;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
+import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand.UpdateToolCommandBuilder;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandBuilder {
@@ -100,6 +111,41 @@ public class CommandBuilder {
         return ChangeRfidReaderTypeCommand.builder() //
                 .id(id) //
                 .type(RfidReaderType.SWITCH_BOX);
+    }
+
+    // ------------------------------------------------------------------------
+    // tool
+
+    public static CreateToolCommandBuilder createToolCommand() {
+        return CreateToolCommand.builder() //
+                .name(RandomValues.toolName()) //
+                .description("Für Längs- und Querschnitte") //
+                .area(ToolArea.HOLZ) //
+                .certificationRequirement(CertificationRequirement.RED);
+    }
+
+    public static UpdateToolCommandBuilder updateToolCommand() {
+        return updateToolCommand(ToolId.random());
+    }
+
+    public static UpdateToolCommandBuilder updateToolCommand(ToolId id) {
+        return UpdateToolCommand.builder() //
+                .id(id) //
+                .name(RandomValues.toolName()) //
+                .description("Mit Absaugung") //
+                .area(ToolArea.METALL) //
+                .certificationRequirement(CertificationRequirement.YELLOW);
+    }
+
+    public static SetWlanRelaisCommandBuilder setWlanRelaisCommand() {
+        return setWlanRelaisCommand(ToolId.random());
+    }
+
+    public static SetWlanRelaisCommandBuilder setWlanRelaisCommand(ToolId id) {
+        return SetWlanRelaisCommand.builder() //
+                .id(id) //
+                .wlanRelaisType(WlanRelaisType.SHELLY_PRO) //
+                .ipAddress(IpAddress.of("192.168.1.50"));
     }
 
 }

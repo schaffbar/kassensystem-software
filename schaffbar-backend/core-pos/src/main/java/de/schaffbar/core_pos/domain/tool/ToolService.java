@@ -19,6 +19,7 @@ import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
@@ -84,32 +85,32 @@ public class ToolService {
         return savedTool.getId();
     }
 
-    @Transactional
-    public void updateTool(@NotNull @Valid ToolId toolId, @NotNull @Valid UpdateToolCommand command) {
-        Tool tool = findOrThrow(toolId);
+    @Command
+    public void updateTool(@NotNull @Valid UpdateToolCommand command) {
+        Tool tool = findOrThrow(command.id());
 
         this.toolRepository.findByName(command.name()) //
-                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
+                .filter(existing -> isFalse(command.id().sameValueAs(existing.getId()))) //
                 .ifPresent(existing -> throwToolNameAlreadyUsedException(command.name(), existing));
 
         List<SchaffbarEvent> events = tool.update(command);
         this.outboxEventStore.save(events);
 
-        log.info("Updated tool with id {} and published events {}", toolId, events);
+        log.info("Updated tool with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
-    public void setWlanRelais(@NotNull @Valid ToolId toolId, @NotNull @Valid SetWlanRelaisCommand command) {
-        Tool tool = findOrThrow(toolId);
+    @Command
+    public void setWlanRelais(@NotNull @Valid SetWlanRelaisCommand command) {
+        Tool tool = findOrThrow(command.id());
 
         this.toolRepository.findByIpAddress(command.ipAddress().getValue()) //
-                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
+                .filter(existing -> isFalse(command.id().sameValueAs(existing.getId()))) //
                 .ifPresent(existing -> throwIpAddressAlreadyUsedException(command.ipAddress(), existing));
 
         List<SchaffbarEvent> events = tool.setWlanRelais(command);
         this.outboxEventStore.save(events);
 
-        log.info("Set WLAN relais of tool with id {} and published events {}", toolId, events);
+        log.info("Set WLAN relais of tool with id {} and published events {}", command.id(), events);
     }
 
     @Transactional
@@ -126,11 +127,8 @@ public class ToolService {
     public void assignRfidReader(@NotNull @Valid ToolId toolId, @NotNull @Valid RfidReaderId rfidReaderId) {
         Tool tool = findOrThrow(toolId);
 
-        if (rfidReaderId.sameValueAs(tool.getRfidReaderId())) {
-            return;
-        }
-
         this.toolRepository.findByRfidReaderId(rfidReaderId) //
+                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
                 .ifPresent(existing -> throwRfidReaderAlreadyAssignedException(rfidReaderId, existing));
 
         List<SchaffbarEvent> events = tool.assignRfidReader(rfidReaderId);

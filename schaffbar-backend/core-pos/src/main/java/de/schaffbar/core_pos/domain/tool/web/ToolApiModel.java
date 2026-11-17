@@ -39,9 +39,9 @@ public interface ToolApiModel extends ValueObjectMapper {
 
     CreateToolCommand toCreateToolCommand(CreateToolRequestBody requestBody);
 
-    UpdateToolCommand toUpdateToolCommand(UpdateToolRequestBody requestBody);
+    UpdateToolCommand toUpdateToolCommand(ToolId id, UpdateToolRequestBody requestBody);
 
-    SetWlanRelaisCommand toSetWlanRelaisCommand(SetWlanRelaisRequestBody requestBody);
+    SetWlanRelaisCommand toSetWlanRelaisCommand(ToolId id, SetWlanRelaisRequestBody requestBody);
 
     // ------------------------------------------------------------------------
     // response
