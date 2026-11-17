@@ -27,7 +27,7 @@ domain/<aggregate>/
   <Aggregate>Service.java          queries and commands of the aggregate        always
   <Aggregate>Views.java            view records + entity → view (MapStruct)     always
   <Inner>.java + <Inner>Repository  inner entity (@Entity) with its repository   optional
-  <Enum>.java, @Embeddable          types of the aggregate (RfidReaderType, CustomerAddress)
+  <Enum>.java, @Embeddable          types of the aggregate (RfidReaderType, CustomerAddress – package-private)
   README.md                        attributes, rules, events
   web/                             controller + API model, only when the portal calls it
 ```
@@ -238,7 +238,9 @@ final class RfidReaderEventFactory {
 
 1. Constant in `shared/event/EventType`.
 2. Payload record in `shared/event/payload/<Aggregate>EventPayload` – nested in the interface, implements it, fields
-   validated like a command. Payloads may use the enums and value objects of their aggregate.
+   validated like a command. Payloads may use the enums and value objects of their aggregate, never an entity or an
+   `@Embeddable`: a part of the entity gets its own record in the payload interface (`CustomerAddressPayload`, with
+   `@Valid` on the field), so a change of the entity does not change the format of the stored events.
 3. Method in the PayloadMapper (when mapped from the entity).
 4. Method in the EventFactory.
 5. Row in the README's "Domain Events".
@@ -492,7 +494,7 @@ Never add a violation to the store to make a build pass. A rule in this skill an
 
 ## Checklist
 
-- [ ] Only the known building blocks in the folder; entity package-private, created by `of(…)`.
+- [ ] Only the known building blocks in the folder; entity and embeddable package-private, created by `of(…)`.
 - [ ] Every state change is an entity command returning its events from the EventFactory; every database change has
       its event, an inner entity's change is in the aggregate's event.
 - [ ] Ids and references are value objects everywhere outside the entity's fields and the repository's derived queries.
@@ -500,5 +502,5 @@ Never add a violation to the store to make a build pass. A rule in this skill an
 - [ ] Service: own repository + `OutboxEventStore` only; queries `@Query` returning views; commands `@Command`, save their
       events, log them.
 - [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test.
-- [ ] New event: EventType, payload, mapper, factory, README.
+- [ ] New event: EventType, payload (no entity or embeddable inside), mapper, factory, README.
 - [ ] README updated; `mvn -q test` passes.

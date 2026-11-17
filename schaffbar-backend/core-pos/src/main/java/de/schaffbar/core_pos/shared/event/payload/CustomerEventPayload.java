@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 
-import de.schaffbar.core_pos.domain.customer.CustomerAddress;
 import de.schaffbar.core_pos.shared.event.EventPayload;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
@@ -22,9 +21,17 @@ public interface CustomerEventPayload extends EventPayload {
             boolean clubMember, //
             @NotBlank String email, //
             String phone, //
-            @NotNull CustomerAddress address, //
+            @Valid @NotNull CustomerAddressPayload address, //
             @NotNull @PastOrPresent Instant createdAt //
     ) implements CustomerEventPayload {}
+
+    record CustomerAddressPayload( //
+            @NotBlank String addressLine1, //
+            String addressLine2, //
+            @NotBlank String postalCode, //
+            @NotBlank String city, //
+            @NotBlank String country //
+    ) {}
 
     record CustomerUpdatedPayload( //
             @Valid @NotNull CustomerId id, //

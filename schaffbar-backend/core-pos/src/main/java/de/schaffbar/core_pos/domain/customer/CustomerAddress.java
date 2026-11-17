@@ -14,7 +14,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerComm
 @Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class CustomerAddress {
+class CustomerAddress {
 
     @NotBlank
     private String addressLine1;

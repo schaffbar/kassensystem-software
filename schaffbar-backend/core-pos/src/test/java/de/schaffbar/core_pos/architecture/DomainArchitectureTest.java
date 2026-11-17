@@ -173,6 +173,16 @@ class DomainArchitectureTest {
             .because("its changes are changes of the aggregate: the aggregate's service, views and events cover them");
 
     // ------------------------------------------------------------------------
+    // embeddable
+
+    @ArchTest
+    static final ArchRule embeddablesAreNotPublic = classes() //
+            .that().resideInAPackage(DOMAIN) //
+            .and().areAnnotatedWith(Embeddable.class) //
+            .should().notBePublic() //
+            .because("an embeddable is part of its aggregate – views and event payloads have records of their own");
+
+    // ------------------------------------------------------------------------
     // commands
 
     @ArchTest

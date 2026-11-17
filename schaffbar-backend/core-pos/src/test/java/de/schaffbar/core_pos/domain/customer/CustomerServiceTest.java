@@ -30,6 +30,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerComm
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerCreatedPayload;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
@@ -62,7 +63,13 @@ class CustomerServiceTest {
 
         // then
         verify(this.customerRepository).save(any());
-        expectSavedEvent(EventType.CUSTOMER_CREATED, customerId);
+        CustomerCreatedPayload payload = expectSavedEvent(EventType.CUSTOMER_CREATED, customerId) //
+                .deserializeAndValidatePayload(CustomerCreatedPayload.class);
+        assertThat(payload.address().addressLine1()).isEqualTo(command.addressLine1());
+        assertThat(payload.address().addressLine2()).isEqualTo(command.addressLine2());
+        assertThat(payload.address().postalCode()).isEqualTo(command.postalCode());
+        assertThat(payload.address().city()).isEqualTo(command.city());
+        assertThat(payload.address().country()).isEqualTo(command.country());
     }
 
     // ------------------------------------------------------------------------
@@ -212,7 +219,7 @@ class CustomerServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private void expectSavedEvent(EventType type, CustomerId customerId) {
+    private SchaffbarEvent expectSavedEvent(EventType type, CustomerId customerId) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
@@ -220,6 +227,8 @@ class CustomerServiceTest {
                     assertThat(event.getType()).isEqualTo(type);
                     assertThat(event.getAggregateId()).isEqualTo(customerId.getValue().toString());
                 });
+
+        return this.events.getValue().getFirst();
     }
 
     private void expectNoEvent() {
