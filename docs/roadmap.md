@@ -110,7 +110,11 @@ Entscheidung 13.11.2026.
      (E26, `RFID_TAG_UNASSIGNED` trägt den Historien-Eintrag); fünf Exceptions mit Code statt `RuntimeException`, TA-4
      in der Entity; Read Facades für Zuweisungen und Historie; die drei Tag-Use-Cases von `customer` gleich mit;
      Befehle antworten `204`; Akzeptanztest
-   - [ ] `customer` mit seinen Use Cases (`CustomerDelete`, Anlegen, Bearbeiten)
+   - [x] `customer` mit seinen Use Cases – 17.11.2026: `CustomerReadFacade`, `@Query` / `@Command`; Kontakt und
+     Adresse heißen `changeContact` / `changeAddress` wie ihre Events (Use Cases `CustomerChangeContact` /
+     `CustomerChangeAddress`, Pfade unverändert); C-6 bis C-8 jetzt auch im Backend (`@Email`, `@Size`, eigener
+     Constraint `@DateOfBirth`, `400`); C-5 antwortet `409` mit `CUSTOMER_HAS_OPEN_WORKSHOP_SESSION` statt `500`
+     (im Portal übersetzt); Befehle antworten `204`; Akzeptanztest
    - [ ] `tool` (ggf. in zwei Commits: Aggregat und Service, dann Use Cases)
    - [ ] `tool_certification` (Use Cases umbenennen: `ToolCertificationPause` …)
    - [ ] Werkstattablauf: `workshop_usage` + `workshop_session` (`EnterWorkshop`, `LeaveWorkshop`, `CloseSession`),
@@ -148,15 +152,11 @@ und einen Test schreiben. Bis A1 kommen die Exceptions noch als `500` an.
 | T-14 | Schaltbox nicht trennen, solange das Werkzeug läuft | `ToolClearRfidReader` |
 | T-15 | Werkzeugnamen ohne Unterschied von Groß- und Kleinschreibung eindeutig | `ToolRepository.findByName` → case-insensitive, `ToolCreate` / `ToolUpdate` |
 | T-16 | Beschreibung höchstens 255 Zeichen | `@Size(max = 255)` an den Commands statt Datenbankfehler |
-| RT-3 | Zugewiesenen Tag nicht löschen | `RfidTagService.deleteRfidTag` (TODO im Code), `409` |
 | TC-5 | Einweiser eines Werkzeugs nicht dafür einweisen | `CertifyCustomersForTool` |
-| C-6 | E-Mail-Format | `@Email` an den Customer-Commands |
-| C-7 | Postleitzahl genau 5 Zeichen | `@Size(min = 5, max = 5)` (oder `@Pattern`) |
-| C-8 | Geburtsdatum in den letzten 100 Jahren und vor dem laufenden Jahr | eigene Validierung, gleiche Grenzen wie `dateOfBirthRange` im Portal |
 | R-4 | Socket-Name nur `a–z`, `0–9`, `-` | nur bei Änderung prüfen – bestehende Namen wie „Socket 43“ bleiben gültig (wie im Portal) |
 | R-6 | Namen von Lesegeräten eindeutig (neu, auch im Portal noch nicht) | `RfidReaderUpdate`, danach Duplikat-Prüfung im Dialog „Lesegerät bearbeiten“ |
 
-Vorher klären: C-6 bis C-8 lehnen bestehende Datensätze nicht ab, die die Regel verletzen – nur neue und geänderte.
+Erledigt im Rollout (K4): RT-3 (16.11.2026), C-6 bis C-8 (17.11.2026).
 
 ### A1 – Problems API (Teil von K) – Grundlage erledigt
 
@@ -166,7 +166,7 @@ Erledigt am 15.11.2026 mit dem Pilot (K3):
   ohne Details (E7, E8). Exceptions von `rfid_reader` haben schon eine Basisklasse und einen Code.
 - Portal: der Fehler-Interceptor zeigt die Übersetzung `shared.errors.<CODE>`, sonst die allgemeine Meldung.
 
-Noch offen (im Rollout, K4): die übrigen 25 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
+Noch offen (im Rollout, K4): die übrigen 22 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
 Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
 Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines Lesegeräts, `canDeleteUser` in der
 Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
