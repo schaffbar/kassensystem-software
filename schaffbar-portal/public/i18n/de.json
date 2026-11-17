@@ -20,7 +20,8 @@
       "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Eine andere Person wartet noch auf ihren Tag – zuerst deren Tag an das Lesegerät an der Theke halten.",
       "RFID_TAG_ALREADY_ASSIGNED": "Der RFID-Tag ist schon einer anderen Person zugewiesen.",
       "NO_RFID_TAG_ASSIGNMENT_WAITING": "Niemand wartet auf einen Tag.",
-      "NO_RFID_TAG_ASSIGNED": "Der Person ist kein RFID-Tag zugewiesen."
+      "NO_RFID_TAG_ASSIGNED": "Der Person ist kein RFID-Tag zugewiesen.",
+      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "Die Person hat noch eine offene Sitzung – zuerst die Sitzung beenden und abrechnen."
     },
     "actions": {
       "close": "Schließen",

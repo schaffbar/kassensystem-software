@@ -20,7 +20,8 @@
       "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Another person is still waiting for their tag – hold their tag to the reader at the counter first.",
       "RFID_TAG_ALREADY_ASSIGNED": "The RFID tag is already assigned to another person.",
       "NO_RFID_TAG_ASSIGNMENT_WAITING": "Nobody is waiting for a tag.",
-      "NO_RFID_TAG_ASSIGNED": "No RFID tag is assigned to the person."
+      "NO_RFID_TAG_ASSIGNED": "No RFID tag is assigned to the person.",
+      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "The person still has an open session – end and bill the session first."
     },
     "actions": {
       "close": "Close",
