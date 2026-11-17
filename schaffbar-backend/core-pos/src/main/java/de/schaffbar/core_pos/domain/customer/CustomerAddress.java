@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -31,22 +31,22 @@ public class CustomerAddress {
     private String country;
 
     static CustomerAddress of(CreateCustomerCommand command) {
-        CustomerAddress address = new CustomerAddress();
-        address.addressLine1 = command.addressLine1();
-        address.addressLine2 = command.addressLine2();
-        address.postalCode = command.postalCode();
-        address.city = command.city();
-        address.country = command.country();
-
-        return address;
+        return of(command.addressLine1(), command.addressLine2(), command.postalCode(), command.city(), command.country());
     }
 
-    public void update(UpdateCustomerAddressCommand command) {
-        this.addressLine1 = command.addressLine1();
-        this.addressLine2 = command.addressLine2();
-        this.postalCode = command.postalCode();
-        this.city = command.city();
-        this.country = command.country();
+    static CustomerAddress of(ChangeCustomerAddressCommand command) {
+        return of(command.addressLine1(), command.addressLine2(), command.postalCode(), command.city(), command.country());
+    }
+
+    private static CustomerAddress of(String addressLine1, String addressLine2, String postalCode, String city, String country) {
+        CustomerAddress address = new CustomerAddress();
+        address.setAddressLine1(addressLine1);
+        address.setAddressLine2(addressLine2);
+        address.setPostalCode(postalCode);
+        address.setCity(city);
+        address.setCountry(country);
+
+        return address;
     }
 
 }

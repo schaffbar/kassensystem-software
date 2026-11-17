@@ -1,24 +1,29 @@
 package de.schaffbar.core_pos.domain.customer.web;
 
+import static de.schaffbar.core_pos.domain.customer.CustomerCommands.POSTAL_CODE_LENGTH;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.validation.DateOfBirth;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface CustomerApiModel {
@@ -41,17 +46,13 @@ public interface CustomerApiModel {
 
     UpdateCustomerCommand toUpdateCustomerCommand(CustomerId id, UpdateCustomerRequestBody requestBody);
 
-    UpdateCustomerContactCommand toUpdateCustomerContactCommand(CustomerId id, UpdateCustomerContactRequestBody requestBody);
+    ChangeCustomerContactCommand toChangeCustomerContactCommand(CustomerId id, ChangeCustomerContactRequestBody requestBody);
 
-    UpdateCustomerAddressCommand toUpdateCustomerAddressCommand(CustomerId id, UpdateCustomerAddressRequestBody requestBody);
+    ChangeCustomerAddressCommand toChangeCustomerAddressCommand(CustomerId id, ChangeCustomerAddressRequestBody requestBody);
 
     @Named("toAgeGroup")
     default AgeGroup toAgeGroup(LocalDate dateOfBirth) {
         int ageInYears = Period.between(dateOfBirth, LocalDate.now()).getYears();
-        if (ageInYears < 0) {
-            throw new IllegalArgumentException("Date of birth is in the future: " + dateOfBirth);
-        }
-
         if (ageInYears < 16) {
             return AgeGroup.UNDER_16;
         }
@@ -61,7 +62,6 @@ public interface CustomerApiModel {
         else {
             return AgeGroup.ADULT;
         }
-
     }
 
     // ------------------------------------------------------------------------
@@ -99,13 +99,13 @@ public interface CustomerApiModel {
     record CreateCustomerRequestBody( //
             @NotBlank String firstName, //
             @NotBlank String lastName, //
-            @NotNull LocalDate dateOfBirth, //
+            @NotNull @DateOfBirth LocalDate dateOfBirth, //
             boolean clubMember, //
-            @NotBlank String email, //
+            @NotBlank @Email String email, //
             String phone, //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank String postalCode, //
+            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}
@@ -113,20 +113,20 @@ public interface CustomerApiModel {
     record UpdateCustomerRequestBody( //
             @NotBlank String firstName, //
             @NotBlank String lastName, //
-            @NotNull LocalDate dateOfBirth, //
+            @NotNull @DateOfBirth LocalDate dateOfBirth, //
             boolean clubMember //
     ) {}
 
-    record UpdateCustomerAddressRequestBody( //
+    record ChangeCustomerAddressRequestBody( //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank String postalCode, //
+            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}
 
-    record UpdateCustomerContactRequestBody( //
-            @NotBlank String email, //
+    record ChangeCustomerContactRequestBody( //
+            @NotBlank @Email String email, //
             String phone //
     ) {}
 

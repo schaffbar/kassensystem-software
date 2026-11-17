@@ -31,13 +31,17 @@ public final class GivenFixture {
         return RfidReaderId.of(SchaffbarApi.createdId(result));
     }
 
-    public RfidReaderId switchBox(MacAddress macAddress) {
+    public RfidReaderId rfidReader(MacAddress macAddress, RfidReaderType type) {
         RfidReaderId rfidReaderId = rfidReader(macAddress);
 
-        MvcTestResult result = this.api.changeRfidReaderType(rfidReaderId, RfidReaderType.SWITCH_BOX);
+        MvcTestResult result = this.api.changeRfidReaderType(rfidReaderId, type);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return rfidReaderId;
+    }
+
+    public RfidReaderId switchBox(MacAddress macAddress) {
+        return rfidReader(macAddress, RfidReaderType.SWITCH_BOX);
     }
 
     // ------------------------------------------------------------------------
@@ -81,6 +85,19 @@ public final class GivenFixture {
         assertThat(assigned).hasStatus(HttpStatus.NO_CONTENT);
     }
 
+    // checked in at a reader of type GATE_KEEPER_IN – the first check-in opens the session
+    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperIn) {
+        CustomerId customerId = customerWithRfidTag(rfidTagId);
+
+        MvcTestResult checkedIn = this.api.holdRfidTagToReader(rfidTagId, gateKeeperIn);
+        assertThat(checkedIn).hasStatus(HttpStatus.OK);
+
+        MvcTestResult session = this.api.getOpenWorkshopSession(customerId);
+        assertThat(session).bodyJson().extractingPath("$.status").isEqualTo("OPEN");
+
+        return customerId;
+    }
+
     // ------------------------------------------------------------------------
     // tools
 
@@ -89,6 +106,21 @@ public final class GivenFixture {
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
         return ToolId.of(SchaffbarApi.createdId(result));
+    }
+
+    public CustomerId instructor(ToolId toolId) {
+        CustomerId instructorId = customer();
+
+        MvcTestResult result = this.api.addInstructor(toolId, instructorId);
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        return instructorId;
+    }
+
+    public void toolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
+        MvcTestResult result = this.api.certifyCustomer(customerId, toolId, certifiedBy);
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.failed").asArray().isEmpty();
     }
 
     public ToolId toolWithSwitchBox(Scenario scenario, RfidReaderId switchBox) {

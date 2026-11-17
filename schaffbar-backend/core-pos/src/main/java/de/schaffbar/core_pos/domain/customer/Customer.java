@@ -17,10 +17,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
@@ -57,13 +57,14 @@ class Customer {
     @NotNull
     private Instant createdAt;
 
+    @NotNull
     @Version
     private Instant updatedAt;
 
     // ------------------------------------------------------------------------
-    // constructor
+    // static constructor
 
-    static Customer of(CreateCustomerCommand command) {
+    public static Customer of(CreateCustomerCommand command) {
         Customer customer = new Customer();
         customer.setId(CustomerId.random().getValue());
         customer.setFirstName(command.firstName());
@@ -89,25 +90,25 @@ class Customer {
     // command
 
     public List<SchaffbarEvent> update(UpdateCustomerCommand command) {
-        this.firstName = command.firstName();
-        this.lastName = command.lastName();
-        this.dateOfBirth = command.dateOfBirth();
-        this.clubMember = command.clubMember();
+        setFirstName(command.firstName());
+        setLastName(command.lastName());
+        setDateOfBirth(command.dateOfBirth());
+        setClubMember(command.clubMember());
 
         return List.of(CustomerEventFactory.customerUpdated(this));
     }
 
-    public List<SchaffbarEvent> updateAddress(UpdateCustomerAddressCommand command) {
-        this.address.update(command);
-
-        return List.of(CustomerEventFactory.customerAddressChanged(this));
-    }
-
-    public List<SchaffbarEvent> updateContact(UpdateCustomerContactCommand command) {
-        this.email = command.email();
-        this.phone = command.phone();
+    public List<SchaffbarEvent> changeContact(ChangeCustomerContactCommand command) {
+        setEmail(command.email());
+        setPhone(command.phone());
 
         return List.of(CustomerEventFactory.customerContactChanged(this));
+    }
+
+    public List<SchaffbarEvent> changeAddress(ChangeCustomerAddressCommand command) {
+        setAddress(CustomerAddress.of(command));
+
+        return List.of(CustomerEventFactory.customerAddressChanged(this));
     }
 
 }

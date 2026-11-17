@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
@@ -17,6 +16,7 @@ import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -41,7 +41,7 @@ public class CustomerDelete {
 
     private final @NonNull ToolService toolService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid CustomerId customerId) {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
@@ -59,10 +59,9 @@ public class CustomerDelete {
     // helper
 
     private void verifyNoOpenWorkshopSession(CustomerId customerId) {
-        this.workshopSessionService.getOpenWorkshopSession(customerId) //
-                .ifPresent(_ -> {
-                    throw new CustomerHasOpenWorkshopSessionException(customerId);
-                });
+        if (this.workshopSessionService.getOpenWorkshopSession(customerId).isPresent()) {
+            throw new CustomerHasOpenWorkshopSessionException(customerId);
+        }
     }
 
     private void releaseRfidTag(CustomerId customerId) {

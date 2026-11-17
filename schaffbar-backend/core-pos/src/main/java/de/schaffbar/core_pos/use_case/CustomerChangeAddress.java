@@ -5,22 +5,22 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 
 @Service
 @Validated
 @RequiredArgsConstructor
-public class CustomerUpdateContact {
+public class CustomerChangeAddress {
 
     private final @NonNull CustomerService customerService;
 
-    @Transactional
-    public void process(@NotNull @Valid UpdateCustomerContactCommand command) {
-        this.customerService.updateCustomerContact(command);
+    @Command
+    public void process(@NotNull @Valid ChangeCustomerAddressCommand command) {
+        this.customerService.changeCustomerAddress(command);
     }
 
 }

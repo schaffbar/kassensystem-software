@@ -19,23 +19,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerService;
+import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.ChangeCustomerAddressRequestBody;
+import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.ChangeCustomerContactRequestBody;
 import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.CreateCustomerRequestBody;
 import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.CustomerApiDto;
-import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.UpdateCustomerAddressRequestBody;
-import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.UpdateCustomerContactRequestBody;
 import de.schaffbar.core_pos.domain.customer.web.CustomerApiModel.UpdateCustomerRequestBody;
+import de.schaffbar.core_pos.read_facade.CustomerReadFacade;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.use_case.CustomerChangeAddress;
+import de.schaffbar.core_pos.use_case.CustomerChangeContact;
 import de.schaffbar.core_pos.use_case.CustomerCreate;
 import de.schaffbar.core_pos.use_case.CustomerDelete;
 import de.schaffbar.core_pos.use_case.CustomerUpdate;
-import de.schaffbar.core_pos.use_case.CustomerUpdateAddress;
-import de.schaffbar.core_pos.use_case.CustomerUpdateContact;
 
 @Validated
 @RestController
@@ -43,15 +43,15 @@ import de.schaffbar.core_pos.use_case.CustomerUpdateContact;
 @RequestMapping(path = "/api/v1/customers")
 public class CustomerController {
 
-    private final @NonNull CustomerService customerService;
+    private final @NonNull CustomerReadFacade customerReadFacade;
 
     private final @NonNull CustomerCreate customerCreate;
 
     private final @NonNull CustomerUpdate customerUpdate;
 
-    private final @NonNull CustomerUpdateContact customerUpdateContact;
+    private final @NonNull CustomerChangeContact customerChangeContact;
 
-    private final @NonNull CustomerUpdateAddress customerUpdateAddress;
+    private final @NonNull CustomerChangeAddress customerChangeAddress;
 
     private final @NonNull CustomerDelete customerDelete;
 
@@ -59,8 +59,8 @@ public class CustomerController {
     // query
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CustomerApiDto>> getAllCustomers() {
-        List<CustomerApiDto> customers = this.customerService.getCustomers().stream() //
+    public ResponseEntity<List<CustomerApiDto>> getCustomers() {
+        List<CustomerApiDto> customers = this.customerReadFacade.getCustomers().stream() //
                 .map(CustomerApiModel.MAPPER::toCustomerApiDto) //
                 .toList();
 
@@ -68,8 +68,8 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CustomerApiDto> getCustomer(@PathVariable @NotNull CustomerId customerId) {
-        CustomerApiDto customer = this.customerService.getCustomer(customerId) //
+    public ResponseEntity<CustomerApiDto> getCustomer(@PathVariable @NotNull @Valid CustomerId customerId) {
+        CustomerApiDto customer = this.customerReadFacade.getCustomer(customerId) //
                 .map(CustomerApiModel.MAPPER::toCustomerApiDto) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
 
@@ -80,7 +80,7 @@ public class CustomerController {
     // command
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createCustomer(@RequestBody @NotNull @Valid CreateCustomerRequestBody requestBody) {
+    public ResponseEntity<Void> createCustomer(@RequestBody @NotNull @Valid CreateCustomerRequestBody requestBody) {
         CreateCustomerCommand command = CustomerApiModel.MAPPER.toCreateCustomerCommand(requestBody);
         CustomerId customerId = this.customerCreate.process(command);
         URI location = URI.create("/api/v1/customers/" + customerId.getValue());
@@ -89,34 +89,40 @@ public class CustomerController {
     }
 
     @PutMapping(value = "/{customerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateCustomer(@PathVariable @NotNull CustomerId customerId,
-            @RequestBody @NotNull @Valid UpdateCustomerRequestBody requestBody) {
+    public ResponseEntity<Void> updateCustomer( //
+            @PathVariable @NotNull @Valid CustomerId customerId, //
+            @RequestBody @NotNull @Valid UpdateCustomerRequestBody requestBody //
+    ) {
         UpdateCustomerCommand command = CustomerApiModel.MAPPER.toUpdateCustomerCommand(customerId, requestBody);
         this.customerUpdate.process(command);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/{customerId}/contact", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateCustomerContact(@PathVariable @NotNull CustomerId customerId,
-            @RequestBody @NotNull @Valid UpdateCustomerContactRequestBody requestBody) {
-        UpdateCustomerContactCommand command = CustomerApiModel.MAPPER.toUpdateCustomerContactCommand(customerId, requestBody);
-        this.customerUpdateContact.process(command);
+    public ResponseEntity<Void> changeCustomerContact( //
+            @PathVariable @NotNull @Valid CustomerId customerId, //
+            @RequestBody @NotNull @Valid ChangeCustomerContactRequestBody requestBody //
+    ) {
+        ChangeCustomerContactCommand command = CustomerApiModel.MAPPER.toChangeCustomerContactCommand(customerId, requestBody);
+        this.customerChangeContact.process(command);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/{customerId}/address", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateCustomerAddress(@PathVariable @NotNull CustomerId customerId,
-            @RequestBody @NotNull @Valid UpdateCustomerAddressRequestBody requestBody) {
-        UpdateCustomerAddressCommand command = CustomerApiModel.MAPPER.toUpdateCustomerAddressCommand(customerId, requestBody);
-        this.customerUpdateAddress.process(command);
+    public ResponseEntity<Void> changeCustomerAddress( //
+            @PathVariable @NotNull @Valid CustomerId customerId, //
+            @RequestBody @NotNull @Valid ChangeCustomerAddressRequestBody requestBody //
+    ) {
+        ChangeCustomerAddressCommand command = CustomerApiModel.MAPPER.toChangeCustomerAddressCommand(customerId, requestBody);
+        this.customerChangeAddress.process(command);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/{customerId}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable @NotNull CustomerId customerId) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable @NotNull @Valid CustomerId customerId) {
         this.customerDelete.process(customerId);
 
         return ResponseEntity.noContent().build();

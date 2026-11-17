@@ -1,9 +1,14 @@
 package de.schaffbar.core_pos.use_case;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagAssignmentView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,13 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import de.schaffbar.core_pos.builder.ViewBuilder;
 import de.schaffbar.core_pos.domain.customer.CustomerService;
-import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentStatus;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
@@ -34,13 +35,9 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
-import de.schaffbar.core_pos.shared.id.ToolId;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerDeleteTest {
-
-    private final CustomerId customerId = CustomerId.random();
 
     @Mock
     private CustomerService customerService;
@@ -61,113 +58,153 @@ class CustomerDeleteTest {
     private CustomerDelete customerDelete;
 
     @Test
-    void deletesCustomerWithoutTagAndCertifications() {
-        noOpenSession();
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(this.customerId)).thenReturn(Optional.empty());
-        when(this.toolService.getTools()).thenReturn(List.of());
+    void deletesACustomerWithoutTagAndCertifications() {
+        // given
+        CustomerId customerId = givenCustomerWithoutOpenSession();
+        givenNoRfidTagAssignment(customerId);
+        givenTools();
 
-        this.customerDelete.process(this.customerId);
+        // when
+        this.customerDelete.process(customerId);
 
-        verify(this.toolCertificationService).deleteAllByCustomerId(this.customerId);
-        verify(this.customerService).deleteCustomer(this.customerId);
+        // then
+        verify(this.toolCertificationService).deleteAllByCustomerId(customerId);
+        verify(this.customerService).deleteCustomer(customerId);
         verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
-    }
-
-    @Test
-    void rejectsCustomerWithOpenSession() {
-        customerExists();
-        when(this.workshopSessionService.getOpenWorkshopSession(this.customerId)) //
-                .thenReturn(Optional.of(ViewBuilder.openWorkshopSessionView().customerId(this.customerId).build()));
-
-        assertThatThrownBy(() -> this.customerDelete.process(this.customerId)) //
-                .isInstanceOf(CustomerHasOpenWorkshopSessionException.class);
-
-        verifyNoInteractions(this.rfidTagAssignmentService, this.toolCertificationService);
-        verify(this.customerService, never()).deleteCustomer(any());
-    }
-
-    @Test
-    void rejectsUnknownCustomer() {
-        CustomerId unknownId = CustomerId.random();
-        when(this.customerService.getCustomer(unknownId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> this.customerDelete.process(unknownId)) //
-                .isInstanceOf(ResourceNotFoundException.class);
-
-        verify(this.customerService, never()).deleteCustomer(any());
-    }
-
-    @Test
-    void freesAssignedTagBeforeDeletingCustomer() {
-        noOpenSession();
-        RfidTagAssignmentView assignment = assignment(RfidTagAssignmentStatus.ASSIGNED);
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(this.customerId)).thenReturn(Optional.of(assignment));
-        when(this.toolService.getTools()).thenReturn(List.of());
-
-        this.customerDelete.process(this.customerId);
-
-        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
-        order.verify(this.rfidTagAssignmentService).unassignRfidTag(this.customerId);
-        order.verify(this.customerService).deleteCustomer(this.customerId);
         verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());
     }
 
     @Test
-    void cancelsWaitingTagRequest() {
-        noOpenSession();
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(this.customerId)) //
-                .thenReturn(Optional.of(assignment(RfidTagAssignmentStatus.WAITING_FOR_ASSIGNMENT)));
-        when(this.toolService.getTools()).thenReturn(List.of());
+    void unassignsTheTagBeforeDeletingTheCustomer() {
+        // given
+        CustomerId customerId = givenCustomerWithoutOpenSession();
+        givenRfidTagAssignment(customerId, RfidTagAssignmentStatus.ASSIGNED);
+        givenTools();
 
-        this.customerDelete.process(this.customerId);
+        // when
+        this.customerDelete.process(customerId);
 
-        verify(this.rfidTagAssignmentService).cancelRfidTagAssignmentRequest(this.customerId);
-        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
-        verify(this.customerService).deleteCustomer(this.customerId);
+        // then
+        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
+        order.verify(this.rfidTagAssignmentService).unassignRfidTag(customerId);
+        order.verify(this.customerService).deleteCustomer(customerId);
+        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());
     }
 
     @Test
-    void removesCustomerAsInstructorOfTheirToolsOnly() {
-        noOpenSession();
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(this.customerId)).thenReturn(Optional.empty());
-        ToolView instructedTool = tool(Set.of(this.customerId, CustomerId.random()));
-        ToolView otherTool = tool(Set.of(CustomerId.random()));
-        when(this.toolService.getTools()).thenReturn(List.of(instructedTool, otherTool));
+    void cancelsAWaitingRequestBeforeDeletingTheCustomer() {
+        // given
+        CustomerId customerId = givenCustomerWithoutOpenSession();
+        givenRfidTagAssignment(customerId, RfidTagAssignmentStatus.WAITING_FOR_ASSIGNMENT);
+        givenTools();
 
-        this.customerDelete.process(this.customerId);
+        // when
+        this.customerDelete.process(customerId);
 
-        verify(this.toolService).removeInstructors(instructedTool.id(), List.of(this.customerId));
-        verify(this.toolService, never()).removeInstructors(otherTool.id(), List.of(this.customerId));
-        verify(this.customerService).deleteCustomer(this.customerId);
+        // then
+        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
+        order.verify(this.rfidTagAssignmentService).cancelRfidTagAssignmentRequest(customerId);
+        order.verify(this.customerService).deleteCustomer(customerId);
+        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
+    }
+
+    @Test
+    void removesTheCustomerAsInstructorOfTheirToolsOnly() {
+        // given
+        CustomerId customerId = givenCustomerWithoutOpenSession();
+        givenNoRfidTagAssignment(customerId);
+        ToolView instructedTool = toolView().instructors(Set.of(customerId, CustomerId.random())).build();
+        ToolView otherTool = toolView().instructors(Set.of(CustomerId.random())).build();
+        givenTools(instructedTool, otherTool);
+
+        // when
+        this.customerDelete.process(customerId);
+
+        // then
+        verify(this.toolService).removeInstructors(instructedTool.id(), List.of(customerId));
+        verify(this.toolService, never()).removeInstructors(eq(otherTool.id()), any());
+        verify(this.customerService).deleteCustomer(customerId);
+    }
+
+    @Test
+    void rejectsACustomerWithAnOpenSession() {
+        // given
+        CustomerId customerId = givenCustomerWithOpenSession();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.customerDelete.process(customerId));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(CustomerHasOpenWorkshopSessionException.class) //
+                .hasFieldOrPropertyWithValue("code", CustomerHasOpenWorkshopSessionException.CODE);
+        expectNothingDeleted();
+    }
+
+    @Test
+    void rejectsAnUnknownCustomer() {
+        // given
+        CustomerId unknown = givenUnknownCustomer();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.customerDelete.process(unknown));
+
+        // then
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectNothingDeleted();
     }
 
     // ------------------------------------------------------------------------
-    // helper
+    // given
 
-    private void customerExists() {
-        when(this.customerService.getCustomer(this.customerId)).thenReturn(Optional.of(mock(CustomerView.class)));
+    private CustomerId givenCustomer() {
+        CustomerId customerId = CustomerId.random();
+        when(this.customerService.getCustomer(customerId)).thenReturn(Optional.of(customerView(customerId).build()));
+
+        return customerId;
     }
 
-    private void noOpenSession() {
-        customerExists();
-        when(this.workshopSessionService.getOpenWorkshopSession(this.customerId)).thenReturn(Optional.empty());
+    private CustomerId givenCustomerWithoutOpenSession() {
+        CustomerId customerId = givenCustomer();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+
+        return customerId;
     }
 
-    private RfidTagAssignmentView assignment(RfidTagAssignmentStatus status) {
-        return RfidTagAssignmentView.builder() //
-                .id(RfidTagAssignmentId.random()) //
-                .customerId(this.customerId) //
-                .assignmentType(RfidTagAssignmentType.FIXED) //
-                .status(status) //
-                .build();
+    private CustomerId givenCustomerWithOpenSession() {
+        CustomerId customerId = givenCustomer();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)) //
+                .thenReturn(Optional.of(openWorkshopSessionView().customerId(customerId).build()));
+
+        return customerId;
     }
 
-    private static ToolView tool(Set<CustomerId> instructors) {
-        return ToolView.builder() //
-                .id(ToolId.random()) //
-                .name("Bandsäge") //
-                .instructors(instructors) //
-                .build();
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private void givenNoRfidTagAssignment(CustomerId customerId) {
+        when(this.rfidTagAssignmentService.getRfidTagAssignment(customerId)).thenReturn(Optional.empty());
+    }
+
+    private void givenRfidTagAssignment(CustomerId customerId, RfidTagAssignmentStatus status) {
+        when(this.rfidTagAssignmentService.getRfidTagAssignment(customerId)) //
+                .thenReturn(Optional.of(rfidTagAssignmentView().customerId(customerId).status(status).build()));
+    }
+
+    private void givenTools(ToolView... tools) {
+        when(this.toolService.getTools()).thenReturn(List.of(tools));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectNothingDeleted() {
+        verifyNoInteractions(this.rfidTagAssignmentService, this.toolCertificationService, this.toolService);
+        verify(this.customerService, never()).deleteCustomer(any());
     }
 
 }

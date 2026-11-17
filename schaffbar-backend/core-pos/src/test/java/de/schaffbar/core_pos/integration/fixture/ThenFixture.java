@@ -2,6 +2,8 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
@@ -10,6 +12,7 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 public final class ThenFixture {
 
@@ -31,8 +34,23 @@ public final class ThenFixture {
         assertThat(result).bodyJson().extractingPath("$.code").isEqualTo(code);
     }
 
+    public void expectBadRequest(MvcTestResult result) {
+        assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
     // ------------------------------------------------------------------------
-    // rfid readers
+    // customers
+
+    public void expectCustomer(CustomerId customerId) {
+        assertThat(this.api.getCustomer(customerId)).hasStatus(HttpStatus.OK);
+    }
+
+    public void expectNoCustomer(CustomerId customerId) {
+        expectProblem(this.api.getCustomer(customerId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+    }
+
+    // ------------------------------------------------------------------------
+    // RFID readers
 
     public void expectRfidReader(RfidReaderId rfidReaderId, RfidReaderType type) {
         MvcTestResult result = this.api.getRfidReader(rfidReaderId);
@@ -96,6 +114,41 @@ public final class ThenFixture {
                 .extractingPath("$[?(@.customerId == '%s')].rfidTagId".formatted(customerId.getValue())) //
                 .asArray() //
                 .containsExactly(rfidTagId.getValue());
+    }
+
+    // ------------------------------------------------------------------------
+    // tools
+
+    public void expectInstructors(ToolId toolId, CustomerId... instructorIds) {
+        MvcTestResult result = this.api.getTool(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$.instructors") //
+                .asArray() //
+                .containsExactlyInAnyOrder(values(instructorIds));
+    }
+
+    // ------------------------------------------------------------------------
+    // tool certifications
+
+    public void expectCertifiedCustomers(ToolId toolId, CustomerId... customerIds) {
+        MvcTestResult result = this.api.getToolCertifications(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$[*].customerId") //
+                .asArray() //
+                .containsExactlyInAnyOrder(values(customerIds));
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private Object[] values(CustomerId... customerIds) {
+        return Arrays.stream(customerIds) //
+                .map(customerId -> customerId.getValue().toString()) //
+                .toArray();
     }
 
 }

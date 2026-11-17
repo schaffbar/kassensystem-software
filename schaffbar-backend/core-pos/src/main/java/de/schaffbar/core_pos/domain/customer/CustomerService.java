@@ -9,14 +9,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerCommand;
-import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
@@ -35,12 +36,14 @@ public class CustomerService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<CustomerView> getCustomers() {
         return this.customerRepository.findAll().stream() //
                 .map(CustomerViews.MAPPER::toCustomerView) //
                 .toList();
     }
 
+    @Query
     public Optional<CustomerView> getCustomer(@NotNull @Valid CustomerId id) {
         return this.customerRepository.findById(id.getValue()) //
                 .map(CustomerViews.MAPPER::toCustomerView);
@@ -49,7 +52,7 @@ public class CustomerService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
+    @Command
     public CustomerId createCustomer(@NotNull @Valid CreateCustomerCommand command) {
         Customer customer = Customer.of(command);
         Customer savedCustomer = this.customerRepository.save(customer);
@@ -62,7 +65,7 @@ public class CustomerService {
         return savedCustomer.getId();
     }
 
-    @Transactional
+    @Command
     public void updateCustomer(@NotNull @Valid UpdateCustomerCommand command) {
         List<SchaffbarEvent> events = this.customerRepository.findById(command.id().getValue()) //
                 .map(customer -> customer.update(command)) //
@@ -73,36 +76,36 @@ public class CustomerService {
         log.info("Updated customer with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
-    public void updateCustomerContact(@NotNull @Valid UpdateCustomerContactCommand command) {
+    @Command
+    public void changeCustomerContact(@NotNull @Valid ChangeCustomerContactCommand command) {
         List<SchaffbarEvent> events = this.customerRepository.findById(command.id().getValue()) //
-                .map(customer -> customer.updateContact(command)) //
+                .map(customer -> customer.changeContact(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(command.id()));
 
         this.outboxEventStore.save(events);
 
-        log.info("Updated contact of customer with id {} and published events {}", command.id(), events);
+        log.info("Changed contact of customer with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
-    public void updateCustomerAddress(@NotNull @Valid UpdateCustomerAddressCommand command) {
+    @Command
+    public void changeCustomerAddress(@NotNull @Valid ChangeCustomerAddressCommand command) {
         List<SchaffbarEvent> events = this.customerRepository.findById(command.id().getValue()) //
-                .map(customer -> customer.updateAddress(command)) //
+                .map(customer -> customer.changeAddress(command)) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(command.id()));
 
         this.outboxEventStore.save(events);
 
-        log.info("Updated address of customer with id {} and published events {}", command.id(), events);
+        log.info("Changed address of customer with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
+    @Command
     public void deleteCustomer(@NotNull @Valid CustomerId id) {
-        CustomerView customerView = getCustomer(id) //
+        Customer customer = this.customerRepository.findById(id.getValue()) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(id));
 
-        this.customerRepository.deleteById(customerView.id().getValue());
-
+        this.customerRepository.delete(customer);
         List<SchaffbarEvent> events = List.of(CustomerEventFactory.customerDeleted(id));
+
         this.outboxEventStore.save(events);
 
         log.info("Deleted customer with id {} and published events {}", id, events);

@@ -1,12 +1,19 @@
 package de.schaffbar.core_pos.integration.fixture;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
+
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
+import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -16,6 +23,10 @@ import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
 public final class SchaffbarApi {
+
+    private static final ObjectMapper JSON = new ObjectMapper() //
+            .registerModule(new JavaTimeModule()) //
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final MockMvcTester mvc;
 
@@ -127,21 +138,32 @@ public final class SchaffbarApi {
     // ------------------------------------------------------------------------
     // customers
 
+    public MvcTestResult getCustomer(CustomerId customerId) {
+        return this.mvc.get().uri("/api/v1/customers/{customerId}", customerId.getValue()).exchange();
+    }
+
     public MvcTestResult createCustomer() {
+        return createCustomer(createCustomerCommand().build());
+    }
+
+    // the command has the fields of the request body
+    public MvcTestResult createCustomer(CreateCustomerCommand command) {
         return this.mvc.post().uri("/api/v1/customers") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content("""
-                        {
-                          "firstName": "Erika", "lastName": "Mustermann", "dateOfBirth": "1990-01-31", "clubMember": false,
-                          "email": "erika@example.org", "phone": null,
-                          "addressLine1": "Hauptstraße 1", "addressLine2": null, "postalCode": "12345", "city": "Berlin", "country": "DE"
-                        }
-                        """) //
+                .content(json(command)) //
                 .exchange();
+    }
+
+    public MvcTestResult deleteCustomer(CustomerId customerId) {
+        return this.mvc.delete().uri("/api/v1/customers/{customerId}", customerId.getValue()).exchange();
     }
 
     // ------------------------------------------------------------------------
     // tools
+
+    public MvcTestResult getTool(ToolId toolId) {
+        return this.mvc.get().uri("/api/v1/tools/{toolId}", toolId.getValue()).exchange();
+    }
 
     public MvcTestResult createTool(String name) {
         return this.mvc.post().uri("/api/v1/tools") //
@@ -158,6 +180,67 @@ public final class SchaffbarApi {
 
     public MvcTestResult clearRfidReader(ToolId toolId) {
         return this.mvc.delete().uri("/api/v1/tools/{toolId}/rfid-reader", toolId.getValue()).exchange();
+    }
+
+    public MvcTestResult addInstructor(ToolId toolId, CustomerId instructorId) {
+        return this.mvc.post().uri("/api/v1/tools/{toolId}/instructors", toolId.getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "instructorIds": ["%s"] }
+                        """.formatted(instructorId.getValue())) //
+                .exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // tool certifications
+
+    public MvcTestResult getToolCertifications(ToolId toolId) {
+        return this.mvc.get().uri("/api/v1/tool-certifications").param("toolId", toolId.getValue().toString()).exchange();
+    }
+
+    public MvcTestResult certifyCustomer(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
+        return this.mvc.post().uri("/api/v1/tool-certifications/batch") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "customerIds": ["%s"], "toolId": "%s", "certifiedBy": "%s" }
+                        """.formatted(customerId.getValue(), toolId.getValue(), certifiedBy.getValue())) //
+                .exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // workshop sessions
+
+    public MvcTestResult getOpenWorkshopSession(CustomerId customerId) {
+        return this.mvc.get().uri("/api/v1/workshop-sessions/{customerId}/active", customerId.getValue()).exchange();
+    }
+
+    public MvcTestResult closeWorkshopSession(CustomerId customerId) {
+        return this.mvc.put().uri("/api/v1/workshop-sessions/{customerId}/close", customerId.getValue()).exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // devices
+
+    // a device always answers 200 – what happened is in the body and in the data
+    public MvcTestResult holdRfidTagToReader(RfidTagId rfidTagId, MacAddress macAddress) {
+        return this.mvc.post().uri("/device/card") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "DEVUSECASE": "test", "MACADDR": "%s", "RFID": "%s" }
+                        """.formatted(macAddress.getValue(), rfidTagId.getValue())) //
+                .exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private String json(Object body) {
+        try {
+            return JSON.writeValueAsString(body);
+        }
+        catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 }
