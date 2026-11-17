@@ -6,16 +6,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.validation.DateOfBirth;
+import de.schaffbar.core_pos.shared.validation.PostalCode;
 
 public interface CustomerCommands {
-
-    int POSTAL_CODE_LENGTH = 5;
 
     @Builder
     @Validated
@@ -28,7 +26,7 @@ public interface CustomerCommands {
             String phone, //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
+            @NotBlank @PostalCode String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}
@@ -57,7 +55,7 @@ public interface CustomerCommands {
             @NotNull @Valid CustomerId id, //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
+            @NotBlank @PostalCode String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}

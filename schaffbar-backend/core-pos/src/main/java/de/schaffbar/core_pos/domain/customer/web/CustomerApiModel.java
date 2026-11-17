@@ -1,7 +1,5 @@
 package de.schaffbar.core_pos.domain.customer.web;
 
-import static de.schaffbar.core_pos.domain.customer.CustomerCommands.POSTAL_CODE_LENGTH;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -9,7 +7,6 @@ import java.time.Period;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -24,6 +21,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.validation.DateOfBirth;
+import de.schaffbar.core_pos.shared.validation.PostalCode;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface CustomerApiModel {
@@ -105,7 +103,7 @@ public interface CustomerApiModel {
             String phone, //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
+            @NotBlank @PostalCode String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}
@@ -120,7 +118,7 @@ public interface CustomerApiModel {
     record ChangeCustomerAddressRequestBody( //
             @NotBlank String addressLine1, //
             String addressLine2, //
-            @NotBlank @Size(min = POSTAL_CODE_LENGTH, max = POSTAL_CODE_LENGTH) String postalCode, //
+            @NotBlank @PostalCode String postalCode, //
             @NotBlank String city, //
             @NotBlank String country //
     ) {}
