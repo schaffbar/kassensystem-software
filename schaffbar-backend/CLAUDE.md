@@ -50,7 +50,8 @@ core_pos/
   dashboard/web/        controllers of the overview (who is in the workshop, which tools run)
                         – until the rollout still `domain/dashboard/` with services instead of read facades (E17)
   device/               endpoints the readers and switch boxes call (`/device/init`, `/counter`, `/card`)
-  shared/               event + outbox, exceptions, id value objects, billing (`BillableDuration`)
+  shared/               event + outbox, exceptions, id value objects, billing (`BillableDuration`), own Bean
+                        Validation constraints (`validation/`, `@DateOfBirth`)
 ```
 
 ## Rules

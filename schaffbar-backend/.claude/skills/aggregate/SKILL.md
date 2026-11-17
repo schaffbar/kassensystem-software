@@ -40,6 +40,7 @@ them, a use case, or in `shared/`.
 | The rule needs | Lives in | Example |
 | --- | --- | --- |
 | one field's format | Bean Validation on the command (`@NotBlank`, `@Size`, `@Email`, `@Pattern`) | postal code has 5 characters |
+| one field's value range Bean Validation has no annotation for | an own constraint in `shared/validation/` (annotation + `ConstraintValidator`), on the command | date of birth within the last 100 years (`@DateOfBirth`) |
 | the aggregate's own state | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
 | other rows of the same aggregate | the service command | MAC address is unique |
 | a second aggregate | a use case | a reader assigned to a tool cannot be deleted |
@@ -191,13 +192,14 @@ public interface RfidReaderCommands {
   value objects takes them directly (`createRfidReader(MacAddress)`, `deleteRfidReader(RfidReaderId)`). When no change
   of an aggregate needs a command, it has no `*Commands`.
 - `public interface <Aggregate>Commands` with one nested record per command, named after the change:
-  `CreateCustomerCommand`, `UpdateCustomerContactCommand`, `ChangeRfidReaderTypeCommand`, `SetWlanRelaisCommand`.
+  `CreateCustomerCommand`, `ChangeCustomerContactCommand`, `ChangeRfidReaderTypeCommand`, `SetWlanRelaisCommand`.
 - Every record has `@Builder` and `@Validated`.
 - **The own aggregate's id is `id`** (as in the entity and the view), a reference to another aggregate is
   `<aggregate>Id` (`customerId`, `toolId`) – both as value objects, never `UUID` or `String`.
 - **Every field is validated:** a value object `@NotNull @Valid` (optional: only `@Valid`), a required string
   `@NotBlank`, other required fields `@NotNull`, formats `@Size`, `@Email`, `@Pattern`. A field without annotation is
-  optional. The service validates the command with `@NotNull @Valid`.
+  optional. The service validates the command with `@NotNull @Valid`. The request body of the API model carries the
+  same constraints, so the controller answers `400` before the use case is called.
 - A change of several entries at once takes a list, not one call per entry:
   `@NotEmpty List<@NotNull @Valid CustomerId> customerIds` (`addInstructors`, `removeInstructors`).
 
@@ -471,7 +473,7 @@ The rules above are the target. Some code predates them and is fixed aggregate b
 this skill, not the code next to you.** Known deviations:
 
 - `@Transactional` (Spring's or jakarta's) instead of `@Query` / `@Command`, queries without any transaction (E9,
-  E21) – `rfid_reader`, `rfid_tag` and `rfid_tag_assignment` are converted.
+  E21) – `rfid_reader`, `rfid_tag`, `rfid_tag_assignment` and `customer` are converted.
 - `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
 - Repository default methods with other names (`findActiveByCustomerId`) or missing
   (`ToolCertificationRepository`); services calling the `UUID` variants.
