@@ -21,7 +21,13 @@
       "RFID_TAG_ALREADY_ASSIGNED": "Der RFID-Tag ist schon einer anderen Person zugewiesen.",
       "NO_RFID_TAG_ASSIGNMENT_WAITING": "Niemand wartet auf einen Tag.",
       "NO_RFID_TAG_ASSIGNED": "Der Person ist kein RFID-Tag zugewiesen.",
-      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "Die Person hat noch eine offene Sitzung – zuerst die Sitzung beenden und abrechnen."
+      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "Die Person hat noch eine offene Sitzung – zuerst die Sitzung beenden und abrechnen.",
+      "TOOL_NAME_ALREADY_USED": "Ein Werkzeug mit diesem Namen gibt es schon.",
+      "IP_ADDRESS_ALREADY_USED": "Die IP-Adresse gehört schon zum WLAN-Relais eines anderen Werkzeugs.",
+      "RFID_READER_ALREADY_ASSIGNED_TO_TOOL": "Die Schaltbox ist schon einem anderen Werkzeug zugewiesen.",
+      "INVALID_RFID_READER_TYPE_FOR_TOOL": "Nur ein Lesegerät vom Typ Schaltbox kann einem Werkzeug zugewiesen werden.",
+      "CUSTOMER_ALREADY_INSTRUCTOR": "Die Person ist schon Einweiser für dieses Werkzeug.",
+      "CUSTOMER_NOT_INSTRUCTOR": "Die Person ist kein Einweiser für dieses Werkzeug."
     },
     "actions": {
       "close": "Schließen",

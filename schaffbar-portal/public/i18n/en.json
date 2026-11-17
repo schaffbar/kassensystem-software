@@ -21,7 +21,13 @@
       "RFID_TAG_ALREADY_ASSIGNED": "The RFID tag is already assigned to another person.",
       "NO_RFID_TAG_ASSIGNMENT_WAITING": "Nobody is waiting for a tag.",
       "NO_RFID_TAG_ASSIGNED": "No RFID tag is assigned to the person.",
-      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "The person still has an open session – end and bill the session first."
+      "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "The person still has an open session – end and bill the session first.",
+      "TOOL_NAME_ALREADY_USED": "A tool with this name already exists.",
+      "IP_ADDRESS_ALREADY_USED": "The IP address already belongs to the WLAN relais of another tool.",
+      "RFID_READER_ALREADY_ASSIGNED_TO_TOOL": "The switch box is already assigned to another tool.",
+      "INVALID_RFID_READER_TYPE_FOR_TOOL": "Only an RFID reader of type switch box can be assigned to a tool.",
+      "CUSTOMER_ALREADY_INSTRUCTOR": "The person is already an instructor for this tool.",
+      "CUSTOMER_NOT_INSTRUCTOR": "The person is not an instructor for this tool."
     },
     "actions": {
       "close": "Close",
