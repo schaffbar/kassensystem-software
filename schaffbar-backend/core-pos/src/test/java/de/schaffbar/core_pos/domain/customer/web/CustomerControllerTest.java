@@ -99,7 +99,7 @@ class CustomerControllerTest {
         givenCustomers(customer);
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/customers"));
+        ResultActions result = getCustomers();
 
         // then
         result.andExpect(status().isOk()) //
@@ -118,7 +118,7 @@ class CustomerControllerTest {
         CustomerView customer = givenCustomer();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/customers/" + customer.id().getValue()));
+        ResultActions result = getCustomer(customer.id());
 
         // then
         result.andExpect(status().isOk()) //
@@ -133,7 +133,7 @@ class CustomerControllerTest {
         CustomerId unknown = givenUnknownCustomer();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/customers/" + unknown.getValue()));
+        ResultActions result = getCustomer(unknown);
 
         // then
         result.andExpect(status().isNotFound()) //
@@ -150,7 +150,7 @@ class CustomerControllerTest {
         CustomerId customerId = givenCreatedCustomer(command);
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
+        ResultActions result = createCustomer(command);
 
         // then
         result.andExpect(status().isCreated()) //
@@ -163,7 +163,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().email("erika.example.org").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
+        ResultActions result = createCustomer(command);
 
         // then
         result.andExpect(status().isBadRequest());
@@ -176,7 +176,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().postalCode("1234").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
+        ResultActions result = createCustomer(command);
 
         // then
         result.andExpect(status().isBadRequest());
@@ -189,7 +189,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
+        ResultActions result = createCustomer(command);
 
         // then
         result.andExpect(status().isBadRequest());
@@ -204,10 +204,8 @@ class CustomerControllerTest {
         // given
         UpdateCustomerCommand command = updateCustomerCommand().build();
 
-        // when – the command has the fields of the request body; its id in the body is ignored, the path decides
-        ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue()) //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+        // when
+        ResultActions result = updateCustomer(command);
 
         // then
         result.andExpect(status().isNoContent());
@@ -223,9 +221,7 @@ class CustomerControllerTest {
         ChangeCustomerContactCommand command = changeCustomerContactCommand().build();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/contact") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+        ResultActions result = changeCustomerContact(command);
 
         // then
         result.andExpect(status().isNoContent());
@@ -238,9 +234,7 @@ class CustomerControllerTest {
         ChangeCustomerContactCommand command = changeCustomerContactCommand().email("max@").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/contact") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+        ResultActions result = changeCustomerContact(command);
 
         // then
         result.andExpect(status().isBadRequest());
@@ -256,9 +250,7 @@ class CustomerControllerTest {
         ChangeCustomerAddressCommand command = changeCustomerAddressCommand().build();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/address") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+        ResultActions result = changeCustomerAddress(command);
 
         // then
         result.andExpect(status().isNoContent());
@@ -271,9 +263,7 @@ class CustomerControllerTest {
         ChangeCustomerAddressCommand command = changeCustomerAddressCommand().postalCode("710321").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/address") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+        ResultActions result = changeCustomerAddress(command);
 
         // then
         result.andExpect(status().isBadRequest());
@@ -289,7 +279,7 @@ class CustomerControllerTest {
         CustomerId customerId = CustomerId.random();
 
         // when
-        ResultActions result = this.mockMvc.perform(delete("/api/v1/customers/" + customerId.getValue()));
+        ResultActions result = deleteCustomer(customerId);
 
         // then
         result.andExpect(status().isNoContent());
@@ -302,11 +292,51 @@ class CustomerControllerTest {
         CustomerId customerId = givenCustomerWithOpenSession();
 
         // when
-        ResultActions result = this.mockMvc.perform(delete("/api/v1/customers/" + customerId.getValue()));
+        ResultActions result = deleteCustomer(customerId);
 
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(CustomerHasOpenWorkshopSessionException.CODE));
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getCustomers() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/customers"));
+    }
+
+    private ResultActions getCustomer(CustomerId customerId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/customers/" + customerId.getValue()));
+    }
+
+    // the commands have the fields of the request bodies; an id in the body is ignored, the path decides
+    private ResultActions createCustomer(CreateCustomerCommand command) throws Exception {
+        return this.mockMvc.perform(post("/api/v1/customers") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions updateCustomer(UpdateCustomerCommand command) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions changeCustomerContact(ChangeCustomerContactCommand command) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/contact") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions changeCustomerAddress(ChangeCustomerAddressCommand command) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/address") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions deleteCustomer(CustomerId customerId) throws Exception {
+        return this.mockMvc.perform(delete("/api/v1/customers/" + customerId.getValue()));
     }
 
     // ------------------------------------------------------------------------

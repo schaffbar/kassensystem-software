@@ -43,7 +43,7 @@ class RfidTagAssignmentHistoryControllerTest {
         givenHistory(historyEntry);
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignment-history"));
+        ResultActions result = getRfidTagAssignmentHistory();
 
         // then
         result.andExpect(status().isOk()) //
@@ -51,6 +51,13 @@ class RfidTagAssignmentHistoryControllerTest {
                 .andExpect(jsonPath("$[0].customerId").value(historyEntry.customerId().getValue().toString())) //
                 .andExpect(jsonPath("$[0].rfidTagId").value(historyEntry.rfidTagId().getValue())) //
                 .andExpect(jsonPath("$[0].assignmentType").value("TEMPORARY"));
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidTagAssignmentHistory() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignment-history"));
     }
 
     // ------------------------------------------------------------------------

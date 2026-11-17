@@ -82,7 +82,7 @@ class RfidTagAssignmentControllerTest {
         givenAssignments(assignment);
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignments"));
+        ResultActions result = getRfidTagAssignments();
 
         // then
         result.andExpect(status().isOk()) //
@@ -98,7 +98,7 @@ class RfidTagAssignmentControllerTest {
         RfidTagAssignmentView assignment = givenAssignmentOfCustomer();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("customer-id", assignment.customerId().getValue().toString()));
+        ResultActions result = getRfidTagAssignments(assignment.customerId());
 
         // then
         result.andExpect(status().isOk()) //
@@ -112,7 +112,7 @@ class RfidTagAssignmentControllerTest {
         RfidTagAssignmentView assignment = givenAssignmentOfTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("rfid-tag-id", assignment.rfidTagId().getValue()));
+        ResultActions result = getRfidTagAssignments(assignment.rfidTagId());
 
         // then
         result.andExpect(status().isOk()) //
@@ -127,7 +127,7 @@ class RfidTagAssignmentControllerTest {
         RfidTagId rfidTagId = givenUnassignedTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("rfid-tag-id", rfidTagId.getValue()));
+        ResultActions result = getRfidTagAssignments(rfidTagId);
 
         // then
         result.andExpect(status().isOk()) //
@@ -143,9 +143,7 @@ class RfidTagAssignmentControllerTest {
         CustomerId customerId = CustomerId.random();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tag-assignments") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"customerId\":\"" + customerId.getValue() + "\",\"assignmentType\":\"TEMPORARY\"}"));
+        ResultActions result = requestRfidTagAssignment(customerId, RfidTagAssignmentType.TEMPORARY);
 
         // then
         result.andExpect(status().isNoContent());
@@ -155,9 +153,7 @@ class RfidTagAssignmentControllerTest {
     @Test
     void requestRfidTagAssignment_withoutCustomerId_is400() throws Exception {
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tag-assignments") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"assignmentType\":\"FIXED\"}"));
+        ResultActions result = requestRfidTagAssignment("{\"assignmentType\":\"FIXED\"}");
 
         // then
         result.andExpect(status().isBadRequest());
@@ -170,9 +166,7 @@ class RfidTagAssignmentControllerTest {
         CustomerId customerId = givenAnotherRequestWaiting();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tag-assignments") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"customerId\":\"" + customerId.getValue() + "\",\"assignmentType\":\"FIXED\"}"));
+        ResultActions result = requestRfidTagAssignment(customerId, RfidTagAssignmentType.FIXED);
 
         // then
         result.andExpect(status().isConflict()) //
@@ -188,9 +182,7 @@ class RfidTagAssignmentControllerTest {
         RfidTagId rfidTagId = RandomValues.rfidTagId();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/assign") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}"));
+        ResultActions result = assignRfidTag(rfidTagId);
 
         // then
         result.andExpect(status().isNoContent());
@@ -206,13 +198,48 @@ class RfidTagAssignmentControllerTest {
         CustomerId customerId = CustomerId.random();
 
         // when
-        ResultActions result = this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/unassign") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"customerId\":\"" + customerId.getValue() + "\"}"));
+        ResultActions result = unassignRfidTag(customerId);
 
         // then
         result.andExpect(status().isNoContent());
         verify(this.customerUnassignRfidTag).process(customerId);
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidTagAssignments() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignments"));
+    }
+
+    private ResultActions getRfidTagAssignments(CustomerId customerId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("customer-id", customerId.getValue().toString()));
+    }
+
+    private ResultActions getRfidTagAssignments(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("rfid-tag-id", rfidTagId.getValue()));
+    }
+
+    private ResultActions requestRfidTagAssignment(CustomerId customerId, RfidTagAssignmentType assignmentType) throws Exception {
+        return requestRfidTagAssignment("{\"customerId\":\"" + customerId.getValue() + "\",\"assignmentType\":\"" + assignmentType + "\"}");
+    }
+
+    private ResultActions requestRfidTagAssignment(String body) throws Exception {
+        return this.mockMvc.perform(post("/api/v1/rfid-tag-assignments") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(body));
+    }
+
+    private ResultActions assignRfidTag(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/assign") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}"));
+    }
+
+    private ResultActions unassignRfidTag(CustomerId customerId) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/unassign") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("{\"customerId\":\"" + customerId.getValue() + "\"}"));
     }
 
     // ------------------------------------------------------------------------

@@ -76,7 +76,7 @@ class RfidTagControllerTest {
         givenTags(rfidTag);
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tags"));
+        ResultActions result = getRfidTags();
 
         // then
         result.andExpect(status().isOk()) //
@@ -94,7 +94,7 @@ class RfidTagControllerTest {
         RfidTagView rfidTag = givenTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tags/" + rfidTag.id().getValue()));
+        ResultActions result = getRfidTag(rfidTag.id());
 
         // then
         result.andExpect(status().isOk()) //
@@ -107,7 +107,7 @@ class RfidTagControllerTest {
         RfidTagId unknown = givenUnknownTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tags/" + unknown.getValue()));
+        ResultActions result = getRfidTag(unknown);
 
         // then
         result.andExpect(status().isNotFound()) //
@@ -123,9 +123,7 @@ class RfidTagControllerTest {
         RfidTagId rfidTagId = givenCreatedTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tags") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}"));
+        ResultActions result = createRfidTag(rfidTagId);
 
         // then
         result.andExpect(status().isCreated()) //
@@ -135,7 +133,7 @@ class RfidTagControllerTest {
     @Test
     void createRfidTag_withoutId_is400() throws Exception {
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tags").contentType(MediaType.APPLICATION_JSON).content("{}"));
+        ResultActions result = createRfidTag("{}");
 
         // then
         result.andExpect(status().isBadRequest());
@@ -148,9 +146,7 @@ class RfidTagControllerTest {
         RfidTagId rfidTagId = givenRegisteredTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/rfid-tags") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}"));
+        ResultActions result = createRfidTag(rfidTagId);
 
         // then
         result.andExpect(status().isConflict()) //
@@ -166,7 +162,7 @@ class RfidTagControllerTest {
         RfidTagId rfidTagId = RandomValues.rfidTagId();
 
         // when
-        ResultActions result = this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
+        ResultActions result = deleteRfidTag(rfidTagId);
 
         // then
         result.andExpect(status().isNoContent());
@@ -179,11 +175,36 @@ class RfidTagControllerTest {
         RfidTagId rfidTagId = givenAssignedTag();
 
         // when
-        ResultActions result = this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
+        ResultActions result = deleteRfidTag(rfidTagId);
 
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(RfidTagAssignedToCustomerException.CODE));
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidTags() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tags"));
+    }
+
+    private ResultActions getRfidTag(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tags/" + rfidTagId.getValue()));
+    }
+
+    private ResultActions createRfidTag(RfidTagId rfidTagId) throws Exception {
+        return createRfidTag("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}");
+    }
+
+    private ResultActions createRfidTag(String body) throws Exception {
+        return this.mockMvc.perform(post("/api/v1/rfid-tags") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(body));
+    }
+
+    private ResultActions deleteRfidTag(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
     }
 
     // ------------------------------------------------------------------------

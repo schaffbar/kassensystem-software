@@ -82,8 +82,13 @@ void createRfidReader_rejectsAUsedMacAddress() {
 ```
 
 - **An exception is caught under `// when`** with `catchThrowable(…)` and checked under `// then` – not
-  `assertThatThrownBy`, which mixes both. A controller test keeps the `ResultActions` of `perform(…)` and calls
+  `assertThatThrownBy`, which mixes both. A controller test keeps the `ResultActions` of its request and calls
   `andExpect` under `// then`.
+- **A controller test sends every request through a method of its `// when` section**, named after the controller
+  method (`updateCustomer(command)`, `getRfidReaders(macAddress)`, no `when…` prefix) and returning the
+  `ResultActions` – no test calls `mockMvc.perform` itself, so path, content type and body exist once per endpoint. A
+  body the test needs to break (`"{}"`, an invalid MAC address) gets an overload taking the `String body`, which the
+  typed one calls.
 - **A stub that sets up a state is a `given…` method** named after the state: `givenReader()`, `givenUnknownReader()`
   (returns the id), `givenReaderWith(macAddress)`, `givenNoToolWith(rfidReaderId)`, `givenSaveReturnsTheReader()`. It
   takes what it needs as parameters and returns what the test needs next. No `when(…)` in the test itself.
@@ -92,8 +97,8 @@ void createRfidReader_rejectsAUsedMacAddress() {
   `expectTypeNotChanged()`. A single assertion on the result of this test stays in the test (`assertThat(rfidReader
   .getType()).isEqualTo(command.type())`).
 - **The class is in sections** (`// ---…` line + name): the tests grouped by the method under test (`// createRfidReader`,
-  `// updateRfidReader`, …) when the class tests several, then `// given` with the `given…` methods, `// then` with the
-  `expect…` methods, `// helper` for anything else. A section only exists when it has content.
+  `// updateRfidReader`, …) when the class tests several, then `// when` with the request methods of a controller test,
+  `// given` with the `given…` methods, `// then` with the `expect…` methods, `// helper` for anything else. A section only exists when it has content.
 
 ## Test data
 
@@ -233,9 +238,34 @@ this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
         .build();
 ```
 
-Every endpoint has at least its success test. Per endpoint: the status (`200`, `201` with `Location`, `204`), the JSON fields the portal reads (`jsonPath`), a
-filter with and without a match, `404` with `RESOURCE_NOT_FOUND`, `400` for an invalid value object, and the problem
-code of each rejection the use case can throw.
+Every endpoint has at least its success test. Per endpoint: the status (`200`, `201` with `Location`, `204`), the JSON
+fields the portal reads (`jsonPath`), a filter with and without a match, `404` with `RESOURCE_NOT_FOUND`, `400` for an
+invalid value object, and the problem code of each rejection the use case can throw.
+
+```java
+@Test
+void changeRfidReaderType_ofASwitchBoxWithTool_is409WithTheCode() throws Exception {
+    // given
+    ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand().type(RfidReaderType.GATE_KEEPER_IN).build();
+    givenSwitchBoxWithToolForTypeChange(command);
+
+    // when
+    ResultActions result = changeRfidReaderType(command);
+
+    // then
+    result.andExpect(status().isConflict()) //
+            .andExpect(jsonPath("$.code").value(RfidReaderHasToolAssignedException.CODE));
+}
+
+// ------------------------------------------------------------------------
+// when
+
+private ResultActions changeRfidReaderType(ChangeRfidReaderTypeCommand command) throws Exception {
+    return this.mockMvc.perform(patch("/api/v1/rfid-readers/" + command.id().getValue() + "/type") //
+            .contentType(MediaType.APPLICATION_JSON) //
+            .content(Json.write(command)));
+}
+```
 
 ## Integration tests
 
@@ -370,7 +400,8 @@ rollout of their aggregate (K4). Copy from the `rfid_reader` and `shared/` tests
 - [ ] A rule that reads the database: `r<number>_…` in its acceptance test, both sides.
 - [ ] Service test with real entity and EventFactory for new command methods; the event in the outbox, for a create
       command with its payload.
-- [ ] Controller tests for every endpoint: at least the success (status, JSON fields), and the problem codes.
+- [ ] Controller tests for every endpoint: at least the success (status, JSON fields), and the problem codes; every
+      request through a method of the `// when` section.
 - [ ] Integration data random (`Scenario`), no cleanup, no assertion on all rows, nothing on the test class except
       `@IntegrationTest`.
 - [ ] A new ArchUnit rule failed once on purpose; its skill updated.
