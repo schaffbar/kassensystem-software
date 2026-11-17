@@ -17,7 +17,7 @@
 | `phone`       | `String`          | optional                  |
 | `address`     | `CustomerAddress` | `@NotNull`, `@Embeddable` |
 | `createdAt`   | `Instant`         | `@NotNull`                |
-| `updatedAt`   | `Instant`         | `@NotNull`, `@Version`    |
+| `updatedAt`   | `Instant`         | `@Version`                |
 
 **Value Object:** `CustomerAddress` (embedded) – replaced as a whole when the address changes
 

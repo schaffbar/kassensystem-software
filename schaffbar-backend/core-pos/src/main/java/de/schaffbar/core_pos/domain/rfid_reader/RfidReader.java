@@ -50,7 +50,6 @@ class RfidReader {
     @NotNull
     private Instant createdAt;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 

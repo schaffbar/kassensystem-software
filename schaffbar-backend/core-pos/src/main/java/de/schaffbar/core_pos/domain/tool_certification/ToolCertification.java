@@ -52,7 +52,6 @@ class ToolCertification {
 
     private UUID certifiedBy;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 

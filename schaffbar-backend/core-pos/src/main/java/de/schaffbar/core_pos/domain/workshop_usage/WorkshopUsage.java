@@ -48,7 +48,6 @@ class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot f
 
     private Instant exitTime;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 

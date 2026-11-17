@@ -31,7 +31,6 @@ class RfidTag {
     @NotNull
     private Instant createdAt;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 

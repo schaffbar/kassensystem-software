@@ -54,7 +54,6 @@ class ToolUsage {
 
     private Instant endTime;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 

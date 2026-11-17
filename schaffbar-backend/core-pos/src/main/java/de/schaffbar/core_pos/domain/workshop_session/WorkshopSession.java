@@ -55,7 +55,6 @@ class WorkshopSession {
 
     private Long toolUnits;
 
-    @NotNull
     @Version
     private Instant updatedAt;
 
