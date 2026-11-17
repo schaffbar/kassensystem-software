@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagEventPayload.RfidTagCreatedPayload;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -57,7 +58,9 @@ class RfidTagServiceTest {
         // then
         assertThat(createdId).isEqualTo(rfidTagId);
         assertThat(savedTag.getValue().isActive()).isTrue();
-        expectSavedEvent(EventType.RFID_TAG_CREATED, rfidTagId);
+        RfidTagCreatedPayload payload = expectSavedEvent(EventType.RFID_TAG_CREATED, rfidTagId) //
+                .deserializeAndValidatePayload(RfidTagCreatedPayload.class);
+        assertThat(payload.id()).isEqualTo(rfidTagId);
     }
 
     @Test
@@ -146,7 +149,7 @@ class RfidTagServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private void expectSavedEvent(EventType type, RfidTagId rfidTagId) {
+    private SchaffbarEvent expectSavedEvent(EventType type, RfidTagId rfidTagId) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
@@ -154,6 +157,8 @@ class RfidTagServiceTest {
                     assertThat(event.getType()).isEqualTo(type);
                     assertThat(event.getAggregateId()).isEqualTo(rfidTagId.getValue());
                 });
+
+        return this.events.getValue().getFirst();
     }
 
     private void expectNothingSaved() {

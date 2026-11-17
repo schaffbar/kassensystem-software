@@ -22,9 +22,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +43,7 @@ import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionExce
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
+import de.schaffbar.core_pos.support.Json;
 import de.schaffbar.core_pos.use_case.CustomerChangeAddress;
 import de.schaffbar.core_pos.use_case.CustomerChangeContact;
 import de.schaffbar.core_pos.use_case.CustomerCreate;
@@ -54,10 +52,6 @@ import de.schaffbar.core_pos.use_case.CustomerUpdate;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerControllerTest {
-
-    private static final ObjectMapper JSON = new ObjectMapper() //
-            .registerModule(new JavaTimeModule()) //
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @Mock
     private CustomerReadFacade customerReadFacade;
@@ -119,6 +113,21 @@ class CustomerControllerTest {
     // getCustomer
 
     @Test
+    void getCustomer_returnsTheCustomer() throws Exception {
+        // given
+        CustomerView customer = givenCustomer();
+
+        // when
+        ResultActions result = this.mockMvc.perform(get("/api/v1/customers/" + customer.id().getValue()));
+
+        // then
+        result.andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.id").value(customer.id().getValue().toString())) //
+                .andExpect(jsonPath("$.lastName").value(customer.lastName())) //
+                .andExpect(jsonPath("$.address.postalCode").value(customer.address().postalCode()));
+    }
+
+    @Test
     void getCustomer_unknownId_is404() throws Exception {
         // given
         CustomerId unknown = givenUnknownCustomer();
@@ -141,7 +150,7 @@ class CustomerControllerTest {
         CustomerId customerId = givenCreatedCustomer(command);
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(json(command)));
+        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
 
         // then
         result.andExpect(status().isCreated()) //
@@ -154,7 +163,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().email("erika.example.org").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(json(command)));
+        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -167,7 +176,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().postalCode("1234").build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(json(command)));
+        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -180,7 +189,7 @@ class CustomerControllerTest {
         CreateCustomerCommand command = createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build();
 
         // when
-        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(json(command)));
+        ResultActions result = this.mockMvc.perform(post("/api/v1/customers").contentType(MediaType.APPLICATION_JSON).content(Json.write(command)));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -195,10 +204,10 @@ class CustomerControllerTest {
         // given
         UpdateCustomerCommand command = updateCustomerCommand().build();
 
-        // when
+        // when – the command has the fields of the request body; its id in the body is ignored, the path decides
         ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue()) //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)));
+                .content(Json.write(command)));
 
         // then
         result.andExpect(status().isNoContent());
@@ -216,7 +225,7 @@ class CustomerControllerTest {
         // when
         ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/contact") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)));
+                .content(Json.write(command)));
 
         // then
         result.andExpect(status().isNoContent());
@@ -231,7 +240,7 @@ class CustomerControllerTest {
         // when
         ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/contact") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)));
+                .content(Json.write(command)));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -249,7 +258,7 @@ class CustomerControllerTest {
         // when
         ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/address") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)));
+                .content(Json.write(command)));
 
         // then
         result.andExpect(status().isNoContent());
@@ -264,7 +273,7 @@ class CustomerControllerTest {
         // when
         ResultActions result = this.mockMvc.perform(put("/api/v1/customers/" + command.id().getValue() + "/address") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(json(command)));
+                .content(Json.write(command)));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -307,6 +316,13 @@ class CustomerControllerTest {
         when(this.customerReadFacade.getCustomers()).thenReturn(List.of(customers));
     }
 
+    private CustomerView givenCustomer() {
+        CustomerView customer = customerView().build();
+        when(this.customerReadFacade.getCustomer(customer.id())).thenReturn(Optional.of(customer));
+
+        return customer;
+    }
+
     private CustomerId givenUnknownCustomer() {
         CustomerId unknown = CustomerId.random();
         when(this.customerReadFacade.getCustomer(unknown)).thenReturn(Optional.empty());
@@ -333,14 +349,6 @@ class CustomerControllerTest {
 
     private void expectNothingCreated() {
         verify(this.customerCreate, never()).process(any());
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    // the commands have the fields of the request bodies; an id in the body is ignored, the path decides
-    private String json(Object command) throws Exception {
-        return JSON.writeValueAsString(command);
     }
 
 }

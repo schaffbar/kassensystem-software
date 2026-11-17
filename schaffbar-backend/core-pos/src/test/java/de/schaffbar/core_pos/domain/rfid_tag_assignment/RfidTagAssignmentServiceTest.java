@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagAssignmentEventPayload.RfidTagAssignmentRequestedPayload;
 import de.schaffbar.core_pos.shared.exception.CustomerHasRfidTagAssignmentException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
@@ -71,7 +72,11 @@ class RfidTagAssignmentServiceTest {
         // then
         assertThat(this.savedAssignment.getValue().isWaitingForAssignment()).isTrue();
         assertThat(this.savedAssignment.getValue().getAssignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY);
-        expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_REQUESTED);
+        RfidTagAssignmentRequestedPayload payload = expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_REQUESTED) //
+                .deserializeAndValidatePayload(RfidTagAssignmentRequestedPayload.class);
+        assertThat(payload.id()).isEqualTo(this.savedAssignment.getValue().getId());
+        assertThat(payload.customerId()).isEqualTo(customerId);
+        assertThat(payload.assignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY.name());
     }
 
     @Test
@@ -276,11 +281,13 @@ class RfidTagAssignmentServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private void expectSavedEvent(EventType type) {
+    private SchaffbarEvent expectSavedEvent(EventType type) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
                 .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+
+        return this.events.getValue().getFirst();
     }
 
     private void expectHistoryEntryOf(RfidTagAssignment assignment) {

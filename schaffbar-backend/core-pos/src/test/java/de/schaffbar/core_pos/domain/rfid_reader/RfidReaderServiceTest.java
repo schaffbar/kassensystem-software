@@ -27,6 +27,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidRea
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderCreatedPayload;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -61,7 +62,10 @@ class RfidReaderServiceTest {
         RfidReaderId rfidReaderId = this.rfidReaderService.createRfidReader(macAddress);
 
         // then
-        expectSavedEvent(EventType.RFID_READER_CREATED, rfidReaderId);
+        RfidReaderCreatedPayload payload = expectSavedEvent(EventType.RFID_READER_CREATED, rfidReaderId) //
+                .deserializeAndValidatePayload(RfidReaderCreatedPayload.class);
+        assertThat(payload.id()).isEqualTo(rfidReaderId);
+        assertThat(payload.macAddress()).isEqualTo(macAddress.getValue());
     }
 
     @Test
@@ -205,7 +209,7 @@ class RfidReaderServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private void expectSavedEvent(EventType type, RfidReaderId rfidReaderId) {
+    private SchaffbarEvent expectSavedEvent(EventType type, RfidReaderId rfidReaderId) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
@@ -213,6 +217,8 @@ class RfidReaderServiceTest {
                     assertThat(event.getType()).isEqualTo(type);
                     assertThat(event.getAggregateId()).isEqualTo(rfidReaderId.getValue().toString());
                 });
+
+        return this.events.getValue().getFirst();
     }
 
     private void expectNothingSaved() {

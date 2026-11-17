@@ -107,6 +107,21 @@ class RfidTagAssignmentControllerTest {
     }
 
     @Test
+    void getRfidTagAssignments_withRfidTagId_returnsTheAssignmentOfTheTag() throws Exception {
+        // given
+        RfidTagAssignmentView assignment = givenAssignmentOfTag();
+
+        // when
+        ResultActions result = this.mockMvc.perform(get("/api/v1/rfid-tag-assignments").param("rfid-tag-id", assignment.rfidTagId().getValue()));
+
+        // then
+        result.andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.length()").value(1)) //
+                .andExpect(jsonPath("$[0].id").value(assignment.id().getValue().toString())) //
+                .andExpect(jsonPath("$[0].rfidTagId").value(assignment.rfidTagId().getValue()));
+    }
+
+    @Test
     void getRfidTagAssignments_withUnassignedRfidTagId_returnsAnEmptyList() throws Exception {
         // given
         RfidTagId rfidTagId = givenUnassignedTag();
@@ -210,6 +225,13 @@ class RfidTagAssignmentControllerTest {
     private RfidTagAssignmentView givenAssignmentOfCustomer() {
         RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
         when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.customerId())).thenReturn(Optional.of(assignment));
+
+        return assignment;
+    }
+
+    private RfidTagAssignmentView givenAssignmentOfTag() {
+        RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
+        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.rfidTagId())).thenReturn(Optional.of(assignment));
 
         return assignment;
     }
