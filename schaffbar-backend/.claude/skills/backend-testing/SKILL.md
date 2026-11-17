@@ -32,13 +32,14 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
 - **A new use case** gets its use case test (every path) and, if it has a rule, the acceptance test above. A use case
   that only forwards to one service (`RfidReaderCreate`, `RfidTagCreate`) has one path and needs no test of its own –
   the service and controller tests cover it.
-- **A new endpoint or a changed `*ApiModel`** gets controller tests: status, the JSON fields the portal reads, the
-  problem code of each rejection.
+- **Every endpoint** has controller tests – at least its success (status, the JSON fields the portal reads), and the
+  problem code of each rejection. A new endpoint or a changed `*ApiModel` gets them in the same step.
 - **Every entity command and `of(…)`** gets entity tests: the success (new state, the returned event with its payload)
   and every rejection – also an inner entity's `of(…)`. That the service test runs the same code with the real entity
   does not replace them.
 - **A new service method** gets a service test when it does more than load, call the entity and save: a rule, a
-  lookup, a cleanup – and always the event it saves.
+  lookup, a cleanup – and always the event it saves. A create command always gets one: `of(…)` returns no event, the
+  service builds the created event, so its payload is checked there.
 - **A bug** gets a test that fails without the fix, on the level where the bug was – named after the behaviour, not
   after the bug.
 - **A changed structure rule** changes its ArchUnit rule and the skill that describes it in the same step.
@@ -122,6 +123,9 @@ void createRfidReader_rejectsAUsedMacAddress() {
   `toolView()`, `toolView(toolId)`), or one named after a state (`openWorkshopSessionView()`); the test sets what it
   is about: `rfidReaderView().type(RfidReaderType.SWITCH_BOX).build()`, `toolView().rfidReaderId(rfidReaderId).build()`.
   A new view gets its methods there.
+- **JSON bodies** of controller and fixture requests: `support/Json.write(command)` when a command has the fields of
+  the request body (the id in the body is ignored, the path decides), otherwise a text block with the fields of the
+  test – never an own `ObjectMapper`.
 
 ## Common
 
@@ -196,7 +200,9 @@ class RfidReaderServiceTest {
 
 - Per command: the success path (what the service does: saved, deleted, the one event in the outbox with its type) and
   every rejection (unknown id → `ResourceNotFoundException`, a rule → its exception), each without an outbox call. The
-  payload is checked in the entity test, not again here.
+  payload is checked in the entity test, not again here – except the created event, which only the service builds:
+  `expectSavedEvent(…)` returns it, the test reads `deserializeAndValidatePayload(XyzCreatedPayload.class)` and checks
+  the fields.
 - A save is stubbed only where the service uses its result (`givenSaveReturnsTheReader()`: `save(any())` →
   `invocation.getArgument(0)`).
 - Queries need a test only when they do more than map (a filter, a combination).
@@ -227,7 +233,7 @@ this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
         .build();
 ```
 
-Per endpoint: the status (`200`, `201` with `Location`, `204`), the JSON fields the portal reads (`jsonPath`), a
+Every endpoint has at least its success test. Per endpoint: the status (`200`, `201` with `Location`, `204`), the JSON fields the portal reads (`jsonPath`), a
 filter with and without a match, `404` with `RESOURCE_NOT_FOUND`, `400` for an invalid value object, and the problem
 code of each rejection the use case can throw.
 
@@ -362,8 +368,9 @@ rollout of their aggregate (K4). Copy from the `rfid_reader` and `shared/` tests
 - [ ] Each changed rule tested where it is enforced: allowed and every rejection, with exception code and "nothing
       happened".
 - [ ] A rule that reads the database: `r<number>_…` in its acceptance test, both sides.
-- [ ] Service test with real entity and EventFactory for new command methods; the event in the outbox.
-- [ ] Controller test for a new or changed endpoint (status, JSON fields, problem codes).
+- [ ] Service test with real entity and EventFactory for new command methods; the event in the outbox, for a create
+      command with its payload.
+- [ ] Controller tests for every endpoint: at least the success (status, JSON fields), and the problem codes.
 - [ ] Integration data random (`Scenario`), no cleanup, no assertion on all rows, nothing on the test class except
       `@IntegrationTest`.
 - [ ] A new ArchUnit rule failed once on purpose; its skill updated.

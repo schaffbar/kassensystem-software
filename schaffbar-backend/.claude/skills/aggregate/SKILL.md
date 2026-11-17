@@ -39,8 +39,9 @@ them, a use case, or in `shared/`.
 
 | The rule needs | Lives in | Example |
 | --- | --- | --- |
-| one field's format | Bean Validation on the command (`@NotBlank`, `@Size`, `@Email`, `@Pattern`) | postal code has 5 characters |
+| one field's format without a value of its own | Bean Validation on the command (`@NotBlank`, `@Email`) | a valid email address |
 | one field's value range Bean Validation has no annotation for | an own constraint in `shared/validation/` (annotation + `ConstraintValidator`), on the command | date of birth within the last 100 years (`@DateOfBirth`) |
+| one field's format with a value (a length, a pattern) | an own constraint in `shared/validation/` composed of Bean Validation annotations (`@Size` + `@ReportAsSingleViolation`, `validatedBy = {}`), so the value is written once and command and request body share it – no constant | postal code has 5 characters (`@PostalCode`) |
 | the aggregate's own state | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
 | other rows of the same aggregate | the service command | MAC address is unique |
 | a second aggregate | a use case | a reader assigned to a tool cannot be deleted |
