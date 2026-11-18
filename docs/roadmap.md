@@ -121,7 +121,12 @@ Entscheidung 13.11.2026.
      Namen ohne Unterschied von Groß- und Kleinschreibung); `CustomerDelete` holt nur die Werkzeuge der Person;
      Tippfehler in der Start-URL von `SHELLY_2` behoben (gespeicherte Werkzeuge behalten den alten Wert, bis das
      Relais neu gesetzt wird); Akzeptanztest
-   - [ ] `tool_certification` (Use Cases umbenennen: `ToolCertificationPause` …)
+   - [x] `tool_certification` – 18.11.2026, in sechs kleinen Schritten: vier Exceptions mit Code (im Portal
+     übersetzt); Entity-, Service- und Controller-Tests, `ToolCertificationReadFacade`, `@Query` / `@Command`; Use
+     Cases `ToolCertificationCreate` / `…Pause` / `…Reactivate` / `…Revoke` / `…Delete`; eine fehlende Einweisung
+     antwortet `404` statt `CUSTOMER_NOT_CERTIFIED_FOR_TOOL`; TC-4 jetzt „alles oder nichts“ (E11, `204` statt
+     `BatchCertificationResult`); TC-5 im Backend (neu `CUSTOMER_IS_INSTRUCTOR`); TC-8 (nur Einweiser weisen ein)
+     im README festgehalten; Akzeptanztest
    - [ ] Werkstattablauf: `workshop_usage` + `workshop_session` (`EnterWorkshop`, `LeaveWorkshop`, `CloseSession`),
      `tool_usage` (`StartToolUsage`, `StopToolUsage`), `DeviceController` (E4), Übersicht als Read Facades (E17),
      Akzeptanztest Einchecken bis Abrechnen
@@ -142,8 +147,8 @@ Erledigt am 11.11.2026 (Commit `1b8ac72`). `CustomerDelete`: offene Sitzung sper
 eine wartende Anfrage abgebrochen (`RFID_TAG_ASSIGNMENT_CANCELLED`), eigene Einweisungen und die Rolle als Einweiser
 werden gelöscht, bezahlte Sitzungen, Nutzungen und die Tag-Historie bleiben (customer-README C-4, C-5, C-9, C-11).
 
-Noch offen daraus: die neue Methode `ToolCertificationRepository.deleteAllByCustomerId` ist nur mit Mocks getestet –
-einmal mit laufendem Backend einen Benutzer mit Einweisungen löschen.
+Das Löschen der Einweisungen prüft seit 18.11.2026 der Akzeptanztest `c9_c11` in `CustomerAcceptanceTest` gegen eine
+echte Datenbank.
 
 ### A2 – Regeln, die heute nur das Portal prüft, im Backend erzwingen
 
@@ -153,11 +158,11 @@ und einen Test schreiben. Bis A1 kommen die Exceptions noch als `500` an.
 
 | # | Regel | Wo |
 | --- | --- | --- |
-| TC-5 | Einweiser eines Werkzeugs nicht dafür einweisen | `CertifyCustomersForTool` |
 | R-4 | Socket-Name nur `a–z`, `0–9`, `-` | nur bei Änderung prüfen – bestehende Namen wie „Socket 43“ bleiben gültig (wie im Portal) |
 | R-6 | Namen von Lesegeräten eindeutig (neu, auch im Portal noch nicht) | `RfidReaderUpdate`, danach Duplikat-Prüfung im Dialog „Lesegerät bearbeiten“ |
 
-Erledigt im Rollout (K4): RT-3 (16.11.2026), C-6 bis C-8 (17.11.2026), T-14 bis T-17 (18.11.2026).
+Erledigt im Rollout (K4): RT-3 (16.11.2026), C-6 bis C-8 (17.11.2026), T-14 bis T-17 (18.11.2026), TC-5
+(18.11.2026).
 
 ### A1 – Problems API (Teil von K) – Grundlage erledigt
 
@@ -167,7 +172,7 @@ Erledigt am 15.11.2026 mit dem Pilot (K3):
   ohne Details (E7, E8). Exceptions von `rfid_reader` haben schon eine Basisklasse und einen Code.
 - Portal: der Fehler-Interceptor zeigt die Übersetzung `shared.errors.<CODE>`, sonst die allgemeine Meldung.
 
-Noch offen (im Rollout, K4): die übrigen 16 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
+Noch offen (im Rollout, K4): die übrigen 12 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
 Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
 Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines Lesegeräts, `canDeleteUser` in der
 Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
