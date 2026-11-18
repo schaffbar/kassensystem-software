@@ -252,12 +252,12 @@ component needs (`canChangeRfidReaderType(): Observable<boolean>`, skill `featur
 - The signature mirrors the controller: **path variables as plain arguments, the body as `…Request`** –
   `updateRfidReader(rfidReaderId, request)`, `deleteRfidReader(rfidReaderId)`. No command types in `shared/api`.
 - Name like the backend action, always verb + entity (`updateRfidReader`, `changeRfidReaderType`,
-  `closeWorkshopSession`; backend `pause` in the `ToolCertificationController` → `pauseToolCertification`) – also when
-  the feature calls it differently: `POST /rfid-tag-assignments` is `requestRfidTagAssignment(request)` in the API,
-  the feature's command stays `AssignRfidTagCommand`, the mapper is `toRequestRfidTagAssignmentRequest`.
+  `closeWorkshopSession`, `pauseToolCertification`) – also when the feature calls it differently:
+  `POST /rfid-tag-assignments` is `requestRfidTagAssignment(request)` in the API, the feature's command stays
+  `AssignRfidTagCommand`, the mapper is `toRequestRfidTagAssignmentRequest`.
 - `Observable<void>` unless the backend really returns a body **the portal uses** (then validate it like a query).
-  201 with only a `Location` header is `void`; a body nobody reads is `void` too (`POST /tool-certifications/batch`
-  returns a `BatchCertificationResult`, the portal ignores it).
+  201 with only a `Location` header is `void`, 204 too (`POST /tool-certifications/batch` certifies all or nobody); a
+  body nobody reads is `void` as well.
 - Several commands on the same sub-path → a pure, unexported URL helper after the class
   (`certificationUrl(customerId, toolId)` in `tool-certifications.api-service.ts`).
 - **The second argument of `put` / `post` / `patch` is the body.** Without payload pass `{}` – otherwise the options
