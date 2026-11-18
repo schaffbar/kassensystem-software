@@ -1,5 +1,3 @@
 Method <de.schaffbar.core_pos.use_case.CloseSession.process(de.schaffbar.core_pos.shared.id.CustomerId)> is not annotated with @Command in (CloseSession.java:45)
-Method <de.schaffbar.core_pos.use_case.EnterWorkshop.process(de.schaffbar.core_pos.shared.id.CustomerId)> is not annotated with @Command in (EnterWorkshop.java:31)
-Method <de.schaffbar.core_pos.use_case.LeaveWorkshop.process(de.schaffbar.core_pos.shared.id.CustomerId)> is not annotated with @Command in (LeaveWorkshop.java:34)
 Method <de.schaffbar.core_pos.use_case.StartToolUsage.process(de.schaffbar.core_pos.shared.id.CustomerId, de.schaffbar.core_pos.shared.id.ToolId)> is not annotated with @Command in (StartToolUsage.java:45)
 Method <de.schaffbar.core_pos.use_case.StopToolUsage.process(de.schaffbar.core_pos.shared.id.CustomerId, de.schaffbar.core_pos.shared.id.ToolId)> is not annotated with @Command in (StopToolUsage.java:24)

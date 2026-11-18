@@ -73,7 +73,7 @@ public class WorkshopSessionService {
     // ------------------------------------------------------------------------
     // helper
 
-    // WS-1 – EnterWorkshop starts a session only without an open one, so an open one here is a bug
+    // WS-1 – WorkshopUsageStart starts a session only without an open one, so an open one here is a bug
     private void ensureNoOpenWorkshopSession(CustomerId customerId) {
         this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
                 .ifPresent(this::throwHasAlreadyOpenWorkshopSession);

@@ -30,14 +30,14 @@
 
 ## Business Rules / Invariants
 
-| #    | Rule                                                                                           | Enforced in                                                                                                                                    |
-|------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| WS-1 | A customer can have at most one `OPEN` session at a time                                       | `EnterWorkshop` starts a session only without an open one; `WorkshopSessionService.startWorkshopSession()` guards it (`IllegalStateException`) |
-| WS-2 | Closing sets status to `PAID` and records `closeTime`; a closed session cannot be closed again | `WorkshopSession.close()` (`IllegalStateException`)                                                                                            |
-| WS-3 | Customer must exist before closing a session                                                   | `CloseSession` use case (404)                                                                                                                  |
-| WS-4 | Only an open session can be closed                                                             | `WorkshopSessionService.closeWorkshopSession()` — `NoOpenWorkshopSessionException` (409)                                                       |
-| WS-5 | Cannot close while a workshop or tool usage is running                                         | `CloseSession` use case — `ActiveToolUsageExistsForSessionException` / `ActiveWorkshopUsageExistsForSessionException` (409)                    |
-| WS-6 | Closing stores the final billing totals (workshop, tools)                                      | `CloseSession` use case computes them, `WorkshopSession.close()` stores them                                                                   |
+| #    | Rule                                                                                           | Enforced in                                                                                                                                         |
+|------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| WS-1 | A customer can have at most one `OPEN` session at a time                                       | `WorkshopUsageStart` starts a session only without an open one; `WorkshopSessionService.startWorkshopSession()` guards it (`IllegalStateException`) |
+| WS-2 | Closing sets status to `PAID` and records `closeTime`; a closed session cannot be closed again | `WorkshopSession.close()` (`IllegalStateException`)                                                                                                 |
+| WS-3 | Customer must exist before closing a session                                                   | `CloseSession` use case (404)                                                                                                                       |
+| WS-4 | Only an open session can be closed                                                             | `WorkshopSessionService.closeWorkshopSession()` — `NoOpenWorkshopSessionException` (409)                                                            |
+| WS-5 | Cannot close while a workshop or tool usage is running                                         | `CloseSession` use case — `ActiveToolUsageExistsForSessionException` / `ActiveWorkshopUsageExistsForSessionException` (409)                         |
+| WS-6 | Closing stores the final billing totals (workshop, tools)                                      | `CloseSession` use case computes them, `WorkshopSession.close()` stores them                                                                        |
 
 ## Domain Events
 

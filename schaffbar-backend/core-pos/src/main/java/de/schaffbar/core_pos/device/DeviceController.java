@@ -58,10 +58,10 @@ import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
-import de.schaffbar.core_pos.use_case.EnterWorkshop;
-import de.schaffbar.core_pos.use_case.LeaveWorkshop;
 import de.schaffbar.core_pos.use_case.StartToolUsage;
 import de.schaffbar.core_pos.use_case.StopToolUsage;
+import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
+import de.schaffbar.core_pos.use_case.WorkshopUsageStop;
 
 @Slf4j
 @Validated
@@ -82,9 +82,9 @@ public class DeviceController {
 
     private final @NonNull ToolUsageService toolUsageService;
 
-    private final @NonNull EnterWorkshop enterWorkshop;
+    private final @NonNull WorkshopUsageStart workshopUsageStart;
 
-    private final @NonNull LeaveWorkshop leaveWorkshop;
+    private final @NonNull WorkshopUsageStop workshopUsageStop;
 
     private final @NonNull StartToolUsage startToolUsage;
 
@@ -321,7 +321,7 @@ public class DeviceController {
     }
 
     private DeviceCardResponse enterWorkshop(CustomerView customer, RfidReaderType type) {
-        this.enterWorkshop.process(customer.id());
+        this.workshopUsageStart.process(customer.id());
 
         List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
         long totalUnits = workshopUsages.stream() //
@@ -339,7 +339,7 @@ public class DeviceController {
     }
 
     private DeviceCardResponse leaveWorkshop(CustomerView customer, RfidReaderType type) {
-        this.leaveWorkshop.process(customer.id());
+        this.workshopUsageStop.process(customer.id());
 
         List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
         long totalUnits = workshopUsages.stream() //

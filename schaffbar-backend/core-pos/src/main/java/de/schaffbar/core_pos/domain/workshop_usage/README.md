@@ -26,15 +26,14 @@ _Note: Code suggests considering renaming to `WorkshopSlot` or `UsageSlot`._
 
 ## Business Rules / Invariants
 
-| #    | Rule                                                                                          | Enforced in                                                                              |
-|------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| WU-1 | A customer can have at most one active (no `exitTime`) workshop usage at a time               | `WorkshopUsageService.startWorkshopUsage()` — `CustomerAlreadyInWorkshopException` (409) |
-| WU-2 | Customer must have an active usage to leave                                                   | `WorkshopUsageService.stopWorkshopUsage()` — `NoActiveWorkshopUsageFoundException` (409) |
-| WU-3 | Duration is computed as `exitTime - entryTime` (truncated to seconds)                         | `WorkshopUsage.getDuration()` — returns `null` if either time is missing                 |
-| WU-4 | A workshop session must exist (OPEN) before entering                                          | `EnterWorkshop` use case — creates session if not present                                |
-| WU-5 | Active tool usages are stopped when leaving the workshop                                      | `LeaveWorkshop` use case — calls `ToolUsageService.stopToolUsages()`                     |
-| WU-6 | Customer must have a valid certificate to enter                                               | **TODO** — noted in `EnterWorkshop` use case                                             |
-| WU-7 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now | `BillableDuration`, `WorkshopUsage.getBillableDurationUntil()`                           |
+| #    | Rule                                                                                          | Enforced in                                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| WU-1 | A customer can have at most one active (no `exitTime`) workshop usage at a time               | `WorkshopUsageService.startWorkshopUsage()` — `CustomerAlreadyInWorkshopException` (409)                     |
+| WU-2 | Customer must have an active usage to leave                                                   | `WorkshopUsageService.stopWorkshopUsage()` — `NoActiveWorkshopUsageFoundException` (409)                     |
+| WU-3 | Duration is computed as `exitTime - entryTime` (truncated to seconds)                         | `WorkshopUsage.getDuration()` — returns `null` if either time is missing                                     |
+| WU-4 | The first check-in starts the session, every later one joins the open session                 | `WorkshopUsageStart` use case — `WorkshopSessionService.startWorkshopSession()` only without an open session |
+| WU-5 | Active tool usages are stopped when leaving the workshop                                      | `WorkshopUsageStop` use case — calls `ToolUsageService.stopToolUsages()`                                     |
+| WU-7 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now | `BillableDuration`, `WorkshopUsage.getBillableDurationUntil()`                                               |
 
 ## Domain Events
 

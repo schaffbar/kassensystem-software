@@ -1,5 +1,3 @@
 de.schaffbar.core_pos.use_case.CloseSession
-de.schaffbar.core_pos.use_case.EnterWorkshop
-de.schaffbar.core_pos.use_case.LeaveWorkshop
 de.schaffbar.core_pos.use_case.StartToolUsage
 de.schaffbar.core_pos.use_case.StopToolUsage
