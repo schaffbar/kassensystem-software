@@ -33,7 +33,10 @@
       "CUSTOMER_IS_INSTRUCTOR": "Die Person ist Einweiser für dieses Werkzeug und braucht keine Einweisung.",
       "CERTIFICATION_PERMANENTLY_REVOKED": "Der Person wurde die Einweisung für dieses Werkzeug entzogen – sie kann nicht neu eingewiesen werden.",
       "INVALID_CERTIFICATION_STATE_TRANSITION": "Die Einweisung hat sich inzwischen geändert – die Seite neu laden.",
-      "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "Die Person hat keine aktive Einweisung für dieses Werkzeug."
+      "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "Die Person hat keine aktive Einweisung für dieses Werkzeug.",
+      "CUSTOMER_ALREADY_IN_WORKSHOP": "Die Person ist schon in der Werkstatt eingecheckt.",
+      "NO_ACTIVE_WORKSHOP_USAGE_FOUND": "Die Person ist nicht eingecheckt – Auschecken ist erst nach dem Einchecken möglich.",
+      "CUSTOMER_NOT_IN_WORKSHOP": "Die Person ist nicht in der Werkstatt eingecheckt – ein Werkzeug lässt sich erst danach einschalten."
     },
     "actions": {
       "close": "Schließen",

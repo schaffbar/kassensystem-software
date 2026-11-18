@@ -33,7 +33,10 @@
       "CUSTOMER_IS_INSTRUCTOR": "The person is an instructor for this tool and needs no certification.",
       "CERTIFICATION_PERMANENTLY_REVOKED": "The certification of the person for this tool was revoked – they cannot be certified again.",
       "INVALID_CERTIFICATION_STATE_TRANSITION": "The certification has changed in the meantime – reload the page.",
-      "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "The person has no active certification for this tool."
+      "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "The person has no active certification for this tool.",
+      "CUSTOMER_ALREADY_IN_WORKSHOP": "The person is already checked in to the workshop.",
+      "NO_ACTIVE_WORKSHOP_USAGE_FOUND": "The person is not checked in – checking out is only possible after checking in.",
+      "CUSTOMER_NOT_IN_WORKSHOP": "The person is not checked in to the workshop – a tool can only be switched on after that."
     },
     "actions": {
       "close": "Close",
