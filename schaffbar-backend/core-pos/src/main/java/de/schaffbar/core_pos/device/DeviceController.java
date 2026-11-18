@@ -44,6 +44,7 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.Worksh
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
+import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
@@ -52,7 +53,6 @@ import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundExceptio
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -202,7 +202,7 @@ public class DeviceController {
 
             return ResponseEntity.ok(response);
         }
-        catch (UserAlreadyInWorkshopException e) {
+        catch (CustomerAlreadyInWorkshopException e) {
             log.error("User is already in workshop [id: {}]", rfidReader.id());
             return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du schaffst schon", customer.getFullName(), devUseCase));
         }

@@ -20,8 +20,8 @@ import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
-import de.schaffbar.core_pos.shared.exception.UserAlreadyInWorkshopException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -98,7 +98,7 @@ public class WorkshopUsageService {
     }
 
     private void throwCustomerIsAlreadyInWorkshop(WorkshopUsage workshopUsage) {
-        throw new UserAlreadyInWorkshopException(workshopUsage.getCustomerId());
+        throw new CustomerAlreadyInWorkshopException(workshopUsage.getCustomerId());
     }
 
 }
