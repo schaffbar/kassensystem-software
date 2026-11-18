@@ -31,7 +31,7 @@ public class RevokeToolCertification {
         verifyCustomerExists(customerId);
         verifyToolExists(toolId);
 
-        this.toolCertificationService.revoke(customerId, toolId);
+        this.toolCertificationService.revokeToolCertification(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

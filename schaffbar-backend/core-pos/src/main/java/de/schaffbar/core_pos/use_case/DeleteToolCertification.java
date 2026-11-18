@@ -31,7 +31,7 @@ public class DeleteToolCertification {
         verifyCustomerExists(customerId);
         verifyToolExists(toolId);
 
-        this.toolCertificationService.delete(customerId, toolId);
+        this.toolCertificationService.deleteToolCertification(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

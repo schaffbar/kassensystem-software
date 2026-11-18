@@ -31,7 +31,7 @@ public class PauseToolCertification {
         verifyCustomerExists(customerId);
         verifyToolExists(toolId);
 
-        this.toolCertificationService.pause(customerId, toolId);
+        this.toolCertificationService.pauseToolCertification(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

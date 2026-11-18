@@ -56,6 +56,10 @@ public class ResourceNotFoundException extends RuntimeException {
         return new ResourceNotFoundException(Resource.TOOL_CERTIFICATION, id.getValue().toString());
     }
 
+    public static ResourceNotFoundException toolCertification(CustomerId customerId, ToolId toolId) {
+        return new ResourceNotFoundException(Resource.TOOL_CERTIFICATION, "customer " + customerId.getValue() + ", tool " + toolId.getValue());
+    }
+
     // ------------------------------------------------------------------------
     // helper
 

@@ -31,7 +31,7 @@ public class ReactivateToolCertification {
         verifyCustomerExists(customerId);
         verifyToolExists(toolId);
 
-        this.toolCertificationService.reactivate(customerId, toolId);
+        this.toolCertificationService.reactivateToolCertification(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

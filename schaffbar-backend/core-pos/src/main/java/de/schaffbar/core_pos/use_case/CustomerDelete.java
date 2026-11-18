@@ -49,7 +49,7 @@ public class CustomerDelete {
         verifyNoOpenWorkshopSession(customerId);
 
         releaseRfidTag(customerId);
-        this.toolCertificationService.deleteAllByCustomerId(customerId);
+        this.toolCertificationService.deleteToolCertifications(customerId);
         removeAsInstructor(customerId);
 
         this.customerService.deleteCustomer(customerId);

@@ -67,7 +67,7 @@ class CustomerDeleteTest {
         this.customerDelete.process(customerId);
 
         // then
-        verify(this.toolCertificationService).deleteAllByCustomerId(customerId);
+        verify(this.toolCertificationService).deleteToolCertifications(customerId);
         verify(this.customerService).deleteCustomer(customerId);
         verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
         verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());

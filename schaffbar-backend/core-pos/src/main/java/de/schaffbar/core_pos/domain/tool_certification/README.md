@@ -34,8 +34,8 @@ return `List<SchaffbarEvent>`.
 
 | #    | Rule                                                                                                 | Enforced in                                                                                                    |
 |------|------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| TC-1 | A customer can have at most one certification per tool (unique constraint on `customer_id, tool_id`) | DB unique constraint + `ToolCertificationService.create()`                                                     |
-| TC-2 | REVOKED is a terminal state — the customer can never be re-certified for that tool                   | `ToolCertificationService.create()` — throws `CertificationPermanentlyRevokedException`                        |
+| TC-1 | A customer can have at most one certification per tool (unique constraint on `customer_id, tool_id`) | DB unique constraint + `ToolCertificationService.createToolCertification()`                                    |
+| TC-2 | REVOKED is a terminal state — the customer can never be re-certified for that tool                   | `ToolCertificationService.createToolCertification()` — throws `CertificationPermanentlyRevokedException`       |
 | TC-3 | Only valid state transitions: ACTIVE→PAUSED, PAUSED→ACTIVE, ACTIVE/PAUSED→REVOKED                    | `ToolCertification.pause()`, `reactivate()`, `revoke()` — throw `InvalidCertificationStateTransitionException` |
 | TC-4 | Batch certification supports partial success with error report                                       | `CertifyCustomersForTool` use case — catches exceptions per customer, returns `BatchCertificationResult`       |
 

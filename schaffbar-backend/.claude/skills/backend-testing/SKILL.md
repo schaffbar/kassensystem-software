@@ -204,7 +204,9 @@ class RfidReaderServiceTest {
 ```
 
 - Per command: the success path (what the service does: saved, deleted, the one event in the outbox with its type) and
-  every rejection (unknown id → `ResourceNotFoundException`, a rule → its exception), each without an outbox call. The
+  every rejection (unknown id → `ResourceNotFoundException`, a rule → its exception), each without an outbox call –
+  also a rule the entity enforces (a state transition): the entity test proves the rule, the service test that the
+  exception passes through, the state stays and nothing reaches the outbox. The
   payload is checked in the entity test, not again here – except the created event, which only the service builds:
   `expectSavedEvent(…)` returns it, the test reads `deserializeAndValidatePayload(XyzCreatedPayload.class)` and checks
   the fields.

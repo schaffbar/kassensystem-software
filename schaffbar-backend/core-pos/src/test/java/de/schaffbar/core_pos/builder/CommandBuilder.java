@@ -27,6 +27,8 @@ import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand.SetWl
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand.UpdateToolCommandBuilder;
 import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand.CreateToolCertificationCommandBuilder;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -146,6 +148,16 @@ public class CommandBuilder {
                 .id(id) //
                 .wlanRelaisType(WlanRelaisType.SHELLY_PRO) //
                 .ipAddress(IpAddress.of("192.168.1.50"));
+    }
+
+    // ------------------------------------------------------------------------
+    // tool certification
+
+    public static CreateToolCertificationCommandBuilder createToolCertificationCommand() {
+        return CreateToolCertificationCommand.builder() //
+                .customerId(CustomerId.random()) //
+                .toolId(ToolId.random()) //
+                .certifiedBy(CustomerId.random());
     }
 
 }

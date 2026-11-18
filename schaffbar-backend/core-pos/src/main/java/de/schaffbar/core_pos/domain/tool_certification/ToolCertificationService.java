@@ -9,16 +9,17 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CertificationAlreadyExistsException;
 import de.schaffbar.core_pos.shared.exception.CertificationPermanentlyRevokedException;
-import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
@@ -36,33 +37,38 @@ public class ToolCertificationService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<ToolCertificationView> getCertifications(@NotNull @Valid CustomerId customerId) {
-        return this.toolCertificationRepository.findByCustomerId(customerId.getValue()).stream() //
+        return this.toolCertificationRepository.findByCustomerId(customerId).stream() //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView) //
                 .toList();
     }
 
+    @Query
     public List<ToolCertificationView> getCertifications(@NotNull @Valid ToolId toolId) {
-        return this.toolCertificationRepository.findByToolId(toolId.getValue()).stream() //
+        return this.toolCertificationRepository.findByToolId(toolId).stream() //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView) //
                 .toList();
     }
 
+    @Query
     public Optional<ToolCertificationView> getCertification(@NotNull @Valid ToolCertificationId id) {
         return this.toolCertificationRepository.findById(id.getValue()) //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView);
     }
 
+    @Query
     public boolean hasActiveCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        return this.toolCertificationRepository.findByCustomerIdAndToolIdAndStatus(customerId.getValue(), toolId.getValue(),
-                ToolCertificationStatus.ACTIVE).isPresent();
+        return this.toolCertificationRepository.findByCustomerIdAndToolId(customerId, toolId) //
+                .filter(certification -> certification.getStatus() == ToolCertificationStatus.ACTIVE) //
+                .isPresent();
     }
 
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
-    public void create(@NotNull @Valid CreateToolCertificationCommand command) {
+    @Command
+    public void createToolCertification(@NotNull @Valid CreateToolCertificationCommand command) {
         ensureNoCertificationExists(command.customerId(), command.toolId());
 
         ToolCertification certification = ToolCertification.of(command);
@@ -74,9 +80,9 @@ public class ToolCertificationService {
         log.info("Created tool certification for customer {} on tool {} and published events {}", command.customerId(), command.toolId(), events);
     }
 
-    @Transactional
-    public void pause(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
+    @Command
+    public void pauseToolCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+        ToolCertification certification = findOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.pause();
         this.outboxEventStore.save(events);
@@ -84,9 +90,9 @@ public class ToolCertificationService {
         log.info("Paused tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
 
-    @Transactional
-    public void reactivate(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
+    @Command
+    public void reactivateToolCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+        ToolCertification certification = findOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.reactivate();
         this.outboxEventStore.save(events);
@@ -94,9 +100,9 @@ public class ToolCertificationService {
         log.info("Reactivated tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
 
-    @Transactional
-    public void revoke(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
+    @Command
+    public void revokeToolCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+        ToolCertification certification = findOrThrow(customerId, toolId);
 
         List<SchaffbarEvent> events = certification.revoke();
         this.outboxEventStore.save(events);
@@ -104,47 +110,47 @@ public class ToolCertificationService {
         log.info("Revoked tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
 
-    @Transactional
-    public void delete(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        ToolCertification certification = findByCustomerAndToolOrThrow(customerId, toolId);
-
-        List<SchaffbarEvent> events = List.of(ToolCertificationEventFactory.toolCertificationDeleted(certification));
-        this.outboxEventStore.save(events);
+    @Command
+    public void deleteToolCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+        ToolCertification certification = findOrThrow(customerId, toolId);
 
         this.toolCertificationRepository.delete(certification);
+        List<SchaffbarEvent> events = List.of(ToolCertificationEventFactory.toolCertificationDeleted(certification));
+
+        this.outboxEventStore.save(events);
 
         log.info("Deleted tool certification for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
 
-    @Transactional
-    public void deleteAllByToolId(@NotNull @Valid ToolId toolId) {
-        List<ToolCertification> certifications = this.toolCertificationRepository.findByToolId(toolId.getValue());
+    @Command
+    public void deleteToolCertifications(@NotNull @Valid ToolId toolId) {
+        List<ToolCertification> certifications = this.toolCertificationRepository.findByToolId(toolId);
         if (certifications.isEmpty()) {
             return;
         }
 
+        this.toolCertificationRepository.deleteAll(certifications);
         List<SchaffbarEvent> events = certifications.stream() //
                 .map(ToolCertificationEventFactory::toolCertificationDeleted) //
                 .toList();
 
-        this.toolCertificationRepository.deleteAllByToolId(toolId.getValue());
         this.outboxEventStore.save(events);
 
         log.info("Deleted {} tool certifications for tool {} and published events {}", certifications.size(), toolId, events);
     }
 
-    @Transactional
-    public void deleteAllByCustomerId(@NotNull @Valid CustomerId customerId) {
-        List<ToolCertification> certifications = this.toolCertificationRepository.findByCustomerId(customerId.getValue());
+    @Command
+    public void deleteToolCertifications(@NotNull @Valid CustomerId customerId) {
+        List<ToolCertification> certifications = this.toolCertificationRepository.findByCustomerId(customerId);
         if (certifications.isEmpty()) {
             return;
         }
 
+        this.toolCertificationRepository.deleteAll(certifications);
         List<SchaffbarEvent> events = certifications.stream() //
                 .map(ToolCertificationEventFactory::toolCertificationDeleted) //
                 .toList();
 
-        this.toolCertificationRepository.deleteAllByCustomerId(customerId.getValue());
         this.outboxEventStore.save(events);
 
         log.info("Deleted {} tool certifications of customer {} and published events {}", certifications.size(), customerId, events);
@@ -153,13 +159,14 @@ public class ToolCertificationService {
     // ------------------------------------------------------------------------
     // helper
 
-    private ToolCertification findByCustomerAndToolOrThrow(CustomerId customerId, ToolId toolId) {
-        return this.toolCertificationRepository.findByCustomerIdAndToolId(customerId.getValue(), toolId.getValue()) //
-                .orElseThrow(() -> new CustomerNotCertifiedForToolException(customerId, toolId));
+    private ToolCertification findOrThrow(CustomerId customerId, ToolId toolId) {
+        return this.toolCertificationRepository.findByCustomerIdAndToolId(customerId, toolId) //
+                .orElseThrow(() -> ResourceNotFoundException.toolCertification(customerId, toolId));
     }
 
+    // a revoked certification stays and blocks a new one (TC-2)
     private void ensureNoCertificationExists(CustomerId customerId, ToolId toolId) {
-        this.toolCertificationRepository.findByCustomerIdAndToolId(customerId.getValue(), toolId.getValue()) //
+        this.toolCertificationRepository.findByCustomerIdAndToolId(customerId, toolId) //
                 .ifPresent(existing -> {
                     if (existing.getStatus() == ToolCertificationStatus.REVOKED) {
                         throw new CertificationPermanentlyRevokedException(customerId, toolId);

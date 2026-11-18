@@ -29,6 +29,8 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolCreatedPayload;
+import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException;
+import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
@@ -389,6 +391,24 @@ class ToolServiceTest {
         expectNoEvent();
     }
 
+    @Test
+    void addInstructors_rejectsAnInstructorOfTheTool() {
+        // given
+        Tool tool = givenTool();
+        CustomerId instructorId = CustomerId.random();
+        tool.addInstructors(List.of(instructorId));
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.toolService.addInstructors(tool.getId(), List.of(instructorId)));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(CustomerAlreadyInstructorException.class) //
+                .hasFieldOrPropertyWithValue("code", CustomerAlreadyInstructorException.CODE);
+        assertThat(tool.getInstructors()).containsExactly(instructorId);
+        expectNoEvent();
+    }
+
     // ------------------------------------------------------------------------
     // removeInstructors
 
@@ -417,6 +437,24 @@ class ToolServiceTest {
 
         // then
         assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectNoEvent();
+    }
+
+    @Test
+    void removeInstructors_rejectsAPersonWhoIsNoInstructorOfTheTool() {
+        // given
+        Tool tool = givenTool();
+        CustomerId instructorId = CustomerId.random();
+        tool.addInstructors(List.of(instructorId));
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.toolService.removeInstructors(tool.getId(), List.of(CustomerId.random())));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(CustomerNotInstructorException.class) //
+                .hasFieldOrPropertyWithValue("code", CustomerNotInstructorException.CODE);
+        assertThat(tool.getInstructors()).containsExactly(instructorId);
         expectNoEvent();
     }
 

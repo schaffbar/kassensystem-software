@@ -52,7 +52,7 @@ class ToolDeleteTest {
 
         // then
         InOrder order = inOrder(this.toolCertificationService, this.toolService);
-        order.verify(this.toolCertificationService).deleteAllByToolId(toolId);
+        order.verify(this.toolCertificationService).deleteToolCertifications(toolId);
         order.verify(this.toolService).deleteTool(toolId);
     }
 

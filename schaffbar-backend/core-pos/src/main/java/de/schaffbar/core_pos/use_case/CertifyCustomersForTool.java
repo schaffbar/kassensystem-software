@@ -50,7 +50,7 @@ public class CertifyCustomersForTool {
             try {
                 verifyCustomerExists(customerId);
                 CreateToolCertificationCommand command = new CreateToolCertificationCommand(customerId, toolId, certifiedBy);
-                this.toolCertificationService.create(command);
+                this.toolCertificationService.createToolCertification(command);
                 succeeded.add(customerId);
             }
             catch (Exception e) {

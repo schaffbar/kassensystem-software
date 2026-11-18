@@ -36,7 +36,7 @@ public class ToolDelete {
             throw ToolInUseException.delete(toolId);
         }
 
-        this.toolCertificationService.deleteAllByToolId(toolId);
+        this.toolCertificationService.deleteToolCertifications(toolId);
         this.toolService.deleteTool(toolId);
     }
 
