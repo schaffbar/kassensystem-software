@@ -131,10 +131,6 @@ class Tool {
                 .collect(Collectors.toSet());
     }
 
-    public boolean isInstructor(CustomerId customerId) {
-        return this.instructorIds.contains(customerId.getValue());
-    }
-
     // ------------------------------------------------------------------------
     // command
 

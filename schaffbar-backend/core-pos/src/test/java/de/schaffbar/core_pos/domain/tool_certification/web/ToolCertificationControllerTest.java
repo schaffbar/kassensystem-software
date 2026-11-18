@@ -30,7 +30,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationStatus;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
+import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.BatchCertifyRequestBody;
 import de.schaffbar.core_pos.read_facade.ToolCertificationReadFacade;
+import de.schaffbar.core_pos.shared.exception.CustomerIsInstructorException;
 import de.schaffbar.core_pos.shared.exception.InvalidCertificationStateTransitionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -40,11 +42,12 @@ import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.util.StringToToolCertificationIdConverter;
 import de.schaffbar.core_pos.shared.util.StringToToolIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
-import de.schaffbar.core_pos.use_case.CertifyCustomersForTool;
-import de.schaffbar.core_pos.use_case.DeleteToolCertification;
-import de.schaffbar.core_pos.use_case.PauseToolCertification;
-import de.schaffbar.core_pos.use_case.ReactivateToolCertification;
-import de.schaffbar.core_pos.use_case.RevokeToolCertification;
+import de.schaffbar.core_pos.support.Json;
+import de.schaffbar.core_pos.use_case.ToolCertificationCreate;
+import de.schaffbar.core_pos.use_case.ToolCertificationDelete;
+import de.schaffbar.core_pos.use_case.ToolCertificationPause;
+import de.schaffbar.core_pos.use_case.ToolCertificationReactivate;
+import de.schaffbar.core_pos.use_case.ToolCertificationRevoke;
 
 @ExtendWith(MockitoExtension.class)
 class ToolCertificationControllerTest {
@@ -53,19 +56,19 @@ class ToolCertificationControllerTest {
     private ToolCertificationReadFacade toolCertificationReadFacade;
 
     @Mock
-    private CertifyCustomersForTool certifyCustomersForTool;
+    private ToolCertificationCreate toolCertificationCreate;
 
     @Mock
-    private PauseToolCertification pauseToolCertification;
+    private ToolCertificationPause toolCertificationPause;
 
     @Mock
-    private ReactivateToolCertification reactivateToolCertification;
+    private ToolCertificationReactivate toolCertificationReactivate;
 
     @Mock
-    private RevokeToolCertification revokeToolCertification;
+    private ToolCertificationRevoke toolCertificationRevoke;
 
     @Mock
-    private DeleteToolCertification deleteToolCertification;
+    private ToolCertificationDelete toolCertificationDelete;
 
     private MockMvc mockMvc;
 
@@ -76,8 +79,8 @@ class ToolCertificationControllerTest {
         conversionService.addConverter(new StringToCustomerIdConverter());
         conversionService.addConverter(new StringToToolIdConverter());
 
-        ToolCertificationController controller = new ToolCertificationController(this.toolCertificationReadFacade, this.certifyCustomersForTool,
-                this.pauseToolCertification, this.reactivateToolCertification, this.revokeToolCertification, this.deleteToolCertification);
+        ToolCertificationController controller = new ToolCertificationController(this.toolCertificationReadFacade, this.toolCertificationCreate,
+                this.toolCertificationPause, this.toolCertificationReactivate, this.toolCertificationRevoke, this.toolCertificationDelete);
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
@@ -165,6 +168,35 @@ class ToolCertificationControllerTest {
     // createToolCertifications
 
     @Test
+    void createToolCertifications_passesTheIdsAndIs204() throws Exception {
+        // given
+        BatchCertifyRequestBody body = new BatchCertifyRequestBody(List.of(CustomerId.random(), CustomerId.random()), ToolId.random(), CustomerId.random());
+
+        // when
+        ResultActions result = createToolCertifications(body);
+
+        // then
+        result.andExpect(status().isNoContent());
+        verify(this.toolCertificationCreate).process(body.customerIds(), body.toolId(), body.certifiedBy());
+    }
+
+    @Test
+    void createToolCertifications_withAnInstructorOfTheTool_is409WithTheCode() throws Exception {
+        // given
+        CustomerId instructorId = CustomerId.random();
+        BatchCertifyRequestBody body = new BatchCertifyRequestBody(List.of(instructorId), ToolId.random(), CustomerId.random());
+        doThrow(new CustomerIsInstructorException(instructorId, body.toolId())).when(this.toolCertificationCreate)
+                .process(body.customerIds(), body.toolId(), body.certifiedBy());
+
+        // when
+        ResultActions result = createToolCertifications(body);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(CustomerIsInstructorException.CODE));
+    }
+
+    @Test
     void createToolCertifications_withoutCustomers_is400() throws Exception {
         // given
         String body = "{\"customerIds\":[],\"toolId\":\"" + ToolId.random().getValue() + "\",\"certifiedBy\":\"" + CustomerId.random().getValue() + "\"}";
@@ -174,7 +206,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.certifyCustomersForTool, never()).process(any(), any(), any());
+        verify(this.toolCertificationCreate, never()).process(any(), any(), any());
     }
 
     // ------------------------------------------------------------------------
@@ -191,7 +223,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.pauseToolCertification).process(customerId, toolId);
+        verify(this.toolCertificationPause).process(customerId, toolId);
     }
 
     @Test
@@ -199,7 +231,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.pauseToolCertification).process(customerId, toolId);
+        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.toolCertificationPause).process(customerId, toolId);
 
         // when
         ResultActions result = pauseToolCertification(customerId, toolId);
@@ -213,7 +245,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.PAUSED)).when(this.pauseToolCertification).process(customerId, toolId);
+        doThrow(invalidTransition(ToolCertificationStatus.PAUSED)).when(this.toolCertificationPause).process(customerId, toolId);
 
         // when
         ResultActions result = pauseToolCertification(customerId, toolId);
@@ -236,7 +268,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.reactivateToolCertification).process(customerId, toolId);
+        verify(this.toolCertificationReactivate).process(customerId, toolId);
     }
 
     @Test
@@ -244,7 +276,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.ACTIVE)).when(this.reactivateToolCertification).process(customerId, toolId);
+        doThrow(invalidTransition(ToolCertificationStatus.ACTIVE)).when(this.toolCertificationReactivate).process(customerId, toolId);
 
         // when
         ResultActions result = reactivateToolCertification(customerId, toolId);
@@ -267,7 +299,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.revokeToolCertification).process(customerId, toolId);
+        verify(this.toolCertificationRevoke).process(customerId, toolId);
     }
 
     @Test
@@ -275,7 +307,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.REVOKED)).when(this.revokeToolCertification).process(customerId, toolId);
+        doThrow(invalidTransition(ToolCertificationStatus.REVOKED)).when(this.toolCertificationRevoke).process(customerId, toolId);
 
         // when
         ResultActions result = revokeToolCertification(customerId, toolId);
@@ -298,7 +330,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.deleteToolCertification).process(customerId, toolId);
+        verify(this.toolCertificationDelete).process(customerId, toolId);
     }
 
     @Test
@@ -306,7 +338,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.deleteToolCertification).process(customerId, toolId);
+        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.toolCertificationDelete).process(customerId, toolId);
 
         // when
         ResultActions result = deleteToolCertification(customerId, toolId);
@@ -359,6 +391,10 @@ class ToolCertificationControllerTest {
 
     private ResultActions getToolCertificationsWithoutFilter() throws Exception {
         return this.mockMvc.perform(get("/api/v1/tool-certifications"));
+    }
+
+    private ResultActions createToolCertifications(BatchCertifyRequestBody body) throws Exception {
+        return createToolCertifications(Json.write(body));
     }
 
     private ResultActions createToolCertifications(String body) throws Exception {

@@ -56,21 +56,6 @@ class ToolServiceTest {
     private ToolService toolService;
 
     // ------------------------------------------------------------------------
-    // isInstructor
-
-    @Test
-    void isInstructor_rejectsAnUnknownTool() {
-        // given
-        ToolId unknown = givenUnknownTool();
-
-        // when
-        Throwable thrown = catchThrowable(() -> this.toolService.isInstructor(unknown, CustomerId.random()));
-
-        // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    // ------------------------------------------------------------------------
     // createTool
 
     @Test

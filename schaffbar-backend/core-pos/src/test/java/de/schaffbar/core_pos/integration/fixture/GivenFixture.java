@@ -135,8 +135,7 @@ public final class GivenFixture {
 
     public void toolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
         MvcTestResult result = this.api.certifyCustomer(customerId, toolId, certifiedBy);
-        assertThat(result).hasStatus(HttpStatus.OK);
-        assertThat(result).bodyJson().extractingPath("$.failed").asArray().isEmpty();
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
     }
 
     public ToolId toolWithSwitchBox(Scenario scenario, RfidReaderId switchBox) {

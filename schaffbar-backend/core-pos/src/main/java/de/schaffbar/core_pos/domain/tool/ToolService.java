@@ -69,11 +69,6 @@ public class ToolService {
                 .toList();
     }
 
-    @Query
-    public boolean isInstructor(@NotNull @Valid ToolId toolId, @NotNull @Valid CustomerId customerId) {
-        return findOrThrow(toolId).isInstructor(customerId);
-    }
-
     // ------------------------------------------------------------------------
     // command
 

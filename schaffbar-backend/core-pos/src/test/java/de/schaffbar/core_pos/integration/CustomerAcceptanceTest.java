@@ -135,21 +135,24 @@ class CustomerAcceptanceTest {
     void c9_c11_deletingACustomerDeletesTheirCertificationsAndInstructorRoleButKeepsTheCertificationsTheyGave() {
         Scenario scenario = Scenario.randomValues().build();
 
-        // given
-        ToolId toolId = this.fixture.given().tool(scenario);
-        CustomerId otherInstructor = this.fixture.given().instructor(toolId);
-        CustomerId customerId = this.fixture.given().instructor(toolId);
-        this.fixture.given().toolCertification(customerId, toolId, otherInstructor);
+        // given – the customer is certified for one tool and instructs another (TC-5)
+        ToolId certifiedTool = this.fixture.given().tool(scenario);
+        CustomerId instructorOfTheCertifiedTool = this.fixture.given().instructor(certifiedTool);
+        ToolId instructedTool = this.fixture.given().tool(RandomValues.toolName());
+        CustomerId otherInstructor = this.fixture.given().instructor(instructedTool);
+        CustomerId customerId = this.fixture.given().instructor(instructedTool);
+        this.fixture.given().toolCertification(customerId, certifiedTool, instructorOfTheCertifiedTool);
         CustomerId certifiedByTheCustomer = this.fixture.given().customer();
-        this.fixture.given().toolCertification(certifiedByTheCustomer, toolId, customerId);
+        this.fixture.given().toolCertification(certifiedByTheCustomer, instructedTool, customerId);
 
         // when
         MvcTestResult result = this.fixture.api().deleteCustomer(customerId);
 
         // then
         this.fixture.then().expectSuccess(result);
-        this.fixture.then().expectInstructors(toolId, otherInstructor);
-        this.fixture.then().expectCertifiedCustomers(toolId, certifiedByTheCustomer);
+        this.fixture.then().expectCertifiedCustomers(certifiedTool);
+        this.fixture.then().expectInstructors(instructedTool, otherInstructor);
+        this.fixture.then().expectCertifiedCustomers(instructedTool, certifiedByTheCustomer);
     }
 
 }
