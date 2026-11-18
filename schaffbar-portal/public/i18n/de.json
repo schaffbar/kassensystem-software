@@ -30,6 +30,7 @@
       "CUSTOMER_NOT_INSTRUCTOR": "Die Person ist kein Einweiser für dieses Werkzeug.",
       "TOOL_IN_USE": "Jemand nutzt das Werkzeug gerade – zuerst die Nutzung an der Schaltbox beenden.",
       "CERTIFICATION_ALREADY_EXISTS": "Die Person ist für dieses Werkzeug schon eingewiesen.",
+      "CUSTOMER_IS_INSTRUCTOR": "Die Person ist Einweiser für dieses Werkzeug und braucht keine Einweisung.",
       "CERTIFICATION_PERMANENTLY_REVOKED": "Der Person wurde die Einweisung für dieses Werkzeug entzogen – sie kann nicht neu eingewiesen werden.",
       "INVALID_CERTIFICATION_STATE_TRANSITION": "Die Einweisung hat sich inzwischen geändert – die Seite neu laden.",
       "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "Die Person hat keine aktive Einweisung für dieses Werkzeug."
