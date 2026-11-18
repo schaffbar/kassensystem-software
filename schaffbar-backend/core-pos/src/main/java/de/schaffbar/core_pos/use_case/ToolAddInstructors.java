@@ -28,7 +28,7 @@ public class ToolAddInstructors {
 
     @Command
     public void process(@NotNull @Valid ToolId toolId, @NotEmpty List<@NotNull @Valid CustomerId> instructorIds) {
-        instructorIds.forEach(this::verifyCustomerExists);
+        instructorIds.forEach(this::ensureCustomerExists);
 
         this.toolService.addInstructors(toolId, instructorIds);
     }
@@ -36,7 +36,8 @@ public class ToolAddInstructors {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyCustomerExists(CustomerId customerId) {
+    // T-22
+    private void ensureCustomerExists(CustomerId customerId) {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
     }

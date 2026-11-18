@@ -24,7 +24,7 @@ public class RfidReaderDelete {
 
     @Command
     public void process(@NotNull @Valid RfidReaderId rfidReaderId) {
-        verifyNoToolAssigned(rfidReaderId);
+        ensureNoToolAssigned(rfidReaderId);
 
         this.rfidReaderService.deleteRfidReader(rfidReaderId);
     }
@@ -32,11 +32,14 @@ public class RfidReaderDelete {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyNoToolAssigned(RfidReaderId rfidReaderId) {
+    // R-5
+    private void ensureNoToolAssigned(RfidReaderId rfidReaderId) {
         this.toolService.getTool(rfidReaderId) //
-                .ifPresent(_ -> {
-                    throw RfidReaderHasToolAssignedException.delete(rfidReaderId);
-                });
+                .ifPresent(_ -> throwRfidReaderHasToolAssignedException(rfidReaderId));
+    }
+
+    private void throwRfidReaderHasToolAssignedException(RfidReaderId rfidReaderId) {
+        throw RfidReaderHasToolAssignedException.delete(rfidReaderId);
     }
 
 }

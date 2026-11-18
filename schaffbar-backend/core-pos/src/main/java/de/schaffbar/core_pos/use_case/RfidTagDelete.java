@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.RfidTagAssignedToCustomerException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -24,7 +25,7 @@ public class RfidTagDelete {
 
     @Command
     public void process(@NotNull @Valid RfidTagId rfidTagId) {
-        verifyNotAssigned(rfidTagId);
+        ensureRfidTagUnassigned(rfidTagId);
 
         this.rfidTagService.deleteRfidTag(rfidTagId);
     }
@@ -32,11 +33,14 @@ public class RfidTagDelete {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyNotAssigned(RfidTagId rfidTagId) {
+    // RT-3
+    private void ensureRfidTagUnassigned(RfidTagId rfidTagId) {
         this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId) //
-                .ifPresent(assignment -> {
-                    throw new RfidTagAssignedToCustomerException(rfidTagId, assignment.customerId());
-                });
+                .ifPresent(assignment -> throwRfidTagAssignedToCustomerException(rfidTagId, assignment));
+    }
+
+    private void throwRfidTagAssignedToCustomerException(RfidTagId rfidTagId, RfidTagAssignmentView assignment) {
+        throw new RfidTagAssignedToCustomerException(rfidTagId, assignment.customerId());
     }
 
 }

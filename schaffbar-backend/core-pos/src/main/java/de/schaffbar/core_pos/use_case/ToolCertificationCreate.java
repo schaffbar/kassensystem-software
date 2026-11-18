@@ -42,8 +42,8 @@ public class ToolCertificationCreate {
     ) {
         ToolView tool = this.toolService.getTool(toolId) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
-        verifyIsInstructor(tool, certifiedBy);
-        customerIds.forEach(customerId -> verifyCanBeCertified(tool, customerId));
+        ensureIsInstructor(tool, certifiedBy);
+        customerIds.forEach(customerId -> ensureCanBeCertified(tool, customerId));
 
         customerIds.forEach(customerId -> this.toolCertificationService
                 .createToolCertification(new CreateToolCertificationCommand(customerId, toolId, certifiedBy)));
@@ -52,14 +52,15 @@ public class ToolCertificationCreate {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyIsInstructor(ToolView tool, CustomerId certifiedBy) {
+    // only an instructor of the tool certifies for it (TC-8)
+    private void ensureIsInstructor(ToolView tool, CustomerId certifiedBy) {
         if (!tool.instructors().contains(certifiedBy)) {
             throw new CustomerNotInstructorException(certifiedBy, tool.id());
         }
     }
 
     // instructors need no certification for their own tool (TC-5)
-    private void verifyCanBeCertified(ToolView tool, CustomerId customerId) {
+    private void ensureCanBeCertified(ToolView tool, CustomerId customerId) {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
 

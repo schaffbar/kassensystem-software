@@ -27,6 +27,7 @@ import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -102,11 +103,7 @@ public class ToolService {
     public void setWlanRelais(@NotNull @Valid SetWlanRelaisCommand command) {
         Tool tool = findOrThrow(command.id());
 
-        this.toolRepository.findByIpAddress(command.ipAddress()) //
-                .filter(existing -> isFalse(command.id().sameValueAs(existing.getId()))) //
-                .ifPresent(existing -> {
-                    throw new IpAddressAlreadyUsedException(command.ipAddress(), existing.getId());
-                });
+        ensureIpAddressUnused(command.ipAddress(), command.id());
 
         List<SchaffbarEvent> events = tool.setWlanRelais(command);
         this.outboxEventStore.save(events);
@@ -128,11 +125,7 @@ public class ToolService {
     public void assignRfidReader(@NotNull @Valid ToolId toolId, @NotNull @Valid RfidReaderId rfidReaderId) {
         Tool tool = findOrThrow(toolId);
 
-        this.toolRepository.findByRfidReaderId(rfidReaderId) //
-                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
-                .ifPresent(existing -> {
-                    throw new RfidReaderAlreadyAssignedToToolException(rfidReaderId, existing.getId());
-                });
+        ensureRfidReaderNotAssignedToAnotherTool(rfidReaderId, toolId);
 
         List<SchaffbarEvent> events = tool.assignRfidReader(rfidReaderId);
         this.outboxEventStore.save(events);
@@ -195,9 +188,33 @@ public class ToolService {
         this.toolRepository.findByNameIgnoreCase(name).stream() //
                 .filter(existing -> isFalse(existing.getId().sameValueAs(toolId))) //
                 .findFirst() //
-                .ifPresent(existing -> {
-                    throw new ToolNameAlreadyUsedException(name, existing.getId());
-                });
+                .ifPresent(existing -> throwToolNameAlreadyUsedException(name, existing));
+    }
+
+    // T-4 – the tool keeps its own IP address
+    private void ensureIpAddressUnused(IpAddress ipAddress, ToolId toolId) {
+        this.toolRepository.findByIpAddress(ipAddress) //
+                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
+                .ifPresent(existing -> throwIpAddressAlreadyUsedException(ipAddress, existing));
+    }
+
+    // T-3 – assigning the reader of the tool again is no change (T-8)
+    private void ensureRfidReaderNotAssignedToAnotherTool(RfidReaderId rfidReaderId, ToolId toolId) {
+        this.toolRepository.findByRfidReaderId(rfidReaderId) //
+                .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
+                .ifPresent(existing -> throwRfidReaderAlreadyAssignedToToolException(rfidReaderId, existing));
+    }
+
+    private void throwToolNameAlreadyUsedException(String name, Tool existing) {
+        throw new ToolNameAlreadyUsedException(name, existing.getId());
+    }
+
+    private void throwIpAddressAlreadyUsedException(IpAddress ipAddress, Tool existing) {
+        throw new IpAddressAlreadyUsedException(ipAddress, existing.getId());
+    }
+
+    private void throwRfidReaderAlreadyAssignedToToolException(RfidReaderId rfidReaderId, Tool existing) {
+        throw new RfidReaderAlreadyAssignedToToolException(rfidReaderId, existing.getId());
     }
 
 }

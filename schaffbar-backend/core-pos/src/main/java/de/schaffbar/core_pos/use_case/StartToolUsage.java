@@ -45,10 +45,10 @@ public class StartToolUsage {
         ToolView tool = this.toolService.getTool(toolId) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
 
-        verifyCustomerIsInWorkshop(customerId);
+        ensureCustomerIsInWorkshop(customerId);
 
         if (tool.certificationRequirement() == CertificationRequirement.RED) {
-            verifyCustomerHasActiveCertification(customerId, toolId);
+            ensureCustomerHasActiveCertification(customerId, toolId);
         }
 
         WorkshopSessionId sessionId = this.workshopSessionService.getOpenWorkshopSession(customerId) //
@@ -62,7 +62,7 @@ public class StartToolUsage {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyCustomerIsInWorkshop(CustomerId customerId) {
+    private void ensureCustomerIsInWorkshop(CustomerId customerId) {
         boolean isInWorkshop = this.workshopUsageService.getActiveWorkshopUsages().stream() //
                 .map(WorkshopUsageView::customerId) //
                 .anyMatch(id -> id.sameValueAs(customerId));
@@ -72,7 +72,7 @@ public class StartToolUsage {
         }
     }
 
-    private void verifyCustomerHasActiveCertification(CustomerId customerId, ToolId toolId) {
+    private void ensureCustomerHasActiveCertification(CustomerId customerId, ToolId toolId) {
         if (!this.toolCertificationService.hasActiveToolCertification(customerId, toolId)) {
             throw new CustomerNotCertifiedForToolException(customerId, toolId);
         }

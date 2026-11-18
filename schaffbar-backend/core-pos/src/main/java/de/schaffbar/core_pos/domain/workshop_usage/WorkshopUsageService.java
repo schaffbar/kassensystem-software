@@ -69,9 +69,7 @@ public class WorkshopUsageService {
 
     @Command
     public void startWorkshopUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid WorkshopSessionId workshopSessionId) {
-        if (this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId).isPresent()) {
-            throw new CustomerAlreadyInWorkshopException(customerId);
-        }
+        ensureCustomerNotInWorkshop(customerId);
 
         WorkshopUsage workshopUsage = WorkshopUsage.of(customerId, workshopSessionId);
         this.workshopUsageRepository.save(workshopUsage);
@@ -92,6 +90,19 @@ public class WorkshopUsageService {
         this.outboxEventStore.save(events);
 
         log.info("Customer {} left workshop and published events {}", customerId, events);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    // WU-1
+    private void ensureCustomerNotInWorkshop(CustomerId customerId) {
+        this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId) //
+                .ifPresent(this::throwCustomerAlreadyInWorkshopException);
+    }
+
+    private void throwCustomerAlreadyInWorkshopException(WorkshopUsage active) {
+        throw new CustomerAlreadyInWorkshopException(active.getCustomerId());
     }
 
 }

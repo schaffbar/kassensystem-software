@@ -32,7 +32,7 @@ public class RfidReaderChangeType {
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));
 
         if (rfidReader.type() == RfidReaderType.SWITCH_BOX) {
-            verifyNoToolAssigned(command.id());
+            ensureNoToolAssigned(command.id());
         }
 
         this.rfidReaderService.changeRfidReaderType(command);
@@ -41,11 +41,14 @@ public class RfidReaderChangeType {
     // ------------------------------------------------------------------------
     // helper
 
-    private void verifyNoToolAssigned(RfidReaderId rfidReaderId) {
+    // R-3
+    private void ensureNoToolAssigned(RfidReaderId rfidReaderId) {
         this.toolService.getTool(rfidReaderId) //
-                .ifPresent(_ -> {
-                    throw RfidReaderHasToolAssignedException.changeType(rfidReaderId);
-                });
+                .ifPresent(_ -> throwRfidReaderHasToolAssignedException(rfidReaderId));
+    }
+
+    private void throwRfidReaderHasToolAssignedException(RfidReaderId rfidReaderId) {
+        throw RfidReaderHasToolAssignedException.changeType(rfidReaderId);
     }
 
 }

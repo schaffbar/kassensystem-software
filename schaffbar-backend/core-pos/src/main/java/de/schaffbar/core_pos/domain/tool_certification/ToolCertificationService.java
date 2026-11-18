@@ -167,12 +167,15 @@ public class ToolCertificationService {
     // a revoked certification stays and blocks a new one (TC-2)
     private void ensureNoCertificationExists(CustomerId customerId, ToolId toolId) {
         this.toolCertificationRepository.findByCustomerIdAndToolId(customerId, toolId) //
-                .ifPresent(existing -> {
-                    if (existing.getStatus() == ToolCertificationStatus.REVOKED) {
-                        throw new CertificationPermanentlyRevokedException(customerId, toolId);
-                    }
-                    throw new CertificationAlreadyExistsException(customerId, toolId);
-                });
+                .ifPresent(this::throwCertificationExistsException);
+    }
+
+    private void throwCertificationExistsException(ToolCertification existing) {
+        if (existing.getStatus() == ToolCertificationStatus.REVOKED) {
+            throw new CertificationPermanentlyRevokedException(existing.getCustomerId(), existing.getToolId());
+        }
+
+        throw new CertificationAlreadyExistsException(existing.getCustomerId(), existing.getToolId());
     }
 
 }

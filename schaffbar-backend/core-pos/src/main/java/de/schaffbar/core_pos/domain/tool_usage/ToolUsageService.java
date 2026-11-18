@@ -147,17 +147,13 @@ public class ToolUsageService {
     private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId customerId) {
         this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId) //
                 .filter(existing -> !existing.getCustomerId().sameValueAs(customerId)) //
-                .ifPresent(_ -> {
-                    throw new ToolAlreadyInUseByAnotherCustomerException(toolId);
-                });
+                .ifPresent(this::throwToolAlreadyInUseByAnotherCustomerException);
     }
 
     // TU-3
     private void ensureCustomerNotAlreadyUsingTool(CustomerId customerId, ToolId toolId) {
         this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId) //
-                .ifPresent(_ -> {
-                    throw new CustomerAlreadyUsingToolException(customerId, toolId);
-                });
+                .ifPresent(this::throwCustomerAlreadyUsingToolException);
     }
 
     // TU-1
@@ -166,6 +162,14 @@ public class ToolUsageService {
         if (activeCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
             throw new MaxToolUsageExceededException(customerId, MAX_SIMULTANEOUS_TOOL_USAGES);
         }
+    }
+
+    private void throwToolAlreadyInUseByAnotherCustomerException(ToolUsage existing) {
+        throw new ToolAlreadyInUseByAnotherCustomerException(existing.getToolId());
+    }
+
+    private void throwCustomerAlreadyUsingToolException(ToolUsage existing) {
+        throw new CustomerAlreadyUsingToolException(existing.getCustomerId(), existing.getToolId());
     }
 
 }

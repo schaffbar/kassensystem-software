@@ -45,8 +45,7 @@ public class WorkshopSessionService {
 
     @Command
     public WorkshopSessionId startWorkshopSession(@NotNull @Valid CustomerId customerId) {
-        findOpenWorkshopSession(customerId) //
-                .ifPresent(this::throwHasAlreadyOpenWorkshopSession);
+        ensureNoOpenWorkshopSession(customerId);
 
         WorkshopSession workshopSession = WorkshopSession.of(customerId);
         this.workshopSessionRepository.save(workshopSession);
@@ -61,7 +60,7 @@ public class WorkshopSessionService {
 
     @Command
     public void closeWorkshopSession(@NotNull @Valid CustomerId customerId, @NotNull BillingTotal workshopTotal, @NotNull BillingTotal toolTotal) {
-        WorkshopSession workshopSession = findOpenWorkshopSession(customerId) //
+        WorkshopSession workshopSession = this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
                 .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));
 
         List<SchaffbarEvent> events = workshopSession.close(workshopTotal, toolTotal);
@@ -74,8 +73,10 @@ public class WorkshopSessionService {
     // ------------------------------------------------------------------------
     // helper
 
-    private Optional<WorkshopSession> findOpenWorkshopSession(CustomerId customerId) {
-        return this.workshopSessionRepository.findOpenWorkshopSession(customerId);
+    // WS-1 – EnterWorkshop starts a session only without an open one, so an open one here is a bug
+    private void ensureNoOpenWorkshopSession(CustomerId customerId) {
+        this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
+                .ifPresent(this::throwHasAlreadyOpenWorkshopSession);
     }
 
     private void throwHasAlreadyOpenWorkshopSession(WorkshopSession session) {

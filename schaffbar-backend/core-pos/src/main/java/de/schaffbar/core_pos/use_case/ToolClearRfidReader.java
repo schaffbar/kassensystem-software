@@ -24,12 +24,22 @@ public class ToolClearRfidReader {
 
     @Command
     public void process(@NotNull @Valid ToolId toolId) {
-        // the person at the tool could no longer stop the usage at its switch box (T-14)
-        if (this.toolUsageService.getActiveToolUsage(toolId).isPresent()) {
-            throw ToolInUseException.clearRfidReader(toolId);
-        }
+        ensureToolNotInUse(toolId);
 
         this.toolService.clearRfidReader(toolId);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    // the person at the tool could no longer stop the usage at its switch box (T-14)
+    private void ensureToolNotInUse(ToolId toolId) {
+        this.toolUsageService.getActiveToolUsage(toolId) //
+                .ifPresent(_ -> throwToolInUseException(toolId));
+    }
+
+    private void throwToolInUseException(ToolId toolId) {
+        throw ToolInUseException.clearRfidReader(toolId);
     }
 
 }

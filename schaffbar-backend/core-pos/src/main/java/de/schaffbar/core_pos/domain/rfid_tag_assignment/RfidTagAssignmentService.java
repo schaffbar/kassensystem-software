@@ -71,12 +71,8 @@ public class RfidTagAssignmentService {
 
     @Command
     public void requestRfidTagAssignment(@NotNull @Valid CustomerId customerId, @NotNull RfidTagAssignmentType assignmentType) {
-        if (this.rfidTagAssignmentRepository.findByCustomerId(customerId).isPresent()) {
-            throw new CustomerHasRfidTagAssignmentException(customerId);
-        }
-
-        this.rfidTagAssignmentRepository.findWaitingForAssignment() //
-                .ifPresent(waiting -> throwRfidTagAssignmentAlreadyWaitingException(customerId, waiting));
+        ensureCustomerHasNoRfidTagAssignment(customerId);
+        ensureNoRfidTagAssignmentWaiting(customerId);
 
         RfidTagAssignment assignment = RfidTagAssignment.of(customerId, assignmentType);
         RfidTagAssignment savedAssignment = this.rfidTagAssignmentRepository.save(assignment);
@@ -103,8 +99,7 @@ public class RfidTagAssignmentService {
 
     @Command
     public void assignRfidTag(@NotNull @Valid RfidTagId rfidTagId) {
-        this.rfidTagAssignmentRepository.findByRfidTagId(rfidTagId) //
-                .ifPresent(existing -> throwRfidTagAlreadyAssignedException(rfidTagId, existing));
+        ensureRfidTagUnassigned(rfidTagId);
 
         RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findWaitingForAssignment() //
                 .orElseThrow(() -> NoRfidTagAssignmentWaitingException.forRfidTag(rfidTagId));
@@ -134,6 +129,28 @@ public class RfidTagAssignmentService {
 
     // ------------------------------------------------------------------------
     // helper
+
+    // TA-1
+    private void ensureCustomerHasNoRfidTagAssignment(CustomerId customerId) {
+        this.rfidTagAssignmentRepository.findByCustomerId(customerId) //
+                .ifPresent(this::throwCustomerHasRfidTagAssignmentException);
+    }
+
+    // TA-3
+    private void ensureNoRfidTagAssignmentWaiting(CustomerId customerId) {
+        this.rfidTagAssignmentRepository.findWaitingForAssignment() //
+                .ifPresent(waiting -> throwRfidTagAssignmentAlreadyWaitingException(customerId, waiting));
+    }
+
+    // TA-2
+    private void ensureRfidTagUnassigned(RfidTagId rfidTagId) {
+        this.rfidTagAssignmentRepository.findByRfidTagId(rfidTagId) //
+                .ifPresent(existing -> throwRfidTagAlreadyAssignedException(rfidTagId, existing));
+    }
+
+    private void throwCustomerHasRfidTagAssignmentException(RfidTagAssignment existing) {
+        throw new CustomerHasRfidTagAssignmentException(existing.getCustomerId());
+    }
 
     private void throwRfidTagAssignmentAlreadyWaitingException(CustomerId customerId, RfidTagAssignment waiting) {
         throw new RfidTagAssignmentAlreadyWaitingException(customerId, waiting.getCustomerId());

@@ -73,6 +73,60 @@ public class MacAddressAlreadyUsedException extends BusinessRuleViolationExcepti
   class – variants from static factories (`RfidReaderHasToolAssignedException.delete(id)`, `.changeType(id)`) share it,
   so its translation fits all of them. A new or renamed code needs the portal's translation in the same change.
 
+### How a check is written
+
+The same in services and use cases – the command reads as the list of its rules, then the change:
+
+```java
+@Command
+public void startToolUsage(@NotNull @Valid StartToolUsageCommand command) {
+    ensureToolNotInUseByAnotherCustomer(command.toolId(), command.customerId());
+    ensureCustomerNotAlreadyUsingTool(command.customerId(), command.toolId());
+    ensureMaxSimultaneousUsagesNotExceeded(command.customerId());
+
+    ToolUsage toolUsage = ToolUsage.of(command);
+    …
+}
+
+// ------------------------------------------------------------------------
+// helper
+
+// TU-9
+private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId customerId) {
+    this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId) //
+            .filter(existing -> !existing.getCustomerId().sameValueAs(customerId)) //
+            .ifPresent(this::throwToolAlreadyInUseByAnotherCustomerException);
+}
+
+// TU-1
+private void ensureMaxSimultaneousUsagesNotExceeded(CustomerId customerId) {
+    long activeCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
+    if (activeCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
+        throw new MaxToolUsageExceededException(customerId, MAX_SIMULTANEOUS_TOOL_USAGES);
+    }
+}
+
+private void throwToolAlreadyInUseByAnotherCustomerException(ToolUsage existing) {
+    throw new ToolAlreadyInUseByAnotherCustomerException(existing.getToolId());
+}
+```
+
+- **Every check before the change is a private `ensure<what must hold>(…)`** in `// helper` – also a one-liner, so
+  the name says the rule. Above it the rule id from the README or why (`// TU-9`,
+  `// the usage of the person at the tool would never end (T-17)`).
+- A row that violates the rule: `find…(…).ifPresent(this::throwXyzException)` or
+  `.ifPresent(existing -> throwXyzException(id, existing))` – **the `throw` lives in a private `throw<Exception>`
+  helper, never `throw new` inside a lambda**. A helper that decides between two exceptions decides there
+  (`throwCertificationExistsException`).
+- A check without an `Optional` (`count >= MAX`, `anyMatch`, a `boolean` query) is a plain `if (…) throw new …;`
+  inside the `ensure…` method.
+- `ensure…` only checks, it changes nothing – an `ifPresent` that acts (unassign or cancel in `CustomerDelete`) is
+  a helper with a verb of its own (`releaseRfidTag`).
+- Loading stays inline: `orElseThrow(() -> ResourceNotFoundException.tool(toolId))` or a `findOrThrow` helper – it
+  returns what the command works with.
+- A guard against a bug (the caller already checked) is an `ensure…` too, throws `IllegalStateException` and says
+  in its comment who checks before (`ensureNoOpenWorkshopSession` in `WorkshopSessionService`).
+
 ## Aggregate root
 
 ```java
@@ -348,8 +402,8 @@ public class RfidReaderService {
 - `@Slf4j @Service @Validated @RequiredArgsConstructor`, `public class <Aggregate>Service`. Dependencies are
   `private final @NonNull` fields: **its own repository and the `OutboxEventStore` – never another service or a use
   case or a read facade.** Use cases (changes) and read facades (queries) call the services, never the other way round.
-- **Public queries and public commands, everything else `private`** (helpers like `throwMacAddressAlreadyUsedException`,
-  `findByCustomerAndToolOrThrow` in `// helper`).
+- **Public queries and public commands, everything else `private`** (helpers like `ensureMacAddressUnused`,
+  `throwMacAddressAlreadyUsedException`, `findOrThrow` in `// helper`).
 - **Input is a command or value objects**, never a raw `UUID` or `String`; every object parameter is validated
   (`@NotNull @Valid`, `@NotEmpty` for lists).
 - **Every public method is `@Query` or `@Command`** (`de.schaffbar.core_pos.shared.cqrs` – not Spring Data's
@@ -363,9 +417,8 @@ public class RfidReaderService {
 - **Commands** are named verb + aggregate (`createTool`, `changeRfidReaderType`, `pauseToolCertification`),
   `@Command`, and return `void` – only a create returns the new id. The flow:
   - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)`;
-  - check the rules that need other rows of the aggregate (uniqueness) – with a private `throw…` helper, no
-    `throw new` inside a lambda:
-    `findByMacAddress(…).ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing))`;
+  - check the rules that need other rows of the aggregate (uniqueness) – one `ensure…` each ("How a check is
+    written");
   - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete:
     `deleteById` + the deleted event);
   - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all. **Every
@@ -512,5 +565,6 @@ Never add a violation to the store to make a build pass. A rule in this skill an
 - [ ] Service: own repository + `OutboxEventStore` only; queries `@Query` returning views; commands `@Command`, save their
       events, log them.
 - [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test.
+- [ ] Each check an `ensure…` with its rule id; `throw` in a `throw…` helper, never inside a lambda.
 - [ ] New event: EventType, payload (no entity or embeddable inside), mapper, factory, README.
 - [ ] README updated; `mvn -q test` passes.

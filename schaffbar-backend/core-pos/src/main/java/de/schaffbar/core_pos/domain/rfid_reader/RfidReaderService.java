@@ -60,8 +60,7 @@ public class RfidReaderService {
 
     @Command
     public RfidReaderId createRfidReader(@NotNull @Valid MacAddress macAddress) {
-        this.rfidReaderRepository.findByMacAddress(macAddress) //
-                .ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing));
+        ensureMacAddressUnused(macAddress);
 
         RfidReader rfidReader = RfidReader.of(macAddress);
         RfidReader savedRfidReader = this.rfidReaderRepository.save(rfidReader);
@@ -111,6 +110,12 @@ public class RfidReaderService {
 
     // ------------------------------------------------------------------------
     // helper
+
+    // R-1
+    private void ensureMacAddressUnused(MacAddress macAddress) {
+        this.rfidReaderRepository.findByMacAddress(macAddress) //
+                .ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing));
+    }
 
     private void throwMacAddressAlreadyUsedException(MacAddress macAddress, RfidReader existingRfidReader) {
         throw new MacAddressAlreadyUsedException(macAddress, existingRfidReader.getId());

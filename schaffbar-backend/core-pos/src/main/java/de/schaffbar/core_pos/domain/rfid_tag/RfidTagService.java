@@ -51,9 +51,7 @@ public class RfidTagService {
 
     @Command
     public RfidTagId createRfidTag(@NotNull @Valid RfidTagId id) {
-        if (this.rfidTagRepository.existsById(id.getValue())) {
-            throw new RfidTagAlreadyRegisteredException(id);
-        }
+        ensureRfidTagNotRegistered(id);
 
         RfidTag rfidTag = RfidTag.of(id);
         RfidTag savedRfidTag = this.rfidTagRepository.save(rfidTag);
@@ -77,6 +75,16 @@ public class RfidTagService {
         this.outboxEventStore.save(events);
 
         log.info("Deleted RFID tag with id {} and published events {}", id, events);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    // RT-5
+    private void ensureRfidTagNotRegistered(RfidTagId id) {
+        if (this.rfidTagRepository.existsById(id.getValue())) {
+            throw new RfidTagAlreadyRegisteredException(id);
+        }
     }
 
 }

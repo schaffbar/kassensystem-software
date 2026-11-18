@@ -31,13 +31,23 @@ public class ToolDelete {
         this.toolService.getTool(toolId) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
 
-        // the usage of the person at the tool would never end (T-17)
-        if (this.toolUsageService.getActiveToolUsage(toolId).isPresent()) {
-            throw ToolInUseException.delete(toolId);
-        }
+        ensureToolNotInUse(toolId);
 
         this.toolCertificationService.deleteToolCertifications(toolId);
         this.toolService.deleteTool(toolId);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    // the usage of the person at the tool would never end (T-17)
+    private void ensureToolNotInUse(ToolId toolId) {
+        this.toolUsageService.getActiveToolUsage(toolId) //
+                .ifPresent(_ -> throwToolInUseException(toolId));
+    }
+
+    private void throwToolInUseException(ToolId toolId) {
+        throw ToolInUseException.delete(toolId);
     }
 
 }
