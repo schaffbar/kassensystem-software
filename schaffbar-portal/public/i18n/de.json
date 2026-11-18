@@ -40,7 +40,10 @@
       "MAX_TOOL_USAGE_EXCEEDED": "Die Person nutzt schon so viele Werkzeuge gleichzeitig wie erlaubt.",
       "CUSTOMER_ALREADY_USING_TOOL": "Die Person nutzt dieses Werkzeug schon.",
       "TOOL_ALREADY_IN_USE_BY_ANOTHER_CUSTOMER": "Jemand anderes nutzt das Werkzeug gerade.",
-      "TOOL_NOT_IN_USE_BY_CUSTOMER": "Die Person nutzt dieses Werkzeug gerade nicht."
+      "TOOL_NOT_IN_USE_BY_CUSTOMER": "Die Person nutzt dieses Werkzeug gerade nicht.",
+      "NO_ACTIVE_WORKSHOP_SESSION_FOUND": "Die Person hat keine offene Sitzung.",
+      "ACTIVE_WORKSHOP_USAGE_EXISTS_FOR_SESSION": "Die Person ist noch in der Werkstatt eingecheckt – die Sitzung lässt sich erst nach dem Auschecken abrechnen.",
+      "ACTIVE_TOOL_USAGE_EXISTS_FOR_SESSION": "Die Person nutzt noch ein Werkzeug – zuerst die Nutzung an der Schaltbox beenden."
     },
     "actions": {
       "close": "Schließen",
