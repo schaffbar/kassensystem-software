@@ -58,8 +58,8 @@ import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
-import de.schaffbar.core_pos.use_case.StartToolUsage;
-import de.schaffbar.core_pos.use_case.StopToolUsage;
+import de.schaffbar.core_pos.use_case.ToolUsageStart;
+import de.schaffbar.core_pos.use_case.ToolUsageStop;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStop;
 
@@ -86,9 +86,9 @@ public class DeviceController {
 
     private final @NonNull WorkshopUsageStop workshopUsageStop;
 
-    private final @NonNull StartToolUsage startToolUsage;
+    private final @NonNull ToolUsageStart toolUsageStart;
 
-    private final @NonNull StopToolUsage stopToolUsage;
+    private final @NonNull ToolUsageStop toolUsageStop;
 
     private final @NonNull CustomerAssignRfidTag assignRfidTagUseCase;
 
@@ -363,11 +363,11 @@ public class DeviceController {
         //                .anyMatch(usage -> usage.toolId().sameValueAs(tool.id()));
         boolean hasActiveUsage = this.toolUsageService.getActiveToolUsage(customer.id(), tool.id()).isPresent();
         if (hasActiveUsage) {
-            this.stopToolUsage.process(customer.id(), tool.id());
+            this.toolUsageStop.process(customer.id(), tool.id());
             return DeviceCardResponse.stopToolUsage(rfidReader.type(), customer.getFullName(), tool.name());
         }
         else {
-            this.startToolUsage.process(customer.id(), tool.id());
+            this.toolUsageStart.process(customer.id(), tool.id());
             return DeviceCardResponse.startToolUsage(rfidReader.type(), customer.getFullName(), tool.name());
         }
 

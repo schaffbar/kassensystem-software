@@ -1,3 +1,1 @@
 Method <de.schaffbar.core_pos.use_case.CloseSession.process(de.schaffbar.core_pos.shared.id.CustomerId)> is annotated with @Transactional in (CloseSession.java:45)
-Method <de.schaffbar.core_pos.use_case.StartToolUsage.process(de.schaffbar.core_pos.shared.id.CustomerId, de.schaffbar.core_pos.shared.id.ToolId)> is annotated with @Transactional in (StartToolUsage.java:45)
-Method <de.schaffbar.core_pos.use_case.StopToolUsage.process(de.schaffbar.core_pos.shared.id.CustomerId, de.schaffbar.core_pos.shared.id.ToolId)> is annotated with @Transactional in (StopToolUsage.java:24)

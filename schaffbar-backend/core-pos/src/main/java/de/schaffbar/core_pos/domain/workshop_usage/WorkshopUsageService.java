@@ -4,6 +4,7 @@ import static java.util.Comparator.comparing;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -44,6 +45,12 @@ public class WorkshopUsageService {
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
                 .toList();
+    }
+
+    @Query
+    public Optional<WorkshopUsageView> getActiveWorkshopUsage(@NotNull @Valid CustomerId customerId) {
+        return this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId) //
+                .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView);
     }
 
     @Query
