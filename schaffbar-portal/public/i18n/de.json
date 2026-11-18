@@ -27,7 +27,8 @@
       "RFID_READER_ALREADY_ASSIGNED_TO_TOOL": "Die Schaltbox ist schon einem anderen Werkzeug zugewiesen.",
       "INVALID_RFID_READER_TYPE_FOR_TOOL": "Nur ein Lesegerät vom Typ Schaltbox kann einem Werkzeug zugewiesen werden.",
       "CUSTOMER_ALREADY_INSTRUCTOR": "Die Person ist schon Einweiser für dieses Werkzeug.",
-      "CUSTOMER_NOT_INSTRUCTOR": "Die Person ist kein Einweiser für dieses Werkzeug."
+      "CUSTOMER_NOT_INSTRUCTOR": "Die Person ist kein Einweiser für dieses Werkzeug.",
+      "TOOL_IN_USE": "Jemand nutzt das Werkzeug gerade – zuerst die Nutzung an der Schaltbox beenden."
     },
     "actions": {
       "close": "Schließen",

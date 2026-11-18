@@ -27,7 +27,8 @@
       "RFID_READER_ALREADY_ASSIGNED_TO_TOOL": "The switch box is already assigned to another tool.",
       "INVALID_RFID_READER_TYPE_FOR_TOOL": "Only an RFID reader of type switch box can be assigned to a tool.",
       "CUSTOMER_ALREADY_INSTRUCTOR": "The person is already an instructor for this tool.",
-      "CUSTOMER_NOT_INSTRUCTOR": "The person is not an instructor for this tool."
+      "CUSTOMER_NOT_INSTRUCTOR": "The person is not an instructor for this tool.",
+      "TOOL_IN_USE": "Somebody is using the tool right now – end the usage at the switch box first."
     },
     "actions": {
       "close": "Close",
