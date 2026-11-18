@@ -15,23 +15,19 @@ interface WorkshopUsageRepository extends JpaRepository<WorkshopUsage, UUID> {
 
     List<WorkshopUsage> findByCustomerIdAndExitTimeIsNull(UUID customerId);
 
-    default Optional<WorkshopUsage> findActiveByCustomerId(CustomerId customerId) {
+    default Optional<WorkshopUsage> findByCustomerIdAndExitTimeIsNull(CustomerId customerId) {
         List<WorkshopUsage> workshopUsages = findByCustomerIdAndExitTimeIsNull(customerId.getValue());
-        if (workshopUsages.isEmpty()) {
-            return Optional.empty();
-        }
-
         if (workshopUsages.size() > 1) {
-            throw new RuntimeException("More than one open workshop usage found");
+            throw new IllegalStateException("More than one active workshop usage of customer [id: " + customerId.getValue() + "]");
         }
 
-        return Optional.of(workshopUsages.getFirst());
+        return workshopUsages.stream().findFirst();
     }
 
-    List<WorkshopUsage> findWorkshopUsageByWorkshopSessionId(UUID workshopSessionId);
+    List<WorkshopUsage> findByWorkshopSessionId(UUID workshopSessionId);
 
-    default List<WorkshopUsage> findWorkshopUsages(WorkshopSessionId workshopSessionId) {
-        return findWorkshopUsageByWorkshopSessionId(workshopSessionId.getValue());
+    default List<WorkshopUsage> findByWorkshopSessionId(WorkshopSessionId workshopSessionId) {
+        return findByWorkshopSessionId(workshopSessionId.getValue());
     }
 
     List<WorkshopUsage> findByExitTimeIsNull();

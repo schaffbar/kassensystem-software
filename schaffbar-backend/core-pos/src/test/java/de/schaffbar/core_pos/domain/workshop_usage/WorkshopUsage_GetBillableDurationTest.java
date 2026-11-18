@@ -16,16 +16,19 @@ class WorkshopUsage_GetBillableDurationTest {
     @Test
     void hasNoFinalBillableDurationWhileRunning() {
         // given
-        WorkshopUsage usage = workshopUsage();
+        WorkshopUsage usage = givenRunningUsage();
 
-        // when / then
-        assertThat(usage.getBillableDuration()).isNull();
+        // when
+        BillableDuration duration = usage.getBillableDuration();
+
+        // then
+        assertThat(duration).isNull();
     }
 
     @Test
     void countsARunningUsageUntilNow() {
         // given
-        WorkshopUsage usage = workshopUsage();
+        WorkshopUsage usage = givenRunningUsage();
         Instant now = usage.getEntryTime() //
                 .plus(Duration.ofMinutes(13).plusSeconds(1));
 
@@ -40,7 +43,7 @@ class WorkshopUsage_GetBillableDurationTest {
     @Test
     void ignoresNowForAFinishedUsage() {
         // given
-        WorkshopUsage usage = workshopUsage();
+        WorkshopUsage usage = givenRunningUsage();
         usage.exit();
 
         // when
@@ -52,9 +55,9 @@ class WorkshopUsage_GetBillableDurationTest {
     }
 
     // ------------------------------------------------------------------------
-    // helper
+    // given
 
-    private WorkshopUsage workshopUsage() {
+    private WorkshopUsage givenRunningUsage() {
         return WorkshopUsage.of(CustomerId.random(), WorkshopSessionId.random());
     }
 

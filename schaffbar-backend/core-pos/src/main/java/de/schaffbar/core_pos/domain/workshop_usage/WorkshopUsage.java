@@ -99,6 +99,10 @@ class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot f
     // command
 
     public List<SchaffbarEvent> exit() {
+        if (nonNull(this.exitTime)) {
+            throw new IllegalStateException("Workshop usage [id: " + this.id + "] has already ended");
+        }
+
         this.setExitTime(Instant.now());
 
         return List.of(WorkshopUsageEventFactory.workshopUsageLeft(this));

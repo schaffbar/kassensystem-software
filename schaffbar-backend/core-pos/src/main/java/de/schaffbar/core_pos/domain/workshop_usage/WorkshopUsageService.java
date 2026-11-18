@@ -4,7 +4,6 @@ import static java.util.Comparator.comparing;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -12,12 +11,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
@@ -38,14 +38,16 @@ public class WorkshopUsageService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<WorkshopUsageView> getWorkshopUsages(@NotNull @Valid WorkshopSessionId workshopSessionId) {
-        return this.workshopUsageRepository.findWorkshopUsages(workshopSessionId).stream() //
+        return this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
                 .toList();
     }
 
-    public List<WorkshopUsageView> getAllActiveWorkshopUsages() {
+    @Query
+    public List<WorkshopUsageView> getActiveWorkshopUsages() {
         return this.workshopUsageRepository.findByExitTimeIsNull().stream() //
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
@@ -53,8 +55,9 @@ public class WorkshopUsageService {
     }
 
     // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
+    @Query
     public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
-        List<BillableDuration> durationList = this.workshopUsageRepository.findWorkshopUsages(workshopSessionId).stream() //
+        List<BillableDuration> durationList = this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(usage -> usage.getBillableDurationUntil(now)) //
                 .toList();
 
@@ -64,41 +67,31 @@ public class WorkshopUsageService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
-    public void enterWorkshop(@NotNull @Valid CustomerId customerId, @NotNull @Valid WorkshopSessionId workshopSessionId) {
-        getOpenWorkshopUsage(customerId, workshopSessionId) //
-                .ifPresent(this::throwCustomerIsAlreadyInWorkshop);
+    @Command
+    public void startWorkshopUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid WorkshopSessionId workshopSessionId) {
+        if (this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId).isPresent()) {
+            throw new CustomerAlreadyInWorkshopException(customerId);
+        }
 
         WorkshopUsage workshopUsage = WorkshopUsage.of(customerId, workshopSessionId);
-        WorkshopUsage savedWorkshopUsage = this.workshopUsageRepository.save(workshopUsage);
-        List<SchaffbarEvent> events = List.of(WorkshopUsageEventFactory.workshopUsageEntered(savedWorkshopUsage));
+        this.workshopUsageRepository.save(workshopUsage);
+        List<SchaffbarEvent> events = List.of(WorkshopUsageEventFactory.workshopUsageEntered(workshopUsage));
 
         this.outboxEventStore.save(events);
 
         log.info("Customer {} entered workshop and published events {}", customerId, events);
     }
 
-    @Transactional
-    public void leaveWorkshop(@NotNull @Valid CustomerId customerId, @NotNull @Valid WorkshopSessionId workshopSessionId) {
-        WorkshopUsage usage = getOpenWorkshopUsage(customerId, workshopSessionId) //
+    @Command
+    public void stopWorkshopUsage(@NotNull @Valid CustomerId customerId) {
+        WorkshopUsage workshopUsage = this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId) //
                 .orElseThrow(() -> new NoActiveWorkshopUsageFoundException(customerId));
 
-        List<SchaffbarEvent> events = usage.exit();
+        List<SchaffbarEvent> events = workshopUsage.exit();
+
         this.outboxEventStore.save(events);
 
         log.info("Customer {} left workshop and published events {}", customerId, events);
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    // TODO: decide what to use customerId, workshopSessionId or both
-    private Optional<WorkshopUsage> getOpenWorkshopUsage(CustomerId customerId, WorkshopSessionId workshopSessionId) {
-        return this.workshopUsageRepository.findActiveByCustomerId(customerId);
-    }
-
-    private void throwCustomerIsAlreadyInWorkshop(WorkshopUsage workshopUsage) {
-        throw new CustomerAlreadyInWorkshopException(workshopUsage.getCustomerId());
     }
 
 }

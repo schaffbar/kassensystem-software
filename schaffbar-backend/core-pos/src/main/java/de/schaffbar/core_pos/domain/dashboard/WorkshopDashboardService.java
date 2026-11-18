@@ -28,7 +28,7 @@ public class WorkshopDashboardService {
     // query
 
     public List<WorkshopDashboardEntryView> getActiveWorkshopUsers() {
-        return this.workshopUsageService.getAllActiveWorkshopUsages().stream() //
+        return this.workshopUsageService.getActiveWorkshopUsages().stream() //
                 .map(this::toWorkshopDashboardEntryView) //
                 .sorted(comparing(WorkshopDashboardEntryView::entryTime)) //
                 .toList();

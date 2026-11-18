@@ -32,7 +32,7 @@ public class EnterWorkshop {
                 .map(WorkshopSessionView::id) //
                 .orElseGet(() -> createWorkshopSession(customerId));
 
-        this.workshopUsageService.enterWorkshop(customerId, sessionId);
+        this.workshopUsageService.startWorkshopUsage(customerId, sessionId);
     }
 
     // ------------------------------------------------------------------------

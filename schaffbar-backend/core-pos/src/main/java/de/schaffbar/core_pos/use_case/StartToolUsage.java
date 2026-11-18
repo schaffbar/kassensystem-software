@@ -63,7 +63,7 @@ public class StartToolUsage {
     // helper
 
     private void verifyCustomerIsInWorkshop(CustomerId customerId) {
-        boolean isInWorkshop = this.workshopUsageService.getAllActiveWorkshopUsages().stream() //
+        boolean isInWorkshop = this.workshopUsageService.getActiveWorkshopUsages().stream() //
                 .map(WorkshopUsageView::customerId) //
                 .anyMatch(id -> id.sameValueAs(customerId));
 
