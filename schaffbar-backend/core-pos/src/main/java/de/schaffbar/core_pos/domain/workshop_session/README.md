@@ -36,7 +36,7 @@
 | WS-2 | Closing sets status to `PAID` and records `closeTime`    | `WorkshopSession.close()`                                                  |
 | WS-3 | Customer must exist before closing a session             | `CloseSession` use case                                                    |
 | WS-4 | Cannot close a session that doesn't exist                | `WorkshopSessionService.closeSession()`                                    |
-| WS-5 | Cannot close while a workshop or tool usage is running   | `CloseSession` use case                                                    |
+| WS-5 | Cannot close while a workshop or tool usage is running   | `CloseSession` use case — `ActiveToolUsageExistsForSessionException` / `ActiveWorkshopUsageExistsForSessionException` (409) |
 | WS-6 | Closing stores the final billing totals (workshop, tools) | `CloseSession` use case computes them, `WorkshopSession.close()` stores them |
 
 ## Domain Events
