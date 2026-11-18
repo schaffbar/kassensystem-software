@@ -3,6 +3,7 @@ package de.schaffbar.core_pos.domain.tool_certification.web;
 import java.time.Instant;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
@@ -24,7 +25,7 @@ public interface ToolCertificationApiModel extends ValueObjectMapper {
     // ------------------------------------------------------------------------
     // mapping view to response
 
-    ToolCertificationApiDto toApiDto(ToolCertificationView view);
+    ToolCertificationApiDto toToolCertificationApiDto(ToolCertificationView view);
 
     // ------------------------------------------------------------------------
     // response
@@ -42,9 +43,9 @@ public interface ToolCertificationApiModel extends ValueObjectMapper {
     // request
 
     record BatchCertifyRequestBody( //
-            @NotEmpty List<CustomerId> customerIds, //
-            @NotNull ToolId toolId, //
-            @NotNull CustomerId certifiedBy //
+            @NotEmpty List<@NotNull @Valid CustomerId> customerIds, //
+            @NotNull @Valid ToolId toolId, //
+            @NotNull @Valid CustomerId certifiedBy //
     ) {}
 
 }

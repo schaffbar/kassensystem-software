@@ -73,7 +73,7 @@ public class StartToolUsage {
     }
 
     private void verifyCustomerHasActiveCertification(CustomerId customerId, ToolId toolId) {
-        if (!this.toolCertificationService.hasActiveCertification(customerId, toolId)) {
+        if (!this.toolCertificationService.hasActiveToolCertification(customerId, toolId)) {
             throw new CustomerNotCertifiedForToolException(customerId, toolId);
         }
     }

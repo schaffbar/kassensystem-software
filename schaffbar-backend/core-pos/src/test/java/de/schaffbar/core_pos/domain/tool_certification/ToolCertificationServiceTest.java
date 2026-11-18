@@ -55,15 +55,15 @@ class ToolCertificationServiceTest {
     private ToolCertificationService toolCertificationService;
 
     // ------------------------------------------------------------------------
-    // hasActiveCertification
+    // hasActiveToolCertification
 
     @Test
-    void hasActiveCertification_isTrueForAnActiveCertification() {
+    void hasActiveToolCertification_isTrueForAnActiveCertification() {
         // given
         ToolCertification certification = givenCertification(ACTIVE);
 
         // when
-        boolean active = this.toolCertificationService.hasActiveCertification(certification.getCustomerId(), certification.getToolId());
+        boolean active = this.toolCertificationService.hasActiveToolCertification(certification.getCustomerId(), certification.getToolId());
 
         // then
         assertThat(active).isTrue();
@@ -71,26 +71,26 @@ class ToolCertificationServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = ToolCertificationStatus.class, names = {"PAUSED", "REVOKED"})
-    void hasActiveCertification_isFalseForAPausedOrRevokedCertification(ToolCertificationStatus status) {
+    void hasActiveToolCertification_isFalseForAPausedOrRevokedCertification(ToolCertificationStatus status) {
         // given
         ToolCertification certification = givenCertification(status);
 
         // when
-        boolean active = this.toolCertificationService.hasActiveCertification(certification.getCustomerId(), certification.getToolId());
+        boolean active = this.toolCertificationService.hasActiveToolCertification(certification.getCustomerId(), certification.getToolId());
 
         // then
         assertThat(active).isFalse();
     }
 
     @Test
-    void hasActiveCertification_isFalseWithoutCertification() {
+    void hasActiveToolCertification_isFalseWithoutCertification() {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
         givenNoCertification(customerId, toolId);
 
         // when
-        boolean active = this.toolCertificationService.hasActiveCertification(customerId, toolId);
+        boolean active = this.toolCertificationService.hasActiveToolCertification(customerId, toolId);
 
         // then
         assertThat(active).isFalse();

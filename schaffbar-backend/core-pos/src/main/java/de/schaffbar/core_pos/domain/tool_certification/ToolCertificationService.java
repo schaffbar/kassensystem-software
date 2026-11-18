@@ -38,27 +38,27 @@ public class ToolCertificationService {
     // query
 
     @Query
-    public List<ToolCertificationView> getCertifications(@NotNull @Valid CustomerId customerId) {
+    public List<ToolCertificationView> getToolCertifications(@NotNull @Valid CustomerId customerId) {
         return this.toolCertificationRepository.findByCustomerId(customerId).stream() //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView) //
                 .toList();
     }
 
     @Query
-    public List<ToolCertificationView> getCertifications(@NotNull @Valid ToolId toolId) {
+    public List<ToolCertificationView> getToolCertifications(@NotNull @Valid ToolId toolId) {
         return this.toolCertificationRepository.findByToolId(toolId).stream() //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView) //
                 .toList();
     }
 
     @Query
-    public Optional<ToolCertificationView> getCertification(@NotNull @Valid ToolCertificationId id) {
+    public Optional<ToolCertificationView> getToolCertification(@NotNull @Valid ToolCertificationId id) {
         return this.toolCertificationRepository.findById(id.getValue()) //
                 .map(ToolCertificationViews.MAPPER::toToolCertificationView);
     }
 
     @Query
-    public boolean hasActiveCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+    public boolean hasActiveToolCertification(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
         return this.toolCertificationRepository.findByCustomerIdAndToolId(customerId, toolId) //
                 .filter(certification -> certification.getStatus() == ToolCertificationStatus.ACTIVE) //
                 .isPresent();

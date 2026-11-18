@@ -22,9 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.domain.tool_certification.BatchCertificationResult;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
 import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.BatchCertifyRequestBody;
 import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.ToolCertificationApiDto;
+import de.schaffbar.core_pos.read_facade.ToolCertificationReadFacade;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
@@ -41,7 +42,7 @@ import de.schaffbar.core_pos.use_case.RevokeToolCertification;
 @RequestMapping(path = "/api/v1/tool-certifications")
 public class ToolCertificationController {
 
-    private final @NonNull ToolCertificationService toolCertificationService;
+    private final @NonNull ToolCertificationReadFacade toolCertificationReadFacade;
 
     private final @NonNull CertifyCustomersForTool certifyCustomersForTool;
 
@@ -56,71 +57,70 @@ public class ToolCertificationController {
     // ------------------------------------------------------------------------
     // query
 
-    @GetMapping(value = "/{certificationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ToolCertificationApiDto> getCertification(@PathVariable @NotNull @Valid ToolCertificationId certificationId) {
-        ToolCertificationApiDto dto = this.toolCertificationService.getCertification(certificationId) //
-                .map(ToolCertificationApiModel.MAPPER::toApiDto) //
-                .orElseThrow(() -> ResourceNotFoundException.toolCertification(certificationId));
+    @GetMapping(value = "/{toolCertificationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ToolCertificationApiDto> getToolCertification(@PathVariable @NotNull @Valid ToolCertificationId toolCertificationId) {
+        ToolCertificationApiDto toolCertification = this.toolCertificationReadFacade.getToolCertification(toolCertificationId) //
+                .map(ToolCertificationApiModel.MAPPER::toToolCertificationApiDto) //
+                .orElseThrow(() -> ResourceNotFoundException.toolCertification(toolCertificationId));
 
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(toolCertification);
     }
 
+    // one of the filters is required; with both, customerId wins
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ToolCertificationApiDto>> getCertifications(@RequestParam(required = false) CustomerId customerId,
-            @RequestParam(required = false) ToolId toolId) {
+    public ResponseEntity<List<ToolCertificationApiDto>> getToolCertifications(@RequestParam(required = false) @Valid CustomerId customerId,
+            @RequestParam(required = false) @Valid ToolId toolId) {
 
-        List<ToolCertificationApiDto> certifications;
-
+        List<ToolCertificationView> toolCertifications;
         if (nonNull(customerId)) {
-            certifications = this.toolCertificationService.getCertifications(customerId).stream() //
-                    .map(ToolCertificationApiModel.MAPPER::toApiDto) //
-                    .toList();
+            toolCertifications = this.toolCertificationReadFacade.getToolCertifications(customerId);
         }
         else if (nonNull(toolId)) {
-            certifications = this.toolCertificationService.getCertifications(toolId).stream() //
-                    .map(ToolCertificationApiModel.MAPPER::toApiDto) //
-                    .toList();
+            toolCertifications = this.toolCertificationReadFacade.getToolCertifications(toolId);
         }
         else {
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity.ok(certifications);
+        return ResponseEntity.ok(toolCertifications.stream() //
+                .map(ToolCertificationApiModel.MAPPER::toToolCertificationApiDto) //
+                .toList());
     }
 
     // ------------------------------------------------------------------------
     // command
 
     @PostMapping(value = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BatchCertificationResult> batchCertify(@RequestBody @Valid BatchCertifyRequestBody requestBody) {
+    public ResponseEntity<BatchCertificationResult> createToolCertifications(@RequestBody @Valid BatchCertifyRequestBody requestBody) {
         BatchCertificationResult result = this.certifyCustomersForTool.process(requestBody.customerIds(), requestBody.toolId(), requestBody.certifiedBy());
 
         return ResponseEntity.ok(result);
     }
 
     @PutMapping(value = "/customers/{customerId}/tools/{toolId}/pause")
-    public ResponseEntity<Void> pause(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
+    public ResponseEntity<Void> pauseToolCertification(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
         this.pauseToolCertification.process(customerId, toolId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/customers/{customerId}/tools/{toolId}/reactivate")
-    public ResponseEntity<Void> reactivate(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
+    public ResponseEntity<Void> reactivateToolCertification(@PathVariable @NotNull @Valid CustomerId customerId,
+            @PathVariable @NotNull @Valid ToolId toolId) {
         this.reactivateToolCertification.process(customerId, toolId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/customers/{customerId}/tools/{toolId}/revoke")
-    public ResponseEntity<Void> revoke(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
+    public ResponseEntity<Void> revokeToolCertification(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
         this.revokeToolCertification.process(customerId, toolId);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/customers/{customerId}/tools/{toolId}")
-    public ResponseEntity<Void> delete(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
+    public ResponseEntity<Void> deleteToolCertification(@PathVariable @NotNull @Valid CustomerId customerId, @PathVariable @NotNull @Valid ToolId toolId) {
         this.deleteToolCertification.process(customerId, toolId);
 
         return ResponseEntity.noContent().build();

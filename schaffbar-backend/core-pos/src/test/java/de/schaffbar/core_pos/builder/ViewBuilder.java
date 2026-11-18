@@ -27,6 +27,9 @@ import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
 import de.schaffbar.core_pos.domain.tool.ToolArea;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView.ToolViewBuilder;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationStatus;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
+import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView.ToolCertificationViewBuilder;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView.ToolUsageViewBuilder;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
@@ -35,6 +38,7 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.ToolUsageId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
@@ -138,6 +142,19 @@ public class ViewBuilder {
                 .area(ToolArea.HOLZ) //
                 .certificationRequirement(CertificationRequirement.YELLOW) //
                 .instructors(Set.of());
+    }
+
+    // ------------------------------------------------------------------------
+    // tool certification
+
+    public static ToolCertificationViewBuilder toolCertificationView() {
+        return ToolCertificationView.builder() //
+                .id(ToolCertificationId.random()) //
+                .customerId(CustomerId.random()) //
+                .toolId(ToolId.random()) //
+                .status(ToolCertificationStatus.ACTIVE) //
+                .certifiedAt(Instant.now()) //
+                .certifiedBy(CustomerId.random());
     }
 
     // ------------------------------------------------------------------------
