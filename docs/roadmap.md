@@ -130,7 +130,10 @@ Entscheidung 13.11.2026.
    - [ ] Werkstattablauf: `workshop_usage` + `workshop_session` (`EnterWorkshop`, `LeaveWorkshop`, `CloseSession`),
      `tool_usage` (`StartToolUsage`, `StopToolUsage`), `DeviceController` (E4), Übersicht als Read Facades (E17),
      Akzeptanztest Einchecken bis Abrechnen
-5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
+     - [ ] ganz zum Schluss: partielle Unique-Indizes in einer Flyway-Migration, damit zwei gleichzeitige Anfragen
+       (Lesegerät meldet einen Tag doppelt) die Regeln nicht umgehen – eine laufende `workshop_usage` pro Person
+       (WU-1), eine offene `workshop_session` pro Person (WS-1), bei `tool_usage` TU-3 und TU-9. Vorher prüft der
+       Maintainer die echte Datenbank auf Duplikate (sonst scheitert die Migration beim Start); Akzeptanztest dazu aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
    Erklärung im Portal.
@@ -172,8 +175,8 @@ Erledigt am 15.11.2026 mit dem Pilot (K3):
   ohne Details (E7, E8). Exceptions von `rfid_reader` haben schon eine Basisklasse und einen Code.
 - Portal: der Fehler-Interceptor zeigt die Übersetzung `shared.errors.<CODE>`, sonst die allgemeine Meldung.
 
-Noch offen (im Rollout, K4): die übrigen 12 Exceptions an die Basisklassen hängen, je mit Code und Übersetzung im
-Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
+Noch offen (im Rollout, K4): die letzte Exception (`NoCustomerAssigned`, nur am Gerät) an die Basisklasse hängen,
+mit Code und Übersetzung im Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
 Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines Lesegeräts, `canDeleteUser` in der
 Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
 
