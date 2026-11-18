@@ -41,7 +41,7 @@
       "CUSTOMER_ALREADY_USING_TOOL": "The person is already using this tool.",
       "TOOL_ALREADY_IN_USE_BY_ANOTHER_CUSTOMER": "Somebody else is using the tool right now.",
       "TOOL_NOT_IN_USE_BY_CUSTOMER": "The person is not using this tool right now.",
-      "NO_ACTIVE_WORKSHOP_SESSION_FOUND": "The person has no open session.",
+      "NO_OPEN_WORKSHOP_SESSION": "The person has no open session.",
       "ACTIVE_WORKSHOP_USAGE_EXISTS_FOR_SESSION": "The person is still checked in to the workshop – the session can only be billed after checking out.",
       "ACTIVE_TOOL_USAGE_EXISTS_FOR_SESSION": "The person is still using a tool – end the usage at the switch box first."
     },
