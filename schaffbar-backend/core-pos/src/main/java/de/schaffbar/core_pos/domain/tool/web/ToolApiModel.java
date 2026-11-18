@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
+import de.schaffbar.core_pos.shared.validation.ToolDescription;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ToolApiModel extends ValueObjectMapper {
@@ -66,14 +67,14 @@ public interface ToolApiModel extends ValueObjectMapper {
 
     record CreateToolRequestBody( //
             @NotBlank String name, //
-            String description, //
+            @ToolDescription String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement //
     ) {}
 
     record UpdateToolRequestBody( //
             @NotBlank String name, //
-            String description, //
+            @ToolDescription String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement //
     ) {}
@@ -84,7 +85,7 @@ public interface ToolApiModel extends ValueObjectMapper {
     ) {}
 
     record InstructorsRequestBody( //
-            @NotEmpty List<@NotNull CustomerId> instructorIds //
+            @NotEmpty List<@NotNull @Valid CustomerId> instructorIds //
     ) {}
 
 }

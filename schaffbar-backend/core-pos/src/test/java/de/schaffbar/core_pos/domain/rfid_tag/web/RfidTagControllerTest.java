@@ -183,31 +183,6 @@ class RfidTagControllerTest {
     }
 
     // ------------------------------------------------------------------------
-    // when
-
-    private ResultActions getRfidTags() throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-tags"));
-    }
-
-    private ResultActions getRfidTag(RfidTagId rfidTagId) throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-tags/" + rfidTagId.getValue()));
-    }
-
-    private ResultActions createRfidTag(RfidTagId rfidTagId) throws Exception {
-        return createRfidTag("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}");
-    }
-
-    private ResultActions createRfidTag(String body) throws Exception {
-        return this.mockMvc.perform(post("/api/v1/rfid-tags") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(body));
-    }
-
-    private ResultActions deleteRfidTag(RfidTagId rfidTagId) throws Exception {
-        return this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
-    }
-
-    // ------------------------------------------------------------------------
     // given
 
     private void givenTags(RfidTagView... rfidTags) {
@@ -247,6 +222,31 @@ class RfidTagControllerTest {
         doThrow(new RfidTagAssignedToCustomerException(rfidTagId, CustomerId.random())).when(this.rfidTagDelete).process(rfidTagId);
 
         return rfidTagId;
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidTags() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tags"));
+    }
+
+    private ResultActions getRfidTag(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tags/" + rfidTagId.getValue()));
+    }
+
+    private ResultActions createRfidTag(RfidTagId rfidTagId) throws Exception {
+        return createRfidTag("{\"rfidTagId\":\"" + rfidTagId.getValue() + "\"}");
+    }
+
+    private ResultActions createRfidTag(String body) throws Exception {
+        return this.mockMvc.perform(post("/api/v1/rfid-tags") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(body));
+    }
+
+    private ResultActions deleteRfidTag(RfidTagId rfidTagId) throws Exception {
+        return this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
     }
 
 }

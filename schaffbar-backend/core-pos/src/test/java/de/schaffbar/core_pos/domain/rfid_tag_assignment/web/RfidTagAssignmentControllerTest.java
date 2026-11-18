@@ -206,6 +206,42 @@ class RfidTagAssignmentControllerTest {
     }
 
     // ------------------------------------------------------------------------
+    // given
+
+    private void givenAssignments(RfidTagAssignmentView... assignments) {
+        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignments()).thenReturn(List.of(assignments));
+    }
+
+    private RfidTagAssignmentView givenAssignmentOfCustomer() {
+        RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
+        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.customerId())).thenReturn(Optional.of(assignment));
+
+        return assignment;
+    }
+
+    private RfidTagAssignmentView givenAssignmentOfTag() {
+        RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
+        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.rfidTagId())).thenReturn(Optional.of(assignment));
+
+        return assignment;
+    }
+
+    private RfidTagId givenUnassignedTag() {
+        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
+
+        return rfidTagId;
+    }
+
+    private CustomerId givenAnotherRequestWaiting() {
+        CustomerId customerId = CustomerId.random();
+        doThrow(new RfidTagAssignmentAlreadyWaitingException(customerId, CustomerId.random())) //
+                .when(this.customerRequestRfidTagAssignment).process(customerId, RfidTagAssignmentType.FIXED);
+
+        return customerId;
+    }
+
+    // ------------------------------------------------------------------------
     // when
 
     private ResultActions getRfidTagAssignments() throws Exception {
@@ -240,42 +276,6 @@ class RfidTagAssignmentControllerTest {
         return this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/unassign") //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("{\"customerId\":\"" + customerId.getValue() + "\"}"));
-    }
-
-    // ------------------------------------------------------------------------
-    // given
-
-    private void givenAssignments(RfidTagAssignmentView... assignments) {
-        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignments()).thenReturn(List.of(assignments));
-    }
-
-    private RfidTagAssignmentView givenAssignmentOfCustomer() {
-        RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
-        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.customerId())).thenReturn(Optional.of(assignment));
-
-        return assignment;
-    }
-
-    private RfidTagAssignmentView givenAssignmentOfTag() {
-        RfidTagAssignmentView assignment = rfidTagAssignmentView().build();
-        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(assignment.rfidTagId())).thenReturn(Optional.of(assignment));
-
-        return assignment;
-    }
-
-    private RfidTagId givenUnassignedTag() {
-        RfidTagId rfidTagId = RandomValues.rfidTagId();
-        when(this.rfidTagAssignmentReadFacade.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
-
-        return rfidTagId;
-    }
-
-    private CustomerId givenAnotherRequestWaiting() {
-        CustomerId customerId = CustomerId.random();
-        doThrow(new RfidTagAssignmentAlreadyWaitingException(customerId, CustomerId.random())) //
-                .when(this.customerRequestRfidTagAssignment).process(customerId, RfidTagAssignmentType.FIXED);
-
-        return customerId;
     }
 
 }

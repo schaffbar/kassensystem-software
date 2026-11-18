@@ -25,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
-import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.CreateToolRequestBody;
 import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.InstructorsRequestBody;
 import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.SetWlanRelaisRequestBody;
 import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.ToolApiDto;
 import de.schaffbar.core_pos.domain.tool.web.ToolApiModel.UpdateToolRequestBody;
+import de.schaffbar.core_pos.read_facade.ToolReadFacade;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
@@ -50,7 +51,7 @@ import de.schaffbar.core_pos.use_case.ToolUpdate;
 @RequestMapping(path = "/api/v1/tools")
 public class ToolController {
 
-    private final @NonNull ToolService toolService;
+    private final @NonNull ToolReadFacade toolReadFacade;
 
     private final @NonNull ToolCreate toolCreate;
 
@@ -74,25 +75,19 @@ public class ToolController {
     // query
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ToolApiDto>> getAllTools(@RequestParam(required = false) RfidReaderId rfidReaderId) {
-        if (nonNull(rfidReaderId)) {
-            List<ToolApiDto> assignedTool = this.toolService.getTool(rfidReaderId) //
-                    .map(ToolApiModel.MAPPER::toToolApiDto) //
-                    .stream().toList();
+    public ResponseEntity<List<ToolApiDto>> getTools(@RequestParam(required = false) @Valid RfidReaderId rfidReaderId) {
+        List<ToolView> tools = nonNull(rfidReaderId) //
+                ? this.toolReadFacade.getTool(rfidReaderId).stream().toList() //
+                : this.toolReadFacade.getTools();
 
-            return ResponseEntity.ok(assignedTool);
-        }
-
-        List<ToolApiDto> tools = this.toolService.getTools().stream() //
+        return ResponseEntity.ok(tools.stream() //
                 .map(ToolApiModel.MAPPER::toToolApiDto) //
-                .toList();
-
-        return ResponseEntity.ok(tools);
+                .toList());
     }
 
     @GetMapping(value = "/{toolId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ToolApiDto> getTool(@PathVariable @NotNull @Valid ToolId toolId) {
-        ToolApiDto tool = this.toolService.getTool(toolId) //
+        ToolApiDto tool = this.toolReadFacade.getTool(toolId) //
                 .map(ToolApiModel.MAPPER::toToolApiDto) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
 

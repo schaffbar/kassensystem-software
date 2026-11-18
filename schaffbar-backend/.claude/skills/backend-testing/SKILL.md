@@ -97,8 +97,8 @@ void createRfidReader_rejectsAUsedMacAddress() {
   `expectTypeNotChanged()`. A single assertion on the result of this test stays in the test (`assertThat(rfidReader
   .getType()).isEqualTo(command.type())`).
 - **The class is in sections** (`// ---…` line + name): the tests grouped by the method under test (`// createRfidReader`,
-  `// updateRfidReader`, …) when the class tests several, then `// when` with the request methods of a controller test,
-  `// given` with the `given…` methods, `// then` with the `expect…` methods, `// helper` for anything else. A section only exists when it has content.
+  `// updateRfidReader`, …) when the class tests several, then `// given` with the `given…` methods, `// when` with the
+  request methods of a controller test, `// then` with the `expect…` methods, `// helper` for anything else. A section only exists when it has content.
 
 ## Test data
 

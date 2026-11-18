@@ -54,17 +54,17 @@ class RfidTagAssignmentHistoryControllerTest {
     }
 
     // ------------------------------------------------------------------------
-    // when
-
-    private ResultActions getRfidTagAssignmentHistory() throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignment-history"));
-    }
-
-    // ------------------------------------------------------------------------
     // given
 
     private void givenHistory(RfidTagAssignmentHistoryView... historyEntries) {
         when(this.rfidTagAssignmentHistoryReadFacade.getRfidTagAssignmentHistory()).thenReturn(List.of(historyEntries));
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidTagAssignmentHistory() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-tag-assignment-history"));
     }
 
 }

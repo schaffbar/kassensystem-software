@@ -285,47 +285,6 @@ class RfidReaderControllerTest {
     }
 
     // ------------------------------------------------------------------------
-    // when
-
-    private ResultActions getRfidReaders() throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-readers"));
-    }
-
-    private ResultActions getRfidReaders(String macAddress) throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-readers").param("macAddress", macAddress));
-    }
-
-    private ResultActions getRfidReader(RfidReaderId rfidReaderId) throws Exception {
-        return this.mockMvc.perform(get("/api/v1/rfid-readers/" + rfidReaderId.getValue()));
-    }
-
-    private ResultActions createRfidReader(MacAddress macAddress) throws Exception {
-        return createRfidReader("{\"macAddress\":\"" + macAddress.getValue() + "\"}");
-    }
-
-    private ResultActions createRfidReader(String body) throws Exception {
-        return this.mockMvc.perform(post("/api/v1/rfid-readers") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(body));
-    }
-
-    private ResultActions updateRfidReader(UpdateRfidReaderCommand command) throws Exception {
-        return this.mockMvc.perform(put("/api/v1/rfid-readers/" + command.id().getValue()) //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
-    }
-
-    private ResultActions changeRfidReaderType(ChangeRfidReaderTypeCommand command) throws Exception {
-        return this.mockMvc.perform(patch("/api/v1/rfid-readers/" + command.id().getValue() + "/type") //
-                .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
-    }
-
-    private ResultActions deleteRfidReader(RfidReaderId rfidReaderId) throws Exception {
-        return this.mockMvc.perform(delete("/api/v1/rfid-readers/" + rfidReaderId.getValue()));
-    }
-
-    // ------------------------------------------------------------------------
     // given
 
     private void givenReaders(RfidReaderView... rfidReaders) {
@@ -371,6 +330,47 @@ class RfidReaderControllerTest {
         doThrow(RfidReaderHasToolAssignedException.delete(rfidReaderId)).when(this.rfidReaderDelete).process(rfidReaderId);
 
         return rfidReaderId;
+    }
+
+    // ------------------------------------------------------------------------
+    // when
+
+    private ResultActions getRfidReaders() throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-readers"));
+    }
+
+    private ResultActions getRfidReaders(String macAddress) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-readers").param("macAddress", macAddress));
+    }
+
+    private ResultActions getRfidReader(RfidReaderId rfidReaderId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/rfid-readers/" + rfidReaderId.getValue()));
+    }
+
+    private ResultActions createRfidReader(MacAddress macAddress) throws Exception {
+        return createRfidReader("{\"macAddress\":\"" + macAddress.getValue() + "\"}");
+    }
+
+    private ResultActions createRfidReader(String body) throws Exception {
+        return this.mockMvc.perform(post("/api/v1/rfid-readers") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(body));
+    }
+
+    private ResultActions updateRfidReader(UpdateRfidReaderCommand command) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/rfid-readers/" + command.id().getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions changeRfidReaderType(ChangeRfidReaderTypeCommand command) throws Exception {
+        return this.mockMvc.perform(patch("/api/v1/rfid-readers/" + command.id().getValue() + "/type") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content(Json.write(command)));
+    }
+
+    private ResultActions deleteRfidReader(RfidReaderId rfidReaderId) throws Exception {
+        return this.mockMvc.perform(delete("/api/v1/rfid-readers/" + rfidReaderId.getValue()));
     }
 
     // ------------------------------------------------------------------------

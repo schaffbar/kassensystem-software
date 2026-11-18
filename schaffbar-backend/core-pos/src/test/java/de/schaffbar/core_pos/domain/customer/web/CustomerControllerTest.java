@@ -300,6 +300,41 @@ class CustomerControllerTest {
     }
 
     // ------------------------------------------------------------------------
+    // given
+
+    private void givenCustomers(CustomerView... customers) {
+        when(this.customerReadFacade.getCustomers()).thenReturn(List.of(customers));
+    }
+
+    private CustomerView givenCustomer() {
+        CustomerView customer = customerView().build();
+        when(this.customerReadFacade.getCustomer(customer.id())).thenReturn(Optional.of(customer));
+
+        return customer;
+    }
+
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerReadFacade.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private CustomerId givenCreatedCustomer(CreateCustomerCommand command) {
+        CustomerId customerId = CustomerId.random();
+        when(this.customerCreate.process(command)).thenReturn(customerId);
+
+        return customerId;
+    }
+
+    private CustomerId givenCustomerWithOpenSession() {
+        CustomerId customerId = CustomerId.random();
+        doThrow(new CustomerHasOpenWorkshopSessionException(customerId)).when(this.customerDelete).process(customerId);
+
+        return customerId;
+    }
+
+    // ------------------------------------------------------------------------
     // when
 
     private ResultActions getCustomers() throws Exception {
@@ -337,41 +372,6 @@ class CustomerControllerTest {
 
     private ResultActions deleteCustomer(CustomerId customerId) throws Exception {
         return this.mockMvc.perform(delete("/api/v1/customers/" + customerId.getValue()));
-    }
-
-    // ------------------------------------------------------------------------
-    // given
-
-    private void givenCustomers(CustomerView... customers) {
-        when(this.customerReadFacade.getCustomers()).thenReturn(List.of(customers));
-    }
-
-    private CustomerView givenCustomer() {
-        CustomerView customer = customerView().build();
-        when(this.customerReadFacade.getCustomer(customer.id())).thenReturn(Optional.of(customer));
-
-        return customer;
-    }
-
-    private CustomerId givenUnknownCustomer() {
-        CustomerId unknown = CustomerId.random();
-        when(this.customerReadFacade.getCustomer(unknown)).thenReturn(Optional.empty());
-
-        return unknown;
-    }
-
-    private CustomerId givenCreatedCustomer(CreateCustomerCommand command) {
-        CustomerId customerId = CustomerId.random();
-        when(this.customerCreate.process(command)).thenReturn(customerId);
-
-        return customerId;
-    }
-
-    private CustomerId givenCustomerWithOpenSession() {
-        CustomerId customerId = CustomerId.random();
-        doThrow(new CustomerHasOpenWorkshopSessionException(customerId)).when(this.customerDelete).process(customerId);
-
-        return customerId;
     }
 
     // ------------------------------------------------------------------------

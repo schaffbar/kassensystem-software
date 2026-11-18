@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.validation.ToolDescription;
 
 public interface ToolCommands {
 
@@ -15,7 +16,7 @@ public interface ToolCommands {
     @Validated
     record CreateToolCommand( //
             @NotBlank String name, //
-            String description, //
+            @ToolDescription String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement //
     ) {}
@@ -25,7 +26,7 @@ public interface ToolCommands {
     record UpdateToolCommand( //
             @NotNull @Valid ToolId id, //
             @NotBlank String name, //
-            String description, //
+            @ToolDescription String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement //
     ) {}
