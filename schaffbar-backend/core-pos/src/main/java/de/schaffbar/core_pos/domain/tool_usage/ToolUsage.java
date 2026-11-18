@@ -23,7 +23,6 @@ import lombok.ToString;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
-import de.schaffbar.core_pos.shared.exception.ToolAlreadyStoppedException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.ToolUsageId;
@@ -111,7 +110,7 @@ class ToolUsage {
 
     public List<SchaffbarEvent> stop() {
         if (nonNull(this.endTime)) {
-            throw new ToolAlreadyStoppedException(this.getId());
+            throw new IllegalStateException("Tool usage [id: " + this.id + "] has already been stopped");
         }
 
         this.setEndTime(Instant.now());
