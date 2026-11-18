@@ -47,6 +47,7 @@
 | T-11 | `area` and `certificationRequirement` can only be changed together with name and description via `UpdateToolCommand`                    | `Tool.update()`, `UpdateToolCommand`                                 |
 | T-12 | When `certificationRequirement` is `RED`, tool usage requires active certification                                                      | `StartToolUsage` use case                                            |
 | T-13 | When `certificationRequirement` is `YELLOW`, tool usage is allowed without certification (advisory only)                                | `StartToolUsage` use case                                            |
+| T-15 | Tool names are unique case-insensitively (extends T-2) – two existing names differing only in case: the next edit renames one           | `ToolService.createTool()`, `ToolService.updateTool()`               |
 
 ## Open Rules
 
@@ -58,7 +59,6 @@ implemented, move it to "Business Rules / Invariants".
 | #    | Rule                                                                                                                                      | Status                                                                                                                                                                          |
 |------|-------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | T-14 | The RFID reader (switch box) cannot be cleared while the tool is in use – the session of the person using it would not be closed properly | Portal: "Schaltbox trennen" disabled with a hint (`canClearRfidReader` in `tool.model.ts`). `ToolClearRfidReader` does not check                                                |
-| T-15 | Tool names are unique case-insensitively (extends T-2)                                                                                    | Portal: `validateUniqueToolName` compares in lower case. `ToolRepository.findByName` is case-sensitive, "Kreissäge" and "kreissäge" both pass                                   |
 | T-16 | `description` has at most 255 characters                                                                                                  | Portal: `maxLength(255)`. Column is `VARCHAR(255)`, no `@Size` on the commands → database error (500)                                                                           |
 | T-17 | A tool cannot be deleted while it is in use – the usage of the person using it would not be ended properly                                | Portal: danger zone and ⋯ menu offer no delete while somebody uses the tool (`canDeleteTool` in `tool.model.ts`). `ToolDelete` deletes certifications and tool without checking |
 

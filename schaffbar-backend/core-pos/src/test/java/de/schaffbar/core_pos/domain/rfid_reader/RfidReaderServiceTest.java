@@ -195,11 +195,11 @@ class RfidReaderServiceTest {
     }
 
     private void givenReaderWith(MacAddress macAddress) {
-        when(this.rfidReaderRepository.findByMacAddress(macAddress.getValue())).thenReturn(Optional.of(RfidReader.of(macAddress)));
+        when(this.rfidReaderRepository.findByMacAddress(macAddress)).thenReturn(Optional.of(RfidReader.of(macAddress)));
     }
 
     private void givenNoReaderWith(MacAddress macAddress) {
-        when(this.rfidReaderRepository.findByMacAddress(macAddress.getValue())).thenReturn(Optional.empty());
+        when(this.rfidReaderRepository.findByMacAddress(macAddress)).thenReturn(Optional.empty());
     }
 
     private void givenSaveReturnsTheReader() {

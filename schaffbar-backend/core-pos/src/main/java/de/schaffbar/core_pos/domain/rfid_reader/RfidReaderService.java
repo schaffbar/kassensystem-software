@@ -51,7 +51,7 @@ public class RfidReaderService {
 
     @Query
     public Optional<RfidReaderView> getRfidReader(@NotNull @Valid MacAddress macAddress) {
-        return this.rfidReaderRepository.findByMacAddress(macAddress.getValue()) //
+        return this.rfidReaderRepository.findByMacAddress(macAddress) //
                 .map(RfidReaderViews.MAPPER::toRfidReaderView);
     }
 
@@ -60,7 +60,7 @@ public class RfidReaderService {
 
     @Command
     public RfidReaderId createRfidReader(@NotNull @Valid MacAddress macAddress) {
-        this.rfidReaderRepository.findByMacAddress(macAddress.getValue()) //
+        this.rfidReaderRepository.findByMacAddress(macAddress) //
                 .ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing));
 
         RfidReader rfidReader = RfidReader.of(macAddress);

@@ -12,7 +12,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
@@ -20,6 +19,7 @@ import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
@@ -27,7 +27,6 @@ import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -44,40 +43,48 @@ public class ToolService {
     // ------------------------------------------------------------------------
     // query
 
+    @Query
     public List<ToolView> getTools() {
         return this.toolRepository.findAll().stream() //
                 .map(ToolViews.MAPPER::toToolView) //
                 .toList();
     }
 
+    @Query
     public Optional<ToolView> getTool(@NotNull @Valid ToolId id) {
         return this.toolRepository.findById(id.getValue()) //
                 .map(ToolViews.MAPPER::toToolView);
     }
 
-    public Optional<ToolView> getTool(@NotNull @Valid RfidReaderId id) {
-        return this.toolRepository.findByRfidReaderId(id) //
+    @Query
+    public Optional<ToolView> getTool(@NotNull @Valid RfidReaderId rfidReaderId) {
+        return this.toolRepository.findByRfidReaderId(rfidReaderId) //
                 .map(ToolViews.MAPPER::toToolView);
     }
 
-    public boolean isInstructor(@NotNull @Valid ToolId toolId, @NotNull @Valid CustomerId customerId) {
-        Tool tool = findOrThrow(toolId);
+    @Query
+    public List<ToolView> getToolsOfInstructor(@NotNull @Valid CustomerId instructorId) {
+        return this.toolRepository.findByInstructorIdsContaining(instructorId).stream() //
+                .map(ToolViews.MAPPER::toToolView) //
+                .toList();
+    }
 
-        return tool.isInstructor(customerId);
+    @Query
+    public boolean isInstructor(@NotNull @Valid ToolId toolId, @NotNull @Valid CustomerId customerId) {
+        return findOrThrow(toolId).isInstructor(customerId);
     }
 
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
+    @Command
     public ToolId createTool(@NotNull @Valid CreateToolCommand command) {
-        this.toolRepository.findByName(command.name()) //
-                .ifPresent(existing -> throwToolNameAlreadyUsedException(command.name(), existing));
+        ensureNameUnused(command.name(), null);
 
         Tool tool = Tool.of(command);
         Tool savedTool = this.toolRepository.save(tool);
-
         List<SchaffbarEvent> events = List.of(ToolEventFactory.toolCreated(savedTool));
+
         this.outboxEventStore.save(events);
 
         log.info("Created tool with id {} and published events {}", savedTool.getId(), events);
@@ -88,10 +95,7 @@ public class ToolService {
     @Command
     public void updateTool(@NotNull @Valid UpdateToolCommand command) {
         Tool tool = findOrThrow(command.id());
-
-        this.toolRepository.findByName(command.name()) //
-                .filter(existing -> isFalse(command.id().sameValueAs(existing.getId()))) //
-                .ifPresent(existing -> throwToolNameAlreadyUsedException(command.name(), existing));
+        ensureNameUnused(command.name(), command.id());
 
         List<SchaffbarEvent> events = tool.update(command);
         this.outboxEventStore.save(events);
@@ -103,9 +107,11 @@ public class ToolService {
     public void setWlanRelais(@NotNull @Valid SetWlanRelaisCommand command) {
         Tool tool = findOrThrow(command.id());
 
-        this.toolRepository.findByIpAddress(command.ipAddress().getValue()) //
+        this.toolRepository.findByIpAddress(command.ipAddress()) //
                 .filter(existing -> isFalse(command.id().sameValueAs(existing.getId()))) //
-                .ifPresent(existing -> throwIpAddressAlreadyUsedException(command.ipAddress(), existing));
+                .ifPresent(existing -> {
+                    throw new IpAddressAlreadyUsedException(command.ipAddress(), existing.getId());
+                });
 
         List<SchaffbarEvent> events = tool.setWlanRelais(command);
         this.outboxEventStore.save(events);
@@ -113,7 +119,7 @@ public class ToolService {
         log.info("Set WLAN relais of tool with id {} and published events {}", command.id(), events);
     }
 
-    @Transactional
+    @Command
     public void clearWlanRelais(@NotNull @Valid ToolId toolId) {
         Tool tool = findOrThrow(toolId);
 
@@ -123,13 +129,15 @@ public class ToolService {
         log.info("Cleared WLAN relais of tool with id {} and published events {}", toolId, events);
     }
 
-    @Transactional
+    @Command
     public void assignRfidReader(@NotNull @Valid ToolId toolId, @NotNull @Valid RfidReaderId rfidReaderId) {
         Tool tool = findOrThrow(toolId);
 
         this.toolRepository.findByRfidReaderId(rfidReaderId) //
                 .filter(existing -> isFalse(toolId.sameValueAs(existing.getId()))) //
-                .ifPresent(existing -> throwRfidReaderAlreadyAssignedException(rfidReaderId, existing));
+                .ifPresent(existing -> {
+                    throw new RfidReaderAlreadyAssignedToToolException(rfidReaderId, existing.getId());
+                });
 
         List<SchaffbarEvent> events = tool.assignRfidReader(rfidReaderId);
         this.outboxEventStore.save(events);
@@ -137,7 +145,7 @@ public class ToolService {
         log.info("Assigned RFID reader {} to tool {} and published events {}", rfidReaderId, toolId, events);
     }
 
-    @Transactional
+    @Command
     public void clearRfidReader(@NotNull @Valid ToolId toolId) {
         Tool tool = findOrThrow(toolId);
 
@@ -147,7 +155,7 @@ public class ToolService {
         log.info("Cleared RFID reader from tool {} and published events {}", toolId, events);
     }
 
-    @Transactional
+    @Command
     public void addInstructors(@NotNull @Valid ToolId toolId, @NotEmpty List<@NotNull @Valid CustomerId> instructorIds) {
         Tool tool = findOrThrow(toolId);
 
@@ -157,7 +165,7 @@ public class ToolService {
         log.info("Added instructors {} to tool {} and published events {}", instructorIds, toolId, events);
     }
 
-    @Transactional
+    @Command
     public void removeInstructors(@NotNull @Valid ToolId toolId, @NotEmpty List<@NotNull @Valid CustomerId> instructorIds) {
         Tool tool = findOrThrow(toolId);
 
@@ -167,13 +175,13 @@ public class ToolService {
         log.info("Removed instructors {} from tool {} and published events {}", instructorIds, toolId, events);
     }
 
-    @Transactional
+    @Command
     public void deleteTool(@NotNull @Valid ToolId toolId) {
-        findOrThrow(toolId);
+        Tool tool = findOrThrow(toolId);
 
-        this.toolRepository.deleteById(toolId.getValue());
-
+        this.toolRepository.delete(tool);
         List<SchaffbarEvent> events = List.of(ToolEventFactory.toolDeleted(toolId));
+
         this.outboxEventStore.save(events);
 
         log.info("Deleted tool with id {} and published events {}", toolId, events);
@@ -187,16 +195,14 @@ public class ToolService {
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
     }
 
-    private void throwToolNameAlreadyUsedException(String name, Tool existingTool) {
-        throw new ToolNameAlreadyUsedException(name, existingTool.getId());
-    }
-
-    private void throwIpAddressAlreadyUsedException(IpAddress ipAddress, Tool existingTool) {
-        throw new IpAddressAlreadyUsedException(ipAddress, existingTool.getId());
-    }
-
-    private void throwRfidReaderAlreadyAssignedException(RfidReaderId rfidReaderId, Tool existingTool) {
-        throw new RfidReaderAlreadyAssignedToToolException(rfidReaderId, existingTool.getId());
+    // names are unique without regard to case (T-2, T-15); toolId is the tool that keeps its name, null for a new one
+    private void ensureNameUnused(String name, ToolId toolId) {
+        this.toolRepository.findByNameIgnoreCase(name).stream() //
+                .filter(existing -> isFalse(existing.getId().sameValueAs(toolId))) //
+                .findFirst() //
+                .ifPresent(existing -> {
+                    throw new ToolNameAlreadyUsedException(name, existing.getId());
+                });
     }
 
 }

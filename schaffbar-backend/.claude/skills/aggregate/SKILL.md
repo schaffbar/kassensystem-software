@@ -273,7 +273,13 @@ differs.
 @Repository
 interface ToolRepository extends JpaRepository<Tool, UUID> {
 
-    Optional<Tool> findByName(String name);
+    List<Tool> findByNameIgnoreCase(String name);
+
+    Optional<Tool> findByIpAddress(String ipAddress);
+
+    default Optional<Tool> findByIpAddress(IpAddress ipAddress) {
+        return findByIpAddress(ipAddress.getValue());
+    }
 
     List<Tool> findByRfidReaderId(UUID rfidReaderId);
 
@@ -282,6 +288,7 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
         if (tools.size() > 1) {
             throw new IllegalStateException("More than one tool with RFID reader [id: " + rfidReaderId.getValue() + "]");
         }
+
         return tools.stream().findFirst();
     }
 
@@ -289,11 +296,15 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
 ```
 
 - **Package-private interface** extending `JpaRepository<Aggregate, UUID>` (`String` for RFID tags), `@Repository`.
-- Spring Data derives queries from methods with raw types. **For every method that takes a raw id (`UUID`) there is a
-  `default` method with the same name that takes the value objects** and calls it with `getValue()`. The service only
-  calls the value object variants (and the inherited `findById(id.getValue())`, `deleteById(…)`).
+- Spring Data derives queries from methods with raw types. **For every method that takes the raw value of a value
+  object** – a `UUID` id or reference, the `String` of an `RfidTagId`, a `MacAddress`, an `IpAddress` – **there is a
+  `default` method with the same name directly below it that takes the value object** and calls it with `getValue()`.
+  A plain value without a value object (a name, a status) needs none. The service only calls the value object variants
+  (and the inherited `findById(id.getValue())`, `delete(entity)`). ArchUnit checks this for `UUID` parameters only.
 - A query for one row that the database returns as a list checks "at most one" in the default method; more than one
   is broken data → `IllegalStateException`.
+- A query the service needs under a name of its own wraps the derived one in a named `default` method
+  (`findWaitingForAssignment()` → `findByStatus(WAITING_FOR_ASSIGNMENT)` in `RfidTagAssignmentRepository`).
 
 ## Service
 
