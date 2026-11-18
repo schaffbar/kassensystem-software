@@ -2,6 +2,9 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -211,11 +214,19 @@ public final class SchaffbarApi {
     }
 
     public MvcTestResult certifyCustomer(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
+        return certifyCustomers(List.of(customerId), toolId, certifiedBy);
+    }
+
+    public MvcTestResult certifyCustomers(List<CustomerId> customerIds, ToolId toolId, CustomerId certifiedBy) {
         return this.mvc.post().uri("/api/v1/tool-certifications/batch") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content("""
-                        { "customerIds": ["%s"], "toolId": "%s", "certifiedBy": "%s" }
-                        """.formatted(customerId.getValue(), toolId.getValue(), certifiedBy.getValue())) //
+                .content(Json.write(Map.of("customerIds", customerIds, "toolId", toolId, "certifiedBy", certifiedBy))) //
+                .exchange();
+    }
+
+    public MvcTestResult revokeToolCertification(CustomerId customerId, ToolId toolId) {
+        return this.mvc.put()
+                .uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/revoke", customerId.getValue(), toolId.getValue())
                 .exchange();
     }
 
