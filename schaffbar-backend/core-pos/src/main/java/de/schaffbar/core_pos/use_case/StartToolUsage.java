@@ -56,7 +56,7 @@ public class StartToolUsage {
                 .orElseThrow(() -> new CustomerNotInWorkshopException(customerId));
 
         StartToolUsageCommand command = new StartToolUsageCommand(customerId, toolId, sessionId);
-        this.toolUsageService.startUsage(command);
+        this.toolUsageService.startToolUsage(command);
     }
 
     // ------------------------------------------------------------------------

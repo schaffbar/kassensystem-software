@@ -1,5 +1,1 @@
-de.schaffbar.core_pos.domain.tool_usage.ToolUsageRepository.countByCustomerIdAndEndTimeIsNull(java.util.UUID) has no variant of the same name taking value objects
-de.schaffbar.core_pos.domain.tool_usage.ToolUsageRepository.findByCustomerIdAndEndTimeIsNull(java.util.UUID) has no variant of the same name taking value objects
-de.schaffbar.core_pos.domain.tool_usage.ToolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(java.util.UUID, java.util.UUID) has no variant of the same name taking value objects
-de.schaffbar.core_pos.domain.tool_usage.ToolUsageRepository.findByToolIdAndEndTimeIsNull(java.util.UUID) has no variant of the same name taking value objects
 de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionRepository.findByCustomerIdAndStatus(java.util.UUID, de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus) has no variant of the same name taking value objects

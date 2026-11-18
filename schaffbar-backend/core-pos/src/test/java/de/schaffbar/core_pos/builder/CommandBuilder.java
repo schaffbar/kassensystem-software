@@ -29,10 +29,13 @@ import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand.UpdateTo
 import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand.CreateToolCertificationCommandBuilder;
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand.StartToolUsageCommandBuilder;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandBuilder {
@@ -158,6 +161,16 @@ public class CommandBuilder {
                 .customerId(CustomerId.random()) //
                 .toolId(ToolId.random()) //
                 .certifiedBy(CustomerId.random());
+    }
+
+    // ------------------------------------------------------------------------
+    // tool usage
+
+    public static StartToolUsageCommandBuilder startToolUsageCommand() {
+        return StartToolUsageCommand.builder() //
+                .customerId(CustomerId.random()) //
+                .toolId(ToolId.random()) //
+                .workshopSessionId(WorkshopSessionId.random());
     }
 
 }

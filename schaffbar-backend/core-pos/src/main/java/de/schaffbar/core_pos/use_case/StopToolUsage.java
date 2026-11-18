@@ -21,7 +21,7 @@ public class StopToolUsage {
 
     @Transactional
     public void process(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        this.toolUsageService.stopUsage(customerId, toolId);
+        this.toolUsageService.stopToolUsage(customerId, toolId);
     }
 
 }

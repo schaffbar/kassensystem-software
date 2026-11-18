@@ -12,7 +12,7 @@ row, so a rule whose check reads the database also gets an acceptance test.
 | Level | What it proves | Test runs with | Example |
 | --- | --- | --- | --- |
 | Value object | the value checks itself | nothing | `shared/id/MacAddressTest` |
-| Entity | state changes, calculations, the events of a command | nothing | `domain/workshop_session/WorkshopSession_CloseTest` |
+| Entity | state changes, calculations, the events of a command | nothing | `domain/tool_usage/ToolUsageTest` |
 | Service | rules of one aggregate that need its repository; the events land in the outbox | Mockito for repository and `OutboxEventStore`, real entity and EventFactory | `domain/rfid_reader/RfidReaderServiceTest` |
 | Use case | the paths through one action: allowed, each rejection, order of side effects | Mockito for the services | `use_case/RfidReaderDeleteTest` |
 | Controller | HTTP: paths, status, JSON, value object conversion, problem codes | standalone MockMvc, mocked use cases and read facade | `domain/rfid_reader/web/RfidReaderControllerTest` |
@@ -49,13 +49,14 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
 - A test lives **in the package of the class it tests** – the service test next to the package-private repository
   and entity (`domain/rfid_reader/`), the controller test in `web/`, the use case test in `use_case/`. Acceptance tests
   live in `integration/`.
-- Class: `<Class>Test` (`RfidReaderServiceTest`, `RfidReaderDeleteTest`); an entity method with many cases gets its
-  own class `<Entity>_<Method>Test` (`ToolUsage_GetBillableDurationTest`). Acceptance: `<Aggregate>AcceptanceTest`
+- Class: `<Class>Test` (`RfidReaderServiceTest`, `RfidReaderDeleteTest`) – **one test class per class**, also when a
+  method has many cases: each tested method is a section (`// getBillableDurationUntil` in `ToolUsageTest`), never a
+  class of its own (`ToolUsage_GetBillableDurationTest`). Acceptance: `<Aggregate>AcceptanceTest`
   or `<Flow>AcceptanceTest` for a flow over several aggregates (check-in to billing). Technical:
   `<Class>IntegrationTest`.
 - Method: what happens, in words – `<method>_<situation>_<result>` when the class tests several methods
   (`createRfidReader_rejectsAUsedMacAddress`, `getRfidReader_unknownId_is404`); without the method when the class
-  tests one (`process` of a use case, `<Entity>_<Method>Test`): `rejectsReaderAssignedToTool`. Acceptance:
+  tests one (`process` of a use case): `rejectsReaderAssignedToTool`. Acceptance:
   `r<number>_<the rule as a sentence>` (`r5_aReaderAssignedToAToolCannotBeDeleted`), the number from the README.
 
 ## Structure of a test
@@ -385,14 +386,16 @@ The whole run takes about 25 seconds, the container start about 10 of them.
 
 ## Not everywhere yet
 
-The tests of `rfid_reader`, `rfid_tag`, `rfid_tag_assignment`, `customer`, `tool`, `tool_certification`, of
-`shared/` and the integration tests follow this skill. The older tests of the other aggregates (`CloseSessionTest`, `ToolUsage_GetBillableDurationTest`,
-`WorkshopSession_CloseTest`, `WorkshopUsage_GetBillableDurationTest`) still use test data in fields,
+The tests of `rfid_reader`, `rfid_tag`, `rfid_tag_assignment`, `customer`, `tool`, `tool_certification`,
+`workshop_usage`, `tool_usage`, of `shared/` and the integration tests follow this skill. The older tests of the other
+aggregates (`CloseSessionTest`; `WorkshopSession_CloseTest`, which becomes the section `// close` of
+`WorkshopSessionTest`) still use test data in fields,
 `mock(XyzView.class)`, `assertThatThrownBy`, stubs in the test and partly `// when / then` – they are changed with the
 rollout of their aggregate (K4). Copy from the `rfid_reader` and `shared/` tests, not from them.
 
 ## Checklist
 
+- [ ] One test class per class (`<Class>Test`), one section per tested method.
 - [ ] `// given` / `// when` / `// then` in every test; stubs in `given…`, verifications in `expect…` methods,
       sections `// given` and `// then`; exceptions with `catchThrowable`.
 - [ ] Commands from `CommandBuilder`, views from `ViewBuilder`; no test data in fields; values random (`RandomValues`,

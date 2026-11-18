@@ -29,7 +29,7 @@ public class LeaveWorkshop {
     public void process(@NotNull @Valid CustomerId customerId) {
 
         // Stop any active tool usages for the customer before leaving the workshop
-        this.toolUsageService.stopAllUsagesForCustomer(customerId);
+        this.toolUsageService.stopToolUsages(customerId);
 
         this.workshopSessionService.getOpenWorkshopSession(customerId) //
                 .orElseThrow(() -> new NoActiveWorkshopSessionFoundException(customerId));

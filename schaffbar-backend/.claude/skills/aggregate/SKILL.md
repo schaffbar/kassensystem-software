@@ -489,8 +489,7 @@ this skill, not the code next to you.** Known deviations:
   E21) – `rfid_reader`, `rfid_tag`, `rfid_tag_assignment`, `customer`, `tool` and `tool_certification` are
   converted.
 - `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
-- Repository default methods with other names (`findActiveByCustomerId`); services calling the `UUID` variants.
-- Short command names `startUsage`.
+- Repository default methods with other names (`findOpenWorkshopSession`); services calling the `UUID` variants.
 - Value objects without `@Valid` in commands and views.
 - Controllers of the not yet converted aggregates read the services directly; `domain/dashboard/` still holds services that read other services – both
   become read facades (E17).

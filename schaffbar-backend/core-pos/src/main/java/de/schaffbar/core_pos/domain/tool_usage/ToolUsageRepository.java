@@ -16,55 +16,45 @@ interface ToolUsageRepository extends JpaRepository<ToolUsage, UUID> {
 
     List<ToolUsage> findByCustomerIdAndEndTimeIsNull(UUID customerId);
 
-    List<ToolUsage> findByCustomerIdAndToolIdAndEndTimeIsNull(UUID customerId, UUID toolId);
-
-    List<ToolUsage> findByToolIdAndEndTimeIsNull(UUID toolId);
-
-    List<ToolUsage> findByEndTimeIsNull();
-
-    List<ToolUsage> findByWorkshopSessionId(UUID workshopSessionId);
-
-    long countByCustomerIdAndEndTimeIsNull(UUID customerId);
-
-    // ------------------------------------------------------------------------
-    // default methods
-
-    default List<ToolUsage> findActiveByCustomerId(CustomerId customerId) {
+    default List<ToolUsage> findByCustomerIdAndEndTimeIsNull(CustomerId customerId) {
         return findByCustomerIdAndEndTimeIsNull(customerId.getValue());
     }
 
-    default Optional<ToolUsage> findActiveByCustomerIdAndToolId(CustomerId customerId, ToolId toolId) {
+    List<ToolUsage> findByCustomerIdAndToolIdAndEndTimeIsNull(UUID customerId, UUID toolId);
+
+    default Optional<ToolUsage> findByCustomerIdAndToolIdAndEndTimeIsNull(CustomerId customerId, ToolId toolId) {
         List<ToolUsage> usages = findByCustomerIdAndToolIdAndEndTimeIsNull(customerId.getValue(), toolId.getValue());
-        if (usages.isEmpty()) {
-            return Optional.empty();
-        }
-
         if (usages.size() > 1) {
-            throw new RuntimeException("More than one active tool usage found for customer [id: " + customerId + "] and tool [id: " + toolId + "]");
+            throw new IllegalStateException("More than one active tool usage of customer [id: " + customerId.getValue() + "] on tool [id: "
+                    + toolId.getValue() + "]");
         }
 
-        return Optional.of(usages.getFirst());
+        return usages.stream().findFirst();
     }
 
-    default long countActiveByCustomerId(CustomerId customerId) {
+    List<ToolUsage> findByToolIdAndEndTimeIsNull(UUID toolId);
+
+    default Optional<ToolUsage> findByToolIdAndEndTimeIsNull(ToolId toolId) {
+        List<ToolUsage> usages = findByToolIdAndEndTimeIsNull(toolId.getValue());
+        if (usages.size() > 1) {
+            throw new IllegalStateException("More than one active tool usage on tool [id: " + toolId.getValue() + "]");
+        }
+
+        return usages.stream().findFirst();
+    }
+
+    long countByCustomerIdAndEndTimeIsNull(UUID customerId);
+
+    default long countByCustomerIdAndEndTimeIsNull(CustomerId customerId) {
         return countByCustomerIdAndEndTimeIsNull(customerId.getValue());
     }
+
+    List<ToolUsage> findByWorkshopSessionId(UUID workshopSessionId);
 
     default List<ToolUsage> findByWorkshopSessionId(WorkshopSessionId workshopSessionId) {
         return findByWorkshopSessionId(workshopSessionId.getValue());
     }
 
-    default Optional<ToolUsage> findActiveByToolId(ToolId toolId) {
-        List<ToolUsage> usages = findByToolIdAndEndTimeIsNull(toolId.getValue());
-        if (usages.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (usages.size() > 1) {
-            throw new RuntimeException("More than one active tool usage found for tool [id: " + toolId + "]");
-        }
-
-        return Optional.of(usages.getFirst());
-    }
+    List<ToolUsage> findByEndTimeIsNull();
 
 }

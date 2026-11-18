@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.payload.WorkshopUsageEventPayload.WorkshopUsageLeftPayload;
@@ -79,6 +80,53 @@ class WorkshopUsageTest {
         // then
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
         assertThat(usage.getExitTime()).isEqualTo(exitTime);
+    }
+
+    // ------------------------------------------------------------------------
+    // getBillableDuration
+
+    @Test
+    void getBillableDuration_isNullWhileRunning() {
+        // given
+        WorkshopUsage usage = givenRunningUsage();
+
+        // when
+        BillableDuration duration = usage.getBillableDuration();
+
+        // then
+        assertThat(duration).isNull();
+    }
+
+    // ------------------------------------------------------------------------
+    // getBillableDurationUntil
+
+    @Test
+    void getBillableDurationUntil_countsARunningUsageUntilNow() {
+        // given
+        WorkshopUsage usage = givenRunningUsage();
+        Instant now = usage.getEntryTime() //
+                .plus(Duration.ofMinutes(13).plusSeconds(1));
+
+        // when
+        BillableDuration duration = usage.getBillableDurationUntil(now);
+
+        // then
+        assertThat(duration.getMinutes()).isEqualTo(14);
+        assertThat(duration.getUnits()).isEqualTo(3);
+    }
+
+    @Test
+    void getBillableDurationUntil_ignoresNowForAFinishedUsage() {
+        // given
+        WorkshopUsage usage = givenRunningUsage();
+        usage.exit();
+
+        // when
+        BillableDuration duration = usage.getBillableDurationUntil(Instant.now().plus(Duration.ofHours(1)));
+
+        // then
+        assertThat(duration).isEqualTo(usage.getBillableDuration());
+        assertThat(duration.getDuration()).isEqualTo(usage.getDuration());
     }
 
     // ------------------------------------------------------------------------

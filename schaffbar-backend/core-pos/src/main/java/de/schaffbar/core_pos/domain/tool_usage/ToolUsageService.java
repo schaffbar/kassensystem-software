@@ -16,13 +16,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
@@ -49,13 +49,8 @@ public class ToolUsageService {
     // ------------------------------------------------------------------------
     // query
 
-    public List<ToolUsageView> getActiveToolUsages(@NotNull @Valid CustomerId customerId) {
-        return this.toolUsageRepository.findActiveByCustomerId(customerId).stream() //
-                .map(ToolUsageViews.MAPPER::toToolUsageView) //
-                .toList();
-    }
-
-    public List<ToolUsageView> getAllActiveToolUsages() {
+    @Query
+    public List<ToolUsageView> getActiveToolUsages() {
         return this.toolUsageRepository.findByEndTimeIsNull().stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
                 .toList();
@@ -63,15 +58,17 @@ public class ToolUsageService {
 
     @Query
     public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid ToolId toolId) {
-        return this.toolUsageRepository.findActiveByToolId(toolId) //
+        return this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId) //
                 .map(ToolUsageViews.MAPPER::toToolUsageView);
     }
 
+    @Query
     public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        return this.toolUsageRepository.findActiveByCustomerIdAndToolId(customerId, toolId) //
+        return this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId) //
                 .map(ToolUsageViews.MAPPER::toToolUsageView);
     }
 
+    @Query
     public List<ToolUsageView> getToolUsages(@NotNull @Valid WorkshopSessionId workshopSessionId) {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
@@ -79,6 +76,7 @@ public class ToolUsageService {
     }
 
     // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
+    @Query
     public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         List<BillableDuration> durations = this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(usage -> usage.getBillableDurationUntil(now)) //
@@ -88,6 +86,7 @@ public class ToolUsageService {
     }
 
     // TODO: merge getBillingTotalsByTool and getToolUsages and return something like getBillingSummary
+    @Query
     public Map<ToolId, BillingTotal> getBillingTotalsByTool(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .collect(groupingBy(ToolUsage::getToolId, //
@@ -97,37 +96,37 @@ public class ToolUsageService {
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
-    public void startUsage(@NotNull @Valid StartToolUsageCommand command) {
+    @Command
+    public void startToolUsage(@NotNull @Valid StartToolUsageCommand command) {
         ensureToolNotInUseByAnotherCustomer(command.toolId(), command.customerId());
         ensureCustomerNotAlreadyUsingTool(command.customerId(), command.toolId());
         ensureMaxSimultaneousUsagesNotExceeded(command.customerId());
 
         ToolUsage toolUsage = ToolUsage.of(command);
-        ToolUsage savedToolUsage = this.toolUsageRepository.save(toolUsage);
+        this.toolUsageRepository.save(toolUsage);
+        List<SchaffbarEvent> events = List.of(ToolUsageEventFactory.toolUsageStarted(toolUsage));
 
-        List<SchaffbarEvent> events = List.of(ToolUsageEventFactory.toolUsageStarted(savedToolUsage));
         this.outboxEventStore.save(events);
 
         log.info("Started tool usage for customer {} on tool {} and published events {}", command.customerId(), command.toolId(), events);
     }
 
-    @Transactional
-    public void stopUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        ToolUsage usage = this.toolUsageRepository.findActiveByCustomerIdAndToolId(customerId, toolId) //
+    @Command
+    public void stopToolUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+        ToolUsage usage = this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId) //
                 .orElseThrow(() -> new ToolNotInUseByCustomerException(customerId, toolId));
 
         List<SchaffbarEvent> events = usage.stop();
+
         this.outboxEventStore.save(events);
 
         log.info("Stopped tool usage for customer {} on tool {} and published events {}", customerId, toolId, events);
     }
 
-    @Transactional
-    public void stopAllUsagesForCustomer(@NotNull @Valid CustomerId customerId) {
-        List<ToolUsage> activeUsages = this.toolUsageRepository.findActiveByCustomerId(customerId);
+    @Command
+    public void stopToolUsages(@NotNull @Valid CustomerId customerId) {
+        List<ToolUsage> activeUsages = this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(customerId);
         if (activeUsages.isEmpty()) {
-            log.info("No active tool usages found for customer {}. Nothing to stop.", customerId);
             return;
         }
 
@@ -144,23 +143,26 @@ public class ToolUsageService {
     // ------------------------------------------------------------------------
     // helper
 
+    // TU-9
     private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId customerId) {
-        this.toolUsageRepository.findActiveByToolId(toolId) //
+        this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId) //
                 .filter(existing -> !existing.getCustomerId().sameValueAs(customerId)) //
                 .ifPresent(_ -> {
                     throw new ToolAlreadyInUseByAnotherCustomerException(toolId);
                 });
     }
 
+    // TU-3
     private void ensureCustomerNotAlreadyUsingTool(CustomerId customerId, ToolId toolId) {
-        this.toolUsageRepository.findActiveByCustomerIdAndToolId(customerId, toolId) //
+        this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId) //
                 .ifPresent(_ -> {
                     throw new CustomerAlreadyUsingToolException(customerId, toolId);
                 });
     }
 
+    // TU-1
     private void ensureMaxSimultaneousUsagesNotExceeded(CustomerId customerId) {
-        long activeCount = this.toolUsageRepository.countActiveByCustomerId(customerId);
+        long activeCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
         if (activeCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
             throw new MaxToolUsageExceededException(customerId, MAX_SIMULTANEOUS_TOOL_USAGES);
         }

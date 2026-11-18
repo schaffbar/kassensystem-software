@@ -31,7 +31,7 @@ public class ToolDashboardService {
     // query
 
     public List<ToolDashboardEntryView> getActiveToolUsages() {
-        return this.toolUsageService.getAllActiveToolUsages().stream() //
+        return this.toolUsageService.getActiveToolUsages().stream() //
                 .map(this::toToolDashboardEntryView) //
                 .toList();
     }
