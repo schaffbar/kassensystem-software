@@ -1,6 +1,5 @@
 package de.schaffbar.core_pos.use_case;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -12,6 +11,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.InvalidRfidReaderTypeForToolException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -26,7 +26,7 @@ public class ToolAssignRfidReader {
 
     private final @NonNull ToolService toolService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid ToolId toolId, @NotNull @Valid RfidReaderId rfidReaderId) {
         RfidReaderView rfidReader = this.rfidReaderService.getRfidReader(rfidReaderId) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(rfidReaderId));

@@ -1,6 +1,5 @@
 package de.schaffbar.core_pos.use_case;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -10,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
 @Service
@@ -19,7 +19,7 @@ public class ToolCreate {
 
     private final @NonNull ToolService toolService;
 
-    @Transactional
+    @Command
     public ToolId process(@NotNull @Valid CreateToolCommand command) {
         return this.toolService.createTool(command);
     }

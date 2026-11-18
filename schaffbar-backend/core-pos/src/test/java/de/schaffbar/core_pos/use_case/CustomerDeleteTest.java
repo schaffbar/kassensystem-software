@@ -7,7 +7,6 @@ import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -62,7 +61,7 @@ class CustomerDeleteTest {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
         givenNoRfidTagAssignment(customerId);
-        givenTools();
+        givenToolsOfInstructor(customerId);
 
         // when
         this.customerDelete.process(customerId);
@@ -79,7 +78,7 @@ class CustomerDeleteTest {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
         givenRfidTagAssignment(customerId, RfidTagAssignmentStatus.ASSIGNED);
-        givenTools();
+        givenToolsOfInstructor(customerId);
 
         // when
         this.customerDelete.process(customerId);
@@ -96,7 +95,7 @@ class CustomerDeleteTest {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
         givenRfidTagAssignment(customerId, RfidTagAssignmentStatus.WAITING_FOR_ASSIGNMENT);
-        givenTools();
+        givenToolsOfInstructor(customerId);
 
         // when
         this.customerDelete.process(customerId);
@@ -109,21 +108,22 @@ class CustomerDeleteTest {
     }
 
     @Test
-    void removesTheCustomerAsInstructorOfTheirToolsOnly() {
+    void removesTheCustomerAsInstructorOfTheirTools() {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
         givenNoRfidTagAssignment(customerId);
-        ToolView instructedTool = toolView().instructors(Set.of(customerId, CustomerId.random())).build();
-        ToolView otherTool = toolView().instructors(Set.of(CustomerId.random())).build();
-        givenTools(instructedTool, otherTool);
+        ToolView tool = toolView().instructors(Set.of(customerId, CustomerId.random())).build();
+        ToolView otherTool = toolView().instructors(Set.of(customerId)).build();
+        givenToolsOfInstructor(customerId, tool, otherTool);
 
         // when
         this.customerDelete.process(customerId);
 
         // then
-        verify(this.toolService).removeInstructors(instructedTool.id(), List.of(customerId));
-        verify(this.toolService, never()).removeInstructors(eq(otherTool.id()), any());
-        verify(this.customerService).deleteCustomer(customerId);
+        InOrder order = inOrder(this.toolService, this.customerService);
+        order.verify(this.toolService).removeInstructors(tool.id(), List.of(customerId));
+        order.verify(this.toolService).removeInstructors(otherTool.id(), List.of(customerId));
+        order.verify(this.customerService).deleteCustomer(customerId);
     }
 
     @Test
@@ -195,8 +195,8 @@ class CustomerDeleteTest {
                 .thenReturn(Optional.of(rfidTagAssignmentView().customerId(customerId).status(status).build()));
     }
 
-    private void givenTools(ToolView... tools) {
-        when(this.toolService.getTools()).thenReturn(List.of(tools));
+    private void givenToolsOfInstructor(CustomerId customerId, ToolView... tools) {
+        when(this.toolService.getToolsOfInstructor(customerId)).thenReturn(List.of(tools));
     }
 
     // ------------------------------------------------------------------------

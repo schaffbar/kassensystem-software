@@ -2,7 +2,6 @@ package de.schaffbar.core_pos.use_case;
 
 import java.util.List;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
+import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
@@ -26,7 +26,7 @@ public class ToolRemoveInstructors {
 
     private final @NonNull CustomerService customerService;
 
-    @Transactional
+    @Command
     public void process(@NotNull @Valid ToolId toolId, @NotEmpty List<@NotNull @Valid CustomerId> instructorIds) {
         instructorIds.forEach(this::verifyCustomerExists);
 

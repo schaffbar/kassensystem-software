@@ -27,6 +27,8 @@ import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
 import de.schaffbar.core_pos.domain.tool.ToolArea;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView.ToolViewBuilder;
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
+import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView.ToolUsageViewBuilder;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -34,6 +36,7 @@ import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.id.ToolUsageId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -144,6 +147,18 @@ public class ViewBuilder {
         return WorkshopSessionView.builder() //
                 .id(WorkshopSessionId.random()) //
                 .status(WorkshopSessionStatus.OPEN);
+    }
+
+    // ------------------------------------------------------------------------
+    // tool usage
+
+    public static ToolUsageViewBuilder activeToolUsageView(ToolId toolId) {
+        return ToolUsageView.builder() //
+                .id(ToolUsageId.random()) //
+                .customerId(CustomerId.random()) //
+                .toolId(toolId) //
+                .workshopSessionId(WorkshopSessionId.random()) //
+                .startTime(Instant.now().minusSeconds(600));
     }
 
 }

@@ -77,8 +77,7 @@ public class CustomerDelete {
     }
 
     private void removeAsInstructor(CustomerId customerId) {
-        this.toolService.getTools().stream() //
-                .filter(tool -> tool.instructors().contains(customerId)) //
+        this.toolService.getToolsOfInstructor(customerId).stream() //
                 .map(ToolView::id) //
                 .forEach(toolId -> this.toolService.removeInstructors(toolId, List.of(customerId)));
     }

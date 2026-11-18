@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageC
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyUsingToolException;
@@ -58,6 +59,12 @@ public class ToolUsageService {
         return this.toolUsageRepository.findByEndTimeIsNull().stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
                 .toList();
+    }
+
+    @Query
+    public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid ToolId toolId) {
+        return this.toolUsageRepository.findActiveByToolId(toolId) //
+                .map(ToolUsageViews.MAPPER::toToolUsageView);
     }
 
     public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
