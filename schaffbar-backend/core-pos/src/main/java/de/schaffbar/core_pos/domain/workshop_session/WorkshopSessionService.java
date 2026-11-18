@@ -9,14 +9,17 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
+import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 @Slf4j
 @Service
@@ -31,35 +34,38 @@ public class WorkshopSessionService {
     // ------------------------------------------------------------------------
     // query
 
-    // TODO: naming - use either active or open session consistently
+    @Query
     public Optional<WorkshopSessionView> getOpenWorkshopSession(@NotNull @Valid CustomerId customerId) {
-        return fetchOpenWorkshopSession(customerId) //
+        return this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
                 .map(WorkshopSessionViews.MAPPER::toWorkshopSessionView);
     }
 
     // ------------------------------------------------------------------------
     // command
 
-    @Transactional
-    public void startSession(@NotNull @Valid CustomerId customerId) {
-        fetchOpenWorkshopSession(customerId) //
+    @Command
+    public WorkshopSessionId startWorkshopSession(@NotNull @Valid CustomerId customerId) {
+        findOpenWorkshopSession(customerId) //
                 .ifPresent(this::throwHasAlreadyOpenWorkshopSession);
 
         WorkshopSession workshopSession = WorkshopSession.of(customerId);
-        WorkshopSession savedWorkshopSession = this.workshopSessionRepository.save(workshopSession);
-        List<SchaffbarEvent> events = List.of(WorkshopSessionEventFactory.workshopSessionStarted(savedWorkshopSession));
+        this.workshopSessionRepository.save(workshopSession);
+        List<SchaffbarEvent> events = List.of(WorkshopSessionEventFactory.workshopSessionStarted(workshopSession));
 
         this.outboxEventStore.save(events);
 
         log.info("Started workshop session for customer {} and published events {}", customerId, events);
+
+        return workshopSession.getId();
     }
 
-    @Transactional
-    public void closeSession(@NotNull @Valid CustomerId customerId, @NotNull BillingTotal workshopTotal, @NotNull BillingTotal toolTotal) {
-        WorkshopSession session = fetchOpenWorkshopSession(customerId) //
-                .orElseThrow(() -> new RuntimeException("No workshop session found for customer [id: " + customerId + "]")); // TODO: use proper exception
+    @Command
+    public void closeWorkshopSession(@NotNull @Valid CustomerId customerId, @NotNull BillingTotal workshopTotal, @NotNull BillingTotal toolTotal) {
+        WorkshopSession workshopSession = findOpenWorkshopSession(customerId) //
+                .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));
 
-        List<SchaffbarEvent> events = session.close(workshopTotal, toolTotal);
+        List<SchaffbarEvent> events = workshopSession.close(workshopTotal, toolTotal);
+
         this.outboxEventStore.save(events);
 
         log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal, toolTotal, events);
@@ -68,12 +74,12 @@ public class WorkshopSessionService {
     // ------------------------------------------------------------------------
     // helper
 
-    private Optional<WorkshopSession> fetchOpenWorkshopSession(CustomerId customerId) {
+    private Optional<WorkshopSession> findOpenWorkshopSession(CustomerId customerId) {
         return this.workshopSessionRepository.findOpenWorkshopSession(customerId);
     }
 
     private void throwHasAlreadyOpenWorkshopSession(WorkshopSession session) {
-        throw new RuntimeException("Customer [id: " + session.getCustomerId() + "] has already open workshop session");
+        throw new IllegalStateException("Customer [id: " + session.getCustomerId().getValue() + "] already has an open workshop session");
     }
 
 }

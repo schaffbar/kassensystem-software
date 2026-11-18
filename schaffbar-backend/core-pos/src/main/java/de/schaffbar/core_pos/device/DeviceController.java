@@ -48,9 +48,9 @@ import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopSessionFoundException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
+import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -210,7 +210,7 @@ public class DeviceController {
             log.error("No active workshop usage [id: {}]", rfidReader.id());
             return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Zwei mal Pause geht nicht", customer.getFullName(), devUseCase));
         }
-        catch (NoActiveWorkshopSessionFoundException e) {
+        catch (NoOpenWorkshopSessionException e) {
             log.error("No active workshop [id: {}]", rfidReader.id());
             return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du warst nie im Werkstatt", customer.getFullName(), devUseCase));
         }

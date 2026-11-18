@@ -1,6 +1,3 @@
-de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService.closeSession(de.schaffbar.core_pos.shared.id.CustomerId, de.schaffbar.core_pos.shared.billing.BillingTotal, de.schaffbar.core_pos.shared.billing.BillingTotal)
-de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService.getOpenWorkshopSession(de.schaffbar.core_pos.shared.id.CustomerId)
-de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService.startSession(de.schaffbar.core_pos.shared.id.CustomerId)
 de.schaffbar.core_pos.use_case.CloseSession.process(de.schaffbar.core_pos.shared.id.CustomerId)
 de.schaffbar.core_pos.use_case.EnterWorkshop.process(de.schaffbar.core_pos.shared.id.CustomerId)
 de.schaffbar.core_pos.use_case.LeaveWorkshop.process(de.schaffbar.core_pos.shared.id.CustomerId)

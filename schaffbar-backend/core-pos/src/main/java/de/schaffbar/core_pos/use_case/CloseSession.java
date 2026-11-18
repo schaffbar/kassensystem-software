@@ -22,7 +22,7 @@ import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUs
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.exception.ActiveToolUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.ActiveWorkshopUsageExistsForSessionException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopSessionFoundException;
+import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
@@ -47,7 +47,7 @@ public class CloseSession {
 
         WorkshopSessionId sessionId = this.workshopSessionService.getOpenWorkshopSession(customer.id()) //
                 .map(WorkshopSessionView::id) //
-                .orElseThrow(() -> new NoActiveWorkshopSessionFoundException(customer.id()));
+                .orElseThrow(() -> new NoOpenWorkshopSessionException(customer.id()));
 
         ensureNoActiveToolUsages(sessionId);
         ensureNoActiveWorkshopUsages(sessionId);
@@ -57,7 +57,7 @@ public class CloseSession {
         BillingTotal workshopTotal = this.workshopUsageService.getBillingTotal(sessionId, now);
         BillingTotal toolTotal = this.toolUsageService.getBillingTotal(sessionId, now);
 
-        this.workshopSessionService.closeSession(customer.id(), workshopTotal, toolTotal);
+        this.workshopSessionService.closeWorkshopSession(customer.id(), workshopTotal, toolTotal);
     }
 
     private void ensureNoActiveWorkshopUsages(WorkshopSessionId sessionId) {

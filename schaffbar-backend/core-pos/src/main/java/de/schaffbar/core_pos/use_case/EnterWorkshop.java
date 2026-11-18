@@ -30,20 +30,9 @@ public class EnterWorkshop {
 
         WorkshopSessionId sessionId = this.workshopSessionService.getOpenWorkshopSession(customerId) //
                 .map(WorkshopSessionView::id) //
-                .orElseGet(() -> createWorkshopSession(customerId));
+                .orElseGet(() -> this.workshopSessionService.startWorkshopSession(customerId));
 
         this.workshopUsageService.startWorkshopUsage(customerId, sessionId);
-    }
-
-    // ------------------------------------------------------------------------
-    // helper
-
-    private WorkshopSessionId createWorkshopSession(CustomerId customerId) {
-        this.workshopSessionService.startSession(customerId);
-
-        return this.workshopSessionService.getOpenWorkshopSession(customerId) //
-                .map(WorkshopSessionView::id) //
-                .orElseThrow(() -> new RuntimeException("TODO: Error during creation of workshop session")); // TODO: error
     }
 
 }

@@ -14,17 +14,17 @@ interface WorkshopSessionRepository extends JpaRepository<WorkshopSession, UUID>
 
     List<WorkshopSession> findByCustomerIdAndStatus(UUID customerId, WorkshopSessionStatus status);
 
+    default List<WorkshopSession> findByCustomerIdAndStatus(CustomerId customerId, WorkshopSessionStatus status) {
+        return findByCustomerIdAndStatus(customerId.getValue(), status);
+    }
+
     default Optional<WorkshopSession> findOpenWorkshopSession(CustomerId customerId) {
-        List<WorkshopSession> workshopSessions = findByCustomerIdAndStatus(customerId.getValue(), WorkshopSessionStatus.OPEN);
-        if (workshopSessions.isEmpty()) {
-            return Optional.empty();
-        }
-
+        List<WorkshopSession> workshopSessions = findByCustomerIdAndStatus(customerId, WorkshopSessionStatus.OPEN);
         if (workshopSessions.size() > 1) {
-            throw new RuntimeException("More than one open session found"); // TODO: create custom exception
+            throw new IllegalStateException("More than one open workshop session of customer [id: " + customerId.getValue() + "]");
         }
 
-        return Optional.of(workshopSessions.getFirst());
+        return workshopSessions.stream().findFirst();
     }
 
 }

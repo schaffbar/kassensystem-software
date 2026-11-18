@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopSessionFoundException;
+import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @Service
@@ -32,7 +32,7 @@ public class LeaveWorkshop {
         this.toolUsageService.stopToolUsages(customerId);
 
         this.workshopSessionService.getOpenWorkshopSession(customerId) //
-                .orElseThrow(() -> new NoActiveWorkshopSessionFoundException(customerId));
+                .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));
 
         this.workshopUsageService.stopWorkshopUsage(customerId);
     }

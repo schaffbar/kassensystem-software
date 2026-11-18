@@ -85,7 +85,7 @@ class CloseSessionTest {
         this.closeSession.process(this.customerId);
 
         // then
-        verify(this.workshopSessionService).closeSession(this.customerId, workshopTotal, toolTotal);
+        verify(this.workshopSessionService).closeWorkshopSession(this.customerId, workshopTotal, toolTotal);
     }
 
     @Test
@@ -97,7 +97,7 @@ class CloseSessionTest {
         // when / then
         assertThatThrownBy(() -> this.closeSession.process(this.customerId)) //
                 .isInstanceOf(ActiveWorkshopUsageExistsForSessionException.class);
-        verify(this.workshopSessionService, never()).closeSession(any(), any(), any());
+        verify(this.workshopSessionService, never()).closeWorkshopSession(any(), any(), any());
     }
 
     @Test
@@ -108,7 +108,7 @@ class CloseSessionTest {
         // when / then
         assertThatThrownBy(() -> this.closeSession.process(this.customerId)) //
                 .isInstanceOf(ActiveToolUsageExistsForSessionException.class);
-        verify(this.workshopSessionService, never()).closeSession(any(), any(), any());
+        verify(this.workshopSessionService, never()).closeWorkshopSession(any(), any(), any());
     }
 
     // ------------------------------------------------------------------------

@@ -94,6 +94,10 @@ class WorkshopSession {
     // command
 
     public List<SchaffbarEvent> close(BillingTotal workshopTotal, BillingTotal toolTotal) {
+        if (this.status != WorkshopSessionStatus.OPEN) {
+            throw new IllegalStateException("Workshop session [id: " + this.id + "] is already closed");
+        }
+
         this.closeTime = Instant.now();
         this.status = WorkshopSessionStatus.PAID;
         this.workshopMinutes = workshopTotal.minutes();
