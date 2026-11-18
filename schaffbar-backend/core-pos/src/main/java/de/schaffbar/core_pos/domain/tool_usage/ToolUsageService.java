@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.tool_usage;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -72,12 +73,13 @@ public class ToolUsageService {
     public List<ToolUsageView> getToolUsages(@NotNull @Valid WorkshopSessionId workshopSessionId) {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
+                .sorted(comparing(ToolUsageView::startTime)) //
                 .toList();
     }
 
     // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
     @Query
-    public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
+    public BillingTotal getBillingTotalUntil(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         List<BillableDuration> durations = this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(usage -> usage.getBillableDurationUntil(now)) //
                 .toList();
@@ -85,9 +87,8 @@ public class ToolUsageService {
         return BillingTotal.of(durations);
     }
 
-    // TODO: merge getBillingTotalsByTool and getToolUsages and return something like getBillingSummary
     @Query
-    public Map<ToolId, BillingTotal> getBillingTotalsByTool(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
+    public Map<ToolId, BillingTotal> getBillingTotalsByToolUntil(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         return this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .collect(groupingBy(ToolUsage::getToolId, //
                         mapping(usage -> usage.getBillableDurationUntil(now), collectingAndThen(toList(), BillingTotal::of))));

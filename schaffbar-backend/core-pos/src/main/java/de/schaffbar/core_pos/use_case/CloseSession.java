@@ -54,8 +54,8 @@ public class CloseSession {
 
         // no usage is running any more, so the totals are final – `now` has no effect
         Instant now = Instant.now();
-        BillingTotal workshopTotal = this.workshopUsageService.getBillingTotal(sessionId, now);
-        BillingTotal toolTotal = this.toolUsageService.getBillingTotal(sessionId, now);
+        BillingTotal workshopTotal = this.workshopUsageService.getBillingTotalUntil(sessionId, now);
+        BillingTotal toolTotal = this.toolUsageService.getBillingTotalUntil(sessionId, now);
 
         this.workshopSessionService.closeWorkshopSession(customer.id(), workshopTotal, toolTotal);
     }

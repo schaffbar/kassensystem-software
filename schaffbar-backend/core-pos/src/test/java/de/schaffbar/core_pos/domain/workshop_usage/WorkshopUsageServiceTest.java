@@ -47,10 +47,10 @@ class WorkshopUsageServiceTest {
     private WorkshopUsageService workshopUsageService;
 
     // ------------------------------------------------------------------------
-    // getBillingTotal
+    // getBillingTotalUntil
 
     @Test
-    void getBillingTotal_countsAFinishedUsageUntilItsExitAndTheRunningOneUntilNow() {
+    void getBillingTotalUntil_countsAFinishedUsageUntilItsExitAndTheRunningOneUntilNow() {
         // given – checked out once and checked in again
         WorkshopSessionId workshopSessionId = WorkshopSessionId.random();
         List<WorkshopUsage> usages = givenAFinishedAndARunningUsageOfTheSession(workshopSessionId);
@@ -59,7 +59,7 @@ class WorkshopUsageServiceTest {
         Instant now = Instant.now().plus(Duration.ofMinutes(13).plusSeconds(1));
 
         // when
-        BillingTotal total = this.workshopUsageService.getBillingTotal(workshopSessionId, now);
+        BillingTotal total = this.workshopUsageService.getBillingTotalUntil(workshopSessionId, now);
 
         // then – every usage is rounded on its own
         assertThat(total).isEqualTo(BillingTotal.of(List.of(finished.getBillableDuration(), running.getBillableDurationUntil(now))));

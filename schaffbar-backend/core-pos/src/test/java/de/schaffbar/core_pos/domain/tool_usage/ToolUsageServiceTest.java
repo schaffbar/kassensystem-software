@@ -55,10 +55,10 @@ class ToolUsageServiceTest {
     private ToolUsageService toolUsageService;
 
     // ------------------------------------------------------------------------
-    // getBillingTotalsByTool
+    // getBillingTotalsByToolUntil
 
     @Test
-    void getBillingTotalsByTool_addsTheUsagesOfEachToolSeparately() {
+    void getBillingTotalsByToolUntil_addsTheUsagesOfEachToolSeparately() {
         // given – the first tool was switched off and on again, the second one runs
         StartToolUsageCommand onFirstTool = startToolUsageCommand().build();
         StartToolUsageCommand onSecondTool = startToolUsageCommand() //
@@ -73,7 +73,7 @@ class ToolUsageServiceTest {
         Instant now = Instant.now().plus(Duration.ofMinutes(13).plusSeconds(1));
 
         // when
-        Map<ToolId, BillingTotal> totals = this.toolUsageService.getBillingTotalsByTool(onFirstTool.workshopSessionId(), now);
+        Map<ToolId, BillingTotal> totals = this.toolUsageService.getBillingTotalsByToolUntil(onFirstTool.workshopSessionId(), now);
 
         // then – a finished usage counts until its end, a running one until now
         assertThat(totals).containsOnly( //

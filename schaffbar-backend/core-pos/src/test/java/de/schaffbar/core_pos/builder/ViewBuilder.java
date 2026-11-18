@@ -34,6 +34,9 @@ import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageViews.ToolUsageView.ToolUsageViewBuilder;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
+import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
+import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView.WorkshopUsageViewBuilder;
+import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
@@ -42,6 +45,7 @@ import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.ToolUsageId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
+import de.schaffbar.core_pos.shared.id.WorkshopUsageId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ViewBuilder {
@@ -163,7 +167,20 @@ public class ViewBuilder {
     public static WorkshopSessionViewBuilder openWorkshopSessionView() {
         return WorkshopSessionView.builder() //
                 .id(WorkshopSessionId.random()) //
+                .customerId(CustomerId.random()) //
+                .startTime(Instant.now().minusSeconds(3600)) //
                 .status(WorkshopSessionStatus.OPEN);
+    }
+
+    // ------------------------------------------------------------------------
+    // workshop usage
+
+    public static WorkshopUsageViewBuilder activeWorkshopUsageView() {
+        return WorkshopUsageView.builder() //
+                .id(WorkshopUsageId.random()) //
+                .customerId(CustomerId.random()) //
+                .workshopSessionId(WorkshopSessionId.random()) //
+                .entryTime(Instant.now().minusSeconds(3600));
     }
 
     // ------------------------------------------------------------------------
@@ -176,6 +193,20 @@ public class ViewBuilder {
                 .toolId(toolId) //
                 .workshopSessionId(WorkshopSessionId.random()) //
                 .startTime(Instant.now().minusSeconds(600));
+    }
+
+    public static ToolUsageViewBuilder finishedToolUsageView(ToolId toolId) {
+        Instant startTime = Instant.now().minusSeconds(1800);
+        Instant endTime = startTime.plusSeconds(420);
+
+        return ToolUsageView.builder() //
+                .id(ToolUsageId.random()) //
+                .customerId(CustomerId.random()) //
+                .toolId(toolId) //
+                .workshopSessionId(WorkshopSessionId.random()) //
+                .startTime(startTime) //
+                .endTime(endTime) //
+                .billableDuration(BillableDuration.between(startTime, endTime));
     }
 
 }

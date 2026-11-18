@@ -78,8 +78,8 @@ class CloseSessionTest {
         BillingTotal toolTotal = new BillingTotal(31, 6);
         when(this.workshopUsageService.getWorkshopUsages(this.sessionId)).thenReturn(List.of(workshopUsage(END)));
         when(this.toolUsageService.getToolUsages(this.sessionId)).thenReturn(List.of(toolUsage(END)));
-        when(this.workshopUsageService.getBillingTotal(eq(this.sessionId), any())).thenReturn(workshopTotal);
-        when(this.toolUsageService.getBillingTotal(eq(this.sessionId), any())).thenReturn(toolTotal);
+        when(this.workshopUsageService.getBillingTotalUntil(eq(this.sessionId), any())).thenReturn(workshopTotal);
+        when(this.toolUsageService.getBillingTotalUntil(eq(this.sessionId), any())).thenReturn(toolTotal);
 
         // when
         this.closeSession.process(this.customerId);
