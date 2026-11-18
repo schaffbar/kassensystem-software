@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -29,6 +30,17 @@ public class RandomValues {
 
     public static String toolName() {
         return "Werkzeug " + UUID.randomUUID();
+    }
+
+    public static IpAddress ipAddress() {
+        return IpAddress.of("10.%d.%d.%d".formatted(octet(), octet(), octet()));
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static int octet() {
+        return ThreadLocalRandom.current().nextInt(256);
     }
 
 }

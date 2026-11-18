@@ -10,6 +10,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerComm
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -159,12 +160,38 @@ public final class SchaffbarApi {
                 .exchange();
     }
 
+    public MvcTestResult updateTool(ToolId toolId, String name) {
+        return this.mvc.put().uri("/api/v1/tools/{toolId}", toolId.getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "name": "%s", "area": "HOLZ", "certificationRequirement": "YELLOW" }
+                        """.formatted(name)) //
+                .exchange();
+    }
+
+    public MvcTestResult deleteTool(ToolId toolId) {
+        return this.mvc.delete().uri("/api/v1/tools/{toolId}", toolId.getValue()).exchange();
+    }
+
     public MvcTestResult assignRfidReader(ToolId toolId, RfidReaderId rfidReaderId) {
         return this.mvc.put().uri("/api/v1/tools/{toolId}/rfid-reader/{rfidReaderId}", toolId.getValue(), rfidReaderId.getValue()).exchange();
     }
 
     public MvcTestResult clearRfidReader(ToolId toolId) {
         return this.mvc.delete().uri("/api/v1/tools/{toolId}/rfid-reader", toolId.getValue()).exchange();
+    }
+
+    public MvcTestResult setWlanRelais(ToolId toolId, IpAddress ipAddress) {
+        return this.mvc.put().uri("/api/v1/tools/{toolId}/wlan-relais", toolId.getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "wlanRelaisType": "SHELLY_PRO", "ipAddress": "%s" }
+                        """.formatted(ipAddress.getValue())) //
+                .exchange();
+    }
+
+    public MvcTestResult clearWlanRelais(ToolId toolId) {
+        return this.mvc.delete().uri("/api/v1/tools/{toolId}/wlan-relais", toolId.getValue()).exchange();
     }
 
     public MvcTestResult addInstructor(ToolId toolId, CustomerId instructorId) {

@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -118,6 +119,38 @@ public final class ThenFixture {
 
     // ------------------------------------------------------------------------
     // tools
+
+    public void expectTool(ToolId toolId, String name) {
+        MvcTestResult result = this.api.getTool(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.name").isEqualTo(name);
+    }
+
+    public void expectNoTool(ToolId toolId) {
+        expectProblem(this.api.getTool(toolId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+    }
+
+    public void expectSwitchBox(ToolId toolId, RfidReaderId rfidReaderId) {
+        MvcTestResult result = this.api.getTool(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.rfidReaderId").isEqualTo(rfidReaderId.getValue().toString());
+    }
+
+    public void expectNoSwitchBox(ToolId toolId) {
+        MvcTestResult result = this.api.getTool(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.rfidReaderId").isNull();
+    }
+
+    public void expectWlanRelais(ToolId toolId, IpAddress ipAddress) {
+        MvcTestResult result = this.api.getTool(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.ipAddress").isEqualTo(ipAddress.getValue());
+    }
 
     public void expectInstructors(ToolId toolId, CustomerId... instructorIds) {
         MvcTestResult result = this.api.getTool(toolId);

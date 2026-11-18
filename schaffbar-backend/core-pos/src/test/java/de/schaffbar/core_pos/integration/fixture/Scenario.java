@@ -3,6 +3,7 @@ package de.schaffbar.core_pos.integration.fixture;
 import lombok.Builder;
 
 import de.schaffbar.core_pos.builder.RandomValues;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -11,14 +12,16 @@ import de.schaffbar.core_pos.shared.id.RfidTagId;
 public record Scenario( //
         MacAddress macAddress, //
         RfidTagId rfidTagId, //
-        String toolName //
+        String toolName, //
+        IpAddress ipAddress //
 ) {
 
     public static ScenarioBuilder randomValues() {
         return Scenario.builder() //
                 .macAddress(RandomValues.macAddress()) //
                 .rfidTagId(RandomValues.rfidTagId()) //
-                .toolName(RandomValues.toolName());
+                .toolName(RandomValues.toolName()) //
+                .ipAddress(RandomValues.ipAddress());
     }
 
 }

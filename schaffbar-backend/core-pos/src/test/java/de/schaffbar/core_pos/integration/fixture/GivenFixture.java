@@ -105,10 +105,23 @@ public final class GivenFixture {
     // tools
 
     public ToolId tool(Scenario scenario) {
-        MvcTestResult result = this.api.createTool(scenario.toolName());
+        return tool(scenario.toolName());
+    }
+
+    public ToolId tool(String name) {
+        MvcTestResult result = this.api.createTool(name);
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
         return ToolId.of(createdId(result));
+    }
+
+    public ToolId toolWithWlanRelais(Scenario scenario) {
+        ToolId toolId = tool(scenario);
+
+        MvcTestResult result = this.api.setWlanRelais(toolId, scenario.ipAddress());
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        return toolId;
     }
 
     public CustomerId instructor(ToolId toolId) {
@@ -133,6 +146,13 @@ public final class GivenFixture {
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return toolId;
+    }
+
+    // the person is in the workshop and holds their tag to the switch box of the tool
+    public void toolUsage(RfidTagId rfidTagId, MacAddress switchBox) {
+        MvcTestResult result = this.api.holdRfidTagToReader(rfidTagId, switchBox);
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.STATE").isEqualTo("WORKING");
     }
 
     // ------------------------------------------------------------------------
