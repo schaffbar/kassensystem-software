@@ -21,8 +21,7 @@ Zeitaufwand abgerechnet werden können. Die Kerndomäne umfasst:
 - **RFID-Infrastruktur** — Lesegeräte, Chips und deren Zuordnung zu Kunden
 - **Werkzeugverwaltung** — Werkstattwerkzeuge mit optionaler WLAN-Relais-Steuerung (Shelly) und RFID-Lesegerät-Kopplung
 - **Werkzeugnutzungsverfolgung** — erfasst welcher Kunde welches Werkzeug nutzt, für Abrechnung und Sicherheit
-- **Einweisungsverwaltung** — Zertifizierungen pro Kunde und Werkzeug, die den Zugang zu Maschinen regeln (
-  ACTIVE/PAUSED/REVOKED-Lebenszyklus)
+- **Einweisungsverwaltung** — Zertifizierungen pro Kunde und Werkzeug, die den Zugang zu Maschinen regeln (ACTIVE/PAUSED/REVOKED-Lebenszyklus)
 - **Werkstattzugangsverfolgung** — Sitzungen (Abrechnungseinheiten) und Nutzungen (einzelne Ein-/Austritts-Zeitslots)
 - **Werkstatt-Dashboard** — ein Lesemodell, das aktuell aktive Nutzer anzeigt
 
@@ -66,7 +65,7 @@ damit jedes Modul leicht verständlich und erweiterbar ist.
 ### Komponentenverantwortlichkeiten
 
 | Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Aggregat-Root**         | Kapselt Zustand und Invarianten. Alle Mutationen erfolgen über Command-Methoden, die `List<SchaffbarEvent>` zurückgeben. Statische `of(...)`-Fabrik für die Erstellung gibt ein `*WithEvents`-Record zurück, das die Entität und ihre Erstellungsereignisse enthält. |
 | **Commands**              | Unveränderliche Java-`record`-Typen mit Bean-Validation-Annotationen. Gruppiert in einem `*Commands`-Interface.                                                                                                                                                      |
 | **Service**               | Validiert Existenz, erzwingt Eindeutigkeitsconstraints (aggregatübergreifende Prüfungen), delegiert an das Aggregat-Root, persistiert Entität und Outbox-Events in einer einzigen `@Transactional`-Grenze.                                                           |
@@ -81,9 +80,7 @@ damit jedes Modul leicht verständlich und erweiterbar ist.
 Jedes Aggregat-Root folgt demselben Code-Layout:
 
 ```java
-class
-
-<Aggregat> {
+class Aggregat {
 
     // --- Felder (JPA @Id, Domänenattribute, @Version) ---
 
@@ -119,17 +116,17 @@ class
 Die detaillierte Dokumentation jedes Aggregats (Attribute, Kommandos, Geschäftsregeln, Domänenereignisse) befindet sich
 in einer `README.md` innerhalb des jeweiligen Pakets. So bleibt die Dokumentation nah am Code, den sie beschreibt.
 
-| #    | Aggregat                                      | Paket                                                      | Identität                    | README                                                                                                                       |
-| ---- | --------------------------------------------- | ---------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| 3.1  | Customer (Kunde)                              | `de.schaffbar.core_pos.domain.customer`                    | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                                       |
-| 3.2  | Tool (Werkzeug)                               | `de.schaffbar.core_pos.domain.tool`                        | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                                               |
-| 3.3  | RfidReader (RFID-Lesegerät)                   | `de.schaffbar.core_pos.domain.rfid_reader`                 | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                                 |
-| 3.4  | RfidTag (RFID-Chip)                           | `de.schaffbar.core_pos.domain.rfid_tag`                    | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                                       |
-| 3.5  | RfidTagAssignment (RFID-Chip-Zuordnung)       | `de.schaffbar.core_pos.domain.rfid_tag_assignment`         | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md)                 |
-| 3.6  | WorkshopSession (Werkstatt-Sitzung)           | `de.schaffbar.core_pos.domain.workshop_session`            | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)                       |
-| 3.7  | WorkshopUsage (Werkstatt-Nutzung)             | `de.schaffbar.core_pos.domain.workshop_usage`              | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)                           |
-| 3.8  | ToolUsage (Werkzeugnutzung)                   | `de.schaffbar.core_pos.domain.tool_usage`                  | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                                   |
-| 3.9  | ToolCertification (Werkzeug-Einweisung)       | `de.schaffbar.core_pos.domain.tool_certification`          | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)                   |
+| #   | Aggregat                                | Paket                                              | Identität                    | README                                                                                                       |
+|-----|-----------------------------------------|----------------------------------------------------|------------------------------|--------------------------------------------------------------------------------------------------------------|
+| 3.1 | Customer (Kunde)                        | `de.schaffbar.core_pos.domain.customer`            | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                       |
+| 3.2 | Tool (Werkzeug)                         | `de.schaffbar.core_pos.domain.tool`                | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                               |
+| 3.3 | RfidReader (RFID-Lesegerät)             | `de.schaffbar.core_pos.domain.rfid_reader`         | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                 |
+| 3.4 | RfidTag (RFID-Chip)                     | `de.schaffbar.core_pos.domain.rfid_tag`            | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                       |
+| 3.5 | RfidTagAssignment (RFID-Chip-Zuordnung) | `de.schaffbar.core_pos.domain.rfid_tag_assignment` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md) |
+| 3.6 | WorkshopSession (Werkstatt-Sitzung)     | `de.schaffbar.core_pos.domain.workshop_session`    | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)       |
+| 3.7 | WorkshopUsage (Werkstatt-Nutzung)       | `de.schaffbar.core_pos.domain.workshop_usage`      | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)           |
+| 3.8 | ToolUsage (Werkzeugnutzung)             | `de.schaffbar.core_pos.domain.tool_usage`          | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                   |
+| 3.9 | ToolCertification (Werkzeug-Einweisung) | `de.schaffbar.core_pos.domain.tool_certification`  | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)   |
 
 ---
 
@@ -141,32 +138,32 @@ sind der einzige Ort, an dem aggregatübergreifende Koordination stattfindet.
 Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use_case/` (eine Klasse pro Aktion, z. B.
 `CustomerDelete`, `RfidReaderDelete`, `ToolClearRfidReader`).
 
-| Anwendungsfall                     | Beschreibung                                                                                                                                                                                                                       | Beteiligte Aggregate                              |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `WorkshopUsageStart`               | Kunde betritt die Werkstatt. Erstellt eine Sitzung falls keine existiert, dann erstellt einen Nutzungseintrag.                                                                                                                     | WorkshopSession, WorkshopUsage                    |
-| `WorkshopUsageStop`                | Kunde verlässt die Werkstatt. Stoppt alle aktiven Werkzeugnutzungen, dann erfasst Austrittszeit.                                                                                                                                   | WorkshopSession, WorkshopUsage, ToolUsage         |
-| `CloseSession`                     | Schließt die Werkstatt-Sitzung eines Kunden (als PAID markieren).                                                                                                                                                                  | Customer, WorkshopSession                         |
-| `ToolUsageStart`                   | Startet die Werkzeugnutzung für einen Kunden. Nimmt die Sitzung des laufenden Werkstattbesuchs (Kunde muss in der Werkstatt sein). Bei ROTEN Werkzeugen wird aktive Einweisung geprüft; bei GELBEN ist Einweisung nur ein Hinweis. | ToolUsage, Tool, WorkshopUsage, ToolCertification |
-| `ToolUsageStop`                    | Stoppt die Werkzeugnutzung für einen Kunden an einem bestimmten Werkzeug.                                                                                                                                                          | ToolUsage                                         |
-| `ToolCertificationCreate`          | Erstellt Einweisungen für mehrere Kunden nach einer Schulung – alle oder keine (TC-4); Einweiser des Werkzeugs werden abgelehnt (TC-5).                                                                                            | ToolCertification                                 |
-| `ToolCertificationPause`           | Pausiert die Einweisung eines Kunden.                                                                                                                                                                                              | ToolCertification                                 |
-| `ToolCertificationReactivate`      | Reaktiviert eine pausierte Einweisung.                                                                                                                                                                                             | ToolCertification                                 |
-| `ToolCertificationRevoke`          | Entzieht eine Einweisung endgültig.                                                                                                                                                                                                | ToolCertification                                 |
-| `ToolCertificationDelete`          | Löscht eine irrtümlich erstellte Einweisung.                                                                                                                                                                                       | ToolCertification                                 |
-| `CustomerRequestRfidTagAssignment` | Startet den RFID-Chip-Zuordnungsprozess für einen Kunden.                                                                                                                                                                          | Customer, RfidTagAssignment                       |
-| `CustomerAssignRfidTag`            | Vervollständigt die RFID-Chip-Zuordnung durch Verknüpfung des Chips mit der ausstehenden Zuordnung.                                                                                                                                | RfidTag, RfidTagAssignment                        |
-| `CustomerUnassignRfidTag`          | Entfernt den RFID-Chip vom Kunden, verschiebt den Datensatz in die Historie.                                                                                                                                                       | Customer, RfidTagAssignment                       |
-| `ToolCreate`                       | Erstellt ein Werkzeug mit optionaler RFID-Lesegerät-Validierung (muss SWITCH_BOX sein).                                                                                                                                            | RfidReader, Tool                                  |
-| `ToolAssignRfidReader`             | Ordnet ein RFID-Lesegerät einem Werkzeug zu (Lesegerät muss SWITCH_BOX sein).                                                                                                                                                      | RfidReader, Tool                                  |
-| `RfidReaderChangeType`             | Ändert den Typ eines RFID-Lesegeräts. Wenn aktueller Typ SWITCH_BOX und Werkzeug zugeordnet → Fehler.                                                                                                                              | RfidReader, Tool                                  |
-| `RfidTagDelete`                    | Löscht einen RFID-Tag – abgelehnt, solange er einer Person zugewiesen ist.                                                                                                                                                         | RfidTag, RfidTagAssignment                        |
+| Anwendungsfall                     | Beschreibung                                                                                                                                                                                                                       | Beteiligte Aggregate                                |
+|------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
+| `WorkshopUsageStart`               | Kunde betritt die Werkstatt. Erstellt eine Sitzung falls keine existiert, dann erstellt einen Nutzungseintrag.                                                                                                                     | WorkshopSession, WorkshopUsage                      |
+| `WorkshopUsageStop`                | Kunde verlässt die Werkstatt. Stoppt alle aktiven Werkzeugnutzungen, dann erfasst Austrittszeit.                                                                                                                                   | WorkshopSession, WorkshopUsage, ToolUsage           |
+| `WorkshopSessionClose`             | Schließt die Werkstatt-Sitzung eines Kunden (als PAID markieren) mit den endgültigen Summen. Abgelehnt, solange ein Werkstattbesuch oder eine Werkzeugnutzung läuft.                                                               | Customer, WorkshopSession, WorkshopUsage, ToolUsage |
+| `ToolUsageStart`                   | Startet die Werkzeugnutzung für einen Kunden. Nimmt die Sitzung des laufenden Werkstattbesuchs (Kunde muss in der Werkstatt sein). Bei ROTEN Werkzeugen wird aktive Einweisung geprüft; bei GELBEN ist Einweisung nur ein Hinweis. | ToolUsage, Tool, WorkshopUsage, ToolCertification   |
+| `ToolUsageStop`                    | Stoppt die Werkzeugnutzung für einen Kunden an einem bestimmten Werkzeug.                                                                                                                                                          | ToolUsage                                           |
+| `ToolCertificationCreate`          | Erstellt Einweisungen für mehrere Kunden nach einer Schulung – alle oder keine (TC-4); Einweiser des Werkzeugs werden abgelehnt (TC-5).                                                                                            | ToolCertification                                   |
+| `ToolCertificationPause`           | Pausiert die Einweisung eines Kunden.                                                                                                                                                                                              | ToolCertification                                   |
+| `ToolCertificationReactivate`      | Reaktiviert eine pausierte Einweisung.                                                                                                                                                                                             | ToolCertification                                   |
+| `ToolCertificationRevoke`          | Entzieht eine Einweisung endgültig.                                                                                                                                                                                                | ToolCertification                                   |
+| `ToolCertificationDelete`          | Löscht eine irrtümlich erstellte Einweisung.                                                                                                                                                                                       | ToolCertification                                   |
+| `CustomerRequestRfidTagAssignment` | Startet den RFID-Chip-Zuordnungsprozess für einen Kunden.                                                                                                                                                                          | Customer, RfidTagAssignment                         |
+| `CustomerAssignRfidTag`            | Vervollständigt die RFID-Chip-Zuordnung durch Verknüpfung des Chips mit der ausstehenden Zuordnung.                                                                                                                                | RfidTag, RfidTagAssignment                          |
+| `CustomerUnassignRfidTag`          | Entfernt den RFID-Chip vom Kunden, verschiebt den Datensatz in die Historie.                                                                                                                                                       | Customer, RfidTagAssignment                         |
+| `ToolCreate`                       | Erstellt ein Werkzeug mit optionaler RFID-Lesegerät-Validierung (muss SWITCH_BOX sein).                                                                                                                                            | RfidReader, Tool                                    |
+| `ToolAssignRfidReader`             | Ordnet ein RFID-Lesegerät einem Werkzeug zu (Lesegerät muss SWITCH_BOX sein).                                                                                                                                                      | RfidReader, Tool                                    |
+| `RfidReaderChangeType`             | Ändert den Typ eines RFID-Lesegeräts. Wenn aktueller Typ SWITCH_BOX und Werkzeug zugeordnet → Fehler.                                                                                                                              | RfidReader, Tool                                    |
+| `RfidTagDelete`                    | Löscht einen RFID-Tag – abgelehnt, solange er einer Person zugewiesen ist.                                                                                                                                                         | RfidTag, RfidTagAssignment                          |
 
 ---
 
 ## 5. Lesemodelle (Query Services)
 
 | Dienst                     | Endpunkt-Konzept       | Beschreibung                                                                                                                                                   |
-| -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `WorkshopDashboardService` | Aktive Werkstattnutzer | Aggregatübergreifende Abfrage, die aktive `WorkshopUsage`-Einträge mit `Customer`-Daten kombiniert, um anzuzeigen, wer sich aktuell in der Werkstatt befindet. |
 
 Die `WorkshopDashboardEntryView` liefert:
@@ -180,7 +177,7 @@ Die `WorkshopDashboardEntryView` liefert:
 Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
 
 | Wertobjekt            | Umschließt | Verwendet für                     |
-| --------------------- | ---------- | --------------------------------- |
+|-----------------------|------------|-----------------------------------|
 | `CustomerId`          | `UUID`     | Kundenidentität                   |
 | `ToolId`              | `UUID`     | Werkzeugidentität                 |
 | `ToolUsageId`         | `UUID`     | Werkzeugnutzungsidentität         |
@@ -198,8 +195,7 @@ Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
 
 ### Ereignis-Infrastruktur
 
-- **`SchaffbarEvent`** — Hülle mit `id`, `type`, `version`, `aggregateType`, `aggregateId`, `timestamp`, `payload` (
-  JSON), `owner`
+- **`SchaffbarEvent`** — Hülle mit `id`, `type`, `version`, `aggregateType`, `aggregateId`, `timestamp`, `payload` (JSON), `owner`
 - **`OutboxEvent`** — JPA-Entität, persistiert in der `schaffbar.outbox_event`-Tabelle innerhalb derselben Transaktion
 - **`EventPayload`** — Marker-Interface mit Validierungsunterstützung
 - **`AggregateType`** — Enumeration, die das Quell-Aggregat identifiziert
@@ -226,7 +222,7 @@ EventFactory.einEreignis(aggregat)
 ### Vollständige Ereignisliste
 
 | Aggregat          | Ereignistyp                                                                                                                                                                                                       |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Customer          | `CUSTOMER_CREATED`, `CUSTOMER_UPDATED`, `CUSTOMER_CONTACT_CHANGED`, `CUSTOMER_ADDRESS_CHANGED`, `CUSTOMER_DELETED`                                                                                                |
 | Tool              | `TOOL_CREATED`, `TOOL_UPDATED`, `TOOL_WLAN_RELAIS_SET`, `TOOL_WLAN_RELAIS_CLEARED`, `TOOL_RFID_READER_ASSIGNED`, `TOOL_RFID_READER_CLEARED`, `TOOL_INSTRUCTORS_ADDED`, `TOOL_INSTRUCTORS_REMOVED`, `TOOL_DELETED` |
 | ToolUsage         | `TOOL_USAGE_STARTED`, `TOOL_USAGE_STOPPED`                                                                                                                                                                        |
@@ -242,7 +238,7 @@ EventFactory.einEreignis(aggregat)
 ## Anhang: Bekannte TODOs und offene Designfragen
 
 | Stelle                        | Beschreibung                                                                                |
-| ----------------------------- | ------------------------------------------------------------------------------------------- |
+|-------------------------------|---------------------------------------------------------------------------------------------|
 | `WorkshopUsage`               | Umbenennung zu `WorkshopSlot` oder `UsageSlot` erwägen                                      |
 | `*Service.saveOutboxEvents()` | DRY — Methode ist in allen Services dupliziert, in Basisklasse oder Hilfsklasse extrahieren |
 | `EventType`                   | Umbenennung von `WORKSHOP_USAGE_ENTERED` / `LEFT` zu `WORKSHOP_ENTERED` / `EXITED` erwägen  |
