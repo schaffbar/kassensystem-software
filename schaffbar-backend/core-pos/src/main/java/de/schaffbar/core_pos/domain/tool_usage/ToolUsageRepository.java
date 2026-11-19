@@ -55,6 +55,12 @@ interface ToolUsageRepository extends JpaRepository<ToolUsage, UUID> {
         return findByWorkshopSessionId(workshopSessionId.getValue());
     }
 
+    boolean existsByWorkshopSessionIdAndEndTimeIsNull(UUID workshopSessionId);
+
+    default boolean existsByWorkshopSessionIdAndEndTimeIsNull(WorkshopSessionId workshopSessionId) {
+        return existsByWorkshopSessionIdAndEndTimeIsNull(workshopSessionId.getValue());
+    }
+
     List<ToolUsage> findByEndTimeIsNull();
 
 }

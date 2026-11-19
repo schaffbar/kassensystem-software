@@ -30,6 +30,12 @@ interface WorkshopUsageRepository extends JpaRepository<WorkshopUsage, UUID> {
         return findByWorkshopSessionId(workshopSessionId.getValue());
     }
 
+    boolean existsByWorkshopSessionIdAndExitTimeIsNull(UUID workshopSessionId);
+
+    default boolean existsByWorkshopSessionIdAndExitTimeIsNull(WorkshopSessionId workshopSessionId) {
+        return existsByWorkshopSessionIdAndExitTimeIsNull(workshopSessionId.getValue());
+    }
+
     List<WorkshopUsage> findByExitTimeIsNull();
 
 }

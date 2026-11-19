@@ -40,7 +40,7 @@ import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
-import de.schaffbar.core_pos.use_case.CloseSession;
+import de.schaffbar.core_pos.use_case.WorkshopSessionClose;
 
 @ExtendWith(MockitoExtension.class)
 class WorkshopSessionControllerTest {
@@ -49,7 +49,7 @@ class WorkshopSessionControllerTest {
     private WorkshopSessionReadFacade workshopSessionReadFacade;
 
     @Mock
-    private CloseSession closeSession;
+    private WorkshopSessionClose workshopSessionClose;
 
     private MockMvc mockMvc;
 
@@ -58,7 +58,7 @@ class WorkshopSessionControllerTest {
         DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
         conversionService.addConverter(new StringToCustomerIdConverter());
 
-        WorkshopSessionController controller = new WorkshopSessionController(this.workshopSessionReadFacade, this.closeSession);
+        WorkshopSessionController controller = new WorkshopSessionController(this.workshopSessionReadFacade, this.workshopSessionClose);
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
@@ -132,29 +132,29 @@ class WorkshopSessionControllerTest {
     }
 
     // ------------------------------------------------------------------------
-    // closeSession
+    // closeWorkshopSession
 
     @Test
-    void closeSession_passesTheCustomerAndIs200() throws Exception {
+    void closeWorkshopSession_passesTheCustomerAndIs200() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
 
         // when
-        ResultActions result = closeSession(customerId);
+        ResultActions result = closeWorkshopSession(customerId);
 
         // then
         result.andExpect(status().isOk());
-        verify(this.closeSession).process(customerId);
+        verify(this.workshopSessionClose).process(customerId);
     }
 
     @Test
-    void closeSession_withARunningToolUsage_is409WithTheCode() throws Exception {
+    void closeWorkshopSession_withARunningToolUsage_is409WithTheCode() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
-        doThrow(new ActiveToolUsageExistsForSessionException(WorkshopSessionId.random())).when(this.closeSession).process(customerId);
+        doThrow(new ActiveToolUsageExistsForSessionException(WorkshopSessionId.random())).when(this.workshopSessionClose).process(customerId);
 
         // when
-        ResultActions result = closeSession(customerId);
+        ResultActions result = closeWorkshopSession(customerId);
 
         // then
         result.andExpect(status().isConflict()) //
@@ -162,13 +162,13 @@ class WorkshopSessionControllerTest {
     }
 
     @Test
-    void closeSession_withoutOpenSession_is409WithTheCode() throws Exception {
+    void closeWorkshopSession_withoutOpenSession_is409WithTheCode() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
-        doThrow(new NoOpenWorkshopSessionException(customerId)).when(this.closeSession).process(customerId);
+        doThrow(new NoOpenWorkshopSessionException(customerId)).when(this.workshopSessionClose).process(customerId);
 
         // when
-        ResultActions result = closeSession(customerId);
+        ResultActions result = closeWorkshopSession(customerId);
 
         // then
         result.andExpect(status().isConflict()) //
@@ -205,7 +205,7 @@ class WorkshopSessionControllerTest {
         return this.mockMvc.perform(get("/api/v1/workshop-sessions/{customerId}/active", customerId.getValue()));
     }
 
-    private ResultActions closeSession(CustomerId customerId) throws Exception {
+    private ResultActions closeWorkshopSession(CustomerId customerId) throws Exception {
         return this.mockMvc.perform(put("/api/v1/workshop-sessions/{customerId}/close", customerId.getValue()));
     }
 

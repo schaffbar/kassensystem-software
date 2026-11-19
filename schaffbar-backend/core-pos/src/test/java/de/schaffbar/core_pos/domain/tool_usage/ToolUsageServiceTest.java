@@ -55,6 +55,44 @@ class ToolUsageServiceTest {
     private ToolUsageService toolUsageService;
 
     // ------------------------------------------------------------------------
+    // getBillingTotal
+
+    @Test
+    void getBillingTotal_addsTheFinishedUsagesOfTheSession() {
+        // given
+        StartToolUsageCommand onFirstTool = startToolUsageCommand().build();
+        ToolUsage first = ToolUsage.of(onFirstTool);
+        first.stop();
+
+        ToolUsage second = ToolUsage.of(startToolUsageCommand() //
+                .customerId(onFirstTool.customerId()) //
+                .workshopSessionId(onFirstTool.workshopSessionId()) //
+                .build());
+        second.stop();
+
+        givenUsagesOfTheSession(onFirstTool.workshopSessionId(), first, second);
+
+        // when
+        BillingTotal total = this.toolUsageService.getBillingTotal(onFirstTool.workshopSessionId());
+
+        // then
+        assertThat(total).isEqualTo(BillingTotal.of(List.of(first.getBillableDuration(), second.getBillableDuration())));
+    }
+
+    @Test
+    void getBillingTotal_rejectsASessionWithARunningUsage() {
+        // given
+        StartToolUsageCommand command = startToolUsageCommand().build();
+        givenUsagesOfTheSession(command.workshopSessionId(), ToolUsage.of(command));
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.toolUsageService.getBillingTotal(command.workshopSessionId()));
+
+        // then
+        assertThat(thrown).isInstanceOf(IllegalStateException.class);
+    }
+
+    // ------------------------------------------------------------------------
     // getBillingTotalsByToolUntil
 
     @Test

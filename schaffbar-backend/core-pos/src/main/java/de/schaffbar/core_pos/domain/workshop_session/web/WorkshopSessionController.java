@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.schaffbar.core_pos.domain.workshop_session.web.WorkshopSessionApiModel.WorkshopSessionApiDto;
 import de.schaffbar.core_pos.read_facade.WorkshopSessionReadFacade;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.use_case.CloseSession;
+import de.schaffbar.core_pos.use_case.WorkshopSessionClose;
 
 @Validated
 @RestController
@@ -25,7 +25,7 @@ public class WorkshopSessionController {
 
     private final @NonNull WorkshopSessionReadFacade workshopSessionReadFacade;
 
-    private final @NonNull CloseSession closeSessionUseCase;
+    private final @NonNull WorkshopSessionClose workshopSessionClose;
 
     // ------------------------------------------------------------------------
     // query
@@ -46,8 +46,8 @@ public class WorkshopSessionController {
 
     // TODO: REST - customerId does not fit in RESTful design here, change to sessionId?
     @PutMapping(value = "/{customerId}/close")
-    public ResponseEntity<Void> closeSession(@PathVariable @NotNull CustomerId customerId) {
-        this.closeSessionUseCase.process(customerId);
+    public ResponseEntity<Void> closeWorkshopSession(@PathVariable @NotNull CustomerId customerId) {
+        this.workshopSessionClose.process(customerId);
 
         return ResponseEntity.ok().build();
     }

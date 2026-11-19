@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.domain.workshop_usage;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 
 import java.time.Instant;
 import java.util.List;
@@ -40,6 +41,14 @@ public class WorkshopUsageService {
     // query
 
     @Query
+    public List<WorkshopUsageView> getActiveWorkshopUsages() {
+        return this.workshopUsageRepository.findByExitTimeIsNull().stream() //
+                .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
+                .sorted(comparing(WorkshopUsageView::entryTime)) //
+                .toList();
+    }
+
+    @Query
     public List<WorkshopUsageView> getWorkshopUsages(@NotNull @Valid WorkshopSessionId workshopSessionId) {
         return this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
@@ -54,14 +63,21 @@ public class WorkshopUsageService {
     }
 
     @Query
-    public List<WorkshopUsageView> getActiveWorkshopUsages() {
-        return this.workshopUsageRepository.findByExitTimeIsNull().stream() //
-                .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
-                .sorted(comparing(WorkshopUsageView::entryTime)) //
-                .toList();
+    public boolean hasActiveWorkshopUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+        return this.workshopUsageRepository.existsByWorkshopSessionIdAndExitTimeIsNull(workshopSessionId);
     }
 
-    // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
+    // the final total of a session without a running usage – the caller checks that first
+    @Query
+    public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+        List<BillableDuration> durations = this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
+                .map(this::getFinalBillableDuration) //
+                .toList();
+
+        return BillingTotal.of(durations);
+    }
+
+    // a running usage counts until now
     @Query
     public BillingTotal getBillingTotalUntil(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         List<BillableDuration> durationList = this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
@@ -101,6 +117,14 @@ public class WorkshopUsageService {
 
     // ------------------------------------------------------------------------
     // helper
+
+    private BillableDuration getFinalBillableDuration(WorkshopUsage usage) {
+        if (isNull(usage.getExitTime())) {
+            throw new IllegalStateException("Workshop usage [id: " + usage.getId().getValue() + "] is still running");
+        }
+
+        return usage.getBillableDuration();
+    }
 
     // WU-1
     private void ensureCustomerNotInWorkshop(CustomerId customerId) {

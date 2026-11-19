@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.domain.tool_usage;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -77,7 +78,22 @@ public class ToolUsageService {
                 .toList();
     }
 
-    // TODO: create two separate methods: one finalBillingTotal (without Instant) and one ...BillingTotal (with Instant)
+    @Query
+    public boolean hasActiveToolUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+        return this.toolUsageRepository.existsByWorkshopSessionIdAndEndTimeIsNull(workshopSessionId);
+    }
+
+    // the final total of a session without a running usage – the caller checks that first
+    @Query
+    public BillingTotal getBillingTotal(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+        List<BillableDuration> durations = this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
+                .map(this::getFinalBillableDuration) //
+                .toList();
+
+        return BillingTotal.of(durations);
+    }
+
+    // a running usage counts until now
     @Query
     public BillingTotal getBillingTotalUntil(@NotNull @Valid WorkshopSessionId workshopSessionId, @NotNull Instant now) {
         List<BillableDuration> durations = this.toolUsageRepository.findByWorkshopSessionId(workshopSessionId).stream() //
@@ -143,6 +159,14 @@ public class ToolUsageService {
 
     // ------------------------------------------------------------------------
     // helper
+
+    private BillableDuration getFinalBillableDuration(ToolUsage usage) {
+        if (isNull(usage.getEndTime())) {
+            throw new IllegalStateException("Tool usage [id: " + usage.getId().getValue() + "] is still running");
+        }
+
+        return usage.getBillableDuration();
+    }
 
     // TU-9
     private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId customerId) {

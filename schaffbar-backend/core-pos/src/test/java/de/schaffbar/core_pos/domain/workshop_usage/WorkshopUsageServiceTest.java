@@ -47,6 +47,40 @@ class WorkshopUsageServiceTest {
     private WorkshopUsageService workshopUsageService;
 
     // ------------------------------------------------------------------------
+    // getBillingTotal
+
+    @Test
+    void getBillingTotal_addsTheFinishedUsagesOfTheSession() {
+        // given – checked out twice
+        WorkshopSessionId workshopSessionId = WorkshopSessionId.random();
+        CustomerId customerId = CustomerId.random();
+        WorkshopUsage first = WorkshopUsage.of(customerId, workshopSessionId);
+        first.exit();
+        WorkshopUsage second = WorkshopUsage.of(customerId, workshopSessionId);
+        second.exit();
+        when(this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId)).thenReturn(List.of(first, second));
+
+        // when
+        BillingTotal total = this.workshopUsageService.getBillingTotal(workshopSessionId);
+
+        // then
+        assertThat(total).isEqualTo(BillingTotal.of(List.of(first.getBillableDuration(), second.getBillableDuration())));
+    }
+
+    @Test
+    void getBillingTotal_rejectsASessionWithARunningUsage() {
+        // given
+        WorkshopSessionId workshopSessionId = WorkshopSessionId.random();
+        givenAFinishedAndARunningUsageOfTheSession(workshopSessionId);
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.workshopUsageService.getBillingTotal(workshopSessionId));
+
+        // then
+        assertThat(thrown).isInstanceOf(IllegalStateException.class);
+    }
+
+    // ------------------------------------------------------------------------
     // getBillingTotalUntil
 
     @Test
