@@ -384,15 +384,6 @@ mvn clean test                                 # after "Unable to create test cl
 
 The whole run takes about 25 seconds, the container start about 10 of them.
 
-## Not everywhere yet
-
-The tests of `rfid_reader`, `rfid_tag`, `rfid_tag_assignment`, `customer`, `tool`, `tool_certification`,
-`workshop_usage`, `tool_usage`, of `shared/` and the integration tests follow this skill. The older tests of the other
-aggregates (`CloseSessionTest`; `WorkshopSession_CloseTest`, which becomes the section `// close` of
-`WorkshopSessionTest`) still use test data in fields,
-`mock(XyzView.class)`, `assertThatThrownBy`, stubs in the test and partly `// when / then` – they are changed with the
-rollout of their aggregate (K4). Copy from the `rfid_reader` and `shared/` tests, not from them.
-
 ## Checklist
 
 - [ ] One test class per class (`<Class>Test`), one section per tested method.

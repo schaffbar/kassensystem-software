@@ -45,7 +45,7 @@ core_pos/
   domain/<aggregate>/   entity (aggregate root, named after the package), inner entities (`RfidTagAssignmentHistory`),
                         *Commands, *Service, *Repository (package-private), *Views, *EventFactory, *PayloadMapper,
                         enums, README.md, web/ (*Controller, *ApiModel)
-  use_case/             one class per change (`RfidReaderCreate`, `CustomerDelete`, `CloseSession`)
+  use_case/             one class per change (`RfidReaderCreate`, `CustomerDelete`, `WorkshopSessionClose`)
   read_facade/          one class per controller for its queries (`RfidReaderReadFacade`, `WorkshopDashboardReadFacade`)
   dashboard/web/        controllers of the overview (who is in the workshop, which tools run)
                         – until the rollout still `domain/dashboard/` with services instead of read facades (E17)
