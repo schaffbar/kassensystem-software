@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.device;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,6 +54,7 @@ import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ToolAlreadyInUseByAnotherCustomerException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -108,33 +110,22 @@ public class DeviceController {
         RfidReaderView rfidReader = this.rfidReaderService.getRfidReader(id) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(id));
 
-        String startHttp = "";
-        String devIp = "";
-        String switchOn = "";
-        String switchOff = "";
-
-        if (rfidReader.type() == RfidReaderType.SWITCH_BOX) {
-            Optional<ToolView> tool = this.toolService.getTool(rfidReader.id());
-            if (tool.isPresent()) {
-                ToolView t = tool.get();
-                startHttp = "http://";
-                devIp = isNull(t.ipAddress()) ? "" : t.ipAddress().getValue();
-                switchOn = "/relay/0?" + Objects.toString(t.onCommand(), "");
-                switchOff = "/relay/0?" + Objects.toString(t.offCommand(), "");
-            }
-        }
+        ToolView tool = rfidReader.type() == RfidReaderType.SWITCH_BOX ? this.toolService.getTool(rfidReader.id()).orElse(null) : null;
+        String error = getInitError(rfidReader, tool);
+        // only a switch box that starts gets the commands for the relay of its tool
+        boolean relay = error.isEmpty() && nonNull(tool);
 
         LocalDateTime now = LocalDateTime.now();
         InitResponse response = InitResponse.builder() //
-                .STATE(isNull(rfidReader.type()) ? "ERROR" : "START") //
+                .STATE(error.isEmpty() ? "START" : "ERROR") //
                 .DEVNAME(getDeviceNme(rfidReader)) //
-                .STARTHTTP(startHttp) //
-                .DEVIP(devIp) //
-                .SWITCHON(switchOn) //
-                .SWITCHOFF(switchOff) //
+                .STARTHTTP(relay ? "http://" : "") //
+                .DEVIP(relay ? tool.ipAddress().getValue() : "") //
+                .SWITCHON(relay ? "/relay/0?" + tool.onCommand() : "") //
+                .SWITCHOFF(relay ? "/relay/0?" + tool.offCommand() : "") //
                 .DEVUSECASE(isNull(rfidReader.type()) ? "ERROR" : rfidReader.type().getKey()) //
                 .TERMINAL("") //
-                .ERROR(isNull(rfidReader.type()) ? "Nicht Gefunden" : "") //
+                .ERROR(error) //
                 .DATEY(now.getYear()) //
                 .DATEM(now.getMonthValue()) //
                 .DATED(now.getDayOfMonth()) //
@@ -196,7 +187,7 @@ public class DeviceController {
             DeviceCardResponse response = switch (rfidReader.type()) {
                 case GATE_KEEPER_IN -> enterWorkshop(customer, rfidReader.type());
                 case GATE_KEEPER_OUT -> leaveWorkshop(customer, rfidReader.type());
-                case SWITCH_BOX -> toggleToolUsage(customer, rfidReader);
+                case SWITCH_BOX -> toggleToolUsage(customer, rfidReader, devUseCase);
                 default -> throw new IllegalStateException("Unexpected value for RFID reader type: " + rfidReader.type());
             };
 
@@ -218,6 +209,10 @@ public class DeviceController {
             log.error("Customer is not in workshop [id: {}]", rfidReader.id());
             return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du bist nicht in der Werkstatt", customer.getFullName(), devUseCase));
         }
+        catch (ToolAlreadyInUseByAnotherCustomerException e) {
+            log.error("Tool already in use by another customer [id: {}]", rfidReader.id());
+            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Werkzeug belegt", customer.getFullName(), devUseCase));
+        }
         catch (MaxToolUsageExceededException e) {
             log.error("Max tool usage [id: {}]", rfidReader.id());
             return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Max. Werkzeuge erreicht", customer.getFullName(), devUseCase));
@@ -234,6 +229,24 @@ public class DeviceController {
 
     // ------------------------------------------------------------------------
     // helper
+
+    // a switch box can only start with a tool that has a WLAN relais (R-8, T-23); tool is null when none is assigned
+    private String getInitError(RfidReaderView rfidReader, ToolView tool) {
+        if (isNull(rfidReader.type())) {
+            return "Nicht Gefunden";
+        }
+        if (rfidReader.type() != RfidReaderType.SWITCH_BOX) {
+            return "";
+        }
+        if (isNull(tool)) {
+            return "Kein Werkzeug";
+        }
+        if (isNull(tool.ipAddress())) {
+            return "Kein WLAN-Relais";
+        }
+
+        return "";
+    }
 
     private String getDeviceNme(RfidReaderView rfidReader) {
         if (isNull(rfidReader.type())) {
@@ -355,9 +368,15 @@ public class DeviceController {
         return DeviceCardResponse.leaveOk(type, customer.getFullName(), totalUnits, lastWorkshopUsage.entryTime(), lastWorkshopUsage.exitTime());
     }
 
-    private DeviceCardResponse toggleToolUsage(CustomerView customer, RfidReaderView rfidReader) {
-        ToolView tool = this.toolService.getTool(rfidReader.id()) //
-                .orElseThrow(() -> new RuntimeException("No tool assigned to RFID reader [id: " + rfidReader.id() + "]"));
+    private DeviceCardResponse toggleToolUsage(CustomerView customer, RfidReaderView rfidReader, String devUseCase) {
+        Optional<ToolView> assignedTool = this.toolService.getTool(rfidReader.id());
+        if (assignedTool.isEmpty()) {
+            // R-8 – the tool was taken from the switch box after it started
+            log.error("No tool assigned to switch box [id: {}]", rfidReader.id());
+            return DeviceCardResponse.errorNoAccess("Kein Werkzeug", customer.getFullName(), devUseCase);
+        }
+
+        ToolView tool = assignedTool.get();
 
         //        boolean hasActiveUsage = this.toolUsageService.getActiveToolUsages(customer.id()).stream() //
         //                .anyMatch(usage -> usage.toolId().sameValueAs(tool.id()));

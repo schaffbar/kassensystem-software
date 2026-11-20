@@ -55,9 +55,8 @@ class SwitchBoxAcceptanceTest {
                 """.formatted(scenario.ipAddress().getValue(), Json.read(tool, "$.onCommand"), Json.read(tool, "$.offCommand")));
     }
 
-    // TODO: fix it - error when no WLAN relais
     @Test
-    void init_toolWithoutWlanRelais_getsNoAddress() {
+    void init_toolWithoutWlanRelais_answersError() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -67,25 +66,24 @@ class SwitchBoxAcceptanceTest {
         // when
         MvcTestResult result = this.fixture.api().initDevice(scenario.macAddress());
 
-        // then – the commands are only the prefix
+        // then – every tool is switched over its WLAN relais (T-23)
         this.fixture.then().expectDeviceAnswer(result, """
                 {
-                    "STATE": "START",
+                    "STATE": "ERROR",
                     "DEVNAME": "Switch Box",
                     "DEVUSECASE": "S",
-                    "ERROR": "",
-                    "STARTHTTP": "http://",
+                    "ERROR": "Kein WLAN-Relais",
+                    "STARTHTTP": "",
                     "DEVIP": "",
-                    "SWITCHON": "/relay/0?",
-                    "SWITCHOFF": "/relay/0?",
+                    "SWITCHON": "",
+                    "SWITCHOFF": "",
                     "TERMINAL": ""
                 }
                 """);
     }
 
-    // TODO: fix it - error when no tool assigned
     @Test
-    void init_withoutTool_startsWithoutRelay() {
+    void init_withoutTool_answersError() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -94,13 +92,13 @@ class SwitchBoxAcceptanceTest {
         // when
         MvcTestResult result = this.fixture.api().initDevice(scenario.macAddress());
 
-        // then
+        // then – a switch box without tool has nothing to switch (R-8)
         this.fixture.then().expectDeviceAnswer(result, """
                 {
-                    "STATE": "START",
+                    "STATE": "ERROR",
                     "DEVNAME": "Switch Box",
                     "DEVUSECASE": "S",
-                    "ERROR": "",
+                    "ERROR": "Kein Werkzeug",
                     "STARTHTTP": "",
                     "DEVIP": "",
                     "SWITCHON": "",
@@ -242,44 +240,18 @@ class SwitchBoxAcceptanceTest {
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
     }
 
-    // TODO: business logik - tool already in use
     @Test
-    void card_toolUsedByAnotherCustomer_answersUnexpectedError() {
+    void card_toolUsedByAnotherCustomer_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
         RfidTagId otherRfidTagId = RandomValues.rfidTagId();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
         this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
-        this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
 
         this.fixture.given().customerInTheWorkshop(otherRfidTagId);
         this.fixture.given().toolUsage(otherRfidTagId, scenario.macAddress());
-
-        // when
-        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
-
-        // then – no message of its own today (TOOL_ALREADY_IN_USE_BY_ANOTHER_CUSTOMER)
-        this.fixture.then().expectDeviceAnswer(result, """
-                {
-                    "DEVUSECASE": "test",
-                    "STATE": "END",
-                    "ERROR": "Unerwarteter Fehler",
-                    "ICON": "NOREG",
-                    "CUSTOMERNAME": null,
-                    "UNITS": "0"
-                }
-                """);
-    }
-
-    // TODO: business logik - no tool assigned
-    @Test
-    void card_switchboxWithoutTool_answersUnexpectedError() {
-        Scenario scenario = Scenario.randomValues().build();
-
-        // given
-        this.fixture.given().switchBox(scenario.macAddress());
-        this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
 
         // when
         MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
@@ -289,12 +261,36 @@ class SwitchBoxAcceptanceTest {
                 {
                     "DEVUSECASE": "test",
                     "STATE": "END",
-                    "ERROR": "Unerwarteter Fehler",
-                    "ICON": "NOREG",
-                    "CUSTOMERNAME": null,
+                    "ERROR": "Werkzeug belegt",
+                    "ICON": "STOP",
+                    "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """);
+                """.formatted(this.fixture.then().fullNameOf(customerId)));
+    }
+
+    @Test
+    void card_switchBoxWithoutTool_isRefused() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given – the tool was taken from the switch box after it started (R-8)
+        this.fixture.given().switchBox(scenario.macAddress());
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "test",
+                    "STATE": "END",
+                    "ERROR": "Kein Werkzeug",
+                    "ICON": "STOP",
+                    "CUSTOMERNAME": "%s",
+                    "UNITS": "0"
+                }
+                """.formatted(this.fixture.then().fullNameOf(customerId)));
     }
 
     @Test

@@ -118,6 +118,8 @@ core_pos/
 - Spring beans: `@Service` / `@RestController` + `@Validated` + `@RequiredArgsConstructor`, dependencies as
   `private final @NonNull` fields; public methods validate their parameters (`@NotNull @Valid CustomerId customerId`).
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
+- `Optional` only as a return type ("maybe nothing there") – never as a parameter or a field. A value that can be
+  missing is passed as a nullable parameter, with a comment what `null` means.
 - `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`.
 - **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`, E21): they
   bring the transaction (`@Query` = `@Transactional(readOnly = true)`, `@Command` = `@Transactional`), so these
