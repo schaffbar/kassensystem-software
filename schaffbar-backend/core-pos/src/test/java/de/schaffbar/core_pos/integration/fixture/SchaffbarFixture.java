@@ -3,6 +3,9 @@ package de.schaffbar.core_pos.integration.fixture;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import de.schaffbar.core_pos.builder.RandomValues;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
+
 @TestComponent
 public class SchaffbarFixture {
 
@@ -28,6 +31,16 @@ public class SchaffbarFixture {
 
     public ThenFixture then() {
         return this.then;
+    }
+
+    // ------------------------------------------------------------------------
+    // cleanup
+
+    // only one request may wait in the whole workshop (TA-3) – a test that leaves one ends with this, else the next
+    // test that requests a tag fails
+    public void endWaitingRfidTagAssignment() {
+        RfidTagId rfidTagId = this.given.rfidTag(RandomValues.rfidTagId());
+        this.given.rfidTagAssignedToTheWaitingCustomer(rfidTagId);
     }
 
 }

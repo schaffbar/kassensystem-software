@@ -6,12 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.integration.IntegrationTest;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @IntegrationTest
 class RfidTagAssignerAcceptanceTest {
@@ -131,10 +129,8 @@ class RfidTagAssignerAcceptanceTest {
         this.fixture.then().expectRfidTagAssigned(owner, scenario.rfidTagId());
         this.fixture.then().expectWaitingForRfidTag(waitingCustomer);
 
-        // the next test finds none waiting (TA-3)
-        RfidTagId otherRfidTagId = RandomValues.rfidTagId();
-        this.fixture.given().rfidTag(otherRfidTagId);
-        this.fixture.given().rfidTagAssignedToTheWaitingCustomer(otherRfidTagId);
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
     }
 
     @Test
@@ -181,11 +177,10 @@ class RfidTagAssignerAcceptanceTest {
                     "CUSTOMERNAME": "Error"
                 }
                 """);
-
-        // the request still waits – assigned here, so the next test finds none waiting (TA-3)
         this.fixture.then().expectWaitingForRfidTag(waitingCustomer);
-        this.fixture.given().rfidTag(scenario.rfidTagId());
-        this.fixture.given().rfidTagAssignedToTheWaitingCustomer(scenario.rfidTagId());
+
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
     }
 
     @Test

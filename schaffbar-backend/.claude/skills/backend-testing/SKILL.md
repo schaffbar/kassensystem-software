@@ -324,6 +324,10 @@ class RfidReaderAcceptanceTest {
 - **No cleanup.** All tests share the database; each test creates its own data with random values (`Scenario`), so
   tests never see each other's data and can run in any order. Never assert on "all readers" – filter by the
   scenario's values (`expectRfidReaderCount(scenario.macAddress(), 1)`).
+- **The one exception: a waiting RFID tag request.** Only one may wait in the whole workshop (TA-3), so a request
+  left behind makes the next test that requests a tag fail with `409` – in any class. A test that leaves one ends with
+  a section `// cleanup` and `this.fixture.endWaitingRfidTagAssignment()` (assigns a new tag to the waiting person),
+  after its `// then`; a test whose rule assigns the tag anyway checks that as part of the rule instead.
 - Integration tests never touch the real database; they run with `mvn test` and need Docker. Without Docker they fail
   at startup – say so instead of skipping them.
 
