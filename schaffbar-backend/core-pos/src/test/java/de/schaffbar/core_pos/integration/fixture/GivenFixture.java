@@ -8,9 +8,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
+import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -88,7 +91,6 @@ public final class GivenFixture {
         assertThat(assigned).hasStatus(HttpStatus.NO_CONTENT);
     }
 
-    // checked in at a reader of type GATE_KEEPER_IN – the first check-in opens the session
     public CustomerId customerInTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperIn) {
         CustomerId customerId = customerWithRfidTag(rfidTagId);
 
@@ -101,24 +103,63 @@ public final class GivenFixture {
         return customerId;
     }
 
+    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId) {
+        MacAddress gateKeeperIn = RandomValues.macAddress();
+        rfidReader(gateKeeperIn, RfidReaderType.GATE_KEEPER_IN);
+        rfidTag(rfidTagId);
+
+        return customerInTheWorkshop(rfidTagId, gateKeeperIn);
+    }
+
+    public void customerLeftTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperOut) {
+        MvcTestResult checkedOut = this.api.holdRfidTagToReader(rfidTagId, gateKeeperOut);
+        assertThat(checkedOut).hasStatus2xxSuccessful();
+
+    }
+
     // ------------------------------------------------------------------------
     // tools
 
-    public ToolId tool(Scenario scenario) {
-        return tool(scenario.toolName());
+    public ToolId tool(String name) {
+        return tool(name, CertificationRequirement.YELLOW);
     }
 
-    public ToolId tool(String name) {
-        MvcTestResult result = this.api.createTool(name);
+    public ToolId tool(String name, CertificationRequirement certificationRequirement) {
+        MvcTestResult result = this.api.createTool(name, certificationRequirement);
         assertThat(result).hasStatus(HttpStatus.CREATED);
 
         return ToolId.of(createdId(result));
     }
 
-    public ToolId toolWithWlanRelais(Scenario scenario) {
-        ToolId toolId = tool(scenario);
+    public ToolId toolWithWlanRelais(String name, IpAddress ipAddress) {
+        ToolId toolId = tool(name);
 
-        MvcTestResult result = this.api.setWlanRelais(toolId, scenario.ipAddress());
+        MvcTestResult result = this.api.setWlanRelais(toolId, ipAddress);
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        return toolId;
+    }
+
+    public ToolId toolWithSwitchBox(String name, RfidReaderId switchBox) {
+        return toolWithSwitchBox(name, switchBox, CertificationRequirement.YELLOW);
+    }
+
+    public ToolId toolWithSwitchBox(String name, RfidReaderId switchBox, CertificationRequirement certificationRequirement) {
+        ToolId toolId = tool(name, certificationRequirement);
+
+        MvcTestResult result = this.api.assignRfidReader(toolId, switchBox);
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        return toolId;
+    }
+
+    public ToolId toolWithSwitchBoxAndWlanRelais(String name, RfidReaderId switchBoxId, IpAddress ipAddress) {
+        ToolId toolId = tool(name);
+
+        MvcTestResult result = this.api.assignRfidReader(toolId, switchBoxId);
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        result = this.api.setWlanRelais(toolId, ipAddress);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return toolId;
@@ -136,15 +177,6 @@ public final class GivenFixture {
     public void toolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
         MvcTestResult result = this.api.certifyCustomer(customerId, toolId, certifiedBy);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
-    }
-
-    public ToolId toolWithSwitchBox(Scenario scenario, RfidReaderId switchBox) {
-        ToolId toolId = tool(scenario);
-
-        MvcTestResult result = this.api.assignRfidReader(toolId, switchBox);
-        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
-
-        return toolId;
     }
 
     // the person is in the workshop and holds their tag to the switch box of the tool

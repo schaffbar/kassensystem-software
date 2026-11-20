@@ -32,7 +32,7 @@ class ToolAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
         ToolId otherTool = this.fixture.given().tool(RandomValues.toolName());
 
         // when
@@ -57,7 +57,7 @@ class ToolAcceptanceTest {
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox);
         ToolId otherTool = this.fixture.given().tool(RandomValues.toolName());
 
         // when
@@ -80,7 +80,7 @@ class ToolAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().toolWithWlanRelais(scenario);
+        ToolId toolId = this.fixture.given().toolWithWlanRelais(scenario.toolName(), scenario.ipAddress());
         ToolId otherTool = this.fixture.given().tool(RandomValues.toolName());
 
         // when
@@ -104,7 +104,7 @@ class ToolAcceptanceTest {
 
         // given
         RfidReaderId gateKeeper = this.fixture.given().rfidReader(scenario.macAddress(), GATE_KEEPER_IN);
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
 
         // when
         MvcTestResult result = this.fixture.api().assignRfidReader(toolId, gateKeeper);
@@ -122,7 +122,7 @@ class ToolAcceptanceTest {
         MacAddress gateKeeperIn = RandomValues.macAddress();
         this.fixture.given().rfidReader(gateKeeperIn, GATE_KEEPER_IN);
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox);
         RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
         this.fixture.given().customerInTheWorkshop(rfidTagId, gateKeeperIn);
         this.fixture.given().toolUsage(rfidTagId, scenario.macAddress());

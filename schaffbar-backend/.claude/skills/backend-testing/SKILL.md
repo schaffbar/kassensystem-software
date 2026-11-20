@@ -34,6 +34,13 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
   the service and controller tests cover it.
 - **Every endpoint** has controller tests – at least its success (status, the JSON fields the portal reads), and the
   problem code of each rejection. A new endpoint or a changed `*ApiModel` gets them in the same step.
+- **The device endpoints** (`/device/init`, `/counter`, `/card`) are tested in `integration/device/` instead – one
+  class per reader type with everything that reader can get, also at the endpoints it does not belong to
+  (`GateKeeperInAcceptanceTest`, `SwitchBoxAcceptanceTest`, …; `UnconfiguredReaderAcceptanceTest` for a reader the
+  backend does not know or that has no type). One method per answer, `<endpoint>_<situation>_<answer>`
+  (`card_alreadyCheckedOut_isRefused`), the body as pretty JSON compared field by field with
+  `then().expectDeviceAnswer(…)`. A changed answer or a new case changes these tests in the same step: they are the
+  contract with the firmware, which cannot be changed together with the backend.
 - **Every entity command and `of(…)`** gets entity tests: the success (new state, the returned event with its payload)
   and every rejection – also an inner entity's `of(…)`. That the service test runs the same code with the real entity
   does not replace them.

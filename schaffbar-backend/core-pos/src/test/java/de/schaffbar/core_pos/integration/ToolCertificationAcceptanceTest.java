@@ -27,7 +27,7 @@ class ToolCertificationAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
         CustomerId instructorId = this.fixture.given().instructor(toolId);
         CustomerId customerId = this.fixture.given().customer();
         this.fixture.given().toolCertification(customerId, toolId, instructorId);
@@ -45,7 +45,7 @@ class ToolCertificationAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
         CustomerId instructorId = this.fixture.given().instructor(toolId);
         CustomerId customerId = this.fixture.given().customer();
         this.fixture.given().toolCertification(customerId, toolId, instructorId);
@@ -64,7 +64,7 @@ class ToolCertificationAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
         CustomerId instructorId = this.fixture.given().instructor(toolId);
         CustomerId certified = this.fixture.given().customer();
         this.fixture.given().toolCertification(certified, toolId, instructorId);
@@ -83,7 +83,7 @@ class ToolCertificationAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        ToolId toolId = this.fixture.given().tool(scenario);
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
         CustomerId instructorId = this.fixture.given().instructor(toolId);
         CustomerId otherInstructorId = this.fixture.given().instructor(toolId);
 

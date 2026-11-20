@@ -43,7 +43,7 @@ class RfidReaderAcceptanceTest {
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox);
 
         // when
         MvcTestResult result = this.fixture.api().changeRfidReaderType(switchBox, GATE_KEEPER_IN);
@@ -69,7 +69,7 @@ class RfidReaderAcceptanceTest {
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario, switchBox);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox);
 
         // when
         MvcTestResult result = this.fixture.api().deleteRfidReader(switchBox);

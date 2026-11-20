@@ -136,7 +136,7 @@ class CustomerAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given – the customer is certified for one tool and instructs another (TC-5)
-        ToolId certifiedTool = this.fixture.given().tool(scenario);
+        ToolId certifiedTool = this.fixture.given().tool(scenario.toolName());
         CustomerId instructorOfTheCertifiedTool = this.fixture.given().instructor(certifiedTool);
         ToolId instructedTool = this.fixture.given().tool(RandomValues.toolName());
         CustomerId otherInstructor = this.fixture.given().instructor(instructedTool);

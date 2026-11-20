@@ -14,6 +14,7 @@ import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.support.Json;
 
 public final class ThenFixture {
 
@@ -37,6 +38,22 @@ public final class ThenFixture {
 
     public void expectBadRequest(MvcTestResult result) {
         assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    // ------------------------------------------------------------------------
+    // devices
+
+    // a device always gets 200; every field written in the expectation must match, fields left out are not checked
+    public void expectDeviceAnswer(MvcTestResult result, String expectedJson) {
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().isLenientlyEqualTo(expectedJson);
+    }
+
+    // the name a device shows
+    public String fullNameOf(CustomerId customerId) {
+        MvcTestResult customer = this.api.getCustomer(customerId);
+
+        return Json.read(customer, "$.firstName") + " " + Json.read(customer, "$.lastName");
     }
 
     // ------------------------------------------------------------------------

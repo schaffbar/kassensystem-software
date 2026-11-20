@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
+import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -155,11 +156,15 @@ public final class SchaffbarApi {
     }
 
     public MvcTestResult createTool(String name) {
+        return createTool(name, CertificationRequirement.YELLOW);
+    }
+
+    public MvcTestResult createTool(String name, CertificationRequirement certificationRequirement) {
         return this.mvc.post().uri("/api/v1/tools") //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("""
-                        { "name": "%s", "area": "HOLZ", "certificationRequirement": "YELLOW" }
-                        """.formatted(name)) //
+                        { "name": "%s", "area": "HOLZ", "certificationRequirement": "%s" }
+                        """.formatted(name, certificationRequirement.name())) //
                 .exchange();
     }
 
@@ -243,6 +248,25 @@ public final class SchaffbarApi {
 
     // ------------------------------------------------------------------------
     // devices
+
+    public MvcTestResult initDevice(MacAddress macAddress) {
+        return this.mvc.post().uri("/device/init") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "MACADDR": "%s" }
+                        """.formatted(macAddress.getValue())) //
+                .exchange();
+    }
+
+    // the readers at the counter: register a new tag, assign it to the waiting person or show its owner
+    public MvcTestResult holdRfidTagToCounterReader(RfidTagId rfidTagId, MacAddress macAddress) {
+        return this.mvc.post().uri("/device/counter") //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "MACADDR": "%s", "RFID": "%s" }
+                        """.formatted(macAddress.getValue(), rfidTagId.getValue())) //
+                .exchange();
+    }
 
     // a device always answers 200 – what happened is in the body and in the data
     public MvcTestResult holdRfidTagToReader(RfidTagId rfidTagId, MacAddress macAddress) {

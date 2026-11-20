@@ -118,7 +118,7 @@ public class DeviceController {
             if (tool.isPresent()) {
                 ToolView t = tool.get();
                 startHttp = "http://";
-                devIp = Objects.toString(t.ipAddress(), "");
+                devIp = isNull(t.ipAddress()) ? "" : t.ipAddress().getValue();
                 switchOn = "/relay/0?" + Objects.toString(t.onCommand(), "");
                 switchOff = "/relay/0?" + Objects.toString(t.offCommand(), "");
             }
