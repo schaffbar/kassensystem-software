@@ -9,12 +9,14 @@ class WlanRelaisTypeTest {
 
     @ParameterizedTest
     @EnumSource(WlanRelaisType.class)
-    void httpStartCommand_isAnUrlOfTheIpAddressEndingWithTheQuery(WlanRelaisType type) {
+    void url_isTheProtocolTheIpAddressThePathAndTheQuery(WlanRelaisType type) {
         // when
-        String httpStartCommand = type.getHttpStartCommand();
+        String onUrl = type.getProtocol() + "://192.168.1.10" + type.getPath() + type.getOnCommand();
+        String offUrl = type.getProtocol() + "://192.168.1.10" + type.getPath() + type.getOffCommand();
 
         // then
-        assertThat(httpStartCommand).matches("http://\\{\\{ipAddress}}/[A-Za-z0-9/.]+\\?");
+        assertThat(onUrl).matches("http://192\\.168\\.1\\.10/[A-Za-z0-9/.]+\\?[a-z0-9=&]+");
+        assertThat(offUrl).matches("http://192\\.168\\.1\\.10/[A-Za-z0-9/.]+\\?[a-z0-9=&]+");
     }
 
 }

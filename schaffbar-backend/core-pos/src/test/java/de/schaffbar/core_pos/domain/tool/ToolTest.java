@@ -151,7 +151,7 @@ class ToolTest {
     // setWlanRelais
 
     @Test
-    void setWlanRelais_setsTypeAndIpAddressWithTheCommandsOfTheTypeAndReturnsTheEvent() {
+    void setWlanRelais_setsTypeAndIpAddressAndReturnsTheEvent() {
         // given
         Tool tool = givenTool();
         SetWlanRelaisCommand command = setWlanRelaisCommand(tool.getId()).build();
@@ -162,9 +162,6 @@ class ToolTest {
         // then
         assertThat(tool.getWlanRelaisType()).isEqualTo(command.wlanRelaisType());
         assertThat(tool.getIpAddress()).isEqualTo(command.ipAddress());
-        assertThat(tool.getHttpStartCommand()).isEqualTo(command.wlanRelaisType().getHttpStartCommand());
-        assertThat(tool.getOnCommand()).isEqualTo(command.wlanRelaisType().getOnCommand());
-        assertThat(tool.getOffCommand()).isEqualTo(command.wlanRelaisType().getOffCommand());
 
         ToolWlanRelaisSetPayload payload = expectSingleEvent(events, EventType.TOOL_WLAN_RELAIS_SET, tool) //
                 .deserializeAndValidatePayload(ToolWlanRelaisSetPayload.class);
@@ -187,9 +184,6 @@ class ToolTest {
         // then
         assertThat(tool.getWlanRelaisType()).isNull();
         assertThat(tool.getIpAddress()).isNull();
-        assertThat(tool.getHttpStartCommand()).isNull();
-        assertThat(tool.getOnCommand()).isNull();
-        assertThat(tool.getOffCommand()).isNull();
 
         ToolWlanRelaisClearedPayload payload = expectSingleEvent(events, EventType.TOOL_WLAN_RELAIS_CLEARED, tool) //
                 .deserializeAndValidatePayload(ToolWlanRelaisClearedPayload.class);

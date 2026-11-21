@@ -8,11 +8,14 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum WlanRelaisType {
 
-    SHELLY_1("http://{{ipAddress}}/relay/0?", "turn=on", "turn=off"), //
-    SHELLY_2("http://{{ipAddress}}/relay/0?", "turn=on", "turn=off"), //
-    SHELLY_PRO("http://{{ipAddress}}/rpc/Switch.Set?", "id=0&on=true", "id=0&on=false");
+    SHELLY_1("http", "/relay/0?", "turn=on", "turn=off"), //
+    SHELLY_2("http", "/relay/0?", "turn=on", "turn=off"), //
+    SHELLY_PRO("http", "/rpc/Switch.Set?", "id=0&on=true", "id=0&on=false");
 
-    private final String httpStartCommand;
+    // the switch box calls <protocol>://<ipAddress><path><onCommand or offCommand>
+    private final String protocol;
+
+    private final String path;
 
     private final String onCommand;
 

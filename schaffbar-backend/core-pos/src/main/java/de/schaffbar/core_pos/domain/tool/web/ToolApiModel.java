@@ -56,9 +56,6 @@ public interface ToolApiModel extends ValueObjectMapper {
             RfidReaderId rfidReaderId, //
             WlanRelaisType wlanRelaisType, //
             IpAddress ipAddress, //
-            String httpStartCommand, //
-            String onCommand, //
-            String offCommand, //
             @NotNull Set<CustomerId> instructors //
     ) {}
 

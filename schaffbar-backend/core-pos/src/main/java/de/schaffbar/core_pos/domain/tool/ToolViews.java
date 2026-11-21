@@ -39,9 +39,6 @@ public interface ToolViews {
             RfidReaderId rfidReaderId, //
             WlanRelaisType wlanRelaisType, //
             IpAddress ipAddress, //
-            String httpStartCommand, //
-            String onCommand, //
-            String offCommand, //
             Set<CustomerId> instructors //
     ) {}
 

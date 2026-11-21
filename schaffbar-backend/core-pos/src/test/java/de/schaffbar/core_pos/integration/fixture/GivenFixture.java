@@ -12,6 +12,7 @@ import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -153,13 +154,13 @@ public final class GivenFixture {
         return toolId;
     }
 
-    public ToolId toolWithSwitchBoxAndWlanRelais(String name, RfidReaderId switchBoxId, IpAddress ipAddress) {
+    public ToolId toolWithSwitchBoxAndWlanRelais(String name, RfidReaderId switchBoxId, IpAddress ipAddress, WlanRelaisType type) {
         ToolId toolId = tool(name);
 
         MvcTestResult result = this.api.assignRfidReader(toolId, switchBoxId);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
-        result = this.api.setWlanRelais(toolId, ipAddress);
+        result = this.api.setWlanRelais(toolId, ipAddress, type);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
 
         return toolId;

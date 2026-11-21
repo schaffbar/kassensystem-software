@@ -70,12 +70,6 @@ class Tool {
 
     private String ipAddress;
 
-    private String httpStartCommand;
-
-    private String onCommand;
-
-    private String offCommand;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "TOOL_INSTRUCTOR", schema = "SCHAFFBAR", joinColumns = @JoinColumn(name = "tool_id"))
     @Column(name = "instructor_id")
@@ -162,9 +156,6 @@ class Tool {
     public List<SchaffbarEvent> setWlanRelais(SetWlanRelaisCommand command) {
         setWlanRelaisType(command.wlanRelaisType());
         setIpAddress(command.ipAddress().getValue());
-        setHttpStartCommand(command.wlanRelaisType().getHttpStartCommand());
-        setOnCommand(command.wlanRelaisType().getOnCommand());
-        setOffCommand(command.wlanRelaisType().getOffCommand());
 
         return List.of(ToolEventFactory.toolWlanRelaisSet(this));
     }
@@ -172,9 +163,6 @@ class Tool {
     public List<SchaffbarEvent> clearWlanRelais() {
         setWlanRelaisType(null);
         setIpAddress(null);
-        setHttpStartCommand(null);
-        setOnCommand(null);
-        setOffCommand(null);
 
         return List.of(ToolEventFactory.toolWlanRelaisCleared(getId()));
     }

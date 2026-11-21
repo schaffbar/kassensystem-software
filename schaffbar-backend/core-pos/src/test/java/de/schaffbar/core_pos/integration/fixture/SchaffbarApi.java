@@ -13,6 +13,7 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerComm
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -190,11 +191,15 @@ public final class SchaffbarApi {
     }
 
     public MvcTestResult setWlanRelais(ToolId toolId, IpAddress ipAddress) {
+        return setWlanRelais(toolId, ipAddress, WlanRelaisType.SHELLY_1);
+    }
+
+    public MvcTestResult setWlanRelais(ToolId toolId, IpAddress ipAddress, WlanRelaisType type) {
         return this.mvc.put().uri("/api/v1/tools/{toolId}/wlan-relais", toolId.getValue()) //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("""
-                        { "wlanRelaisType": "SHELLY_PRO", "ipAddress": "%s" }
-                        """.formatted(ipAddress.getValue())) //
+                        { "wlanRelaisType": "%s", "ipAddress": "%s" }
+                        """.formatted(type.name(), ipAddress.getValue())) //
                 .exchange();
     }
 
@@ -230,9 +235,8 @@ public final class SchaffbarApi {
     }
 
     public MvcTestResult revokeToolCertification(CustomerId customerId, ToolId toolId) {
-        return this.mvc.put()
-                .uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/revoke", customerId.getValue(), toolId.getValue())
-                .exchange();
+        return this.mvc.put().uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/revoke", customerId.getValue(),
+                toolId.getValue()).exchange();
     }
 
     // ------------------------------------------------------------------------

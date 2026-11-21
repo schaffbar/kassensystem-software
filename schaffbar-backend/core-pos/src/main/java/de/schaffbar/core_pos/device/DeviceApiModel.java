@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -47,15 +48,15 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static InitResponse startSwitchBox(IpAddress relayIpAddress, String onCommand, String offCommand) {
+        public static InitResponse startSwitchBox(IpAddress relayIpAddress, WlanRelaisType relayType) {
             return withCurrentTime() //
                     .STATE("START") //
                     .DEVNAME(deviceName(RfidReaderType.SWITCH_BOX)) //
                     .DEVUSECASE(RfidReaderType.SWITCH_BOX.getKey()) //
-                    .STARTHTTP("http://") //
+                    .STARTHTTP(relayType.getProtocol() + "://") //
                     .DEVIP(relayIpAddress.getValue()) //
-                    .SWITCHON("/relay/0?" + onCommand) //
-                    .SWITCHOFF("/relay/0?" + offCommand) //
+                    .SWITCHON(relayType.getPath() + relayType.getOnCommand()) //
+                    .SWITCHOFF(relayType.getPath() + relayType.getOffCommand()) //
                     .ERROR("") //
                     .build();
         }

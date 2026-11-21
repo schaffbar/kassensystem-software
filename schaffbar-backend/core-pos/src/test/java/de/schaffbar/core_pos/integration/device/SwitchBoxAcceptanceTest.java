@@ -1,6 +1,8 @@
 package de.schaffbar.core_pos.integration.device;
 
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.SWITCH_BOX;
+import static de.schaffbar.core_pos.domain.tool.WlanRelaisType.SHELLY_1;
+import static de.schaffbar.core_pos.domain.tool.WlanRelaisType.SHELLY_PRO;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,6 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
-import de.schaffbar.core_pos.shared.id.ToolId;
-import de.schaffbar.core_pos.support.Json;
 
 @IntegrationTest
 class SwitchBoxAcceptanceTest {
@@ -28,13 +28,12 @@ class SwitchBoxAcceptanceTest {
     // init
 
     @Test
-    void init_toolWithWlanRelais_getsTheRelayCommands() {
+    void init_toolWithShelly1_getsTheRelayCommands() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        ToolId toolId = this.fixture.given().toolWithSwitchBoxAndWlanRelais(scenario.toolName(), switchBox, scenario.ipAddress());
-        MvcTestResult tool = this.fixture.api().getTool(toolId);
+        this.fixture.given().toolWithSwitchBoxAndWlanRelais(scenario.toolName(), switchBox, scenario.ipAddress(), SHELLY_1);
 
         // when
         MvcTestResult result = this.fixture.api().initDevice(scenario.macAddress());
@@ -48,11 +47,38 @@ class SwitchBoxAcceptanceTest {
                     "ERROR": "",
                     "STARTHTTP": "http://",
                     "DEVIP": "%s",
-                    "SWITCHON": "/relay/0?%s",
-                    "SWITCHOFF": "/relay/0?%s",
+                    "SWITCHON": "/relay/0?turn=on",
+                    "SWITCHOFF": "/relay/0?turn=off",
                     "TERMINAL": ""
                 }
-                """.formatted(scenario.ipAddress().getValue(), Json.read(tool, "$.onCommand"), Json.read(tool, "$.offCommand")));
+                """.formatted(scenario.ipAddress().getValue()));
+    }
+
+    @Test
+    void init_toolWithShellyPro_getsTheRelayCommands() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
+        this.fixture.given().toolWithSwitchBoxAndWlanRelais(scenario.toolName(), switchBox, scenario.ipAddress(), SHELLY_PRO);
+
+        // when
+        MvcTestResult result = this.fixture.api().initDevice(scenario.macAddress());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "STATE": "START",
+                    "DEVNAME": "Switch Box",
+                    "DEVUSECASE": "S",
+                    "ERROR": "",
+                    "STARTHTTP": "http://",
+                    "DEVIP": "%s",
+                    "SWITCHON": "/rpc/Switch.Set?id=0&on=true",
+                    "SWITCHOFF": "/rpc/Switch.Set?id=0&on=false",
+                    "TERMINAL": ""
+                }
+                """.formatted(scenario.ipAddress().getValue()));
     }
 
     @Test

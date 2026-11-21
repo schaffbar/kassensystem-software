@@ -174,7 +174,7 @@ public class DeviceController {
             return InitResponse.error(RfidReaderType.SWITCH_BOX, "Kein WLAN-Relais");
         }
 
-        return InitResponse.startSwitchBox(tool.ipAddress(), tool.onCommand(), tool.offCommand());
+        return InitResponse.startSwitchBox(tool.ipAddress(), tool.wlanRelaisType());
     }
 
     private CounterResponse registerRfidTag(RfidTagId rfidTagId) {
