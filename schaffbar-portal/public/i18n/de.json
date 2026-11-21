@@ -43,7 +43,8 @@
       "TOOL_NOT_IN_USE_BY_CUSTOMER": "Die Person nutzt dieses Werkzeug gerade nicht.",
       "NO_OPEN_WORKSHOP_SESSION": "Die Person hat keine offene Sitzung.",
       "ACTIVE_WORKSHOP_USAGE_EXISTS_FOR_SESSION": "Die Person ist noch in der Werkstatt eingecheckt – die Sitzung lässt sich erst nach dem Auschecken abrechnen.",
-      "ACTIVE_TOOL_USAGE_EXISTS_FOR_SESSION": "Die Person nutzt noch ein Werkzeug – zuerst die Nutzung an der Schaltbox beenden."
+      "ACTIVE_TOOL_USAGE_EXISTS_FOR_SESSION": "Die Person nutzt noch ein Werkzeug – zuerst die Nutzung an der Schaltbox beenden.",
+      "NO_CUSTOMER_ASSIGNED": "Dem RFID-Tag ist keine Person zugewiesen."
     },
     "actions": {
       "close": "Schließen",
