@@ -10,14 +10,14 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { WorkshopSessionApiModel } from '../../api/workshop-sessions/workshop-session.api-model';
 import {
   toolUsageSummaryFixture,
   workshopSessionFixture,
   workshopUsageFixture,
 } from '../../api/workshop-sessions/workshop-session.api-fixtures';
-import { CloseSessionDialogModalComponent } from './close-session-dialog-modal.component';
+import { WorkshopSessionApiModel } from '../../api/workshop-sessions/workshop-session.api-model';
 import { CloseSessionDialogContainerComponent } from './close-session-dialog-container.component';
+import { CloseSessionDialogModalComponent } from './close-session-dialog-modal.component';
 
 describe('CloseSessionDialogContainerComponent', () => {
   const sessionUrl = `${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/active`;

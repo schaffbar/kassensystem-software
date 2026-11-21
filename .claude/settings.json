@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/schaffbar-portal/.claude/hooks/format-portal-file.js\"",
+            "timeout": 60,
+            "statusMessage": "Prettier (portal)"
+          }
+        ]
+      }
+    ]
+  }
+}

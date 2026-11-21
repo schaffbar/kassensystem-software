@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { WlanRelaisType } from '../shared/models/wlan-relais-type';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
+import { WlanRelaisType } from '../shared/models/wlan-relais-type';
 import { canClearRfidReader, canDeleteTool, isHardwareSetUp, Tool, wlanRelaisCommands } from './tool.model';
 
 describe('wlanRelaisCommands', () => {

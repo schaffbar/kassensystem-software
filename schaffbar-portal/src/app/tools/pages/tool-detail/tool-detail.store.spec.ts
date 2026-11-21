@@ -8,14 +8,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
 import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
-import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
+import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
-import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { WlanRelaisType } from '../../../shared/models/wlan-relais-type';
 import { toToolCertification } from '../../tool-certification.mapper';
 import { toTool } from '../../tool.mapper';
 import { ToolDetailStore } from './tool-detail.store';

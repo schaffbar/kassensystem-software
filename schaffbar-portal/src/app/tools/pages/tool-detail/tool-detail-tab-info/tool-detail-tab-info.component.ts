@@ -17,9 +17,9 @@ import {
   ToolHardwareSummaryViewModel,
 } from '../../../components/tool-hardware-summary/tool-hardware-summary.component';
 import { ToolInstructorsComponent } from '../../../components/tool-instructors/tool-instructors.component';
-import { openUpdateToolForm } from '../open-update-tool-form';
 import { AddToolInstructorsCommand, RemoveToolInstructorsCommand, Tool } from '../../../tool.model';
 import { ToolsStore } from '../../../tools.store';
+import { openUpdateToolForm } from '../open-update-tool-form';
 import { ToolDetailStore } from '../tool-detail.store';
 
 @Component({

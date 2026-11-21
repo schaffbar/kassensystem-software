@@ -9,9 +9,10 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+import { DangerZoneComponent } from '../../../../shared/components/danger-zone/danger-zone.component';
 import { CertificationRequirement } from '../../../../shared/models/certification-requirement';
-import { ToolCertificationStatus } from '../../../../shared/models/tool-certification-status';
 import { ToolArea } from '../../../../shared/models/tool-area';
+import { ToolCertificationStatus } from '../../../../shared/models/tool-certification-status';
 import { WlanRelaisType } from '../../../../shared/models/wlan-relais-type';
 import { AddToolInstructorsFormComponent } from '../../../components/add-tool-instructors-form/add-tool-instructors-form.component';
 import { ToolDetailInfoComponent } from '../../../components/tool-detail-info/tool-detail-info.component';
@@ -20,7 +21,6 @@ import { ToolInstructorsComponent } from '../../../components/tool-instructors/t
 import { UpdateToolFormComponent } from '../../../components/update-tool-form/update-tool-form.component';
 import { AddToolInstructorsCommand, Tool, UpdateToolCommand } from '../../../tool.model';
 import { ToolsStore } from '../../../tools.store';
-import { DangerZoneComponent } from '../../../../shared/components/danger-zone/danger-zone.component';
 import { InstructorCandidate, ToolInstructor } from '../../../user.model';
 import { ToolDetailStore } from '../tool-detail.store';
 import { ToolDetailTabInfoComponent } from './tool-detail-tab-info.component';

@@ -27,10 +27,10 @@ import { StatusBadgeComponent } from '../../../shared/components/status-badge/st
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { DIALOG_WIDTH, FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog-constants';
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { SNACKBAR_DURATION_MS } from '../../../shared/snack-bar/snack-bar-constants';
-import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
 import { NewUserDialogData, NewUserFormComponent } from '../../components/new-user-form/new-user-form.component';
 import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
 import { CreateUserCommand, DeleteUserCommand, hasTemporaryRfidTag, UserListItem } from '../../user.model';

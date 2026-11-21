@@ -5,11 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
-import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
 import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
-import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
+import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
 
 export interface ToolDetailInfoViewModel {
   description: string | null;

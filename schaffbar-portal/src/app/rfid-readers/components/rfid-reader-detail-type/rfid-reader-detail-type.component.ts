@@ -9,9 +9,9 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { ChangeRfidReaderTypeCommand } from '../../rfid-reader.model';
 import { RfidReaderTypeDescriptionKeyPipe } from '../../rfid-reader-type-description-key.pipe';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
+import { ChangeRfidReaderTypeCommand } from '../../rfid-reader.model';
 
 export interface RfidReaderDetailTypeViewModel {
   id: string;

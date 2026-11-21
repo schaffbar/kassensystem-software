@@ -2,9 +2,9 @@ import { Component, computed, input } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { StatusBadgeComponent, StatusBadgeTone } from '../status-badge/status-badge.component';
 import { CertificationRequirement } from '../../models/certification-requirement';
 import { CertificationRequirementKeyPipe } from '../../pipes/certification-requirement-key.pipe';
+import { StatusBadgeComponent, StatusBadgeTone } from '../status-badge/status-badge.component';
 
 @Component({
   selector: 'schbar-certification-requirement-badge',

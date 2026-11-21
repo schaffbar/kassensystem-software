@@ -11,8 +11,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { FormDialogHeaderComponent } from '../../../shared/dialogs/form-dialog-header/form-dialog-header.component';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { UpdateRfidReaderCommand } from '../../rfid-reader.model';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
+import { UpdateRfidReaderCommand } from '../../rfid-reader.model';
 
 export interface UpdateRfidReaderViewModel {
   id: string;

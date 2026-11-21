@@ -8,15 +8,15 @@ import { MatRadioModule } from '@angular/material/radio';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { FormDialogHeaderComponent } from '../../../shared/dialogs/form-dialog-header/form-dialog-header.component';
 import { CertificationRequirement } from '../../../shared/models/certification-requirement';
 import { ToolArea } from '../../../shared/models/tool-area';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
+import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
 import { CreateToolCommand } from '../../tool.model';
 import { TOOL_DESCRIPTION_MAX_LENGTH, validateToolDescription, validateUniqueToolName } from '../../tool.validators';
-import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
-import { CertificationRequirementDescriptionKeyPipe } from '../../certification-requirement-description-key.pipe';
-import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 
 // all tools – for the unique name check
 export interface ExistingToolViewModel {

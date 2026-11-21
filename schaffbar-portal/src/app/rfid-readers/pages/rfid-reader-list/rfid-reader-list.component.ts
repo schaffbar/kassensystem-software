@@ -24,6 +24,8 @@ import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.c
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
+import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
+import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import {
   canDeleteRfidReader,
   DeleteRfidReaderCommand,
@@ -31,8 +33,6 @@ import {
   rfidReaderGroup,
   RfidReaderListItem,
 } from '../../rfid-reader.model';
-import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
-import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReadersStore } from '../../rfid-readers.store';
 
 type RfidReaderFilter = 'all' | 'desk' | 'switchBox' | 'unassigned';

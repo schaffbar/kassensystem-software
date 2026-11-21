@@ -11,15 +11,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ROUTE } from '../../../app.routes';
+import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
-import { CertificationRequirementBadgeComponent } from '../../../shared/components/certification-requirement-badge/certification-requirement-badge.component';
-import { openUpdateToolForm } from './open-update-tool-form';
+import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
 import { canDeleteTool, DeleteToolCommand } from '../../tool.model';
 import { ToolsStore } from '../../tools.store';
-import { ToolAreaKeyPipe } from '../../../shared/pipes/tool-area-key.pipe';
+import { openUpdateToolForm } from './open-update-tool-form';
 import { ToolDetailTabCertificationsComponent } from './tool-detail-tab-certifications/tool-detail-tab-certifications.component';
 import { ToolDetailTabConfigurationComponent } from './tool-detail-tab-configuration/tool-detail-tab-configuration.component';
 import { ToolDetailTabInfoComponent } from './tool-detail-tab-info/tool-detail-tab-info.component';

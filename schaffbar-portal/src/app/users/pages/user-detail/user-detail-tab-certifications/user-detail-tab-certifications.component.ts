@@ -7,8 +7,8 @@ import {
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
 } from '../../../tool-certification.model';
-import { toUserToolCertificationRowViewModels } from '../user-tool-certification-rows';
 import { UserDetailStore } from '../user-detail.store';
+import { toUserToolCertificationRowViewModels } from '../user-tool-certification-rows';
 
 @Component({
   selector: 'schbar-user-detail-tab-certifications',

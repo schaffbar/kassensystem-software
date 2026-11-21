@@ -7,23 +7,23 @@ import { provideRouter, Router } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { RfidTagAssignmentApiModel } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
-import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
-import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
-import { toRfidTagAssignment } from '../../rfid-tag-assignment.mapper';
-import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
-import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
-import { toToolCertification } from '../../tool-certification.mapper';
-import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
-import { toTool } from '../../tool.mapper';
 import { customerFixture } from '../../../shared/api/customers/customer.api-fixtures';
-import { toUser } from '../../user.mapper';
-import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
+import { RfidTagAssignmentApiModel } from '../../../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
+import { ToolCertificationApiModel } from '../../../shared/api/tool-certifications/tool-certification.api-model';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import {
   toolUsageSummaryFixture,
   workshopSessionFixture,
   workshopUsageFixture,
 } from '../../../shared/api/workshop-sessions/workshop-session.api-fixtures';
+import { WorkshopSessionApiModel } from '../../../shared/api/workshop-sessions/workshop-session.api-model';
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
+import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
+import { toRfidTagAssignment } from '../../rfid-tag-assignment.mapper';
+import { toToolCertification } from '../../tool-certification.mapper';
+import { toTool } from '../../tool.mapper';
+import { toUser } from '../../user.mapper';
 import { toWorkshopSession } from '../../workshop-session.mapper';
 import { UserDetailStore } from './user-detail.store';
 

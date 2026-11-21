@@ -26,14 +26,14 @@ import {
   UpdateRfidReaderDialogData,
   UpdateRfidReaderFormComponent,
 } from '../../components/update-rfid-reader-form/update-rfid-reader-form.component';
+import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
+import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import {
   canDeleteRfidReader,
   ChangeRfidReaderTypeCommand,
   DeleteRfidReaderCommand,
   UpdateRfidReaderCommand,
 } from '../../rfid-reader.model';
-import { RfidReaderTypeIconPipe } from '../../rfid-reader-type-icon.pipe';
-import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 @Component({

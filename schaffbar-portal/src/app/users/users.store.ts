@@ -4,8 +4,8 @@ import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals
 import { map, Observable } from 'rxjs';
 
 import { CustomersApiService } from '../shared/api/customers/customers.api-service';
-import { RfidTagAssignmentsApiService } from '../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
 import { DashboardApiService } from '../shared/api/dashboard/dashboard.api-service';
+import { RfidTagAssignmentsApiService } from '../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
 import { WorkshopSessionsApiService } from '../shared/api/workshop-sessions/workshop-sessions.api-service';
 import { mutation } from '../shared/state/mutation';
 import { toCreateCustomerRequest, toUserListItems } from './user.mapper';

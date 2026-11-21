@@ -15,8 +15,8 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
-import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { AgeGroupKeyPipe } from '../../../shared/pipes/age-group-key.pipe';
+import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import {
   UserSessionBannerComponent,
   UserSessionBannerViewModel,

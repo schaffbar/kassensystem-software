@@ -8,11 +8,11 @@ import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../../../environments/environment';
-import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
 import { RfidReaderApiModel } from '../../../shared/api/rfid-readers/rfid-reader.api-model';
+import { toolFixture } from '../../../shared/api/tools/tool.api-fixtures';
+import { ToolApiModel } from '../../../shared/api/tools/tool.api-model';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { toRfidReader } from '../../rfid-reader.mapper';
-import { ToolApiModel } from '../../../shared/api/tools/tool.api-model';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 describe('RfidReaderDetailStore', () => {

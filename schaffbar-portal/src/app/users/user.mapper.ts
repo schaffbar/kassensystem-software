@@ -8,8 +8,8 @@ import {
   UpdateCustomerContactRequest,
   UpdateCustomerRequest,
 } from '../shared/api/customers/customer.api-model';
-import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { ActiveWorkshopUserApiModel } from '../shared/api/dashboard/dashboard.api-model';
+import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
 import { CreateUserCommand, UpdateUserCommand, User, UserAddress, UserListItem, UserRfidTag } from './user.model';
 
 const ISO_DATE = 'yyyy-MM-dd';

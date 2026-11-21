@@ -3,8 +3,8 @@ import { Component, computed, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../shared/components/status-badge/status-badge.component';
-import { RfidTagState } from '../../rfid-tag.model';
 import { RfidTagStateKeyPipe } from '../../rfid-tag-state-key.pipe';
+import { RfidTagState } from '../../rfid-tag.model';
 
 @Component({
   selector: 'schbar-rfid-tag-state-badge',

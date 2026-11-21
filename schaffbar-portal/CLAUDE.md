@@ -11,7 +11,13 @@ git rules: `../CLAUDE.md`.
 npm start                                    # dev server on http://localhost:4200, backend on http://127.0.0.1:5000
 npm run check                                # lint, prettier, spec types, all tests, build – before handing over
 npx ng test --watch=false --include 'src/app/users/**/*.spec.ts'   # one folder (glob ends in .spec.ts)
+npx prettier --write <files>                 # format and sort the imports
 ```
+
+Imports are sorted by Prettier (`prettier-plugin-organize-imports`, the same order as "Organize Imports" in the IDE);
+ESLint's `import/order` only checks the groups (Angular, Material, libraries, relative paths) with a blank line
+between them. A Claude Code hook (`.claude/hooks/format-portal-file.js`) runs Prettier on every file Claude edits;
+a file changed by a script or `sed` is not covered – run `npx prettier --write` on it.
 
 ## Skills
 

@@ -23,7 +23,9 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { RowMenuComponent } from '../../../shared/components/row-menu/row-menu.component';
 import { ConfirmActionDialogService } from '../../../shared/dialogs/confirm-action-dialog/confirm-action-dialog.service';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
+import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { RfidTagStateBadgeComponent } from '../../components/rfid-tag-state-badge/rfid-tag-state-badge.component';
+import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
 import {
   canDeleteRfidTag,
   DeleteRfidTagCommand,
@@ -31,8 +33,6 @@ import {
   RfidTagState,
   UnassignRfidTagCommand,
 } from '../../rfid-tag.model';
-import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
-import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { RfidTagsStore } from '../../rfid-tags.store';
 
 type RfidTagFilter = 'all' | RfidTagState;

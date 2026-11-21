@@ -4,17 +4,15 @@ import { Router } from '@angular/router';
 import { patchState, signalMethod, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 
 import { ROUTE } from '../../../app.routes';
-import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
 import { CustomersApiService } from '../../../shared/api/customers/customers.api-service';
 import { RfidReadersApiService } from '../../../shared/api/rfid-readers/rfid-readers.api-service';
+import { ToolCertificationsApiService } from '../../../shared/api/tool-certifications/tool-certifications.api-service';
 import { ToolsApiService } from '../../../shared/api/tools/tools.api-service';
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { ToolCertificationStatus } from '../../../shared/models/tool-certification-status';
 import { mutation } from '../../../shared/state/mutation';
-import { toBatchCertifyRequest, toToolCertification } from '../../tool-certification.mapper';
 import { toRfidReader } from '../../rfid-reader.mapper';
-import { toUser } from '../../user.mapper';
-import { toInstructorsRequest, toSetWlanRelaisRequest, toTool, toUpdateToolRequest } from '../../tool.mapper';
+import { toBatchCertifyRequest, toToolCertification } from '../../tool-certification.mapper';
 import {
   BatchCreateToolCertificationsCommand,
   DeleteToolCertificationCommand,
@@ -22,7 +20,7 @@ import {
   ReactivateToolCertificationCommand,
   RevokeToolCertificationCommand,
 } from '../../tool-certification.model';
-import { InstructorCandidate, ToolInstructor } from '../../user.model';
+import { toInstructorsRequest, toSetWlanRelaisRequest, toTool, toUpdateToolRequest } from '../../tool.mapper';
 import {
   AddToolInstructorsCommand,
   ChangeRfidReaderCommand,
@@ -33,6 +31,8 @@ import {
   SetWlanRelaisCommand,
   UpdateToolCommand,
 } from '../../tool.model';
+import { toUser } from '../../user.mapper';
+import { InstructorCandidate, ToolInstructor } from '../../user.model';
 
 interface ToolDetailState {
   toolId: string | null;
