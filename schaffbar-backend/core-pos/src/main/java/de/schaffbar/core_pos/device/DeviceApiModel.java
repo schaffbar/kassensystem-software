@@ -67,29 +67,9 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static CounterResponse userQueryOk(String customerFullName, RfidTagId rfidTagId) {
+        public static CounterResponse error(RfidReaderType type, String message) {
             return CounterResponse.builder() //
-                    .DEVUSECASE(RfidReaderType.RFID_TAG_ASSIGNER.getKey()) //
-                    .STATE("END") //
-                    .ERROR("") //
-                    .ICON("OK") //
-                    .CUSTOMERNAME(customerFullName) //
-                    .RFID(rfidTagId.getValue()) //
-                    .build();
-        }
-
-        public static CounterResponse registerError(String message) {
-            return CounterResponse.builder() //
-                    .DEVUSECASE(RfidReaderType.RFID_TAG_REGISTER.getKey()) //
-                    .STATE("END") //
-                    .ERROR(message) //
-                    .CUSTOMERNAME("Error") //
-                    .build();
-        }
-
-        public static CounterResponse assignerError(String message) {
-            return CounterResponse.builder() //
-                    .DEVUSECASE(RfidReaderType.RFID_TAG_ASSIGNER.getKey()) //
+                    .DEVUSECASE(type.getKey()) //
                     .STATE("END") //
                     .ERROR(message) //
                     .CUSTOMERNAME("Error") //

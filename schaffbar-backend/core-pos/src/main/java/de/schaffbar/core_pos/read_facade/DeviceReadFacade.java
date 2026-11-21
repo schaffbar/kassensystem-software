@@ -80,6 +80,11 @@ public class DeviceReadFacade {
     }
 
     @Query
+    public boolean isRfidTagAssigned(@NotNull @Valid RfidTagId rfidTagId) {
+        return this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId).isPresent();
+    }
+
+    @Query
     public Optional<ToolView> getTool(@NotNull @Valid RfidReaderId switchBoxId) {
         return this.toolService.getTool(switchBoxId);
     }

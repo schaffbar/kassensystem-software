@@ -212,7 +212,7 @@ class GateKeeperOutAcceptanceTest {
     // counter
 
     @Test
-    void counter_answersError() {
+    void counter_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -226,7 +226,7 @@ class GateKeeperOutAcceptanceTest {
                 {
                     "DEVUSECASE": "",
                     "STATE": "END",
-                    "ERROR": "Unexpected RFID reader type: GATE_KEEPER_OUT",
+                    "ERROR": "Falsches Lesegerät",
                     "CUSTOMERNAME": "Error"
                 }
                 """);

@@ -172,7 +172,7 @@ class RfidTagAssignerAcceptanceTest {
                 {
                     "DEVUSECASE": "C",
                     "STATE": "END",
-                    "ERROR": "RFID Tag unbekannt",
+                    "ERROR": "RFID Tag nicht erkannt",
                     "ICON": null,
                     "CUSTOMERNAME": "Error"
                 }
@@ -198,7 +198,7 @@ class RfidTagAssignerAcceptanceTest {
                 {
                     "DEVUSECASE": "C",
                     "STATE": "END",
-                    "ERROR": "RFID Tag unbekannt",
+                    "ERROR": "RFID Tag nicht erkannt",
                     "ICON": null,
                     "CUSTOMERNAME": "Error"
                 }

@@ -15,7 +15,9 @@ import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
 import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.exception.ToolAlreadyInUseByAnotherCustomerException;
 
 // what the display of a reader shows – the device counterpart of shared.errors in the portal
@@ -24,7 +26,7 @@ final class DeviceMessages {
 
     static final String UNEXPECTED = "Unerwarteter Fehler";
 
-    // every code a use case behind /device/card can throw – the tests in integration/device/ show each text
+    // every code a use case behind /device/card and /device/counter can throw – the tests in integration/device/ show each text
     static final Map<String, String> BY_CODE = Map.ofEntries( //
             entry(NoCustomerAssignedException.CODE, "Kein Kunde für RFID Tag"), //
             entry(CustomerAlreadyInWorkshopException.CODE, "Du schaffst schon"), //
@@ -33,7 +35,9 @@ final class DeviceMessages {
             entry(CustomerNotInWorkshopException.CODE, "Du bist nicht in der Werkstatt"), //
             entry(CustomerNotCertifiedForToolException.CODE, "Keine Einweisung"), //
             entry(MaxToolUsageExceededException.CODE, "Max. Werkzeuge erreicht"), //
-            entry(ToolAlreadyInUseByAnotherCustomerException.CODE, "Werkzeug belegt"));
+            entry(ToolAlreadyInUseByAnotherCustomerException.CODE, "Werkzeug belegt"), //
+            entry(RfidTagAlreadyRegisteredException.CODE, "RFID bereits vorhanden!"), //
+            entry(NoRfidTagAssignmentWaitingException.CODE, "RFID nicht zugewiesen"));
 
     static String of(BusinessRuleViolationException e) {
         return BY_CODE.getOrDefault(e.getCode(), UNEXPECTED);

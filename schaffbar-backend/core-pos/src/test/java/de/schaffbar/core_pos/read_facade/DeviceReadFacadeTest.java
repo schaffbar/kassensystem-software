@@ -134,6 +134,35 @@ class DeviceReadFacadeTest {
     }
 
     // ------------------------------------------------------------------------
+    // isRfidTagAssigned
+
+    @Test
+    void isRfidTagAssigned_tagWithOwner_isTrue() {
+        // given
+        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        givenAssignment(rfidTagId, CustomerId.random());
+
+        // when
+        boolean assigned = this.deviceReadFacade.isRfidTagAssigned(rfidTagId);
+
+        // then
+        assertThat(assigned).isTrue();
+    }
+
+    @Test
+    void isRfidTagAssigned_tagWithoutOwner_isFalse() {
+        // given
+        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        when(this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
+
+        // when
+        boolean assigned = this.deviceReadFacade.isRfidTagAssigned(rfidTagId);
+
+        // then
+        assertThat(assigned).isFalse();
+    }
+
+    // ------------------------------------------------------------------------
     // getWorkshopStay
 
     @Test

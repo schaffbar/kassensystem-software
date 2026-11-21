@@ -1,7 +1,5 @@
 package de.schaffbar.core_pos.integration.device;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -9,7 +7,6 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import de.schaffbar.core_pos.integration.IntegrationTest;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
-import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 
 @IntegrationTest
 class UnconfiguredReaderAcceptanceTest {
@@ -45,15 +42,22 @@ class UnconfiguredReaderAcceptanceTest {
     }
 
     @Test
-    void counter_unknownReader_isNotHandled() {
+    void counter_unknownReader_isNotRecognized() {
         Scenario scenario = Scenario.randomValues().build();
 
         // when
         MvcTestResult result = this.fixture.api().holdRfidTagToCounterReader(scenario.rfidTagId(), scenario.macAddress());
 
-        // then – ApiExceptionHandler covers only domain/, the server answers 500
-        assertThat(result).hasFailed();
-        assertThat(result.getUnresolvedException()).hasRootCauseInstanceOf(ResourceNotFoundException.class);
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "",
+                    "STATE": "END",
+                    "ERROR": "RFID Reader nicht erkannt",
+                    "ICON": null,
+                    "CUSTOMERNAME": "Error"
+                }
+                """);
     }
 
     @Test
@@ -107,7 +111,7 @@ class UnconfiguredReaderAcceptanceTest {
     }
 
     @Test
-    void counter_readerWithoutType_isNotHandled() {
+    void counter_readerWithoutType_answersError() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -116,9 +120,16 @@ class UnconfiguredReaderAcceptanceTest {
         // when
         MvcTestResult result = this.fixture.api().holdRfidTagToCounterReader(scenario.rfidTagId(), scenario.macAddress());
 
-        // then – the switch over the type fails on null, the server answers 500
-        assertThat(result).hasFailed();
-        assertThat(result.getUnresolvedException()).hasRootCauseInstanceOf(NullPointerException.class);
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "",
+                    "STATE": "END",
+                    "ERROR": "Lesegerät ohne Typ",
+                    "ICON": null,
+                    "CUSTOMERNAME": "Error"
+                }
+                """);
     }
 
     @Test

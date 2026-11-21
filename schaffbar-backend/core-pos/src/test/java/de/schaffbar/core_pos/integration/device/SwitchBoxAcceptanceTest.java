@@ -344,7 +344,7 @@ class SwitchBoxAcceptanceTest {
     // counter
 
     @Test
-    void counter_answersError() {
+    void counter_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -358,7 +358,7 @@ class SwitchBoxAcceptanceTest {
                 {
                     "DEVUSECASE": "",
                     "STATE": "END",
-                    "ERROR": "Unexpected RFID reader type: SWITCH_BOX",
+                    "ERROR": "Falsches Lesegerät",
                     "CUSTOMERNAME": "Error"
                 }
                 """);
