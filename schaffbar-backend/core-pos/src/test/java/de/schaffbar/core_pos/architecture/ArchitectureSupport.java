@@ -3,7 +3,6 @@ package de.schaffbar.core_pos.architecture;
 import static com.tngtech.archunit.base.DescribedPredicate.and;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
 
 import java.util.List;
@@ -39,7 +38,8 @@ final class ArchitectureSupport {
 
     static final String WEB = "..domain..web..";
 
-    static final String DASHBOARD = "..domain.dashboard..";
+    // controllers that belong to no aggregate (web.device, web.dashboard) – spelled out, "..web.." would match shared.web
+    static final String WEB_OUTSIDE_AGGREGATES = ROOT + ".web..";
 
     static final String USE_CASE = "..use_case..";
 
@@ -58,8 +58,7 @@ final class ArchitectureSupport {
 
     static final DescribedPredicate<JavaClass> DOMAIN_SERVICE = and( //
             annotatedWith(Service.class).forSubtype(), //
-            resideInAPackage(DOMAIN), //
-            resideOutsideOfPackage(DASHBOARD)) //
+            resideInAPackage(DOMAIN)) //
             .as("domain services");
 
     static final String READ_FACADE = "..read_facade..";

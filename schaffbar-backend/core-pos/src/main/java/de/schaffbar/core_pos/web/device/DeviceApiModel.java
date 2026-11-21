@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.device;
+package de.schaffbar.core_pos.web.device;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

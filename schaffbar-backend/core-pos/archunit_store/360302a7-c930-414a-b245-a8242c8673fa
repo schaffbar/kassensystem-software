@@ -1,1 +1,0 @@
-Method <de.schaffbar.core_pos.domain.dashboard.WorkshopDashboardService.toWorkshopDashboardEntryView(de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews$WorkshopUsageView)> calls constructor <java.lang.RuntimeException.<init>(java.lang.String)> in (WorkshopDashboardService.java:41)

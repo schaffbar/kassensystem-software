@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.device;
+package de.schaffbar.core_pos.web.device;
 
 import static java.util.Objects.isNull;
 
@@ -15,12 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.schaffbar.core_pos.device.DeviceApiModel.CounterResponse;
-import de.schaffbar.core_pos.device.DeviceApiModel.DeviceCardRequestBody;
-import de.schaffbar.core_pos.device.DeviceApiModel.DeviceCardResponse;
-import de.schaffbar.core_pos.device.DeviceApiModel.InitRequestBody;
-import de.schaffbar.core_pos.device.DeviceApiModel.InitResponse;
-import de.schaffbar.core_pos.device.DeviceApiModel.RfidTagRequestBody;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
@@ -37,6 +31,12 @@ import de.schaffbar.core_pos.use_case.RfidTagCreate;
 import de.schaffbar.core_pos.use_case.ToolUsageToggle;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStop;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.CounterResponse;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.DeviceCardRequestBody;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.DeviceCardResponse;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.InitRequestBody;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.InitResponse;
+import de.schaffbar.core_pos.web.device.DeviceApiModel.RfidTagRequestBody;
 
 @Slf4j
 @Validated

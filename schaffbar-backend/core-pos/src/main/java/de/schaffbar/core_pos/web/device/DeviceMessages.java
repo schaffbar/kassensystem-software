@@ -1,4 +1,4 @@
-package de.schaffbar.core_pos.device;
+package de.schaffbar.core_pos.web.device;
 
 import static java.util.Map.entry;
 

@@ -8,7 +8,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.AGGREGATE;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DASHBOARD;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.INNER_ENTITY;
@@ -73,13 +72,13 @@ class DomainArchitectureTest {
             .should(haveRequiredBuildingBlocks()));
 
     @ArchTest
-    static final ArchRule aggregatePackagesContainOnlyBuildingBlocks = freeze(classes() //
+    static final ArchRule aggregatePackagesContainOnlyBuildingBlocks = classes() //
             .that().resideInAPackage(DOMAIN) //
-            .and().resideOutsideOfPackages(WEB, DASHBOARD) //
+            .and().resideOutsideOfPackage(WEB) //
             .and().areTopLevelClasses() //
             .should(classCondition("be an aggregate, an embeddable, an enum or a building block (*Commands, *Service, …)",
                     DomainArchitectureTest::isAggregatePackageMember)) //
-            .because("an agent should not invent a *Helper or *Manager – every kind of class has its place"));
+            .because("an agent should not invent a *Helper or *Manager – every kind of class has its place");
 
     // ------------------------------------------------------------------------
     // aggregate
@@ -376,7 +375,6 @@ class DomainArchitectureTest {
     @ArchTest
     static final ArchRule viewsMapTheAggregateWithMapStruct = classes() //
             .that().resideInAPackage(DOMAIN) //
-            .and().resideOutsideOfPackage(DASHBOARD) //
             .and().haveSimpleNameEndingWith("Views") //
             .should().beAnnotatedWith(Mapper.class) //
             .because("the views interface is the MapStruct mapper from the aggregate to its views");
