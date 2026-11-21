@@ -160,15 +160,15 @@ Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use
 
 ---
 
-## 5. Lesemodelle (Query Services)
+## 5. Lesemodelle (Read Facades)
 
-| Dienst                     | Endpunkt-Konzept       | Beschreibung                                                                                                                                                   |
-|----------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `WorkshopDashboardService` | Aktive Werkstattnutzer | Aggregatübergreifende Abfrage, die aktive `WorkshopUsage`-Einträge mit `Customer`-Daten kombiniert, um anzuzeigen, wer sich aktuell in der Werkstatt befindet. |
+Jeder Controller liest über seine Read Facade in `read_facade/` (E17). Die der Übersicht (`web/dashboard/`)
+kombiniert mehrere Aggregate:
 
-Die `WorkshopDashboardEntryView` liefert:
-
-- `customerId`, `firstName`, `lastName`, `entryTime`
+| Read Facade                   | Endpunkt                               | Beschreibung                                                                                      |
+|-------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------|
+| `DashboardReadFacade`         | `GET /dashboard/active-users`          | Laufende `WorkshopUsage`-Einträge mit ihrem `Customer` – wer in der Werkstatt ist, am längsten zuerst |
+| `DashboardReadFacade`         | `GET /dashboard/active-tools`          | Laufende `ToolUsage`-Einträge mit `Tool` und `Customer` – welches Werkzeug läuft und wer es nutzt    |
 
 ---
 

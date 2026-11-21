@@ -158,15 +158,15 @@ The table shows the main ones – the full list is the package `use_case/` (one 
 
 ---
 
-## 5. Read Models (Query Services)
+## 5. Read Models (Read Facades)
 
-| Service                    | Endpoint concept      | Description                                                                                                                   |
-|----------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `WorkshopDashboardService` | Active workshop users | Cross-aggregate query combining active `WorkshopUsage` entries with `Customer` data to show who is currently in the workshop. |
+Every controller reads through its read facade in `read_facade/` (E17). The one of the overview (`web/dashboard/`)
+combines several aggregates:
 
-The `WorkshopDashboardEntryView` provides:
-
-- `customerId`, `firstName`, `lastName`, `entryTime`
+| Read facade                   | Endpoint                               | Description                                                                                       |
+|-------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------|
+| `DashboardReadFacade`         | `GET /dashboard/active-users`          | Running `WorkshopUsage` entries with their `Customer` – who is in the workshop, the longest first |
+| `DashboardReadFacade`         | `GET /dashboard/active-tools`          | Running `ToolUsage` entries with their `Tool` and `Customer` – which tool runs and who uses it    |
 
 ---
 

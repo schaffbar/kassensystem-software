@@ -14,7 +14,7 @@ Entscheidungen: `ui-redesign.md`.
 | Check-ins heute | Kennzahl „Check-ins heute“ mit „N bereits ausgecheckt“ | Neuer Endpunkt (oder Feld in einem Kennzahlen-Endpunkt): Anzahl Werkstatt-Eintritte des Tages und davon ausgecheckt |
 | Lesegeräte online | Kennzahl „Lesegeräte online N / gesamt“, Hinweis „Lesegerät offline“ im Block „Braucht Aufmerksamkeit“ | Online-Status der Lesegeräte (siehe RFID-Lesegeräte) |
 | Werkzeug gestört / offline | Status „Offline“ im Werkzeugstatus, Hinweis „WLAN-Relais antwortet nicht“ | Online-Status des WLAN-Relais (siehe Werkzeuge) |
-| Dauer der Werkzeugnutzung | „Lena Hoffmann · 57 min“ im Werkzeugstatus | `GET /tool-dashboard/active-tools` um die Startzeit der laufenden Nutzung erweitern |
+| Dauer der Werkzeugnutzung | „Lena Hoffmann · 57 min“ im Werkzeugstatus | `GET /dashboard/active-tools` um die Startzeit der laufenden Nutzung erweitern |
 | Live-Aktualisierung | Heute lädt die Übersicht jede Minute neu (Polling). Später sofort, wenn jemand ein- oder auscheckt | Server-Sent Events oder WebSocket für Ein-/Auschecken und Werkzeug an/aus |
 | Statusbox „Werkstatt geöffnet“ | In der Seitenleiste: geöffnet, Personen anwesend, Werkzeuge aktiv, Anzahl nicht eingerichteter Lesegeräte | Öffnungszustand der Werkstatt (gibt es ihn fachlich?), sonst aus vorhandenen Daten |
 
