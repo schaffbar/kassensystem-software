@@ -2,7 +2,7 @@ import { computed, inject } from '@angular/core';
 
 import { signalStore, withComputed, withMethods, withProps } from '@ngrx/signals';
 
-import { ToolDashboardApiService } from '../shared/api/tool-dashboard/tool-dashboard.api-service';
+import { DashboardApiService } from '../shared/api/dashboard/dashboard.api-service';
 import { ToolsApiService } from '../shared/api/tools/tools.api-service';
 import { mutation } from '../shared/state/mutation';
 import { toCreateToolRequest, toToolListItems } from './tool.mapper';
@@ -16,7 +16,7 @@ export const ToolsStore = signalStore(
       _toolsApi: toolsApi,
       // both load on first use of the store; the active tools tell who uses a tool right now
       _toolsResource: toolsApi.toolsResource(),
-      _activeToolsResource: inject(ToolDashboardApiService).activeToolsResource(),
+      _activeToolsResource: inject(DashboardApiService).activeToolsResource(),
     };
   }),
   withComputed(({ _toolsResource, _activeToolsResource }) => ({

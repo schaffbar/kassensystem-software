@@ -6,7 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
-import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
+import { ActiveToolUsageApiModel } from '../shared/api/dashboard/dashboard.api-model';
 import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
 import { CertificationRequirement } from '../shared/models/certification-requirement';
 import { ToolArea } from '../shared/models/tool-area';
@@ -15,9 +15,9 @@ import { ToolsStore } from './tools.store';
 
 describe('ToolsStore', () => {
   const url = `${environment.apiBaseUrl}/api/v1/tools`;
-  const activeToolsUrl = `${environment.apiBaseUrl}/api/v1/tool-dashboard/active-tools`;
+  const activeToolsUrl = `${environment.apiBaseUrl}/api/v1/dashboard/active-tools`;
   const tools = [toolFixture()];
-  const activeTools: ToolDashboardEntryApiModel[] = [
+  const activeTools: ActiveToolUsageApiModel[] = [
     { toolId: 'tool-1', toolName: 'Bandsäge', customerId: 'user-1', firstName: 'Anna', lastName: 'Becker' },
   ];
 

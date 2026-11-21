@@ -5,7 +5,7 @@ import { map, Observable } from 'rxjs';
 
 import { CustomersApiService } from '../shared/api/customers/customers.api-service';
 import { RfidTagAssignmentsApiService } from '../shared/api/rfid-tag-assignments/rfid-tag-assignments.api-service';
-import { WorkshopDashboardApiService } from '../shared/api/workshop-dashboard/workshop-dashboard.api-service';
+import { DashboardApiService } from '../shared/api/dashboard/dashboard.api-service';
 import { WorkshopSessionsApiService } from '../shared/api/workshop-sessions/workshop-sessions.api-service';
 import { mutation } from '../shared/state/mutation';
 import { toCreateCustomerRequest, toUserListItems } from './user.mapper';
@@ -21,7 +21,7 @@ export const UsersStore = signalStore(
       // all load on first use of the store; assignments and active users tell who has a tag and who is in the workshop
       _usersResource: customersApi.customersResource(),
       _assignmentsResource: inject(RfidTagAssignmentsApiService).rfidTagAssignmentsResource(),
-      _activeUsersResource: inject(WorkshopDashboardApiService).activeUsersResource(),
+      _activeUsersResource: inject(DashboardApiService).activeUsersResource(),
     };
   }),
   withComputed(({ _usersResource, _assignmentsResource, _activeUsersResource }) => ({

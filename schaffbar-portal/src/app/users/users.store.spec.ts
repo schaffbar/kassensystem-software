@@ -58,7 +58,7 @@ describe('UsersStore', () => {
   const expectLoad = (): TestRequest => httpMock.expectOne((req) => req.method === 'GET' && req.url === url);
 
   const expectAssignments = (): TestRequest => httpMock.expectOne(`${apiUrl}/rfid-tag-assignments`);
-  const expectActiveUsers = (): TestRequest => httpMock.expectOne(`${apiUrl}/workshop-dashboard/active-users`);
+  const expectActiveUsers = (): TestRequest => httpMock.expectOne(`${apiUrl}/dashboard/active-users`);
 
   async function load(): Promise<void> {
     trigger();

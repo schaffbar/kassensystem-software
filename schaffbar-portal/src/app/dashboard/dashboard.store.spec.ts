@@ -7,10 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { environment } from '../../environments/environment';
 import { customerFixture } from '../shared/api/customers/customer.api-fixtures';
+import { ActiveToolUsageApiModel, ActiveWorkshopUserApiModel } from '../shared/api/dashboard/dashboard.api-model';
 import { RfidReaderApiModel } from '../shared/api/rfid-readers/rfid-reader.api-model';
-import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
 import { toolFixture } from '../shared/api/tools/tool.api-fixtures';
-import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
 import { AgeGroup } from '../shared/models/age-group';
 import { RfidReaderType } from '../shared/models/rfid-reader-type';
 import { WlanRelaisType } from '../shared/models/wlan-relais-type';
@@ -24,11 +23,11 @@ describe('DashboardStore', () => {
     toolFixture({ rfidReaderId: 'reader-1', wlanRelaisType: WlanRelaisType.Shelly1 }),
     toolFixture({ id: 'tool-2', name: 'Drechselbank' }),
   ];
-  const activeUsers: WorkshopDashboardEntryApiModel[] = [
+  const activeUsers: ActiveWorkshopUserApiModel[] = [
     { customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann', entryTime: '2026-10-27T08:30:00Z' },
     { customerId: 'user-2', firstName: 'Lena', lastName: 'Klein', entryTime: '2026-10-27T09:00:00Z' },
   ];
-  const activeTools: ToolDashboardEntryApiModel[] = [
+  const activeTools: ActiveToolUsageApiModel[] = [
     { toolId: 'tool-1', toolName: 'Bandsäge', customerId: 'user-1', firstName: 'Max', lastName: 'Mustermann' },
   ];
   const users = [
@@ -85,8 +84,8 @@ describe('DashboardStore', () => {
   const expectGet = (path: string): TestRequest => httpMock.expectOne({ method: 'GET', url: `${api}${path}` });
 
   function respond(overrides: { activeUsers?: unknown } = {}): void {
-    expectGet('/workshop-dashboard/active-users').flush(overrides.activeUsers ?? activeUsers);
-    expectGet('/tool-dashboard/active-tools').flush(activeTools);
+    expectGet('/dashboard/active-users').flush(overrides.activeUsers ?? activeUsers);
+    expectGet('/dashboard/active-tools').flush(activeTools);
     expectGet('/tools').flush(tools);
     expectGet('/customers').flush(users);
     expectGet('/rfid-readers').flush(rfidReaders);
@@ -158,8 +157,8 @@ describe('DashboardStore', () => {
 
   it('should expose a load error of any list', async () => {
     trigger();
-    expectGet('/workshop-dashboard/active-users').flush(activeUsers);
-    expectGet('/tool-dashboard/active-tools').flush('boom', { status: 500, statusText: 'Server Error' });
+    expectGet('/dashboard/active-users').flush(activeUsers);
+    expectGet('/dashboard/active-tools').flush('boom', { status: 500, statusText: 'Server Error' });
     expectGet('/tools').flush(tools);
     expectGet('/customers').flush(users);
     expectGet('/rfid-readers').flush(rfidReaders);

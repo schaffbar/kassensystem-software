@@ -1,4 +1,4 @@
-import { ToolDashboardEntryApiModel } from '../shared/api/tool-dashboard/tool-dashboard.api-model';
+import { ActiveToolUsageApiModel } from '../shared/api/dashboard/dashboard.api-model';
 import {
   CreateToolRequest,
   InstructorsRequest,
@@ -34,7 +34,7 @@ export function toTool(apiModel: ToolApiModel): Tool {
 }
 
 // a tool is in use while the dashboard lists it as active
-export function toToolListItems(tools: ToolApiModel[], activeTools: ToolDashboardEntryApiModel[]): ToolListItem[] {
+export function toToolListItems(tools: ToolApiModel[], activeTools: ActiveToolUsageApiModel[]): ToolListItem[] {
   const usersByToolId = new Map(
     activeTools.map((activeTool) => [activeTool.toolId, `${activeTool.firstName} ${activeTool.lastName}`]),
   );

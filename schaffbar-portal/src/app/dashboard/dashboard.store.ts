@@ -5,22 +5,24 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { interval, pipe, switchMap, tap } from 'rxjs';
 
 import { CustomersApiService } from '../shared/api/customers/customers.api-service';
+import { DashboardApiService } from '../shared/api/dashboard/dashboard.api-service';
 import { RfidReadersApiService } from '../shared/api/rfid-readers/rfid-readers.api-service';
-import { ToolDashboardApiService } from '../shared/api/tool-dashboard/tool-dashboard.api-service';
 import { ToolsApiService } from '../shared/api/tools/tools.api-service';
-import { WorkshopDashboardApiService } from '../shared/api/workshop-dashboard/workshop-dashboard.api-service';
 import { toActiveTool, toActiveUser, toRfidReader, toTool, toUser } from './dashboard.mapper';
 import { isHardwareSetUp, isMinor, needsRfidReaderType } from './dashboard.model';
 
 export const DashboardStore = signalStore(
-  withProps(() => ({
-    // all load when the overview opens
-    _activeUsersResource: inject(WorkshopDashboardApiService).activeUsersResource(),
-    _activeToolsResource: inject(ToolDashboardApiService).activeToolsResource(),
-    _usersResource: inject(CustomersApiService).customersResource(),
-    _toolsResource: inject(ToolsApiService).toolsResource(),
-    _rfidReadersResource: inject(RfidReadersApiService).rfidReadersResource(),
-  })),
+  withProps(() => {
+    const dashboardApi = inject(DashboardApiService);
+    return {
+      // all load when the overview opens
+      _activeUsersResource: dashboardApi.activeUsersResource(),
+      _activeToolsResource: dashboardApi.activeToolsResource(),
+      _usersResource: inject(CustomersApiService).customersResource(),
+      _toolsResource: inject(ToolsApiService).toolsResource(),
+      _rfidReadersResource: inject(RfidReadersApiService).rfidReadersResource(),
+    };
+  }),
   withProps((store) => ({
     _resources: [
       store._activeUsersResource,

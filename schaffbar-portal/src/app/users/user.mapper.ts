@@ -9,7 +9,7 @@ import {
   UpdateCustomerRequest,
 } from '../shared/api/customers/customer.api-model';
 import { RfidTagAssignmentApiModel } from '../shared/api/rfid-tag-assignments/rfid-tag-assignment.api-model';
-import { WorkshopDashboardEntryApiModel } from '../shared/api/workshop-dashboard/workshop-dashboard.api-model';
+import { ActiveWorkshopUserApiModel } from '../shared/api/dashboard/dashboard.api-model';
 import { CreateUserCommand, UpdateUserCommand, User, UserAddress, UserListItem, UserRfidTag } from './user.model';
 
 const ISO_DATE = 'yyyy-MM-dd';
@@ -48,7 +48,7 @@ function toUserAddress(apiModel: CustomerAddressApiModel): UserAddress {
 export function toUserListItems(
   customers: CustomerApiModel[],
   assignments: RfidTagAssignmentApiModel[],
-  activeUsers: WorkshopDashboardEntryApiModel[],
+  activeUsers: ActiveWorkshopUserApiModel[],
 ): UserListItem[] {
   const assignmentsByCustomerId = new Map(assignments.map((assignment) => [assignment.customerId, assignment]));
   const activeCustomerIds = new Set(activeUsers.map((activeUser) => activeUser.customerId));
