@@ -122,7 +122,7 @@ class UnconfiguredReaderAcceptanceTest {
     }
 
     @Test
-    void card_readerWithoutType_answersUnexpectedError() {
+    void card_readerWithoutType_answersError() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -138,7 +138,7 @@ class UnconfiguredReaderAcceptanceTest {
                 {
                     "DEVUSECASE": "test",
                     "STATE": "END",
-                    "ERROR": "Unerwarteter Fehler",
+                    "ERROR": "Lesegerät ohne Typ",
                     "ICON": "NOREG",
                     "CUSTOMERNAME": null,
                     "UNITS": "0"

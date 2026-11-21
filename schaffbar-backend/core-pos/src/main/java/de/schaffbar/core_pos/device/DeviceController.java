@@ -1,12 +1,9 @@
 package de.schaffbar.core_pos.device;
 
-import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -39,29 +36,17 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
-import de.schaffbar.core_pos.domain.tool_usage.ToolUsageService;
-import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
-import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
-import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
-import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
-import de.schaffbar.core_pos.shared.billing.BillableDuration;
-import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
-import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
-import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
-import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
-import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
-import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.read_facade.DeviceReadFacade;
+import de.schaffbar.core_pos.read_facade.DeviceViews.WorkshopStayView;
+import de.schaffbar.core_pos.shared.exception.BusinessRuleViolationException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.exception.ToolAlreadyInUseByAnotherCustomerException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
-import de.schaffbar.core_pos.use_case.ToolUsageStart;
-import de.schaffbar.core_pos.use_case.ToolUsageStop;
+import de.schaffbar.core_pos.use_case.ToolUsageToggle;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStop;
 
@@ -82,21 +67,16 @@ public class DeviceController {
 
     private final @NonNull ToolService toolService;
 
-    private final @NonNull ToolUsageService toolUsageService;
-
     private final @NonNull WorkshopUsageStart workshopUsageStart;
 
     private final @NonNull WorkshopUsageStop workshopUsageStop;
 
-    private final @NonNull ToolUsageStart toolUsageStart;
-
-    private final @NonNull ToolUsageStop toolUsageStop;
-
     private final @NonNull CustomerAssignRfidTag assignRfidTagUseCase;
 
-    private final @NonNull WorkshopSessionService workshopSessionService;
+    private final @NonNull ToolUsageToggle toolUsageToggle;
 
-    private final @NonNull WorkshopUsageService workshopUsageService;
+    private final @NonNull DeviceReadFacade deviceReadFacade;
+
 
     @PostMapping(value = "/init", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<InitResponse> init(@RequestBody @NotNull @Valid InitRequestBody requestBody) {
@@ -141,7 +121,7 @@ public class DeviceController {
 
     @PostMapping(value = "/counter", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CounterResponse> counter(@RequestBody @NotNull @Valid RfidTagRequestBody requestBody) {
-        RfidReaderView rfidReader = getRfidReader(MacAddress.of(requestBody.MACADDR()));
+        RfidReaderView rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR()));
 
         RfidTagId rfidTagId = RfidTagId.of(requestBody.RFID());
         CounterResponse response = switch (rfidReader.type()) {
@@ -160,70 +140,36 @@ public class DeviceController {
         CustomerView customer;
 
         try {
-            rfidReader = getRfidReader(MacAddress.of(requestBody.MACADDR()));
-            customer = getCustomer(RfidTagId.of(requestBody.RFID()));
+            rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR()));
+            customer = this.deviceReadFacade.getCustomer(RfidTagId.of(requestBody.RFID()));
         }
         catch (ResourceNotFoundException e) {
-            String message = switch (e.getResource()) {
-                case RFID_READER -> "RFID Reader nicht erkannt";
-                case RFID_TAG -> "RFID Tag nicht erkannt";
-                case CUSTOMER -> "Kunde nicht erkannt";
-                default -> "Unerwarteter Fehler";
-            };
-
-            log.error(message);
-            return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(message, devUseCase));
+            log.error("Not recognized at the reader: {}", e.getMessage());
+            return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.of(e), devUseCase));
         }
-        catch (NoCustomerAssignedException e) {
-            log.error("No customer assigned to RFID tag [id: {}]. Returning error response.", e.getMessage());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized("Kein Kunde für RFID Tag", devUseCase));
-        }
-        catch (Exception e) {
-            log.error("An unexpected error occurred while processing RFID tag request", e);
-            return ResponseEntity.ok(DeviceCardResponse.errorUnexpected("Unerwarteter Fehler", devUseCase));
+        catch (BusinessRuleViolationException e) {
+            log.error("Not recognized at the reader: {}", e.getMessage());
+            return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.of(e), devUseCase));
         }
 
         try {
             DeviceCardResponse response = switch (rfidReader.type()) {
-                case GATE_KEEPER_IN -> enterWorkshop(customer, rfidReader.type());
-                case GATE_KEEPER_OUT -> leaveWorkshop(customer, rfidReader.type());
-                case SWITCH_BOX -> toggleToolUsage(customer, rfidReader, devUseCase);
-                default -> throw new IllegalStateException("Unexpected value for RFID reader type: " + rfidReader.type());
+                case GATE_KEEPER_IN -> checkIn(customer);
+                case GATE_KEEPER_OUT -> checkOut(customer);
+                case SWITCH_BOX -> switchTool(customer, rfidReader, devUseCase);
+                case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER -> DeviceCardResponse.errorUnexpected("Falsches Lesegerät", devUseCase);
+                case null -> DeviceCardResponse.errorUnexpected("Lesegerät ohne Typ", devUseCase);
             };
 
             return ResponseEntity.ok(response);
         }
-        catch (CustomerAlreadyInWorkshopException e) {
-            log.error("User is already in workshop [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du schaffst schon", customer.getFullName(), devUseCase));
+        catch (BusinessRuleViolationException e) {
+            log.info("Refused at RFID reader [id: {}]: {}", rfidReader.id(), e.getMessage());
+            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess(DeviceMessages.of(e), customer.getFullName(), devUseCase));
         }
-        catch (NoActiveWorkshopUsageFoundException e) {
-            log.error("No active workshop usage [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Zwei mal Pause geht nicht", customer.getFullName(), devUseCase));
-        }
-        catch (NoOpenWorkshopSessionException e) {
-            log.error("No active workshop [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du warst nie im Werkstatt", customer.getFullName(), devUseCase));
-        }
-        catch (CustomerNotInWorkshopException e) {
-            log.error("Customer is not in workshop [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Du bist nicht in der Werkstatt", customer.getFullName(), devUseCase));
-        }
-        catch (ToolAlreadyInUseByAnotherCustomerException e) {
-            log.error("Tool already in use by another customer [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Werkzeug belegt", customer.getFullName(), devUseCase));
-        }
-        catch (MaxToolUsageExceededException e) {
-            log.error("Max tool usage [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Max. Werkzeuge erreicht", customer.getFullName(), devUseCase));
-        }
-        catch (CustomerNotCertifiedForToolException e) {
-            log.error("Customer not certified for tool [id: {}]", rfidReader.id());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoAccess("Keine Einweisung", customer.getFullName(), devUseCase));
-        }
-        catch (Exception e) {
-            log.error("An unexpected error occurred while processing RFID tag request. Message {}", e.getMessage());
-            return ResponseEntity.ok(DeviceCardResponse.errorUnexpected("Unerwarteter Fehler", devUseCase));
+        catch (RuntimeException e) {
+            log.error("Unexpected error at RFID reader [id: {}]", rfidReader.id(), e);
+            return ResponseEntity.ok(DeviceCardResponse.errorUnexpected(DeviceMessages.UNEXPECTED, devUseCase));
         }
     }
 
@@ -262,23 +208,6 @@ public class DeviceController {
         };
     }
 
-    private RfidReaderView getRfidReader(MacAddress macAddress) {
-        return this.rfidReaderService.getRfidReader(macAddress) //
-                .orElseThrow(() -> ResourceNotFoundException.rfidReader(macAddress));
-    }
-
-    private CustomerView getCustomer(RfidTagId rfidTagId) {
-        RfidTagView rfidTag = this.rfidTagService.getRfidTag(rfidTagId) //
-                .orElseThrow(() -> ResourceNotFoundException.rfidTag(rfidTagId));
-
-        CustomerId customerId = this.rfidTagAssignmentService.getRfidTagAssignment(rfidTag.id()) //
-                .map(RfidTagAssignmentView::customerId) //
-                .orElseThrow(() -> new NoCustomerAssignedException(rfidTagId));
-
-        return this.customerService.getCustomer(customerId) //
-                .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
-    }
-
     private CounterResponse registerRfidTag(RfidTagId rfid) {
         Optional<RfidTagView> rfidTag = this.rfidTagService.getRfidTag(rfid);
         if (rfidTag.isPresent()) {
@@ -304,7 +233,7 @@ public class DeviceController {
     private CounterResponse assignRfidTag(RfidTagId rfidTagId) {
         try {
             this.assignRfidTagUseCase.process(rfidTagId);
-            CustomerView customer = getCustomer(rfidTagId);
+            CustomerView customer = this.deviceReadFacade.getCustomer(rfidTagId);
 
             return CounterResponse.assignerOk(customer.getFullName(), rfidTagId);
         }
@@ -333,70 +262,34 @@ public class DeviceController {
         return CounterResponse.userQueryOk(customer.getFullName(), rfidTagId);
     }
 
-    private DeviceCardResponse enterWorkshop(CustomerView customer, RfidReaderType type) {
+    private DeviceCardResponse checkIn(CustomerView customer) {
         this.workshopUsageStart.process(customer.id());
 
-        List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
-        long totalUnits = workshopUsages.stream() //
-                .map(WorkshopUsageView::billableDuration) //
-                .filter(Objects::nonNull) //
-                .mapToLong(BillableDuration::getUnits) //
-                .sum();
-
-        WorkshopUsageView lastWorkshopUsage = workshopUsages.stream() //
-                .filter(usage -> isNull(usage.exitTime())) //
-                .sorted(comparing(WorkshopUsageView::entryTime).reversed()) //
-                .toList().getFirst();
-
-        return DeviceCardResponse.enterOk(type, customer.getFullName(), totalUnits, lastWorkshopUsage.entryTime());
+        WorkshopStayView stay = this.deviceReadFacade.getWorkshopStay(customer.id());
+        return DeviceCardResponse.enterOk(RfidReaderType.GATE_KEEPER_IN, customer.getFullName(), stay.finishedUnits(), stay.entryTime());
     }
 
-    private DeviceCardResponse leaveWorkshop(CustomerView customer, RfidReaderType type) {
+    private DeviceCardResponse checkOut(CustomerView customer) {
         this.workshopUsageStop.process(customer.id());
 
-        List<WorkshopUsageView> workshopUsages = getWorkshopUsages(customer.id());
-        long totalUnits = workshopUsages.stream() //
-                .map(WorkshopUsageView::billableDuration) //
-                .filter(Objects::nonNull) //
-                .mapToLong(BillableDuration::getUnits) //
-                .sum();
-
-        WorkshopUsageView lastWorkshopUsage = workshopUsages.stream() //
-                .sorted(comparing(WorkshopUsageView::exitTime).reversed()) //
-                .toList().getFirst();
-
-        return DeviceCardResponse.leaveOk(type, customer.getFullName(), totalUnits, lastWorkshopUsage.entryTime(), lastWorkshopUsage.exitTime());
+        WorkshopStayView stay = this.deviceReadFacade.getWorkshopStay(customer.id());
+        return DeviceCardResponse.leaveOk(RfidReaderType.GATE_KEEPER_OUT, customer.getFullName(), stay.finishedUnits(), stay.entryTime(),
+                stay.exitTime());
     }
 
-    private DeviceCardResponse toggleToolUsage(CustomerView customer, RfidReaderView rfidReader, String devUseCase) {
-        Optional<ToolView> assignedTool = this.toolService.getTool(rfidReader.id());
-        if (assignedTool.isEmpty()) {
+    private DeviceCardResponse switchTool(CustomerView customer, RfidReaderView switchBox, String devUseCase) {
+        ToolView tool = this.deviceReadFacade.getTool(switchBox.id()).orElse(null);
+        if (isNull(tool)) {
             // R-8 – the tool was taken from the switch box after it started
-            log.error("No tool assigned to switch box [id: {}]", rfidReader.id());
+            log.error("No tool assigned to switch box [id: {}]", switchBox.id());
             return DeviceCardResponse.errorNoAccess("Kein Werkzeug", customer.getFullName(), devUseCase);
         }
 
-        ToolView tool = assignedTool.get();
+        this.toolUsageToggle.process(customer.id(), tool.id());
 
-        //        boolean hasActiveUsage = this.toolUsageService.getActiveToolUsages(customer.id()).stream() //
-        //                .anyMatch(usage -> usage.toolId().sameValueAs(tool.id()));
-        boolean hasActiveUsage = this.toolUsageService.getActiveToolUsage(customer.id(), tool.id()).isPresent();
-        if (hasActiveUsage) {
-            this.toolUsageStop.process(customer.id(), tool.id());
-            return DeviceCardResponse.stopToolUsage(rfidReader.type(), customer.getFullName(), tool.name());
-        }
-        else {
-            this.toolUsageStart.process(customer.id(), tool.id());
-            return DeviceCardResponse.startToolUsage(rfidReader.type(), customer.getFullName(), tool.name());
-        }
-
-    }
-
-    private List<WorkshopUsageView> getWorkshopUsages(CustomerId customerId) {
-        WorkshopSessionView workshopSessionView = this.workshopSessionService.getOpenWorkshopSession(customerId) //
-                .orElseThrow(() -> new RuntimeException("No open workshop session found after entering workshop")); // TODO: error handling
-
-        return this.workshopUsageService.getWorkshopUsages(workshopSessionView.id());
+        return this.deviceReadFacade.isToolInUse(customer.id(), tool.id()) //
+                ? DeviceCardResponse.startToolUsage(RfidReaderType.SWITCH_BOX, customer.getFullName(), tool.name()) //
+                : DeviceCardResponse.stopToolUsage(RfidReaderType.SWITCH_BOX, customer.getFullName(), tool.name());
     }
 
 }

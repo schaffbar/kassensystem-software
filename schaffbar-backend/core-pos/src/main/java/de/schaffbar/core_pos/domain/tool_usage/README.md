@@ -36,7 +36,8 @@
 | TU-8  | Customer must have an open workshop session to start a tool usage                                                          | `ToolUsageStart` use case — takes the session of the running workshop usage, which is open (WS-5)                        |
 | TU-9  | A tool can only be used by one customer at a time                                                                          | `ToolUsageService.startToolUsage()` — `ToolAlreadyInUseByAnotherCustomerException` (409)                                 |
 | TU-10 | A customer needs an active ToolCertification for a tool with certification requirement `RED`; `YELLOW` only recommends one | `ToolUsageStart` use case — `CustomerNotCertifiedForToolException` (409) for `RED` only                                  |
-| TU-11 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now                              | `BillableDuration`, `ToolUsage.getBillableDurationUntil()`                                                               |
+| TU-11 | The switch box has one action: the tag switches the tool off when the person uses it, else on                              | `ToolUsageToggle` use case – `ToolUsageStop` or `ToolUsageStart` with their rules                                        |
+| TU-11 | The switch box has one action: the tag switches the tool off when the person uses it, else on                              | `ToolUsageToggle` use case – `ToolUsageStop` or `ToolUsageStart` with their rules                                        |
 
 ## Domain Events
 

@@ -100,7 +100,7 @@ class RfidTagRegisterAcceptanceTest {
     // card
 
     @Test
-    void card_answersUnexpectedError() {
+    void card_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -116,7 +116,7 @@ class RfidTagRegisterAcceptanceTest {
                 {
                     "DEVUSECASE": "test",
                     "STATE": "END",
-                    "ERROR": "Unerwarteter Fehler",
+                    "ERROR": "Falsches Lesegerät",
                     "ICON": "NOREG",
                     "CUSTOMERNAME": null,
                     "UNITS": "0"
