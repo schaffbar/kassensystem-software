@@ -131,11 +131,7 @@ public class DeviceController {
 
             return ResponseEntity.ok(response);
         }
-        catch (ResourceNotFoundException e) {
-            log.info("Refused at RFID reader [id: {}]: {}", rfidReader.id(), e.getMessage());
-            return ResponseEntity.ok(CounterResponse.error(rfidReader.type(), DeviceMessages.of(e)));
-        }
-        catch (BusinessRuleViolationException e) {
+        catch (ResourceNotFoundException | BusinessRuleViolationException e) {
             log.info("Refused at RFID reader [id: {}]: {}", rfidReader.id(), e.getMessage());
             return ResponseEntity.ok(CounterResponse.error(rfidReader.type(), DeviceMessages.of(e)));
         }
@@ -155,11 +151,7 @@ public class DeviceController {
             rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR()));
             customer = this.deviceReadFacade.getCustomer(RfidTagId.of(requestBody.RFID()));
         }
-        catch (ResourceNotFoundException e) {
-            log.error("Not recognized at the reader: {}", e.getMessage());
-            return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.of(e), devUseCase));
-        }
-        catch (BusinessRuleViolationException e) {
+        catch (ResourceNotFoundException | BusinessRuleViolationException e) {
             log.error("Not recognized at the reader: {}", e.getMessage());
             return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.of(e), devUseCase));
         }

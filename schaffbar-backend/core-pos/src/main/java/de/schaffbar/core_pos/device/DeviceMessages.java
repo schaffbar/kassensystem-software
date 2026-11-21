@@ -17,6 +17,7 @@ import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.exception.ToolAlreadyInUseByAnotherCustomerException;
 
@@ -39,12 +40,16 @@ final class DeviceMessages {
             entry(RfidTagAlreadyRegisteredException.CODE, "RFID bereits vorhanden!"), //
             entry(NoRfidTagAssignmentWaitingException.CODE, "RFID nicht zugewiesen"));
 
-    static String of(BusinessRuleViolationException e) {
-        return BY_CODE.getOrDefault(e.getCode(), UNEXPECTED);
+    static String of(RuntimeException e) {
+        return switch (e) {
+            case BusinessRuleViolationException violation -> BY_CODE.getOrDefault(violation.getCode(), UNEXPECTED);
+            case ResourceNotFoundException notFound -> notFound(notFound.getResource());
+            default -> UNEXPECTED;
+        };
     }
 
-    static String of(ResourceNotFoundException e) {
-        return switch (e.getResource()) {
+    private static String notFound(Resource resource) {
+        return switch (resource) {
             case RFID_READER -> "RFID Reader nicht erkannt";
             case RFID_TAG -> "RFID Tag nicht erkannt";
             case CUSTOMER -> "Kunde nicht erkannt";
