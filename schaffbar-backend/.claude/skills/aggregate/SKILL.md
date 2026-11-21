@@ -538,15 +538,10 @@ Besides the folder, a new aggregate touches `shared/`, the migrations and the do
 The rules above are the target. Some code predates them and is fixed aggregate by aggregate (roadmap K4) – **follow
 this skill, not the code next to you.** Known deviations:
 
-- `@Transactional` (Spring's or jakarta's) instead of `@Query` / `@Command`, queries without any transaction (E9,
-  E21) – `rfid_reader`, `rfid_tag`, `rfid_tag_assignment`, `customer`, `tool` and `tool_certification` are
-  converted; of `workshop_usage`, `tool_usage` and `workshop_session` the services, their use cases follow.
-- `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
-- Value objects without `@Valid` in commands and views.
-- The dashboard controllers read the services directly; `domain/dashboard/` still holds services that read other
-  services – both become read facades (E17).
+- Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
+  `ToolViews`, …).
 
-The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
+The ArchUnit freeze store `core-pos/archunit_store/` holds no violation any more (21.11.2026).
 
 ## Tests that enforce it
 

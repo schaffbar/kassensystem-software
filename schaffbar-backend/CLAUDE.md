@@ -46,10 +46,10 @@ core_pos/
                         *Commands, *Service, *Repository (package-private), *Views, *EventFactory, *PayloadMapper,
                         enums, README.md, web/ (*Controller, *ApiModel)
   use_case/             one class per change (`RfidReaderCreate`, `CustomerDelete`, `WorkshopSessionClose`)
-  read_facade/          one class per controller for its queries (`RfidReaderReadFacade`, `WorkshopDashboardReadFacade`)
-  dashboard/web/        controllers of the overview (who is in the workshop, which tools run)
-                        – until the rollout still `domain/dashboard/` with services instead of read facades (E17)
-  device/               endpoints the readers and switch boxes call (`/device/init`, `/counter`, `/card`)
+  read_facade/          one class per controller for its queries (`RfidReaderReadFacade`, `DashboardReadFacade`)
+  web/<object>/         controllers that belong to no aggregate (*Controller, *ApiModel):
+    dashboard/          the overview – who is in the workshop, which tools run
+    device/             the endpoints the readers and switch boxes call (`/device/init`, `/counter`, `/card`)
   shared/               event + outbox, exceptions, id value objects, billing (`BillableDuration`), own Bean
                         Validation constraints (`validation/`, `@DateOfBirth`, `@PostalCode`, `@ToolDescription`)
 ```
@@ -94,15 +94,16 @@ core_pos/
 ### Read facades (until their skill)
 
 - One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
-  `WorkshopDashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
+  `DashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
   `@Query` on every public method.
 - Public methods are queries (`get…`) and return views – of one aggregate, or a view of its own that combines several
-  (`WorkshopDashboardViews`, next to the facade). It reads services (any number) and never changes anything.
+  (`DashboardViews`, next to the facade). It reads services (any number) and never changes anything.
 
 ### Controller and API model (until the skill `rest-api`)
 
 - `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
-  `/api/v1/<aggregate-in-kebab-case>`. Commands call a use case, queries its read facade – never a service.
+  `/api/v1/<aggregate-in-kebab-case>`; a controller of no aggregate is `web/<object>/<Object>Controller`, path
+  `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands call a use case, queries its read facade – never a service.
 - **An endpoint is a query or a command**, never both (no "get or create").
 - `@PathVariable` and `@RequestParam` are value objects (`@PathVariable RfidReaderId rfidReaderId`), never `UUID` or
   `String` converted by hand – each needs its `StringTo<ValueObject>Converter` in `shared/util/`. An optional filter is

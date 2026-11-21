@@ -72,13 +72,13 @@ class `RfidReadersApiService`, schema `rfidReaderSchema`, type `RfidReaderApiMod
 `UpdateRfidReaderRequest`.
 
 - API names follow the **backend**: the folder and the service are named after the controller path
-  (`/api/v1/workshop-dashboard` → `workshop-dashboard/`, `workshop-dashboard.api-service.ts`), the model file after
-  the backend `…ApiModel.java` (`WorkshopDashboardApiModel.java` → `workshop-dashboard.api-model.ts`), the types
-  inside after its records (`WorkshopDashboardEntryApiDto` → `WorkshopDashboardEntryApiModel`,
-  `UpdateRfidReaderRequestBody` → `UpdateRfidReaderRequest`). Feature names follow the **feature**: the dashboard
-  calls the same thing `ActiveUser`. The mapper connects them (`toActiveUser`).
-- One feature using two controllers gets two API folders and injects both services in its store
-  (`dashboard` → `shared/api/workshop-dashboard/` + `shared/api/tool-dashboard/`).
+  (`/api/v1/dashboard` → `dashboard/`, `dashboard.api-service.ts`), the model file after the backend `…ApiModel.java`
+  (`DashboardApiModel.java` → `dashboard.api-model.ts`), the types inside after its records
+  (`ActiveWorkshopUserApiDto` → `ActiveWorkshopUserApiModel`, `UpdateRfidReaderRequestBody` →
+  `UpdateRfidReaderRequest`). Feature names follow the **feature**: the dashboard calls the same thing `ActiveUser`.
+  The mapper connects them (`toActiveUser`).
+- One feature using several controllers injects each of their services in its store (`users` →
+  `shared/api/customers/` + `shared/api/dashboard/` for who is in the workshop right now).
 
 ## API model
 
