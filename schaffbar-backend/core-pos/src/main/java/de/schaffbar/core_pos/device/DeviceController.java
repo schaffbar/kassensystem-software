@@ -1,9 +1,6 @@
 package de.schaffbar.core_pos.device;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-
-import java.time.LocalDateTime;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -25,19 +22,17 @@ import de.schaffbar.core_pos.device.DeviceApiModel.InitRequestBody;
 import de.schaffbar.core_pos.device.DeviceApiModel.InitResponse;
 import de.schaffbar.core_pos.device.DeviceApiModel.RfidTagRequestBody;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderService;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
-import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.read_facade.DeviceReadFacade;
 import de.schaffbar.core_pos.read_facade.DeviceViews.WorkshopStayView;
 import de.schaffbar.core_pos.shared.exception.BusinessRuleViolationException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidReaderCreate;
 import de.schaffbar.core_pos.use_case.RfidTagCreate;
 import de.schaffbar.core_pos.use_case.ToolUsageToggle;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
@@ -50,9 +45,7 @@ import de.schaffbar.core_pos.use_case.WorkshopUsageStop;
 @RequestMapping(path = "/device")
 public class DeviceController {
 
-    private final @NonNull RfidReaderService rfidReaderService;
-
-    private final @NonNull ToolService toolService;
+    private final @NonNull RfidReaderCreate rfidReaderCreate;
 
     private final @NonNull RfidTagCreate rfidTagCreate;
 
@@ -71,41 +64,22 @@ public class DeviceController {
     public ResponseEntity<InitResponse> init(@RequestBody @NotNull @Valid InitRequestBody requestBody) {
         log.info("Init RFID reader. Received mac address: {}", requestBody.MACADDR());
 
-        MacAddress macAddress = MacAddress.of(requestBody.MACADDR());
-        RfidReaderId id = this.rfidReaderService.getRfidReader(macAddress) //
-                .map(RfidReaderView::id) //
-                .orElseGet(() -> this.rfidReaderService.createRfidReader(macAddress));
+        try {
+            RfidReaderView rfidReader = getOrRegisterRfidReader(MacAddress.of(requestBody.MACADDR()));
 
-        RfidReaderView rfidReader = this.rfidReaderService.getRfidReader(id) //
-                .orElseThrow(() -> ResourceNotFoundException.rfidReader(id));
+            InitResponse response = switch (rfidReader.type()) {
+                case SWITCH_BOX -> startSwitchBox(rfidReader);
+                case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER, GATE_KEEPER_IN, GATE_KEEPER_OUT -> InitResponse.start(rfidReader.type());
+                case null -> InitResponse.errorWithoutType("Nicht Gefunden");
+            };
 
-        ToolView tool = rfidReader.type() == RfidReaderType.SWITCH_BOX ? this.toolService.getTool(rfidReader.id()).orElse(null) : null;
-        String error = getInitError(rfidReader, tool);
-        // only a switch box that starts gets the commands for the relay of its tool
-        boolean relay = error.isEmpty() && nonNull(tool);
-
-        LocalDateTime now = LocalDateTime.now();
-        InitResponse response = InitResponse.builder() //
-                .STATE(error.isEmpty() ? "START" : "ERROR") //
-                .DEVNAME(getDeviceNme(rfidReader)) //
-                .STARTHTTP(relay ? "http://" : "") //
-                .DEVIP(relay ? tool.ipAddress().getValue() : "") //
-                .SWITCHON(relay ? "/relay/0?" + tool.onCommand() : "") //
-                .SWITCHOFF(relay ? "/relay/0?" + tool.offCommand() : "") //
-                .DEVUSECASE(isNull(rfidReader.type()) ? "ERROR" : rfidReader.type().getKey()) //
-                .TERMINAL("") //
-                .ERROR(error) //
-                .DATEY(now.getYear()) //
-                .DATEM(now.getMonthValue()) //
-                .DATED(now.getDayOfMonth()) //
-                .TIMEH(now.getHour()) //
-                .TIMEM(now.getMinute()) //
-                .TIMES(now.getSecond()) //
-                .build();
-
-        log.info("RFID reader init response: {}", response);
-
-        return ResponseEntity.ok(response);
+            log.info("RFID reader init response: {}", response);
+            return ResponseEntity.ok(response);
+        }
+        catch (RuntimeException e) {
+            log.error("Unexpected error at init of RFID reader [mac address: {}]", requestBody.MACADDR(), e);
+            return ResponseEntity.ok(InitResponse.errorWithoutType(DeviceMessages.UNEXPECTED));
+        }
     }
 
     @PostMapping(value = "/counter", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -180,36 +154,27 @@ public class DeviceController {
     // ------------------------------------------------------------------------
     // helper
 
-    // a switch box can only start with a tool that has a WLAN relais (R-8, T-23); tool is null when none is assigned
-    private String getInitError(RfidReaderView rfidReader, ToolView tool) {
-        if (isNull(rfidReader.type())) {
-            return "Nicht Gefunden";
-        }
-        if (rfidReader.type() != RfidReaderType.SWITCH_BOX) {
-            return "";
-        }
-        if (isNull(tool)) {
-            return "Kein Werkzeug";
-        }
-        if (isNull(tool.ipAddress())) {
-            return "Kein WLAN-Relais";
+    // R-9 – an unknown reader registers itself, without type, until it gets one in the portal
+    private RfidReaderView getOrRegisterRfidReader(MacAddress macAddress) {
+        if (!this.deviceReadFacade.isRfidReaderRegistered(macAddress)) {
+            this.rfidReaderCreate.process(macAddress);
         }
 
-        return "";
+        return this.deviceReadFacade.getRfidReader(macAddress);
     }
 
-    private String getDeviceNme(RfidReaderView rfidReader) {
-        if (isNull(rfidReader.type())) {
-            return "ERROR";
+    // a switch box only starts with a tool (R-8) that has a WLAN relais (T-23)
+    private InitResponse startSwitchBox(RfidReaderView switchBox) {
+        ToolView tool = this.deviceReadFacade.getTool(switchBox.id()).orElse(null);
+        if (isNull(tool)) {
+            return InitResponse.error(RfidReaderType.SWITCH_BOX, "Kein Werkzeug");
+        }
+        // the API sets type and IP address together (T-5), old data may have only one of them
+        if (isNull(tool.wlanRelaisType()) || isNull(tool.ipAddress())) {
+            return InitResponse.error(RfidReaderType.SWITCH_BOX, "Kein WLAN-Relais");
         }
 
-        return switch (rfidReader.type()) {
-            case RFID_TAG_REGISTER -> "RFID Tag Register";
-            case RFID_TAG_ASSIGNER -> "RFID Tag Assigner";
-            case GATE_KEEPER_IN -> "Gate Keeper In";
-            case GATE_KEEPER_OUT -> "Gate Keeper Out";
-            case SWITCH_BOX -> "Switch Box";
-        };
+        return InitResponse.startSwitchBox(tool.ipAddress(), tool.onCommand(), tool.offCommand());
     }
 
     private CounterResponse registerRfidTag(RfidTagId rfidTagId) {

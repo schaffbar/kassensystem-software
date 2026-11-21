@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.device;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 public interface DeviceApiModel {
@@ -16,9 +18,7 @@ public interface DeviceApiModel {
     // ------------------------------------------------------------------------
     // response
 
-    // TODO: change access level to PRIVATE
-    // @Builder(access = AccessLevel.PRIVATE)
-    @Builder
+    @Builder(access = AccessLevel.PRIVATE)
     record InitResponse( //
             String STATE,  //
             String DEVNAME,  //
@@ -35,7 +35,78 @@ public interface DeviceApiModel {
             int TIMEH, //
             int TIMEM, //
             int TIMES //
-    ) {}
+    ) {
+
+        // a reader without relay: everything except a switch box
+        public static InitResponse start(RfidReaderType type) {
+            return withCurrentTime() //
+                    .STATE("START") //
+                    .DEVNAME(deviceName(type)) //
+                    .DEVUSECASE(type.getKey()) //
+                    .ERROR("") //
+                    .build();
+        }
+
+        public static InitResponse startSwitchBox(IpAddress relayIpAddress, String onCommand, String offCommand) {
+            return withCurrentTime() //
+                    .STATE("START") //
+                    .DEVNAME(deviceName(RfidReaderType.SWITCH_BOX)) //
+                    .DEVUSECASE(RfidReaderType.SWITCH_BOX.getKey()) //
+                    .STARTHTTP("http://") //
+                    .DEVIP(relayIpAddress.getValue()) //
+                    .SWITCHON("/relay/0?" + onCommand) //
+                    .SWITCHOFF("/relay/0?" + offCommand) //
+                    .ERROR("") //
+                    .build();
+        }
+
+        public static InitResponse error(RfidReaderType type, String message) {
+            return withCurrentTime() //
+                    .STATE("ERROR") //
+                    .DEVNAME(deviceName(type)) //
+                    .DEVUSECASE(type.getKey()) //
+                    .ERROR(message) //
+                    .build();
+        }
+
+        // a reader without type, or one that could not be read
+        public static InitResponse errorWithoutType(String message) {
+            return withCurrentTime() //
+                    .STATE("ERROR") //
+                    .DEVNAME("ERROR") //
+                    .DEVUSECASE("ERROR") //
+                    .ERROR(message) //
+                    .build();
+        }
+
+        private static InitResponseBuilder withCurrentTime() {
+            LocalDateTime now = LocalDateTime.now();
+
+            return InitResponse.builder() //
+                    .STARTHTTP("") //
+                    .DEVIP("") //
+                    .SWITCHON("") //
+                    .SWITCHOFF("") //
+                    .TERMINAL("") //
+                    .DATEY(now.getYear()) //
+                    .DATEM(now.getMonthValue()) //
+                    .DATED(now.getDayOfMonth()) //
+                    .TIMEH(now.getHour()) //
+                    .TIMEM(now.getMinute()) //
+                    .TIMES(now.getSecond());
+        }
+
+        private static String deviceName(RfidReaderType type) {
+            return switch (type) {
+                case RFID_TAG_REGISTER -> "RFID Tag Register";
+                case RFID_TAG_ASSIGNER -> "RFID Tag Assigner";
+                case GATE_KEEPER_IN -> "Gate Keeper In";
+                case GATE_KEEPER_OUT -> "Gate Keeper Out";
+                case SWITCH_BOX -> "Switch Box";
+            };
+        }
+
+    }
 
     @Builder(access = AccessLevel.PRIVATE)
     record CounterResponse( //

@@ -60,6 +60,11 @@ public class DeviceReadFacade {
     private final @NonNull WorkshopUsageService workshopUsageService;
 
     @Query
+    public boolean isRfidReaderRegistered(@NotNull @Valid MacAddress macAddress) {
+        return this.rfidReaderService.getRfidReader(macAddress).isPresent();
+    }
+
+    @Query
     public RfidReaderView getRfidReader(@NotNull @Valid MacAddress macAddress) {
         return this.rfidReaderService.getRfidReader(macAddress) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(macAddress));

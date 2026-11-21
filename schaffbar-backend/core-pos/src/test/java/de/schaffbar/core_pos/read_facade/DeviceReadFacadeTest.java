@@ -3,6 +3,7 @@ package de.schaffbar.core_pos.read_facade;
 import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.rfidReaderView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagAssignmentView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagView;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,6 +71,35 @@ class DeviceReadFacadeTest {
 
     @InjectMocks
     private DeviceReadFacade deviceReadFacade;
+
+    // ------------------------------------------------------------------------
+    // isRfidReaderRegistered
+
+    @Test
+    void isRfidReaderRegistered_knownMacAddress_isTrue() {
+        // given
+        MacAddress macAddress = RandomValues.macAddress();
+        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress.getValue()).build()));
+
+        // when
+        boolean registered = this.deviceReadFacade.isRfidReaderRegistered(macAddress);
+
+        // then
+        assertThat(registered).isTrue();
+    }
+
+    @Test
+    void isRfidReaderRegistered_unknownMacAddress_isFalse() {
+        // given
+        MacAddress unknown = RandomValues.macAddress();
+        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
+
+        // when
+        boolean registered = this.deviceReadFacade.isRfidReaderRegistered(unknown);
+
+        // then
+        assertThat(registered).isFalse();
+    }
 
     // ------------------------------------------------------------------------
     // getRfidReader
