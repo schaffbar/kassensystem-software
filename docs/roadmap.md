@@ -175,8 +175,7 @@ Erledigt am 15.11.2026 mit dem Pilot (K3):
   ohne Details (E7, E8). Exceptions von `rfid_reader` haben schon eine Basisklasse und einen Code.
 - Portal: der Fehler-Interceptor zeigt die Übersetzung `shared.errors.<CODE>`, sonst die allgemeine Meldung.
 
-Noch offen (im Rollout, K4): die letzte Exception (`NoCustomerAssigned`, nur am Gerät) an die Basisklasse hängen,
-mit Code und Übersetzung im Portal; nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
+Alle Exceptions haben eine Basisklasse und einen Code (zuletzt `NoCustomerAssigned`, 21.11.2026). Noch offen: nach dem Neustart des Backends einmal gegen das echte Backend prüfen. Danach werden reine Vorab-Prüfungen im
 Portal optional (z. B. `getToolsByRfidReader` vor dem Typwechsel eines Lesegeräts, `canDeleteUser` in der
 Benutzerliste) – behalten, wo sie den Button schon vorher erklären.
 
