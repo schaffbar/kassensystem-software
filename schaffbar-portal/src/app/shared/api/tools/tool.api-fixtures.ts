@@ -12,9 +12,6 @@ export function toolFixture(overrides: Partial<ToolApiModel> = {}): ToolApiModel
     rfidReaderId: null,
     wlanRelaisType: null,
     ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
     instructors: [],
     ...overrides,
   };

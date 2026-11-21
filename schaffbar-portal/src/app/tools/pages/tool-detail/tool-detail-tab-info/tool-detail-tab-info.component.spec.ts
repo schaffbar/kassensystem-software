@@ -35,9 +35,6 @@ describe('ToolDetailTabInfoComponent', () => {
     rfidReaderId: 'reader-1',
     wlanRelaisType: WlanRelaisType.Shelly1,
     ipAddress: '192.168.1.56',
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
     instructors: ['user-1'],
   };
   const instructors: ToolInstructor[] = [

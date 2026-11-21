@@ -33,9 +33,6 @@ describe('isHardwareSetUp', () => {
     rfidReaderId: null,
     wlanRelaisType: null,
     ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
     instructors: [],
   };
 
@@ -60,9 +57,6 @@ describe('canClearRfidReader', () => {
     rfidReaderId: 'reader-1',
     wlanRelaisType: null,
     ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
     instructors: [],
   };
 

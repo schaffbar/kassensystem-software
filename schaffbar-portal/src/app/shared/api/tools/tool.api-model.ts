@@ -13,9 +13,6 @@ export const toolSchema = z.object({
   rfidReaderId: z.string().nullable(),
   wlanRelaisType: z.enum(WlanRelaisType).nullable(),
   ipAddress: z.string().nullable(),
-  httpStartCommand: z.string().nullable(),
-  onCommand: z.string().nullable(),
-  offCommand: z.string().nullable(),
   instructors: z.array(z.string()),
 });
 

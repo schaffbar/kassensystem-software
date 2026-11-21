@@ -30,9 +30,6 @@ describe('ToolDetailComponent', () => {
     rfidReaderId: null,
     wlanRelaisType: null,
     ipAddress: null,
-    httpStartCommand: null,
-    onCommand: null,
-    offCommand: null,
     instructors: [],
     usedBy: 'Anna Becker',
   };

@@ -27,9 +27,6 @@ describe('ToolDetailTabConfigurationComponent', () => {
       rfidReaderId,
       wlanRelaisType: null,
       ipAddress: null,
-      httpStartCommand: null,
-      onCommand: null,
-      offCommand: null,
       instructors: [],
       usedBy,
     };

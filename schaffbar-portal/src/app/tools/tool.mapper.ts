@@ -29,9 +29,6 @@ export function toTool(apiModel: ToolApiModel): Tool {
     rfidReaderId: apiModel.rfidReaderId,
     ipAddress: apiModel.ipAddress,
     wlanRelaisType: apiModel.wlanRelaisType,
-    httpStartCommand: apiModel.httpStartCommand,
-    onCommand: apiModel.onCommand,
-    offCommand: apiModel.offCommand,
     instructors: apiModel.instructors,
   };
 }

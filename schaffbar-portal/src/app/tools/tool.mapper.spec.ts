@@ -25,9 +25,6 @@ describe('tool.mapper', () => {
         rfidReaderId: 'reader-1',
         wlanRelaisType: WlanRelaisType.ShellyPro,
         ipAddress: '192.168.0.10',
-        httpStartCommand: 'http://192.168.0.10/rpc/Switch.Set?',
-        onCommand: 'id=0&on=true',
-        offCommand: 'id=0&on=false',
         instructors: ['user-1'],
       };
 

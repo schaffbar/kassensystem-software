@@ -11,9 +11,6 @@ export interface Tool {
   rfidReaderId: string | null;
   ipAddress: string | null;
   wlanRelaisType: WlanRelaisType | null;
-  httpStartCommand: string | null;
-  onCommand: string | null;
-  offCommand: string | null;
   instructors: string[];
 }
 
