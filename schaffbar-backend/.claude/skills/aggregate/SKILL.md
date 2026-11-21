@@ -543,8 +543,8 @@ this skill, not the code next to you.** Known deviations:
   converted; of `workshop_usage`, `tool_usage` and `workshop_session` the services, their use cases follow.
 - `RuntimeException` and exceptions without a base class → dedicated exceptions / `IllegalStateException` (E8).
 - Value objects without `@Valid` in commands and views.
-- The dashboard controllers and the `DeviceController` read the services directly; `domain/dashboard/` still holds
-  services that read other services – both become read facades (E17).
+- The dashboard controllers read the services directly; `domain/dashboard/` still holds services that read other
+  services – both become read facades (E17).
 
 The full list is the ArchUnit freeze store `core-pos/archunit_store/`.
 
