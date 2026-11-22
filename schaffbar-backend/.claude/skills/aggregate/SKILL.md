@@ -588,9 +588,9 @@ this skill, not the code next to you.** Known deviations:
 - Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
   `ToolViews`, …).
 - From the backend review (`docs/backend-review.md`, section 3), fixed in the step of each aggregate: `Active…` instead
-  of `Running…` (E6); delete via a view and `deleteById` (`rfid_tag`, E30); enums as `String` in payloads
-  (`rfid_tag_assignment`, E31); entity guards without the comment who checks (E29); `WorkshopUsage.exit()` instead of
-  `stop()`; `cancelRfidTagAssignmentRequest` instead of `cancelRfidTagAssignment` (E20).
+  of `Running…` (E6); enums as `String` in payloads (`rfid_tag_assignment`, E31); entity guards without the comment
+  who checks (E29); `WorkshopUsage.exit()` instead of `stop()`; `cancelRfidTagAssignmentRequest` instead of
+  `cancelRfidTagAssignment` (E20).
 
 Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 
