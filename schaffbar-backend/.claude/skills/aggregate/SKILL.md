@@ -541,14 +541,13 @@ this skill, not the code next to you.** Known deviations:
 - Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
   `ToolViews`, …).
 
-The ArchUnit freeze store `core-pos/archunit_store/` holds no violation any more (21.11.2026).
+Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 
 ## Tests that enforce it
 
 Most of these rules are checked by the ArchUnit tests in `core-pos/src/test/java/de/schaffbar/core_pos/architecture/`
-(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`. Rules with known violations are
-frozen: only new violations fail; a fixed one disappears from `archunit_store/` on the next run – keep that change.
-Never add a violation to the store to make a build pass. A rule in this skill and its ArchUnit rule change together.
+(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`. Every rule is strict (no `freeze(…)`):
+a violation is fixed, never excepted to make a build pass. A rule in this skill and its ArchUnit rule change together.
 
 ## Checklist
 

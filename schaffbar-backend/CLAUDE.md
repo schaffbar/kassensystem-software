@@ -104,12 +104,16 @@ core_pos/
 - `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
   `/api/v1/<aggregate-in-kebab-case>`; a controller of no aggregate is `web/<object>/<Object>Controller`, path
   `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands call a use case, queries its read facade – never a service.
+  A new `web/<object>/` controller of the portal is added to `basePackages` of `ApiExceptionHandler` (`web/device/` is
+  not: it answers the firmware in its own format).
 - **An endpoint is a query or a command**, never both (no "get or create").
 - `@PathVariable` and `@RequestParam` are value objects (`@PathVariable RfidReaderId rfidReaderId`), never `UUID` or
   `String` converted by hand – each needs its `StringTo<ValueObject>Converter` in `shared/util/`. An optional filter is
   `@RequestParam(required = false)` with a `nonNull(…)` check.
 - `<Aggregate>ApiModel`: a MapStruct `@Mapper` extending `ValueObjectMapper` with the response records (`…ApiDto`) and
-  request records (`…RequestBody`). Ids in responses are `String` (`@Mapping(target = "id", source = "id.value")`),
+  request records (`…RequestBody`). Responses carry no value object and no `UUID`: ids and values are `String`
+  (`@Mapping(target = "id", source = "id.value")`; a `Set<CustomerId>` maps with `ValueObjectMapper.toValue`), enums
+  their enum type, dates `Instant` / `LocalDate` (ArchUnit `ValueObjectArchitectureTest`);
   request bodies take value objects (their `@JsonCreator` reads them).
 
 ## Code
@@ -191,8 +195,8 @@ Skill `backend-testing` has all rules; the short form:
   verifications in `expect…` methods. Follow the skill, not the test next to it.
   Each test creates its own data (no fields): commands from `builder/CommandBuilder`, views from `builder/ViewBuilder`,
   values random (`RandomValues`, `XyzId.random()`) unless the value is the subject of the test.
-- **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`); frozen violations live in
-  `core-pos/archunit_store/` – never add one to make the build pass.
+- **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`); every rule is strict (no `freeze(…)`) –
+  a violation is fixed, never excepted to make the build pass.
 
 ## Definition of done
 

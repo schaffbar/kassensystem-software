@@ -378,9 +378,8 @@ data still from random values. The first one sets the pattern – show it before
 
 - A rule is a `static final ArchRule` field with `@ArchTest`, named as the rule in words
   (`valuesFromDevicesAreNeverInvented`), with `.because(…)` where the reason is not obvious.
-- **Rules with known violations are frozen** (`freeze(…)`, store in `core-pos/archunit_store/`): only new violations
-  fail; a fixed one leaves the store on the next run – keep that change. Never add a violation to the store to make the
-  build pass; a renamed frozen rule leaves an orphan in `stored.rules` – remove it.
+- **Every rule is strict** – no `freeze(…)`, no store of known violations. A new rule that finds violations comes
+  with their fix in the same change; a violation is never excepted to make the build pass.
 - **A new rule is tried once against a deliberate violation** – a rule that cannot fail proves nothing.
 - A rule in ArchUnit is also written in the skill of its topic (skills are the complete documentation; ArchUnit
   enforces part of it).
