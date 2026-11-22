@@ -301,7 +301,7 @@ Das bleibt so und kommt so in die Skills:
 | E12 | Formatregeln an den Commands | ja | 13.11.2026: ja |
 | E13 | ArchUnit im Pilot | ja | 13.11.2026: ja |
 | E14 | Datenbanktests mit Testcontainers | später (nach K) | 13.11.2026: später – 15.11.2026 geändert: **jetzt, vor dem Rollout** (E22–E24) |
-| E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja |
+| E15 | ArchUnit-Regeln mit vielen Altlasten | `FreezingArchRule`: bekannte Verstöße in `core-pos/archunit_store/`, nur neue schlagen fehl, behobene verschwinden beim nächsten Lauf | 15.11.2026: ja – 22.11.2026: Store leer, `freeze(…)` und Store entfernt, alle Regeln streng |
 | E16 | `rfid_tag_assignment_history` hängt von `rfid_tag_assignment` ab (Typ, View) | Historie ins Paket `rfid_tag_assignment` ziehen | 15.11.2026: beim Rollout von `rfid_tag_assignment` entscheiden – 16.11.2026: ja, als **innere Entity** von `RfidTagAssignment` (eigenes Repository, sonst keine Bausteine); das Lösen löscht die Zuweisung und schreibt den Historien-Eintrag in einem Schritt, `RFID_TAG_UNASSIGNED` trägt den Eintrag; ArchUnit: Aggregat = Entity mit dem Namen des Pakets |
 | E17 | Abfragen der Controller | eine ReadFacade pro Controller in `read_facade/` neben `use_case/` (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`), `@Transactional(readOnly = true)`, auch wenn sie nur weiterreicht; Controller kennen nur Use Cases und ReadFacades; die Dashboard-Services werden ReadFacades, Controller und API-Modell ziehen nach `dashboard/web/` – in `domain/` liegen nur Aggregate | 15.11.2026: ja |
 | E18 | Value Objects als Feld in Commands und Views | immer `@NotNull @Valid` (optional: nur `@Valid`) | 15.11.2026: ja |
@@ -313,6 +313,7 @@ Das bleibt so und kommt so in die Skills:
 | E24 | Testcontainers | ein Container `postgres:16.3` für den ganzen Testlauf, Flyway migriert einmal, `@ServiceConnection`; läuft in `mvn test` (kein eigenes Failsafe-Ziel, solange es schnell genug ist) | 15.11.2026: ja |
 | E25 | Value Objects einheitlich | Interface `ValueObject<T>` mit `sameValueAs` als Default-Methode (Typparameter verhindert Vergleiche über Typen hinweg); `random()` nur für UUID-Ids – Werte von Geräten (`MacAddress`, `RfidTagId`, `IpAddress`) erfindet das System nie, Tests nehmen `RandomValues`; Enum für Fehlermeldungen heißt `ValueObjectName`; geprüft von `ValueObjectArchitectureTest` | 15.11.2026: ja |
 | E26 | Jede Datenbankänderung erzeugt ein Event | auch Löschen und das Schreiben einer inneren Entity; die Änderung einer inneren Entity steht im Event des Aggregats (kein zweites Event); `@Command`-Methoden der Services speichern Events (ArchUnit) | 16.11.2026: feste Regel – die Historie ohne Event war eine Abkürzung |
+| E27 | Typen in API-Antworten | keine Value Objects und keine `UUID` in `…ApiDto`: Ids und Werte (`IpAddress`) als `String` über `id.value`, Enums als Enum (auch in Anfragen: `RfidReaderType` statt `String`), Datum als `LocalDate`; geprüft von `ValueObjectArchitectureTest` – das JSON bleibt gleich | 22.11.2026: ja |
 
 ## Pilot (K3)
 
