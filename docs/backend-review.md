@@ -42,7 +42,7 @@ Ein erledigter Punkt bekommt sein Häkchen und das Datum.
   `RfidTagAssignmentUnassignRfidTag` (Namen nach der Regel zu E20)
   (mit Tests, TA-7/TA-8, `ddd-overview.md`); Regel in Skill `aggregate` und `CLAUDE.md` (Abschnitt 2), ArchUnit in
   Abschnitt 4.
-- [x] **`RfidTagAssignmentHistoryController`** – 22.11.2026: zusammenlegen (E16 ergänzt). Im Schritt
+- [x] **`RfidTagAssignmentHistoryController`** – 22.11.2026: zusammenlegen (E16 ergänzt), umgesetzt 22.11.2026. Im Schritt
   `rfid_tag_assignment`: `GET /api/v1/rfid-tag-assignments/history` im `RfidTagAssignmentController`,
   `getRfidTagAssignmentHistory()` in `RfidTagAssignmentReadFacade`; `RfidTagAssignmentHistoryController` und
   `RfidTagAssignmentHistoryReadFacade` löschen, Test in `RfidTagAssignmentControllerTest`, Bruno anpassen. Kein Filter,
@@ -244,9 +244,14 @@ Teil (a) erledigt 22.11.2026, 560 Tests grün: Use Cases umbenannt (E3), `cancel
 mit Kommentar (E29), `assignmentType` als Enum im Payload (E31), `@Valid` in den Views, TA-12 neu; `ddd-overview.md`
 und `ddd-uebersicht.md` mit den neuen Namen.
 
+Teil (b) erledigt 22.11.2026, 570 Backend-Tests und `npm run check` grün: `GET /rfid-tag-assignments?customerId=&rfidTagId=`
+(E5, Portal `rfid-tag-assignments.api-service.ts`, Bruno, Skill `api`), `GET /rfid-tag-assignments/history` im
+`RfidTagAssignmentController` (E16) – `RfidTagAssignmentHistoryController` und seine Read Facade gelöscht; mit beiden
+Filtern gilt der Tag (Controller-Test).
+
 - [x] Entscheidungen oben: Zustandsregeln (E29: Kommentare an den Absicherungen, README TA-4/5/10), E3 (Use Cases
   umbenannt), Namen (`cancelRfidTagAssignment`), Payload-Typ (E31).
-- [ ] Teil (b): E5 (Query-Parameter camelCase) und Historie-Controller (E16) – mit Portal und Bruno.
+- [x] Teil (b): E5 (Query-Parameter camelCase) und Historie-Controller (E16) – mit Portal und Bruno.
 - [x] Nach dem Umbenennen von `CustomerAssignRfidTag` auch RT-4 im README von `rfid_tag` anpassen.
 - [x] `RfidTagAssignmentApiModel` erbt nicht von `ValueObjectMapper` (`:21`).
 - [x] `RfidTagAssignmentRepository:25,40,55`: Meldungen ohne Ids – `findByCustomerId` / `findByRfidTagId` liefern jetzt
@@ -257,15 +262,15 @@ und `ddd-uebersicht.md` mit den neuen Namen.
   über ihre Id gesucht (Skill `aggregate`).
 - [x] Gerät: „ein zugewiesener Tag zeigt seinen Besitzer“ (`DeviceController.assignRfidTagOrShowOwner`, Kommentar TA-2)
   hat keine README-Zeile – jetzt TA-12.
-- [ ] Tests:
+- [x] Tests:
   - [x] `RfidTagAssignmentTest` (Referenz im Skill!): Ablehnungen ohne „Zustand unverändert“ (`:66-75, 100-109, 129-138`);
     Helfer `waiting()` / `assigned()` (`:143-152`) nicht `given…`.
   - [x] `RfidTagAssignmentServiceTest:284` `expectSavedEvent` ohne Id; `:278` Captor im Stub, gelesen `:73-79`;
     wiederholt: `verify(repo).delete(…)` `:176, 208`, `verifyNoInteractions(historyRepository)` `:192, 209`.
   - [x] Fehlt im Service: unassign/cancel ohne jede Zuweisung; Anfrage, während die eigene noch wartet (TA-1).
-  - [ ] Controller (Teil b): `:92` `"ASSIGNED"` und History `:53` `"TEMPORARY"` sind Builder-Defaults; `:141, 180, 196` `returns204`;
+  - [x] Controller (Teil b): `:92` `"ASSIGNED"` und History `:53` `"TEMPORARY"` sind Builder-Defaults; `:141, 180, 196` `returns204`;
     `:164` `is409WithCode`; JSON als String `:156, 260, 272, 278`.
-  - [ ] Fehlt im Controller (Teil b): request 409 `CUSTOMER_HAS_RFID_TAG_ASSIGNMENT` und 404; assign 409 `RFID_TAG_ALREADY_ASSIGNED`,
+  - [x] Fehlt im Controller (Teil b): request 409 `CUSTOMER_HAS_RFID_TAG_ASSIGNMENT` und 404; assign 409 `RFID_TAG_ALREADY_ASSIGNED`,
     `NO_RFID_TAG_ASSIGNMENT_WAITING` und 404; unassign 409 `NO_RFID_TAG_ASSIGNED` und 404; Filter ohne Treffer; beide
     Filter.
   - [x] Use Cases: 404 ohne `resource` (`CustomerAssignRfidTagTest:57`, `CustomerRequestRfidTagAssignmentTest:57`,
