@@ -27,7 +27,8 @@ domain/<aggregate>/
   <Aggregate>Service.java          queries and commands of the aggregate        always
   <Aggregate>Views.java            view records + entity → view (MapStruct)     always
   <Inner>.java + <Inner>Repository  inner entity (@Entity) with its repository   optional
-  <Enum>.java, @Embeddable          types of the aggregate (RfidReaderType, CustomerAddress – package-private)
+  <Enum>.java                      enums of the aggregate (RfidReaderType) – public: views, API and payloads use them
+  <Part>.java                      @Embeddable part of the entity (CustomerAddress) – package-private
   README.md                        attributes, rules, events
   web/                             controller + API model, only when the portal calls it
 ```
@@ -42,7 +43,8 @@ them, a use case, or in `shared/`.
 | one field's format without a value of its own | Bean Validation on the command (`@NotBlank`, `@Email`) | a valid email address |
 | one field's value range Bean Validation has no annotation for | an own constraint in `shared/validation/` (annotation + `ConstraintValidator`), on the command | date of birth within the last 100 years (`@DateOfBirth`) |
 | one field's format with a value (a length, a pattern) | an own constraint in `shared/validation/` composed of Bean Validation annotations (`@Size` + `@ReportAsSingleViolation`, `validatedBy = {}`), so the value is written once and command and request body share it – no constant | postal code has 5 characters (`@PostalCode`) |
-| the aggregate's own state | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
+| the aggregate's own state, the aggregate loaded by its id | the entity's command method, throws a dedicated exception | a paused certification cannot be paused again |
+| the aggregate's own state, the aggregate found **by that state** ("the open session of the customer", "the waiting request", "the running visit") | whoever finds it – the service, or the use case that needs its id: the query finds the row in that state, `orElseThrow` throws the dedicated exception; the entity's command keeps a guard against a bug (see "How a check is written") | leaving without a running visit (WU-2), assigning a tag without a waiting request (TA-4) |
 | other rows of the same aggregate | the service command | MAC address is unique |
 | a second aggregate | a use case | a reader assigned to a tool cannot be deleted |
 | a referenced aggregate exists | a use case, before the change; for a list, all entries first | the customers of a batch certification exist |
@@ -123,9 +125,21 @@ private void throwToolAlreadyInUseByAnotherCustomerException(ToolUsage existing)
 - `ensure…` only checks, it changes nothing – an `ifPresent` that acts (unassign or cancel in `CustomerDelete`) is
   a helper with a verb of its own (`releaseRfidTag`).
 - Loading stays inline: `orElseThrow(() -> ResourceNotFoundException.tool(toolId))` or a `findOrThrow` helper – it
-  returns what the command works with.
+  returns what the command works with. An aggregate found by its state throws the rule's exception instead
+  (`findByCustomerIdAndExitTimeIsNull(customerId).orElseThrow(() -> new NoRunningWorkshopUsageFoundException(customerId))`,
+  E29 in `docs/backend-consistency.md`).
 - A guard against a bug (the caller already checked) is an `ensure…` too, throws `IllegalStateException` and says
-  in its comment who checks before (`ensureNoOpenWorkshopSession` in `WorkshopSessionService`).
+  in its comment who checks before (`ensureNoOpenWorkshopSession` in `WorkshopSessionService`). The same in an
+  entity's command whose aggregate was found by its state – the guard stays, the comment says who found it:
+
+  ```java
+  public List<SchaffbarEvent> stop() {
+      // the service finds only a running visit (WU-2)
+      if (nonNull(this.exitTime)) {
+          throw new IllegalStateException("Workshop usage [id: " + this.id + "] has already been stopped");
+      }
+      …
+  ```
 
 ## Aggregate root
 
@@ -188,8 +202,8 @@ class RfidReader {
 - **Package-private class** – only its own service sees it; everyone else gets views.
 - **No public constructor.** The protected no-args constructor is for JPA; an aggregate is created by
   `public static <Aggregate> of(…)`, which takes a command or value objects, sets a new id
-  (`<Aggregate>Id.random().getValue()`, not `UUID.randomUUID()`) and `createdAt`, and returns the entity – the creation
-  event is created by the service after saving.
+  (`<Aggregate>Id.random().getValue()`, not `UUID.randomUUID()`) and `createdAt` when the entity has one, and returns
+  the entity – the creation event is created by the service after saving.
 - **Fields store raw values**: the id and references to other aggregates as `UUID` (or `String` for RFID tags), value
   objects as their value, enums with `@Enumerated(EnumType.STRING)`. Constraints on the fields (`@NotNull`,
   `@NotBlank`) mirror the migration. Every entity has `@Version private Instant updatedAt`.
@@ -201,11 +215,17 @@ class RfidReader {
   (`isInstructor(CustomerId)`, `getBillableDurationUntil(Instant)`). A command changes the state through the private
   setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
   checks the rules that need only the aggregate's own state and throws their exception
-  (`ToolCertification.pause()`).
+  (`ToolCertification.pause()`) – or, when the aggregate was found by that state, keeps a guard against a bug
+  (`WorkshopUsage.stop()`, table "Where a rule lives").
 - **A command is named after the change, without the aggregate's name:** a change of the aggregate itself is the
   verb alone (`session.close()`, `certification.pause()`, `assignment.cancel()`); a change concerning something else
   names it, and opposite changes are named as a pair (`tool.assignRfidReader()` / `clearRfidReader()`,
-  `assignment.assignRfidTag()` / `unassignRfidTag()`). Never `certification.pauseCertification()`.
+  `assignment.assignRfidTag()` / `unassignRfidTag()`). Never `certification.pauseCertification()`. The service command
+  and the use case take their names from it (section "Service").
+- **A state without an end is named as in the glossary (E6):** a session is *open* (`OPEN`), a workshop or tool usage
+  is *running* (no `exitTime` / `endTime`) – in methods, exceptions and their codes, views, fields and API paths:
+  `getOpenWorkshopSession`, `hasRunningToolUsage`, `RunningToolUsageExistsForSessionException`; never `active`. A
+  certification's status `ACTIVE` is not such a state – it stays.
 - Null checks with `nonNull(…)` / `isNull(…)` (static import from `java.util.Objects`), not `!= null` / `== null`.
 - Sections `// static constructor`, `// query`, `// command`, `// helper`.
 
@@ -218,11 +238,17 @@ entity in the package is an **inner entity**: it belongs to the aggregate and ch
 - Package-private like the root, created by a **package-private** `static of(…)` that the service calls, private
   setters; it has its own package-private `<Inner>Repository`, but **no service, views, commands, event factory or
   payload mapper** of its own – the aggregate's building blocks cover it (its view is a record in `<Aggregate>Views`).
+  Also on the web side: no controller or read facade of its own – a sub-path of the aggregate's controller
+  (`GET /rfid-tag-assignments/history`) with a query in the aggregate's read facade (E16).
 - **Its change is a change of the aggregate:** the service writes it in the same command, and the aggregate's event
-  describes it. `unassignRfidTag` creates the history entry with `RfidTagAssignmentHistory.of(assignment)`, passes it
-  to the entity's command `assignment.unassignRfidTag(historyEntry)`, saves it and deletes the assignment;
+  describes it. `unassignRfidTag` finds the customer's assignment in the state `ASSIGNED` (or throws
+  `NoRfidTagAssignedException`), only then creates the history entry with `RfidTagAssignmentHistory.of(assignment)`,
+  passes it to the entity's command `assignment.unassignRfidTag(historyEntry)`, saves it and deletes the assignment;
   `RFID_TAG_UNASSIGNED` carries the whole history entry. One change, one event – never a second event for the inner
   entity.
+- **The inner entity is created after the aggregate's state is checked** – it is built from that state
+  (`of(assignment)` reads the tag), so the service creates it only after it found the aggregate in the right state
+  (E29); the guard in the root's command then protects against a bug.
 - Its id stays inside (`UUID`, no value object) – nobody outside refers to it.
 - Use it only when the rows exist because of the aggregate and are never changed alone. Something with its own
   lifecycle is an aggregate.
@@ -293,9 +319,11 @@ final class RfidReaderEventFactory {
 
 1. Constant in `shared/event/EventType`.
 2. Payload record in `shared/event/payload/<Aggregate>EventPayload` – nested in the interface, implements it, fields
-   validated like a command. Payloads may use the enums and value objects of their aggregate, never an entity or an
-   `@Embeddable`: a part of the entity gets its own record in the payload interface (`CustomerAddressPayload`, with
-   `@Valid` on the field), so a change of the entity does not change the format of the stored events.
+   validated like a command. Payloads contain **enums and values**: an enum as the enum, never its `String` (the
+   stored JSON is the same); a value as its value object (`MacAddress`, `IpAddress`, the ids), also a value record
+   from `shared/` (`BillingTotal`) – E31. Never an entity or an `@Embeddable`: a part of the entity gets its own record
+   in the payload interface (`CustomerAddressPayload`, with `@Valid` on the field), so a change of the entity does not
+   change the format of the stored events.
 3. Method in the PayloadMapper (when mapped from the entity).
 4. Method in the EventFactory.
 5. Row in the README's "Domain Events".
@@ -329,12 +357,6 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
 
     List<Tool> findByNameIgnoreCase(String name);
 
-    Optional<Tool> findByIpAddress(String ipAddress);
-
-    default Optional<Tool> findByIpAddress(IpAddress ipAddress) {
-        return findByIpAddress(ipAddress.getValue());
-    }
-
     List<Tool> findByRfidReaderId(UUID rfidReaderId);
 
     default Optional<Tool> findByRfidReaderId(RfidReaderId rfidReaderId) {
@@ -354,9 +376,13 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
   object** – a `UUID` id or reference, the `String` of an `RfidTagId`, a `MacAddress`, an `IpAddress` – **there is a
   `default` method with the same name directly below it that takes the value object** and calls it with `getValue()`.
   A plain value without a value object (a name, a status) needs none. The service only calls the value object variants
-  (and the inherited `findById(id.getValue())`, `delete(entity)`). ArchUnit checks this for `UUID` parameters only.
-- A query for one row that the database returns as a list checks "at most one" in the default method; more than one
-  is broken data → `IllegalStateException`.
+  and, of the inherited methods, `findById(id.getValue())` and `delete(entity)`; another inherited method it needs gets
+  a value object overload too (`default boolean existsById(RfidTagId id)`). ArchUnit checks this for `UUID`
+  parameters only.
+- **`Optional` straight from Spring Data only on a unique column** (the id, a unique constraint, a partial unique
+  index like V9). A query that should find at most one row on a column without such a constraint returns a `List` and
+  checks "at most one" in the default method (`findByRfidReaderId` above); more than one is broken data →
+  `IllegalStateException` instead of Spring's `IncorrectResultSizeDataAccessException`.
 - A query the service needs under a name of its own wraps the derived one in a named `default` method
   (`findWaitingForAssignment()` → `findByStatus(WAITING_FOR_ASSIGNMENT)` in `RfidTagAssignmentRepository`).
 
@@ -414,13 +440,24 @@ public class RfidReaderService {
   `List<View>` – or a plain answer (`boolean`, value object), never `void`. Never an entity, also not inside
   `Optional` or `List`. They map with `<Aggregate>Views.MAPPER`. Called from a use case they join its writing
   transaction.
-- **Commands** are named verb + aggregate (`createTool`, `changeRfidReaderType`, `pauseToolCertification`),
-  `@Command`, and return `void` – only a create returns the new id. The flow:
-  - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)`;
+- **Commands** are `@Command` and return `void` – only a create returns the new id. **A service command is the
+  entity's command; where the entity leaves out the aggregate's name, it stands after the verb** (E20). The use case
+  is named `<Aggregate><EntityCommand>` (E3, `schaffbar-backend/CLAUDE.md`):
+
+  | Entity command | Service command | Use case |
+  | --- | --- | --- |
+  | the verb alone: `pause()`, `close()`, `stop()`, `update(…)` | verb + aggregate: `pauseToolCertification`, `closeWorkshopSession` | `ToolCertificationPause`, `WorkshopSessionClose` |
+  | verb + property: `changeType(…)`, `changeContact(…)` | the aggregate after the verb: `changeRfidReaderType`, `changeCustomerContact` | `RfidReaderChangeType`, `CustomerChangeContact` |
+  | names something else: `assignRfidReader(…)`, `setWlanRelais(…)`, `assignRfidTag(…)` | the same: `assignRfidReader`, `setWlanRelais`, `assignRfidTag` | `ToolAssignRfidReader`, `RfidTagAssignmentAssignRfidTag` |
+  | create (`of(…)` + `save`), delete | verb + aggregate: `createTool`, `deleteTool` | `ToolCreate`, `ToolDelete` |
+
+  The flow:
+  - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)` – or, found by its state, the rule's
+    exception (E29);
   - check the rules that need other rows of the aggregate (uniqueness) – one `ensure…` each ("How a check is
     written");
-  - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete:
-    `deleteById` + the deleted event);
+  - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete: the loaded
+    entity to `delete(entity)` + the deleted event – never a view and `deleteById`, E30);
   - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all. **Every
     database change produces an event** – a create, an update, a delete, the write of an inner entity; a command that
     changes rows without an event is a bug;
@@ -450,6 +487,7 @@ public interface RfidReaderViews {
             @NotBlank String macAddress, //
             RfidReaderType type, //
             String name, //
+            String socketName, //
             @NotNull Instant createdAt //
     ) {}
 
@@ -495,6 +533,9 @@ public class ToolId implements ValueObject<ToolId> {
 - **`random()` only for UUID ids** – the entity's `of(…)` creates its id with it. A value that comes from a device
   (`MacAddress`, `RfidTagId`, `IpAddress`) has none: our system never invents one. Tests take random values from
   `RandomValues` in the test sources.
+- **An `@Embeddable` is not a value object** – `CustomerAddress` is a part of the entity: package-private, without
+  its own check on creation, stored in the entity's table. The README calls it a part (or embeddable), not a value
+  object.
 
 ## README
 
@@ -514,8 +555,9 @@ Besides the folder, a new aggregate touches `shared/`, the migrations and the do
 3. **Events** in `shared/event/`: a value in `AggregateType`, the event types in `EventType`, the payload interface
    `<Aggregate>EventPayload` in `payload/`, and the factory method `SchaffbarEvent.<aggregate>Event(EventType,
    <Aggregate>Id, <Aggregate>EventPayload)`.
-4. **Exceptions** in `shared/exception/`: a `Resource` value and a factory in `ResourceNotFoundException`; the rule
-   exceptions of the aggregate.
+4. **Exceptions** in `shared/exception/`: the rule exceptions of the aggregate; a `Resource` value and a factory in
+   `ResourceNotFoundException` only when something looks it up by its id (a `404`). Like the converter: nothing is
+   added for later.
 5. **The folder** (above): enums, commands, entity, repository, payload mapper, event factory, views, service, README.
 6. **Migration** `core-pos/src/main/resources/db/migration/V<next>__<aggregate>.sql`: `CREATE TABLE
    schaffbar.<aggregate> (…)` with primary key, constraints and indexes, then
@@ -539,15 +581,20 @@ The rules above are the target. Some code predates them and is fixed aggregate b
 this skill, not the code next to you.** Known deviations:
 
 - Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
-  `ToolViews`, …).
+  `ToolViews`, also `RfidReaderCommands`, …).
+- From the backend review (`docs/backend-review.md`, section 3), fixed in the step of each aggregate: `Active…` instead
+  of `Running…` (E6); delete via a view and `deleteById` (`rfid_reader`, `rfid_tag`, E30); enums as `String` and
+  `macAddress` as `String` in payloads (`rfid_reader`, `rfid_tag_assignment`, E31); entity guards without the comment
+  who checks (E29); `WorkshopUsage.exit()` instead of `stop()`; `cancelRfidTagAssignmentRequest` instead of
+  `cancelRfidTagAssignment` (E20).
 
 Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 
 ## Tests that enforce it
 
 Most of these rules are checked by the ArchUnit tests in `core-pos/src/test/java/de/schaffbar/core_pos/architecture/`
-(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`. Every rule is strict (no `freeze(…)`):
-a violation is fixed, never excepted to make a build pass. A rule in this skill and its ArchUnit rule change together.
+(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`.
+Every rule is strict (no `freeze(…)`): a violation is fixed, never excepted to make a build pass. A rule in this skill and its ArchUnit rule change together.
 
 ## Checklist
 
@@ -558,7 +605,12 @@ a violation is fixed, never excepted to make a build pass. A rule in this skill 
 - [ ] Commands and views validated field by field; `@Builder` + `@Validated`.
 - [ ] Service: own repository + `OutboxEventStore` only; queries `@Query` returning views; commands `@Command`, save their
       events, log them.
-- [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test.
+- [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test; a guard against a
+      bug says who checks before.
 - [ ] Each check an `ensure…` with its rule id; `throw` in a `throw…` helper, never inside a lambda.
-- [ ] New event: EventType, payload (no entity or embeddable inside), mapper, factory, README.
+- [ ] Names: service command = entity command (+ aggregate where the entity leaves it out); open / running, never
+      active.
+- [ ] Delete: load the entity, `delete(entity)`, the deleted event.
+- [ ] New event: EventType, payload (enums as enum, values as value objects, no entity or embeddable inside), mapper,
+      factory, README.
 - [ ] README updated; `mvn -q test` passes.
