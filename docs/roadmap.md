@@ -142,12 +142,17 @@ Entscheidung 13.11.2026.
        partielle Unique-Indizes in einer Flyway-Migration, damit zwei gleichzeitige Anfragen
        (Lesegerät meldet einen Tag doppelt) die Regeln nicht umgehen – eine laufende `workshop_usage` pro Person
        (WU-1), eine offene `workshop_session` pro Person (WS-1), bei `tool_usage` TU-3 und TU-9. Vorher prüft der
-       Maintainer die echte Datenbank auf Duplikate (sonst scheitert die Migration beim Start); Akzeptanztest dazu aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
+       Maintainer die echte Datenbank auf Duplikate (sonst scheitert die Migration beim Start); Akzeptanztest dazu
+5. [ ] **Skills** aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
    Fehlerbehandlung, Backend-Tests, API-Vertrag mit dem Portal; zum Schluss `business-rule` für Portal und Backend
    (`.claude/skills/` im Repo-Root): eine Regel von der README über Backend-Prüfung, Exception und Test bis zur
    Erklärung im Portal.
    - [x] `backend-testing` – 16.11.2026: Testebenen, Benennung, Integrationstests mit Testcontainers und
      `SchaffbarFixture`, Pilot `RfidReaderAcceptanceTest`
+6. [ ] **Backend-Review** (22.11.2026) gegen `CLAUDE.md`, die Skills `aggregate` / `backend-testing` und die
+   Entscheidungen – die Liste mit allen Funden und der Reihenfolge in `backend-review.md`: zuerst die Entscheidungen,
+   dann die Regeldokumente, dann pro Aggregat Code, Tests und README, dann Übergreifendes, die Fehler im Verhalten zum
+   Schluss (noch kein Betrieb).
 
 Danach A2 mit den Skills – vielleicht als erster Versuch der Pipeline (P).
 
