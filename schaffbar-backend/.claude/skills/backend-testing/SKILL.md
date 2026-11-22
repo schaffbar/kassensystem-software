@@ -17,7 +17,7 @@ row, so a rule whose check reads the database also gets an acceptance test.
 | Use case | the paths through one action: allowed, each rejection, order of side effects | Mockito for the services | `use_case/RfidReaderDeleteTest` |
 | Controller | HTTP: paths, status, JSON, value object conversion, problem codes | standalone MockMvc, mocked use cases and read facade | `domain/rfid_reader/web/RfidReaderControllerTest` |
 | Integration – acceptance | a rule or a flow as the portal sees it, through all layers and the database | `@IntegrationTest` (Spring context, Testcontainers) | `integration/RfidReaderAcceptanceTest` |
-| Integration – technical | what only the database shows: repository queries, migrations, transaction and outbox | `@IntegrationTest` | none yet – the first one sets the pattern |
+| Integration – technical | what only the database shows: repository queries, migrations, transaction and outbox | `@IntegrationTest` | `domain/workshop_usage/WorkshopUsageRepositoryIntegrationTest` |
 | Architecture | the structure rules of the skills | ArchUnit | `architecture/*ArchitectureTest` |
 
 All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core_pos/`.
@@ -373,7 +373,11 @@ class RfidReaderAcceptanceTest {
 For what only a real database shows: a derived or `@Query` repository method, a migration with data, the transaction
 around the outbox (events saved or rolled back with the change), optimistic locking. It lives next to the class it
 tests (package-private repositories: `domain/<aggregate>/`), uses `@IntegrationTest` and injects the beans directly;
-data still from random values. The first one sets the pattern – show it before writing more.
+data still from random values. Each `saveAndFlush` commits on its own (no test transaction), so a test can show a
+rejection by the database and then the allowed side – `WorkshopUsageRepositoryIntegrationTest`: a second running
+usage of the same person fails on the partial unique index of V9 (`DataIntegrityViolationException`), after
+checking out the next one is saved. A comment above the class says which rule the database guards and why the
+service's check is not enough.
 
 ## Architecture tests
 
