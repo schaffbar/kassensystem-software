@@ -98,7 +98,7 @@ describe('UserDetailStore', () => {
       (req) => req.method === 'GET' && req.url === url && (!param || req.params.get(param[0]) === param[1]),
     );
   const expectUser = () => expectGet(`${api}/customers/user-1`);
-  const expectAssignment = () => expectGet(`${api}/rfid-tag-assignments`, ['customer-id', 'user-1']);
+  const expectAssignment = () => expectGet(`${api}/rfid-tag-assignments`, ['customerId', 'user-1']);
   const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/active`);
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
   const expectTools = () => expectGet(`${api}/tools`);

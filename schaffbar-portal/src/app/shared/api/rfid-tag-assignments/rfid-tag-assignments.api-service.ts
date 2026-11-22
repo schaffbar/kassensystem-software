@@ -31,11 +31,11 @@ export class RfidTagAssignmentsApiService {
   currentRfidTagAssignmentResource(
     customerId: () => string | null,
   ): HttpResourceRef<RfidTagAssignmentApiModel | null | undefined> {
-    const parseAssignments = parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments?customer-id');
+    const parseAssignments = parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments?customerId');
     return httpResource(
       () => {
         const id = customerId();
-        return id ? { url: RFID_TAG_ASSIGNMENTS_API_URL, params: { 'customer-id': id } } : undefined;
+        return id ? { url: RFID_TAG_ASSIGNMENTS_API_URL, params: { customerId: id } } : undefined;
       },
       // the backend returns a list; the customer has at most one current assignment
       { parse: (response) => parseAssignments(response)[0] ?? null },
