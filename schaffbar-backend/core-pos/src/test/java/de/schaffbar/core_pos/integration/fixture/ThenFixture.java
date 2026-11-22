@@ -189,6 +189,54 @@ public final class ThenFixture {
     }
 
     // ------------------------------------------------------------------------
+    // workshop sessions
+
+    // returns the id of the session, to tell it from a later one
+    public String expectOpenWorkshopSession(CustomerId customerId) {
+        MvcTestResult result = this.api.getOpenWorkshopSession(customerId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.status").isEqualTo("OPEN");
+        return Json.read(result, "$.id");
+    }
+
+    // without an open session the body is empty
+    public void expectNoOpenWorkshopSession(CustomerId customerId) {
+        MvcTestResult result = this.api.getOpenWorkshopSession(customerId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).hasBodyTextEqualTo("");
+    }
+
+    public void expectInTheWorkshop(CustomerId customerId) {
+        assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
+                .extractingPath("$.workshopUsages[?(@.exitTime == null)]") //
+                .asArray() //
+                .hasSize(1);
+    }
+
+    public void expectCheckedOut(CustomerId customerId) {
+        assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
+                .extractingPath("$.workshopUsages[?(@.exitTime == null)]") //
+                .asArray() //
+                .isEmpty();
+    }
+
+    public void expectToolRunning(CustomerId customerId, ToolId toolId) {
+        assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].active".formatted(toolId.getValue())) //
+                .asArray() //
+                .containsExactly(true);
+    }
+
+    public void expectToolStopped(CustomerId customerId, ToolId toolId) {
+        assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].active".formatted(toolId.getValue())) //
+                .asArray() //
+                .containsExactly(false);
+    }
+
+    // ------------------------------------------------------------------------
     // tool certifications
 
     public void expectCertifiedCustomers(ToolId toolId, CustomerId... customerIds) {

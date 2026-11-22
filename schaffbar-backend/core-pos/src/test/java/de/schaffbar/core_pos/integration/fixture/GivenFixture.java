@@ -115,7 +115,6 @@ public final class GivenFixture {
     public void customerLeftTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperOut) {
         MvcTestResult checkedOut = this.api.holdRfidTagToReader(rfidTagId, gateKeeperOut);
         assertThat(checkedOut).hasStatus2xxSuccessful();
-
     }
 
     // ------------------------------------------------------------------------

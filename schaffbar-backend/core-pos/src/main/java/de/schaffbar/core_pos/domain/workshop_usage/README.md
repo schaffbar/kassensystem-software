@@ -19,10 +19,10 @@ _Note: Code suggests considering renaming to `WorkshopSlot` or `UsageSlot`._
 
 ## Commands
 
-| Operation      | Input                         |
-|----------------|-------------------------------|
-| Enter workshop | customerId, workshopSessionId |
-| Leave workshop | customerId                    |
+| Command                         | Fields                        | Use case             |
+|---------------------------------|-------------------------------|----------------------|
+| _(Check in, without a command)_ | customerId, workshopSessionId | `WorkshopUsageStart` |
+| _(Check out, without a command)_ | customerId                   | `WorkshopUsageStop`  |
 
 ## Business Rules / Invariants
 
@@ -34,6 +34,7 @@ _Note: Code suggests considering renaming to `WorkshopSlot` or `UsageSlot`._
 | WU-4 | The first check-in starts the session, every later one joins the open session                 | `WorkshopUsageStart` use case — `WorkshopSessionService.startWorkshopSession()` only without an open session |
 | WU-5 | Active tool usages are stopped when leaving the workshop                                      | `WorkshopUsageStop` use case — calls `ToolUsageService.stopToolUsages()`                                     |
 | WU-7 | Billing: minutes rounded up, one unit per started 6 minutes; a running usage counts until now | `BillableDuration`, `WorkshopUsage.getBillableDurationUntil()`                                               |
+| WU-8 | Check-in and check-out happen with the RFID tag at the gate keepers (`GATE_KEEPER_IN` / `_OUT`) | `DeviceController` – `/device/card` finds the person via `DeviceReadFacade.getCustomer(rfidTagId)` and calls `WorkshopUsageStart` / `WorkshopUsageStop`; a refusal is `STATE: ERROR` with the message of the code |
 
 ## Domain Events
 

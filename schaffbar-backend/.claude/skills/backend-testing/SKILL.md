@@ -361,6 +361,12 @@ class RfidReaderAcceptanceTest {
   method: rejected while the condition holds, allowed after it is gone (R-3, R-5 above).
 - Steps as `// given`, `// when`, `// then`, repeated for the second side; a comment on a step only for what the
   code can't say (`// when – lower case is the same address (R-7)`).
+- A side of a rule the API cannot reach (the tool side of WS-5: checking out switches the tools off) is named in a
+  comment above the test; its use case test proves it.
+- **A flow** (`WorkshopFlowAcceptanceTest`: check-in, tool on and off, check-out, billing, the next visit) is one
+  method per flow with a `// when` – `// then` pair per step, each `then` reading the state through the API
+  (`expectToolRunning`, `expectCheckedOut`). It proves the steps fit together; the answers of the devices stay in
+  `integration/device/`, the rules in the aggregate's acceptance test.
 
 ### Technical integration test
 
