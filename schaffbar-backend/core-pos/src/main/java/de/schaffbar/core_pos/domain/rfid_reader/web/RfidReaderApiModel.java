@@ -27,12 +27,13 @@ public interface RfidReaderApiModel extends ValueObjectMapper {
     // mapping view to response
 
     @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "macAddress", source = "macAddress.value")
     RfidReaderApiDto toRfidReaderApiDto(RfidReaderView rfidReader);
 
     // ------------------------------------------------------------------------
     // mapping request body to command
 
-    UpdateRfidReaderCommand toRfidReaderCommand(RfidReaderId id, UpdateRfidReaderRequestBody requestBody);
+    UpdateRfidReaderCommand toUpdateRfidReaderCommand(RfidReaderId id, UpdateRfidReaderRequestBody requestBody);
 
     ChangeRfidReaderTypeCommand toChangeRfidReaderTypeCommand(RfidReaderId id, ChangeRfidReaderTypeRequestBody requestBody);
 

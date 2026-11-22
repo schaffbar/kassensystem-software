@@ -2,7 +2,7 @@ package de.schaffbar.core_pos.domain.rfid_reader;
 
 import java.time.Instant;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.mapstruct.Mapper;
@@ -10,6 +10,7 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.springframework.validation.annotation.Validated;
 
+import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
@@ -28,8 +29,8 @@ public interface RfidReaderViews {
     @Builder
     @Validated
     record RfidReaderView( //
-            @NotNull RfidReaderId id, //
-            @NotBlank String macAddress, //
+            @NotNull @Valid RfidReaderId id, //
+            @NotNull @Valid MacAddress macAddress, //
             RfidReaderType type, //
             String name, //
             String socketName, //

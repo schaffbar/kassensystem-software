@@ -32,7 +32,7 @@ class RfidReaderTest {
 
         // then
         assertThat(rfidReader.getId()).isNotNull();
-        assertThat(rfidReader.getMacAddress()).isEqualTo(macAddress.getValue());
+        assertThat(rfidReader.getMacAddress()).isEqualTo(macAddress);
         assertThat(rfidReader.getType()).isNull();
         assertThat(rfidReader.getCreatedAt()).isNotNull();
     }
@@ -55,6 +55,7 @@ class RfidReaderTest {
 
         RfidReaderUpdatedPayload payload = expectSingleEvent(events, EventType.RFID_READER_UPDATED, rfidReader) //
                 .deserializeAndValidatePayload(RfidReaderUpdatedPayload.class);
+        assertThat(payload.id()).isEqualTo(rfidReader.getId());
         assertThat(payload.type()).isNull();
         assertThat(payload.name()).isEqualTo(command.name());
         assertThat(payload.socketName()).isEqualTo(command.socketName());
@@ -67,17 +68,18 @@ class RfidReaderTest {
     void changeType_setsTheTypeAndReturnsTheEvent() {
         // given
         RfidReader rfidReader = RfidReader.of(RandomValues.macAddress());
-        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReader.getId()).type(RfidReaderType.GATE_KEEPER_IN).build();
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand(rfidReader.getId()).build();
 
         // when
         List<SchaffbarEvent> events = rfidReader.changeType(command);
 
         // then
-        assertThat(rfidReader.getType()).isEqualTo(RfidReaderType.GATE_KEEPER_IN);
+        assertThat(rfidReader.getType()).isEqualTo(command.type());
 
         RfidReaderTypeChangedPayload payload = expectSingleEvent(events, EventType.RFID_READER_TYPE_CHANGED, rfidReader) //
                 .deserializeAndValidatePayload(RfidReaderTypeChangedPayload.class);
-        assertThat(payload.type()).isEqualTo(RfidReaderType.GATE_KEEPER_IN.name());
+        assertThat(payload.id()).isEqualTo(rfidReader.getId());
+        assertThat(payload.type()).isEqualTo(command.type());
     }
 
     // ------------------------------------------------------------------------

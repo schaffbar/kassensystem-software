@@ -94,7 +94,7 @@ public class RfidReaderController {
             @PathVariable @NotNull @Valid RfidReaderId rfidReaderId, //
             @RequestBody @NotNull @Valid UpdateRfidReaderRequestBody requestBody //
     ) {
-        UpdateRfidReaderCommand command = RfidReaderApiModel.MAPPER.toRfidReaderCommand(rfidReaderId, requestBody);
+        UpdateRfidReaderCommand command = RfidReaderApiModel.MAPPER.toUpdateRfidReaderCommand(rfidReaderId, requestBody);
         this.rfidReaderUpdate.process(command);
 
         return ResponseEntity.noContent().build();

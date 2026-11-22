@@ -34,9 +34,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
-import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.read_facade.RfidReaderReadFacade;
+import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -80,6 +82,7 @@ class RfidReaderControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -90,7 +93,7 @@ class RfidReaderControllerTest {
     @Test
     void getRfidReaders_withoutFilter_returnsAll() throws Exception {
         // given
-        RfidReaderView rfidReader = rfidReaderView().type(RfidReaderType.SWITCH_BOX).build();
+        RfidReaderView rfidReader = rfidReaderView().build();
         givenReaders(rfidReader);
 
         // when
@@ -100,7 +103,11 @@ class RfidReaderControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].id").value(rfidReader.id().getValue().toString())) //
-                .andExpect(jsonPath("$[0].type").value("SWITCH_BOX"));
+                .andExpect(jsonPath("$[0].macAddress").value(rfidReader.macAddress().getValue())) //
+                .andExpect(jsonPath("$[0].type").value(rfidReader.type().name())) //
+                .andExpect(jsonPath("$[0].name").value(rfidReader.name())) //
+                .andExpect(jsonPath("$[0].socketName").value(rfidReader.socketName())) //
+                .andExpect(jsonPath("$[0].createdAt").value(rfidReader.createdAt().toString()));
     }
 
     @Test
@@ -155,8 +162,11 @@ class RfidReaderControllerTest {
         // then
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.id").value(rfidReader.id().getValue().toString())) //
-                .andExpect(jsonPath("$.macAddress").value(rfidReader.macAddress())) //
-                .andExpect(jsonPath("$.type").value("SWITCH_BOX"));
+                .andExpect(jsonPath("$.macAddress").value(rfidReader.macAddress().getValue())) //
+                .andExpect(jsonPath("$.type").value(rfidReader.type().name())) //
+                .andExpect(jsonPath("$.name").value(rfidReader.name())) //
+                .andExpect(jsonPath("$.socketName").value(rfidReader.socketName())) //
+                .andExpect(jsonPath("$.createdAt").value(rfidReader.createdAt().toString()));
     }
 
     @Test
@@ -168,8 +178,7 @@ class RfidReaderControllerTest {
         ResultActions result = getRfidReader(unknown);
 
         // then
-        result.andExpect(status().isNotFound()) //
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        expectRfidReaderNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -187,6 +196,20 @@ class RfidReaderControllerTest {
         // then
         result.andExpect(status().isCreated()) //
                 .andExpect(header().string("Location", "/api/v1/rfid-readers/" + rfidReaderId.getValue()));
+    }
+
+    @Test
+    void createRfidReader_withAUsedMacAddress_is409WithTheCode() throws Exception {
+        // given
+        MacAddress macAddress = RandomValues.macAddress();
+        givenCreateRejectedWith(macAddress, new MacAddressAlreadyUsedException(macAddress, RfidReaderId.random()));
+
+        // when
+        ResultActions result = createRfidReader(macAddress);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(MacAddressAlreadyUsedException.CODE));
     }
 
     @Test
@@ -222,7 +245,20 @@ class RfidReaderControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.rfidReaderUpdate).process(command);
+        expectUpdated(command);
+    }
+
+    @Test
+    void updateRfidReader_unknownId_is404() throws Exception {
+        // given
+        UpdateRfidReaderCommand command = updateRfidReaderCommand().build();
+        givenUpdateRejectedWith(command, ResourceNotFoundException.rfidReader(command.id()));
+
+        // when
+        ResultActions result = updateRfidReader(command);
+
+        // then
+        expectRfidReaderNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -238,7 +274,7 @@ class RfidReaderControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.rfidReaderChangeType).process(command);
+        expectTypeChanged(command);
     }
 
     @Test
@@ -257,8 +293,8 @@ class RfidReaderControllerTest {
     @Test
     void changeRfidReaderType_ofASwitchBoxWithTool_is409WithTheCode() throws Exception {
         // given
-        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand().type(RfidReaderType.GATE_KEEPER_IN).build();
-        givenSwitchBoxWithToolForTypeChange(command);
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand().build();
+        givenChangeTypeRejectedWith(command, RfidReaderHasToolAssignedException.changeType(command.id()));
 
         // when
         ResultActions result = changeRfidReaderType(command);
@@ -266,6 +302,19 @@ class RfidReaderControllerTest {
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(RfidReaderHasToolAssignedException.CODE));
+    }
+
+    @Test
+    void changeRfidReaderType_unknownId_is404() throws Exception {
+        // given
+        ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand().build();
+        givenChangeTypeRejectedWith(command, ResourceNotFoundException.rfidReader(command.id()));
+
+        // when
+        ResultActions result = changeRfidReaderType(command);
+
+        // then
+        expectRfidReaderNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -281,13 +330,14 @@ class RfidReaderControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.rfidReaderDelete).process(rfidReaderId);
+        expectDeleted(rfidReaderId);
     }
 
     @Test
     void deleteRfidReader_withTool_is409WithTheCode() throws Exception {
         // given
-        RfidReaderId rfidReaderId = givenReaderWithToolForDelete();
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+        givenDeleteRejectedWith(rfidReaderId, RfidReaderHasToolAssignedException.delete(rfidReaderId));
 
         // when
         ResultActions result = deleteRfidReader(rfidReaderId);
@@ -295,6 +345,19 @@ class RfidReaderControllerTest {
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(RfidReaderHasToolAssignedException.CODE));
+    }
+
+    @Test
+    void deleteRfidReader_unknownId_is404() throws Exception {
+        // given
+        RfidReaderId unknown = RfidReaderId.random();
+        givenDeleteRejectedWith(unknown, ResourceNotFoundException.rfidReader(unknown));
+
+        // when
+        ResultActions result = deleteRfidReader(unknown);
+
+        // then
+        expectRfidReaderNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -305,7 +368,7 @@ class RfidReaderControllerTest {
     }
 
     private void givenReaderWith(MacAddress macAddress) {
-        RfidReaderView rfidReader = rfidReaderView().macAddress(macAddress.getValue()).build();
+        RfidReaderView rfidReader = rfidReaderView().macAddress(macAddress).build();
         when(this.rfidReaderReadFacade.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReader));
     }
 
@@ -314,7 +377,7 @@ class RfidReaderControllerTest {
     }
 
     private RfidReaderView givenReader() {
-        RfidReaderView rfidReader = rfidReaderView().type(RfidReaderType.SWITCH_BOX).build();
+        RfidReaderView rfidReader = rfidReaderView().build();
         when(this.rfidReaderReadFacade.getRfidReader(rfidReader.id())).thenReturn(Optional.of(rfidReader));
 
         return rfidReader;
@@ -334,15 +397,20 @@ class RfidReaderControllerTest {
         return rfidReaderId;
     }
 
-    private void givenSwitchBoxWithToolForTypeChange(ChangeRfidReaderTypeCommand command) {
-        doThrow(RfidReaderHasToolAssignedException.changeType(command.id())).when(this.rfidReaderChangeType).process(command);
+    private void givenCreateRejectedWith(MacAddress macAddress, RuntimeException rejection) {
+        when(this.rfidReaderCreate.process(macAddress)).thenThrow(rejection);
     }
 
-    private RfidReaderId givenReaderWithToolForDelete() {
-        RfidReaderId rfidReaderId = RfidReaderId.random();
-        doThrow(RfidReaderHasToolAssignedException.delete(rfidReaderId)).when(this.rfidReaderDelete).process(rfidReaderId);
+    private void givenUpdateRejectedWith(UpdateRfidReaderCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.rfidReaderUpdate).process(command);
+    }
 
-        return rfidReaderId;
+    private void givenChangeTypeRejectedWith(ChangeRfidReaderTypeCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.rfidReaderChangeType).process(command);
+    }
+
+    private void givenDeleteRejectedWith(RfidReaderId rfidReaderId, RuntimeException rejection) {
+        doThrow(rejection).when(this.rfidReaderDelete).process(rfidReaderId);
     }
 
     // ------------------------------------------------------------------------
@@ -393,12 +461,30 @@ class RfidReaderControllerTest {
     // ------------------------------------------------------------------------
     // then
 
+    private void expectRfidReaderNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(Resource.RFID_READER.name()));
+    }
+
     private void expectNothingCreated() {
         verify(this.rfidReaderCreate, never()).process(any());
     }
 
+    private void expectUpdated(UpdateRfidReaderCommand command) {
+        verify(this.rfidReaderUpdate).process(command);
+    }
+
+    private void expectTypeChanged(ChangeRfidReaderTypeCommand command) {
+        verify(this.rfidReaderChangeType).process(command);
+    }
+
     private void expectTypeNotChanged() {
         verify(this.rfidReaderChangeType, never()).process(any());
+    }
+
+    private void expectDeleted(RfidReaderId rfidReaderId) {
+        verify(this.rfidReaderDelete).process(rfidReaderId);
     }
 
 }

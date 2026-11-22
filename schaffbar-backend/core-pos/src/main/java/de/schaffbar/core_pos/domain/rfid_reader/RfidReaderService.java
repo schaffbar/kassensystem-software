@@ -97,10 +97,10 @@ public class RfidReaderService {
 
     @Command
     public void deleteRfidReader(@NotNull @Valid RfidReaderId id) {
-        RfidReaderView rfidReader = getRfidReader(id) //
+        RfidReader rfidReader = this.rfidReaderRepository.findById(id.getValue()) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(id));
 
-        this.rfidReaderRepository.deleteById(rfidReader.id().getValue());
+        this.rfidReaderRepository.delete(rfidReader);
         List<SchaffbarEvent> events = List.of(RfidReaderEventFactory.rfidReaderDeleted(id));
 
         this.outboxEventStore.save(events);

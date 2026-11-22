@@ -230,7 +230,7 @@ class DeviceReadFacadeTest {
 
     private MacAddress givenRegisteredReader() {
         MacAddress macAddress = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress.getValue()).build()));
+        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress).build()));
 
         return macAddress;
     }

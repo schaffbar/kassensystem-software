@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum RfidReaderType {
+
     RFID_TAG_REGISTER("A"), //
     RFID_TAG_ASSIGNER("C"), //
     GATE_KEEPER_IN("GI"), //
@@ -14,4 +15,5 @@ public enum RfidReaderType {
 
     @Getter
     private final String key;
+
 }

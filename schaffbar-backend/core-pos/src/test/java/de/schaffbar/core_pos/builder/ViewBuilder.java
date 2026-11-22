@@ -85,7 +85,7 @@ public class ViewBuilder {
     public static RfidReaderViewBuilder rfidReaderView(RfidReaderId id) {
         return RfidReaderView.builder() //
                 .id(id) //
-                .macAddress(RandomValues.macAddress().getValue()) //
+                .macAddress(RandomValues.macAddress()) //
                 .type(RfidReaderType.RFID_TAG_ASSIGNER) //
                 .name("Theke") //
                 .socketName("socket-43") //

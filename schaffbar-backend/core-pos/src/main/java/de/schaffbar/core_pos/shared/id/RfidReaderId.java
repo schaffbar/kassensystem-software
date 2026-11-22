@@ -21,7 +21,7 @@ public class RfidReaderId implements ValueObject<RfidReaderId> {
     }
 
     public static RfidReaderId random() {
-        return new RfidReaderId(UUID.randomUUID());
+        return RfidReaderId.of(UUID.randomUUID());
     }
 
 }

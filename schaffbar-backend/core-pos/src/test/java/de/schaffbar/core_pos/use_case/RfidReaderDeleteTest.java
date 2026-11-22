@@ -43,7 +43,7 @@ class RfidReaderDeleteTest {
         this.rfidReaderDelete.process(rfidReaderId);
 
         // then
-        verify(this.rfidReaderService).deleteRfidReader(rfidReaderId);
+        expectDeleted(rfidReaderId);
     }
 
     @Test
@@ -59,7 +59,7 @@ class RfidReaderDeleteTest {
         assertThat(thrown) //
                 .isInstanceOf(RfidReaderHasToolAssignedException.class) //
                 .hasFieldOrPropertyWithValue("code", RfidReaderHasToolAssignedException.CODE);
-        verify(this.rfidReaderService, never()).deleteRfidReader(any());
+        expectNotDeleted();
     }
 
     // ------------------------------------------------------------------------
@@ -71,6 +71,17 @@ class RfidReaderDeleteTest {
 
     private void givenNoToolWith(RfidReaderId rfidReaderId) {
         when(this.toolService.getTool(rfidReaderId)).thenReturn(Optional.empty());
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectDeleted(RfidReaderId rfidReaderId) {
+        verify(this.rfidReaderService).deleteRfidReader(rfidReaderId);
+    }
+
+    private void expectNotDeleted() {
+        verify(this.rfidReaderService, never()).deleteRfidReader(any());
     }
 
 }

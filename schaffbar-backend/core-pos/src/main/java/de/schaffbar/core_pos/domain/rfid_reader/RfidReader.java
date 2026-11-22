@@ -72,6 +72,10 @@ class RfidReader {
         return RfidReaderId.of(this.id);
     }
 
+    public MacAddress getMacAddress() {
+        return MacAddress.of(this.macAddress);
+    }
+
     // ------------------------------------------------------------------------
     // command
 

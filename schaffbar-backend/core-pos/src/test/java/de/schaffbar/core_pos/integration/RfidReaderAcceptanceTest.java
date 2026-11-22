@@ -27,13 +27,21 @@ class RfidReaderAcceptanceTest {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
-        this.fixture.given().rfidReader(scenario.macAddress());
+        RfidReaderId rfidReaderId = this.fixture.given().rfidReader(scenario.macAddress());
 
         // when – lower case is the same address (R-7)
         MvcTestResult result = this.fixture.api().createRfidReader(scenario.macAddress().getValue().toLowerCase());
 
         // then
         this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, MacAddressAlreadyUsedException.CODE);
+        this.fixture.then().expectRfidReaderCount(scenario.macAddress(), 1);
+
+        // when
+        this.fixture.then().expectSuccess(this.fixture.api().deleteRfidReader(rfidReaderId));
+        result = this.fixture.api().createRfidReader(scenario.macAddress());
+
+        // then
+        this.fixture.then().expectSuccess(result);
         this.fixture.then().expectRfidReaderCount(scenario.macAddress(), 1);
     }
 

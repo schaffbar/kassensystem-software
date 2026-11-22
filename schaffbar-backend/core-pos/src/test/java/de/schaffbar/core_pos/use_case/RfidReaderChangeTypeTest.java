@@ -25,6 +25,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
@@ -50,7 +51,9 @@ class RfidReaderChangeTypeTest {
         Throwable thrown = catchThrowable(() -> this.rfidReaderChangeType.process(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.RFID_READER);
         expectTypeNotChanged();
     }
 
@@ -65,7 +68,7 @@ class RfidReaderChangeTypeTest {
 
         // then
         expectTypeChanged(command);
-        verifyNoInteractions(this.toolService);
+        expectNoToolLookedUp();
     }
 
     @Test
@@ -133,6 +136,10 @@ class RfidReaderChangeTypeTest {
 
     private void expectTypeNotChanged() {
         verify(this.rfidReaderService, never()).changeRfidReaderType(any());
+    }
+
+    private void expectNoToolLookedUp() {
+        verifyNoInteractions(this.toolService);
     }
 
 }

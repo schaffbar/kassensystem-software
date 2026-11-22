@@ -28,8 +28,10 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidReaderDeletedPayload;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
@@ -65,7 +67,7 @@ class RfidReaderServiceTest {
         RfidReaderCreatedPayload payload = expectSavedEvent(EventType.RFID_READER_CREATED, rfidReaderId) //
                 .deserializeAndValidatePayload(RfidReaderCreatedPayload.class);
         assertThat(payload.id()).isEqualTo(rfidReaderId);
-        assertThat(payload.macAddress()).isEqualTo(macAddress.getValue());
+        assertThat(payload.macAddress()).isEqualTo(macAddress);
     }
 
     @Test
@@ -112,7 +114,7 @@ class RfidReaderServiceTest {
         Throwable thrown = catchThrowable(() -> this.rfidReaderService.updateRfidReader(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectRfidReaderNotFound(thrown);
         expectNoEvent();
     }
 
@@ -143,7 +145,7 @@ class RfidReaderServiceTest {
         Throwable thrown = catchThrowable(() -> this.rfidReaderService.changeRfidReaderType(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectRfidReaderNotFound(thrown);
         expectNoEvent();
     }
 
@@ -159,8 +161,10 @@ class RfidReaderServiceTest {
         this.rfidReaderService.deleteRfidReader(rfidReader.getId());
 
         // then
-        verify(this.rfidReaderRepository).deleteById(rfidReader.getId().getValue());
-        expectSavedEvent(EventType.RFID_READER_DELETED, rfidReader.getId());
+        expectDeleted(rfidReader);
+        RfidReaderDeletedPayload payload = expectSavedEvent(EventType.RFID_READER_DELETED, rfidReader.getId()) //
+                .deserializeAndValidatePayload(RfidReaderDeletedPayload.class);
+        assertThat(payload.id()).isEqualTo(rfidReader.getId());
     }
 
     @Test
@@ -172,8 +176,8 @@ class RfidReaderServiceTest {
         Throwable thrown = catchThrowable(() -> this.rfidReaderService.deleteRfidReader(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verify(this.rfidReaderRepository, never()).deleteById(any());
+        expectRfidReaderNotFound(thrown);
+        expectNothingDeleted();
         expectNoEvent();
     }
 
@@ -219,6 +223,20 @@ class RfidReaderServiceTest {
                 });
 
         return this.events.getValue().getFirst();
+    }
+
+    private void expectRfidReaderNotFound(Throwable thrown) {
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.RFID_READER);
+    }
+
+    private void expectDeleted(RfidReader rfidReader) {
+        verify(this.rfidReaderRepository).delete(rfidReader);
+    }
+
+    private void expectNothingDeleted() {
+        verify(this.rfidReaderRepository, never()).delete(any());
     }
 
     private void expectNothingSaved() {

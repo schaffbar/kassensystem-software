@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.rfid_reader;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.validation.annotation.Validated;
@@ -11,7 +12,7 @@ public interface RfidReaderCommands {
     @Builder
     @Validated
     record UpdateRfidReaderCommand( //
-            @NotNull RfidReaderId id, //
+            @NotNull @Valid RfidReaderId id, //
             String name, //
             String socketName //
     ) {}
@@ -19,7 +20,7 @@ public interface RfidReaderCommands {
     @Builder
     @Validated
     record ChangeRfidReaderTypeCommand( //
-            @NotNull RfidReaderId id, //
+            @NotNull @Valid RfidReaderId id, //
             @NotNull RfidReaderType type //
     ) {}
 

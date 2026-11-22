@@ -28,11 +28,12 @@
 
 ## Commands
 
-| Command                       | Fields                                                         |
-|-------------------------------|----------------------------------------------------------------|
-| _(Creation via MacAddress)_   | macAddress (`MacAddress` value object)                         |
-| `UpdateRfidReaderCommand`     | id (`RfidReaderId`), type (`RfidReaderType`), name, socketName |
-| `ChangeRfidReaderTypeCommand` | id (`RfidReaderId`), type (`RfidReaderType`)                   |
+| Command                       | Fields                                       | Use case               |
+|-------------------------------|----------------------------------------------|------------------------|
+| _(create, no command)_        | macAddress (`MacAddress`)                    | `RfidReaderCreate`     |
+| `UpdateRfidReaderCommand`     | id (`RfidReaderId`), name, socketName        | `RfidReaderUpdate`     |
+| `ChangeRfidReaderTypeCommand` | id (`RfidReaderId`), type (`RfidReaderType`) | `RfidReaderChangeType` |
+| _(delete, no command)_        | id (`RfidReaderId`)                          | `RfidReaderDelete`     |
 
 ## Business Rules / Invariants
 
@@ -65,9 +66,9 @@ implemented, move it to "Business Rules / Invariants".
 
 ## Domain Events
 
-| Event                      | Payload              |
-|----------------------------|----------------------|
-| `RFID_READER_CREATED`      | Full reader snapshot |
-| `RFID_READER_UPDATED`      | Updated fields       |
-| `RFID_READER_TYPE_CHANGED` | rfidReaderId, type   |
-| `RFID_READER_DELETED`      | rfidReaderId         |
+| Event                      | Payload                    |
+|----------------------------|----------------------------|
+| `RFID_READER_CREATED`      | id, macAddress             |
+| `RFID_READER_UPDATED`      | id, type, name, socketName |
+| `RFID_READER_TYPE_CHANGED` | id, type                   |
+| `RFID_READER_DELETED`      | id                         |
