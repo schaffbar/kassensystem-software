@@ -216,6 +216,15 @@ public final class SchaffbarApi {
                 .exchange();
     }
 
+    public MvcTestResult removeInstructor(ToolId toolId, CustomerId instructorId) {
+        return this.mvc.delete().uri("/api/v1/tools/{toolId}/instructors", toolId.getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "instructorIds": ["%s"] }
+                        """.formatted(instructorId.getValue())) //
+                .exchange();
+    }
+
     // ------------------------------------------------------------------------
     // tool certifications
 

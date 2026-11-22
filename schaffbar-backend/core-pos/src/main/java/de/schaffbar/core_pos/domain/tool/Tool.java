@@ -51,6 +51,7 @@ class Tool {
     private UUID id;
 
     @NotBlank
+    @Column(unique = true)
     private String name;
 
     private String description;
@@ -73,6 +74,7 @@ class Tool {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "TOOL_INSTRUCTOR", schema = "SCHAFFBAR", joinColumns = @JoinColumn(name = "tool_id"))
     @Column(name = "instructor_id")
+    @Getter(AccessLevel.NONE) // changed only by addInstructors / removeInstructors, read as getInstructors()
     private Set<UUID> instructorIds = new HashSet<>();
 
     @NotNull

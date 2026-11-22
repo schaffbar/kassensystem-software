@@ -31,11 +31,19 @@ public class ToolAssignRfidReader {
         RfidReaderView rfidReader = this.rfidReaderService.getRfidReader(rfidReaderId) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(rfidReaderId));
 
-        if (rfidReader.type() != RfidReaderType.SWITCH_BOX) {
-            throw new InvalidRfidReaderTypeForToolException(rfidReaderId);
-        }
+        ensureIsSwitchBox(rfidReader);
 
         this.toolService.assignRfidReader(toolId, rfidReaderId);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    // T-9
+    private void ensureIsSwitchBox(RfidReaderView rfidReader) {
+        if (rfidReader.type() != RfidReaderType.SWITCH_BOX) {
+            throw new InvalidRfidReaderTypeForToolException(rfidReader.id());
+        }
     }
 
 }

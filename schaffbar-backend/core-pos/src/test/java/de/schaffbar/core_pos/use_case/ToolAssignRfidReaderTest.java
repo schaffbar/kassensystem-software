@@ -20,6 +20,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.shared.exception.InvalidRfidReaderTypeForToolException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -45,7 +46,7 @@ class ToolAssignRfidReaderTest {
         this.toolAssignRfidReader.process(toolId, rfidReaderId);
 
         // then
-        verify(this.toolService).assignRfidReader(toolId, rfidReaderId);
+        expectAssigned(toolId, rfidReaderId);
     }
 
     @Test
@@ -60,7 +61,7 @@ class ToolAssignRfidReaderTest {
         assertThat(thrown) //
                 .isInstanceOf(InvalidRfidReaderTypeForToolException.class) //
                 .hasFieldOrPropertyWithValue("code", InvalidRfidReaderTypeForToolException.CODE);
-        verifyNoInteractions(this.toolService);
+        expectNotAssigned();
     }
 
     @Test
@@ -72,8 +73,10 @@ class ToolAssignRfidReaderTest {
         Throwable thrown = catchThrowable(() -> this.toolAssignRfidReader.process(ToolId.random(), rfidReaderId));
 
         // then
-        assertThat(thrown).isInstanceOf(InvalidRfidReaderTypeForToolException.class);
-        verifyNoInteractions(this.toolService);
+        assertThat(thrown) //
+                .isInstanceOf(InvalidRfidReaderTypeForToolException.class) //
+                .hasFieldOrPropertyWithValue("code", InvalidRfidReaderTypeForToolException.CODE);
+        expectNotAssigned();
     }
 
     @Test
@@ -85,8 +88,10 @@ class ToolAssignRfidReaderTest {
         Throwable thrown = catchThrowable(() -> this.toolAssignRfidReader.process(ToolId.random(), unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.toolService);
+assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.RFID_READER);
+        expectNotAssigned();
     }
 
     // ------------------------------------------------------------------------
@@ -104,6 +109,14 @@ class ToolAssignRfidReaderTest {
         when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
 
         return unknown;
+    }
+
+    private void expectAssigned(ToolId toolId, RfidReaderId rfidReaderId) {
+        verify(this.toolService).assignRfidReader(toolId, rfidReaderId);
+    }
+
+    private void expectNotAssigned() {
+        verifyNoInteractions(this.toolService);
     }
 
 }

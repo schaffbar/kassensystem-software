@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.tool;
 
 import java.util.Set;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -31,15 +32,15 @@ public interface ToolViews {
     @Builder
     @Validated
     record ToolView( //
-            @NotNull ToolId id, //
+            @NotNull @Valid ToolId id, //
             @NotBlank String name, //
             String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement, //
-            RfidReaderId rfidReaderId, //
+            @Valid RfidReaderId rfidReaderId, //
             WlanRelaisType wlanRelaisType, //
-            IpAddress ipAddress, //
-            Set<CustomerId> instructors //
+            @Valid IpAddress ipAddress, //
+            @NotNull Set<@NotNull @Valid CustomerId> instructors //
     ) {}
 
 }

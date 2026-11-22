@@ -16,16 +16,23 @@
 | `rfidReaderId`             | `UUID`                     | optional, FK-like reference                                                                     |
 | `wlanRelaisType`           | `WlanRelaisType`           | optional enum (`SHELLY_1`, `SHELLY_2`, `SHELLY_PRO`) – gives protocol, path and on/off commands |
 | `ipAddress`                | `String`                   | required when `wlanRelaisType` is set                                                           |
+| `instructorIds`            | `Set<UUID>`                | the instructors (`@ElementCollection`, table `tool_instructor`), read as `getInstructors()`     |
 | `createdAt`                | `Instant`                  | `@NotNull`                                                                                      |
 | `updatedAt`                | `Instant`                  | `@Version`                                                                                      |
 
 ## Commands
 
-| Command                | Fields                                                |
-| ---------------------- | ----------------------------------------------------- |
-| `CreateToolCommand`    | name, description, area, certificationRequirement     |
-| `UpdateToolCommand`    | id, name, description, area, certificationRequirement |
-| `SetWlanRelaisCommand` | id, wlanRelaisType, ipAddress                         |
+| Command                       | Fields                                                | Use case                |
+| ----------------------------- | ----------------------------------------------------- | ----------------------- |
+| `CreateToolCommand`           | name, description, area, certificationRequirement     | `ToolCreate`            |
+| `UpdateToolCommand`           | id, name, description, area, certificationRequirement | `ToolUpdate`            |
+| _(assign reader, no command)_ | toolId, rfidReaderId                                  | `ToolAssignRfidReader`  |
+| _(clear reader, no command)_  | toolId                                                | `ToolClearRfidReader`   |
+| `SetWlanRelaisCommand`        | id, wlanRelaisType, ipAddress                         | `ToolSetWlanRelais`     |
+| _(clear relais, no command)_  | toolId                                                | `ToolClearWlanRelais`   |
+| _(add instructors)_           | toolId, instructorIds (list)                          | `ToolAddInstructors`    |
+| _(remove instructors)_        | toolId, instructorIds (list)                          | `ToolRemoveInstructors` |
+| _(delete, no command)_        | toolId                                                | `ToolDelete`            |
 
 ## Business Rules / Invariants
 

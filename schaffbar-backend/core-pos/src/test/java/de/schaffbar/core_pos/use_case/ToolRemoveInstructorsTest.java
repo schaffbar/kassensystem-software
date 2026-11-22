@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -44,7 +45,7 @@ class ToolRemoveInstructorsTest {
         this.toolRemoveInstructors.process(toolId, instructorIds);
 
         // then
-        verify(this.toolService).removeInstructors(toolId, instructorIds);
+        expectInstructorsRemoved(toolId, instructorIds);
     }
 
     @Test
@@ -56,8 +57,10 @@ class ToolRemoveInstructorsTest {
         Throwable thrown = catchThrowable(() -> this.toolRemoveInstructors.process(ToolId.random(), instructorIds));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.toolService);
+assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNoInstructorsRemoved();
     }
 
     // ------------------------------------------------------------------------
@@ -75,6 +78,14 @@ class ToolRemoveInstructorsTest {
         when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
 
         return unknown;
+    }
+
+    private void expectInstructorsRemoved(ToolId toolId, List<CustomerId> instructorIds) {
+        verify(this.toolService).removeInstructors(toolId, instructorIds);
+    }
+
+    private void expectNoInstructorsRemoved() {
+        verifyNoInteractions(this.toolService);
     }
 
 }

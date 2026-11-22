@@ -29,10 +29,12 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolEventPayload.ToolDeletedPayload;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -68,7 +70,7 @@ class ToolServiceTest {
         ToolId toolId = this.toolService.createTool(command);
 
         // then
-        verify(this.toolRepository).save(any());
+        expectSaved();
         ToolCreatedPayload payload = expectSavedEvent(EventType.TOOL_CREATED, toolId) //
                 .deserializeAndValidatePayload(ToolCreatedPayload.class);
         assertThat(payload.id()).isEqualTo(toolId);
@@ -81,8 +83,8 @@ class ToolServiceTest {
     @Test
     void createTool_rejectsTheNameOfAnotherTool() {
         // given
-        Tool other = givenToolNamed("Kreissäge");
-        CreateToolCommand command = createToolCommand().name("Kreissäge").build();
+        CreateToolCommand command = createToolCommand().build();
+        Tool other = givenOtherToolNamed(command.name());
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.createTool(command));
@@ -92,8 +94,7 @@ class ToolServiceTest {
                 .isInstanceOf(ToolNameAlreadyUsedException.class) //
                 .hasFieldOrPropertyWithValue("code", ToolNameAlreadyUsedException.CODE) //
                 .hasMessageContaining(other.getId().getValue().toString());
-        verify(this.toolRepository, never()).save(any());
-        expectNoEvent();
+        expectNothingSaved();
     }
 
     // ------------------------------------------------------------------------
@@ -117,7 +118,7 @@ class ToolServiceTest {
     void updateTool_keepsItsOwnName() {
         // given
         Tool tool = givenTool();
-        givenNameUsedBy(tool, tool.getName());
+        givenToolsNamed(tool.getName(), tool);
         UpdateToolCommand command = updateToolCommand(tool.getId()).name(tool.getName()).build();
 
         // when
@@ -132,8 +133,8 @@ class ToolServiceTest {
     void updateTool_rejectsTheNameOfAnotherTool() {
         // given
         Tool tool = givenTool();
-        Tool other = givenToolNamed("Bandsäge");
-        UpdateToolCommand command = updateToolCommand(tool.getId()).name("Bandsäge").build();
+        UpdateToolCommand command = updateToolCommand(tool.getId()).build();
+        Tool other = givenOtherToolNamed(command.name());
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.updateTool(command));
@@ -147,6 +148,26 @@ class ToolServiceTest {
         expectNoEvent();
     }
 
+    // T-15 – two existing names that differ only in case: the next edit of one of them renames it
+    @Test
+    void updateTool_rejectsItsOwnNameWhileAnotherToolHasItInOtherCase() {
+        // given
+        Tool tool = givenTool();
+        Tool other = Tool.of(createToolCommand().name(tool.getName().toUpperCase()).build());
+        givenToolsNamed(tool.getName(), tool, other);
+        UpdateToolCommand command = updateToolCommand(tool.getId()).name(tool.getName()).build();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.toolService.updateTool(command));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(ToolNameAlreadyUsedException.class) //
+                .hasFieldOrPropertyWithValue("code", ToolNameAlreadyUsedException.CODE) //
+                .hasMessageContaining(other.getId().getValue().toString());
+        expectNoEvent();
+    }
+
     @Test
     void updateTool_rejectsAnUnknownTool() {
         // given
@@ -156,7 +177,7 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.updateTool(updateToolCommand(unknown).build()));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
@@ -173,6 +194,7 @@ class ToolServiceTest {
         this.toolService.setWlanRelais(command);
 
         // then
+        assertThat(tool.getWlanRelaisType()).isEqualTo(command.wlanRelaisType());
         assertThat(tool.getIpAddress()).isEqualTo(command.ipAddress());
         expectSavedEvent(EventType.TOOL_WLAN_RELAIS_SET, tool.getId());
     }
@@ -196,7 +218,7 @@ class ToolServiceTest {
         // given
         Tool tool = givenTool();
         SetWlanRelaisCommand command = setWlanRelaisCommand(tool.getId()).build();
-        givenIpAddressUsedBy(Tool.of(createToolCommand().build()), command.ipAddress());
+        givenOtherToolWithIpAddress(command.ipAddress());
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.setWlanRelais(command));
@@ -218,7 +240,7 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.setWlanRelais(setWlanRelaisCommand(unknown).build()));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
@@ -228,14 +250,14 @@ class ToolServiceTest {
     @Test
     void clearWlanRelais_clearsTheRelaisAndSavesTheEvent() {
         // given
-        Tool tool = givenTool();
-        tool.setWlanRelais(setWlanRelaisCommand(tool.getId()).build());
+        Tool tool = givenToolWithWlanRelais();
 
         // when
         this.toolService.clearWlanRelais(tool.getId());
 
         // then
         assertThat(tool.getWlanRelaisType()).isNull();
+        assertThat(tool.getIpAddress()).isNull();
         expectSavedEvent(EventType.TOOL_WLAN_RELAIS_CLEARED, tool.getId());
     }
 
@@ -248,7 +270,7 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.clearWlanRelais(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
@@ -269,12 +291,12 @@ class ToolServiceTest {
         expectSavedEvent(EventType.TOOL_RFID_READER_ASSIGNED, tool.getId());
     }
 
+    // T-8
     @Test
     void assignRfidReader_theSameSwitchBoxAgain_savesNoEvent() {
         // given
-        Tool tool = givenTool();
         RfidReaderId rfidReaderId = RfidReaderId.random();
-        tool.assignRfidReader(rfidReaderId);
+        Tool tool = givenToolWithSwitchBox(rfidReaderId);
         givenSwitchBoxOf(tool, rfidReaderId);
 
         // when
@@ -282,7 +304,7 @@ class ToolServiceTest {
 
         // then
         assertThat(tool.getRfidReaderId()).isEqualTo(rfidReaderId);
-        verify(this.outboxEventStore).save(List.of());
+        expectSavedWithoutEvent();
     }
 
     @Test
@@ -290,7 +312,7 @@ class ToolServiceTest {
         // given
         Tool tool = givenTool();
         RfidReaderId rfidReaderId = RfidReaderId.random();
-        givenSwitchBoxOf(Tool.of(createToolCommand().build()), rfidReaderId);
+        givenOtherToolWithSwitchBox(rfidReaderId);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.assignRfidReader(tool.getId(), rfidReaderId));
@@ -312,7 +334,7 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.assignRfidReader(unknown, RfidReaderId.random()));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
@@ -322,8 +344,7 @@ class ToolServiceTest {
     @Test
     void clearRfidReader_clearsTheSwitchBoxAndSavesTheEvent() {
         // given
-        Tool tool = givenTool();
-        tool.assignRfidReader(RfidReaderId.random());
+        Tool tool = givenToolWithSwitchBox(RfidReaderId.random());
 
         // when
         this.toolService.clearRfidReader(tool.getId());
@@ -342,7 +363,7 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.clearRfidReader(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
@@ -372,16 +393,15 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.addInstructors(unknown, List.of(CustomerId.random())));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
     @Test
     void addInstructors_rejectsAnInstructorOfTheTool() {
         // given
-        Tool tool = givenTool();
         CustomerId instructorId = CustomerId.random();
-        tool.addInstructors(List.of(instructorId));
+        Tool tool = givenToolWithInstructor(instructorId);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.addInstructors(tool.getId(), List.of(instructorId)));
@@ -400,9 +420,8 @@ class ToolServiceTest {
     @Test
     void removeInstructors_removesThePeopleAndSavesTheEvent() {
         // given
-        Tool tool = givenTool();
         CustomerId instructorId = CustomerId.random();
-        tool.addInstructors(List.of(instructorId));
+        Tool tool = givenToolWithInstructor(instructorId);
 
         // when
         this.toolService.removeInstructors(tool.getId(), List.of(instructorId));
@@ -421,16 +440,15 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.removeInstructors(unknown, List.of(CustomerId.random())));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectToolNotFound(thrown);
         expectNoEvent();
     }
 
     @Test
     void removeInstructors_rejectsAPersonWhoIsNoInstructorOfTheTool() {
         // given
-        Tool tool = givenTool();
         CustomerId instructorId = CustomerId.random();
-        tool.addInstructors(List.of(instructorId));
+        Tool tool = givenToolWithInstructor(instructorId);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolService.removeInstructors(tool.getId(), List.of(CustomerId.random())));
@@ -455,8 +473,10 @@ class ToolServiceTest {
         this.toolService.deleteTool(tool.getId());
 
         // then
-        verify(this.toolRepository).delete(tool);
-        expectSavedEvent(EventType.TOOL_DELETED, tool.getId());
+        expectDeleted(tool);
+        ToolDeletedPayload payload = expectSavedEvent(EventType.TOOL_DELETED, tool.getId()) //
+                .deserializeAndValidatePayload(ToolDeletedPayload.class);
+        assertThat(payload.id()).isEqualTo(tool.getId());
     }
 
     @Test
@@ -468,8 +488,8 @@ class ToolServiceTest {
         Throwable thrown = catchThrowable(() -> this.toolService.deleteTool(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verify(this.toolRepository, never()).delete(any());
+        expectToolNotFound(thrown);
+        expectNothingDeleted();
         expectNoEvent();
     }
 
@@ -483,6 +503,27 @@ class ToolServiceTest {
         return tool;
     }
 
+    private Tool givenToolWithWlanRelais() {
+        Tool tool = givenTool();
+        tool.setWlanRelais(setWlanRelaisCommand(tool.getId()).build());
+
+        return tool;
+    }
+
+    private Tool givenToolWithSwitchBox(RfidReaderId rfidReaderId) {
+        Tool tool = givenTool();
+        tool.assignRfidReader(rfidReaderId);
+
+        return tool;
+    }
+
+    private Tool givenToolWithInstructor(CustomerId instructorId) {
+        Tool tool = givenTool();
+        tool.addInstructors(List.of(instructorId));
+
+        return tool;
+    }
+
     private ToolId givenUnknownTool() {
         ToolId unknown = ToolId.random();
         when(this.toolRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
@@ -490,23 +531,31 @@ class ToolServiceTest {
         return unknown;
     }
 
-    private Tool givenToolNamed(String name) {
-        Tool tool = Tool.of(createToolCommand().name(name).build());
-        when(this.toolRepository.findByNameIgnoreCase(name)).thenReturn(List.of(tool));
+    private Tool givenOtherToolNamed(String name) {
+        Tool other = Tool.of(createToolCommand().name(name).build());
+        givenToolsNamed(name, other);
 
-        return tool;
+        return other;
     }
 
-    private void givenNameUsedBy(Tool tool, String name) {
-        when(this.toolRepository.findByNameIgnoreCase(name)).thenReturn(List.of(tool));
+    private void givenToolsNamed(String name, Tool... tools) {
+        when(this.toolRepository.findByNameIgnoreCase(name)).thenReturn(List.of(tools));
     }
 
     private void givenIpAddressUsedBy(Tool tool, IpAddress ipAddress) {
         when(this.toolRepository.findByIpAddress(ipAddress)).thenReturn(Optional.of(tool));
     }
 
+    private void givenOtherToolWithIpAddress(IpAddress ipAddress) {
+        givenIpAddressUsedBy(Tool.of(createToolCommand().build()), ipAddress);
+    }
+
     private void givenSwitchBoxOf(Tool tool, RfidReaderId rfidReaderId) {
         when(this.toolRepository.findByRfidReaderId(rfidReaderId)).thenReturn(Optional.of(tool));
+    }
+
+    private void givenOtherToolWithSwitchBox(RfidReaderId rfidReaderId) {
+        givenSwitchBoxOf(Tool.of(createToolCommand().build()), rfidReaderId);
     }
 
     private void givenSaveReturnsTheTool() {
@@ -526,6 +575,34 @@ class ToolServiceTest {
                 });
 
         return this.events.getValue().getFirst();
+    }
+
+    // a command without a change still goes through the outbox, with no event in it
+    private void expectSavedWithoutEvent() {
+        verify(this.outboxEventStore).save(List.of());
+    }
+
+    private void expectToolNotFound(Throwable thrown) {
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.TOOL);
+    }
+
+    private void expectSaved() {
+        verify(this.toolRepository).save(any());
+    }
+
+    private void expectNothingSaved() {
+        verify(this.toolRepository, never()).save(any());
+        expectNoEvent();
+    }
+
+    private void expectDeleted(Tool tool) {
+        verify(this.toolRepository).delete(tool);
+    }
+
+    private void expectNothingDeleted() {
+        verify(this.toolRepository, never()).delete(any());
     }
 
     private void expectNoEvent() {

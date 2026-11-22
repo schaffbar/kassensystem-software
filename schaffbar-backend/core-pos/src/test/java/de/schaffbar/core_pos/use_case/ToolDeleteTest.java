@@ -24,6 +24,7 @@ import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageService;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.ToolInUseException;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -51,9 +52,7 @@ class ToolDeleteTest {
         this.toolDelete.process(toolId);
 
         // then
-        InOrder order = inOrder(this.toolCertificationService, this.toolService);
-        order.verify(this.toolCertificationService).deleteToolCertifications(toolId);
-        order.verify(this.toolService).deleteTool(toolId);
+        expectCertificationsDeletedBeforeTheTool(toolId);
     }
 
     @Test
@@ -80,7 +79,9 @@ class ToolDeleteTest {
         Throwable thrown = catchThrowable(() -> this.toolDelete.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.TOOL);
         expectNothingDeleted();
     }
 
@@ -117,6 +118,12 @@ class ToolDeleteTest {
 
     // ------------------------------------------------------------------------
     // then
+
+    private void expectCertificationsDeletedBeforeTheTool(ToolId toolId) {
+        InOrder order = inOrder(this.toolCertificationService, this.toolService);
+        order.verify(this.toolCertificationService).deleteToolCertifications(toolId);
+        order.verify(this.toolService).deleteTool(toolId);
+    }
 
     private void expectNothingDeleted() {
         verifyNoInteractions(this.toolCertificationService);

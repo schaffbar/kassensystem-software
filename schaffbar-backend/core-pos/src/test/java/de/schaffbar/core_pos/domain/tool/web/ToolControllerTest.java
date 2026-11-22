@@ -4,6 +4,8 @@ import static de.schaffbar.core_pos.builder.CommandBuilder.createToolCommand;
 import static de.schaffbar.core_pos.builder.CommandBuilder.setWlanRelaisCommand;
 import static de.schaffbar.core_pos.builder.CommandBuilder.updateToolCommand;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -20,10 +22,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -43,7 +49,10 @@ import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException
 import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
 import de.schaffbar.core_pos.shared.exception.InvalidRfidReaderTypeForToolException;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
+import de.schaffbar.core_pos.shared.exception.ToolInUseException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -109,6 +118,7 @@ class ToolControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -136,9 +146,11 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].id").value(tool.id().getValue().toString())) //
                 .andExpect(jsonPath("$[0].name").value(tool.name())) //
+                .andExpect(jsonPath("$[0].description").value(tool.description())) //
                 .andExpect(jsonPath("$[0].area").value(tool.area().name())) //
+                .andExpect(jsonPath("$[0].certificationRequirement").value(tool.certificationRequirement().name())) //
                 .andExpect(jsonPath("$[0].rfidReaderId").value(tool.rfidReaderId().getValue().toString())) //
-                .andExpect(jsonPath("$[0].wlanRelaisType").value("SHELLY_1")) //
+                .andExpect(jsonPath("$[0].wlanRelaisType").value(tool.wlanRelaisType().name())) //
                 .andExpect(jsonPath("$[0].ipAddress").value(tool.ipAddress().getValue())) //
                 .andExpect(jsonPath("$[0].instructors[0]").value(instructorId.getValue().toString()));
     }
@@ -186,7 +198,10 @@ class ToolControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.id").value(tool.id().getValue().toString())) //
                 .andExpect(jsonPath("$.name").value(tool.name())) //
-                .andExpect(jsonPath("$.certificationRequirement").value(tool.certificationRequirement().name()));
+                .andExpect(jsonPath("$.description").value(tool.description())) //
+                .andExpect(jsonPath("$.area").value(tool.area().name())) //
+                .andExpect(jsonPath("$.certificationRequirement").value(tool.certificationRequirement().name())) //
+                .andExpect(jsonPath("$.instructors.length()").value(tool.instructors().size()));
     }
 
     @Test
@@ -198,8 +213,7 @@ class ToolControllerTest {
         ResultActions result = getTool(unknown);
 
         // then
-        result.andExpect(status().isNotFound()) //
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -233,30 +247,15 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$.code").value(ToolNameAlreadyUsedException.CODE));
     }
 
-    @Test
-    void createTool_withoutName_is400() throws Exception {
-        // given
-        CreateToolCommand command = createToolCommand().name(" ").build();
-
+    @ParameterizedTest
+    @MethodSource("invalidCreateToolCommands")
+    void createTool_withAnInvalidValue_is400(CreateToolCommand command) throws Exception {
         // when
         ResultActions result = createTool(command);
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.toolCreate, never()).process(any());
-    }
-
-    @Test
-    void createTool_withADescriptionOf256Characters_is400() throws Exception {
-        // given
-        CreateToolCommand command = createToolCommand().description("x".repeat(256)).build();
-
-        // when
-        ResultActions result = createTool(command);
-
-        // then
-        result.andExpect(status().isBadRequest());
-        verify(this.toolCreate, never()).process(any());
+        expectNothingCreated();
     }
 
     // ------------------------------------------------------------------------
@@ -272,7 +271,7 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolUpdate).process(command);
+        expectUpdated(command);
     }
 
     @Test
@@ -289,17 +288,28 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$.code").value(ToolNameAlreadyUsedException.CODE));
     }
 
-    @Test
-    void updateTool_withADescriptionOf256Characters_is400() throws Exception {
-        // given
-        UpdateToolCommand command = updateToolCommand().description("x".repeat(256)).build();
-
+    @ParameterizedTest
+    @MethodSource("invalidUpdateToolCommands")
+    void updateTool_withAnInvalidValue_is400(UpdateToolCommand command) throws Exception {
         // when
         ResultActions result = updateTool(command);
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.toolUpdate, never()).process(any());
+        expectNothingUpdated();
+    }
+
+    @Test
+    void updateTool_unknownId_is404() throws Exception {
+        // given
+        UpdateToolCommand command = updateToolCommand().build();
+        givenUpdateRejectedWith(command, ResourceNotFoundException.tool(command.id()));
+
+        // when
+        ResultActions result = updateTool(command);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -316,7 +326,7 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolAssignRfidReader).process(toolId, rfidReaderId);
+        expectRfidReaderAssigned(toolId, rfidReaderId);
     }
 
     @Test
@@ -349,6 +359,20 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$.code").value(RfidReaderAlreadyAssignedToToolException.CODE));
     }
 
+    @Test
+    void assignRfidReader_unknownTool_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+        givenRejectedAssignment(unknown, rfidReaderId, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = assignRfidReader(unknown, rfidReaderId);
+
+        // then
+        expectToolNotFound(result);
+    }
+
     // ------------------------------------------------------------------------
     // clearRfidReader
 
@@ -362,7 +386,34 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolClearRfidReader).process(toolId);
+        expectRfidReaderCleared(toolId);
+    }
+
+    @Test
+    void clearRfidReader_ofAToolInUse_is409WithTheCode() throws Exception {
+        // given
+        ToolId toolId = ToolId.random();
+        givenClearRfidReaderRejectedWith(toolId, ToolInUseException.clearRfidReader(toolId));
+
+        // when
+        ResultActions result = clearRfidReader(toolId);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(ToolInUseException.CODE));
+    }
+
+    @Test
+    void clearRfidReader_unknownTool_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        givenClearRfidReaderRejectedWith(unknown, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = clearRfidReader(unknown);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -378,7 +429,7 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolSetWlanRelais).process(command);
+        expectWlanRelaisSet(command);
     }
 
     @Test
@@ -405,7 +456,34 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.toolSetWlanRelais, never()).process(any());
+        expectNoWlanRelaisSet();
+    }
+
+    // T-5
+    @Test
+    void setWlanRelais_withoutIpAddress_is400() throws Exception {
+        // given
+        ToolId toolId = ToolId.random();
+
+        // when
+        ResultActions result = setWlanRelais(toolId, "{\"wlanRelaisType\":\"SHELLY_1\"}");
+
+        // then
+        result.andExpect(status().isBadRequest());
+        expectNoWlanRelaisSet();
+    }
+
+    @Test
+    void setWlanRelais_unknownTool_is404() throws Exception {
+        // given
+        SetWlanRelaisCommand command = setWlanRelaisCommand().build();
+        givenSetWlanRelaisRejectedWith(command, ResourceNotFoundException.tool(command.id()));
+
+        // when
+        ResultActions result = setWlanRelais(command);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -421,7 +499,20 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolClearWlanRelais).process(toolId);
+        expectWlanRelaisCleared(toolId);
+    }
+
+    @Test
+    void clearWlanRelais_unknownTool_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        givenClearWlanRelaisRejectedWith(unknown, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = clearWlanRelais(unknown);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -438,7 +529,7 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolAddInstructors).process(toolId, List.of(instructorId));
+        expectInstructorsAdded(toolId, List.of(instructorId));
     }
 
     @Test
@@ -465,7 +556,21 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.toolAddInstructors, never()).process(any(), any());
+        expectNoInstructorsAdded();
+    }
+
+    @Test
+    void addInstructors_unknownTool_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        CustomerId instructorId = CustomerId.random();
+        givenAddInstructorsRejectedWith(unknown, instructorId, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = addInstructors(unknown, instructorId);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -482,7 +587,7 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolRemoveInstructors).process(toolId, List.of(instructorId));
+        expectInstructorsRemoved(toolId, List.of(instructorId));
     }
 
     @Test
@@ -499,6 +604,20 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$.code").value(CustomerNotInstructorException.CODE));
     }
 
+    @Test
+    void removeInstructors_unknownTool_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        CustomerId instructorId = CustomerId.random();
+        givenRemoveInstructorsRejectedWith(unknown, instructorId, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = removeInstructors(unknown, instructorId);
+
+        // then
+        expectToolNotFound(result);
+    }
+
     // ------------------------------------------------------------------------
     // deleteTool
 
@@ -512,7 +631,34 @@ class ToolControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolDelete).process(toolId);
+        expectDeleted(toolId);
+    }
+
+    @Test
+    void deleteTool_ofAToolInUse_is409WithTheCode() throws Exception {
+        // given
+        ToolId toolId = ToolId.random();
+        givenDeleteRejectedWith(toolId, ToolInUseException.delete(toolId));
+
+        // when
+        ResultActions result = deleteTool(toolId);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(ToolInUseException.CODE));
+    }
+
+    @Test
+    void deleteTool_unknownId_is404() throws Exception {
+        // given
+        ToolId unknown = ToolId.random();
+        givenDeleteRejectedWith(unknown, ResourceNotFoundException.tool(unknown));
+
+        // when
+        ResultActions result = deleteTool(unknown);
+
+        // then
+        expectToolNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -571,6 +717,51 @@ class ToolControllerTest {
 
     private void givenIpAddressUsed(SetWlanRelaisCommand command) {
         doThrow(new IpAddressAlreadyUsedException(command.ipAddress(), ToolId.random())).when(this.toolSetWlanRelais).process(command);
+    }
+
+    private void givenUpdateRejectedWith(UpdateToolCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolUpdate).process(command);
+    }
+
+    private void givenClearRfidReaderRejectedWith(ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolClearRfidReader).process(toolId);
+    }
+
+    private void givenSetWlanRelaisRejectedWith(SetWlanRelaisCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolSetWlanRelais).process(command);
+    }
+
+    private void givenClearWlanRelaisRejectedWith(ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolClearWlanRelais).process(toolId);
+    }
+
+    private void givenAddInstructorsRejectedWith(ToolId toolId, CustomerId instructorId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolAddInstructors).process(toolId, List.of(instructorId));
+    }
+
+    private void givenRemoveInstructorsRejectedWith(ToolId toolId, CustomerId instructorId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolRemoveInstructors).process(toolId, List.of(instructorId));
+    }
+
+    private void givenDeleteRejectedWith(ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolDelete).process(toolId);
+    }
+
+    // T-1, T-10 and the length of the description – each format rule of the request body once (E33)
+    static Stream<Arguments> invalidCreateToolCommands() {
+        return Stream.of( //
+                arguments(named("blank name (T-1)", createToolCommand().name(" ").build())), //
+                arguments(named("description of 256 characters", createToolCommand().description("x".repeat(256)).build())), //
+                arguments(named("no area (T-10)", createToolCommand().area(null).build())), //
+                arguments(named("no certification requirement (T-10)", createToolCommand().certificationRequirement(null).build())));
+    }
+
+    static Stream<Arguments> invalidUpdateToolCommands() {
+        return Stream.of( //
+                arguments(named("blank name (T-1)", updateToolCommand().name(" ").build())), //
+                arguments(named("description of 256 characters", updateToolCommand().description("x".repeat(256)).build())), //
+                arguments(named("no area (T-10)", updateToolCommand().area(null).build())), //
+                arguments(named("no certification requirement (T-10)", updateToolCommand().certificationRequirement(null).build())));
     }
 
     private CustomerId givenInstructorOf(ToolId toolId) {
@@ -655,6 +846,63 @@ class ToolControllerTest {
 
     private ResultActions deleteTool(ToolId toolId) throws Exception {
         return this.mockMvc.perform(delete("/api/v1/tools/" + toolId.getValue()));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectToolNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(Resource.TOOL.name()));
+    }
+
+    private void expectNothingCreated() {
+        verify(this.toolCreate, never()).process(any());
+    }
+
+    private void expectUpdated(UpdateToolCommand command) {
+        verify(this.toolUpdate).process(command);
+    }
+
+    private void expectNothingUpdated() {
+        verify(this.toolUpdate, never()).process(any());
+    }
+
+    private void expectRfidReaderAssigned(ToolId toolId, RfidReaderId rfidReaderId) {
+        verify(this.toolAssignRfidReader).process(toolId, rfidReaderId);
+    }
+
+    private void expectRfidReaderCleared(ToolId toolId) {
+        verify(this.toolClearRfidReader).process(toolId);
+    }
+
+    private void expectWlanRelaisSet(SetWlanRelaisCommand command) {
+        verify(this.toolSetWlanRelais).process(command);
+    }
+
+    private void expectNoWlanRelaisSet() {
+        verify(this.toolSetWlanRelais, never()).process(any());
+    }
+
+    private void expectWlanRelaisCleared(ToolId toolId) {
+        verify(this.toolClearWlanRelais).process(toolId);
+    }
+
+    private void expectInstructorsAdded(ToolId toolId, List<CustomerId> instructorIds) {
+        verify(this.toolAddInstructors).process(toolId, instructorIds);
+    }
+
+    private void expectNoInstructorsAdded() {
+        verify(this.toolAddInstructors, never()).process(any(), any());
+    }
+
+    private void expectInstructorsRemoved(ToolId toolId, List<CustomerId> instructorIds) {
+        verify(this.toolRemoveInstructors).process(toolId, instructorIds);
+    }
+
+    private void expectDeleted(ToolId toolId) {
+        verify(this.toolDelete).process(toolId);
     }
 
     // ------------------------------------------------------------------------

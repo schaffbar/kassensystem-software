@@ -16,10 +16,16 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
 
     List<Tool> findByNameIgnoreCase(String name);
 
-    Optional<Tool> findByIpAddress(String ipAddress);
+    List<Tool> findByIpAddress(String ipAddress);
 
+    // T-4 – checked by the service, the column has no unique constraint
     default Optional<Tool> findByIpAddress(IpAddress ipAddress) {
-        return findByIpAddress(ipAddress.getValue());
+        List<Tool> tools = findByIpAddress(ipAddress.getValue());
+        if (tools.size() > 1) {
+            throw new IllegalStateException("More than one tool with IP address [" + ipAddress.getValue() + "]");
+        }
+
+        return tools.stream().findFirst();
     }
 
     List<Tool> findByRfidReaderId(UUID rfidReaderId);

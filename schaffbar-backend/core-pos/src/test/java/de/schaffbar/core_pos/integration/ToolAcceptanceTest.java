@@ -15,6 +15,7 @@ import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ToolInUseException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
@@ -73,6 +74,14 @@ class ToolAcceptanceTest {
         // then
         this.fixture.then().expectSuccess(result);
         this.fixture.then().expectSwitchBox(toolId, switchBox);
+
+        // when – the first tool gives the switch box up
+        this.fixture.then().expectSuccess(this.fixture.api().clearRfidReader(toolId));
+        result = this.fixture.api().assignRfidReader(otherTool, switchBox);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectSwitchBox(otherTool, switchBox);
     }
 
     @Test
@@ -112,6 +121,14 @@ class ToolAcceptanceTest {
         // then
         this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, InvalidRfidReaderTypeForToolException.CODE);
         this.fixture.then().expectNoSwitchBox(toolId);
+
+        // when
+        RfidReaderId switchBox = this.fixture.given().switchBox(RandomValues.macAddress());
+        result = this.fixture.api().assignRfidReader(toolId, switchBox);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectSwitchBox(toolId, switchBox);
     }
 
     @Test
@@ -124,7 +141,7 @@ class ToolAcceptanceTest {
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
         ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox);
         RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
-        this.fixture.given().customerInTheWorkshop(rfidTagId, gateKeeperIn);
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(rfidTagId, gateKeeperIn);
         this.fixture.given().toolUsage(rfidTagId, scenario.macAddress());
 
         // when
@@ -137,7 +154,8 @@ class ToolAcceptanceTest {
         this.fixture.then().expectSwitchBox(toolId, switchBox);
 
         // when – the person ends the usage at the switch box
-        this.fixture.then().expectSuccess(this.fixture.api().holdRfidTagToReader(rfidTagId, scenario.macAddress()));
+        this.fixture.api().holdRfidTagToReader(rfidTagId, scenario.macAddress());
+        this.fixture.then().expectToolStopped(customerId, toolId);
         cleared = this.fixture.api().clearRfidReader(toolId);
         deleted = this.fixture.api().deleteTool(toolId);
 
@@ -145,6 +163,39 @@ class ToolAcceptanceTest {
         this.fixture.then().expectSuccess(cleared);
         this.fixture.then().expectSuccess(deleted);
         this.fixture.then().expectNoTool(toolId);
+    }
+
+    @Test
+    void t22_instructorsMustExistAsCustomers() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
+        CustomerId unknown = CustomerId.random();
+
+        // when
+        MvcTestResult added = this.fixture.api().addInstructor(toolId, unknown);
+        MvcTestResult removed = this.fixture.api().removeInstructor(toolId, unknown);
+
+        // then
+        this.fixture.then().expectProblem(added, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(removed, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectInstructors(toolId);
+
+        // when
+        CustomerId customerId = this.fixture.given().customer();
+        added = this.fixture.api().addInstructor(toolId, customerId);
+
+        // then
+        this.fixture.then().expectSuccess(added);
+        this.fixture.then().expectInstructors(toolId, customerId);
+
+        // when
+        removed = this.fixture.api().removeInstructor(toolId, customerId);
+
+        // then
+        this.fixture.then().expectSuccess(removed);
+        this.fixture.then().expectInstructors(toolId);
     }
 
 }

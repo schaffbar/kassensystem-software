@@ -42,7 +42,7 @@ class ToolClearRfidReaderTest {
         this.toolClearRfidReader.process(toolId);
 
         // then
-        verify(this.toolService).clearRfidReader(toolId);
+        expectCleared(toolId);
     }
 
     @Test
@@ -57,7 +57,7 @@ class ToolClearRfidReaderTest {
         assertThat(thrown) //
                 .isInstanceOf(ToolInUseException.class) //
                 .hasFieldOrPropertyWithValue("code", ToolInUseException.CODE);
-        verify(this.toolService, never()).clearRfidReader(any());
+        expectNotCleared();
     }
 
     // ------------------------------------------------------------------------
@@ -75,6 +75,14 @@ class ToolClearRfidReaderTest {
         when(this.toolUsageService.getActiveToolUsage(toolId)).thenReturn(Optional.of(activeToolUsageView(toolId).build()));
 
         return toolId;
+    }
+
+    private void expectCleared(ToolId toolId) {
+        verify(this.toolService).clearRfidReader(toolId);
+    }
+
+    private void expectNotCleared() {
+        verify(this.toolService, never()).clearRfidReader(any());
     }
 
 }
