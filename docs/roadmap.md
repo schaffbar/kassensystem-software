@@ -99,8 +99,8 @@ Entscheidung 13.11.2026.
    `RfidReaderReadFacade`, Controller aufgeräumt (Filter liefert Liste), `MacAddress` prüft das Format, Tests;
    Unterbau `ApiExceptionHandler`, `OutboxEventStore`, ArchUnit mit Freeze-Store, Spotless, Skill `aggregate`; Portal
    zeigt den übersetzten Code. Details: `backend-consistency.md`, Abschnitt „Pilot (K3)“.
-4. [ ] **Ausrollen** Aggregat für Aggregat – die Arbeitsliste war der Freeze-Store `core-pos/archunit_store/` (leer
-   und entfernt am 22.11.2026, alle ArchUnit-Regeln streng);
+4. [x] **Ausrollen** Aggregat für Aggregat (abgeschlossen 22.11.2026) – die Arbeitsliste war der Freeze-Store
+   `core-pos/archunit_store/` (leer und entfernt am 22.11.2026, alle ArchUnit-Regeln streng);
    dazu der `DeviceController` (E4) und das Dashboard als Read Facades (E17); die Tests des Aggregats nach dem
    Skill `backend-testing` (Abschnitt „Not everywhere yet“). Reihenfolge von außen nach innen (16.11.2026) – wer
    wenig aufruft, zuerst; der Werkstattablauf hängt an allem und kommt zuletzt:
@@ -136,7 +136,10 @@ Entscheidung 13.11.2026.
      (V8), T-23 „Kein WLAN-Relais“; Freeze-Store entfernt, `TestArchitectureTest` (Stubs nur in `given…`), API-Antworten
      ohne Value Objects (E27); Akzeptanztests `WorkshopFlowAcceptanceTest` (Einchecken bis Abrechnen),
      `WorkshopSessionAcceptanceTest` und je Lesegerät in `integration/device/`
-     - [ ] ganz zum Schluss: partielle Unique-Indizes in einer Flyway-Migration, damit zwei gleichzeitige Anfragen
+     - [x] ganz zum Schluss: partielle Unique-Indizes – 22.11.2026: V9 (`uq_workshop_usage_running`,
+       `uq_workshop_session_open`, `uq_tool_usage_running`), echte Datenbank ohne Duplikate; statt eines
+       Akzeptanztests je ein technischer Integrationstest pro Index (`*RepositoryIntegrationTest`). Ursprünglich:
+       partielle Unique-Indizes in einer Flyway-Migration, damit zwei gleichzeitige Anfragen
        (Lesegerät meldet einen Tag doppelt) die Regeln nicht umgehen – eine laufende `workshop_usage` pro Person
        (WU-1), eine offene `workshop_session` pro Person (WS-1), bei `tool_usage` TU-3 und TU-9. Vorher prüft der
        Maintainer die echte Datenbank auf Duplikate (sonst scheitert die Migration beim Start); Akzeptanztest dazu aus dem Ergebnis (`schaffbar-backend/.claude/skills/`), voraussichtlich: Aggregat und Use Case,
