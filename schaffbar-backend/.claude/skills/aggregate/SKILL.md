@@ -187,6 +187,10 @@ class RfidReader {
         return RfidReaderId.of(this.id);
     }
 
+    public MacAddress getMacAddress() {
+        return MacAddress.of(this.macAddress);
+    }
+
     // ------------------------------------------------------------------------
     // command
 
@@ -208,9 +212,10 @@ class RfidReader {
   objects as their value, enums with `@Enumerated(EnumType.STRING)`. Constraints on the fields (`@NotNull`,
   `@NotBlank`) mirror the migration. Every entity has `@Version private Instant updatedAt`.
 - **Getters are public, setters private** (Lombok `@Getter`, `@Setter(AccessLevel.PRIVATE)`).
-- **`getId()` and every getter of a reference return the value object**, never `UUID` or `String`:
-  `getCustomerId()` → `CustomerId.of(this.customerId)`; an optional reference returns `null` when unset
-  (`getCertifiedBy()`). The own id is always `getId()`, never `get<Aggregate>Id()`.
+- **`getId()` and every getter of a reference or of a value with a value object return the value object**, never
+  `UUID` or `String`: `getCustomerId()` → `CustomerId.of(this.customerId)`, `getMacAddress()`, `getIpAddress()`; an
+  optional one returns `null` when unset (`getCertifiedBy()`, `getIpAddress()`). The own id is always `getId()`, never
+  `get<Aggregate>Id()`. Payload mapper and views then take the value object from the getter without a conversion.
 - **Further public methods are queries or commands.** A query starts with `get`, `is` or `has` and may take parameters
   (`isInstructor(CustomerId)`, `getBillableDurationUntil(Instant)`). A command changes the state through the private
   setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
@@ -484,7 +489,7 @@ public interface RfidReaderViews {
     @Validated
     record RfidReaderView( //
             @NotNull @Valid RfidReaderId id, //
-            @NotBlank String macAddress, //
+            @NotNull @Valid MacAddress macAddress, //
             RfidReaderType type, //
             String name, //
             String socketName, //
@@ -498,8 +503,8 @@ public interface RfidReaderViews {
   MapStruct mapper: `@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)` and `MAPPER`, then `// mapper` and
   `// views`.
 - One record `<Aggregate>View` (and nested parts like `CustomerAddressView`), each with `@Builder` and `@Validated`.
-- Ids and references as value objects, fields validated like a command: the annotations say which values can be
-  missing – the API model and the portal's zod schema follow them.
+- Ids, references and values with a value object as value objects (`MacAddress`, `IpAddress`), fields validated like
+  a command: the annotations say which values can be missing – the API model and the portal's zod schema follow them.
 
 ## Value objects
 
@@ -581,12 +586,11 @@ The rules above are the target. Some code predates them and is fixed aggregate b
 this skill, not the code next to you.** Known deviations:
 
 - Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
-  `ToolViews`, also `RfidReaderCommands`, …).
+  `ToolViews`, …).
 - From the backend review (`docs/backend-review.md`, section 3), fixed in the step of each aggregate: `Active…` instead
-  of `Running…` (E6); delete via a view and `deleteById` (`rfid_reader`, `rfid_tag`, E30); enums as `String` and
-  `macAddress` as `String` in payloads (`rfid_reader`, `rfid_tag_assignment`, E31); entity guards without the comment
-  who checks (E29); `WorkshopUsage.exit()` instead of `stop()`; `cancelRfidTagAssignmentRequest` instead of
-  `cancelRfidTagAssignment` (E20).
+  of `Running…` (E6); delete via a view and `deleteById` (`rfid_tag`, E30); enums as `String` in payloads
+  (`rfid_tag_assignment`, E31); entity guards without the comment who checks (E29); `WorkshopUsage.exit()` instead of
+  `stop()`; `cancelRfidTagAssignmentRequest` instead of `cancelRfidTagAssignment` (E20).
 
 Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 

@@ -154,9 +154,9 @@ void createRfidReader_rejectsAUsedMacAddress() {
   invalid input (`"34-CD-B0-D3-A9-30"`). Integration tests take theirs from `Scenario` (below).
 - **Views come from `builder/ViewBuilder`**, the same way – never `XyzView.builder()`, `new XyzView(…)` or
   `mock(XyzView.class)` in a test. Two methods for a view with an id (`rfidReaderView()`,
-  `rfidReaderView(rfidReaderId)`, `toolView()`, `toolView(toolId)`), one for a view without an id of its own (`rfidTagAssignmentHistoryView()`, the
-  views of a read facade), or one named after a state (`openWorkshopSessionView()`, `finishedToolUsageView()`); the
-  test sets what it is about:
+  `rfidReaderView(rfidReaderId)`, `toolView()`, `toolView(toolId)`), one for a view without an id of its own
+  (`rfidTagAssignmentHistoryView()`, the views of a read facade), or one named after a state
+  (`openWorkshopSessionView()`, `finishedToolUsageView()`); the test sets what it is about:
   `rfidReaderView().type(RfidReaderType.SWITCH_BOX).build()`, `toolView().rfidReaderId(rfidReaderId).build()`. A new
   view gets its methods there.
 - **JSON bodies** of controller and fixture requests: `support/Json.write(command)` when a command has the fields of
