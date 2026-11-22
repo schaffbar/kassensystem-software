@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,14 @@ public final class ThenFixture {
 
     public void expectCustomer(CustomerId customerId) {
         assertThat(this.api.getCustomer(customerId)).hasStatus(HttpStatus.OK);
+    }
+
+    // the date of birth as the portal reads it (z.iso.date(): "1990-01-31")
+    public void expectCreatedCustomerBornOn(MvcTestResult result, LocalDate dateOfBirth) {
+        assertThat(result).hasStatus(HttpStatus.CREATED);
+        MvcTestResult customer = this.api.getCustomer(CustomerId.of(GivenFixture.createdId(result)));
+
+        assertThat(customer).bodyJson().extractingPath("$.dateOfBirth").isEqualTo(dateOfBirth.toString());
     }
 
     public void expectNoCustomer(CustomerId customerId) {

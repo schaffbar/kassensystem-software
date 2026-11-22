@@ -122,13 +122,17 @@ class CustomerAcceptanceTest {
 
     @Test
     void c8_theDateOfBirthLiesWithinTheLast100YearsAndBeforeTheCurrentYear() {
+        LocalDate thirtyYearsAgo = LocalDate.now().minusYears(30).withDayOfYear(31);
+
         // when
         MvcTestResult bornThisYear = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build());
         MvcTestResult tooOld = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(LocalDate.now().minusYears(101)).build());
+        MvcTestResult bornThirtyYearsAgo = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(thirtyYearsAgo).build());
 
         // then
         this.fixture.then().expectBadRequest(bornThisYear);
         this.fixture.then().expectBadRequest(tooOld);
+        this.fixture.then().expectCreatedCustomerBornOn(bornThirtyYearsAgo, thirtyYearsAgo);
     }
 
     @Test

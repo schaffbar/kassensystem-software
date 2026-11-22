@@ -1,9 +1,9 @@
 package de.schaffbar.core_pos.domain.rfid_tag_assignment.web;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -38,8 +38,8 @@ public interface RfidTagAssignmentApiModel {
     // response
 
     record RfidTagAssignmentApiDto( //
-            @NotNull UUID id, //
-            @NotNull UUID customerId, //
+            @NotBlank String id, //
+            @NotBlank String customerId, //
             @NotNull RfidTagAssignmentType assignmentType, //
             @NotNull RfidTagAssignmentStatus status, //
             String rfidTagId, //
@@ -47,8 +47,8 @@ public interface RfidTagAssignmentApiModel {
     ) {}
 
     record RfidTagAssignmentHistoryApiDto( //
-            @NotNull UUID customerId, //
-            @NotNull String rfidTagId, //
+            @NotBlank String customerId, //
+            @NotBlank String rfidTagId, //
             @NotNull RfidTagAssignmentType assignmentType, //
             @NotNull Instant assignmentDate, //
             @NotNull Instant unassignmentDate //

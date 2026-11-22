@@ -71,7 +71,7 @@ public interface WorkshopSessionApiModel extends ValueObjectMapper {
     ) {}
 
     record WorkshopUsageApiDto( //
-            @NotNull String id, //
+            @NotBlank String id, //
             @NotNull @PastOrPresent Instant entryTime, //
             @PastOrPresent Instant exitTime, //
             @Positive Long durationInMinutes, //

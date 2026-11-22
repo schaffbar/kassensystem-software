@@ -32,10 +32,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.CreateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.SetWlanRelaisCommand;
 import de.schaffbar.core_pos.domain.tool.ToolCommands.UpdateToolCommand;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
+import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.read_facade.ToolReadFacade;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInstructorException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
@@ -117,7 +119,13 @@ class ToolControllerTest {
     @Test
     void getTools_withoutFilter_returnsAll() throws Exception {
         // given
-        ToolView tool = toolView().instructors(Set.of(CustomerId.random())).build();
+        CustomerId instructorId = CustomerId.random();
+        ToolView tool = toolView() //
+                .rfidReaderId(RfidReaderId.random()) //
+                .wlanRelaisType(WlanRelaisType.SHELLY_1) //
+                .ipAddress(RandomValues.ipAddress()) //
+                .instructors(Set.of(instructorId)) //
+                .build();
         givenTools(tool);
 
         // when
@@ -129,7 +137,10 @@ class ToolControllerTest {
                 .andExpect(jsonPath("$[0].id").value(tool.id().getValue().toString())) //
                 .andExpect(jsonPath("$[0].name").value(tool.name())) //
                 .andExpect(jsonPath("$[0].area").value(tool.area().name())) //
-                .andExpect(jsonPath("$[0].instructors.length()").value(1));
+                .andExpect(jsonPath("$[0].rfidReaderId").value(tool.rfidReaderId().getValue().toString())) //
+                .andExpect(jsonPath("$[0].wlanRelaisType").value("SHELLY_1")) //
+                .andExpect(jsonPath("$[0].ipAddress").value(tool.ipAddress().getValue())) //
+                .andExpect(jsonPath("$[0].instructors[0]").value(instructorId.getValue().toString()));
     }
 
     @Test

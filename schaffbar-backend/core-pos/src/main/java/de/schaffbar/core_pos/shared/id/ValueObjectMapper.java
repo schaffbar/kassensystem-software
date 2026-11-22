@@ -30,4 +30,9 @@ public interface ValueObjectMapper {
         return isNull(ipAddress) ? null : IpAddress.of(ipAddress);
     }
 
+    // responses carry the value as String – a single field maps "id.value", a collection (Set<CustomerId>) needs this
+    default String toValue(ValueObject<?> valueObject) {
+        return isNull(valueObject) ? null : valueObject.getValue().toString();
+    }
+
 }

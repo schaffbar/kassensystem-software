@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -20,7 +21,6 @@ import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
-import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 import de.schaffbar.core_pos.shared.validation.ToolDescription;
@@ -33,6 +33,9 @@ public interface ToolApiModel extends ValueObjectMapper {
     // ------------------------------------------------------------------------
     // mapping view to response
 
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "rfidReaderId", source = "rfidReaderId.value")
+    @Mapping(target = "ipAddress", source = "ipAddress.value")
     ToolApiDto toToolApiDto(ToolView tool);
 
     // ------------------------------------------------------------------------
@@ -48,15 +51,15 @@ public interface ToolApiModel extends ValueObjectMapper {
     // response
 
     record ToolApiDto( //
-            @NotNull ToolId id, //
+            @NotBlank String id, //
             @NotBlank String name, //
             String description, //
             @NotNull ToolArea area, //
             @NotNull CertificationRequirement certificationRequirement, //
-            RfidReaderId rfidReaderId, //
+            String rfidReaderId, //
             WlanRelaisType wlanRelaisType, //
-            IpAddress ipAddress, //
-            @NotNull Set<CustomerId> instructors //
+            String ipAddress, //
+            @NotNull Set<String> instructors //
     ) {}
 
     // ------------------------------------------------------------------------

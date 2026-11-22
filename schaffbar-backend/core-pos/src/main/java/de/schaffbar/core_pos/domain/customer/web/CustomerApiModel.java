@@ -73,7 +73,7 @@ public interface CustomerApiModel {
             @NotBlank String id, //
             @NotBlank String firstName, //
             @NotBlank String lastName, //
-            @NotBlank String dateOfBirth, //
+            @NotNull LocalDate dateOfBirth, //
             @NotNull AgeGroup ageGroup, //
             boolean clubMember, //
             @NotBlank String email, //

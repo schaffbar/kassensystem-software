@@ -12,6 +12,7 @@ import org.mapstruct.factory.Mappers;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.ChangeRfidReaderTypeCommand;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderCommands.UpdateRfidReaderCommand;
+import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderViews.RfidReaderView;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
@@ -41,7 +42,7 @@ public interface RfidReaderApiModel extends ValueObjectMapper {
     record RfidReaderApiDto( //
             @NotBlank String id, //
             @NotBlank String macAddress, //
-            String type, //
+            RfidReaderType type, //
             String name, //
             String socketName, //
             @NotNull Instant createdAt //
@@ -60,7 +61,7 @@ public interface RfidReaderApiModel extends ValueObjectMapper {
     ) {}
 
     record ChangeRfidReaderTypeRequestBody( //
-            @NotBlank String type //
+            @NotNull RfidReaderType type //
     ) {}
 
 }

@@ -17,8 +17,8 @@ import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
  * {@link ResponseEntityExceptionHandler}.
  */
 @Slf4j
-// only the portal API: the device endpoints (device/) answer the firmware in their own format
-@RestControllerAdvice(basePackages = "de.schaffbar.core_pos.domain")
+// only the portal API: the device endpoints (web/device/) answer the firmware in their own format
+@RestControllerAdvice(basePackages = {"de.schaffbar.core_pos.domain", "de.schaffbar.core_pos.web.dashboard"})
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     static final String CODE = "code";

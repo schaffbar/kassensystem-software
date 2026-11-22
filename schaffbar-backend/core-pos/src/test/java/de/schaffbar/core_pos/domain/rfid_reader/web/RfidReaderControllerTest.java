@@ -242,6 +242,19 @@ class RfidReaderControllerTest {
     }
 
     @Test
+    void changeRfidReaderType_withUnknownType_is400() throws Exception {
+        // given
+        RfidReaderId rfidReaderId = RfidReaderId.random();
+
+        // when
+        ResultActions result = changeRfidReaderType(rfidReaderId, "{\"type\":\"COFFEE_MACHINE\"}");
+
+        // then
+        result.andExpect(status().isBadRequest());
+        expectTypeNotChanged();
+    }
+
+    @Test
     void changeRfidReaderType_ofASwitchBoxWithTool_is409WithTheCode() throws Exception {
         // given
         ChangeRfidReaderTypeCommand command = changeRfidReaderTypeCommand().type(RfidReaderType.GATE_KEEPER_IN).build();
@@ -364,9 +377,13 @@ class RfidReaderControllerTest {
     }
 
     private ResultActions changeRfidReaderType(ChangeRfidReaderTypeCommand command) throws Exception {
-        return this.mockMvc.perform(patch("/api/v1/rfid-readers/" + command.id().getValue() + "/type") //
+        return changeRfidReaderType(command.id(), Json.write(command));
+    }
+
+    private ResultActions changeRfidReaderType(RfidReaderId rfidReaderId, String body) throws Exception {
+        return this.mockMvc.perform(patch("/api/v1/rfid-readers/" + rfidReaderId.getValue() + "/type") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(command)));
+                .content(body));
     }
 
     private ResultActions deleteRfidReader(RfidReaderId rfidReaderId) throws Exception {
@@ -378,6 +395,10 @@ class RfidReaderControllerTest {
 
     private void expectNothingCreated() {
         verify(this.rfidReaderCreate, never()).process(any());
+    }
+
+    private void expectTypeNotChanged() {
+        verify(this.rfidReaderChangeType, never()).process(any());
     }
 
 }

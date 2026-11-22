@@ -190,7 +190,7 @@ public final class GivenFixture {
     // ------------------------------------------------------------------------
     // helper
 
-    private UUID createdId(MvcTestResult result) {
+    static UUID createdId(MvcTestResult result) {
         String location = result.getResponse().getHeader(HttpHeaders.LOCATION);
         return UUID.fromString(location.substring(location.lastIndexOf('/') + 1));
     }
