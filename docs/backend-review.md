@@ -191,9 +191,12 @@ und der Abschnitt zu `web/device/`.
 
 ### `backend-consistency.md`
 
-- [ ] E2 („Abfragen direkt an den Service“) ist durch E17 ersetzt, E17 (`@Transactional(readOnly = true)`,
+Erledigt 22.11.2026: E2 und E17 als geändert markiert; E6 wurde mit der Entscheidung geändert; neu E29–E34 aus
+den Entscheidungen.
+
+- [x] E2 („Abfragen direkt an den Service“) ist durch E17 ersetzt, E17 (`@Transactional(readOnly = true)`,
   `dashboard/web/`) durch E21 und `web/dashboard/` – als ersetzt markieren wie E14/E15.
-- [ ] E6 nach der Entscheidung oben.
+- [x] E6 nach der Entscheidung oben.
 
 ## 3. Pro Aggregat
 
