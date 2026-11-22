@@ -50,8 +50,16 @@ core_pos/
   web/<object>/         controllers that belong to no aggregate (*Controller, *ApiModel):
     dashboard/          the overview – who is in the workshop, which tools run
     device/             the endpoints the readers and switch boxes call (`/device/init`, `/counter`, `/card`)
-  shared/               event + outbox, exceptions, id value objects, billing (`BillableDuration`), own Bean
-                        Validation constraints (`validation/`, `@DateOfBirth`, `@PostalCode`, `@ToolDescription`)
+  shared/               used by everyone, knows no feature (ArchUnit `sharedDoesNotDependOnFeatures`) – only the
+                        event payloads use the enums and value objects of their aggregate:
+    cqrs/               `@Query`, `@Command`
+    event/              `SchaffbarEvent`, `EventType`, `outbox/` (`OutboxEventStore`), `payload/`
+    exception/          rule exceptions, `ResourceNotFoundException`
+    id/                 value objects (`CustomerId`, `MacAddress`, `IpAddress`, …)
+    billing/            `BillableDuration`, `BillingTotal`
+    validation/         own Bean Validation constraints (`@DateOfBirth`, `@PostalCode`, `@ToolDescription`)
+    util/               `StringTo<ValueObject>Converter` for path variables and request parameters
+    web/                `ApiExceptionHandler`
 ```
 
 ## Rules
@@ -72,10 +80,11 @@ core_pos/
   "Open Rules" to "Business Rules" – the same change.
 - **A violated rule throws a dedicated exception** in `shared/exception/` (`CustomerHasOpenWorkshopSessionException`),
   English message with the ids, static factories for variants (`RfidReaderHasToolAssignedException.delete(id)`). It
-  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates: `public static final String CODE`,
-  the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants) or is a
-  `ResourceNotFoundException` (→ `404`); `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible
-  states (broken data) are an `IllegalStateException` (→ `500`). Many exceptions do not have a base class yet (E8).
+  extends `BusinessRuleViolationException` (→ `409` with a stable `code` the portal translates:
+  `public static final String CODE`, the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants)
+  or is a `ResourceNotFoundException` (→ `404`, `CODE` `RESOURCE_NOT_FOUND` and the `resource`);
+  `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible states (broken data, a bug) are an
+  `IllegalStateException` (→ `500`, E8).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`
   – never edit an applied one. `ddl-auto: validate`: entity and migration must match.
 - **The API is a contract with the portal.** A field's nullability is its Bean Validation (`@NotNull`, `@NotBlank`)
@@ -84,29 +93,45 @@ core_pos/
 
 ### Use cases (until the skill `use-case`)
 
-- One class per action in `use_case/`, named `<Aggregate><Action>` (`RfidReaderChangeType`, `ToolAddInstructors`) –
-  also for a plain create, update or delete, so every controller looks the same.
-- `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` annotated `@Command`.
-- Checks that a referenced aggregate exists (`customerService.getCustomer(id).orElseThrow(() -> ResourceNotFoundException.customer(id))`) –
-  for a list all entries before the change –, then the rules with a second
-  aggregate, then the service call(s). A batch is all or nothing (E11).
+- One class per action in `use_case/`, named `<Aggregate><EntityCommand>` (`RfidReaderChangeType`,
+  `ToolAddInstructors`, `RfidTagAssignmentAssignRfidTag`) – also for a plain create, update or delete
+  (`ToolCreate`, `ToolDelete`), so every controller looks the same. **The aggregate is the one whose state changes**;
+  when several change, the one the action is about (`WorkshopUsageStart` also starts a session). The action is the
+  entity's command (E3, E20 – table in skill `aggregate`, "Service").
+- `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` annotated `@Command`; it returns
+  `void` or the id of what it created (`ToolCreate` → `ToolId`). Only the section `// helper`.
+- A use case may call other use cases when it chooses between whole actions with their rules (`ToolUsageToggle` →
+  `ToolUsageStart` or `ToolUsageStop`).
+- Checks that a referenced aggregate exists
+  (`customerService.getCustomer(id).orElseThrow(() -> ResourceNotFoundException.customer(id))`) – for a list all
+  entries before the change –, then the rules with a second aggregate, then the service call(s). A batch is all or
+  nothing (E11).
 
 ### Read facades (until their skill)
 
 - One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
   `DashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
   `@Query` on every public method.
-- Public methods are queries (`get…`) and return views – of one aggregate, or a view of its own that combines several
-  (`DashboardViews`, next to the facade). It reads services (any number) and never changes anything.
+- Public methods are queries (`get…`, `is…` / `has…` for a yes/no answer) and return views – of one aggregate, or a
+  view of its own that combines several, in a `<What it shows>Views` next to the facade (`DashboardViews`,
+  `DeviceViews`, `OpenWorkshopSessionViews` – not `WorkshopSessionViews`, the aggregate's name). It reads services (any
+  number) and never changes anything. A query with a precondition throws its exception
+  (`DeviceReadFacade.getCustomer(rfidTagId)`: unknown tag → `ResourceNotFoundException`, no assignment →
+  `NoCustomerAssignedException`). Only the section `// helper`.
 
 ### Controller and API model (until the skill `rest-api`)
 
 - `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
-  `/api/v1/<aggregate-in-kebab-case>`; a controller of no aggregate is `web/<object>/<Object>Controller`, path
-  `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands call a use case, queries its read facade – never a service.
-  A new `web/<object>/` controller of the portal is added to `basePackages` of `ApiExceptionHandler` (`web/device/` is
-  not: it answers the firmware in its own format).
+  `/api/v1/<aggregate in kebab case, plural>` (`/api/v1/rfid-readers`); a controller of no aggregate is
+  `web/<object>/<Object>Controller`, path `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands
+  call a use case, queries its read facade – never a service. A new `web/<object>/` controller of the portal is added
+  to `basePackages` of `ApiExceptionHandler`.
+- **One controller per aggregate** – an inner entity gets a sub-path of it (`GET /rfid-tag-assignments/history`) and
+  a query in its read facade, no controller of its own (E16).
 - **An endpoint is a query or a command**, never both (no "get or create").
+- **A create answers `201` with `Location`** pointing to the `GET /{id}` of the new resource; without such a `GET`
+  (found by something else like the assignment by its customer, or several created like `/batch`) it answers `204`
+  (E32). Other commands answer `204`.
 - `@PathVariable` and `@RequestParam` are value objects (`@PathVariable RfidReaderId rfidReaderId`), never `UUID` or
   `String` converted by hand – each needs its `StringTo<ValueObject>Converter` in `shared/util/`. An optional filter is
   `@RequestParam(required = false)` with a `nonNull(…)` check.
@@ -114,7 +139,13 @@ core_pos/
   request records (`…RequestBody`). Responses carry no value object and no `UUID`: ids and values are `String`
   (`@Mapping(target = "id", source = "id.value")`; a `Set<CustomerId>` maps with `ValueObjectMapper.toValue`), enums
   their enum type, dates `Instant` / `LocalDate` (ArchUnit `ValueObjectArchitectureTest`);
-  request bodies take value objects (their `@JsonCreator` reads them).
+  request bodies take value objects (their `@JsonCreator` reads them) and enums. Sections `// mapping view to
+  response`, `// mapping request body to command`, `// response`, `// request body`.
+- **`web/device/` is the firmware's contract** (E4) and differs on purpose: an endpoint may change and answer with
+  what the device shows (`/device/card` checks in and returns the stay); request and response fields carry the
+  firmware's names as `String` (`RFID`, `MACADDR`), converted to value objects in the controller; responses are
+  `*Response` records, not `…ApiDto`; a refusal is a `200` with a text from `DeviceMessages`, not a `ProblemDetail` –
+  so `web/device/` is not in `ApiExceptionHandler`. Its logic still lives in use cases and the `DeviceReadFacade`.
 
 ## Code
 
@@ -125,11 +156,16 @@ core_pos/
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
 - `Optional` only as a return type ("maybe nothing there") – never as a parameter or a field. A value that can be
   missing is passed as a nullable parameter, with a comment what `null` means.
-- `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`.
+- A state without an end is *open* for a session and *running* for a workshop or tool usage – never *active* (E6,
+  skill `aggregate`).
+- `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`;
+  `// static constructor` above the one `of(…)` of a class, `// static factories` above several named ones
+  (exceptions, `SchaffbarEvent`).
 - **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`, E21): they
   bring the transaction (`@Query` = `@Transactional(readOnly = true)`, `@Command` = `@Transactional`), so these
-  classes never use `@Transactional` themselves. Spring Data's `@Query` belongs only to repositories. Older code still
-  has `@Transactional` (also jakarta's) – replace it when you touch the class.
+  classes never use `@Transactional` themselves. Spring Data's `@Query` belongs only to repositories. The one
+  `@Transactional` is `OutboxEventStore.save` with `Propagation.MANDATORY`: outside a command's transaction it fails,
+  so an event is never saved without its change.
 - Comments only for what the code can't say (why, a non-obvious rule); no JavaDoc that repeats a name or signature.
 
 ### Formatting
@@ -186,11 +222,13 @@ Skill `backend-testing` has all rules; the short form:
 - **Each rule on the lowest level that proves it completely:** value object / entity (no mocks), service (Mockito for
   repository and outbox, real entity and EventFactory), use case (mocked services, one test per path), controller
   (standalone MockMvc), integration, ArchUnit.
-- **A rule whose check reads the database** also gets an acceptance test `r<number>_…` in
+- **A rule whose check reads the database** also gets an acceptance test `<rule id>_…` (`r5_`, `ta1_`) in
   `integration/<Aggregate>AcceptanceTest`: `@IntegrationTest`, `SchaffbarFixture` (`given()` / `api()` / `then()`),
   random values from `Scenario`, no cleanup. One PostgreSQL container (Testcontainers) for the whole run – `mvn test`
   needs Docker; the real database is never touched.
 - A rejection is checked with its exception, its `code` and that nothing happened. Mockito runs strict – stub per test.
+- A format rule (Bean Validation): a controller test `…_is400` per constraint and endpoint (E33). Controller tests run
+  with Boot's Jackson configuration (`Json.messageConverter()`) and compare dates with their value (E34).
 - Every test has `// given` / `// when` / `// then`; stubs live in `given…` (ArchUnit `TestArchitectureTest`),
   verifications in `expect…` methods. Follow the skill, not the test next to it.
   Each test creates its own data (no fields): commands from `builder/CommandBuilder`, views from `builder/ViewBuilder`,
