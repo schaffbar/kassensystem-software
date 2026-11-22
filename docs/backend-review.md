@@ -105,41 +105,48 @@ Ein erledigter Punkt bekommt sein Häkchen und das Datum.
   pro Constraint und Endpunkt ein Controller-Test `<endpoint>_with<WhatIsWrong>_is400`; am Command im Service kein
   Test (dieselben Annotationen, Mockito validiert nicht). Die Akzeptanztests `c6`, `c7`
   (`T:integration/CustomerAcceptanceTest:106,115`) bleiben – sie werden später ausgebaut; der Skill verlangt für eine
-  Formatregel keinen, verbietet ihn aber nicht. `c8` bekommt den Kommentar zum Datumsformat der Antwort.
+  Formatregel keinen, verbietet ihn aber nicht. Das Datumsformat beweist nach der Entscheidung zu den Controller-Tests
+  (unten, Skill `backend-testing`) der Controller-Test – `c8` braucht keinen Kommentar dazu.
 
 ## 2. Regeldokumente
 
 ### Skill `backend-testing`
 
-- [ ] Pfad in Zeile 8: `../docs/backend-consistency.md` stimmt vom Skill aus nicht.
-- [ ] Veraltete Beispiele: `given().switchBox(scenario)`, `toolWithSwitchBox(scenario, switchBox)` (die Fixture nimmt
+Erledigt 22.11.2026 (alle Punkte unten). Dazu entschieden: Controller-Tests bekommen Boots Jackson-Konfiguration
+(`Json.messageConverter()` im Standalone-MockMvc) und prüfen Datum und Zeit gegen den Wert statt nur `exists()` – sie
+beweisen das Format für das Portal (E22). Selbst festgelegt und bestätigt: jede Interaktion in einer `expect…`-Methode;
+`Scenario` ein Wert pro Art, ein zweiter aus `RandomValues` nach seiner Rolle benannt; technische Tests nur, wo kein
+Akzeptanztest hinkommt, keiner für „höchstens eine“ in `default`-Methoden.
+
+- [x] Pfad in Zeile 8: `../docs/backend-consistency.md` stimmt vom Skill aus nicht.
+- [x] Veraltete Beispiele: `given().switchBox(scenario)`, `toolWithSwitchBox(scenario, switchBox)` (die Fixture nimmt
   `MacAddress` / `String`); Use-Case-Beispiel `givenTool()` / `givenNoTool()` / `expectTypeChanged()`.
-- [ ] Referenz `RfidTagAssignmentTest` verstößt selbst gegen den Skill (Abschnitt 3, `rfid_tag_assignment`) – reparieren
+- [x] Referenz `RfidTagAssignmentTest` verstößt selbst gegen den Skill (Abschnitt 3, `rfid_tag_assignment`) – reparieren
   oder auf `ToolCertificationTest` (`expectRejected(thrown, entity, unchangedStatus)`) zeigen.
-- [ ] `expectSavedEvent(type, id)` bei `void`-Create (die Id kennt der Test nicht): `expectSaved…()` mit
+- [x] `expectSavedEvent(type, id)` bei `void`-Create (die Id kennt der Test nicht): `expectSaved…()` mit
   `verify(repo).save(captor.capture())` beschreiben – kein Captor im Stub.
-- [ ] Payloads: „jedes Event, das der Service baut“ (auch die Deleted-Events), nicht nur das Created-Event.
-- [ ] „Zwei Methoden pro Command/View“ passt nicht auf Create-Commands ohne eigene Id und Read-Facade-Views.
-- [ ] Was im Test bleiben darf: Zustand und Payload des Ergebnisses inline, Interaktionen und Wiederholtes in `expect…`;
+- [x] Payloads: „jedes Event, das der Service baut“ (auch die Deleted-Events), nicht nur das Created-Event.
+- [x] „Zwei Methoden pro Command/View“ passt nicht auf Create-Commands ohne eigene Id und Read-Facade-Views.
+- [x] Was im Test bleiben darf: Zustand und Payload des Ergebnisses inline, Interaktionen und Wiederholtes in `expect…`;
   die Checkliste ist strenger als der Text; ein `InOrder`-Block ist mehr als eine Zeile.
-- [ ] Methodennamen: „ohne Methode, wenn die Klasse eine testet“ widerspricht dem eigenen Beispiel (`MacAddressTest`
+- [x] Methodennamen: „ohne Methode, wenn die Klasse eine testet“ widerspricht dem eigenen Beispiel (`MacAddressTest`
   `of_…`).
-- [ ] JSON-Bodies: Textblock oder kurzer String (`"{}"` steht im Skill selbst, kein Test nutzt Textblöcke).
-- [ ] Gelten die Controller-Regeln für `ApiExceptionHandlerTest` (Testcontroller)?
-- [ ] Bean Validation nach E33 (Validator, Controller `…_is400`, kein Test am Command; Akzeptanztest erlaubt, nicht verlangt).
-- [ ] Controller: wo die Felder des Portals stehen (`schaffbar-portal/src/app/shared/api/<resource>/*.api-model.ts`);
+- [x] JSON-Bodies: Textblock oder kurzer String (`"{}"` steht im Skill selbst, kein Test nutzt Textblöcke).
+- [x] Gelten die Controller-Regeln für `ApiExceptionHandlerTest` (Testcontroller)?
+- [x] Bean Validation nach E33 (Validator, Controller `…_is400`, kein Test am Command; Akzeptanztest erlaubt, nicht verlangt).
+- [x] Controller: wo die Felder des Portals stehen (`schaffbar-portal/src/app/shared/api/<resource>/*.api-model.ts`);
   Datumsformate beweist erst der Integrationstest (Standalone-MockMvc ohne Boots Jackson); wie `Instant`-Felder
   geprüft werden.
-- [ ] Technische Tests: braucht jede abgeleitete Query / jede `default`-Methode mit Logik einen?
-- [ ] `Scenario` hat einen Wert pro Art – Regel für den zweiten Leser, Tag, Werkzeugnamen (heute ~20× `RandomValues`).
-- [ ] „SchaffbarApi kennt als einzige URLs und JSON“ meint die Anfragen (Given/Then lesen Antworten).
-- [ ] Namen der Akzeptanztests: Präfix pro Aggregat (`c4_`, `ta1_`, `ws3_`), zusammengefasste Regeln (`t2_t15_`),
+- [x] Technische Tests: braucht jede abgeleitete Query / jede `default`-Methode mit Logik einen?
+- [x] `Scenario` hat einen Wert pro Art – Regel für den zweiten Leser, Tag, Werkzeugnamen (heute ~20× `RandomValues`).
+- [x] „SchaffbarApi kennt als einzige URLs und JSON“ meint die Anfragen (Given/Then lesen Antworten).
+- [x] Namen der Akzeptanztests: Präfix pro Aggregat (`c4_`, `ta1_`, `ws3_`), zusammengefasste Regeln (`t2_t15_`),
   mehrere Methoden pro Regel.
-- [ ] Wie ein Device-Test seine Regelnummer trägt (TU-1, TU-2, TU-9, TU-10, WU-1, WU-2, TA-4 nur dort bewiesen).
-- [ ] Erwartete Werte: `new XyzCommand(…)` / `new XyzView(…)` im Test ist wie `.builder()` verboten.
-- [ ] Die erlaubte Seite einer Regel: über `api()` (nicht `given()`); `expectSuccess` auf `/device/*` ist immer wahr.
-- [ ] Vollständige Ablehnung: bei `ResourceNotFoundException` die `resource` prüfen; am Gerät: Zustand unverändert.
-- [ ] Muster, die die Tests einheitlich nutzen, aber nirgends stehen: `given…RejectedWith(…, RuntimeException)`,
+- [x] Wie ein Device-Test seine Regelnummer trägt (TU-1, TU-2, TU-9, TU-10, WU-1, WU-2, TA-4 nur dort bewiesen).
+- [x] Erwartete Werte: `new XyzCommand(…)` / `new XyzView(…)` im Test ist wie `.builder()` verboten.
+- [x] Die erlaubte Seite einer Regel: über `api()` (nicht `given()`); `expectSuccess` auf `/device/*` ist immer wahr.
+- [x] Vollständige Ablehnung: bei `ResourceNotFoundException` die `resource` prüfen; am Gerät: Zustand unverändert.
+- [x] Muster, die die Tests einheitlich nutzen, aber nirgends stehen: `given…RejectedWith(…, RuntimeException)`,
   `expectSavedEvents(type, list)`, `@ParameterizedTest @EnumSource` über Zustände, erklärende `// when – …` in Unit-Tests.
 
 ### Skill `aggregate`
@@ -189,6 +196,8 @@ Abweichungen aus dem Review unter „Not everywhere yet“.
 
 ### `rfid_reader` (Referenz-Implementierung – soll vorbildlich sein)
 
+- [ ] Zuerst: `support/Json.messageConverter()` (Skill `backend-testing`, Controller); danach jeder Controller-Test
+  im Schritt seines Aggregats mit `setMessageConverters(Json.messageConverter())` und Datumsfeldern gegen den Wert.
 - [ ] README: `UpdateRfidReaderCommand` ohne `type` (Code: id, name, socketName); `RFID_READER_CREATED` trägt id und
   macAddress (nicht „Full snapshot“), `RFID_READER_UPDATED` auch `type`; Löschen fehlt bei den Befehlen.
 - [ ] `RfidReaderApiModel.toRfidReaderCommand` → `toUpdateRfidReaderCommand` (`RfidReaderController:97`).
@@ -255,8 +264,8 @@ Abweichungen aus dem Review unter „Not everywhere yet“.
     für C-1, C-2, C-3 beim Anlegen, C-8 beim Ändern.
   - `CustomerDeleteTest`: `verify(…).deleteCustomer` viermal (`:70-73, 87-90, 104-107, 123-126`); Name von `:60`
     irreführend; Reihenfolge Einweisungen vor Person nicht geprüft; `:153` 404 ohne `resource`.
-  - Akzeptanz: erlaubte Seite über `given()` (`:47, 68-69`); `expectSuccess` auf Gerät (`:95`); c8 sagt nicht, warum
-    es ein Akzeptanztest ist (Datumsformat); `RandomValues` `:81, 145`.
+  - Akzeptanz: erlaubte Seite über `given()` (`:47, 68-69`); `expectSuccess` auf Gerät (`:95`); `RandomValues` `:81, 145`
+    (nach dem Skill erlaubt, wenn nach der Rolle benannt).
 
 ### `tool`
 

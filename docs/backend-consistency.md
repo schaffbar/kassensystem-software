@@ -320,6 +320,7 @@ Das bleibt so und kommt so in die Skills:
 | E31 | Typen in Event-Payloads | Enums als Enum (nicht `String`, das gespeicherte JSON bleibt gleich), Werte als Value Object; erlaubt sind auch Records aus `shared/` (`BillingTotal`) – nie eine Entity oder ein `@Embeddable` | 22.11.2026: ja |
 | E32 | Status beim Anlegen | `201` mit `Location` auf `GET /{id}` der neuen Ressource; gibt es kein solches GET (über etwas anderes gefunden: `POST /rfid-tag-assignments`; mehrere: `/tool-certifications/batch`), `204` | 22.11.2026: ja |
 | E33 | Formatregeln (Bean Validation) testen | eigene Logik eines Constraints im Unit-Test des Validators, zusammengesetzte ohne eigenen Test; pro Constraint und Endpunkt ein Controller-Test `…_is400`; am Command im Service kein Test; ein Akzeptanztest ist nicht verlangt, aber erlaubt (`c6`, `c7` bleiben, die Akzeptanztests werden später ausgebaut) | 22.11.2026: ja |
+| E34 | Datum und Zeit im Controller-Test | der Standalone-MockMvc bekommt Boots Jackson-Konfiguration (`Json.messageConverter()`: `JavaTimeModule`, keine Timestamps), Datumsfelder werden gegen ihren Wert geprüft – der Controller-Test beweist das Format, das das Portal liest (E22), nicht erst der Akzeptanztest | 22.11.2026: ja |
 
 ## Pilot (K3)
 
