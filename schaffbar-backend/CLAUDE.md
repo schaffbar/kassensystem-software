@@ -187,7 +187,8 @@ Skill `backend-testing` has all rules; the short form:
   random values from `Scenario`, no cleanup. One PostgreSQL container (Testcontainers) for the whole run – `mvn test`
   needs Docker; the real database is never touched.
 - A rejection is checked with its exception, its `code` and that nothing happened. Mockito runs strict – stub per test.
-- Every test has `// given` / `// when` / `// then`; stubs live in `given…`, verifications in `expect…` methods.
+- Every test has `// given` / `// when` / `// then`; stubs live in `given…` (ArchUnit `TestArchitectureTest`),
+  verifications in `expect…` methods. Follow the skill, not the test next to it.
   Each test creates its own data (no fields): commands from `builder/CommandBuilder`, views from `builder/ViewBuilder`,
   values random (`RandomValues`, `XyzId.random()`) unless the value is the subject of the test.
 - **Architecture** is checked by ArchUnit (`architecture/*ArchitectureTest`); frozen violations live in

@@ -78,8 +78,7 @@ class DeviceReadFacadeTest {
     @Test
     void isRfidReaderRegistered_knownMacAddress_isTrue() {
         // given
-        MacAddress macAddress = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress.getValue()).build()));
+        MacAddress macAddress = givenRegisteredReader();
 
         // when
         boolean registered = this.deviceReadFacade.isRfidReaderRegistered(macAddress);
@@ -91,8 +90,7 @@ class DeviceReadFacadeTest {
     @Test
     void isRfidReaderRegistered_unknownMacAddress_isFalse() {
         // given
-        MacAddress unknown = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
+        MacAddress unknown = givenUnknownReader();
 
         // when
         boolean registered = this.deviceReadFacade.isRfidReaderRegistered(unknown);
@@ -107,8 +105,7 @@ class DeviceReadFacadeTest {
     @Test
     void getRfidReader_unknownMacAddress_isNotFound() {
         // given
-        MacAddress unknown = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
+        MacAddress unknown = givenUnknownReader();
 
         // when
         Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getRfidReader(unknown));
@@ -124,9 +121,8 @@ class DeviceReadFacadeTest {
     void getCustomer_returnsTheOwnerOfTheTag() {
         // given
         RfidTagId rfidTagId = givenRegisteredTag();
-        CustomerView owner = customerView().build();
+        CustomerView owner = givenCustomer();
         givenAssignment(rfidTagId, owner.id());
-        when(this.customerService.getCustomer(owner.id())).thenReturn(Optional.of(owner));
 
         // when
         CustomerView customer = this.deviceReadFacade.getCustomer(rfidTagId);
@@ -138,8 +134,7 @@ class DeviceReadFacadeTest {
     @Test
     void getCustomer_unregisteredTag_isNotFound() {
         // given
-        RfidTagId unregistered = RandomValues.rfidTagId();
-        when(this.rfidTagService.getRfidTag(unregistered)).thenReturn(Optional.empty());
+        RfidTagId unregistered = givenUnregisteredTag();
 
         // when
         Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getCustomer(unregistered));
@@ -152,7 +147,7 @@ class DeviceReadFacadeTest {
     void getCustomer_tagWithoutCustomer_isRejected() {
         // given
         RfidTagId rfidTagId = givenRegisteredTag();
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
+        givenNoAssignment(rfidTagId);
 
         // when
         Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getCustomer(rfidTagId));
@@ -183,7 +178,7 @@ class DeviceReadFacadeTest {
     void isRfidTagAssigned_tagWithoutOwner_isFalse() {
         // given
         RfidTagId rfidTagId = RandomValues.rfidTagId();
-        when(this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
+        givenNoAssignment(rfidTagId);
 
         // when
         boolean assigned = this.deviceReadFacade.isRfidTagAssigned(rfidTagId);
@@ -207,7 +202,7 @@ class DeviceReadFacadeTest {
                 .billableDuration(BillableDuration.between(firstEntry, firstExit)) //
                 .build();
         WorkshopUsageView running = activeWorkshopUsageView().entryTime(Instant.now().minusSeconds(60)).build();
-        when(this.workshopUsageService.getWorkshopUsages(session.id())).thenReturn(List.of(finished, running));
+        givenWorkshopUsages(session, finished, running);
 
         // when
         WorkshopStayView stay = this.deviceReadFacade.getWorkshopStay(session.customerId());
@@ -221,8 +216,7 @@ class DeviceReadFacadeTest {
     @Test
     void getWorkshopStay_withoutOpenSession_isABug() {
         // given
-        CustomerId customerId = CustomerId.random();
-        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+        CustomerId customerId = givenNoOpenSession();
 
         // when
         Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getWorkshopStay(customerId));
@@ -233,6 +227,34 @@ class DeviceReadFacadeTest {
 
     // ------------------------------------------------------------------------
     // given
+
+    private MacAddress givenRegisteredReader() {
+        MacAddress macAddress = RandomValues.macAddress();
+        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress.getValue()).build()));
+
+        return macAddress;
+    }
+
+    private MacAddress givenUnknownReader() {
+        MacAddress unknown = RandomValues.macAddress();
+        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private CustomerView givenCustomer() {
+        CustomerView customer = customerView().build();
+        when(this.customerService.getCustomer(customer.id())).thenReturn(Optional.of(customer));
+
+        return customer;
+    }
+
+    private RfidTagId givenUnregisteredTag() {
+        RfidTagId unregistered = RandomValues.rfidTagId();
+        when(this.rfidTagService.getRfidTag(unregistered)).thenReturn(Optional.empty());
+
+        return unregistered;
+    }
 
     private RfidTagId givenRegisteredTag() {
         RfidTagId rfidTagId = RandomValues.rfidTagId();
@@ -246,11 +268,26 @@ class DeviceReadFacadeTest {
                 .thenReturn(Optional.of(rfidTagAssignmentView(RfidTagAssignmentId.random()).rfidTagId(rfidTagId).customerId(customerId).build()));
     }
 
+    private void givenNoAssignment(RfidTagId rfidTagId) {
+        when(this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId)).thenReturn(Optional.empty());
+    }
+
     private WorkshopSessionView givenOpenSession() {
         WorkshopSessionView session = openWorkshopSessionView().build();
         when(this.workshopSessionService.getOpenWorkshopSession(session.customerId())).thenReturn(Optional.of(session));
 
         return session;
+    }
+
+    private CustomerId givenNoOpenSession() {
+        CustomerId customerId = CustomerId.random();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+
+        return customerId;
+    }
+
+    private void givenWorkshopUsages(WorkshopSessionView session, WorkshopUsageView... usages) {
+        when(this.workshopUsageService.getWorkshopUsages(session.id())).thenReturn(List.of(usages));
     }
 
 }

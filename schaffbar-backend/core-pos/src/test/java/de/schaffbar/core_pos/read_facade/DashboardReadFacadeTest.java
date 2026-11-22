@@ -28,6 +28,7 @@ import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveToolUsageView;
 import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveWorkshopUserView;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +60,7 @@ class DashboardReadFacadeTest {
         Instant now = Instant.now();
         WorkshopUsageView annaSinceTen = activeWorkshopUsageView().customerId(anna.id()).entryTime(now.minusSeconds(600)).build();
         WorkshopUsageView benSinceAnHour = activeWorkshopUsageView().customerId(ben.id()).entryTime(now.minusSeconds(3600)).build();
-        when(this.workshopUsageService.getActiveWorkshopUsages()).thenReturn(List.of(annaSinceTen, benSinceAnHour));
+        givenActiveWorkshopUsages(annaSinceTen, benSinceAnHour);
 
         // when
         List<ActiveWorkshopUserView> users = this.dashboardReadFacade.getActiveWorkshopUsers();
@@ -74,8 +75,8 @@ class DashboardReadFacadeTest {
     void getActiveWorkshopUsers_withoutTheCustomerOfAUsage_isABug() {
         // given
         WorkshopUsageView usage = activeWorkshopUsageView().build();
-        when(this.workshopUsageService.getActiveWorkshopUsages()).thenReturn(List.of(usage));
-        when(this.customerService.getCustomer(usage.customerId())).thenReturn(Optional.empty());
+        givenActiveWorkshopUsages(usage);
+        givenNoCustomer(usage.customerId());
 
         // when
         Throwable thrown = catchThrowable(() -> this.dashboardReadFacade.getActiveWorkshopUsers());
@@ -93,7 +94,7 @@ class DashboardReadFacadeTest {
         ToolView saw = givenTool("Kreissäge");
         CustomerView anna = givenCustomer("Anna");
         ToolUsageView usage = activeToolUsageView(saw.id()).customerId(anna.id()).build();
-        when(this.toolUsageService.getActiveToolUsages()).thenReturn(List.of(usage));
+        givenActiveToolUsages(usage);
 
         // when
         List<ActiveToolUsageView> toolUsages = this.dashboardReadFacade.getActiveToolUsages();
@@ -106,8 +107,8 @@ class DashboardReadFacadeTest {
     void getActiveToolUsages_withoutTheToolOfAUsage_isABug() {
         // given
         ToolUsageView usage = activeToolUsageView(ToolId.random()).build();
-        when(this.toolUsageService.getActiveToolUsages()).thenReturn(List.of(usage));
-        when(this.toolService.getTool(usage.toolId())).thenReturn(Optional.empty());
+        givenActiveToolUsages(usage);
+        givenNoTool(usage.toolId());
 
         // when
         Throwable thrown = catchThrowable(() -> this.dashboardReadFacade.getActiveToolUsages());
@@ -121,8 +122,8 @@ class DashboardReadFacadeTest {
         // given
         ToolView saw = givenTool("Kreissäge");
         ToolUsageView usage = activeToolUsageView(saw.id()).build();
-        when(this.toolUsageService.getActiveToolUsages()).thenReturn(List.of(usage));
-        when(this.customerService.getCustomer(usage.customerId())).thenReturn(Optional.empty());
+        givenActiveToolUsages(usage);
+        givenNoCustomer(usage.customerId());
 
         // when
         Throwable thrown = catchThrowable(() -> this.dashboardReadFacade.getActiveToolUsages());
@@ -133,6 +134,14 @@ class DashboardReadFacadeTest {
 
     // ------------------------------------------------------------------------
     // given
+
+    private void givenActiveWorkshopUsages(WorkshopUsageView... usages) {
+        when(this.workshopUsageService.getActiveWorkshopUsages()).thenReturn(List.of(usages));
+    }
+
+    private void givenActiveToolUsages(ToolUsageView... usages) {
+        when(this.toolUsageService.getActiveToolUsages()).thenReturn(List.of(usages));
+    }
 
     private CustomerView givenCustomer(String firstName) {
         CustomerView customer = customerView().firstName(firstName).build();
@@ -146,6 +155,16 @@ class DashboardReadFacadeTest {
         when(this.toolService.getTool(tool.id())).thenReturn(Optional.of(tool));
 
         return tool;
+    }
+
+    // broken data – the usage points to a customer that does not exist
+    private void givenNoCustomer(CustomerId customerId) {
+        when(this.customerService.getCustomer(customerId)).thenReturn(Optional.empty());
+    }
+
+    // broken data – the usage points to a tool that does not exist
+    private void givenNoTool(ToolId toolId) {
+        when(this.toolService.getTool(toolId)).thenReturn(Optional.empty());
     }
 
 }

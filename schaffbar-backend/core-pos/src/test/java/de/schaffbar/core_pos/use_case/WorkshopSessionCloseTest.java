@@ -54,8 +54,7 @@ class WorkshopSessionCloseTest {
         WorkshopSessionView open = givenOpenSessionWithoutRunningUsages();
         BillingTotal workshopTotal = new BillingTotal(60, 10);
         BillingTotal toolTotal = new BillingTotal(31, 6);
-        when(this.workshopUsageService.getBillingTotal(open.id())).thenReturn(workshopTotal);
-        when(this.toolUsageService.getBillingTotal(open.id())).thenReturn(toolTotal);
+        givenBillingTotals(open, workshopTotal, toolTotal);
 
         // when
         this.workshopSessionClose.process(open.customerId());
@@ -67,8 +66,7 @@ class WorkshopSessionCloseTest {
     @Test
     void rejectsASessionWithARunningWorkshopUsage_beforeLookingAtTheTools() {
         // given – checking out stops the tools too, so it is the answer
-        WorkshopSessionView open = givenOpenSession();
-        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(true);
+        WorkshopSessionView open = givenOpenSessionWithRunningWorkshopUsage();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionClose.process(open.customerId()));
@@ -84,9 +82,7 @@ class WorkshopSessionCloseTest {
     @Test
     void rejectsASessionWithARunningToolUsage() {
         // given
-        WorkshopSessionView open = givenOpenSession();
-        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(false);
-        when(this.toolUsageService.hasActiveToolUsage(open.id())).thenReturn(true);
+        WorkshopSessionView open = givenOpenSessionWithRunningToolUsage();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionClose.process(open.customerId()));
@@ -101,8 +97,7 @@ class WorkshopSessionCloseTest {
     @Test
     void rejectsACustomerWithoutOpenSession() {
         // given
-        CustomerId customerId = givenCustomer();
-        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+        CustomerId customerId = givenCustomerWithoutOpenSession();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionClose.process(customerId));
@@ -117,8 +112,7 @@ class WorkshopSessionCloseTest {
     @Test
     void rejectsAnUnknownCustomer() {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionClose.process(unknown));
@@ -138,6 +132,20 @@ class WorkshopSessionCloseTest {
         return customerId;
     }
 
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private CustomerId givenCustomerWithoutOpenSession() {
+        CustomerId customerId = givenCustomer();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+
+        return customerId;
+    }
+
     private WorkshopSessionView givenOpenSession() {
         WorkshopSessionView open = openWorkshopSessionView().customerId(givenCustomer()).build();
         when(this.workshopSessionService.getOpenWorkshopSession(open.customerId())).thenReturn(Optional.of(open));
@@ -151,6 +159,26 @@ class WorkshopSessionCloseTest {
         when(this.toolUsageService.hasActiveToolUsage(open.id())).thenReturn(false);
 
         return open;
+    }
+
+    private WorkshopSessionView givenOpenSessionWithRunningWorkshopUsage() {
+        WorkshopSessionView open = givenOpenSession();
+        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(true);
+
+        return open;
+    }
+
+    private WorkshopSessionView givenOpenSessionWithRunningToolUsage() {
+        WorkshopSessionView open = givenOpenSession();
+        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(false);
+        when(this.toolUsageService.hasActiveToolUsage(open.id())).thenReturn(true);
+
+        return open;
+    }
+
+    private void givenBillingTotals(WorkshopSessionView session, BillingTotal workshopTotal, BillingTotal toolTotal) {
+        when(this.workshopUsageService.getBillingTotal(session.id())).thenReturn(workshopTotal);
+        when(this.toolUsageService.getBillingTotal(session.id())).thenReturn(toolTotal);
     }
 
     // ------------------------------------------------------------------------

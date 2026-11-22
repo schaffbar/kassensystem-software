@@ -58,7 +58,7 @@ class WorkshopUsageServiceTest {
         first.exit();
         WorkshopUsage second = WorkshopUsage.of(customerId, workshopSessionId);
         second.exit();
-        when(this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId)).thenReturn(List.of(first, second));
+        givenUsagesOfTheSession(workshopSessionId, first, second);
 
         // when
         BillingTotal total = this.workshopUsageService.getBillingTotal(workshopSessionId);
@@ -185,6 +185,10 @@ class WorkshopUsageServiceTest {
         when(this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId)).thenReturn(Optional.empty());
 
         return customerId;
+    }
+
+    private void givenUsagesOfTheSession(WorkshopSessionId workshopSessionId, WorkshopUsage... usages) {
+        when(this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId)).thenReturn(List.of(usages));
     }
 
     private List<WorkshopUsage> givenAFinishedAndARunningUsageOfTheSession(WorkshopSessionId workshopSessionId) {

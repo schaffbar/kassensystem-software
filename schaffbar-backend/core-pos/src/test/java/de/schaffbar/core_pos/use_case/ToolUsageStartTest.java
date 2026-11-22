@@ -72,7 +72,7 @@ class ToolUsageStartTest {
         // given
         WorkshopUsageView inWorkshop = givenCustomerInTheWorkshop();
         ToolView tool = givenTool(CertificationRequirement.RED);
-        when(this.toolCertificationService.hasActiveToolCertification(inWorkshop.customerId(), tool.id())).thenReturn(true);
+        givenCertification(inWorkshop.customerId(), tool.id());
 
         // when
         this.toolUsageStart.process(inWorkshop.customerId(), tool.id());
@@ -86,7 +86,7 @@ class ToolUsageStartTest {
         // given – checking in would not help, so the missing certification is the answer
         CustomerId customerId = givenCustomer();
         ToolView tool = givenTool(CertificationRequirement.RED);
-        when(this.toolCertificationService.hasActiveToolCertification(customerId, tool.id())).thenReturn(false);
+        givenNoCertification(customerId, tool.id());
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(customerId, tool.id()));
@@ -104,7 +104,7 @@ class ToolUsageStartTest {
         // given
         CustomerId customerId = givenCustomer();
         ToolView tool = givenTool(CertificationRequirement.YELLOW);
-        when(this.workshopUsageService.getActiveWorkshopUsage(customerId)).thenReturn(Optional.empty());
+        givenNotInTheWorkshop(customerId);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(customerId, tool.id()));
@@ -120,8 +120,7 @@ class ToolUsageStartTest {
     void rejectsAnUnknownTool() {
         // given
         CustomerId customerId = givenCustomer();
-        ToolId unknown = ToolId.random();
-        when(this.toolService.getTool(unknown)).thenReturn(Optional.empty());
+        ToolId unknown = givenUnknownTool();
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(customerId, unknown));
@@ -134,8 +133,7 @@ class ToolUsageStartTest {
     @Test
     void rejectsAnUnknownCustomer() {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(unknown, ToolId.random()));
@@ -155,6 +153,13 @@ class ToolUsageStartTest {
         return customerId;
     }
 
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
     private WorkshopUsageView givenCustomerInTheWorkshop() {
         WorkshopUsageView running = activeWorkshopUsageView().customerId(givenCustomer()).build();
         when(this.workshopUsageService.getActiveWorkshopUsage(running.customerId())).thenReturn(Optional.of(running));
@@ -162,11 +167,30 @@ class ToolUsageStartTest {
         return running;
     }
 
+    private void givenNotInTheWorkshop(CustomerId customerId) {
+        when(this.workshopUsageService.getActiveWorkshopUsage(customerId)).thenReturn(Optional.empty());
+    }
+
     private ToolView givenTool(CertificationRequirement certificationRequirement) {
         ToolView tool = toolView().certificationRequirement(certificationRequirement).build();
         when(this.toolService.getTool(tool.id())).thenReturn(Optional.of(tool));
 
         return tool;
+    }
+
+    private ToolId givenUnknownTool() {
+        ToolId unknown = ToolId.random();
+        when(this.toolService.getTool(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private void givenCertification(CustomerId customerId, ToolId toolId) {
+        when(this.toolCertificationService.hasActiveToolCertification(customerId, toolId)).thenReturn(true);
+    }
+
+    private void givenNoCertification(CustomerId customerId, ToolId toolId) {
+        when(this.toolCertificationService.hasActiveToolCertification(customerId, toolId)).thenReturn(false);
     }
 
     // ------------------------------------------------------------------------

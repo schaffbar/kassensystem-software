@@ -185,8 +185,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId instructorId = CustomerId.random();
         BatchCertifyRequestBody body = new BatchCertifyRequestBody(List.of(instructorId), ToolId.random(), CustomerId.random());
-        doThrow(new CustomerIsInstructorException(instructorId, body.toolId())).when(this.toolCertificationCreate)
-                .process(body.customerIds(), body.toolId(), body.certifiedBy());
+        givenCreateRejectedWith(body, new CustomerIsInstructorException(instructorId, body.toolId()));
 
         // when
         ResultActions result = createToolCertifications(body);
@@ -231,7 +230,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.toolCertificationPause).process(customerId, toolId);
+        givenPauseRejectedWith(customerId, toolId, ResourceNotFoundException.toolCertification(customerId, toolId));
 
         // when
         ResultActions result = pauseToolCertification(customerId, toolId);
@@ -245,7 +244,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.PAUSED)).when(this.toolCertificationPause).process(customerId, toolId);
+        givenPauseRejectedWith(customerId, toolId, invalidTransition(ToolCertificationStatus.PAUSED));
 
         // when
         ResultActions result = pauseToolCertification(customerId, toolId);
@@ -276,7 +275,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.ACTIVE)).when(this.toolCertificationReactivate).process(customerId, toolId);
+        givenReactivateRejectedWith(customerId, toolId, invalidTransition(ToolCertificationStatus.ACTIVE));
 
         // when
         ResultActions result = reactivateToolCertification(customerId, toolId);
@@ -307,7 +306,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(invalidTransition(ToolCertificationStatus.REVOKED)).when(this.toolCertificationRevoke).process(customerId, toolId);
+        givenRevokeRejectedWith(customerId, toolId, invalidTransition(ToolCertificationStatus.REVOKED));
 
         // when
         ResultActions result = revokeToolCertification(customerId, toolId);
@@ -338,7 +337,7 @@ class ToolCertificationControllerTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        doThrow(ResourceNotFoundException.toolCertification(customerId, toolId)).when(this.toolCertificationDelete).process(customerId, toolId);
+        givenDeleteRejectedWith(customerId, toolId, ResourceNotFoundException.toolCertification(customerId, toolId));
 
         // when
         ResultActions result = deleteToolCertification(customerId, toolId);
@@ -376,6 +375,26 @@ class ToolCertificationControllerTest {
         when(this.toolCertificationReadFacade.getToolCertifications(certification.toolId())).thenReturn(List.of(certification));
 
         return certification;
+    }
+
+    private void givenCreateRejectedWith(BatchCertifyRequestBody body, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationCreate).process(body.customerIds(), body.toolId(), body.certifiedBy());
+    }
+
+    private void givenPauseRejectedWith(CustomerId customerId, ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationPause).process(customerId, toolId);
+    }
+
+    private void givenReactivateRejectedWith(CustomerId customerId, ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationReactivate).process(customerId, toolId);
+    }
+
+    private void givenRevokeRejectedWith(CustomerId customerId, ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationRevoke).process(customerId, toolId);
+    }
+
+    private void givenDeleteRejectedWith(CustomerId customerId, ToolId toolId, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationDelete).process(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

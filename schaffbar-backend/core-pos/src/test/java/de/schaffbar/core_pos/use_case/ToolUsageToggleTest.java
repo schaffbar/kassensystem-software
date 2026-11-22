@@ -38,7 +38,7 @@ class ToolUsageToggleTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)).thenReturn(Optional.empty());
+        givenToolNotInUseBy(customerId, toolId);
 
         // when
         this.toolUsageToggle.process(customerId, toolId);
@@ -53,8 +53,7 @@ class ToolUsageToggleTest {
         // given
         CustomerId customerId = CustomerId.random();
         ToolId toolId = ToolId.random();
-        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)) //
-                .thenReturn(Optional.of(activeToolUsageView(toolId).customerId(customerId).build()));
+        givenToolInUseBy(customerId, toolId);
 
         // when
         this.toolUsageToggle.process(customerId, toolId);
@@ -62,6 +61,18 @@ class ToolUsageToggleTest {
         // then
         verify(this.toolUsageStop).process(customerId, toolId);
         verify(this.toolUsageStart, never()).process(any(), any());
+    }
+
+    // ------------------------------------------------------------------------
+    // given
+
+    private void givenToolNotInUseBy(CustomerId customerId, ToolId toolId) {
+        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)).thenReturn(Optional.empty());
+    }
+
+    private void givenToolInUseBy(CustomerId customerId, ToolId toolId) {
+        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)) //
+                .thenReturn(Optional.of(activeToolUsageView(toolId).customerId(customerId).build()));
     }
 
 }

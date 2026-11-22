@@ -339,7 +339,7 @@ class ToolCertificationServiceTest {
     void deleteToolCertifications_ofAToolWithoutCertifications_savesNoEvent() {
         // given
         ToolId toolId = ToolId.random();
-        when(this.toolCertificationRepository.findByToolId(toolId)).thenReturn(List.of());
+        givenNoCertificationsOf(toolId);
 
         // when
         this.toolCertificationService.deleteToolCertifications(toolId);
@@ -367,7 +367,7 @@ class ToolCertificationServiceTest {
     void deleteToolCertifications_ofACustomerWithoutCertifications_savesNoEvent() {
         // given
         CustomerId customerId = CustomerId.random();
-        when(this.toolCertificationRepository.findByCustomerId(customerId)).thenReturn(List.of());
+        givenNoCertificationsOf(customerId);
 
         // when
         this.toolCertificationService.deleteToolCertifications(customerId);
@@ -414,6 +414,14 @@ class ToolCertificationServiceTest {
         when(this.toolCertificationRepository.findByCustomerId(customerId)).thenReturn(certifications);
 
         return certifications;
+    }
+
+    private void givenNoCertificationsOf(ToolId toolId) {
+        when(this.toolCertificationRepository.findByToolId(toolId)).thenReturn(List.of());
+    }
+
+    private void givenNoCertificationsOf(CustomerId customerId) {
+        when(this.toolCertificationRepository.findByCustomerId(customerId)).thenReturn(List.of());
     }
 
     private static CreateToolCertificationCommand createCommandFor(ToolCertification existing) {

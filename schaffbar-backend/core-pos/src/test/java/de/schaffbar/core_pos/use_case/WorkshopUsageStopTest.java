@@ -60,8 +60,7 @@ class WorkshopUsageStopTest {
     @Test
     void rejectsACustomerWithoutOpenSession() {
         // given
-        CustomerId customerId = givenCustomer();
-        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+        CustomerId customerId = givenCustomerWithoutOpenSession();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopUsageStop.process(customerId));
@@ -76,8 +75,7 @@ class WorkshopUsageStopTest {
     @Test
     void rejectsAnUnknownCustomer() {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopUsageStop.process(unknown));
@@ -93,6 +91,20 @@ class WorkshopUsageStopTest {
     private CustomerId givenCustomer() {
         CustomerId customerId = CustomerId.random();
         when(this.customerService.getCustomer(customerId)).thenReturn(Optional.of(customerView(customerId).build()));
+
+        return customerId;
+    }
+
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private CustomerId givenCustomerWithoutOpenSession() {
+        CustomerId customerId = givenCustomer();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
 
         return customerId;
     }

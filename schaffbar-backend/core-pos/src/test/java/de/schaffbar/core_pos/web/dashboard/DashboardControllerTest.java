@@ -48,7 +48,7 @@ class DashboardControllerTest {
     void getActiveWorkshopUsers_returnsThePeopleInTheWorkshop() throws Exception {
         // given
         ActiveWorkshopUserView user = new ActiveWorkshopUserView(CustomerId.random(), "Anna", "Becker", Instant.parse("2026-11-21T09:15:00Z"));
-        when(this.dashboardReadFacade.getActiveWorkshopUsers()).thenReturn(List.of(user));
+        givenActiveWorkshopUsers(user);
 
         // when
         ResultActions result = getActiveWorkshopUsers();
@@ -65,7 +65,7 @@ class DashboardControllerTest {
     @Test
     void getActiveWorkshopUsers_withNobodyInTheWorkshop_isAnEmptyList() throws Exception {
         // given
-        when(this.dashboardReadFacade.getActiveWorkshopUsers()).thenReturn(List.of());
+        givenNobodyInTheWorkshop();
 
         // when
         ResultActions result = getActiveWorkshopUsers();
@@ -82,7 +82,7 @@ class DashboardControllerTest {
     void getActiveToolUsages_returnsTheRunningToolsWithThePersonUsingThem() throws Exception {
         // given
         ActiveToolUsageView toolUsage = new ActiveToolUsageView(ToolId.random(), "Kreissäge", CustomerId.random(), "Anna", "Becker");
-        when(this.dashboardReadFacade.getActiveToolUsages()).thenReturn(List.of(toolUsage));
+        givenActiveToolUsages(toolUsage);
 
         // when
         ResultActions result = getActiveToolUsages();
@@ -100,7 +100,7 @@ class DashboardControllerTest {
     @Test
     void getActiveToolUsages_withNoToolRunning_isAnEmptyList() throws Exception {
         // given
-        when(this.dashboardReadFacade.getActiveToolUsages()).thenReturn(List.of());
+        givenNoToolRunning();
 
         // when
         ResultActions result = getActiveToolUsages();
@@ -108,6 +108,25 @@ class DashboardControllerTest {
         // then
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    // ------------------------------------------------------------------------
+    // given
+
+    private void givenActiveWorkshopUsers(ActiveWorkshopUserView... users) {
+        when(this.dashboardReadFacade.getActiveWorkshopUsers()).thenReturn(List.of(users));
+    }
+
+    private void givenNobodyInTheWorkshop() {
+        givenActiveWorkshopUsers();
+    }
+
+    private void givenActiveToolUsages(ActiveToolUsageView... toolUsages) {
+        when(this.dashboardReadFacade.getActiveToolUsages()).thenReturn(List.of(toolUsages));
+    }
+
+    private void givenNoToolRunning() {
+        givenActiveToolUsages();
     }
 
     // ------------------------------------------------------------------------

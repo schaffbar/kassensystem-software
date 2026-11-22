@@ -164,8 +164,7 @@ class ToolUsageServiceTest {
         // given
         StartToolUsageCommand command = startToolUsageCommand().build();
         ToolUsage active = givenToolInUseBy(command.customerId(), command.toolId());
-        when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(command.customerId(), command.toolId())) //
-                .thenReturn(Optional.of(active));
+        givenCustomerUsingTheTool(active);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageService.startToolUsage(command));
@@ -202,8 +201,7 @@ class ToolUsageServiceTest {
     void stopToolUsage_stopsTheUsageAndSavesTheEvent() {
         // given
         ToolUsage active = ToolUsage.of(startToolUsageCommand().build());
-        when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(active.getCustomerId(), active.getToolId())) //
-                .thenReturn(Optional.of(active));
+        givenCustomerUsingTheTool(active);
 
         // when
         this.toolUsageService.stopToolUsage(active.getCustomerId(), active.getToolId());
@@ -239,7 +237,7 @@ class ToolUsageServiceTest {
         StartToolUsageCommand onFirstTool = startToolUsageCommand().build();
         ToolUsage first = ToolUsage.of(onFirstTool);
         ToolUsage second = ToolUsage.of(startToolUsageCommand().customerId(onFirstTool.customerId()).build());
-        when(this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(onFirstTool.customerId())).thenReturn(List.of(first, second));
+        givenRunningUsagesOfTheCustomer(onFirstTool.customerId(), first, second);
 
         // when
         this.toolUsageService.stopToolUsages(onFirstTool.customerId());
@@ -254,7 +252,7 @@ class ToolUsageServiceTest {
     void stopToolUsages_withoutActiveUsages_savesNoEvent() {
         // given
         CustomerId customerId = CustomerId.random();
-        when(this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(customerId)).thenReturn(List.of());
+        givenRunningUsagesOfTheCustomer(customerId);
 
         // when
         this.toolUsageService.stopToolUsages(customerId);
@@ -279,6 +277,15 @@ class ToolUsageServiceTest {
 
     private void givenToolNotInUse(ToolId toolId) {
         when(this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId)).thenReturn(Optional.empty());
+    }
+
+    private void givenCustomerUsingTheTool(ToolUsage active) {
+        when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(active.getCustomerId(), active.getToolId())) //
+                .thenReturn(Optional.of(active));
+    }
+
+    private void givenRunningUsagesOfTheCustomer(CustomerId customerId, ToolUsage... usages) {
+        when(this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(customerId)).thenReturn(List.of(usages));
     }
 
     private void givenCustomerNotUsingTheTool(CustomerId customerId, ToolId toolId) {

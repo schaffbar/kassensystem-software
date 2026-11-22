@@ -107,8 +107,7 @@ class WorkshopSessionControllerTest {
     @Test
     void getOpenWorkshopSession_withoutOpenSession_is200WithAnEmptyBody() throws Exception {
         // given
-        CustomerId customerId = CustomerId.random();
-        when(this.workshopSessionReadFacade.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+        CustomerId customerId = givenNoOpenSession();
 
         // when
         ResultActions result = getOpenWorkshopSession(customerId);
@@ -121,8 +120,7 @@ class WorkshopSessionControllerTest {
     @Test
     void getOpenWorkshopSession_unknownCustomer_is404() throws Exception {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.workshopSessionReadFacade.getOpenWorkshopSession(unknown)).thenThrow(ResourceNotFoundException.customer(unknown));
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         ResultActions result = getOpenWorkshopSession(unknown);
@@ -151,7 +149,7 @@ class WorkshopSessionControllerTest {
     void closeWorkshopSession_withARunningToolUsage_is409WithTheCode() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
-        doThrow(new ActiveToolUsageExistsForSessionException(WorkshopSessionId.random())).when(this.workshopSessionClose).process(customerId);
+        givenCloseRejectedWith(customerId, new ActiveToolUsageExistsForSessionException(WorkshopSessionId.random()));
 
         // when
         ResultActions result = closeWorkshopSession(customerId);
@@ -165,7 +163,7 @@ class WorkshopSessionControllerTest {
     void closeWorkshopSession_withoutOpenSession_is409WithTheCode() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
-        doThrow(new NoOpenWorkshopSessionException(customerId)).when(this.workshopSessionClose).process(customerId);
+        givenCloseRejectedWith(customerId, new NoOpenWorkshopSessionException(customerId));
 
         // when
         ResultActions result = closeWorkshopSession(customerId);
@@ -196,6 +194,24 @@ class WorkshopSessionControllerTest {
         when(this.workshopSessionReadFacade.getOpenWorkshopSession(session.customerId())).thenReturn(Optional.of(open));
 
         return open;
+    }
+
+    private CustomerId givenNoOpenSession() {
+        CustomerId customerId = CustomerId.random();
+        when(this.workshopSessionReadFacade.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+
+        return customerId;
+    }
+
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.workshopSessionReadFacade.getOpenWorkshopSession(unknown)).thenThrow(ResourceNotFoundException.customer(unknown));
+
+        return unknown;
+    }
+
+    private void givenCloseRejectedWith(CustomerId customerId, RuntimeException rejection) {
+        doThrow(rejection).when(this.workshopSessionClose).process(customerId);
     }
 
     // ------------------------------------------------------------------------

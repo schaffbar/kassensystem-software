@@ -47,8 +47,7 @@ class WorkshopUsageStartTest {
     void withoutOpenSession_startsASessionAndTheUsageInIt() {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
-        WorkshopSessionId started = WorkshopSessionId.random();
-        when(this.workshopSessionService.startWorkshopSession(customerId)).thenReturn(started);
+        WorkshopSessionId started = givenSessionStartsFor(customerId);
 
         // when
         this.workshopUsageStart.process(customerId);
@@ -75,8 +74,7 @@ class WorkshopUsageStartTest {
     @Test
     void rejectsAnUnknownCustomer() {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopUsageStart.process(unknown));
@@ -96,6 +94,13 @@ class WorkshopUsageStartTest {
         return customerId;
     }
 
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
     private CustomerId givenCustomerWithoutOpenSession() {
         CustomerId customerId = givenCustomer();
         when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
@@ -108,6 +113,13 @@ class WorkshopUsageStartTest {
         when(this.workshopSessionService.getOpenWorkshopSession(open.customerId())).thenReturn(Optional.of(open));
 
         return open;
+    }
+
+    private WorkshopSessionId givenSessionStartsFor(CustomerId customerId) {
+        WorkshopSessionId started = WorkshopSessionId.random();
+        when(this.workshopSessionService.startWorkshopSession(customerId)).thenReturn(started);
+
+        return started;
     }
 
 }

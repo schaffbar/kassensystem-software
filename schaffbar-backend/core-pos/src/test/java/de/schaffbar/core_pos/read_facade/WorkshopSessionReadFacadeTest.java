@@ -113,8 +113,7 @@ class WorkshopSessionReadFacadeTest {
     @Test
     void getOpenWorkshopSession_showsADeletedToolWithoutName() {
         // given
-        ToolId deleted = ToolId.random();
-        when(this.toolService.getTool(deleted)).thenReturn(Optional.empty());
+        ToolId deleted = givenDeletedTool();
         WorkshopSessionView session = givenOpenSession(List.of(), BillingTotal.ZERO, List.of(finishedToolUsageView(deleted).build()),
                 Map.of(deleted, new BillingTotal(7, 2)));
 
@@ -133,8 +132,7 @@ class WorkshopSessionReadFacadeTest {
     @Test
     void getOpenWorkshopSession_withoutOpenSession_isEmpty() {
         // given
-        CustomerId customerId = givenCustomer();
-        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
+        CustomerId customerId = givenCustomerWithoutOpenSession();
 
         // when
         Optional<OpenWorkshopSessionView> result = this.workshopSessionReadFacade.getOpenWorkshopSession(customerId);
@@ -147,8 +145,7 @@ class WorkshopSessionReadFacadeTest {
     @Test
     void getOpenWorkshopSession_ofAnUnknownCustomer_isRejected() {
         // given
-        CustomerId unknown = CustomerId.random();
-        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+        CustomerId unknown = givenUnknownCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionReadFacade.getOpenWorkshopSession(unknown));
@@ -164,6 +161,20 @@ class WorkshopSessionReadFacadeTest {
     private CustomerId givenCustomer() {
         CustomerId customerId = CustomerId.random();
         when(this.customerService.getCustomer(customerId)).thenReturn(Optional.of(customerView(customerId).build()));
+
+        return customerId;
+    }
+
+    private CustomerId givenUnknownCustomer() {
+        CustomerId unknown = CustomerId.random();
+        when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
+
+        return unknown;
+    }
+
+    private CustomerId givenCustomerWithoutOpenSession() {
+        CustomerId customerId = givenCustomer();
+        when(this.workshopSessionService.getOpenWorkshopSession(customerId)).thenReturn(Optional.empty());
 
         return customerId;
     }
@@ -185,6 +196,13 @@ class WorkshopSessionReadFacadeTest {
         when(this.toolService.getTool(tool.id())).thenReturn(Optional.of(tool));
 
         return tool;
+    }
+
+    private ToolId givenDeletedTool() {
+        ToolId deleted = ToolId.random();
+        when(this.toolService.getTool(deleted)).thenReturn(Optional.empty());
+
+        return deleted;
     }
 
 }
