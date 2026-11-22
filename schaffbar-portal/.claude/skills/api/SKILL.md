@@ -45,8 +45,8 @@ Components get feature models from the store and emit commands – they don't kn
 Look up the endpoint in the backend
 (`../schaffbar-backend/core-pos/src/main/java/de/schaffbar/core_pos/domain/<feature>/web/`):
 
-- `*Controller.java`: path, HTTP method, path variables, query parameter names (`customer-id` vs. `customerId`),
-  response status (201 with only a `Location` header = no body).
+- `*Controller.java`: path, HTTP method, path variables, query parameter names (camelCase like the Java parameter,
+  `customerId` – E5), response status (201 with only a `Location` header = no body).
 - `*ApiModel.java`: the response record `…ApiDto` (→ schema) and the request record `…RequestBody` (→ `…Request`).
   Check every field's nullability: without `@NotNull` / `@NotBlank` (or a primitive type) the field can be `null` –
   Jackson always writes `null` fields, so they are **`.nullable()`, never `.optional()`**.
@@ -218,7 +218,7 @@ errors.
   the name says it (`current<Entity>Resource`):
   ```ts
   currentRfidTagAssignmentResource(customerId: () => string | null): HttpResourceRef<RfidTagAssignmentApiModel | null | undefined> {
-    const parseAssignments = parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments?customer-id');
+    const parseAssignments = parseWith(z.array(rfidTagAssignmentSchema), 'GET /rfid-tag-assignments?customerId');
     return httpResource(
       () => { … },
       // the backend returns a list; the customer has at most one current assignment
