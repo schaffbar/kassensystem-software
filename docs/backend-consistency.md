@@ -314,6 +314,7 @@ Das bleibt so und kommt so in die Skills:
 | E25 | Value Objects einheitlich | Interface `ValueObject<T>` mit `sameValueAs` als Default-Methode (Typparameter verhindert Vergleiche über Typen hinweg); `random()` nur für UUID-Ids – Werte von Geräten (`MacAddress`, `RfidTagId`, `IpAddress`) erfindet das System nie, Tests nehmen `RandomValues`; Enum für Fehlermeldungen heißt `ValueObjectName`; geprüft von `ValueObjectArchitectureTest` | 15.11.2026: ja |
 | E26 | Jede Datenbankänderung erzeugt ein Event | auch Löschen und das Schreiben einer inneren Entity; die Änderung einer inneren Entity steht im Event des Aggregats (kein zweites Event); `@Command`-Methoden der Services speichern Events (ArchUnit) | 16.11.2026: feste Regel – die Historie ohne Event war eine Abkürzung |
 | E27 | Typen in API-Antworten | keine Value Objects und keine `UUID` in `…ApiDto`: Ids und Werte (`IpAddress`) als `String` über `id.value`, Enums als Enum (auch in Anfragen: `RfidReaderType` statt `String`), Datum als `LocalDate`; geprüft von `ValueObjectArchitectureTest` – das JSON bleibt gleich | 22.11.2026: ja |
+| E28 | Zwei gleichzeitige Anfragen (Tag doppelt gesendet) | partielle Unique-Indizes (V9) für WU-1, WS-1, TU-9 (deckt TU-3); die zweite Anfrage scheitert als `500` bzw. allgemeiner Fehler am Gerät, ohne Abbildung auf den Code der Regel – sollte kaum vorkommen; `workshop_session.status` `NOT NULL`; getestet mit je einem technischen Integrationstest | 22.11.2026: ja |
 
 ## Pilot (K3)
 
