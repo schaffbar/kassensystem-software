@@ -1,7 +1,6 @@
 package de.schaffbar.core_pos.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondition;
 
@@ -21,17 +20,17 @@ import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 class ExceptionArchitectureTest {
 
     @ArchTest
-    static final ArchRule noGenericExceptions = freeze(GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS //
-            .because("a violated rule has its own exception, a bug is an IllegalStateException (E8)"));
+    static final ArchRule noGenericExceptions = GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS //
+            .because("a violated rule has its own exception, a bug is an IllegalStateException (E8)");
 
     @ArchTest
-    static final ArchRule exceptionsHaveAKind = freeze(classes() //
+    static final ArchRule exceptionsHaveAKind = classes() //
             .that().resideInAPackage("..shared.exception..") //
             .and().areTopLevelClasses() //
             .and().haveSimpleNameEndingWith("Exception") //
             .should().beAssignableTo(ResourceNotFoundException.class) //
             .orShould().beAssignableTo(BusinessRuleViolationException.class) //
-            .because("the kind decides the HTTP status in ApiExceptionHandler (E8)"));
+            .because("the kind decides the HTTP status in ApiExceptionHandler (E8)");
 
     @ArchTest
     static final ArchRule businessRuleViolationsDeclareTheirCode = classes() //

@@ -6,7 +6,6 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEn
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.READ_FACADE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
@@ -33,19 +32,19 @@ class QueryCommandArchitectureTest {
             .as("services, use cases and read facades");
 
     @ArchTest
-    static final ArchRule publicMethodsAreQueriesOrCommands = freeze(methods() //
+    static final ArchRule publicMethodsAreQueriesOrCommands = methods() //
             .that().areDeclaredInClassesThat(SERVICES_USE_CASES_AND_READ_FACADES) //
             .and().arePublic() //
             .should(methodCondition("be annotated with either @Query or @Command",
                     method -> method.isAnnotatedWith(Query.class) ^ method.isAnnotatedWith(Command.class))) //
-            .because("the annotation says whether a method reads or writes and brings its transaction (E21)"));
+            .because("the annotation says whether a method reads or writes and brings its transaction (E21)");
 
     @ArchTest
-    static final ArchRule methodsHaveNoTransactionalOfTheirOwn = freeze(methods() //
+    static final ArchRule methodsHaveNoTransactionalOfTheirOwn = methods() //
             .that().areDeclaredInClassesThat(SERVICES_USE_CASES_AND_READ_FACADES) //
             .should().notBeAnnotatedWith(Transactional.class) //
             .andShould().notBeAnnotatedWith(jakarta.transaction.Transactional.class) //
-            .because("the transaction comes with @Query or @Command – one place to change it (E21)"));
+            .because("the transaction comes with @Query or @Command – one place to change it (E21)");
 
     @ArchTest
     static final ArchRule classesHaveNoTransactionalOfTheirOwn = classes() //

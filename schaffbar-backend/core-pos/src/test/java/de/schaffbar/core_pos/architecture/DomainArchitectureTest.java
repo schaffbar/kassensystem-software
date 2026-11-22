@@ -6,7 +6,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.constructors;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.AGGREGATE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
@@ -67,9 +66,9 @@ class DomainArchitectureTest {
     // aggregate package
 
     @ArchTest
-    static final ArchRule aggregatesHaveAllBuildingBlocks = freeze(classes() //
+    static final ArchRule aggregatesHaveAllBuildingBlocks = classes() //
             .that(AGGREGATE) //
-            .should(haveRequiredBuildingBlocks()));
+            .should(haveRequiredBuildingBlocks());
 
     @ArchTest
     static final ArchRule aggregatePackagesContainOnlyBuildingBlocks = classes() //
@@ -276,16 +275,16 @@ class DomainArchitectureTest {
             .because("only the service of the aggregate reads and writes it");
 
     @ArchTest
-    static final ArchRule repositoryMethodsTakingUuidsHaveAValueObjectVariant = freeze(classes() //
+    static final ArchRule repositoryMethodsTakingUuidsHaveAValueObjectVariant = classes() //
             .that().resideInAPackage(DOMAIN) //
             .and().haveSimpleNameEndingWith("Repository") //
-            .should(haveValueObjectVariants()));
+            .should(haveValueObjectVariants());
 
     @ArchTest
-    static final ArchRule servicesUseTheValueObjectVariants = freeze(noClasses() //
+    static final ArchRule servicesUseTheValueObjectVariants = noClasses() //
             .that(DOMAIN_SERVICE) //
             .should().callMethodWhere(REPOSITORY_METHOD_TAKING_UUID) //
-            .because("the service works with CustomerId, ToolId, … – the raw UUID stays in the repository"));
+            .because("the service works with CustomerId, ToolId, … – the raw UUID stays in the repository");
 
     // ------------------------------------------------------------------------
     // service
@@ -341,12 +340,12 @@ class DomainArchitectureTest {
                     method -> method.getRawReturnType().getName().equals("void") || isValueObject(method.getRawReturnType())));
 
     @ArchTest
-    static final ArchRule serviceCommandsSaveTheirEvents = freeze(methods() //
+    static final ArchRule serviceCommandsSaveTheirEvents = methods() //
             .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
             .and().arePublic() //
             .and(WRITE_TRANSACTION) //
             .should(methodCondition("save the events with OutboxEventStore.save(…)", method -> method.getMethodCallsFromSelf().stream() //
-                    .anyMatch(call -> call.getTargetOwner().isEquivalentTo(OutboxEventStore.class)))));
+                    .anyMatch(call -> call.getTargetOwner().isEquivalentTo(OutboxEventStore.class))));
 
     // ------------------------------------------------------------------------
     // views

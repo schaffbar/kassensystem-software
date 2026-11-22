@@ -2,7 +2,6 @@ package de.schaffbar.core_pos.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
-import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.aggregateNames;
@@ -36,18 +35,18 @@ class UseCaseArchitectureTest {
             .because("a use case is one action");
 
     @ArchTest
-    static final ArchRule useCasesAreCommands = freeze(methods() //
+    static final ArchRule useCasesAreCommands = methods() //
             .that().areDeclaredInClassesThat().resideInAPackage(USE_CASE) //
             .and().haveName("process") //
             .should().beAnnotatedWith(Command.class) //
-            .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)"));
+            .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)");
 
     @ArchTest
-    static final ArchRule useCasesAreNamedAfterTheirAggregate = freeze(classes() //
+    static final ArchRule useCasesAreNamedAfterTheirAggregate = classes() //
             .that().resideInAPackage(USE_CASE) //
             .and().areTopLevelClasses() //
             .should(classCondition("start with the name of an aggregate (<Aggregate><Action>)",
                     useCase -> aggregateNames(useCase).anyMatch(useCase.getSimpleName()::startsWith))) //
-            .because("E3 in docs/backend-consistency.md"));
+            .because("E3 in docs/backend-consistency.md");
 
 }
