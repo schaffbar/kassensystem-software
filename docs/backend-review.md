@@ -172,19 +172,22 @@ Abweichungen aus dem Review unter „Not everywhere yet“.
 
 ### `schaffbar-backend/CLAUDE.md`
 
-- [ ] „Many exceptions do not have a base class yet (E8)“ – stimmt nicht mehr.
-- [ ] „Older code still has `@Transactional`“ – keins mehr; `OutboxEventStore` (`Propagation.MANDATORY`) nicht erwähnt.
-- [ ] Baum: `shared/` ohne `cqrs/`, `util/`, `web/`.
-- [ ] Pfade sind Plural (`/api/v1/customers`), nicht `<aggregate-in-kebab-case>`.
-- [ ] Ausnahmen für `web/device/`: Endpunkt ändert und liest, Strings statt Value Objects, `*Response` statt `…ApiDto`.
-- [ ] Read Facades: „`get…`“, `DeviceReadFacade` hat `is…`.
-- [ ] `<Aggregate><Action>`: welches Aggregat (Entscheidung oben).
-- [ ] Abschnitte: Use Cases und Read Facades nur `// helper`; ApiModel (`// mapping view to response`, `// response`,
+Erledigt 22.11.2026 (alle Punkte unten); dazu E3/E20 (Name des Use Case), E16 (Unterpfad), E32, E33, E34, E6
+und der Abschnitt zu `web/device/`.
+
+- [x] „Many exceptions do not have a base class yet (E8)“ – stimmt nicht mehr.
+- [x] „Older code still has `@Transactional`“ – keins mehr; `OutboxEventStore` (`Propagation.MANDATORY`) nicht erwähnt.
+- [x] Baum: `shared/` ohne `cqrs/`, `util/`, `web/`.
+- [x] Pfade sind Plural (`/api/v1/customers`), nicht `<aggregate-in-kebab-case>`.
+- [x] Ausnahmen für `web/device/`: Endpunkt ändert und liest, Strings statt Value Objects, `*Response` statt `…ApiDto`.
+- [x] Read Facades: „`get…`“, `DeviceReadFacade` hat `is…`.
+- [x] `<Aggregate><Action>`: welches Aggregat (Entscheidung oben).
+- [x] Abschnitte: Use Cases und Read Facades nur `// helper`; ApiModel (`// mapping view to response`, `// response`,
   `// request body`, …); Exceptions `// static factories`.
-- [ ] Nicht beschrieben: ein Use Case ruft Use Cases (`ToolUsageToggle`), Read Facades werfen Regel-Exceptions, was
+- [x] Nicht beschrieben: ein Use Case ruft Use Cases (`ToolUsageToggle`), Read Facades werfen Regel-Exceptions, was
   `process` zurückgeben darf, Name der Views-Datei einer Read Facade.
-- [ ] `shared/` kennt kein Feature (ArchUnit `sharedDoesNotDependOnFeatures`) steht in keinem Dokument.
-- [ ] Status beim Anlegen nach E32 (`201` mit `Location` oder `204`).
+- [x] `shared/` kennt kein Feature (ArchUnit `sharedDoesNotDependOnFeatures`) steht in keinem Dokument.
+- [x] Status beim Anlegen nach E32 (`201` mit `Location` oder `204`).
 
 ### `backend-consistency.md`
 
@@ -385,7 +388,9 @@ Abweichungen aus dem Review unter „Not everywhere yet“.
 - [ ] Outbox nach der Entscheidung (oben): `markAsProcessed`, `findByProcessedFalseOrderByCreatedAtAsc` löschen; Felder
   bleiben, `owner` bleibt ungesetzt.
 - [ ] `ResourceNotFoundException.CODE` nach der Entscheidung (oben), dazu `ExceptionArchitectureTest:40`.
-- [ ] Abschnittsnamen: `static factory method`, `static factory methods`, `static factories` nebeneinander.
+- [ ] Abschnittsnamen: `static factory method`, `static factory methods`, `static factories` nebeneinander – nach
+  `CLAUDE.md` (22.11.2026): `// static constructor` über dem einen `of(…)` (`OutboxEvent`), `// static factories` über
+  mehreren (`SchaffbarEvent`, `EventType`).
 - [ ] Tests: `ApiExceptionHandlerTest` ruft `mockMvc.perform` selbst (`:44-111`); `BillableDurationTest`,
   `BillingTotalTest` ohne Abschnitte und Methodenpräfix; `IpAddressTest` fehlt.
 
