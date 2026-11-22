@@ -72,7 +72,7 @@ public class CustomerDelete {
                         this.rfidTagAssignmentService.unassignRfidTag(customerId);
                     }
                     else {
-                        this.rfidTagAssignmentService.cancelRfidTagAssignmentRequest(customerId);
+                        this.rfidTagAssignmentService.cancelRfidTagAssignment(customerId);
                     }
                 });
     }

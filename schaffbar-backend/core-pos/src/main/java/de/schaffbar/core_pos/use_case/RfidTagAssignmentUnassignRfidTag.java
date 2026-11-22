@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
-import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -17,18 +16,18 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 @Service
 @Validated
 @RequiredArgsConstructor
-public class CustomerRequestRfidTagAssignment {
+public class RfidTagAssignmentUnassignRfidTag {
 
     private final @NonNull CustomerService customerService;
 
     private final @NonNull RfidTagAssignmentService rfidTagAssignmentService;
 
     @Command
-    public void process(@NotNull @Valid CustomerId customerId, @NotNull RfidTagAssignmentType assignmentType) {
+    public void process(@NotNull @Valid CustomerId customerId) {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
 
-        this.rfidTagAssignmentService.requestRfidTagAssignment(customerId, assignmentType);
+        this.rfidTagAssignmentService.unassignRfidTag(customerId);
     }
 
 }

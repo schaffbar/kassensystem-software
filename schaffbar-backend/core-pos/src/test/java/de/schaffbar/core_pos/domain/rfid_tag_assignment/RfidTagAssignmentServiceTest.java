@@ -70,19 +70,35 @@ class RfidTagAssignmentServiceTest {
         this.rfidTagAssignmentService.requestRfidTagAssignment(customerId, RfidTagAssignmentType.TEMPORARY);
 
         // then
-        assertThat(this.savedAssignment.getValue().isWaitingForAssignment()).isTrue();
-        assertThat(this.savedAssignment.getValue().getAssignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY);
-        RfidTagAssignmentRequestedPayload payload = expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_REQUESTED) //
+        RfidTagAssignment assignment = expectSavedAssignment();
+        assertThat(assignment.isWaitingForAssignment()).isTrue();
+        assertThat(assignment.getAssignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY);
+        RfidTagAssignmentRequestedPayload payload = expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_REQUESTED, assignment) //
                 .deserializeAndValidatePayload(RfidTagAssignmentRequestedPayload.class);
-        assertThat(payload.id()).isEqualTo(this.savedAssignment.getValue().getId());
+        assertThat(payload.id()).isEqualTo(assignment.getId());
         assertThat(payload.customerId()).isEqualTo(customerId);
-        assertThat(payload.assignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY.name());
+        assertThat(payload.assignmentType()).isEqualTo(RfidTagAssignmentType.TEMPORARY);
     }
 
     @Test
     void requestRfidTagAssignment_rejectsACustomerWithAssignment() {
         // given
         RfidTagAssignment assignment = givenCustomerWithTag();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.requestRfidTagAssignment(assignment.getCustomerId(), RfidTagAssignmentType.FIXED));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(CustomerHasRfidTagAssignmentException.class) //
+                .hasFieldOrPropertyWithValue("code", CustomerHasRfidTagAssignmentException.CODE);
+        expectNothingSaved();
+    }
+
+    @Test
+    void requestRfidTagAssignment_rejectsACustomerWhoseRequestIsStillWaiting() {
+        // given
+        RfidTagAssignment assignment = givenWaitingRequestOfTheCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.requestRfidTagAssignment(assignment.getCustomerId(), RfidTagAssignmentType.FIXED));
@@ -126,7 +142,7 @@ class RfidTagAssignmentServiceTest {
         assertThat(assignment.isAssigned()).isTrue();
         assertThat(assignment.getRfidTagId()).isEqualTo(rfidTagId);
         assertThat(assignment.getAssignmentDate()).isNotNull();
-        expectSavedEvent(EventType.RFID_TAG_ASSIGNED);
+        expectSavedEvent(EventType.RFID_TAG_ASSIGNED, assignment);
     }
 
     @Test
@@ -173,8 +189,8 @@ class RfidTagAssignmentServiceTest {
 
         // then
         expectHistoryEntryOf(assignment);
-        verify(this.rfidTagAssignmentRepository).delete(assignment);
-        expectSavedEvent(EventType.RFID_TAG_UNASSIGNED);
+        expectDeleted(assignment);
+        expectSavedEvent(EventType.RFID_TAG_UNASSIGNED, assignment);
     }
 
     @Test
@@ -189,34 +205,65 @@ class RfidTagAssignmentServiceTest {
         assertThat(thrown) //
                 .isInstanceOf(NoRfidTagAssignedException.class) //
                 .hasFieldOrPropertyWithValue("code", NoRfidTagAssignedException.CODE);
-        verifyNoInteractions(this.rfidTagAssignmentHistoryRepository);
+        expectNoHistoryEntry();
+        expectNothingDeleted();
+    }
+
+    @Test
+    void unassignRfidTag_rejectsACustomerWithoutAssignment() {
+        // given
+        CustomerId customerId = givenCustomerWithoutAssignment();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.unassignRfidTag(customerId));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(NoRfidTagAssignedException.class) //
+                .hasFieldOrPropertyWithValue("code", NoRfidTagAssignedException.CODE);
+        expectNoHistoryEntry();
         expectNothingDeleted();
     }
 
     // ------------------------------------------------------------------------
-    // cancelRfidTagAssignmentRequest
+    // cancelRfidTagAssignment
 
     @Test
-    void cancelRfidTagAssignmentRequest_deletesTheWaitingRequestWithoutHistory() {
+    void cancelRfidTagAssignment_deletesTheWaitingRequestWithoutHistory() {
         // given
         RfidTagAssignment assignment = givenWaitingRequestOfTheCustomer();
 
         // when
-        this.rfidTagAssignmentService.cancelRfidTagAssignmentRequest(assignment.getCustomerId());
+        this.rfidTagAssignmentService.cancelRfidTagAssignment(assignment.getCustomerId());
 
         // then
-        verify(this.rfidTagAssignmentRepository).delete(assignment);
-        verifyNoInteractions(this.rfidTagAssignmentHistoryRepository);
-        expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_CANCELLED);
+        expectDeleted(assignment);
+        expectNoHistoryEntry();
+        expectSavedEvent(EventType.RFID_TAG_ASSIGNMENT_CANCELLED, assignment);
     }
 
     @Test
-    void cancelRfidTagAssignmentRequest_rejectsAnAssignedTag() {
+    void cancelRfidTagAssignment_rejectsAnAssignedTag() {
         // given
         RfidTagAssignment assignment = givenCustomerWithTag();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.cancelRfidTagAssignmentRequest(assignment.getCustomerId()));
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.cancelRfidTagAssignment(assignment.getCustomerId()));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(NoRfidTagAssignmentWaitingException.class) //
+                .hasFieldOrPropertyWithValue("code", NoRfidTagAssignmentWaitingException.CODE);
+        expectNothingDeleted();
+    }
+
+    @Test
+    void cancelRfidTagAssignment_rejectsACustomerWithoutAssignment() {
+        // given
+        CustomerId customerId = givenCustomerWithoutAssignment();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentService.cancelRfidTagAssignment(customerId));
 
         // then
         assertThat(thrown) //
@@ -275,19 +322,36 @@ class RfidTagAssignmentServiceTest {
     }
 
     private void givenSaveReturnsTheAssignment() {
-        when(this.rfidTagAssignmentRepository.save(this.savedAssignment.capture())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(this.rfidTagAssignmentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     // ------------------------------------------------------------------------
     // then
 
-    private SchaffbarEvent expectSavedEvent(EventType type) {
+    private RfidTagAssignment expectSavedAssignment() {
+        verify(this.rfidTagAssignmentRepository).save(this.savedAssignment.capture());
+
+        return this.savedAssignment.getValue();
+    }
+
+    private SchaffbarEvent expectSavedEvent(EventType type, RfidTagAssignment assignment) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
-                .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+                .satisfies(event -> {
+                    assertThat(event.getType()).isEqualTo(type);
+                    assertThat(event.getAggregateId()).isEqualTo(assignment.getId().getValue().toString());
+                });
 
         return this.events.getValue().getFirst();
+    }
+
+    private void expectDeleted(RfidTagAssignment assignment) {
+        verify(this.rfidTagAssignmentRepository).delete(assignment);
+    }
+
+    private void expectNoHistoryEntry() {
+        verifyNoInteractions(this.rfidTagAssignmentHistoryRepository);
     }
 
     private void expectHistoryEntryOf(RfidTagAssignment assignment) {

@@ -37,6 +37,17 @@ class RfidTagAssignmentAcceptanceTest {
         // then
         this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, CustomerHasRfidTagAssignmentException.CODE);
         this.fixture.then().expectRfidTagAssigned(customerId, rfidTagId);
+
+        // when
+        this.fixture.then().expectSuccess(this.fixture.api().unassignRfidTag(customerId));
+        result = this.fixture.api().requestRfidTagAssignment(customerId, RfidTagAssignmentType.TEMPORARY);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectWaitingForRfidTag(customerId);
+
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
     }
 
     @Test
@@ -82,7 +93,7 @@ class RfidTagAssignmentAcceptanceTest {
         this.fixture.then().expectNoRfidTagAssignment(otherCustomer);
 
         // when
-        this.fixture.given().rfidTagAssignedToTheWaitingCustomer(rfidTagId);
+        this.fixture.then().expectSuccess(this.fixture.api().assignRfidTag(rfidTagId));
         result = this.fixture.api().requestRfidTagAssignment(otherCustomer, RfidTagAssignmentType.FIXED);
 
         // then
@@ -90,12 +101,8 @@ class RfidTagAssignmentAcceptanceTest {
         this.fixture.then().expectRfidTagAssigned(waitingCustomer, rfidTagId);
         this.fixture.then().expectWaitingForRfidTag(otherCustomer);
 
-        // when
-        RfidTagId otherRfidTagId = this.fixture.given().rfidTag(RandomValues.rfidTagId());
-        this.fixture.given().rfidTagAssignedToTheWaitingCustomer(otherRfidTagId);
-
-        // then
-        this.fixture.then().expectRfidTagAssigned(otherCustomer, otherRfidTagId);
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
     }
 
     @Test

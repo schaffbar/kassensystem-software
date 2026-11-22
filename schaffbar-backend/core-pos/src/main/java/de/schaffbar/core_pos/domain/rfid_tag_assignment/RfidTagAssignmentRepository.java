@@ -13,49 +13,31 @@ import de.schaffbar.core_pos.shared.id.RfidTagId;
 @Repository
 interface RfidTagAssignmentRepository extends JpaRepository<RfidTagAssignment, UUID> {
 
-    List<RfidTagAssignment> findByCustomerId(UUID customerId);
+    // customer_id and rfid_tag_id are unique columns (V1)
+    Optional<RfidTagAssignment> findByCustomerId(UUID customerId);
 
     default Optional<RfidTagAssignment> findByCustomerId(CustomerId customerId) {
-        List<RfidTagAssignment> assignments = findByCustomerId(customerId.getValue());
-        if (assignments.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (assignments.size() > 1) {
-            throw new IllegalStateException("More than one RFID tag assignment found");
-        }
-
-        return Optional.of(assignments.getFirst());
+        return findByCustomerId(customerId.getValue());
     }
 
-    List<RfidTagAssignment> findByRfidTagId(String rfidTagId);
+    Optional<RfidTagAssignment> findByRfidTagId(String rfidTagId);
 
     default Optional<RfidTagAssignment> findByRfidTagId(RfidTagId rfidTagId) {
-        List<RfidTagAssignment> assignments = findByRfidTagId(rfidTagId.getValue());
-        if (assignments.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (assignments.size() > 1) {
-            throw new IllegalStateException("More than one RFID tag assignment found");
-        }
-
-        return Optional.of(assignments.getFirst());
+        return findByRfidTagId(rfidTagId.getValue());
     }
 
     List<RfidTagAssignment> findByStatus(RfidTagAssignmentStatus status);
 
+    // TA-3 – checked by the service, not by the database
     default Optional<RfidTagAssignment> findWaitingForAssignment() {
         List<RfidTagAssignment> assignments = findByStatus(RfidTagAssignmentStatus.WAITING_FOR_ASSIGNMENT);
-        if (assignments.isEmpty()) {
-            return Optional.empty();
-        }
-
         if (assignments.size() > 1) {
-            throw new IllegalStateException("More than one RFID tag assignment found");
+            throw new IllegalStateException("More than one RFID tag assignment waits for a tag: " + assignments.stream() //
+                    .map(assignment -> assignment.getId().getValue().toString()) //
+                    .toList());
         }
 
-        return Optional.of(assignments.getFirst());
+        return assignments.stream().findFirst();
     }
 
 }

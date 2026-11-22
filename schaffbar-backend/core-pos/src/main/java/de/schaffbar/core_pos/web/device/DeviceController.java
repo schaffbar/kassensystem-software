@@ -25,8 +25,8 @@ import de.schaffbar.core_pos.shared.exception.BusinessRuleViolationException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
-import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
 import de.schaffbar.core_pos.use_case.RfidReaderCreate;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentAssignRfidTag;
 import de.schaffbar.core_pos.use_case.RfidTagCreate;
 import de.schaffbar.core_pos.use_case.ToolUsageToggle;
 import de.schaffbar.core_pos.use_case.WorkshopUsageStart;
@@ -49,7 +49,7 @@ public class DeviceController {
 
     private final @NonNull RfidTagCreate rfidTagCreate;
 
-    private final @NonNull CustomerAssignRfidTag customerAssignRfidTag;
+    private final @NonNull RfidTagAssignmentAssignRfidTag rfidTagAssignmentAssignRfidTag;
 
     private final @NonNull WorkshopUsageStart workshopUsageStart;
 
@@ -184,9 +184,9 @@ public class DeviceController {
     }
 
     private CounterResponse assignRfidTagOrShowOwner(RfidTagId rfidTagId) {
-        // an assigned tag shows its owner – a waiting request keeps waiting (TA-2)
+        // an assigned tag shows its owner – a waiting request keeps waiting (TA-12)
         if (!this.deviceReadFacade.isRfidTagAssigned(rfidTagId)) {
-            this.customerAssignRfidTag.process(rfidTagId);
+            this.rfidTagAssignmentAssignRfidTag.process(rfidTagId);
         }
 
         CustomerView customer = this.deviceReadFacade.getCustomer(rfidTagId);

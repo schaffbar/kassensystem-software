@@ -38,9 +38,9 @@ implemented, move it to "Business Rules / Invariants".
 
 ### Planned (not implemented yet)
 
-| #    | Rule                                                                                                      | Status                                                                                                                         |
-|------|-----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| RT-4 | A tag can be deactivated (lost) and reactivated; a deactivated tag cannot be assigned and unlocks nothing | `active` exists, but there is no endpoint, and `CustomerAssignRfidTag`, `WorkshopUsageStart`, `ToolUsageStart` do not check it |
+| #    | Rule                                                                                                      | Status                                                                                                                                  |
+|------|-----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| RT-4 | A tag can be deactivated (lost) and reactivated; a deactivated tag cannot be assigned and unlocks nothing | `active` exists, but there is no endpoint, and `RfidTagAssignmentAssignRfidTag`, `WorkshopUsageStart`, `ToolUsageStart` do not check it |
 
 ## Domain Events
 

@@ -3,9 +3,9 @@ package de.schaffbar.core_pos.shared.event.payload;
 import java.time.Instant;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.shared.event.EventPayload;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
@@ -16,7 +16,7 @@ public interface RfidTagAssignmentEventPayload extends EventPayload {
     record RfidTagAssignmentRequestedPayload( //
             @Valid @NotNull RfidTagAssignmentId id, //
             @Valid @NotNull CustomerId customerId, //
-            @NotBlank String assignmentType //
+            @NotNull RfidTagAssignmentType assignmentType //
     ) implements RfidTagAssignmentEventPayload {}
 
     record RfidTagAssignmentCancelledPayload( //
@@ -35,7 +35,7 @@ public interface RfidTagAssignmentEventPayload extends EventPayload {
             @Valid @NotNull RfidTagAssignmentId id, //
             @Valid @NotNull CustomerId customerId, //
             @Valid @NotNull RfidTagId rfidTagId, //
-            @NotBlank String assignmentType, //
+            @NotNull RfidTagAssignmentType assignmentType, //
             @NotNull Instant assignmentDate, //
             @NotNull Instant unassignmentDate //
     ) implements RfidTagAssignmentEventPayload {}

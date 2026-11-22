@@ -70,7 +70,7 @@ class CustomerDeleteTest {
         verify(this.toolCertificationService).deleteToolCertifications(customerId);
         verify(this.customerService).deleteCustomer(customerId);
         verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
-        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());
+        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
     }
 
     @Test
@@ -87,7 +87,7 @@ class CustomerDeleteTest {
         InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
         order.verify(this.rfidTagAssignmentService).unassignRfidTag(customerId);
         order.verify(this.customerService).deleteCustomer(customerId);
-        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignmentRequest(any());
+        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
     }
 
     @Test
@@ -102,7 +102,7 @@ class CustomerDeleteTest {
 
         // then
         InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
-        order.verify(this.rfidTagAssignmentService).cancelRfidTagAssignmentRequest(customerId);
+        order.verify(this.rfidTagAssignmentService).cancelRfidTagAssignment(customerId);
         order.verify(this.customerService).deleteCustomer(customerId);
         verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
     }

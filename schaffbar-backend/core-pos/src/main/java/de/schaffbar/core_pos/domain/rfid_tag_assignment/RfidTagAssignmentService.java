@@ -84,7 +84,7 @@ public class RfidTagAssignmentService {
     }
 
     @Command
-    public void cancelRfidTagAssignmentRequest(@NotNull @Valid CustomerId customerId) {
+    public void cancelRfidTagAssignment(@NotNull @Valid CustomerId customerId) {
         RfidTagAssignment assignment = this.rfidTagAssignmentRepository.findByCustomerId(customerId) //
                 .filter(RfidTagAssignment::isWaitingForAssignment) //
                 .orElseThrow(() -> NoRfidTagAssignmentWaitingException.forCustomer(customerId));

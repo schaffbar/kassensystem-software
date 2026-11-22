@@ -19,10 +19,11 @@ import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @ExtendWith(MockitoExtension.class)
-class CustomerAssignRfidTagTest {
+class RfidTagAssignmentAssignRfidTagTest {
 
     @Mock
     private RfidTagService rfidTagService;
@@ -31,7 +32,7 @@ class CustomerAssignRfidTagTest {
     private RfidTagAssignmentService rfidTagAssignmentService;
 
     @InjectMocks
-    private CustomerAssignRfidTag customerAssignRfidTag;
+    private RfidTagAssignmentAssignRfidTag rfidTagAssignmentAssignRfidTag;
 
     @Test
     void assignsARegisteredTag() {
@@ -39,10 +40,10 @@ class CustomerAssignRfidTagTest {
         RfidTagId rfidTagId = givenRegisteredTag();
 
         // when
-        this.customerAssignRfidTag.process(rfidTagId);
+        this.rfidTagAssignmentAssignRfidTag.process(rfidTagId);
 
         // then
-        verify(this.rfidTagAssignmentService).assignRfidTag(rfidTagId);
+        expectAssigned(rfidTagId);
     }
 
     @Test
@@ -51,11 +52,13 @@ class CustomerAssignRfidTagTest {
         RfidTagId unknown = givenUnknownTag();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.customerAssignRfidTag.process(unknown));
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentAssignRfidTag.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.rfidTagAssignmentService);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.RFID_TAG);
+        expectNothingAssigned();
     }
 
     // ------------------------------------------------------------------------
@@ -73,6 +76,17 @@ class CustomerAssignRfidTagTest {
         when(this.rfidTagService.getRfidTag(unknown)).thenReturn(Optional.empty());
 
         return unknown;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectAssigned(RfidTagId rfidTagId) {
+        verify(this.rfidTagAssignmentService).assignRfidTag(rfidTagId);
+    }
+
+    private void expectNothingAssigned() {
+        verifyNoInteractions(this.rfidTagAssignmentService);
     }
 
 }

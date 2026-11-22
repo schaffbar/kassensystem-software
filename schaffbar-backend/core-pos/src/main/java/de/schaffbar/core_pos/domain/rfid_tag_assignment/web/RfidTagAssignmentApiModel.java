@@ -16,9 +16,10 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.R
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface RfidTagAssignmentApiModel {
+public interface RfidTagAssignmentApiModel extends ValueObjectMapper {
 
     RfidTagAssignmentApiModel MAPPER = Mappers.getMapper(RfidTagAssignmentApiModel.class);
 

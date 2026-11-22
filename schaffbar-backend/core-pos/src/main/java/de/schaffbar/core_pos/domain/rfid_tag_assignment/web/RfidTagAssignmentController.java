@@ -27,9 +27,9 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApi
 import de.schaffbar.core_pos.read_facade.RfidTagAssignmentReadFacade;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
-import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
-import de.schaffbar.core_pos.use_case.CustomerRequestRfidTagAssignment;
-import de.schaffbar.core_pos.use_case.CustomerUnassignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentAssignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentRequest;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentUnassignRfidTag;
 
 @Validated
 @RestController
@@ -39,11 +39,11 @@ public class RfidTagAssignmentController {
 
     private final @NonNull RfidTagAssignmentReadFacade rfidTagAssignmentReadFacade;
 
-    private final @NonNull CustomerRequestRfidTagAssignment customerRequestRfidTagAssignment;
+    private final @NonNull RfidTagAssignmentRequest rfidTagAssignmentRequest;
 
-    private final @NonNull CustomerAssignRfidTag customerAssignRfidTag;
+    private final @NonNull RfidTagAssignmentAssignRfidTag rfidTagAssignmentAssignRfidTag;
 
-    private final @NonNull CustomerUnassignRfidTag customerUnassignRfidTag;
+    private final @NonNull RfidTagAssignmentUnassignRfidTag rfidTagAssignmentUnassignRfidTag;
 
     // ------------------------------------------------------------------------
     // query
@@ -74,21 +74,21 @@ public class RfidTagAssignmentController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> requestRfidTagAssignment(@RequestBody @NotNull @Valid RequestRfidTagAssignmentRequestBody requestBody) {
-        this.customerRequestRfidTagAssignment.process(requestBody.customerId(), requestBody.assignmentType());
+        this.rfidTagAssignmentRequest.process(requestBody.customerId(), requestBody.assignmentType());
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/assign", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> assignRfidTag(@RequestBody @NotNull @Valid AssignRfidTagRequestBody requestBody) {
-        this.customerAssignRfidTag.process(requestBody.rfidTagId());
+        this.rfidTagAssignmentAssignRfidTag.process(requestBody.rfidTagId());
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/unassign", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> unassignRfidTag(@RequestBody @NotNull @Valid UnassignRfidTagRequestBody requestBody) {
-        this.customerUnassignRfidTag.process(requestBody.customerId());
+        this.rfidTagAssignmentUnassignRfidTag.process(requestBody.customerId());
 
         return ResponseEntity.noContent().build();
     }

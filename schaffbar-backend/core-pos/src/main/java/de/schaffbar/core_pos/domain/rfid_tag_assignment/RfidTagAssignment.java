@@ -1,6 +1,6 @@
 package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
 import java.time.Instant;
 import java.util.List;
@@ -81,7 +81,7 @@ class RfidTagAssignment {
     }
 
     public RfidTagId getRfidTagId() {
-        if (isBlank(this.rfidTagId)) {
+        if (isNull(this.rfidTagId)) {
             return null;
         }
 
@@ -100,6 +100,7 @@ class RfidTagAssignment {
     // command
 
     public List<SchaffbarEvent> assignRfidTag(RfidTagId rfidTagId) {
+        // the service finds only the waiting request (TA-4)
         if (!isWaitingForAssignment()) {
             throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] is not waiting for a tag");
         }
@@ -112,6 +113,7 @@ class RfidTagAssignment {
     }
 
     public List<SchaffbarEvent> unassignRfidTag(RfidTagAssignmentHistory historyEntry) {
+        // the service finds only an assigned one (TA-5)
         if (!isAssigned()) {
             throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] has no tag to unassign");
         }
@@ -120,6 +122,7 @@ class RfidTagAssignment {
     }
 
     public List<SchaffbarEvent> cancel() {
+        // the service finds only a waiting request (TA-10)
         if (!isWaitingForAssignment()) {
             throw new IllegalStateException("RFID tag assignment [id: " + this.id + "] is not waiting for a tag");
         }

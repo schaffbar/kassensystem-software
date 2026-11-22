@@ -7,27 +7,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import de.schaffbar.core_pos.domain.customer.CustomerService;
+import de.schaffbar.core_pos.domain.rfid_tag.RfidTagService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
 import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
-import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.RfidTagId;
 
 @Service
 @Validated
 @RequiredArgsConstructor
-public class CustomerUnassignRfidTag {
+public class RfidTagAssignmentAssignRfidTag {
 
-    private final @NonNull CustomerService customerService;
+    private final @NonNull RfidTagService rfidTagService;
 
     private final @NonNull RfidTagAssignmentService rfidTagAssignmentService;
 
     @Command
-    public void process(@NotNull @Valid CustomerId customerId) {
-        this.customerService.getCustomer(customerId) //
-                .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
+    public void process(@NotNull @Valid RfidTagId rfidTagId) {
+        this.rfidTagService.getRfidTag(rfidTagId) //
+                .orElseThrow(() -> ResourceNotFoundException.rfidTag(rfidTagId));
 
-        this.rfidTagAssignmentService.unassignRfidTag(customerId);
+        this.rfidTagAssignmentService.assignRfidTag(rfidTagId);
     }
 
 }

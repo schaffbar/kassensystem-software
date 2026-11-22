@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.rfid_tag_assignment;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.mapstruct.Mapper;
@@ -31,19 +32,19 @@ public interface RfidTagAssignmentViews {
     @Builder
     @Validated
     record RfidTagAssignmentView( //
-            @NotNull RfidTagAssignmentId id, //
-            @NotNull CustomerId customerId, //
+            @NotNull @Valid RfidTagAssignmentId id, //
+            @NotNull @Valid CustomerId customerId, //
             @NotNull RfidTagAssignmentType assignmentType, //
             @NotNull RfidTagAssignmentStatus status, //
-            RfidTagId rfidTagId, //
+            @Valid RfidTagId rfidTagId, //
             Instant assignmentDate //
     ) {}
 
     @Builder
     @Validated
     record RfidTagAssignmentHistoryView( //
-            @NotNull CustomerId customerId, //
-            @NotNull RfidTagId rfidTagId, //
+            @NotNull @Valid CustomerId customerId, //
+            @NotNull @Valid RfidTagId rfidTagId, //
             @NotNull RfidTagAssignmentType assignmentType, //
             @NotNull Instant assignmentDate, //
             @NotNull Instant unassignmentDate //

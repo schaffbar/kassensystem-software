@@ -36,9 +36,9 @@ import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.util.StringToRfidTagIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
-import de.schaffbar.core_pos.use_case.CustomerAssignRfidTag;
-import de.schaffbar.core_pos.use_case.CustomerRequestRfidTagAssignment;
-import de.schaffbar.core_pos.use_case.CustomerUnassignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentAssignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentRequest;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentUnassignRfidTag;
 
 @ExtendWith(MockitoExtension.class)
 class RfidTagAssignmentControllerTest {
@@ -47,13 +47,13 @@ class RfidTagAssignmentControllerTest {
     private RfidTagAssignmentReadFacade rfidTagAssignmentReadFacade;
 
     @Mock
-    private CustomerRequestRfidTagAssignment customerRequestRfidTagAssignment;
+    private RfidTagAssignmentRequest rfidTagAssignmentRequest;
 
     @Mock
-    private CustomerAssignRfidTag customerAssignRfidTag;
+    private RfidTagAssignmentAssignRfidTag rfidTagAssignmentAssignRfidTag;
 
     @Mock
-    private CustomerUnassignRfidTag customerUnassignRfidTag;
+    private RfidTagAssignmentUnassignRfidTag rfidTagAssignmentUnassignRfidTag;
 
     private MockMvc mockMvc;
 
@@ -63,8 +63,8 @@ class RfidTagAssignmentControllerTest {
         conversionService.addConverter(new StringToCustomerIdConverter());
         conversionService.addConverter(new StringToRfidTagIdConverter());
 
-        RfidTagAssignmentController controller = new RfidTagAssignmentController(this.rfidTagAssignmentReadFacade, this.customerRequestRfidTagAssignment,
-                this.customerAssignRfidTag, this.customerUnassignRfidTag);
+        RfidTagAssignmentController controller = new RfidTagAssignmentController(this.rfidTagAssignmentReadFacade, this.rfidTagAssignmentRequest,
+                this.rfidTagAssignmentAssignRfidTag, this.rfidTagAssignmentUnassignRfidTag);
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
@@ -147,7 +147,7 @@ class RfidTagAssignmentControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerRequestRfidTagAssignment).process(customerId, RfidTagAssignmentType.TEMPORARY);
+        verify(this.rfidTagAssignmentRequest).process(customerId, RfidTagAssignmentType.TEMPORARY);
     }
 
     @Test
@@ -157,7 +157,7 @@ class RfidTagAssignmentControllerTest {
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.customerRequestRfidTagAssignment, never()).process(any(), any());
+        verify(this.rfidTagAssignmentRequest, never()).process(any(), any());
     }
 
     @Test
@@ -186,7 +186,7 @@ class RfidTagAssignmentControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerAssignRfidTag).process(rfidTagId);
+        verify(this.rfidTagAssignmentAssignRfidTag).process(rfidTagId);
     }
 
     // ------------------------------------------------------------------------
@@ -202,7 +202,7 @@ class RfidTagAssignmentControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerUnassignRfidTag).process(customerId);
+        verify(this.rfidTagAssignmentUnassignRfidTag).process(customerId);
     }
 
     // ------------------------------------------------------------------------
@@ -236,7 +236,7 @@ class RfidTagAssignmentControllerTest {
     private CustomerId givenAnotherRequestWaiting() {
         CustomerId customerId = CustomerId.random();
         doThrow(new RfidTagAssignmentAlreadyWaitingException(customerId, CustomerId.random())) //
-                .when(this.customerRequestRfidTagAssignment).process(customerId, RfidTagAssignmentType.FIXED);
+                .when(this.rfidTagAssignmentRequest).process(customerId, RfidTagAssignmentType.FIXED);
 
         return customerId;
     }

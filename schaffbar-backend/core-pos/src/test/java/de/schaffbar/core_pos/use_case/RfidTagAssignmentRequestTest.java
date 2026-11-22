@@ -19,10 +19,11 @@ import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
-class CustomerRequestRfidTagAssignmentTest {
+class RfidTagAssignmentRequestTest {
 
     @Mock
     private CustomerService customerService;
@@ -31,7 +32,7 @@ class CustomerRequestRfidTagAssignmentTest {
     private RfidTagAssignmentService rfidTagAssignmentService;
 
     @InjectMocks
-    private CustomerRequestRfidTagAssignment customerRequestRfidTagAssignment;
+    private RfidTagAssignmentRequest rfidTagAssignmentRequest;
 
     @Test
     void requestsATagForAnExistingCustomer() {
@@ -39,10 +40,10 @@ class CustomerRequestRfidTagAssignmentTest {
         CustomerId customerId = givenCustomer();
 
         // when
-        this.customerRequestRfidTagAssignment.process(customerId, RfidTagAssignmentType.TEMPORARY);
+        this.rfidTagAssignmentRequest.process(customerId, RfidTagAssignmentType.TEMPORARY);
 
         // then
-        verify(this.rfidTagAssignmentService).requestRfidTagAssignment(customerId, RfidTagAssignmentType.TEMPORARY);
+        expectRequested(customerId, RfidTagAssignmentType.TEMPORARY);
     }
 
     @Test
@@ -51,11 +52,13 @@ class CustomerRequestRfidTagAssignmentTest {
         CustomerId unknown = givenUnknownCustomer();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.customerRequestRfidTagAssignment.process(unknown, RfidTagAssignmentType.FIXED));
+        Throwable thrown = catchThrowable(() -> this.rfidTagAssignmentRequest.process(unknown, RfidTagAssignmentType.FIXED));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.rfidTagAssignmentService);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNothingRequested();
     }
 
     // ------------------------------------------------------------------------
@@ -73,6 +76,17 @@ class CustomerRequestRfidTagAssignmentTest {
         when(this.customerService.getCustomer(unknown)).thenReturn(Optional.empty());
 
         return unknown;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectRequested(CustomerId customerId, RfidTagAssignmentType assignmentType) {
+        verify(this.rfidTagAssignmentService).requestRfidTagAssignment(customerId, assignmentType);
+    }
+
+    private void expectNothingRequested() {
+        verifyNoInteractions(this.rfidTagAssignmentService);
     }
 
 }
