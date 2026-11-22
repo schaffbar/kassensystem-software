@@ -2,7 +2,8 @@
 
 **Aggregate Root:** `RfidTagAssignment`
 
-**Inner entity:** `RfidTagAssignmentHistory` – one entry per finished assignment, written by the unassignment
+**Inner entity:** `RfidTagAssignmentHistory` – one entry per finished assignment, written by the unassignment; read
+through `GET /api/v1/rfid-tag-assignments/history` (a sub-path of the aggregate, E16)
 
 **Identity:** `RfidTagAssignmentId` (UUID)
 

@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentService;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentHistoryView;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.RfidTagAssignmentView;
 import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
@@ -43,6 +44,11 @@ public class RfidTagAssignmentReadFacade {
     @Query
     public Optional<RfidTagAssignmentView> getRfidTagAssignment(@NotNull @Valid RfidTagId rfidTagId) {
         return this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId);
+    }
+
+    @Query
+    public List<RfidTagAssignmentHistoryView> getRfidTagAssignmentHistory() {
+        return this.rfidTagAssignmentService.getRfidTagAssignmentHistory();
     }
 
 }

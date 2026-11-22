@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentViews.R
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.AssignRfidTagRequestBody;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.RequestRfidTagAssignmentRequestBody;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.RfidTagAssignmentApiDto;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.RfidTagAssignmentHistoryApiDto;
 import de.schaffbar.core_pos.domain.rfid_tag_assignment.web.RfidTagAssignmentApiModel.UnassignRfidTagRequestBody;
 import de.schaffbar.core_pos.read_facade.RfidTagAssignmentReadFacade;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -50,8 +51,8 @@ public class RfidTagAssignmentController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RfidTagAssignmentApiDto>> getRfidTagAssignments( //
-            @RequestParam(value = "rfid-tag-id", required = false) @Valid RfidTagId rfidTagId, //
-            @RequestParam(value = "customer-id", required = false) @Valid CustomerId customerId //
+            @RequestParam(required = false) @Valid RfidTagId rfidTagId, //
+            @RequestParam(required = false) @Valid CustomerId customerId //
     ) {
         List<RfidTagAssignmentView> assignments;
         if (nonNull(rfidTagId)) {
@@ -66,6 +67,14 @@ public class RfidTagAssignmentController {
 
         return ResponseEntity.ok(assignments.stream() //
                 .map(RfidTagAssignmentApiModel.MAPPER::toRfidTagAssignmentApiDto) //
+                .toList());
+    }
+
+    // the inner entity RfidTagAssignmentHistory – a sub-path of its aggregate (E16)
+    @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<RfidTagAssignmentHistoryApiDto>> getRfidTagAssignmentHistory() {
+        return ResponseEntity.ok(this.rfidTagAssignmentReadFacade.getRfidTagAssignmentHistory().stream() //
+                .map(RfidTagAssignmentApiModel.MAPPER::toRfidTagAssignmentHistoryApiDto) //
                 .toList());
     }
 
