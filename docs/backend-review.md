@@ -202,15 +202,20 @@ den Entscheidungen.
 
 ### `rfid_reader` (Referenz-Implementierung – soll vorbildlich sein)
 
-- [ ] Zuerst: `support/Json.messageConverter()` (Skill `backend-testing`, Controller); danach jeder Controller-Test
+Erledigt 22.11.2026 (alle Punkte unten), 550 Tests grün. Dazu: `RfidReader.getMacAddress()` liefert `MacAddress`
+(wie `Tool.getIpAddress()`), ebenso `RfidReaderView.macAddress` – Regel im Skill `aggregate` ergänzt; `@Valid` an den
+Ids in `RfidReaderCommands` und `RfidReaderViews`; `RfidReaderId.random()` über `of(…)`; `support/Json` baut den
+`ObjectMapper` wie Boot (`Jackson2ObjectMapperBuilder`: unbekannte Felder ignoriert, Datum als ISO-Text).
+
+- [x] Zuerst: `support/Json.messageConverter()` (Skill `backend-testing`, Controller); danach jeder Controller-Test
   im Schritt seines Aggregats mit `setMessageConverters(Json.messageConverter())` und Datumsfeldern gegen den Wert.
-- [ ] README: `UpdateRfidReaderCommand` ohne `type` (Code: id, name, socketName); `RFID_READER_CREATED` trägt id und
+- [x] README: `UpdateRfidReaderCommand` ohne `type` (Code: id, name, socketName); `RFID_READER_CREATED` trägt id und
   macAddress (nicht „Full snapshot“), `RFID_READER_UPDATED` auch `type`; Löschen fehlt bei den Befehlen.
-- [ ] `RfidReaderApiModel.toRfidReaderCommand` → `toUpdateRfidReaderCommand` (`RfidReaderController:97`).
-- [ ] Löschen nach der Entscheidung (`RfidReaderService:99-103`).
-- [ ] Payloads nach E31: `type` als `RfidReaderType`, `RfidReaderCreatedPayload.macAddress` als `MacAddress`.
-- [ ] `RfidReaderType`: Leerzeilen nach Kopf und vor Ende fehlen.
-- [ ] Tests:
+- [x] `RfidReaderApiModel.toRfidReaderCommand` → `toUpdateRfidReaderCommand` (`RfidReaderController:97`).
+- [x] Löschen nach der Entscheidung (`RfidReaderService:99-103`).
+- [x] Payloads nach E31: `type` als `RfidReaderType`, `RfidReaderCreatedPayload.macAddress` als `MacAddress`.
+- [x] `RfidReaderType`: Leerzeilen nach Kopf und vor Ende fehlen.
+- [x] Tests:
   - `RfidReaderTest:76,80` prüft `GATE_KEEPER_IN` statt `command.type()`.
   - Controller: Erfolg ohne name, socketName, createdAt (`:100-103, 156-159`); JSON als String (`:205, 250, 364`).
   - Fehlt: `createRfidReader` 409 `MAC_ADDRESS_ALREADY_USED` (R-1), 404 für update, changeType, delete.
@@ -220,10 +225,13 @@ den Entscheidungen.
 
 ### `rfid_tag`
 
-- [ ] README: `RFID_TAG_CREATED` trägt nur die id; RT-4 nennt `EnterWorkshop` / `StartToolUsage`.
-- [ ] Löschen nach der Entscheidung (`RfidTagService:68-72`, rohes `existsById` `:85`).
-- [ ] `RfidTag.java:56-57`: leerer Abschnitt `// command`.
-- [ ] Tests:
+Erledigt 22.11.2026 (alle Punkte unten), 556 Tests grün. Dazu: `@Valid` an der Id in `RfidTagViews`; die README
+nennt den Use Case jeder Änderung; `RfidTagIdTest` neu (RT-1 und echte Tag-Ids).
+
+- [x] README: `RFID_TAG_CREATED` trägt nur die id; RT-4 nennt `EnterWorkshop` / `StartToolUsage`.
+- [x] Löschen nach der Entscheidung (`RfidTagService:68-72`, rohes `existsById` `:85`).
+- [x] `RfidTag.java:56-57`: leerer Abschnitt `// command`.
+- [x] Tests:
   - `RfidTagServiceTest:142-147`: Captor im Stub, gelesen in `:60` → `expectSavedTag()`; `:85` Deleted-Payload.
   - Controller: `:85` prüft den Builder-Default `active == true`; `:100` nur die id; `:160` `returns204`, `:144, 173`
     `is409WithCode` (sonst `is204`, `is409WithTheCode`); `:239` JSON als String; fehlt: delete 404.
@@ -232,29 +240,39 @@ den Entscheidungen.
 
 ### `rfid_tag_assignment`
 
-- [ ] Entscheidungen oben: Zustandsregeln, E5, E3, Historie-Controller, Namen, Payload-Typ.
-- [ ] `RfidTagAssignmentApiModel` erbt nicht von `ValueObjectMapper` (`:21`).
-- [ ] `RfidTagAssignmentRepository:25,40,55`: Meldungen ohne Ids.
-- [ ] `RfidTagAssignment.java:84`: `isBlank` statt `isNull`.
-- [ ] `RfidTagAssignmentStatus`, `RfidTagAssignmentType`: Leerzeilen.
-- [ ] `ResourceNotFoundException.Resource` hat keinen Wert für die Zuweisung (nur nötig, wenn danach gesucht wird).
-- [ ] Gerät: „ein zugewiesener Tag zeigt seinen Besitzer“ (`DeviceController.assignRfidTagOrShowOwner`, Kommentar TA-2)
-  hat keine README-Zeile.
+Teil (a) erledigt 22.11.2026, 560 Tests grün: Use Cases umbenannt (E3), `cancelRfidTagAssignment` (E20), Absicherungen
+mit Kommentar (E29), `assignmentType` als Enum im Payload (E31), `@Valid` in den Views, TA-12 neu; `ddd-overview.md`
+und `ddd-uebersicht.md` mit den neuen Namen.
+
+- [x] Entscheidungen oben: Zustandsregeln (E29: Kommentare an den Absicherungen, README TA-4/5/10), E3 (Use Cases
+  umbenannt), Namen (`cancelRfidTagAssignment`), Payload-Typ (E31).
+- [ ] Teil (b): E5 (Query-Parameter camelCase) und Historie-Controller (E16) – mit Portal und Bruno.
+- [x] Nach dem Umbenennen von `CustomerAssignRfidTag` auch RT-4 im README von `rfid_tag` anpassen.
+- [x] `RfidTagAssignmentApiModel` erbt nicht von `ValueObjectMapper` (`:21`).
+- [x] `RfidTagAssignmentRepository:25,40,55`: Meldungen ohne Ids – `findByCustomerId` / `findByRfidTagId` liefern jetzt
+  `Optional` (Unique-Spalten), `findWaitingForAssignment()` nennt die Ids.
+- [x] `RfidTagAssignment.java:84`: `isBlank` statt `isNull`.
+- [x] `RfidTagAssignmentStatus`, `RfidTagAssignmentType`: Leerzeilen.
+- [x] `ResourceNotFoundException.Resource` hat keinen Wert für die Zuweisung – nicht nötig, nach der Zuweisung wird nicht
+  über ihre Id gesucht (Skill `aggregate`).
+- [x] Gerät: „ein zugewiesener Tag zeigt seinen Besitzer“ (`DeviceController.assignRfidTagOrShowOwner`, Kommentar TA-2)
+  hat keine README-Zeile – jetzt TA-12.
 - [ ] Tests:
-  - `RfidTagAssignmentTest` (Referenz im Skill!): Ablehnungen ohne „Zustand unverändert“ (`:66-75, 100-109, 129-138`);
+  - [x] `RfidTagAssignmentTest` (Referenz im Skill!): Ablehnungen ohne „Zustand unverändert“ (`:66-75, 100-109, 129-138`);
     Helfer `waiting()` / `assigned()` (`:143-152`) nicht `given…`.
-  - `RfidTagAssignmentServiceTest:284` `expectSavedEvent` ohne Id; `:278` Captor im Stub, gelesen `:73-79`;
+  - [x] `RfidTagAssignmentServiceTest:284` `expectSavedEvent` ohne Id; `:278` Captor im Stub, gelesen `:73-79`;
     wiederholt: `verify(repo).delete(…)` `:176, 208`, `verifyNoInteractions(historyRepository)` `:192, 209`.
-  - Fehlt im Service: unassign/cancel ohne jede Zuweisung; Anfrage, während die eigene noch wartet (TA-1).
-  - Controller: `:92` `"ASSIGNED"` und History `:53` `"TEMPORARY"` sind Builder-Defaults; `:141, 180, 196` `returns204`;
+  - [x] Fehlt im Service: unassign/cancel ohne jede Zuweisung; Anfrage, während die eigene noch wartet (TA-1).
+  - [ ] Controller (Teil b): `:92` `"ASSIGNED"` und History `:53` `"TEMPORARY"` sind Builder-Defaults; `:141, 180, 196` `returns204`;
     `:164` `is409WithCode`; JSON als String `:156, 260, 272, 278`.
-  - Fehlt im Controller: request 409 `CUSTOMER_HAS_RFID_TAG_ASSIGNMENT` und 404; assign 409 `RFID_TAG_ALREADY_ASSIGNED`,
+  - [ ] Fehlt im Controller (Teil b): request 409 `CUSTOMER_HAS_RFID_TAG_ASSIGNMENT` und 404; assign 409 `RFID_TAG_ALREADY_ASSIGNED`,
     `NO_RFID_TAG_ASSIGNMENT_WAITING` und 404; unassign 409 `NO_RFID_TAG_ASSIGNED` und 404; Filter ohne Treffer; beide
     Filter.
-  - Use Cases: 404 ohne `resource` (`CustomerAssignRfidTagTest:57`, `CustomerRequestRfidTagAssignmentTest:57`,
+  - [x] Use Cases: 404 ohne `resource` (`CustomerAssignRfidTagTest:57`, `CustomerRequestRfidTagAssignmentTest:57`,
     `CustomerUnassignRfidTagTest:56`); `RfidTagAssignmentReadFacadeTest` nur der leere Fall (`:59`).
-  - Akzeptanz: ta1 nur abgelehnt (`:27`); erlaubte Seite über `given()` (`:94-95`); `RandomValues` `:60, 94, 157`.
-  - Technisch: `default`-Methoden `findByCustomerId(CustomerId)`, `findWaitingForAssignment()`.
+  - [x] Akzeptanz: ta1 nur abgelehnt (`:27`); erlaubte Seite über `given()` (`:94-95`); `RandomValues` `:60, 94, 157`.
+  - [x] Technisch: `default`-Methoden `findByCustomerId(CustomerId)`, `findWaitingForAssignment()` – nach dem Skill
+    nicht nötig (Akzeptanztests laufen durch, „höchstens eine“ ohne Test).
 
 ### `customer`
 
@@ -262,7 +280,7 @@ den Entscheidungen.
 - [ ] `CustomerApiModel` erbt nicht von `ValueObjectMapper` (`:27`).
 - [ ] README: Löschen fehlt bei den Befehlen; `CustomerAddress` heißt „Value Object“ (`:22`).
 - [ ] `CustomerViews.java:39`: `CustomerAddressView` ohne `@Valid`.
-- [ ] `CustomerId.random()` (und `RfidReaderId.random()`) mit `new …` statt `….of(UUID.randomUUID())`.
+- [ ] `CustomerId.random()` mit `new …` statt `….of(UUID.randomUUID())` (`RfidReaderId` erledigt 22.11.2026).
 - [ ] `CustomerDelete:25-29`: JavaDoc statt Regel-Ids (`// C-4`, `// C-9`, C-11).
 - [ ] Tests:
   - `CustomerServiceTest:55-73`: Created-Payload nur die Adresse; `:171` Deleted-Payload.
