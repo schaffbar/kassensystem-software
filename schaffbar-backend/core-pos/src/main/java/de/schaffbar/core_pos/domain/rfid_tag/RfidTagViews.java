@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.rfid_tag;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.mapstruct.Mapper;
@@ -27,7 +28,7 @@ public interface RfidTagViews {
     @Builder
     @Validated
     record RfidTagView( //
-            @NotNull RfidTagId id, //
+            @NotNull @Valid RfidTagId id, //
             boolean active, //
             @NotNull Instant createdAt //
     ) {}

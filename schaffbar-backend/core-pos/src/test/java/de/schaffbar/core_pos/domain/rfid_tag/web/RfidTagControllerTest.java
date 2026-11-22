@@ -30,12 +30,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.domain.rfid_tag.RfidTagViews.RfidTagView;
 import de.schaffbar.core_pos.read_facade.RfidTagReadFacade;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAssignedToCustomerException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.util.StringToRfidTagIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
+import de.schaffbar.core_pos.support.Json;
 import de.schaffbar.core_pos.use_case.RfidTagCreate;
 import de.schaffbar.core_pos.use_case.RfidTagDelete;
 
@@ -62,6 +65,7 @@ class RfidTagControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -82,7 +86,7 @@ class RfidTagControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].id").value(rfidTag.id().getValue())) //
-                .andExpect(jsonPath("$[0].active").value(true));
+                .andExpect(jsonPath("$[0].active").value(rfidTag.active()));
     }
 
     // ------------------------------------------------------------------------
@@ -98,7 +102,8 @@ class RfidTagControllerTest {
 
         // then
         result.andExpect(status().isOk()) //
-                .andExpect(jsonPath("$.id").value(rfidTag.id().getValue()));
+                .andExpect(jsonPath("$.id").value(rfidTag.id().getValue())) //
+                .andExpect(jsonPath("$.active").value(rfidTag.active()));
     }
 
     @Test
@@ -110,8 +115,7 @@ class RfidTagControllerTest {
         ResultActions result = getRfidTag(unknown);
 
         // then
-        result.andExpect(status().isNotFound()) //
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        expectRfidTagNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -137,13 +141,14 @@ class RfidTagControllerTest {
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.rfidTagCreate, never()).process(any());
+        expectNothingCreated();
     }
 
     @Test
-    void createRfidTag_registeredTag_is409WithCode() throws Exception {
+    void createRfidTag_registeredTag_is409WithTheCode() throws Exception {
         // given
-        RfidTagId rfidTagId = givenRegisteredTag();
+        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        givenCreateRejectedWith(rfidTagId, new RfidTagAlreadyRegisteredException(rfidTagId));
 
         // when
         ResultActions result = createRfidTag(rfidTagId);
@@ -157,7 +162,7 @@ class RfidTagControllerTest {
     // deleteRfidTag
 
     @Test
-    void deleteRfidTag_returns204() throws Exception {
+    void deleteRfidTag_is204() throws Exception {
         // given
         RfidTagId rfidTagId = RandomValues.rfidTagId();
 
@@ -166,13 +171,14 @@ class RfidTagControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.rfidTagDelete).process(rfidTagId);
+        expectDeleted(rfidTagId);
     }
 
     @Test
-    void deleteRfidTag_assignedTag_is409WithCode() throws Exception {
+    void deleteRfidTag_assignedTag_is409WithTheCode() throws Exception {
         // given
-        RfidTagId rfidTagId = givenAssignedTag();
+        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        givenDeleteRejectedWith(rfidTagId, new RfidTagAssignedToCustomerException(rfidTagId, CustomerId.random()));
 
         // when
         ResultActions result = deleteRfidTag(rfidTagId);
@@ -180,6 +186,19 @@ class RfidTagControllerTest {
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(RfidTagAssignedToCustomerException.CODE));
+    }
+
+    @Test
+    void deleteRfidTag_unknownId_is404() throws Exception {
+        // given
+        RfidTagId unknown = RandomValues.rfidTagId();
+        givenDeleteRejectedWith(unknown, ResourceNotFoundException.rfidTag(unknown));
+
+        // when
+        ResultActions result = deleteRfidTag(unknown);
+
+        // then
+        expectRfidTagNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -210,18 +229,12 @@ class RfidTagControllerTest {
         return rfidTagId;
     }
 
-    private RfidTagId givenRegisteredTag() {
-        RfidTagId rfidTagId = RandomValues.rfidTagId();
-        when(this.rfidTagCreate.process(rfidTagId)).thenThrow(new RfidTagAlreadyRegisteredException(rfidTagId));
-
-        return rfidTagId;
+    private void givenCreateRejectedWith(RfidTagId rfidTagId, RuntimeException rejection) {
+        when(this.rfidTagCreate.process(rfidTagId)).thenThrow(rejection);
     }
 
-    private RfidTagId givenAssignedTag() {
-        RfidTagId rfidTagId = RandomValues.rfidTagId();
-        doThrow(new RfidTagAssignedToCustomerException(rfidTagId, CustomerId.random())).when(this.rfidTagDelete).process(rfidTagId);
-
-        return rfidTagId;
+    private void givenDeleteRejectedWith(RfidTagId rfidTagId, RuntimeException rejection) {
+        doThrow(rejection).when(this.rfidTagDelete).process(rfidTagId);
     }
 
     // ------------------------------------------------------------------------
@@ -247,6 +260,23 @@ class RfidTagControllerTest {
 
     private ResultActions deleteRfidTag(RfidTagId rfidTagId) throws Exception {
         return this.mockMvc.perform(delete("/api/v1/rfid-tags/" + rfidTagId.getValue()));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectRfidTagNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(Resource.RFID_TAG.name()));
+    }
+
+    private void expectNothingCreated() {
+        verify(this.rfidTagCreate, never()).process(any());
+    }
+
+    private void expectDeleted(RfidTagId rfidTagId) {
+        verify(this.rfidTagDelete).process(rfidTagId);
     }
 
 }

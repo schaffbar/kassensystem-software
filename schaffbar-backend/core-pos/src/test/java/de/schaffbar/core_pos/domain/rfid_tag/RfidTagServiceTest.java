@@ -24,7 +24,9 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.RfidTagEventPayload.RfidTagCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.RfidTagEventPayload.RfidTagDeletedPayload;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -40,6 +42,9 @@ class RfidTagServiceTest {
     @Captor
     private ArgumentCaptor<List<SchaffbarEvent>> events;
 
+    @Captor
+    private ArgumentCaptor<RfidTag> savedTag;
+
     @InjectMocks
     private RfidTagService rfidTagService;
 
@@ -50,14 +55,14 @@ class RfidTagServiceTest {
     void createRfidTag_savesAnActiveTagAndItsCreatedEvent() {
         // given
         RfidTagId rfidTagId = givenUnregisteredTag();
-        ArgumentCaptor<RfidTag> savedTag = givenSaveReturnsTheTag();
+        givenSaveReturnsTheTag();
 
         // when
         RfidTagId createdId = this.rfidTagService.createRfidTag(rfidTagId);
 
         // then
         assertThat(createdId).isEqualTo(rfidTagId);
-        assertThat(savedTag.getValue().isActive()).isTrue();
+        assertThat(expectSavedTag().isActive()).isTrue();
         RfidTagCreatedPayload payload = expectSavedEvent(EventType.RFID_TAG_CREATED, rfidTagId) //
                 .deserializeAndValidatePayload(RfidTagCreatedPayload.class);
         assertThat(payload.id()).isEqualTo(rfidTagId);
@@ -90,8 +95,10 @@ class RfidTagServiceTest {
         this.rfidTagService.deleteRfidTag(rfidTag.getId());
 
         // then
-        verify(this.rfidTagRepository).deleteById(rfidTag.getId().getValue());
-        expectSavedEvent(EventType.RFID_TAG_DELETED, rfidTag.getId());
+        expectDeleted(rfidTag);
+        RfidTagDeletedPayload payload = expectSavedEvent(EventType.RFID_TAG_DELETED, rfidTag.getId()) //
+                .deserializeAndValidatePayload(RfidTagDeletedPayload.class);
+        assertThat(payload.id()).isEqualTo(rfidTag.getId());
     }
 
     @Test
@@ -103,8 +110,10 @@ class RfidTagServiceTest {
         Throwable thrown = catchThrowable(() -> this.rfidTagService.deleteRfidTag(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verify(this.rfidTagRepository, never()).deleteById(any());
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.RFID_TAG);
+        expectNothingDeleted();
         expectNoEvent();
     }
 
@@ -127,23 +136,20 @@ class RfidTagServiceTest {
 
     private RfidTagId givenRegisteredTag() {
         RfidTagId rfidTagId = RandomValues.rfidTagId();
-        when(this.rfidTagRepository.existsById(rfidTagId.getValue())).thenReturn(true);
+        when(this.rfidTagRepository.existsById(rfidTagId)).thenReturn(true);
 
         return rfidTagId;
     }
 
     private RfidTagId givenUnregisteredTag() {
         RfidTagId rfidTagId = RandomValues.rfidTagId();
-        when(this.rfidTagRepository.existsById(rfidTagId.getValue())).thenReturn(false);
+        when(this.rfidTagRepository.existsById(rfidTagId)).thenReturn(false);
 
         return rfidTagId;
     }
 
-    private ArgumentCaptor<RfidTag> givenSaveReturnsTheTag() {
-        ArgumentCaptor<RfidTag> savedTag = ArgumentCaptor.forClass(RfidTag.class);
-        when(this.rfidTagRepository.save(savedTag.capture())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        return savedTag;
+    private void givenSaveReturnsTheTag() {
+        when(this.rfidTagRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     // ------------------------------------------------------------------------
@@ -159,6 +165,20 @@ class RfidTagServiceTest {
                 });
 
         return this.events.getValue().getFirst();
+    }
+
+    private RfidTag expectSavedTag() {
+        verify(this.rfidTagRepository).save(this.savedTag.capture());
+
+        return this.savedTag.getValue();
+    }
+
+    private void expectDeleted(RfidTag rfidTag) {
+        verify(this.rfidTagRepository).delete(rfidTag);
+    }
+
+    private void expectNothingDeleted() {
+        verify(this.rfidTagRepository, never()).delete(any());
     }
 
     private void expectNothingSaved() {

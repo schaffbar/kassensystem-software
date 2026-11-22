@@ -44,7 +44,7 @@ class RfidTagDeleteTest {
         this.rfidTagDelete.process(rfidTagId);
 
         // then
-        verify(this.rfidTagService).deleteRfidTag(rfidTagId);
+        expectDeleted(rfidTagId);
     }
 
     @Test
@@ -60,7 +60,7 @@ class RfidTagDeleteTest {
         assertThat(thrown) //
                 .isInstanceOf(RfidTagAssignedToCustomerException.class) //
                 .hasFieldOrPropertyWithValue("code", RfidTagAssignedToCustomerException.CODE);
-        verify(this.rfidTagService, never()).deleteRfidTag(any());
+        expectNotDeleted();
     }
 
     // ------------------------------------------------------------------------
@@ -74,6 +74,17 @@ class RfidTagDeleteTest {
     private void givenNoAssignmentOf(RfidTagId rfidTagId) {
         when(this.rfidTagAssignmentService.getRfidTagAssignment(rfidTagId)) //
                 .thenReturn(Optional.empty());
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectDeleted(RfidTagId rfidTagId) {
+        verify(this.rfidTagService).deleteRfidTag(rfidTagId);
+    }
+
+    private void expectNotDeleted() {
+        verify(this.rfidTagService, never()).deleteRfidTag(any());
     }
 
 }

@@ -66,10 +66,10 @@ public class RfidTagService {
 
     @Command
     public void deleteRfidTag(@NotNull @Valid RfidTagId id) {
-        RfidTagView rfidTag = getRfidTag(id) //
+        RfidTag rfidTag = this.rfidTagRepository.findById(id.getValue()) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidTag(id));
 
-        this.rfidTagRepository.deleteById(rfidTag.id().getValue());
+        this.rfidTagRepository.delete(rfidTag);
         List<SchaffbarEvent> events = List.of(RfidTagEventFactory.rfidTagDeleted(id));
 
         this.outboxEventStore.save(events);
@@ -82,7 +82,7 @@ public class RfidTagService {
 
     // RT-5
     private void ensureRfidTagNotRegistered(RfidTagId id) {
-        if (this.rfidTagRepository.existsById(id.getValue())) {
+        if (this.rfidTagRepository.existsById(id)) {
             throw new RfidTagAlreadyRegisteredException(id);
         }
     }

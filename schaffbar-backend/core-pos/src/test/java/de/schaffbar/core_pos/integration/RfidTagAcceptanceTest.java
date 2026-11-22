@@ -58,6 +58,14 @@ class RfidTagAcceptanceTest {
         // then
         this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, RfidTagAlreadyRegisteredException.CODE);
         this.fixture.then().expectRfidTag(rfidTagId);
+
+        // when
+        this.fixture.then().expectSuccess(this.fixture.api().deleteRfidTag(rfidTagId));
+        result = this.fixture.api().createRfidTag(rfidTagId);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectRfidTag(rfidTagId);
     }
 
 }

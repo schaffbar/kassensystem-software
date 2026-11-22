@@ -17,10 +17,10 @@
 
 No command records – both changes take only the id (E1):
 
-| Change | Input                                |
-|--------|--------------------------------------|
-| create | rfidTagId (`RfidTagId` value object) |
-| delete | rfidTagId (`RfidTagId` value object) |
+| Change | Input                                | Use case        |
+|--------|--------------------------------------|-----------------|
+| create | rfidTagId (`RfidTagId` value object) | `RfidTagCreate` |
+| delete | rfidTagId (`RfidTagId` value object) | `RfidTagDelete` |
 
 ## Business Rules / Invariants
 
@@ -38,13 +38,13 @@ implemented, move it to "Business Rules / Invariants".
 
 ### Planned (not implemented yet)
 
-| #    | Rule                                                                                                      | Status                                                                                                                    |
-|------|-----------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| RT-4 | A tag can be deactivated (lost) and reactivated; a deactivated tag cannot be assigned and unlocks nothing | `active` exists, but there is no endpoint, and `CustomerAssignRfidTag`, `EnterWorkshop`, `StartToolUsage` do not check it |
+| #    | Rule                                                                                                      | Status                                                                                                                         |
+|------|-----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| RT-4 | A tag can be deactivated (lost) and reactivated; a deactivated tag cannot be assigned and unlocks nothing | `active` exists, but there is no endpoint, and `CustomerAssignRfidTag`, `WorkshopUsageStart`, `ToolUsageStart` do not check it |
 
 ## Domain Events
 
-| Event              | Payload           |
-|--------------------|-------------------|
-| `RFID_TAG_CREATED` | Full tag snapshot |
-| `RFID_TAG_DELETED` | rfidTagId         |
+| Event              | Payload |
+|--------------------|---------|
+| `RFID_TAG_CREATED` | id      |
+| `RFID_TAG_DELETED` | id      |
