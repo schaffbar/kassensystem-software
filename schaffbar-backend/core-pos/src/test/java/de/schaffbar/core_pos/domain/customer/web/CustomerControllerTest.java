@@ -5,6 +5,8 @@ import static de.schaffbar.core_pos.builder.CommandBuilder.changeCustomerContact
 import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
 import static de.schaffbar.core_pos.builder.CommandBuilder.updateCustomerCommand;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -21,10 +23,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -40,6 +46,8 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerComm
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.read_facade.CustomerReadFacade;
 import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
@@ -83,6 +91,7 @@ class CustomerControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -91,11 +100,9 @@ class CustomerControllerTest {
     // getCustomers
 
     @Test
-    void getCustomers_returnsAllWithTheirAgeGroup() throws Exception {
+    void getCustomers_returnsAll() throws Exception {
         // given
-        CustomerView customer = customerView() //
-                .dateOfBirth(LocalDate.now().minusYears(10)) //
-                .build();
+        CustomerView customer = customerView().phone("030 123456").build();
         givenCustomers(customer);
 
         // when
@@ -105,8 +112,19 @@ class CustomerControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].id").value(customer.id().getValue().toString())) //
-                .andExpect(jsonPath("$[0].ageGroup").value("UNDER_16")) //
-                .andExpect(jsonPath("$[0].address.city").value(customer.address().city()));
+                .andExpect(jsonPath("$[0].firstName").value(customer.firstName())) //
+                .andExpect(jsonPath("$[0].lastName").value(customer.lastName())) //
+                .andExpect(jsonPath("$[0].dateOfBirth").value(customer.dateOfBirth().toString())) //
+                .andExpect(jsonPath("$[0].ageGroup").value(customer.ageGroup().name())) //
+                .andExpect(jsonPath("$[0].clubMember").value(customer.clubMember())) //
+                .andExpect(jsonPath("$[0].email").value(customer.email())) //
+                .andExpect(jsonPath("$[0].phone").value(customer.phone())) //
+                .andExpect(jsonPath("$[0].address.addressLine1").value(customer.address().addressLine1())) //
+                .andExpect(jsonPath("$[0].address.postalCode").value(customer.address().postalCode())) //
+                .andExpect(jsonPath("$[0].address.city").value(customer.address().city())) //
+                .andExpect(jsonPath("$[0].address.country").value(customer.address().country())) //
+                .andExpect(jsonPath("$[0].createdAt").value(customer.createdAt().toString())) //
+                .andExpect(jsonPath("$[0].updatedAt").value(customer.updatedAt().toString()));
     }
 
     // ------------------------------------------------------------------------
@@ -123,8 +141,18 @@ class CustomerControllerTest {
         // then
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.id").value(customer.id().getValue().toString())) //
+                .andExpect(jsonPath("$.firstName").value(customer.firstName())) //
                 .andExpect(jsonPath("$.lastName").value(customer.lastName())) //
-                .andExpect(jsonPath("$.address.postalCode").value(customer.address().postalCode()));
+                .andExpect(jsonPath("$.dateOfBirth").value(customer.dateOfBirth().toString())) //
+                .andExpect(jsonPath("$.ageGroup").value(customer.ageGroup().name())) //
+                .andExpect(jsonPath("$.clubMember").value(customer.clubMember())) //
+                .andExpect(jsonPath("$.email").value(customer.email())) //
+                .andExpect(jsonPath("$.address.addressLine1").value(customer.address().addressLine1())) //
+                .andExpect(jsonPath("$.address.postalCode").value(customer.address().postalCode())) //
+                .andExpect(jsonPath("$.address.city").value(customer.address().city())) //
+                .andExpect(jsonPath("$.address.country").value(customer.address().country())) //
+                .andExpect(jsonPath("$.createdAt").value(customer.createdAt().toString())) //
+                .andExpect(jsonPath("$.updatedAt").value(customer.updatedAt().toString()));
     }
 
     @Test
@@ -136,8 +164,7 @@ class CustomerControllerTest {
         ResultActions result = getCustomer(unknown);
 
         // then
-        result.andExpect(status().isNotFound()) //
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        expectCustomerNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -157,37 +184,9 @@ class CustomerControllerTest {
                 .andExpect(header().string("Location", "/api/v1/customers/" + customerId.getValue()));
     }
 
-    @Test
-    void createCustomer_withInvalidEmail_is400() throws Exception {
-        // given
-        CreateCustomerCommand command = createCustomerCommand().email("erika.example.org").build();
-
-        // when
-        ResultActions result = createCustomer(command);
-
-        // then
-        result.andExpect(status().isBadRequest());
-        expectNothingCreated();
-    }
-
-    @Test
-    void createCustomer_withPostalCodeOfFourCharacters_is400() throws Exception {
-        // given
-        CreateCustomerCommand command = createCustomerCommand().postalCode("1234").build();
-
-        // when
-        ResultActions result = createCustomer(command);
-
-        // then
-        result.andExpect(status().isBadRequest());
-        expectNothingCreated();
-    }
-
-    @Test
-    void createCustomer_bornThisYear_is400() throws Exception {
-        // given
-        CreateCustomerCommand command = createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build();
-
+    @ParameterizedTest
+    @MethodSource("invalidCreateCustomerCommands")
+    void createCustomer_withAnInvalidValue_is400(CreateCustomerCommand command) throws Exception {
         // when
         ResultActions result = createCustomer(command);
 
@@ -209,7 +208,31 @@ class CustomerControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerUpdate).process(command);
+        expectUpdated(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateCustomerCommands")
+    void updateCustomer_withAnInvalidValue_is400(UpdateCustomerCommand command) throws Exception {
+        // when
+        ResultActions result = updateCustomer(command);
+
+        // then
+        result.andExpect(status().isBadRequest());
+        expectNothingUpdated();
+    }
+
+    @Test
+    void updateCustomer_unknownId_is404() throws Exception {
+        // given
+        UpdateCustomerCommand command = updateCustomerCommand().build();
+        givenUpdateRejectedWith(command, ResourceNotFoundException.customer(command.id()));
+
+        // when
+        ResultActions result = updateCustomer(command);
+
+        // then
+        expectCustomerNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -225,20 +248,31 @@ class CustomerControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerChangeContact).process(command);
+        expectContactChanged(command);
     }
 
-    @Test
-    void changeCustomerContact_withInvalidEmail_is400() throws Exception {
-        // given
-        ChangeCustomerContactCommand command = changeCustomerContactCommand().email("max@").build();
-
+    @ParameterizedTest
+    @MethodSource("invalidChangeCustomerContactCommands")
+    void changeCustomerContact_withAnInvalidValue_is400(ChangeCustomerContactCommand command) throws Exception {
         // when
         ResultActions result = changeCustomerContact(command);
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.customerChangeContact, never()).process(any());
+        expectContactNotChanged();
+    }
+
+    @Test
+    void changeCustomerContact_unknownId_is404() throws Exception {
+        // given
+        ChangeCustomerContactCommand command = changeCustomerContactCommand().build();
+        givenChangeContactRejectedWith(command, ResourceNotFoundException.customer(command.id()));
+
+        // when
+        ResultActions result = changeCustomerContact(command);
+
+        // then
+        expectCustomerNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -254,20 +288,31 @@ class CustomerControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerChangeAddress).process(command);
+        expectAddressChanged(command);
     }
 
-    @Test
-    void changeCustomerAddress_withPostalCodeOfSixCharacters_is400() throws Exception {
-        // given
-        ChangeCustomerAddressCommand command = changeCustomerAddressCommand().postalCode("710321").build();
-
+    @ParameterizedTest
+    @MethodSource("invalidChangeCustomerAddressCommands")
+    void changeCustomerAddress_withAnInvalidValue_is400(ChangeCustomerAddressCommand command) throws Exception {
         // when
         ResultActions result = changeCustomerAddress(command);
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.customerChangeAddress, never()).process(any());
+        expectAddressNotChanged();
+    }
+
+    @Test
+    void changeCustomerAddress_unknownId_is404() throws Exception {
+        // given
+        ChangeCustomerAddressCommand command = changeCustomerAddressCommand().build();
+        givenChangeAddressRejectedWith(command, ResourceNotFoundException.customer(command.id()));
+
+        // when
+        ResultActions result = changeCustomerAddress(command);
+
+        // then
+        expectCustomerNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -283,13 +328,14 @@ class CustomerControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.customerDelete).process(customerId);
+        expectDeleted(customerId);
     }
 
     @Test
     void deleteCustomer_withOpenSession_is409WithTheCode() throws Exception {
         // given
-        CustomerId customerId = givenCustomerWithOpenSession();
+        CustomerId customerId = CustomerId.random();
+        givenDeleteRejectedWith(customerId, new CustomerHasOpenWorkshopSessionException(customerId));
 
         // when
         ResultActions result = deleteCustomer(customerId);
@@ -297,6 +343,19 @@ class CustomerControllerTest {
         // then
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(CustomerHasOpenWorkshopSessionException.CODE));
+    }
+
+    @Test
+    void deleteCustomer_unknownId_is404() throws Exception {
+        // given
+        CustomerId unknown = CustomerId.random();
+        givenDeleteRejectedWith(unknown, ResourceNotFoundException.customer(unknown));
+
+        // when
+        ResultActions result = deleteCustomer(unknown);
+
+        // then
+        expectCustomerNotFound(result);
     }
 
     // ------------------------------------------------------------------------
@@ -327,11 +386,58 @@ class CustomerControllerTest {
         return customerId;
     }
 
-    private CustomerId givenCustomerWithOpenSession() {
-        CustomerId customerId = CustomerId.random();
-        doThrow(new CustomerHasOpenWorkshopSessionException(customerId)).when(this.customerDelete).process(customerId);
+    private void givenUpdateRejectedWith(UpdateCustomerCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.customerUpdate).process(command);
+    }
 
-        return customerId;
+    private void givenChangeContactRejectedWith(ChangeCustomerContactCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.customerChangeContact).process(command);
+    }
+
+    private void givenChangeAddressRejectedWith(ChangeCustomerAddressCommand command, RuntimeException rejection) {
+        doThrow(rejection).when(this.customerChangeAddress).process(command);
+    }
+
+    private void givenDeleteRejectedWith(CustomerId customerId, RuntimeException rejection) {
+        doThrow(rejection).when(this.customerDelete).process(customerId);
+    }
+
+    // C-1, C-2, C-3, C-6, C-7, C-8 – each format rule of the request body once (E33)
+    static Stream<Arguments> invalidCreateCustomerCommands() {
+        return Stream.of( //
+                arguments(named("blank first name (C-1)", createCustomerCommand().firstName(" ").build())), //
+                arguments(named("blank last name (C-1)", createCustomerCommand().lastName(" ").build())), //
+                arguments(named("blank email (C-1)", createCustomerCommand().email(" ").build())), //
+                arguments(named("no date of birth (C-2)", createCustomerCommand().dateOfBirth(null).build())), //
+                arguments(named("blank address line (C-3)", createCustomerCommand().addressLine1(" ").build())), //
+                arguments(named("blank city (C-3)", createCustomerCommand().city(" ").build())), //
+                arguments(named("blank country (C-3)", createCustomerCommand().country(" ").build())), //
+                arguments(named("invalid email (C-6)", createCustomerCommand().email("erika.example.org").build())), //
+                arguments(named("postal code of four characters (C-7)", createCustomerCommand().postalCode("1234").build())), //
+                arguments(named("born this year (C-8)", createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build())));
+    }
+
+    static Stream<Arguments> invalidUpdateCustomerCommands() {
+        return Stream.of( //
+                arguments(named("blank first name (C-1)", updateCustomerCommand().firstName(" ").build())), //
+                arguments(named("blank last name (C-1)", updateCustomerCommand().lastName(" ").build())), //
+                arguments(named("no date of birth (C-2)", updateCustomerCommand().dateOfBirth(null).build())), //
+                arguments(named("born this year (C-8)", updateCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build())), //
+                arguments(named("born more than 100 years ago (C-8)", updateCustomerCommand().dateOfBirth(LocalDate.now().minusYears(101)).build())));
+    }
+
+    static Stream<Arguments> invalidChangeCustomerContactCommands() {
+        return Stream.of( //
+                arguments(named("blank email (C-1)", changeCustomerContactCommand().email(" ").build())), //
+                arguments(named("invalid email (C-6)", changeCustomerContactCommand().email("max@").build())));
+    }
+
+    static Stream<Arguments> invalidChangeCustomerAddressCommands() {
+        return Stream.of( //
+                arguments(named("blank address line (C-3)", changeCustomerAddressCommand().addressLine1(" ").build())), //
+                arguments(named("blank city (C-3)", changeCustomerAddressCommand().city(" ").build())), //
+                arguments(named("blank country (C-3)", changeCustomerAddressCommand().country(" ").build())), //
+                arguments(named("postal code of six characters (C-7)", changeCustomerAddressCommand().postalCode("710321").build())));
     }
 
     // ------------------------------------------------------------------------
@@ -377,8 +483,42 @@ class CustomerControllerTest {
     // ------------------------------------------------------------------------
     // then
 
+    private void expectCustomerNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(Resource.CUSTOMER.name()));
+    }
+
     private void expectNothingCreated() {
         verify(this.customerCreate, never()).process(any());
+    }
+
+    private void expectUpdated(UpdateCustomerCommand command) {
+        verify(this.customerUpdate).process(command);
+    }
+
+    private void expectNothingUpdated() {
+        verify(this.customerUpdate, never()).process(any());
+    }
+
+    private void expectContactChanged(ChangeCustomerContactCommand command) {
+        verify(this.customerChangeContact).process(command);
+    }
+
+    private void expectContactNotChanged() {
+        verify(this.customerChangeContact, never()).process(any());
+    }
+
+    private void expectAddressChanged(ChangeCustomerAddressCommand command) {
+        verify(this.customerChangeAddress).process(command);
+    }
+
+    private void expectAddressNotChanged() {
+        verify(this.customerChangeAddress, never()).process(any());
+    }
+
+    private void expectDeleted(CustomerId customerId) {
+        verify(this.customerDelete).process(customerId);
     }
 
 }

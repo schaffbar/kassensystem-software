@@ -6,9 +6,12 @@ import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand
 import static de.schaffbar.core_pos.builder.CommandBuilder.updateCustomerCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
@@ -127,6 +130,24 @@ class CustomerTest {
         assertThat(payload.postalCode()).isEqualTo(command.postalCode());
         assertThat(payload.city()).isEqualTo(command.city());
         assertThat(payload.country()).isEqualTo(command.country());
+    }
+
+    // ------------------------------------------------------------------------
+    // getAgeGroupOn
+
+    // C-12 – the day before and on the 16th and the 18th birthday
+    @ParameterizedTest
+    @CsvSource({ "2010-06-15, 2026-06-14, UNDER_16", "2010-06-15, 2026-06-15, UNDER_18", "2008-06-15, 2026-06-14, UNDER_18",
+            "2008-06-15, 2026-06-15, ADULT" })
+    void getAgeGroupOn_isTheGroupOfTheAgeOnThatDay(LocalDate dateOfBirth, LocalDate day, AgeGroup ageGroup) {
+        // given
+        Customer customer = Customer.of(createCustomerCommand().dateOfBirth(dateOfBirth).build());
+
+        // when
+        AgeGroup result = customer.getAgeGroupOn(day);
+
+        // then
+        assertThat(result).isEqualTo(ageGroup);
     }
 
     // ------------------------------------------------------------------------

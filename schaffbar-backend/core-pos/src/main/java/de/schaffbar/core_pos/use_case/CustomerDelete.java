@@ -22,11 +22,6 @@ import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionExce
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
-/**
- * Deletes a customer with everything that only belongs to them: the RFID tag becomes free again, their certifications
- * and their place as instructor are removed. Paid sessions and usages stay for the accounting, certifications the
- * customer has given to others stay as well.
- */
 @Service
 @Validated
 @RequiredArgsConstructor
@@ -49,6 +44,8 @@ public class CustomerDelete {
 
         ensureNoOpenWorkshopSession(customerId);
 
+        // C-4, C-9 – what only belongs to the customer goes with them; paid sessions, usages and the certifications
+        // they gave to others stay (C-11)
         releaseRfidTag(customerId);
         this.toolCertificationService.deleteToolCertifications(customerId);
         removeAsInstructor(customerId);

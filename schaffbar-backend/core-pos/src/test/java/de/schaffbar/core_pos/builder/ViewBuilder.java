@@ -9,6 +9,7 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import de.schaffbar.core_pos.domain.customer.AgeGroup;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView.CustomerViewBuilder;
@@ -63,6 +64,7 @@ public class ViewBuilder {
                 .firstName("Erika") //
                 .lastName("Mustermann") //
                 .dateOfBirth(LocalDate.of(1990, 1, 31)) //
+                .ageGroup(AgeGroup.ADULT) //
                 .clubMember(false) //
                 .email("erika@example.org") //
                 .address(CustomerAddressView.builder() //

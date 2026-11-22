@@ -33,6 +33,7 @@ import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +58,7 @@ class CustomerDeleteTest {
     private CustomerDelete customerDelete;
 
     @Test
-    void deletesACustomerWithoutTagAndCertifications() {
+    void deletesTheCertificationsBeforeTheCustomer() {
         // given
         CustomerId customerId = givenCustomerWithoutOpenSession();
         givenNoRfidTagAssignment(customerId);
@@ -67,10 +68,8 @@ class CustomerDeleteTest {
         this.customerDelete.process(customerId);
 
         // then
-        verify(this.toolCertificationService).deleteToolCertifications(customerId);
-        verify(this.customerService).deleteCustomer(customerId);
-        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
-        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
+        expectCertificationsDeletedBeforeTheCustomer(customerId);
+        expectRfidTagNotTouched();
     }
 
     @Test
@@ -84,10 +83,7 @@ class CustomerDeleteTest {
         this.customerDelete.process(customerId);
 
         // then
-        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
-        order.verify(this.rfidTagAssignmentService).unassignRfidTag(customerId);
-        order.verify(this.customerService).deleteCustomer(customerId);
-        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
+        expectRfidTagUnassignedBeforeTheCustomerIsDeleted(customerId);
     }
 
     @Test
@@ -101,10 +97,7 @@ class CustomerDeleteTest {
         this.customerDelete.process(customerId);
 
         // then
-        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
-        order.verify(this.rfidTagAssignmentService).cancelRfidTagAssignment(customerId);
-        order.verify(this.customerService).deleteCustomer(customerId);
-        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
+        expectRequestCancelledBeforeTheCustomerIsDeleted(customerId);
     }
 
     @Test
@@ -120,10 +113,7 @@ class CustomerDeleteTest {
         this.customerDelete.process(customerId);
 
         // then
-        InOrder order = inOrder(this.toolService, this.customerService);
-        order.verify(this.toolService).removeInstructors(tool.id(), List.of(customerId));
-        order.verify(this.toolService).removeInstructors(otherTool.id(), List.of(customerId));
-        order.verify(this.customerService).deleteCustomer(customerId);
+        expectRemovedAsInstructorBeforeTheCustomerIsDeleted(customerId, tool, otherTool);
     }
 
     @Test
@@ -150,7 +140,9 @@ class CustomerDeleteTest {
         Throwable thrown = catchThrowable(() -> this.customerDelete.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
         expectNothingDeleted();
     }
 
@@ -201,6 +193,39 @@ class CustomerDeleteTest {
 
     // ------------------------------------------------------------------------
     // then
+
+    private void expectCertificationsDeletedBeforeTheCustomer(CustomerId customerId) {
+        InOrder order = inOrder(this.toolCertificationService, this.customerService);
+        order.verify(this.toolCertificationService).deleteToolCertifications(customerId);
+        order.verify(this.customerService).deleteCustomer(customerId);
+    }
+
+    private void expectRfidTagUnassignedBeforeTheCustomerIsDeleted(CustomerId customerId) {
+        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
+        order.verify(this.rfidTagAssignmentService).unassignRfidTag(customerId);
+        order.verify(this.customerService).deleteCustomer(customerId);
+        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
+    }
+
+    private void expectRequestCancelledBeforeTheCustomerIsDeleted(CustomerId customerId) {
+        InOrder order = inOrder(this.rfidTagAssignmentService, this.customerService);
+        order.verify(this.rfidTagAssignmentService).cancelRfidTagAssignment(customerId);
+        order.verify(this.customerService).deleteCustomer(customerId);
+        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
+    }
+
+    private void expectRemovedAsInstructorBeforeTheCustomerIsDeleted(CustomerId customerId, ToolView... tools) {
+        InOrder order = inOrder(this.toolService, this.customerService);
+        for (ToolView tool : tools) {
+            order.verify(this.toolService).removeInstructors(tool.id(), List.of(customerId));
+        }
+        order.verify(this.customerService).deleteCustomer(customerId);
+    }
+
+    private void expectRfidTagNotTouched() {
+        verify(this.rfidTagAssignmentService, never()).unassignRfidTag(any());
+        verify(this.rfidTagAssignmentService, never()).cancelRfidTagAssignment(any());
+    }
 
     private void expectNothingDeleted() {
         verifyNoInteractions(this.rfidTagAssignmentService, this.toolCertificationService, this.toolService);

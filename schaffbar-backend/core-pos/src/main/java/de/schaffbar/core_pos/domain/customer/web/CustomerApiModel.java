@@ -2,17 +2,16 @@ package de.schaffbar.core_pos.domain.customer.web;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import de.schaffbar.core_pos.domain.customer.AgeGroup;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerAddressCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.ChangeCustomerContactCommand;
 import de.schaffbar.core_pos.domain.customer.CustomerCommands.CreateCustomerCommand;
@@ -20,11 +19,12 @@ import de.schaffbar.core_pos.domain.customer.CustomerCommands.UpdateCustomerComm
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerAddressView;
 import de.schaffbar.core_pos.domain.customer.CustomerViews.CustomerView;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.id.ValueObjectMapper;
 import de.schaffbar.core_pos.shared.validation.DateOfBirth;
 import de.schaffbar.core_pos.shared.validation.PostalCode;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface CustomerApiModel {
+public interface CustomerApiModel extends ValueObjectMapper {
 
     CustomerApiModel MAPPER = Mappers.getMapper(CustomerApiModel.class);
 
@@ -32,7 +32,6 @@ public interface CustomerApiModel {
     // mapping view to response
 
     @Mapping(target = "id", source = "id.value")
-    @Mapping(target = "ageGroup", source = "dateOfBirth", qualifiedByName = "toAgeGroup")
     CustomerApiDto toCustomerApiDto(CustomerView customer);
 
     CustomerAddressApiDto toCustomerAddressApiDto(CustomerAddressView address);
@@ -48,26 +47,8 @@ public interface CustomerApiModel {
 
     ChangeCustomerAddressCommand toChangeCustomerAddressCommand(CustomerId id, ChangeCustomerAddressRequestBody requestBody);
 
-    @Named("toAgeGroup")
-    default AgeGroup toAgeGroup(LocalDate dateOfBirth) {
-        int ageInYears = Period.between(dateOfBirth, LocalDate.now()).getYears();
-        if (ageInYears < 16) {
-            return AgeGroup.UNDER_16;
-        }
-        else if (ageInYears < 18) {
-            return AgeGroup.UNDER_18;
-        }
-        else {
-            return AgeGroup.ADULT;
-        }
-    }
-
     // ------------------------------------------------------------------------
     // response
-
-    enum AgeGroup {
-        UNDER_16, UNDER_18, ADULT
-    }
 
     record CustomerApiDto( //
             @NotBlank String id, //

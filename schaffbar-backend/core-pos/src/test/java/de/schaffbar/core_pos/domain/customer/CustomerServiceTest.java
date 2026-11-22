@@ -31,7 +31,9 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload.CustomerDeletedPayload;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,9 +64,17 @@ class CustomerServiceTest {
         CustomerId customerId = this.customerService.createCustomer(command);
 
         // then
-        verify(this.customerRepository).save(any());
+        expectSaved();
         CustomerCreatedPayload payload = expectSavedEvent(EventType.CUSTOMER_CREATED, customerId) //
                 .deserializeAndValidatePayload(CustomerCreatedPayload.class);
+        assertThat(payload.id()).isEqualTo(customerId);
+        assertThat(payload.firstName()).isEqualTo(command.firstName());
+        assertThat(payload.lastName()).isEqualTo(command.lastName());
+        assertThat(payload.dateOfBirth()).isEqualTo(command.dateOfBirth());
+        assertThat(payload.clubMember()).isEqualTo(command.clubMember());
+        assertThat(payload.email()).isEqualTo(command.email());
+        assertThat(payload.phone()).isEqualTo(command.phone());
+        assertThat(payload.createdAt()).isNotNull();
         assertThat(payload.address().addressLine1()).isEqualTo(command.addressLine1());
         assertThat(payload.address().addressLine2()).isEqualTo(command.addressLine2());
         assertThat(payload.address().postalCode()).isEqualTo(command.postalCode());
@@ -99,7 +109,7 @@ class CustomerServiceTest {
         Throwable thrown = catchThrowable(() -> this.customerService.updateCustomer(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectCustomerNotFound(thrown);
         expectNoEvent();
     }
 
@@ -130,7 +140,7 @@ class CustomerServiceTest {
         Throwable thrown = catchThrowable(() -> this.customerService.changeCustomerContact(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectCustomerNotFound(thrown);
         expectNoEvent();
     }
 
@@ -161,7 +171,7 @@ class CustomerServiceTest {
         Throwable thrown = catchThrowable(() -> this.customerService.changeCustomerAddress(command));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        expectCustomerNotFound(thrown);
         expectNoEvent();
     }
 
@@ -177,8 +187,10 @@ class CustomerServiceTest {
         this.customerService.deleteCustomer(customer.getId());
 
         // then
-        verify(this.customerRepository).delete(customer);
-        expectSavedEvent(EventType.CUSTOMER_DELETED, customer.getId());
+        expectDeleted(customer);
+        CustomerDeletedPayload payload = expectSavedEvent(EventType.CUSTOMER_DELETED, customer.getId()) //
+                .deserializeAndValidatePayload(CustomerDeletedPayload.class);
+        assertThat(payload.id()).isEqualTo(customer.getId());
     }
 
     @Test
@@ -190,8 +202,8 @@ class CustomerServiceTest {
         Throwable thrown = catchThrowable(() -> this.customerService.deleteCustomer(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verify(this.customerRepository, never()).delete(any());
+        expectCustomerNotFound(thrown);
+        expectNothingDeleted();
         expectNoEvent();
     }
 
@@ -229,6 +241,24 @@ class CustomerServiceTest {
                 });
 
         return this.events.getValue().getFirst();
+    }
+
+    private void expectCustomerNotFound(Throwable thrown) {
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+    }
+
+    private void expectSaved() {
+        verify(this.customerRepository).save(any());
+    }
+
+    private void expectDeleted(Customer customer) {
+        verify(this.customerRepository).delete(customer);
+    }
+
+    private void expectNothingDeleted() {
+        verify(this.customerRepository, never()).delete(any());
     }
 
     private void expectNoEvent() {

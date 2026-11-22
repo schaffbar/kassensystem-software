@@ -19,19 +19,21 @@
 | `createdAt`   | `Instant`         | `@NotNull`                |
 | `updatedAt`   | `Instant`         | `@Version`                |
 
-**Value Object:** `CustomerAddress` (embedded) – replaced as a whole when the address changes
+**Embeddable:** `CustomerAddress` – a part of the entity in its table (not a value object), replaced as a whole when
+the address changes
 
 - `addressLine1` (`@NotBlank`), `addressLine2` (optional), `postalCode` (`@NotBlank`), `city` (`@NotBlank`), `country` (
   `@NotBlank`)
 
 ## Commands
 
-| Command                        | Fields                                                                                                            |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `CreateCustomerCommand`        | firstName, lastName, dateOfBirth, clubMember, email, phone, addressLine1, addressLine2, postalCode, city, country |
-| `UpdateCustomerCommand`        | id (`CustomerId`), firstName, lastName, dateOfBirth, clubMember                                                   |
-| `ChangeCustomerContactCommand` | id (`CustomerId`), email, phone                                                                                   |
-| `ChangeCustomerAddressCommand` | id (`CustomerId`), addressLine1, addressLine2, postalCode, city, country                                          |
+| Command                        | Fields                                                                                                            | Use case                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `CreateCustomerCommand`        | firstName, lastName, dateOfBirth, clubMember, email, phone, addressLine1, addressLine2, postalCode, city, country | `CustomerCreate`        |
+| `UpdateCustomerCommand`        | id (`CustomerId`), firstName, lastName, dateOfBirth, clubMember                                                   | `CustomerUpdate`        |
+| `ChangeCustomerContactCommand` | id (`CustomerId`), email, phone                                                                                   | `CustomerChangeContact` |
+| `ChangeCustomerAddressCommand` | id (`CustomerId`), addressLine1, addressLine2, postalCode, city, country                                          | `CustomerChangeAddress` |
+| _(delete, no command)_         | id (`CustomerId`)                                                                                                 | `CustomerDelete`        |
 
 ## Business Rules / Invariants
 
@@ -47,6 +49,7 @@
 | C-8  | `dateOfBirth` lies within the last 100 years and before the current year                                                                                                                                                      | `@DateOfBirth` on the commands (`400`); portal: `validateDateOfBirth`                                         |
 | C-9  | Deleting a customer deletes their tool certifications and removes them as instructor from all tools                                                                                                                           | `CustomerDelete` use case                                                                                     |
 | C-11 | Paid sessions, workshop and tool usages and the tag history stay when a customer is deleted (accounting, statistics); so do certifications the customer has given to others (`certifiedBy` then points to a deleted customer) | `CustomerDelete` use case deletes nothing of them – there are no foreign keys (V6)                            |
+| C-12 | The age group follows from the date of birth on the day it is read: under 16, 16 and 17 (`UNDER_18`), from 18 (`ADULT`)                                                                                                       | `Customer.getAgeGroupOn()`, read into `CustomerView.ageGroup`                                                 |
 
 The deletion concept (C-4, C-5, C-9, C-11) was decided on 2026-11-11; C-10 ("remove the tag assignment") became C-4.
 C-6 to C-8 were enforced only in the portal until 2026-11-17. They check new and changed data; existing rows that

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.builder.RandomValues;
+import de.schaffbar.core_pos.domain.rfid_tag_assignment.RfidTagAssignmentType;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionException;
@@ -43,17 +44,18 @@ class CustomerAcceptanceTest {
         this.fixture.then().expectNoCustomer(customerId);
         this.fixture.then().expectHistoryEntry(customerId, rfidTagId);
 
-        // when
-        CustomerId otherCustomer = this.fixture.given().customerWithRfidTag(rfidTagId);
+        // when – the tag is free for the next customer
+        CustomerId otherCustomer = this.fixture.given().customer();
+        this.fixture.then().expectSuccess(this.fixture.api().requestRfidTagAssignment(otherCustomer, RfidTagAssignmentType.FIXED));
+        result = this.fixture.api().assignRfidTag(rfidTagId);
 
         // then
+        this.fixture.then().expectSuccess(result);
         this.fixture.then().expectRfidTagAssigned(otherCustomer, rfidTagId);
     }
 
     @Test
     void c4_deletingACustomerCancelsTheirWaitingRequest() {
-        Scenario scenario = Scenario.randomValues().build();
-
         // given
         CustomerId waitingCustomer = this.fixture.given().customerWaitingForRfidTag();
 
@@ -65,11 +67,15 @@ class CustomerAcceptanceTest {
         this.fixture.then().expectNoCustomer(waitingCustomer);
 
         // when – no request waits any more (TA-3)
-        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
-        CustomerId otherCustomer = this.fixture.given().customerWithRfidTag(rfidTagId);
+        CustomerId otherCustomer = this.fixture.given().customer();
+        result = this.fixture.api().requestRfidTagAssignment(otherCustomer, RfidTagAssignmentType.FIXED);
 
         // then
-        this.fixture.then().expectRfidTagAssigned(otherCustomer, rfidTagId);
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectWaitingForRfidTag(otherCustomer);
+
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
     }
 
     @Test
@@ -92,7 +98,8 @@ class CustomerAcceptanceTest {
         this.fixture.then().expectCustomer(customerId);
 
         // when – checked out and billed
-        this.fixture.then().expectSuccess(this.fixture.api().holdRfidTagToReader(rfidTagId, gateKeeperOut));
+        this.fixture.api().holdRfidTagToReader(rfidTagId, gateKeeperOut);
+        this.fixture.then().expectCheckedOut(customerId);
         this.fixture.then().expectSuccess(this.fixture.api().closeWorkshopSession(customerId));
 
         result = this.fixture.api().deleteCustomer(customerId);

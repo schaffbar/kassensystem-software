@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.customer;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,6 +84,19 @@ class Customer {
 
     public CustomerId getId() {
         return CustomerId.of(this.id);
+    }
+
+    // C-12 – the day is a parameter, so the age group of any day can be computed (and tested without a clock)
+    public AgeGroup getAgeGroupOn(LocalDate day) {
+        int age = Period.between(this.dateOfBirth, day).getYears();
+        if (age < 16) {
+            return AgeGroup.UNDER_16;
+        }
+        if (age < 18) {
+            return AgeGroup.UNDER_18;
+        }
+
+        return AgeGroup.ADULT;
     }
 
     // ------------------------------------------------------------------------

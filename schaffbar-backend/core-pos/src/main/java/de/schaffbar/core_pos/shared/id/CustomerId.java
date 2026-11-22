@@ -21,7 +21,7 @@ public class CustomerId implements ValueObject<CustomerId> {
     }
 
     public static CustomerId random() {
-        return new CustomerId(UUID.randomUUID());
+        return CustomerId.of(UUID.randomUUID());
     }
 
 }
