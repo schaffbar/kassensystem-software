@@ -1,11 +1,11 @@
 package de.schaffbar.core_pos.read_facade;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidReaderView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagAssignmentView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
@@ -196,12 +196,12 @@ class DeviceReadFacadeTest {
         WorkshopSessionView session = givenOpenSession();
         Instant firstEntry = Instant.now().minusSeconds(3600);
         Instant firstExit = firstEntry.plusSeconds(1500);
-        WorkshopUsageView finished = activeWorkshopUsageView() //
+        WorkshopUsageView finished = runningWorkshopUsageView() //
                 .entryTime(firstEntry) //
                 .exitTime(firstExit) //
                 .billableDuration(BillableDuration.between(firstEntry, firstExit)) //
                 .build();
-        WorkshopUsageView running = activeWorkshopUsageView().entryTime(Instant.now().minusSeconds(60)).build();
+        WorkshopUsageView running = runningWorkshopUsageView().entryTime(Instant.now().minusSeconds(60)).build();
         givenWorkshopUsages(session, finished, running);
 
         // when

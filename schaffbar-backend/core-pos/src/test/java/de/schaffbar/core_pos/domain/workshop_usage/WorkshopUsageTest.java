@@ -36,30 +36,24 @@ class WorkshopUsageTest {
         assertThat(usage.getWorkshopSessionId()).isEqualTo(workshopSessionId);
         assertThat(usage.getEntryTime()).isNotNull();
         assertThat(usage.getExitTime()).isNull();
-        assertThat(usage.getDuration()).isNull();
     }
 
     // ------------------------------------------------------------------------
-    // exit
+    // stop
 
     @Test
-    void exit_endsTheUsageAndReturnsTheEvent() {
+    void stop_endsTheUsageAndReturnsTheEvent() {
         // given
         WorkshopUsage usage = givenRunningUsage();
 
         // when
-        List<SchaffbarEvent> events = usage.exit();
+        List<SchaffbarEvent> events = usage.stop();
 
         // then
         assertThat(usage.getExitTime()).isAfterOrEqualTo(usage.getEntryTime());
-        assertThat(usage.getDuration()).isGreaterThanOrEqualTo(Duration.ZERO);
 
-        assertThat(events).hasSize(1);
-        SchaffbarEvent event = events.getFirst();
-        assertThat(event.getType()).isEqualTo(EventType.WORKSHOP_USAGE_LEFT);
-        assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
-
-        WorkshopUsageLeftPayload payload = event.deserializeAndValidatePayload(WorkshopUsageLeftPayload.class);
+        WorkshopUsageLeftPayload payload = expectSingleEvent(events, EventType.WORKSHOP_USAGE_LEFT, usage) //
+                .deserializeAndValidatePayload(WorkshopUsageLeftPayload.class);
         assertThat(payload.id()).isEqualTo(usage.getId());
         assertThat(payload.customerId()).isEqualTo(usage.getCustomerId());
         assertThat(payload.workshopSessionId()).isEqualTo(usage.getWorkshopSessionId());
@@ -68,14 +62,13 @@ class WorkshopUsageTest {
     }
 
     @Test
-    void exit_rejectsAnEndedUsage() {
+    void stop_rejectsAStoppedUsage() {
         // given
-        WorkshopUsage usage = givenRunningUsage();
-        usage.exit();
+        WorkshopUsage usage = givenStoppedUsage();
         Instant exitTime = usage.getExitTime();
 
         // when
-        Throwable thrown = catchThrowable(usage::exit);
+        Throwable thrown = catchThrowable(usage::stop);
 
         // then
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
@@ -95,6 +88,18 @@ class WorkshopUsageTest {
 
         // then
         assertThat(duration).isNull();
+    }
+
+    @Test
+    void getBillableDuration_ofAStoppedUsage_isFromEntryToExit() {
+        // given
+        WorkshopUsage usage = givenStoppedUsage();
+
+        // when
+        BillableDuration duration = usage.getBillableDuration();
+
+        // then
+        assertThat(duration).isEqualTo(BillableDuration.between(usage.getEntryTime(), usage.getExitTime()));
     }
 
     // ------------------------------------------------------------------------
@@ -118,15 +123,13 @@ class WorkshopUsageTest {
     @Test
     void getBillableDurationUntil_ignoresNowForAFinishedUsage() {
         // given
-        WorkshopUsage usage = givenRunningUsage();
-        usage.exit();
+        WorkshopUsage usage = givenStoppedUsage();
 
         // when
         BillableDuration duration = usage.getBillableDurationUntil(Instant.now().plus(Duration.ofHours(1)));
 
         // then
         assertThat(duration).isEqualTo(usage.getBillableDuration());
-        assertThat(duration.getDuration()).isEqualTo(usage.getDuration());
     }
 
     // ------------------------------------------------------------------------
@@ -134,6 +137,25 @@ class WorkshopUsageTest {
 
     private WorkshopUsage givenRunningUsage() {
         return WorkshopUsage.of(CustomerId.random(), WorkshopSessionId.random());
+    }
+
+    private WorkshopUsage givenStoppedUsage() {
+        WorkshopUsage usage = givenRunningUsage();
+        usage.stop();
+
+        return usage;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private SchaffbarEvent expectSingleEvent(List<SchaffbarEvent> events, EventType type, WorkshopUsage usage) {
+        assertThat(events).hasSize(1);
+        SchaffbarEvent event = events.getFirst();
+        assertThat(event.getType()).isEqualTo(type);
+        assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
+
+        return event;
     }
 
 }

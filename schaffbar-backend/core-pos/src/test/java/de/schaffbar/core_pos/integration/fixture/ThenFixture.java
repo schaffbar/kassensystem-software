@@ -50,6 +50,17 @@ public final class ThenFixture {
         assertThat(result).bodyJson().isLenientlyEqualTo(expectedJson);
     }
 
+    // the times change with every run – the gate keeper shows them as HH:mm, the units as a number
+    public void expectEntryTimeShown(MvcTestResult result) {
+        assertThat(Json.read(result, "$.CUSTOMERSTARTSTOP")).matches("\\d{2}:\\d{2}");
+        assertThat(Json.read(result, "$.UNITS")).matches("\\d+");
+    }
+
+    public void expectEntryAndExitTimeShown(MvcTestResult result) {
+        assertThat(Json.read(result, "$.CUSTOMERSTARTSTOP")).matches("\\d{2}:\\d{2} - \\d{2}:\\d{2}");
+        assertThat(Json.read(result, "$.UNITS")).matches("\\d+");
+    }
+
     // the name a device shows
     public String fullNameOf(CustomerId customerId) {
         MvcTestResult customer = this.api.getCustomer(customerId);
@@ -206,6 +217,14 @@ public final class ThenFixture {
 
         assertThat(result).hasStatus(HttpStatus.OK);
         assertThat(result).hasBodyTextEqualTo("");
+    }
+
+    // the visits of the open session, checked out or not
+    public void expectVisits(CustomerId customerId, int count) {
+        assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
+                .extractingPath("$.workshopUsages") //
+                .asArray() //
+                .hasSize(count);
     }
 
     public void expectInTheWorkshop(CustomerId customerId) {

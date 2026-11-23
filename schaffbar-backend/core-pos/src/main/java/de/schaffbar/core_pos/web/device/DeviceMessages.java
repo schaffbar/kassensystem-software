@@ -12,10 +12,10 @@ import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.MaxToolUsageExceededException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
+import de.schaffbar.core_pos.shared.exception.NoRunningWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyRegisteredException;
@@ -31,7 +31,7 @@ final class DeviceMessages {
     static final Map<String, String> BY_CODE = Map.ofEntries( //
             entry(NoCustomerAssignedException.CODE, "Kein Kunde für RFID Tag"), //
             entry(CustomerAlreadyInWorkshopException.CODE, "Du schaffst schon"), //
-            entry(NoActiveWorkshopUsageFoundException.CODE, "Zwei mal Pause geht nicht"), //
+            entry(NoRunningWorkshopUsageFoundException.CODE, "Zwei mal Pause geht nicht"), //
             entry(NoOpenWorkshopSessionException.CODE, "Du warst nie im Werkstatt"), //
             entry(CustomerNotInWorkshopException.CODE, "Du bist nicht in der Werkstatt"), //
             entry(CustomerNotCertifiedForToolException.CODE, "Keine Einweisung"), //

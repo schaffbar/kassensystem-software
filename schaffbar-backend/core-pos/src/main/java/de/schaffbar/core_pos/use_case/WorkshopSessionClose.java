@@ -57,7 +57,7 @@ public class WorkshopSessionClose {
 
     // WS-5 – checked before the tools: checking out stops them too (WU-5), so it is the one thing left to do
     private void ensureNoWorkshopUsageRunning(WorkshopSessionId workshopSessionId) {
-        if (this.workshopUsageService.hasActiveWorkshopUsage(workshopSessionId)) {
+        if (this.workshopUsageService.hasRunningWorkshopUsage(workshopSessionId)) {
             throw new ActiveWorkshopUsageExistsForSessionException(workshopSessionId);
         }
     }

@@ -70,7 +70,7 @@ public enum EventType {
     // ------------------------------------------------------------------------
     // workshop usage
 
-    WORKSHOP_USAGE_ENTERED, // TODO: Consider renaming to WORKSHOP_ENTERED and WORKSHOP_EXITED
+    WORKSHOP_USAGE_ENTERED, //
     WORKSHOP_USAGE_LEFT; //
 
     // ------------------------------------------------------------------------

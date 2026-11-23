@@ -80,6 +80,9 @@ assertThat(thrown) //
         return unknown;
     }
 
+    // ------------------------------------------------------------------------
+    // then
+
     private void expectInstructorsAdded(ToolId toolId, List<CustomerId> instructorIds) {
         verify(this.toolService).addInstructors(toolId, instructorIds);
     }

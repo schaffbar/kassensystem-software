@@ -181,7 +181,7 @@ public class ViewBuilder {
     // ------------------------------------------------------------------------
     // workshop usage
 
-    public static WorkshopUsageViewBuilder activeWorkshopUsageView() {
+    public static WorkshopUsageViewBuilder runningWorkshopUsageView() {
         return WorkshopUsageView.builder() //
                 .id(WorkshopUsageId.random()) //
                 .customerId(CustomerId.random()) //

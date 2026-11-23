@@ -25,6 +25,7 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -53,9 +54,7 @@ class WorkshopUsageStartTest {
         this.workshopUsageStart.process(customerId);
 
         // then
-        InOrder order = inOrder(this.workshopSessionService, this.workshopUsageService);
-        order.verify(this.workshopSessionService).startWorkshopSession(customerId);
-        order.verify(this.workshopUsageService).startWorkshopUsage(customerId, started);
+        expectSessionStartedBeforeTheUsage(customerId, started);
     }
 
     @Test
@@ -67,8 +66,7 @@ class WorkshopUsageStartTest {
         this.workshopUsageStart.process(open.customerId());
 
         // then
-        verify(this.workshopUsageService).startWorkshopUsage(open.customerId(), open.id());
-        verify(this.workshopSessionService, never()).startWorkshopSession(any());
+        expectStartedInTheOpenSession(open);
     }
 
     @Test
@@ -80,8 +78,10 @@ class WorkshopUsageStartTest {
         Throwable thrown = catchThrowable(() -> this.workshopUsageStart.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.workshopSessionService, this.workshopUsageService);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNothingStarted();
     }
 
     // ------------------------------------------------------------------------
@@ -120,6 +120,24 @@ class WorkshopUsageStartTest {
         when(this.workshopSessionService.startWorkshopSession(customerId)).thenReturn(started);
 
         return started;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectSessionStartedBeforeTheUsage(CustomerId customerId, WorkshopSessionId started) {
+        InOrder order = inOrder(this.workshopSessionService, this.workshopUsageService);
+        order.verify(this.workshopSessionService).startWorkshopSession(customerId);
+        order.verify(this.workshopUsageService).startWorkshopUsage(customerId, started);
+    }
+
+    private void expectStartedInTheOpenSession(WorkshopSessionView open) {
+        verify(this.workshopUsageService).startWorkshopUsage(open.customerId(), open.id());
+        verify(this.workshopSessionService, never()).startWorkshopSession(any());
+    }
+
+    private void expectNothingStarted() {
+        verifyNoInteractions(this.workshopSessionService, this.workshopUsageService);
     }
 
 }

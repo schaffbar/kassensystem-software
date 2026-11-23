@@ -23,6 +23,7 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,9 +53,7 @@ class WorkshopUsageStopTest {
         this.workshopUsageStop.process(customerId);
 
         // then
-        InOrder order = inOrder(this.toolUsageService, this.workshopUsageService);
-        order.verify(this.toolUsageService).stopToolUsages(customerId);
-        order.verify(this.workshopUsageService).stopWorkshopUsage(customerId);
+        expectToolsStoppedBeforeTheUsage(customerId);
     }
 
     @Test
@@ -81,7 +80,9 @@ class WorkshopUsageStopTest {
         Throwable thrown = catchThrowable(() -> this.workshopUsageStop.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
         expectNothingStopped();
     }
 
@@ -119,6 +120,12 @@ class WorkshopUsageStopTest {
 
     // ------------------------------------------------------------------------
     // then
+
+    private void expectToolsStoppedBeforeTheUsage(CustomerId customerId) {
+        InOrder order = inOrder(this.toolUsageService, this.workshopUsageService);
+        order.verify(this.toolUsageService).stopToolUsages(customerId);
+        order.verify(this.workshopUsageService).stopWorkshopUsage(customerId);
+    }
 
     private void expectNothingStopped() {
         verifyNoInteractions(this.toolUsageService, this.workshopUsageService);

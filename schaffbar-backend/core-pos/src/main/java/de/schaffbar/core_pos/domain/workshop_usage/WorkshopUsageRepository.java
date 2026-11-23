@@ -18,7 +18,7 @@ interface WorkshopUsageRepository extends JpaRepository<WorkshopUsage, UUID> {
     default Optional<WorkshopUsage> findByCustomerIdAndExitTimeIsNull(CustomerId customerId) {
         List<WorkshopUsage> workshopUsages = findByCustomerIdAndExitTimeIsNull(customerId.getValue());
         if (workshopUsages.size() > 1) {
-            throw new IllegalStateException("More than one active workshop usage of customer [id: " + customerId.getValue() + "]");
+            throw new IllegalStateException("More than one running workshop usage of customer [id: " + customerId.getValue() + "]");
         }
 
         return workshopUsages.stream().findFirst();

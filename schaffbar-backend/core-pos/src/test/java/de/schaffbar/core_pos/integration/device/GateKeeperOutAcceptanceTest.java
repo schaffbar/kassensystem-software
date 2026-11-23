@@ -1,7 +1,6 @@
 package de.schaffbar.core_pos.integration.device;
 
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.GATE_KEEPER_OUT;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
-import de.schaffbar.core_pos.support.Json;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @IntegrationTest
 class GateKeeperOutAcceptanceTest {
@@ -27,7 +26,7 @@ class GateKeeperOutAcceptanceTest {
     // init
 
     @Test
-    void init_startsWithoutRelay() {
+    void init_registeredGateKeeper_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -56,7 +55,7 @@ class GateKeeperOutAcceptanceTest {
     // card
 
     @Test
-    void card_checksOutWithEntryAndExitTime() {
+    void card_inTheWorkshop_checksOutWithEntryAndExitTime() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -77,19 +76,20 @@ class GateKeeperOutAcceptanceTest {
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
 
-        assertThat(Json.read(result, "$.CUSTOMERSTARTSTOP")).matches("\\d{2}:\\d{2} - \\d{2}:\\d{2}");
-        assertThat(Json.read(result, "$.UNITS")).matches("\\d+");
+        this.fixture.then().expectEntryAndExitTimeShown(result);
+        this.fixture.then().expectCheckedOut(customerId);
     }
 
+    // WU-5
     @Test
-    void card_switchesTheRunningToolsOff() {
+    void card_withARunningTool_switchesItOff() {
         Scenario scenario = Scenario.randomValues().build();
         MacAddress switchBoxMacAddress = RandomValues.macAddress();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(switchBoxMacAddress);
         this.fixture.given().rfidReader(scenario.macAddress(), GATE_KEEPER_OUT);
-        this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
 
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
         this.fixture.given().toolUsage(scenario.rfidTagId(), switchBoxMacAddress);
@@ -108,9 +108,11 @@ class GateKeeperOutAcceptanceTest {
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
 
-        assertThat(this.fixture.api().getOpenWorkshopSession(customerId)).bodyJson().extractingPath("$.toolUsageSummaries[0].active").isEqualTo(false);
+        this.fixture.then().expectToolStopped(customerId, toolId);
+        this.fixture.then().expectCheckedOut(customerId);
     }
 
+    // WU-9
     @Test
     void card_neverCheckedIn_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
@@ -136,6 +138,7 @@ class GateKeeperOutAcceptanceTest {
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
     }
 
+    // WU-2
     @Test
     void card_alreadyCheckedOut_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
@@ -143,7 +146,7 @@ class GateKeeperOutAcceptanceTest {
         // given – checked out, the session is still open until it is billed
         this.fixture.given().rfidReader(scenario.macAddress(), GATE_KEEPER_OUT);
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
-        this.fixture.then().expectSuccess(this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress()));
+        this.fixture.given().customerLeftTheWorkshop(scenario.rfidTagId(), scenario.macAddress());
 
         // when
         MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
@@ -212,7 +215,7 @@ class GateKeeperOutAcceptanceTest {
     // counter
 
     @Test
-    void counter_isTheWrongReader() {
+    void counter_anyTag_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given

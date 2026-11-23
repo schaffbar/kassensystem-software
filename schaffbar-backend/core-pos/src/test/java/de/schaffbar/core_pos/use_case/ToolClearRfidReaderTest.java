@@ -77,6 +77,9 @@ class ToolClearRfidReaderTest {
         return toolId;
     }
 
+    // ------------------------------------------------------------------------
+    // then
+
     private void expectCleared(ToolId toolId) {
         verify(this.toolService).clearRfidReader(toolId);
     }

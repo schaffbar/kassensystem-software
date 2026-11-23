@@ -3,9 +3,7 @@ package de.schaffbar.core_pos.domain.workshop_usage;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +30,7 @@ import de.schaffbar.core_pos.shared.id.WorkshopUsageId;
 @ToString
 @Entity
 @Table(name = "WORKSHOP_USAGE", schema = "SCHAFFBAR")
-class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot for clarity.
+class WorkshopUsage {
 
     @Id
     private UUID id;
@@ -79,14 +77,6 @@ class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot f
         return WorkshopSessionId.of(this.workshopSessionId);
     }
 
-    public Duration getDuration() {
-        if (isNull(this.entryTime) || isNull(this.exitTime)) {
-            return null;
-        }
-
-        return Duration.between(this.entryTime.truncatedTo(ChronoUnit.SECONDS), this.exitTime.truncatedTo(ChronoUnit.SECONDS));
-    }
-
     public BillableDuration getBillableDuration() {
         return isNull(this.exitTime) ? null : BillableDuration.between(this.entryTime, this.exitTime);
     }
@@ -98,9 +88,10 @@ class WorkshopUsage { // TODO: Consider renaming to WorkshopSlot, or UsageSlot f
     // ------------------------------------------------------------------------
     // command
 
-    public List<SchaffbarEvent> exit() {
+    public List<SchaffbarEvent> stop() {
+        // the service finds only a running visit (WU-2)
         if (nonNull(this.exitTime)) {
-            throw new IllegalStateException("Workshop usage [id: " + this.id + "] has already ended");
+            throw new IllegalStateException("Workshop usage [id: " + this.id + "] has already been stopped");
         }
 
         this.setExitTime(Instant.now());

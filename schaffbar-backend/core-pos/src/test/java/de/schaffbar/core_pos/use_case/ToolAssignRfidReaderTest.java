@@ -111,6 +111,9 @@ assertThat(thrown) //
         return unknown;
     }
 
+    // ------------------------------------------------------------------------
+    // then
+
     private void expectAssigned(ToolId toolId, RfidReaderId rfidReaderId) {
         verify(this.toolService).assignRfidReader(toolId, rfidReaderId);
     }

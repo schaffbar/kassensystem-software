@@ -23,7 +23,7 @@ import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
+import de.schaffbar.core_pos.shared.exception.NoRunningWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -41,7 +41,7 @@ public class WorkshopUsageService {
     // query
 
     @Query
-    public List<WorkshopUsageView> getActiveWorkshopUsages() {
+    public List<WorkshopUsageView> getRunningWorkshopUsages() {
         return this.workshopUsageRepository.findByExitTimeIsNull().stream() //
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView) //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
@@ -57,13 +57,13 @@ public class WorkshopUsageService {
     }
 
     @Query
-    public Optional<WorkshopUsageView> getActiveWorkshopUsage(@NotNull @Valid CustomerId customerId) {
+    public Optional<WorkshopUsageView> getRunningWorkshopUsage(@NotNull @Valid CustomerId customerId) {
         return this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId) //
                 .map(WorkshopUsageViews.MAPPER::toWorkshopUsageView);
     }
 
     @Query
-    public boolean hasActiveWorkshopUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+    public boolean hasRunningWorkshopUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
         return this.workshopUsageRepository.existsByWorkshopSessionIdAndExitTimeIsNull(workshopSessionId);
     }
 
@@ -106,9 +106,9 @@ public class WorkshopUsageService {
     @Command
     public void stopWorkshopUsage(@NotNull @Valid CustomerId customerId) {
         WorkshopUsage workshopUsage = this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(customerId) //
-                .orElseThrow(() -> new NoActiveWorkshopUsageFoundException(customerId));
+                .orElseThrow(() -> new NoRunningWorkshopUsageFoundException(customerId));
 
-        List<SchaffbarEvent> events = workshopUsage.exit();
+        List<SchaffbarEvent> events = workshopUsage.stop();
 
         this.outboxEventStore.save(events);
 
@@ -119,11 +119,16 @@ public class WorkshopUsageService {
     // helper
 
     private BillableDuration getFinalBillableDuration(WorkshopUsage usage) {
+        ensureStopped(usage);
+
+        return usage.getBillableDuration();
+    }
+
+    // WS-5 – WorkshopSessionClose checks before that no visit of the session is running
+    private void ensureStopped(WorkshopUsage usage) {
         if (isNull(usage.getExitTime())) {
             throw new IllegalStateException("Workshop usage [id: " + usage.getId().getValue() + "] is still running");
         }
-
-        return usage.getBillableDuration();
     }
 
     // WU-1
@@ -132,8 +137,8 @@ public class WorkshopUsageService {
                 .ifPresent(this::throwCustomerAlreadyInWorkshopException);
     }
 
-    private void throwCustomerAlreadyInWorkshopException(WorkshopUsage active) {
-        throw new CustomerAlreadyInWorkshopException(active.getCustomerId());
+    private void throwCustomerAlreadyInWorkshopException(WorkshopUsage running) {
+        throw new CustomerAlreadyInWorkshopException(running.getCustomerId());
     }
 
 }

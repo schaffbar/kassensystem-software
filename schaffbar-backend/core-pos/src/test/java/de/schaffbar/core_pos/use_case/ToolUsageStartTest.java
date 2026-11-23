@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.use_case;
 
 import static de.schaffbar.core_pos.builder.CommandBuilder.startToolUsageCommand;
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -166,14 +166,14 @@ class ToolUsageStartTest {
     }
 
     private WorkshopUsageView givenCustomerInTheWorkshop() {
-        WorkshopUsageView running = activeWorkshopUsageView().customerId(givenCustomer()).build();
-        when(this.workshopUsageService.getActiveWorkshopUsage(running.customerId())).thenReturn(Optional.of(running));
+        WorkshopUsageView running = runningWorkshopUsageView().customerId(givenCustomer()).build();
+        when(this.workshopUsageService.getRunningWorkshopUsage(running.customerId())).thenReturn(Optional.of(running));
 
         return running;
     }
 
     private void givenNotInTheWorkshop(CustomerId customerId) {
-        when(this.workshopUsageService.getActiveWorkshopUsage(customerId)).thenReturn(Optional.empty());
+        when(this.workshopUsageService.getRunningWorkshopUsage(customerId)).thenReturn(Optional.empty());
     }
 
     private ToolView givenTool(CertificationRequirement certificationRequirement) {

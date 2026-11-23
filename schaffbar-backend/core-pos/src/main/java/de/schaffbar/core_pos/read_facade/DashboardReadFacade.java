@@ -39,7 +39,7 @@ public class DashboardReadFacade {
     // everybody checked in right now, the longest there first
     @Query
     public List<ActiveWorkshopUserView> getActiveWorkshopUsers() {
-        return this.workshopUsageService.getActiveWorkshopUsages().stream() //
+        return this.workshopUsageService.getRunningWorkshopUsages().stream() //
                 .sorted(comparing(WorkshopUsageView::entryTime)) //
                 .map(this::toActiveWorkshopUserView) //
                 .toList();

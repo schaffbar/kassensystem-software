@@ -49,7 +49,7 @@ public class ToolUsageStart {
         ensureCertifiedIfRequired(customerId, tool);
 
         // TU-2 – the running workshop usage belongs to the open session: a session with one is not closed (WS-5)
-        WorkshopSessionId workshopSessionId = this.workshopUsageService.getActiveWorkshopUsage(customerId) //
+        WorkshopSessionId workshopSessionId = this.workshopUsageService.getRunningWorkshopUsage(customerId) //
                 .map(WorkshopUsageView::workshopSessionId) //
                 .orElseThrow(() -> new CustomerNotInWorkshopException(customerId));
 

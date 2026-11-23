@@ -2,7 +2,6 @@ package de.schaffbar.core_pos.integration.device;
 
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.GATE_KEEPER_IN;
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.GATE_KEEPER_OUT;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
-import de.schaffbar.core_pos.support.Json;
 
 @IntegrationTest
 class GateKeeperInAcceptanceTest {
@@ -26,7 +24,7 @@ class GateKeeperInAcceptanceTest {
     // init
 
     @Test
-    void init_startsWithoutRelay() {
+    void init_registeredGateKeeper_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -55,7 +53,7 @@ class GateKeeperInAcceptanceTest {
     // card
 
     @Test
-    void card_checksInAndGreetsWithTheEntryTime() {
+    void card_notInTheWorkshop_checksInWithTheEntryTime() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -78,10 +76,12 @@ class GateKeeperInAcceptanceTest {
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
 
-        assertThat(Json.read(result, "$.CUSTOMERSTARTSTOP")).matches("\\d{2}:\\d{2}");
-        assertThat(this.fixture.api().getOpenWorkshopSession(customerId)).bodyJson().extractingPath("$.status").isEqualTo("OPEN");
+        this.fixture.then().expectEntryTimeShown(result);
+        this.fixture.then().expectOpenWorkshopSession(customerId);
+        this.fixture.then().expectInTheWorkshop(customerId);
     }
 
+    // WU-4
     @Test
     void card_againAfterCheckingOut_joinsTheOpenSession() {
         Scenario scenario = Scenario.randomValues().build();
@@ -110,11 +110,12 @@ class GateKeeperInAcceptanceTest {
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
 
-        assertThat(Json.read(result, "$.CUSTOMERSTARTSTOP")).matches("\\d{2}:\\d{2}");
-        assertThat(Json.read(result, "$.UNITS")).matches("\\d+");
-        assertThat(this.fixture.api().getOpenWorkshopSession(customerId)).bodyJson().extractingPath("$.workshopUsages.length()").isEqualTo(2);
+        this.fixture.then().expectEntryTimeShown(result);
+        this.fixture.then().expectVisits(customerId, 2);
+        this.fixture.then().expectInTheWorkshop(customerId);
     }
 
+    // WU-1
     @Test
     void card_alreadyInTheWorkshop_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
@@ -138,6 +139,7 @@ class GateKeeperInAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectVisits(customerId, 1);
     }
 
     @Test
@@ -191,7 +193,7 @@ class GateKeeperInAcceptanceTest {
     // counter
 
     @Test
-    void counter_isTheWrongReader() {
+    void counter_anyTag_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given

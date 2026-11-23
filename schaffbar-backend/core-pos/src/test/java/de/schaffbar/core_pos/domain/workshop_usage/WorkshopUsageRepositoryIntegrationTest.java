@@ -33,7 +33,7 @@ class WorkshopUsageRepositoryIntegrationTest {
         assertThat(thrown).isInstanceOf(DataIntegrityViolationException.class);
 
         // when – after checking out
-        running.exit();
+        running.stop();
         this.workshopUsageRepository.saveAndFlush(running);
         WorkshopUsage next = this.workshopUsageRepository.saveAndFlush(WorkshopUsage.of(customerId, workshopSessionId));
 

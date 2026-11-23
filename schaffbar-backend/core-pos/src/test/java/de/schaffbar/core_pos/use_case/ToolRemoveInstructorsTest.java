@@ -80,6 +80,9 @@ assertThat(thrown) //
         return unknown;
     }
 
+    // ------------------------------------------------------------------------
+    // then
+
     private void expectInstructorsRemoved(ToolId toolId, List<CustomerId> instructorIds) {
         verify(this.toolService).removeInstructors(toolId, instructorIds);
     }

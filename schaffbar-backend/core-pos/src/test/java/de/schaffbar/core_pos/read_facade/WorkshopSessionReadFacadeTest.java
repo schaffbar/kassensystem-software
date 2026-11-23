@@ -1,10 +1,10 @@
 package de.schaffbar.core_pos.read_facade;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.finishedToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -68,7 +68,7 @@ class WorkshopSessionReadFacadeTest {
     @Test
     void getOpenWorkshopSession_combinesTheUsagesAndTheirTotals() {
         // given
-        WorkshopUsageView workshopUsage = activeWorkshopUsageView().build();
+        WorkshopUsageView workshopUsage = runningWorkshopUsageView().build();
         BillingTotal workshopTotal = new BillingTotal(61, 11);
         WorkshopSessionView session = givenOpenSession(List.of(workshopUsage), workshopTotal, List.of(), Map.of());
 

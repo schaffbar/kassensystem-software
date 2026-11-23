@@ -155,7 +155,7 @@ class WorkshopSessionCloseTest {
 
     private WorkshopSessionView givenOpenSessionWithoutRunningUsages() {
         WorkshopSessionView open = givenOpenSession();
-        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(false);
+        when(this.workshopUsageService.hasRunningWorkshopUsage(open.id())).thenReturn(false);
         when(this.toolUsageService.hasRunningToolUsage(open.id())).thenReturn(false);
 
         return open;
@@ -163,14 +163,14 @@ class WorkshopSessionCloseTest {
 
     private WorkshopSessionView givenOpenSessionWithRunningWorkshopUsage() {
         WorkshopSessionView open = givenOpenSession();
-        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(true);
+        when(this.workshopUsageService.hasRunningWorkshopUsage(open.id())).thenReturn(true);
 
         return open;
     }
 
     private WorkshopSessionView givenOpenSessionWithRunningToolUsage() {
         WorkshopSessionView open = givenOpenSession();
-        when(this.workshopUsageService.hasActiveWorkshopUsage(open.id())).thenReturn(false);
+        when(this.workshopUsageService.hasRunningWorkshopUsage(open.id())).thenReturn(false);
         when(this.toolUsageService.hasRunningToolUsage(open.id())).thenReturn(true);
 
         return open;

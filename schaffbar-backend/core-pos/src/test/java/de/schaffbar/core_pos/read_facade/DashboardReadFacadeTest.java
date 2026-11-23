@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.read_facade;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -58,8 +58,8 @@ class DashboardReadFacadeTest {
         CustomerView anna = givenCustomer("Anna");
         CustomerView ben = givenCustomer("Ben");
         Instant now = Instant.now();
-        WorkshopUsageView annaSinceTen = activeWorkshopUsageView().customerId(anna.id()).entryTime(now.minusSeconds(600)).build();
-        WorkshopUsageView benSinceAnHour = activeWorkshopUsageView().customerId(ben.id()).entryTime(now.minusSeconds(3600)).build();
+        WorkshopUsageView annaSinceTen = runningWorkshopUsageView().customerId(anna.id()).entryTime(now.minusSeconds(600)).build();
+        WorkshopUsageView benSinceAnHour = runningWorkshopUsageView().customerId(ben.id()).entryTime(now.minusSeconds(3600)).build();
         givenActiveWorkshopUsages(annaSinceTen, benSinceAnHour);
 
         // when
@@ -74,7 +74,7 @@ class DashboardReadFacadeTest {
     @Test
     void getActiveWorkshopUsers_withoutTheCustomerOfAUsage_isABug() {
         // given
-        WorkshopUsageView usage = activeWorkshopUsageView().build();
+        WorkshopUsageView usage = runningWorkshopUsageView().build();
         givenActiveWorkshopUsages(usage);
         givenNoCustomer(usage.customerId());
 
@@ -136,7 +136,7 @@ class DashboardReadFacadeTest {
     // given
 
     private void givenActiveWorkshopUsages(WorkshopUsageView... usages) {
-        when(this.workshopUsageService.getActiveWorkshopUsages()).thenReturn(List.of(usages));
+        when(this.workshopUsageService.getRunningWorkshopUsages()).thenReturn(List.of(usages));
     }
 
     private void givenActiveToolUsages(ToolUsageView... usages) {

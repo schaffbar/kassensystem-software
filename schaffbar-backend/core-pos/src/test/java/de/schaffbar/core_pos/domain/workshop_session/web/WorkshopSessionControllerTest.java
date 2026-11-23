@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.domain.workshop_session.web;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -181,7 +181,7 @@ class WorkshopSessionControllerTest {
         ToolId toolId = ToolId.random();
         OpenWorkshopSessionView open = OpenWorkshopSessionView.builder() //
                 .session(session) //
-                .workshopUsages(List.of(activeWorkshopUsageView().workshopSessionId(session.id()).build())) //
+                .workshopUsages(List.of(runningWorkshopUsageView().workshopSessionId(session.id()).build())) //
                 .workshopTotal(new BillingTotal(61, 11)) //
                 .toolUsageSummaries(List.of(ToolUsageSummaryView.builder() //
                         .toolId(toolId) //

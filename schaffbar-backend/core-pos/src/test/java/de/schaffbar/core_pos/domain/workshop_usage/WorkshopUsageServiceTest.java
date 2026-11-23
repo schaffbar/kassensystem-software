@@ -27,7 +27,7 @@ import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.WorkshopUsageEventPayload.WorkshopUsageEnteredPayload;
 import de.schaffbar.core_pos.shared.exception.CustomerAlreadyInWorkshopException;
-import de.schaffbar.core_pos.shared.exception.NoActiveWorkshopUsageFoundException;
+import de.schaffbar.core_pos.shared.exception.NoRunningWorkshopUsageFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -43,6 +43,9 @@ class WorkshopUsageServiceTest {
     @Captor
     private ArgumentCaptor<List<SchaffbarEvent>> events;
 
+    @Captor
+    private ArgumentCaptor<WorkshopUsage> savedUsage;
+
     @InjectMocks
     private WorkshopUsageService workshopUsageService;
 
@@ -55,9 +58,9 @@ class WorkshopUsageServiceTest {
         WorkshopSessionId workshopSessionId = WorkshopSessionId.random();
         CustomerId customerId = CustomerId.random();
         WorkshopUsage first = WorkshopUsage.of(customerId, workshopSessionId);
-        first.exit();
+        first.stop();
         WorkshopUsage second = WorkshopUsage.of(customerId, workshopSessionId);
-        second.exit();
+        second.stop();
         givenUsagesOfTheSession(workshopSessionId, first, second);
 
         // when
@@ -67,6 +70,7 @@ class WorkshopUsageServiceTest {
         assertThat(total).isEqualTo(BillingTotal.of(List.of(first.getBillableDuration(), second.getBillableDuration())));
     }
 
+    // a guard against a bug – WorkshopSessionClose checks before that no visit is running (WS-5)
     @Test
     void getBillingTotal_rejectsASessionWithARunningUsage() {
         // given
@@ -114,9 +118,10 @@ class WorkshopUsageServiceTest {
         this.workshopUsageService.startWorkshopUsage(customerId, workshopSessionId);
 
         // then
-        verify(this.workshopUsageRepository).save(any());
-        WorkshopUsageEnteredPayload payload = expectSavedEvent(EventType.WORKSHOP_USAGE_ENTERED) //
+        WorkshopUsage usage = expectSavedUsage();
+        WorkshopUsageEnteredPayload payload = expectSavedEvent(EventType.WORKSHOP_USAGE_ENTERED, usage) //
                 .deserializeAndValidatePayload(WorkshopUsageEnteredPayload.class);
+        assertThat(payload.id()).isEqualTo(usage.getId());
         assertThat(payload.customerId()).isEqualTo(customerId);
         assertThat(payload.workshopSessionId()).isEqualTo(workshopSessionId);
         assertThat(payload.entryTime()).isNotNull();
@@ -125,17 +130,16 @@ class WorkshopUsageServiceTest {
     @Test
     void startWorkshopUsage_rejectsACustomerInTheWorkshop() {
         // given
-        WorkshopUsage active = givenCustomerInTheWorkshop();
+        WorkshopUsage running = givenCustomerInTheWorkshop();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.workshopUsageService.startWorkshopUsage(active.getCustomerId(), WorkshopSessionId.random()));
+        Throwable thrown = catchThrowable(() -> this.workshopUsageService.startWorkshopUsage(running.getCustomerId(), WorkshopSessionId.random()));
 
         // then
         assertThat(thrown) //
                 .isInstanceOf(CustomerAlreadyInWorkshopException.class) //
                 .hasFieldOrPropertyWithValue("code", CustomerAlreadyInWorkshopException.CODE);
-        verify(this.workshopUsageRepository, never()).save(any());
-        expectNoEvent();
+        expectNothingSaved();
     }
 
     // ------------------------------------------------------------------------
@@ -144,15 +148,14 @@ class WorkshopUsageServiceTest {
     @Test
     void stopWorkshopUsage_endsTheUsageAndSavesTheEvent() {
         // given
-        WorkshopUsage active = givenCustomerInTheWorkshop();
+        WorkshopUsage running = givenCustomerInTheWorkshop();
 
         // when
-        this.workshopUsageService.stopWorkshopUsage(active.getCustomerId());
+        this.workshopUsageService.stopWorkshopUsage(running.getCustomerId());
 
         // then
-        assertThat(active.getExitTime()).isNotNull();
-        SchaffbarEvent event = expectSavedEvent(EventType.WORKSHOP_USAGE_LEFT);
-        assertThat(event.getAggregateId()).isEqualTo(active.getId().getValue().toString());
+        assertThat(running.getExitTime()).isNotNull();
+        expectSavedEvent(EventType.WORKSHOP_USAGE_LEFT, running);
     }
 
     @Test
@@ -165,8 +168,8 @@ class WorkshopUsageServiceTest {
 
         // then
         assertThat(thrown) //
-                .isInstanceOf(NoActiveWorkshopUsageFoundException.class) //
-                .hasFieldOrPropertyWithValue("code", NoActiveWorkshopUsageFoundException.CODE);
+                .isInstanceOf(NoRunningWorkshopUsageFoundException.class) //
+                .hasFieldOrPropertyWithValue("code", NoRunningWorkshopUsageFoundException.CODE);
         expectNoEvent();
     }
 
@@ -174,10 +177,10 @@ class WorkshopUsageServiceTest {
     // given
 
     private WorkshopUsage givenCustomerInTheWorkshop() {
-        WorkshopUsage active = WorkshopUsage.of(CustomerId.random(), WorkshopSessionId.random());
-        when(this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(active.getCustomerId())).thenReturn(Optional.of(active));
+        WorkshopUsage running = WorkshopUsage.of(CustomerId.random(), WorkshopSessionId.random());
+        when(this.workshopUsageRepository.findByCustomerIdAndExitTimeIsNull(running.getCustomerId())).thenReturn(Optional.of(running));
 
-        return active;
+        return running;
     }
 
     private CustomerId givenCustomerNotInTheWorkshop() {
@@ -194,7 +197,7 @@ class WorkshopUsageServiceTest {
     private List<WorkshopUsage> givenAFinishedAndARunningUsageOfTheSession(WorkshopSessionId workshopSessionId) {
         CustomerId customerId = CustomerId.random();
         WorkshopUsage finished = WorkshopUsage.of(customerId, workshopSessionId);
-        finished.exit();
+        finished.stop();
         WorkshopUsage running = WorkshopUsage.of(customerId, workshopSessionId);
         List<WorkshopUsage> usages = List.of(finished, running);
         when(this.workshopUsageRepository.findByWorkshopSessionId(workshopSessionId)).thenReturn(usages);
@@ -205,11 +208,25 @@ class WorkshopUsageServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private SchaffbarEvent expectSavedEvent(EventType type) {
+    private WorkshopUsage expectSavedUsage() {
+        verify(this.workshopUsageRepository).save(this.savedUsage.capture());
+
+        return this.savedUsage.getValue();
+    }
+
+    private void expectNothingSaved() {
+        verify(this.workshopUsageRepository, never()).save(any());
+        expectNoEvent();
+    }
+
+    private SchaffbarEvent expectSavedEvent(EventType type, WorkshopUsage usage) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
-                .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+                .satisfies(event -> {
+                    assertThat(event.getType()).isEqualTo(type);
+                    assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
+                });
 
         return this.events.getValue().getFirst();
     }

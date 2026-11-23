@@ -44,7 +44,7 @@ public class WorkshopUsageStop {
     // ------------------------------------------------------------------------
     // helper
 
-    // tells "never checked in" apart from "already checked out" (NoActiveWorkshopUsageFoundException)
+    // WU-9 – tells "never checked in" apart from "already checked out" (WU-2, NoRunningWorkshopUsageFoundException)
     private void ensureOpenWorkshopSession(CustomerId customerId) {
         if (this.workshopSessionService.getOpenWorkshopSession(customerId).isEmpty()) {
             throw new NoOpenWorkshopSessionException(customerId);
