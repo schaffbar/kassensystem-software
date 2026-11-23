@@ -35,7 +35,7 @@
       "INVALID_CERTIFICATION_STATE_TRANSITION": "Die Einweisung hat sich inzwischen geändert – die Seite neu laden.",
       "CUSTOMER_NOT_CERTIFIED_FOR_TOOL": "Die Person hat keine aktive Einweisung für dieses Werkzeug.",
       "CUSTOMER_ALREADY_IN_WORKSHOP": "Die Person ist schon in der Werkstatt eingecheckt.",
-      "NO_ACTIVE_WORKSHOP_USAGE_FOUND": "Die Person ist nicht eingecheckt – Auschecken ist erst nach dem Einchecken möglich.",
+      "NO_RUNNING_WORKSHOP_USAGE_FOUND": "Die Person ist nicht eingecheckt – Auschecken ist erst nach dem Einchecken möglich.",
       "CUSTOMER_NOT_IN_WORKSHOP": "Die Person ist nicht in der Werkstatt eingecheckt – ein Werkzeug lässt sich erst danach einschalten.",
       "MAX_TOOL_USAGE_EXCEEDED": "Die Person nutzt schon so viele Werkzeuge gleichzeitig wie erlaubt.",
       "CUSTOMER_ALREADY_USING_TOOL": "Die Person nutzt dieses Werkzeug schon.",
