@@ -51,6 +51,9 @@ class ToolUsageServiceTest {
     @Captor
     private ArgumentCaptor<List<SchaffbarEvent>> events;
 
+    @Captor
+    private ArgumentCaptor<ToolUsage> savedUsage;
+
     @InjectMocks
     private ToolUsageService toolUsageService;
 
@@ -79,6 +82,7 @@ class ToolUsageServiceTest {
         assertThat(total).isEqualTo(BillingTotal.of(List.of(first.getBillableDuration(), second.getBillableDuration())));
     }
 
+    // a guard against a bug – WorkshopSessionClose checks before that no usage is running (WS-5)
     @Test
     void getBillingTotal_rejectsASessionWithARunningUsage() {
         // given
@@ -90,6 +94,26 @@ class ToolUsageServiceTest {
 
         // then
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
+    }
+
+    // ------------------------------------------------------------------------
+    // getBillingTotalUntil
+
+    @Test
+    void getBillingTotalUntil_countsAFinishedUsageUntilItsEndAndARunningOneUntilNow() {
+        // given
+        StartToolUsageCommand command = startToolUsageCommand().build();
+        ToolUsage finished = ToolUsage.of(command);
+        finished.stop();
+        ToolUsage running = ToolUsage.of(command);
+        givenUsagesOfTheSession(command.workshopSessionId(), finished, running);
+        Instant now = Instant.now().plus(Duration.ofMinutes(13).plusSeconds(1));
+
+        // when
+        BillingTotal total = this.toolUsageService.getBillingTotalUntil(command.workshopSessionId(), now);
+
+        // then
+        assertThat(total).isEqualTo(BillingTotal.of(List.of(finished.getBillableDuration(), running.getBillableDurationUntil(now))));
     }
 
     // ------------------------------------------------------------------------
@@ -128,15 +152,16 @@ class ToolUsageServiceTest {
         StartToolUsageCommand command = startToolUsageCommand().build();
         givenToolNotInUse(command.toolId());
         givenCustomerNotUsingTheTool(command.customerId(), command.toolId());
-        givenActiveUsagesOfTheCustomer(command.customerId(), 1);
+        givenNumberOfRunningUsages(command.customerId(), 1);
 
         // when
         this.toolUsageService.startToolUsage(command);
 
         // then
-        verify(this.toolUsageRepository).save(any());
-        ToolUsageStartedPayload payload = expectSavedEvent(EventType.TOOL_USAGE_STARTED) //
+        ToolUsage usage = expectSavedUsage();
+        ToolUsageStartedPayload payload = expectSavedEvent(EventType.TOOL_USAGE_STARTED, usage) //
                 .deserializeAndValidatePayload(ToolUsageStartedPayload.class);
+        assertThat(payload.id()).isEqualTo(usage.getId());
         assertThat(payload.customerId()).isEqualTo(command.customerId());
         assertThat(payload.toolId()).isEqualTo(command.toolId());
         assertThat(payload.workshopSessionId()).isEqualTo(command.workshopSessionId());
@@ -163,8 +188,8 @@ class ToolUsageServiceTest {
     void startToolUsage_rejectsAToolTheCustomerAlreadyUses() {
         // given
         StartToolUsageCommand command = startToolUsageCommand().build();
-        ToolUsage active = givenToolInUseBy(command.customerId(), command.toolId());
-        givenCustomerUsingTheTool(active);
+        ToolUsage running = givenToolInUseBy(command.customerId(), command.toolId());
+        givenCustomerUsingTheTool(running);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageService.startToolUsage(command));
@@ -182,7 +207,7 @@ class ToolUsageServiceTest {
         StartToolUsageCommand command = startToolUsageCommand().build();
         givenToolNotInUse(command.toolId());
         givenCustomerNotUsingTheTool(command.customerId(), command.toolId());
-        givenActiveUsagesOfTheCustomer(command.customerId(), ToolUsageService.MAX_SIMULTANEOUS_TOOL_USAGES);
+        givenNumberOfRunningUsages(command.customerId(), ToolUsageService.MAX_SIMULTANEOUS_TOOL_USAGES);
 
         // when
         Throwable thrown = catchThrowable(() -> this.toolUsageService.startToolUsage(command));
@@ -200,15 +225,15 @@ class ToolUsageServiceTest {
     @Test
     void stopToolUsage_stopsTheUsageAndSavesTheEvent() {
         // given
-        ToolUsage active = ToolUsage.of(startToolUsageCommand().build());
-        givenCustomerUsingTheTool(active);
+        ToolUsage running = ToolUsage.of(startToolUsageCommand().build());
+        givenCustomerUsingTheTool(running);
 
         // when
-        this.toolUsageService.stopToolUsage(active.getCustomerId(), active.getToolId());
+        this.toolUsageService.stopToolUsage(running.getCustomerId(), running.getToolId());
 
         // then
-        assertThat(active.getEndTime()).isNotNull();
-        expectSavedEvents(EventType.TOOL_USAGE_STOPPED, List.of(active));
+        assertThat(running.getEndTime()).isNotNull();
+        expectSavedEvents(EventType.TOOL_USAGE_STOPPED, List.of(running));
     }
 
     @Test
@@ -232,7 +257,7 @@ class ToolUsageServiceTest {
     // stopToolUsages
 
     @Test
-    void stopToolUsages_stopsEveryActiveUsageOfTheCustomerWithOneEventEach() {
+    void stopToolUsages_stopsEveryRunningUsageOfTheCustomerWithOneEventEach() {
         // given
         StartToolUsageCommand onFirstTool = startToolUsageCommand().build();
         ToolUsage first = ToolUsage.of(onFirstTool);
@@ -249,7 +274,7 @@ class ToolUsageServiceTest {
     }
 
     @Test
-    void stopToolUsages_withoutActiveUsages_savesNoEvent() {
+    void stopToolUsages_withoutRunningUsages_savesNoEvent() {
         // given
         CustomerId customerId = CustomerId.random();
         givenRunningUsagesOfTheCustomer(customerId);
@@ -269,19 +294,19 @@ class ToolUsageServiceTest {
     }
 
     private ToolUsage givenToolInUseBy(CustomerId customerId, ToolId toolId) {
-        ToolUsage active = ToolUsage.of(startToolUsageCommand().customerId(customerId).toolId(toolId).build());
-        when(this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId)).thenReturn(Optional.of(active));
+        ToolUsage running = ToolUsage.of(startToolUsageCommand().customerId(customerId).toolId(toolId).build());
+        when(this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId)).thenReturn(Optional.of(running));
 
-        return active;
+        return running;
     }
 
     private void givenToolNotInUse(ToolId toolId) {
         when(this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId)).thenReturn(Optional.empty());
     }
 
-    private void givenCustomerUsingTheTool(ToolUsage active) {
-        when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(active.getCustomerId(), active.getToolId())) //
-                .thenReturn(Optional.of(active));
+    private void givenCustomerUsingTheTool(ToolUsage running) {
+        when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(running.getCustomerId(), running.getToolId())) //
+                .thenReturn(Optional.of(running));
     }
 
     private void givenRunningUsagesOfTheCustomer(CustomerId customerId, ToolUsage... usages) {
@@ -292,18 +317,27 @@ class ToolUsageServiceTest {
         when(this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId)).thenReturn(Optional.empty());
     }
 
-    private void givenActiveUsagesOfTheCustomer(CustomerId customerId, long count) {
+    private void givenNumberOfRunningUsages(CustomerId customerId, long count) {
         when(this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId)).thenReturn(count);
     }
 
     // ------------------------------------------------------------------------
     // then
 
-    private SchaffbarEvent expectSavedEvent(EventType type) {
+    private ToolUsage expectSavedUsage() {
+        verify(this.toolUsageRepository).save(this.savedUsage.capture());
+
+        return this.savedUsage.getValue();
+    }
+
+    private SchaffbarEvent expectSavedEvent(EventType type, ToolUsage usage) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
-                .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+                .satisfies(event -> {
+                    assertThat(event.getType()).isEqualTo(type);
+                    assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
+                });
 
         return this.events.getValue().getFirst();
     }

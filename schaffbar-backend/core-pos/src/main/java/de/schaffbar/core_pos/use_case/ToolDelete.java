@@ -42,7 +42,7 @@ public class ToolDelete {
 
     // the usage of the person at the tool would never end (T-17)
     private void ensureToolNotInUse(ToolId toolId) {
-        this.toolUsageService.getActiveToolUsage(toolId) //
+        this.toolUsageService.getRunningToolUsage(toolId) //
                 .ifPresent(_ -> throwToolInUseException(toolId));
     }
 

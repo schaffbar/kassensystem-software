@@ -25,7 +25,7 @@ interface ToolUsageRepository extends JpaRepository<ToolUsage, UUID> {
     default Optional<ToolUsage> findByCustomerIdAndToolIdAndEndTimeIsNull(CustomerId customerId, ToolId toolId) {
         List<ToolUsage> usages = findByCustomerIdAndToolIdAndEndTimeIsNull(customerId.getValue(), toolId.getValue());
         if (usages.size() > 1) {
-            throw new IllegalStateException("More than one active tool usage of customer [id: " + customerId.getValue() + "] on tool [id: "
+            throw new IllegalStateException("More than one running tool usage of customer [id: " + customerId.getValue() + "] on tool [id: "
                     + toolId.getValue() + "]");
         }
 
@@ -37,7 +37,7 @@ interface ToolUsageRepository extends JpaRepository<ToolUsage, UUID> {
     default Optional<ToolUsage> findByToolIdAndEndTimeIsNull(ToolId toolId) {
         List<ToolUsage> usages = findByToolIdAndEndTimeIsNull(toolId.getValue());
         if (usages.size() > 1) {
-            throw new IllegalStateException("More than one active tool usage on tool [id: " + toolId.getValue() + "]");
+            throw new IllegalStateException("More than one running tool usage on tool [id: " + toolId.getValue() + "]");
         }
 
         return usages.stream().findFirst();

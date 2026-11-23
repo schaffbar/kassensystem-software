@@ -10,7 +10,7 @@ public class ToolNotInUseByCustomerException extends BusinessRuleViolationExcept
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String MESSAGE = "No active tool usage found for customer [id: %s] and tool [id: %s]";
+    private static final String MESSAGE = "No running tool usage found for customer [id: %s] and tool [id: %s]";
 
     public static final String CODE = "TOOL_NOT_IN_USE_BY_CUSTOMER";
 

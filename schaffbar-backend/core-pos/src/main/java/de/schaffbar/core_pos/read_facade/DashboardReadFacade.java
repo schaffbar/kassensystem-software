@@ -48,7 +48,7 @@ public class DashboardReadFacade {
     // every tool switched on right now, with the person using it
     @Query
     public List<ActiveToolUsageView> getActiveToolUsages() {
-        return this.toolUsageService.getActiveToolUsages().stream() //
+        return this.toolUsageService.getRunningToolUsages().stream() //
                 .map(this::toActiveToolUsageView) //
                 .toList();
     }

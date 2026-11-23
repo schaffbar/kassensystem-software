@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.domain.workshop_session.web;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -188,7 +188,7 @@ class WorkshopSessionControllerTest {
                         .toolName("Kreissäge") //
                         .active(true) //
                         .total(new BillingTotal(7, 2)) //
-                        .usages(List.of(activeToolUsageView(toolId).build())) //
+                        .usages(List.of(runningToolUsageView(toolId).build())) //
                         .build())) //
                 .build();
         when(this.workshopSessionReadFacade.getOpenWorkshopSession(session.customerId())).thenReturn(Optional.of(open));

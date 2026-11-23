@@ -3,9 +3,7 @@ package de.schaffbar.core_pos.domain.tool_usage;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,14 +87,6 @@ class ToolUsage {
         return WorkshopSessionId.of(this.workshopSessionId);
     }
 
-    public Duration getDuration() {
-        if (isNull(this.startTime) || isNull(this.endTime)) {
-            return null;
-        }
-
-        return Duration.between(this.startTime.truncatedTo(ChronoUnit.SECONDS), this.endTime.truncatedTo(ChronoUnit.SECONDS));
-    }
-
     public BillableDuration getBillableDuration() {
         return isNull(this.endTime) ? null : BillableDuration.between(this.startTime, this.endTime);
     }
@@ -109,6 +99,7 @@ class ToolUsage {
     // command
 
     public List<SchaffbarEvent> stop() {
+        // the service finds only a running usage (TU-12, TU-4)
         if (nonNull(this.endTime)) {
             throw new IllegalStateException("Tool usage [id: " + this.id + "] has already been stopped");
         }
@@ -117,8 +108,5 @@ class ToolUsage {
 
         return List.of(ToolUsageEventFactory.toolUsageStopped(this));
     }
-
-    // ------------------------------------------------------------------------
-    // helper
 
 }

@@ -1,10 +1,10 @@
 package de.schaffbar.core_pos.read_facade;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.finishedToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -92,7 +92,7 @@ class WorkshopSessionReadFacadeTest {
         Instant start = Instant.now().minusSeconds(3600);
         ToolUsageView drillUsage = finishedToolUsageView(drill.id()).startTime(start).build();
         ToolUsageView firstSawUsage = finishedToolUsageView(saw.id()).startTime(start.plusSeconds(60)).build();
-        ToolUsageView runningSawUsage = activeToolUsageView(saw.id()).build();
+        ToolUsageView runningSawUsage = runningToolUsageView(saw.id()).build();
         BillingTotal drillTotal = new BillingTotal(7, 2);
         BillingTotal sawTotal = new BillingTotal(19, 4);
         WorkshopSessionView session = givenOpenSession(List.of(), BillingTotal.ZERO, List.of(drillUsage, firstSawUsage, runningSawUsage),

@@ -192,7 +192,7 @@ public class ViewBuilder {
     // ------------------------------------------------------------------------
     // tool usage
 
-    public static ToolUsageViewBuilder activeToolUsageView(ToolId toolId) {
+    public static ToolUsageViewBuilder runningToolUsageView(ToolId toolId) {
         return ToolUsageView.builder() //
                 .id(ToolUsageId.random()) //
                 .customerId(CustomerId.random()) //

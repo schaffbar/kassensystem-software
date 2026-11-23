@@ -36,7 +36,6 @@ class ToolUsageTest {
         assertThat(usage.getWorkshopSessionId()).isEqualTo(command.workshopSessionId());
         assertThat(usage.getStartTime()).isNotNull();
         assertThat(usage.getEndTime()).isNull();
-        assertThat(usage.getDuration()).isNull();
     }
 
     // ------------------------------------------------------------------------
@@ -52,14 +51,9 @@ class ToolUsageTest {
 
         // then
         assertThat(usage.getEndTime()).isAfterOrEqualTo(usage.getStartTime());
-        assertThat(usage.getDuration()).isGreaterThanOrEqualTo(Duration.ZERO);
 
-        assertThat(events).hasSize(1);
-        SchaffbarEvent event = events.getFirst();
-        assertThat(event.getType()).isEqualTo(EventType.TOOL_USAGE_STOPPED);
-        assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
-
-        ToolUsageStoppedPayload payload = event.deserializeAndValidatePayload(ToolUsageStoppedPayload.class);
+        ToolUsageStoppedPayload payload = expectSingleEvent(events, EventType.TOOL_USAGE_STOPPED, usage) //
+                .deserializeAndValidatePayload(ToolUsageStoppedPayload.class);
         assertThat(payload.id()).isEqualTo(usage.getId());
         assertThat(payload.customerId()).isEqualTo(usage.getCustomerId());
         assertThat(payload.toolId()).isEqualTo(usage.getToolId());
@@ -71,8 +65,7 @@ class ToolUsageTest {
     @Test
     void stop_rejectsAStoppedUsage() {
         // given
-        ToolUsage usage = givenRunningUsage();
-        usage.stop();
+        ToolUsage usage = givenStoppedUsage();
         Instant endTime = usage.getEndTime();
 
         // when
@@ -98,6 +91,18 @@ class ToolUsageTest {
         assertThat(duration).isNull();
     }
 
+    @Test
+    void getBillableDuration_ofAStoppedUsage_isFromStartToEnd() {
+        // given
+        ToolUsage usage = givenStoppedUsage();
+
+        // when
+        BillableDuration duration = usage.getBillableDuration();
+
+        // then
+        assertThat(duration).isEqualTo(BillableDuration.between(usage.getStartTime(), usage.getEndTime()));
+    }
+
     // ------------------------------------------------------------------------
     // getBillableDurationUntil
 
@@ -119,15 +124,13 @@ class ToolUsageTest {
     @Test
     void getBillableDurationUntil_ignoresNowForAFinishedUsage() {
         // given
-        ToolUsage usage = givenRunningUsage();
-        usage.stop();
+        ToolUsage usage = givenStoppedUsage();
 
         // when
         BillableDuration duration = usage.getBillableDurationUntil(Instant.now().plus(Duration.ofHours(1)));
 
         // then
         assertThat(duration).isEqualTo(usage.getBillableDuration());
-        assertThat(duration.getDuration()).isEqualTo(usage.getDuration());
     }
 
     // ------------------------------------------------------------------------
@@ -135,6 +138,25 @@ class ToolUsageTest {
 
     private ToolUsage givenRunningUsage() {
         return ToolUsage.of(startToolUsageCommand().build());
+    }
+
+    private ToolUsage givenStoppedUsage() {
+        ToolUsage usage = givenRunningUsage();
+        usage.stop();
+
+        return usage;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private SchaffbarEvent expectSingleEvent(List<SchaffbarEvent> events, EventType type, ToolUsage usage) {
+        assertThat(events).hasSize(1);
+        SchaffbarEvent event = events.getFirst();
+        assertThat(event.getType()).isEqualTo(type);
+        assertThat(event.getAggregateId()).isEqualTo(usage.getId().getValue().toString());
+
+        return event;
     }
 
 }

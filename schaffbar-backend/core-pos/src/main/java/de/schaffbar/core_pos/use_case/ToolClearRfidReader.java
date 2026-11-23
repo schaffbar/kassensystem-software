@@ -34,7 +34,7 @@ public class ToolClearRfidReader {
 
     // the person at the tool could no longer stop the usage at its switch box (T-14)
     private void ensureToolNotInUse(ToolId toolId) {
-        this.toolUsageService.getActiveToolUsage(toolId) //
+        this.toolUsageService.getRunningToolUsage(toolId) //
                 .ifPresent(_ -> throwToolInUseException(toolId));
     }
 

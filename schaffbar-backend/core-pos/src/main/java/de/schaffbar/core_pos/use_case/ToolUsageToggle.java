@@ -26,7 +26,7 @@ public class ToolUsageToggle {
     // the switch box has one action: holding the tag switches the tool off when the person uses it, else on (TU-11)
     @Command
     public void process(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        if (this.toolUsageService.getActiveToolUsage(customerId, toolId).isPresent()) {
+        if (this.toolUsageService.getRunningToolUsage(customerId, toolId).isPresent()) {
             this.toolUsageStop.process(customerId, toolId);
         }
         else {

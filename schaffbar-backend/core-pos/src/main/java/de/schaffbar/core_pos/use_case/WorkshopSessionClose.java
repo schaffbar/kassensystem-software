@@ -64,7 +64,7 @@ public class WorkshopSessionClose {
 
     // WS-5
     private void ensureNoToolUsageRunning(WorkshopSessionId workshopSessionId) {
-        if (this.toolUsageService.hasActiveToolUsage(workshopSessionId)) {
+        if (this.toolUsageService.hasRunningToolUsage(workshopSessionId)) {
             throw new ActiveToolUsageExistsForSessionException(workshopSessionId);
         }
     }

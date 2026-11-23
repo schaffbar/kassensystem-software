@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.read_facade;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -93,7 +93,7 @@ class DashboardReadFacadeTest {
         // given
         ToolView saw = givenTool("Kreissäge");
         CustomerView anna = givenCustomer("Anna");
-        ToolUsageView usage = activeToolUsageView(saw.id()).customerId(anna.id()).build();
+        ToolUsageView usage = runningToolUsageView(saw.id()).customerId(anna.id()).build();
         givenActiveToolUsages(usage);
 
         // when
@@ -106,7 +106,7 @@ class DashboardReadFacadeTest {
     @Test
     void getActiveToolUsages_withoutTheToolOfAUsage_isABug() {
         // given
-        ToolUsageView usage = activeToolUsageView(ToolId.random()).build();
+        ToolUsageView usage = runningToolUsageView(ToolId.random()).build();
         givenActiveToolUsages(usage);
         givenNoTool(usage.toolId());
 
@@ -121,7 +121,7 @@ class DashboardReadFacadeTest {
     void getActiveToolUsages_withoutTheCustomerOfAUsage_isABug() {
         // given
         ToolView saw = givenTool("Kreissäge");
-        ToolUsageView usage = activeToolUsageView(saw.id()).build();
+        ToolUsageView usage = runningToolUsageView(saw.id()).build();
         givenActiveToolUsages(usage);
         givenNoCustomer(usage.customerId());
 
@@ -140,7 +140,7 @@ class DashboardReadFacadeTest {
     }
 
     private void givenActiveToolUsages(ToolUsageView... usages) {
-        when(this.toolUsageService.getActiveToolUsages()).thenReturn(List.of(usages));
+        when(this.toolUsageService.getRunningToolUsages()).thenReturn(List.of(usages));
     }
 
     private CustomerView givenCustomer(String firstName) {

@@ -1,6 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -44,8 +44,7 @@ class ToolUsageToggleTest {
         this.toolUsageToggle.process(customerId, toolId);
 
         // then
-        verify(this.toolUsageStart).process(customerId, toolId);
-        verify(this.toolUsageStop, never()).process(any(), any());
+        expectSwitchedOn(customerId, toolId);
     }
 
     @Test
@@ -59,20 +58,32 @@ class ToolUsageToggleTest {
         this.toolUsageToggle.process(customerId, toolId);
 
         // then
-        verify(this.toolUsageStop).process(customerId, toolId);
-        verify(this.toolUsageStart, never()).process(any(), any());
+        expectSwitchedOff(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------
     // given
 
     private void givenToolNotInUseBy(CustomerId customerId, ToolId toolId) {
-        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)).thenReturn(Optional.empty());
+        when(this.toolUsageService.getRunningToolUsage(customerId, toolId)).thenReturn(Optional.empty());
     }
 
     private void givenToolInUseBy(CustomerId customerId, ToolId toolId) {
-        when(this.toolUsageService.getActiveToolUsage(customerId, toolId)) //
-                .thenReturn(Optional.of(activeToolUsageView(toolId).customerId(customerId).build()));
+        when(this.toolUsageService.getRunningToolUsage(customerId, toolId)) //
+                .thenReturn(Optional.of(runningToolUsageView(toolId).customerId(customerId).build()));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectSwitchedOn(CustomerId customerId, ToolId toolId) {
+        verify(this.toolUsageStart).process(customerId, toolId);
+        verify(this.toolUsageStop, never()).process(any(), any());
+    }
+
+    private void expectSwitchedOff(CustomerId customerId, ToolId toolId) {
+        verify(this.toolUsageStop).process(customerId, toolId);
+        verify(this.toolUsageStart, never()).process(any(), any());
     }
 
 }

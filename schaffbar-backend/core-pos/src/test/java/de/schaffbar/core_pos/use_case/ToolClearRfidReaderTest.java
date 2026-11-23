@@ -1,6 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
-import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,14 +65,14 @@ class ToolClearRfidReaderTest {
 
     private ToolId givenToolNobodyUses() {
         ToolId toolId = ToolId.random();
-        when(this.toolUsageService.getActiveToolUsage(toolId)).thenReturn(Optional.empty());
+        when(this.toolUsageService.getRunningToolUsage(toolId)).thenReturn(Optional.empty());
 
         return toolId;
     }
 
     private ToolId givenToolInUse() {
         ToolId toolId = ToolId.random();
-        when(this.toolUsageService.getActiveToolUsage(toolId)).thenReturn(Optional.of(activeToolUsageView(toolId).build()));
+        when(this.toolUsageService.getRunningToolUsage(toolId)).thenReturn(Optional.of(runningToolUsageView(toolId).build()));
 
         return toolId;
     }

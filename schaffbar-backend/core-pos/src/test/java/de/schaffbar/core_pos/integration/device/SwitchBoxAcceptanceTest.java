@@ -139,19 +139,19 @@ class SwitchBoxAcceptanceTest {
     // card
 
     @Test
-    void card_switchesTheToolOnAndOff() {
+    void card_toolNotRunning_switchesItOn() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
 
         // when
-        MvcTestResult switchedOn = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
 
         // then
-        this.fixture.then().expectDeviceAnswer(switchedOn, """
+        this.fixture.then().expectDeviceAnswer(result, """
                 {
                     "DEVUSECASE": "S",
                     "STATE": "WORKING",
@@ -162,12 +162,25 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": ""
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+        this.fixture.then().expectToolRunning(customerId, toolId);
+    }
+
+    // TU-11
+    @Test
+    void card_toolRunning_switchesItOff() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+        this.fixture.given().toolUsage(scenario.rfidTagId(), scenario.macAddress());
 
         // when
-        MvcTestResult switchedOff = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
 
         // then
-        this.fixture.then().expectDeviceAnswer(switchedOff, """
+        this.fixture.then().expectDeviceAnswer(result, """
                 {
                     "DEVUSECASE": "S",
                     "STATE": "END",
@@ -178,15 +191,47 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": ""
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+        this.fixture.then().expectToolStopped(customerId, toolId);
     }
 
+    // TU-10
+    @Test
+    void card_redToolWithCertification_switchesItOn() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.RED);
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+        CustomerId instructorId = this.fixture.given().instructor(toolId);
+        this.fixture.given().toolCertification(customerId, toolId, instructorId);
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "S",
+                    "STATE": "WORKING",
+                    "ERROR": "",
+                    "ICON": "",
+                    "CUSTOMERNAME": "%s",
+                    "CUSTOMERSTARTSTOP": "%s",
+                    "UNITS": ""
+                }
+                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+        this.fixture.then().expectToolRunning(customerId, toolId);
+    }
+
+    // TU-2
     @Test
     void card_notInTheWorkshop_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
         this.fixture.given().rfidTag(scenario.rfidTagId());
         CustomerId customerId = this.fixture.given().customerWithRfidTag(scenario.rfidTagId());
 
@@ -204,15 +249,17 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
+    // TU-10
     @Test
     void card_redToolWithoutCertification_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.RED);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.RED);
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
 
         // when
@@ -229,6 +276,7 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
     // TU-10 – a paused certification counts like none
@@ -257,30 +305,31 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
+    // TU-1
     @Test
     void card_thirdToolAtTheSameTime_isRefused() {
-        RfidTagId rfidTagId = RandomValues.rfidTagId();
+        Scenario scenario = Scenario.randomValues().build();
         MacAddress firstSwitchBoxMacAddress = RandomValues.macAddress();
         MacAddress secondSwitchBoxMacAddress = RandomValues.macAddress();
-        MacAddress thirdSwitchBoxMacAddress = RandomValues.macAddress();
 
         // given
         RfidReaderId firstSwitchBox = this.fixture.given().switchBox(firstSwitchBoxMacAddress);
         RfidReaderId secondSwitchBox = this.fixture.given().switchBox(secondSwitchBoxMacAddress);
-        RfidReaderId thirdSwitchBox = this.fixture.given().switchBox(thirdSwitchBoxMacAddress);
+        RfidReaderId thirdSwitchBox = this.fixture.given().switchBox(scenario.macAddress());
 
         this.fixture.given().toolWithSwitchBox(RandomValues.toolName(), firstSwitchBox, CertificationRequirement.YELLOW);
         this.fixture.given().toolWithSwitchBox(RandomValues.toolName(), secondSwitchBox, CertificationRequirement.YELLOW);
-        this.fixture.given().toolWithSwitchBox(RandomValues.toolName(), thirdSwitchBox, CertificationRequirement.YELLOW);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), thirdSwitchBox, CertificationRequirement.YELLOW);
 
-        CustomerId customerId = this.fixture.given().customerInTheWorkshop(rfidTagId);
-        this.fixture.given().toolUsage(rfidTagId, firstSwitchBoxMacAddress);
-        this.fixture.given().toolUsage(rfidTagId, secondSwitchBoxMacAddress);
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+        this.fixture.given().toolUsage(scenario.rfidTagId(), firstSwitchBoxMacAddress);
+        this.fixture.given().toolUsage(scenario.rfidTagId(), secondSwitchBoxMacAddress);
 
         // when
-        MvcTestResult result = this.fixture.api().holdRfidTagToReader(rfidTagId, thirdSwitchBoxMacAddress);
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
 
         // then
         this.fixture.then().expectDeviceAnswer(result, """
@@ -293,8 +342,10 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
+    // TU-9
     @Test
     void card_toolUsedByAnotherCustomer_isRefused() {
         Scenario scenario = Scenario.randomValues().build();
@@ -302,7 +353,7 @@ class SwitchBoxAcceptanceTest {
 
         // given
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
-        this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.YELLOW);
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
 
         this.fixture.given().customerInTheWorkshop(otherRfidTagId);
@@ -322,6 +373,7 @@ class SwitchBoxAcceptanceTest {
                     "UNITS": "0"
                 }
                 """.formatted(this.fixture.then().fullNameOf(customerId)));
+        this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
     @Test

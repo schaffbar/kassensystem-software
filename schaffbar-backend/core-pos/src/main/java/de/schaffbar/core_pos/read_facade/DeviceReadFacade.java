@@ -96,7 +96,7 @@ public class DeviceReadFacade {
 
     @Query
     public boolean isToolInUse(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
-        return this.toolUsageService.getActiveToolUsage(customerId, toolId).isPresent();
+        return this.toolUsageService.getRunningToolUsage(customerId, toolId).isPresent();
     }
 
     // read right after a check-in or check-out, so the session is open

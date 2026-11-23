@@ -229,6 +229,20 @@ public final class ThenFixture {
                 .containsExactly(true);
     }
 
+    // the customer has no running usage of the tool – also when they have no open session at all
+    public void expectToolNotRunningFor(CustomerId customerId, ToolId toolId) {
+        MvcTestResult result = this.api.getOpenWorkshopSession(customerId);
+        assertThat(result).hasStatus(HttpStatus.OK);
+        if (result.getResponse().getContentAsByteArray().length == 0) {
+            return;
+        }
+
+        assertThat(result).bodyJson() //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s' && @.active == true)]".formatted(toolId.getValue())) //
+                .asArray() //
+                .isEmpty();
+    }
+
     public void expectToolStopped(CustomerId customerId, ToolId toolId) {
         assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
                 .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].active".formatted(toolId.getValue())) //

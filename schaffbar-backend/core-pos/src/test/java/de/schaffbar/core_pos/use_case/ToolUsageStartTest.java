@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.startToolUsageCommand;
 import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
@@ -22,13 +23,13 @@ import de.schaffbar.core_pos.domain.tool.CertificationRequirement;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
-import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.shared.exception.CustomerNotCertifiedForToolException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInWorkshopException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -63,8 +64,8 @@ class ToolUsageStartTest {
         this.toolUsageStart.process(inWorkshop.customerId(), tool.id());
 
         // then
-        verify(this.toolUsageService).startToolUsage(new StartToolUsageCommand(inWorkshop.customerId(), tool.id(), inWorkshop.workshopSessionId()));
-        verifyNoInteractions(this.toolCertificationService);
+        expectStartedInTheSessionOf(inWorkshop, tool);
+        expectNoCertificationLookedUp();
     }
 
     @Test
@@ -78,7 +79,7 @@ class ToolUsageStartTest {
         this.toolUsageStart.process(inWorkshop.customerId(), tool.id());
 
         // then
-        verify(this.toolUsageService).startToolUsage(new StartToolUsageCommand(inWorkshop.customerId(), tool.id(), inWorkshop.workshopSessionId()));
+        expectStartedInTheSessionOf(inWorkshop, tool);
     }
 
     @Test
@@ -126,7 +127,9 @@ class ToolUsageStartTest {
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(customerId, unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.TOOL);
         expectNothingStarted();
     }
 
@@ -139,7 +142,9 @@ class ToolUsageStartTest {
         Throwable thrown = catchThrowable(() -> this.toolUsageStart.process(unknown, ToolId.random()));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
         expectNothingStarted();
     }
 
@@ -195,6 +200,18 @@ class ToolUsageStartTest {
 
     // ------------------------------------------------------------------------
     // then
+
+    private void expectStartedInTheSessionOf(WorkshopUsageView inWorkshop, ToolView tool) {
+        verify(this.toolUsageService).startToolUsage(startToolUsageCommand() //
+                .customerId(inWorkshop.customerId()) //
+                .toolId(tool.id()) //
+                .workshopSessionId(inWorkshop.workshopSessionId()) //
+                .build());
+    }
+
+    private void expectNoCertificationLookedUp() {
+        verifyNoInteractions(this.toolCertificationService);
+    }
 
     private void expectNothingStarted() {
         verifyNoInteractions(this.toolUsageService);

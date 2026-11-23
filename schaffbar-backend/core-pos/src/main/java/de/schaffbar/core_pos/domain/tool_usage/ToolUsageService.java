@@ -52,20 +52,20 @@ public class ToolUsageService {
     // query
 
     @Query
-    public List<ToolUsageView> getActiveToolUsages() {
+    public List<ToolUsageView> getRunningToolUsages() {
         return this.toolUsageRepository.findByEndTimeIsNull().stream() //
                 .map(ToolUsageViews.MAPPER::toToolUsageView) //
                 .toList();
     }
 
     @Query
-    public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid ToolId toolId) {
+    public Optional<ToolUsageView> getRunningToolUsage(@NotNull @Valid ToolId toolId) {
         return this.toolUsageRepository.findByToolIdAndEndTimeIsNull(toolId) //
                 .map(ToolUsageViews.MAPPER::toToolUsageView);
     }
 
     @Query
-    public Optional<ToolUsageView> getActiveToolUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
+    public Optional<ToolUsageView> getRunningToolUsage(@NotNull @Valid CustomerId customerId, @NotNull @Valid ToolId toolId) {
         return this.toolUsageRepository.findByCustomerIdAndToolIdAndEndTimeIsNull(customerId, toolId) //
                 .map(ToolUsageViews.MAPPER::toToolUsageView);
     }
@@ -79,7 +79,7 @@ public class ToolUsageService {
     }
 
     @Query
-    public boolean hasActiveToolUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
+    public boolean hasRunningToolUsage(@NotNull @Valid WorkshopSessionId workshopSessionId) {
         return this.toolUsageRepository.existsByWorkshopSessionIdAndEndTimeIsNull(workshopSessionId);
     }
 
@@ -142,12 +142,12 @@ public class ToolUsageService {
 
     @Command
     public void stopToolUsages(@NotNull @Valid CustomerId customerId) {
-        List<ToolUsage> activeUsages = this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(customerId);
-        if (activeUsages.isEmpty()) {
+        List<ToolUsage> runningUsages = this.toolUsageRepository.findByCustomerIdAndEndTimeIsNull(customerId);
+        if (runningUsages.isEmpty()) {
             return;
         }
 
-        List<SchaffbarEvent> events = activeUsages.stream() //
+        List<SchaffbarEvent> events = runningUsages.stream() //
                 .map(ToolUsage::stop) //
                 .flatMap(List::stream) //
                 .toList();
@@ -161,11 +161,16 @@ public class ToolUsageService {
     // helper
 
     private BillableDuration getFinalBillableDuration(ToolUsage usage) {
+        ensureStopped(usage);
+
+        return usage.getBillableDuration();
+    }
+
+    // WS-5 – WorkshopSessionClose checks before that no usage of the session is running
+    private void ensureStopped(ToolUsage usage) {
         if (isNull(usage.getEndTime())) {
             throw new IllegalStateException("Tool usage [id: " + usage.getId().getValue() + "] is still running");
         }
-
-        return usage.getBillableDuration();
     }
 
     // TU-9
@@ -183,8 +188,8 @@ public class ToolUsageService {
 
     // TU-1
     private void ensureMaxSimultaneousUsagesNotExceeded(CustomerId customerId) {
-        long activeCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
-        if (activeCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
+        long runningCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
+        if (runningCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
             throw new MaxToolUsageExceededException(customerId, MAX_SIMULTANEOUS_TOOL_USAGES);
         }
     }
