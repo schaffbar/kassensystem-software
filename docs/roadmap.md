@@ -149,11 +149,11 @@ Entscheidung 13.11.2026.
    Erklärung im Portal.
    - [x] `backend-testing` – 16.11.2026: Testebenen, Benennung, Integrationstests mit Testcontainers und
      `SchaffbarFixture`, Pilot `RfidReaderAcceptanceTest`
-6. [ ] **Backend-Review** (22.11.2026) gegen `CLAUDE.md`, die Skills `aggregate` / `backend-testing` und die
+6. [x] **Backend-Review** (22.11.2026) gegen `CLAUDE.md`, die Skills `aggregate` / `backend-testing` und die
    Entscheidungen – die Liste mit allen Funden und der Reihenfolge in `backend-review.md`: zuerst die Entscheidungen,
    dann die Regeldokumente, dann pro Aggregat Code, Tests und README, dann Übergreifendes, die Fehler im Verhalten zum
    Schluss (noch kein Betrieb). Stand 23.11.2026: Abschnitte 1–4 erledigt (Entscheidungen, Regeldokumente, alle
-   Aggregate, Übergreifendes), aus Abschnitt 5 alles bis auf die Zeitzone am Gerät.
+   Aggregate, Übergreifendes) und Abschnitt 5 – alle Punkte des Reviews erledigt, 23.11.2026 (Commit folgt).
 
 Danach A2 mit den Skills – vielleicht als erster Versuch der Pipeline (P).
 

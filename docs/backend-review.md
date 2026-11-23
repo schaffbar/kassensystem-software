@@ -609,9 +609,15 @@ Service oder Use Case“, `IpAddress` fehlte, das Inhaltsverzeichnis passte nich
   23.11.2026 im Schritt `web/device`: jeder Fehler gibt „Unerwarteter Fehler“ in der Antwort des Endpunkts, `@Valid`
   am Body entfernt (`@NotNull` bleibt, Regel für alle Beans); Tests `…_brokenMacAddress_…` (`UnconfiguredReaderAcceptanceTest`, alle drei Endpunkte) und
   `…_blankTag_…` (`RfidTagRegisterAcceptanceTest`, `GateKeeperInAcceptanceTest`).
-- [ ] ✔ **Uhrzeit am Gerät hängt an der Zeitzone der JVM** (`DeviceApiModel:84, 174, 189, 192`); Image und Compose
+- [x] ✔ **Uhrzeit am Gerät hängt an der Zeitzone der JVM** (`DeviceApiModel:84, 174, 189, 192`); Image und Compose
   setzen kein `TZ` – auf dem Server prüfen, feste Zone `Europe/Berlin`; betrifft auch `LocalDate.now()` der
-  Altersgruppe (Entscheidung oben).
+  Altersgruppe (Entscheidung oben). – erledigt 23.11.2026: feste Zone im Code, unabhängig vom
+  Server – `shared/time/WorkshopTime` (`ZONE = Europe/Berlin`, `today()`) in `DeviceApiModel` (Uhrzeit für `/init`,
+  Ein- und Austrittszeit), `CustomerViews` (Altersgruppe) und `DateOfBirthValidator` (aktuelles Jahr), dazu die Tests,
+  die „heute“ rechnen. `DeviceApiModelTest` prüft Winter- und Sommerzeit und die Nacht der Umstellung, mit einer JVM in
+  `America/New_York`; ArchUnit `TimeArchitectureTest` verbietet `now()` ohne Zone, `ZoneId.systemDefault()` und
+  Verwandte. Gegenprobe mit dem alten Code: alle sechs Stellen gemeldet, alle sechs Zeitfälle scheitern. `TZ` in Image
+  oder Compose ist nicht mehr nötig; auf dem Server nicht geprüft.
 - [x] ✔ **`IpAddress` nimmt `+1.+2.+3.+4` und `-0.-0.-0.-0`** (`Integer.parseInt` erlaubt ein Vorzeichen,
   `IpAddress:35`) – nur Ziffern zulassen; dazu `IpAddressTest` – erledigt 23.11.2026 im Schritt `shared/` (auch Ziffern
   anderer Schriften wie `١٩٢`, die `parseInt` ebenfalls nimmt).
