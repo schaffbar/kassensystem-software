@@ -425,8 +425,13 @@ Absicherung in `close()` mit Kommentar; `close()` über die Setter; `Running…E
 `void`); `@Valid` an den Pfadvariablen; README WS-2, WS-4, Befehle, Satz zu WS-6. `ViewBuilder` neu
 `openWorkshopSessionWithUsagesView`, `toolUsageSummaryView`; `ThenFixture.expectNewWorkshopSession`.
 
-- [ ] Teil (b), E6 an der API mit Portal: `GET /workshop-sessions/{customerId}/active` → `…/open` (dazu die zwei TODOs
-  „REST“ im Controller), Feld `active` in `ToolUsageSummaryApiDto` / `ToolUsageSummaryView` → `running`.
+- [x] Teil (b), E6 an der API mit Portal: `GET /workshop-sessions/{customerId}/active` → `…/open` (dazu die zwei TODOs
+  „REST“ im Controller), Feld `active` in `ToolUsageSummaryApiDto` / `ToolUsageSummaryView` → `running` – 23.11.2026,
+  der kleine Weg: die Theke kennt die Person, nicht die Sitzung (E29), die TODOs sind durch Kommentare ersetzt. Portal:
+  `openWorkshopSessionResource`, `getOpenWorkshopSession`, Feld `running` in Schema, Fixtures, Feature-Modell, Mapper,
+  Dialog und Specs; Skills `api` und `dialog` angepasst. 631 Backend-Tests, `npm run check` grün. Im Browser geprüft (neu
+  deployt, ohne Schreiben): Tab „Offene Sitzung“ mit simuliert laufendem Werkzeug (Desktop, Handy), Dialog „Sitzung
+  beenden & abrechnen“, Hinweis vor dem Löschen bei offener Sitzung; Anfragen an `/open`, alter Pfad 404, Konsole sauber.
 
 - [x] E6: `ActiveToolUsageExistsForSessionException` und `ActiveWorkshopUsageExistsForSessionException` → `Running…`,
   mit ihren Codes und den Übersetzungen im Portal (`shared.errors.…`).
@@ -453,40 +458,69 @@ Absicherung in `close()` mit Kommentar; `close()` über die Setter; `Running…E
 
 ### `shared/`
 
-- [ ] `SchaffbarEvent`: `implements ValidationSupport` ohne Aufruf (`:53`), `@NotBlank` auf `UUID id` (`:59`), öffentliche
+Erledigt 23.11.2026 (alle Punkte unten), 655 Backend-Tests grün: `SchaffbarEvent` ist ein unveränderlicher `@Value`
+mit privatem Konstruktor und Builder – ohne `ValidationSupport` und ohne Constraints, die niemand prüfte (die Spalten
+prüft `OutboxEvent` beim Speichern); `deserializeAndValidatePayload` nimmt nur noch `EventPayload` und ruft dessen
+`validate()`. `ValidationSupport` nutzt einen `Validator` für die ganze Anwendung (`DefaultValidator`).
+`ResourceNotFoundException.CODE` mit der ArchUnit-Regel `exceptionsDeclareTheirCode` (jetzt jede konkrete Exception in
+`shared/exception/`); die Tests nutzen die Konstante, nur `ApiExceptionHandlerTest` behält das Literal mit Kommentar
+(der Vertrag mit dem Portal). Mitgenommen aus Abschnitt 5: `IpAddress` (nur ASCII-Ziffern), `BillableDuration`
+(negativ → `IllegalStateException`), `@NotBlank` an der UUID. Gegenprobe: mit dem alten Code scheitern
+`IpAddressTest.of_notOnlyAsciiDigits_isRejected` (4 Fälle) und `BillableDurationTest.between_endBeforeStart_…`.
+Skill `aggregate`: Beispiel „Converter“ ohne `IpAddress`.
+
+- [x] `SchaffbarEvent`: `implements ValidationSupport` ohne Aufruf (`:53`), `@NotBlank` auf `UUID id` (`:59`), öffentliche
   Konstruktoren (`:49-50`, nur die EventFactory soll Events bauen); auskommentiertes `@JsonFormat` (`:75`); `owner` nie
   gesetzt (`:81`, bleibt – Entscheidung Outbox); Tippfehler „afsEvent“ (`:166`); `toJsonNode` ungenutzt (`:200-207`); `validatePayload` doppelt zu
   `ValidationSupport` (`:209-215`).
-- [ ] `ValidationSupport:12`: neue `ValidatorFactory` pro Aufruf, nie geschlossen → ein statischer `Validator`.
-- [ ] Toter Code: `EventType.toEnum` (`:79-87`) und `UnsupportedEventTypeException`; `ResourceNotFoundException.Resource`
+- [x] `ValidationSupport:12`: neue `ValidatorFactory` pro Aufruf, nie geschlossen → ein statischer `Validator`.
+- [x] Toter Code: `EventType.toEnum` (`:79-87`) und `UnsupportedEventTypeException`; `ResourceNotFoundException.Resource`
   `TOOL_USAGE`, `WORKSHOP_SESSION`, `WORKSHOP_USAGE` (Schreibweise uneinheitlich); `ValueObjectMapper:9-31` (die sechs
   `to…`-Methoden); `ValueObjectAssert.positive` (`:16, 30-40, 53-55`); `StringToIpAddressConverter`.
-- [ ] `OutboxEvent:75`: TODO „whole event as JSON“ ist falsch – die Spalte enthält schon das ganze Event.
-- [ ] Outbox nach der Entscheidung (oben): `markAsProcessed`, `findByProcessedFalseOrderByCreatedAtAsc` löschen; Felder
+- [x] `OutboxEvent:75`: TODO „whole event as JSON“ ist falsch – die Spalte enthält schon das ganze Event.
+- [x] Outbox nach der Entscheidung (oben): `markAsProcessed`, `findByProcessedFalseOrderByCreatedAtAsc` löschen; Felder
   bleiben, `owner` bleibt ungesetzt.
-- [ ] `ResourceNotFoundException.CODE` nach der Entscheidung (oben), dazu `ExceptionArchitectureTest:40`.
-- [ ] Abschnittsnamen: `static factory method`, `static factory methods`, `static factories` nebeneinander – nach
+- [x] `ResourceNotFoundException.CODE` nach der Entscheidung (oben), dazu `ExceptionArchitectureTest:40`.
+- [x] Abschnittsnamen: `static factory method`, `static factory methods`, `static factories` nebeneinander – nach
   `CLAUDE.md` (22.11.2026): `// static constructor` über dem einen `of(…)` (`OutboxEvent`), `// static factories` über
   mehreren (`SchaffbarEvent`, `EventType`).
-- [ ] Tests: `ApiExceptionHandlerTest` ruft `mockMvc.perform` selbst (`:44-111`); `BillableDurationTest`,
+- [x] Tests: `ApiExceptionHandlerTest` ruft `mockMvc.perform` selbst (`:44-111`); `BillableDurationTest`,
   `BillingTotalTest` ohne Abschnitte und Methodenpräfix; `IpAddressTest` fehlt.
 
 ### `web/device`, `web/dashboard`, Read Facades
 
-- [ ] Anzeigetexte im Controller statt in `DeviceMessages`: „Nicht Gefunden“ (`:73`), „Falsches Lesegerät“
+`web/device` erledigt 23.11.2026 (Punkte 1–6 und der Device-Teil von 7), 659 Backend-Tests grün: alle Texte der
+Geräte in `DeviceMessages`; `DeviceReadFacade.getRfidReader(MacAddress)` liefert `Optional` (wie `getTool`),
+`isRfidReaderRegistered` und `ResourceNotFoundException.rfidReader(MacAddress)` (mit seinem TODO) fallen weg – der
+Controller entscheidet, was ein unbekannter Leser bekommt. Mitgenommen aus Abschnitt 5: die 500er am Gerät. Gegenprobe
+mit dem alten Code: 7 der neuen bzw. geänderten Tests scheitern (kaputte MAC und leerer Tag an `/counter` und `/card`,
+der Text „Lesegerät ohne Typ“ an `/init` zweimal, die Zuweisung ohne Person). Dashboard am selben Tag: die Tests
+(vorletzter Punkt), E6 bleibt dort aus (letzter Punkt).
+
+- [x] Anzeigetexte im Controller statt in `DeviceMessages`: „Nicht Gefunden“ (`:73`), „Falsches Lesegerät“
   (`:102, 138`), „Lesegerät ohne Typ“ (`:103, 139`), „Kein Werkzeug“ (`:170, 216`), „Kein WLAN-Relais“ (`:174`); ein
-  Text für „ohne Typ“ (`/init` sagt „Nicht Gefunden“), R-9 im README anpassen.
-- [ ] `/card`: nach dem Umschalten fragt `isToolInUse` (`:221`) ab, was der Toggle gerade entschieden hat; `/init` liest
-  den Leser zweimal (`:159-163`).
-- [ ] `DeviceApiModel`: privater `@Builder` an den Request-Records ungenutzt (`:266, 271, 277`); Parameter `type` von
+  Text für „ohne Typ“ (`/init` sagt „Nicht Gefunden“), R-9 im README anpassen – `/init` sagt jetzt auch „Lesegerät ohne
+  Typ“ (neuer und alter Leser ohne Typ), R-9 angepasst.
+- [x] `/card`: nach dem Umschalten fragt `isToolInUse` (`:221`) ab, was der Toggle gerade entschieden hat; `/init` liest
+  den Leser zweimal (`:159-163`) – `/init` liest einmal (ein neuer Leser hat keinen Typ, die Antwort steht fest). Die
+  Abfrage nach dem Umschalten bleibt: ein Use Case gibt nur `void` oder eine neue Id zurück (`CLAUDE.md`), der Zustand
+  danach ist die Antwort – wie der Aufenthalt nach dem Check-in; Kommentar im Code.
+- [x] `DeviceApiModel`: privater `@Builder` an den Request-Records ungenutzt (`:266, 271, 277`); Parameter `type` von
   `enterOk`, `leaveOk`, `startToolUsage`, `stopToolUsage` immer gleich; `CounterResponse.unexpectedRfidReaderType`
-  (`:151`) auch für „Leser nicht gefunden“.
-- [ ] `DeviceController`: zwei Leerzeilen (`:61-62`); keine Abschnitte; Ablehnungen mal `error` (`:94, 129, 215`), mal
-  `info` (`:109, 145`).
-- [ ] Zuweisung ohne Person → `IllegalStateException`, `DeviceMessages` ohne `CUSTOMER` (Entscheidung oben).
-- [ ] Tests: `DeviceReadFacadeTest` fehlt Zuweisung ohne Person (`IllegalStateException`) und `getWorkshopStay` ohne Besuch; `:199-203`
-  `finishedWorkshopUsageView()`; `DashboardControllerTest:50, 84` und `DashboardReadFacadeTest:70-71, 103` bauen Views
-  mit `new` und prüfen Literale; `DashboardControllerTest:62` nur `entryTime` `exists()`.
+  (`:151`) auch für „Leser nicht gefunden“ – heißt `errorWithoutUseCase`.
+- [x] `DeviceController`: zwei Leerzeilen (`:61-62`); keine Abschnitte; Ablehnungen mal `error` (`:94, 129, 215`), mal
+  `info` (`:109, 145`) – Abschnitte `// command`, `// helper`; Ablehnungen `info`, Unerwartetes `error`.
+- [x] Zuweisung ohne Person → `IllegalStateException`, `DeviceMessages` ohne `CUSTOMER` (Entscheidung oben).
+- [x] Tests: `DeviceReadFacadeTest` fehlt Zuweisung ohne Person (`IllegalStateException`) und `getWorkshopStay` ohne Besuch; `:199-203`
+  `finishedWorkshopUsageView()` – neu im `ViewBuilder`; die Tests auf das weggefallene `isRfidReaderRegistered` /
+  `getRfidReader` sind gelöscht (`getRfidReader` reicht nur durch, wie `getTool`).
+- [x] Tests Dashboard (mit dem Dashboard-Teil): `DashboardControllerTest:50, 84` und `DashboardReadFacadeTest:70-71, 103`
+  bauen Views mit `new` und prüfen Literale; `DashboardControllerTest:62` nur `entryTime` `exists()` – 23.11.2026:
+  `ViewBuilder.activeWorkshopUserView()` / `activeToolUsageView()`, Vergleich mit den Werten der Views (`extracting` /
+  `tuple`), `entryTime` als ISO-Text über `Json.messageConverter()`; die Fehlerfälle prüfen die Id in der Meldung.
+- [x] Dashboard und E6 – 23.11.2026 entschieden: das Dashboard behält seine Namen (`/dashboard/active-users`,
+  `/active-tools`, `Active…View` / `…ApiDto`, `getActive…`), das Portal bleibt unverändert; Ausnahme in E6, Skill
+  `aggregate` und `CLAUDE.md`.
 
 ### Integrationstests und Fixture
 
@@ -525,21 +559,26 @@ Absicherung in `close()` mit Kommentar; `close()` über die Setter; `Running…E
 
 ## 5. Fehler im Verhalten (zum Schluss)
 
-- [ ] ✔ **Geräte bekommen 500 statt ihrer Antwort**: `/counter` baut `RfidTagId.of(…)` außerhalb des `try` und fängt beim
+- [x] ✔ **Geräte bekommen 500 statt ihrer Antwort**: `/counter` baut `RfidTagId.of(…)` außerhalb des `try` und fängt beim
   Leser nur `ResourceNotFoundException` (`DeviceController:87-96`), `/card` im ersten `try` nur RNF/BRV (`:124-131`) – ein
   leerer Tag, eine kaputte MAC oder ein Datenbankfehler gehen an Springs Standard-500 vorbei an `DeviceMessages`.
-  `@Valid` an den Device-Requests prüft nichts (keine Constraints). Mit Akzeptanztest „kaputte MAC“.
+  `@Valid` an den Device-Requests prüft nichts (keine Constraints). Mit Akzeptanztest „kaputte MAC“ – erledigt
+  23.11.2026 im Schritt `web/device`: jeder Fehler gibt „Unerwarteter Fehler“ in der Antwort des Endpunkts, `@Valid` /
+  `@NotNull` am Body entfernt; Tests `…_brokenMacAddress_…` (`UnconfiguredReaderAcceptanceTest`, alle drei Endpunkte) und
+  `…_blankTag_…` (`RfidTagRegisterAcceptanceTest`, `GateKeeperInAcceptanceTest`).
 - [ ] ✔ **Uhrzeit am Gerät hängt an der Zeitzone der JVM** (`DeviceApiModel:84, 174, 189, 192`); Image und Compose
   setzen kein `TZ` – auf dem Server prüfen, feste Zone `Europe/Berlin`; betrifft auch `LocalDate.now()` der
   Altersgruppe (Entscheidung oben).
-- [ ] ✔ **`IpAddress` nimmt `+1.+2.+3.+4` und `-0.-0.-0.-0`** (`Integer.parseInt` erlaubt ein Vorzeichen,
-  `IpAddress:35`) – nur Ziffern zulassen; dazu `IpAddressTest`.
+- [x] ✔ **`IpAddress` nimmt `+1.+2.+3.+4` und `-0.-0.-0.-0`** (`Integer.parseInt` erlaubt ein Vorzeichen,
+  `IpAddress:35`) – nur Ziffern zulassen; dazu `IpAddressTest` – erledigt 23.11.2026 im Schritt `shared/` (auch Ziffern
+  anderer Schriften wie `١٩٢`, die `parseInt` ebenfalls nimmt).
 - [x] ✔ **`Tool` gibt `Set<UUID> instructorIds` veränderbar heraus** (Klassen-`@Getter`, `Tool.java:42, 73-76`) – Änderung
   ohne Event möglich; `@Getter(AccessLevel.NONE)` am Feld – erledigt 23.11.2026 im Schritt `tool`.
 - [x] **`ToolCertificationCreate` prüft TC-8 vor der Existenz der Personen** (`:43-46, 63-70`): unbekannte Person plus
   Nicht-Einweiser gibt 409 statt 404 – erledigt 23.11.2026 im Schritt `tool_certification`.
 - [x] **`ToolRepository.findByIpAddress`** (`:19`) liefert `Optional` auf eine Spalte ohne Unique-Constraint – Liste und
   „höchstens eine“ im `default` – erledigt 23.11.2026 im Schritt `tool`.
-- [ ] **`BillableDuration`** (`:25-26`): negative Dauer (kaputte Daten) als `IllegalArgumentException` → 400 statt 500.
-- [ ] **`SchaffbarEvent`**: `@NotBlank` auf `UUID` würde bei einer Prüfung mit `UnexpectedTypeException` scheitern (siehe
-  `shared/`).
+- [x] **`BillableDuration`** (`:25-26`): negative Dauer (kaputte Daten) als `IllegalArgumentException` → 400 statt 500 –
+  erledigt 23.11.2026 im Schritt `shared/`: `IllegalStateException`, `null` bleibt `IllegalArgumentException`.
+- [x] **`SchaffbarEvent`**: `@NotBlank` auf `UUID` würde bei einer Prüfung mit `UnexpectedTypeException` scheitern (siehe
+  `shared/`) – erledigt 23.11.2026: die Constraints sind mit `implements ValidationSupport` entfallen.
