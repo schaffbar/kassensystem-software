@@ -384,8 +384,10 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
   `default` method with the same name directly below it that takes the value object** and calls it with `getValue()`.
   A plain value without a value object (a name, a status) needs none. The service only calls the value object variants
   and, of the inherited methods, `findById(id.getValue())` and `delete(entity)`; another inherited method it needs gets
-  a value object overload too (`default boolean existsById(RfidTagId id)`). ArchUnit checks this for `UUID`
-  parameters only.
+  a value object overload too (`default boolean existsById(RfidTagId id)`). ArchUnit checks both:
+  `servicesUseTheValueObjectVariants` for a method taking a `UUID`, `nothingDeletesOrChecksByARawId` for the
+  inherited `deleteById`, `deleteAllById`, `deleteAllByIdInBatch` and `existsById` (their id is erased to `Object`) –
+  outside the repository only the value object overload is allowed (E30).
 - **`Optional` straight from Spring Data only on a unique column** (the id, a unique constraint, a partial unique
   index like V9). A query that should find at most one row on a column without such a constraint returns a `List` and
   checks "at most one" in the default method (`findByRfidReaderId` above); more than one is broken data →
@@ -450,6 +452,16 @@ public class RfidReaderService {
 - **Commands** are `@Command` and return `void` – only a create returns the new id. **A service command is the
   entity's command; where the entity leaves out the aggregate's name, it stands after the verb** (E20). The use case
   is named `<Aggregate><EntityCommand>` (E3, `schaffbar-backend/CLAUDE.md`):
+  - **The prefix is the aggregate whose state changes** – the one whose service command the use case calls. When
+    several change, it is the one the action is about (`WorkshopUsageStart` also starts a session). It is not the
+    aggregate the action starts from: requesting a tag for a customer changes the assignment, so it is
+    `RfidTagAssignmentRequest`, not `CustomerRequestRfidTagAssignment`. Two aggregates with the same start are told
+    apart by the whole name – `ToolUsageStart` belongs to `ToolUsage`, not `Tool`.
+  - **The action is the entity's command** without the aggregate's name (table below); a use case that only chooses
+    between two others is named after what it does (`ToolUsageToggle` → `ToolUsageStart` or `ToolUsageStop`).
+  - **No ArchUnit rule checks the name** (decided 23.11.2026: a check of the prefix alone let the wrong aggregate
+    through, a full check needs a list of exceptions) – a new or renamed use case is checked against these two
+    points when it is written and in the review.
 
   | Entity command | Service command | Use case |
   | --- | --- | --- |
@@ -610,9 +622,10 @@ Every rule is strict (no `freeze(…)`): a violation is fixed, never excepted to
 - [ ] Rule in the right place (table "Where a rule lives") with a dedicated exception and a test; a guard against a
       bug says who checks before.
 - [ ] Each check an `ensure…` with its rule id; `throw` in a `throw…` helper, never inside a lambda.
-- [ ] Names: service command = entity command (+ aggregate where the entity leaves it out); open / running, never
-      active.
-- [ ] Delete: load the entity, `delete(entity)`, the deleted event.
+- [ ] Names: service command = entity command (+ aggregate where the entity leaves it out); use case
+      `<Aggregate><EntityCommand>` with the aggregate whose state changes (no ArchUnit rule – check it by hand); open /
+      running, never active.
+- [ ] Delete: load the entity, `delete(entity)`, the deleted event – no `deleteById` (ArchUnit).
 - [ ] New event: EventType, payload (enums as enum, values as value objects, no entity or embeddable inside), mapper,
       factory, README.
 - [ ] README updated; `mvn -q test` passes.
