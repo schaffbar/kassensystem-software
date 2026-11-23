@@ -1,12 +1,16 @@
 # Schaffbar — Documentation
 
+An overview of the core-pos backend for someone new to it. The rules themselves – how an aggregate, a use case or a
+test is written – are in `schaffbar-backend/CLAUDE.md` and the skills `aggregate` and `backend-testing`; the rules of
+each aggregate are in its `README.md`. When this overview and they differ, they are right.
+
 ## Table of Contents
 
 1. [Domain Overview](#1-domain-overview)
 2. [Aggregate Structure Pattern](#2-aggregate-structure-pattern)
 3. [Aggregate Catalog](#3-aggregate-catalog)
-4. [Use Cases (Application Services)](#4-use-cases-application-services)
-5. [Read Models (Query Services)](#5-read-models-query-services)
+4. [Use Cases](#4-use-cases)
+5. [Read Facades](#5-read-facades)
 6. [Value Objects](#6-value-objects)
 7. [Domain Events](#7-domain-events)
 
@@ -14,98 +18,103 @@
 
 ## 1. Domain Overview
 
-The **Schaffbar Core-POS** system manages a **workshop** (Werkstatt) where customers can enter, use tools, and be billed
-for their time. The core domain revolves around:
+The **Schaffbar Core-POS** system manages a **workshop** (Werkstatt) where customers check in, use tools, and are
+billed for their time. The core domain revolves around:
 
-- **Customer management** — personal data, contact info, addresses
+- **Customer management** — personal data, contact info, addresses, age group
 - **RFID infrastructure** — readers, tags, and their assignment to customers
-- **Tool management** — workshop tools with optional WLAN-Relais (Shelly) control and RFID reader pairing
-- **Tool usage tracking** — tracks which customer uses which tool, for billing and safety enforcement
+- **Tool management** — workshop tools with their switch box (RFID reader) and WLAN relais (Shelly), instructors
 - **Tool certification management** — per-customer, per-tool certifications (Einweisungen) that gate access to
   machines (ACTIVE/PAUSED/REVOKED lifecycle)
-- **Workshop access tracking** — sessions (billing units) and usages (individual entry/exit time slots)
-- **Workshop dashboard** — a read model showing currently active users
+- **Workshop access tracking** — sessions (what is billed, `OPEN` → `PAID`) and workshop usages (one stay from the
+  gate at the entrance to the gate at the exit)
+- **Tool usage tracking** — which customer uses which tool, for billing and safety enforcement
+- **Devices** — the RFID readers at the counter, at the gates and at the tools talk to `/device/*`
+- **Workshop dashboard** — who is in the workshop right now and which tools run
 
 ### Bounded Context
 
-All aggregates live in a single bounded context: **Core-POS**. Cross-aggregate coordination is handled through **Use
-Cases** (application-level services in the `use_case` package) that orchestrate calls across multiple domain services.
+All aggregates live in a single bounded context: **Core-POS**. An aggregate changes only itself; its service knows
+only its own repository and the outbox. **Every change is a use case** in `use_case/` – one class per action, also for
+a plain create, update or delete, so every controller looks the same. A use case checks what needs a second aggregate
+(it exists, a rule across aggregates) and then calls the service command(s). **Every query goes through the read
+facade** of its controller in `read_facade/`. Controllers never call a service.
 
 ### Event-Driven Architecture
 
-Every state mutation produces **`SchaffbarEvent`** instances that are persisted to a **transactional outbox** (
-`outbox_event` table) within the same transaction. This enables reliable event publishing for downstream consumers.
+Every database change produces **`SchaffbarEvent`** instances – a create, an update, a delete, the write of an inner
+entity. They are saved to the **transactional outbox** (`outbox_event` table) in the transaction of the change, or not
+at all. Today the outbox is the **change log** of the system: no process reads or publishes it yet. The columns
+`processed`, `processed_at` and `owner` are prepared for a later relay and stay empty.
 
 ---
 
 ## 2. Aggregate Structure Pattern
 
-Every aggregate in this project follows a consistent internal structure. This section documents the pattern so each
-module is easy to understand and extend.
+Every aggregate is a folder in `domain/` with the same building blocks (skill `aggregate`, "Folder"):
 
 ```txt
-<aggregate_name>/
+domain/<aggregate>/
 │
-├── <Aggregate>.java              # Aggregate Root (Entity)
-├── <Aggregate>Commands.java      # Command records (input DTOs)
-├── <Aggregate>Service.java       # Domain/Application Service
-├── <Aggregate>Repository.java    # Spring Data JPA Repository
-├── <Aggregate>Views.java         # MapStruct-based read-only projections (View records)
-├── <Aggregate>EventFactory.java  # Static factory for creating SchaffbarEvents
-├── <Aggregate>PayloadMapper.java # MapStruct mapper: Entity → Event Payload
-├── <Status/Type Enums>.java      # Status or type enumerations (if any)
-├── <Value Objects>.java          # Embedded value objects (if any, e.g. CustomerAddress)
+├── <Aggregate>.java              # aggregate root (@Entity)
+├── <Aggregate>Commands.java      # command records (optional)
+├── <Aggregate>EventFactory.java  # creates the domain events
+├── <Aggregate>PayloadMapper.java # entity → event payload (MapStruct)
+├── <Aggregate>Repository.java    # Spring Data repository, package-private
+├── <Aggregate>Service.java       # queries and commands of the aggregate
+├── <Aggregate>Views.java         # view records + entity → view (MapStruct)
+├── <Inner>.java + <Inner>Repository.java  # inner entity with its repository (optional, RfidTagAssignmentHistory)
+├── <Enum>.java                   # enums of the aggregate (RfidReaderType, AgeGroup) – public
+├── <Part>.java                   # @Embeddable part of the entity (CustomerAddress) – package-private
+├── README.md                     # attributes, rules, events
 │
-└── web/
-    ├── <Aggregate>Controller.java   # REST Controller
-    └── <Aggregate>ApiModel.java     # API request/response models
+└── web/                          # only when the portal calls it
+    ├── <Aggregate>Controller.java   # REST controller
+    └── <Aggregate>ApiModel.java     # response and request records, MapStruct mapping
 ```
 
 ### Component Responsibilities
 
-| Component                 | Responsibility                                                                                                                                                                                                                    |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Aggregate Root**        | Encapsulates state + invariants. All mutations go through command methods that return `List<SchaffbarEvent>`. Static `of(...)` factory for creation returns a `*WithEvents` record containing the entity and its creation events. |
-| **Commands**              | Immutable Java `record` types with Bean Validation annotations. Grouped in a `*Commands` interface.                                                                                                                               |
-| **Service**               | Validates existence, enforces uniqueness constraints (cross-aggregate checks), delegates to aggregate root, persists entity + outbox events in a single `@Transactional` boundary.                                                |
-| **Repository**            | Spring Data `JpaRepository` with custom query methods. Package-private.                                                                                                                                                           |
-| **Views**                 | Read-only `record` projections mapped via MapStruct. Exposes a singleton `MAPPER` instance.                                                                                                                                       |
-| **EventFactory**          | Creates `SchaffbarEvent` for each event type by mapping the entity to a payload via `PayloadMapper`, validating the payload, and wrapping it.                                                                                     |
-| **PayloadMapper**         | MapStruct interface that maps from the aggregate root entity to specific event payload records.                                                                                                                                   |
-| **Controller / ApiModel** | REST layer — maps HTTP requests to commands and calls service or use case.                                                                                                                                                        |
+| Component                 | Responsibility                                                                                                                                                                                                                  |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Aggregate Root**        | Encapsulates state and invariants. Created by a static `of(…)`; every state change is a command method that returns `List<SchaffbarEvent>`. Nothing outside the folder sees the entity.                                         |
+| **Commands**              | Immutable `record` types with Bean Validation, grouped in a `*Commands` interface.                                                                                                                                              |
+| **Service**               | Loads the entity (or `404`), checks the rules that need other rows of the aggregate (uniqueness), calls the entity's command and saves its events with `OutboxEventStore`. Every public method is `@Query` or `@Command` (E21). |
+| **Repository**            | Spring Data `JpaRepository`, package-private; every method taking a raw value has an overload taking the value object.                                                                                                          |
+| **Views**                 | Read-only `record` projections, mapped with MapStruct (`MAPPER`) – what the outside world gets instead of the entity.                                                                                                           |
+| **EventFactory**          | Creates the `SchaffbarEvent` of each event type: maps the entity to its payload (`PayloadMapper`), validates the payload, wraps it.                                                                                             |
+| **PayloadMapper**         | MapStruct interface from the entity to the event payload records.                                                                                                                                                               |
+| **Controller / ApiModel** | REST layer: a command calls a use case, a query the controller's read facade.                                                                                                                                                   |
 
 ### Aggregate Root Internal Structure
-
-Every aggregate root follows the same code layout:
 
 ```java
 class Aggregate {
 
-    // --- Fields (JPA @Id, domain attributes, @Version) ---
+    // fields: JPA @Id (raw UUID), attributes, references as raw ids, @Version Instant updatedAt
 
     // --- static constructor ---
-    // static <WithEvents> of(<CreateCommand>) { ... }
+    // static Aggregate of(<CreateCommand>) { ... }   – the service saves it and builds the created event
 
     // --- query ---
-    // getId() returns typed Value Object
-    // other derived query methods
+    // getId() and the getters of references return value objects
+    // derived queries: is…, has…, get…
 
     // --- command ---
     // List<SchaffbarEvent> update(...) { ... }
     // List<SchaffbarEvent> <domainAction>(...) { ... }
 
     // --- helper ---
-    // record <WithEvents>(<Aggregate>, List<SchaffbarEvent>) {}
 }
 ```
 
 **Key conventions:**
 
 - **No public setters** — state changes only through named command methods
-- **Every command method returns `List<SchaffbarEvent>`** — caller (Service) persists them to the outbox
-- **Static factory `of(...)`** returns a `*WithEvents` record (entity + events)
+- **Every command method returns `List<SchaffbarEvent>`** — the service saves them to the outbox
+- **`of(…)` returns the new entity** — the service saves it and creates the created event with the EventFactory
 - **`@Version` field** (`Instant updatedAt`) for optimistic locking
-- **IDs stored as raw types** (`UUID`, `String`) internally but exposed as **Value Objects** via getter methods
+- **Ids stored as raw types** (`UUID`, `String`) internally, exposed as **value objects** by the getters
 
 ---
 
@@ -128,64 +137,77 @@ inside its package. This keeps the documentation close to the code it describes.
 
 ---
 
-## 4. Use Cases (Application Services)
+## 4. Use Cases
 
-Use cases live in the `use_case` package and **orchestrate operations across multiple aggregates**. They are the only
-place where cross-aggregate coordination happens.
+One class per action in `use_case/`, named `<Aggregate><EntityCommand>`: the prefix is the aggregate whose state
+changes, the action is the command of its entity (E3, E20 – skill `aggregate`, "Service"). The rule ids are those of
+the aggregate READMEs.
 
-The table shows the main ones – the full list is the package `use_case/` (one class per action, e.g. `CustomerDelete`,
-`RfidReaderDelete`, `ToolClearRfidReader`).
+**With a second aggregate** – the use case reads or changes more than its own aggregate:
 
-| Use Case                           | Description                                                                                                                                                                                                           | Aggregates Involved                                 |
-|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| `WorkshopUsageStart`               | Customer enters the workshop. Creates a session if none exists, then creates a usage entry.                                                                                                                           | WorkshopSession, WorkshopUsage                      |
-| `WorkshopUsageStop`                | Customer leaves the workshop. Stops all active tool usages, then records exit time.                                                                                                                                   | WorkshopSession, WorkshopUsage, ToolUsage           |
-| `WorkshopSessionClose`             | Closes a customer's workshop session (mark as PAID) with the final totals. Rejected while a workshop or tool usage is running.                                                                                        | Customer, WorkshopSession, WorkshopUsage, ToolUsage |
-| `ToolUsageStart`                   | Starts tool usage for a customer. Takes the session of the running workshop usage (customer must be in the workshop). For RED tools, verifies active certification; for YELLOW tools, certification is advisory only. | ToolUsage, Tool, WorkshopUsage, ToolCertification   |
-| `ToolUsageStop`                    | Stops tool usage for a customer on a specific tool.                                                                                                                                                                   | ToolUsage                                           |
-| `ToolCertificationCreate`          | Creates certifications for multiple customers after a training session – all or nobody (TC-4); instructors of the tool are rejected (TC-5).                                                                           | ToolCertification                                   |
-| `ToolCertificationPause`           | Pauses a customer's tool certification.                                                                                                                                                                               | ToolCertification                                   |
-| `ToolCertificationReactivate`      | Reactivates a paused tool certification.                                                                                                                                                                              | ToolCertification                                   |
-| `ToolCertificationRevoke`          | Permanently revokes a customer's tool certification.                                                                                                                                                                  | ToolCertification                                   |
-| `ToolCertificationDelete`          | Deletes an erroneously created tool certification.                                                                                                                                                                    | ToolCertification                                   |
-| `RfidTagAssignmentRequest`         | Initiates RFID tag assignment process for a customer.                                                                                                                                                                 | Customer, RfidTagAssignment                         |
-| `RfidTagAssignmentAssignRfidTag`   | Completes RFID tag assignment by linking tag to pending assignment.                                                                                                                                                   | RfidTag, RfidTagAssignment                          |
-| `RfidTagAssignmentUnassignRfidTag` | Removes RFID tag from customer, moves record to history.                                                                                                                                                              | Customer, RfidTagAssignment                         |
-| `ToolCreate`                       | Creates a tool with optional RFID reader validation (must be SWITCH_BOX).                                                                                                                                             | RfidReader, Tool                                    |
-| `ToolAssignRfidReader`             | Assigns an RFID reader to a tool (reader must be SWITCH_BOX).                                                                                                                                                         | RfidReader, Tool                                    |
-| `RfidReaderChangeType`             | Changes the type of an RFID reader. If current type is SWITCH_BOX and a tool is assigned → error.                                                                                                                     | RfidReader, Tool                                    |
-| `RfidTagDelete`                    | Deletes an RFID tag – rejected while it is assigned to a customer.                                                                                                                                                    | RfidTag, RfidTagAssignment                          |
+| Use Case                           | Also reads / changes                                                | What it checks and does                                                                                                                                                                                                                               |
+|------------------------------------|---------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CustomerDelete`                   | WorkshopSession; changes RfidTagAssignment, ToolCertification, Tool | no open session (C-5); frees the tag – an assigned one is unassigned, a waiting request cancelled (C-4) –, deletes the customer's certifications and removes them as instructor (C-9); paid sessions, usages and certifications they gave stay (C-11) |
+| `RfidReaderChangeType`             | Tool                                                                | a switch box with a tool keeps its type (R-3)                                                                                                                                                                                                         |
+| `RfidReaderDelete`                 | Tool                                                                | a reader assigned to a tool is not deleted (R-5)                                                                                                                                                                                                      |
+| `RfidTagAssignmentRequest`         | Customer                                                            | the customer exists, then the request waits for a tag                                                                                                                                                                                                 |
+| `RfidTagAssignmentAssignRfidTag`   | RfidTag                                                             | the tag is registered, then it is assigned to the waiting request (the reader at the counter)                                                                                                                                                         |
+| `RfidTagAssignmentUnassignRfidTag` | Customer                                                            | the customer exists, then their tag is unassigned (history entry)                                                                                                                                                                                     |
+| `RfidTagDelete`                    | RfidTagAssignment                                                   | an assigned tag is not deleted (RT-3)                                                                                                                                                                                                                 |
+| `ToolAddInstructors`               | Customer                                                            | the instructors exist as customers (T-22)                                                                                                                                                                                                             |
+| `ToolRemoveInstructors`            | Customer                                                            | the instructors exist as customers (T-22)                                                                                                                                                                                                             |
+| `ToolAssignRfidReader`             | RfidReader                                                          | the reader exists and is a switch box (T-9)                                                                                                                                                                                                           |
+| `ToolClearRfidReader`              | ToolUsage                                                           | not while the tool runs – the usage could no longer be stopped at the switch box (T-14)                                                                                                                                                               |
+| `ToolDelete`                       | ToolUsage; changes ToolCertification                                | not while the tool runs (T-17); its certifications are deleted with it                                                                                                                                                                                |
+| `ToolCertificationCreate`          | Tool, Customer                                                      | all customers exist – all or nobody (TC-4); the one who certifies is an instructor of the tool (TC-8); instructors of the tool are not certified (TC-5)                                                                                               |
+| `ToolUsageStart`                   | Customer, Tool, ToolCertification, WorkshopUsage                    | a `RED` tool needs an active certification, `YELLOW` only recommends one (TU-10); the customer is in the workshop, the usage belongs to the session of the running visit (TU-2)                                                                       |
+| `ToolUsageToggle`                  | – (calls `ToolUsageStart` or `ToolUsageStop`)                       | the one action of the switch box: switches the tool off when the customer uses it, else on (TU-11)                                                                                                                                                    |
+| `WorkshopSessionClose`             | Customer, WorkshopUsage, ToolUsage                                  | the customer's open session (WS-4); no visit and no tool usage runs (WS-5); closes it with the totals of both                                                                                                                                         |
+| `WorkshopUsageStart`               | Customer; changes WorkshopSession                                   | the first check-in starts the session, every later one joins it (WU-4)                                                                                                                                                                                |
+| `WorkshopUsageStop`                | Customer, WorkshopSession; changes ToolUsage                        | an open session – "never checked in" apart from "already checked out" (WU-9, WU-2); the running tools are switched off (WU-5, TU-4)                                                                                                                   |
+
+**Only their own aggregate** – they forward to the service, which checks the aggregate's own rules: `CustomerCreate`,
+`CustomerUpdate`, `CustomerChangeContact`, `CustomerChangeAddress`, `RfidReaderCreate`, `RfidReaderUpdate`,
+`RfidTagCreate`, `ToolCreate`, `ToolUpdate`, `ToolSetWlanRelais`, `ToolClearWlanRelais`, `ToolCertificationPause`,
+`ToolCertificationReactivate`, `ToolCertificationRevoke`, `ToolCertificationDelete`, `ToolUsageStop`.
 
 ---
 
-## 5. Read Models (Read Facades)
+## 5. Read Facades
 
-Every controller reads through its read facade in `read_facade/` (E17). The one of the overview (`web/dashboard/`)
-combines several aggregates:
+Every controller reads through the one read facade named after it in `read_facade/` (E17); a read facade only reads.
+Those that combine several aggregates have views of their own (`DashboardViews`, `DeviceViews`,
+`OpenWorkshopSessionViews`):
 
-| Read facade                   | Endpoint                               | Description                                                                                       |
-|-------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------|
-| `DashboardReadFacade`         | `GET /dashboard/active-users`          | Running `WorkshopUsage` entries with their `Customer` – who is in the workshop, the longest first |
-| `DashboardReadFacade`         | `GET /dashboard/active-tools`          | Running `ToolUsage` entries with their `Tool` and `Customer` – which tool runs and who uses it    |
+| Read facade                   | Reads                                                                                             | What for                                                                                                                                                                                     |
+|-------------------------------|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DashboardReadFacade`         | WorkshopUsage, ToolUsage, Tool, Customer                                                          | `GET /dashboard/active-users`: the running workshop usages with their customer, the longest first; `GET /dashboard/active-tools`: the running tool usages with tool and customer             |
+| `DeviceReadFacade`            | RfidReader, RfidTag, RfidTagAssignment, Customer, Tool, ToolUsage, WorkshopSession, WorkshopUsage | `/device/*`: the reader by its MAC address, the customer of a tag (tag → assignment → customer), the tool of a switch box, whether a tool runs, the stay shown after a check-in or check-out |
+| `WorkshopSessionReadFacade`   | WorkshopSession, WorkshopUsage, ToolUsage, Tool, Customer                                         | `GET /workshop-sessions/{customerId}/open`: the open session with its visits and one summary per tool, with the totals                                                                       |
+| `RfidTagAssignmentReadFacade` | RfidTagAssignment, Customer                                                                       | the assignments (the customer must exist) and their history                                                                                                                                  |
+| the others                    | their aggregate                                                                                   | `CustomerReadFacade`, `RfidReaderReadFacade`, `RfidTagReadFacade`, `ToolReadFacade`, `ToolCertificationReadFacade`                                                                           |
 
 ---
 
 ## 6. Value Objects
 
-All value objects are located in `de.schaffbar.core_pos.shared.id`:
+All value objects are located in `de.schaffbar.core_pos.shared.id`. They check themselves when created; the ids have
+`random()`, the values that come from a device (`MacAddress`, `RfidTagId`, `IpAddress`) have not – the system never
+invents one.
 
-| Value Object          | Wraps    | Used for                        |
-|-----------------------|----------|---------------------------------|
-| `CustomerId`          | `UUID`   | Customer identity               |
-| `ToolId`              | `UUID`   | Tool identity                   |
-| `ToolUsageId`         | `UUID`   | Tool Usage identity             |
-| `ToolCertificationId` | `UUID`   | Tool Certification identity     |
-| `RfidReaderId`        | `UUID`   | RFID Reader identity            |
-| `RfidTagId`           | `String` | RFID Tag identity (hardware ID) |
-| `RfidTagAssignmentId` | `UUID`   | RFID Tag Assignment identity    |
-| `WorkshopSessionId`   | `UUID`   | Workshop Session identity       |
-| `WorkshopUsageId`     | `UUID`   | Workshop Usage identity         |
-| `MacAddress`          | `String` | RFID Reader MAC address         |
+| Value Object          | Wraps    | Used for                                      |
+|-----------------------|----------|-----------------------------------------------|
+| `CustomerId`          | `UUID`   | Customer identity                             |
+| `ToolId`              | `UUID`   | Tool identity                                 |
+| `ToolUsageId`         | `UUID`   | Tool Usage identity                           |
+| `ToolCertificationId` | `UUID`   | Tool Certification identity                   |
+| `RfidReaderId`        | `UUID`   | RFID Reader identity                          |
+| `RfidTagId`           | `String` | RFID Tag identity (hardware id, `04A31F9C`)   |
+| `RfidTagAssignmentId` | `UUID`   | RFID Tag Assignment identity                  |
+| `WorkshopSessionId`   | `UUID`   | Workshop Session identity                     |
+| `WorkshopUsageId`     | `UUID`   | Workshop Usage identity                       |
+| `MacAddress`          | `String` | RFID Reader MAC address (`34:CD:B0:D3:A9:30`) |
+| `IpAddress`           | `String` | IPv4 address of a tool's WLAN relais          |
 
 ---
 
@@ -193,29 +215,31 @@ All value objects are located in `de.schaffbar.core_pos.shared.id`:
 
 ### Event Infrastructure
 
-- **`SchaffbarEvent`** — envelope containing `id`, `type`, `version`, `aggregateType`, `aggregateId`, `timestamp`,
-  `payload` (JSON), `owner`
-- **`OutboxEvent`** — JPA entity persisted to `schaffbar.outbox_event` table within the same transaction
-- **`EventPayload`** — marker interface with validation support
+- **`SchaffbarEvent`** — immutable envelope with `id`, `type`, `version`, `aggregateType`, `aggregateId`,
+  `timestamp`, `payload` (JSON) and `owner` (not set yet); built only by its static factories, which the EventFactory
+  of each aggregate calls
+- **`EventPayload`** — the interface of all payload records, with `validate()` (Bean Validation)
+- **`OutboxEventStore`** — saves the events of a command (`Propagation.MANDATORY`: outside the command's transaction
+  it fails, so an event is never saved without its change)
+- **`OutboxEvent`** — JPA entity of the `schaffbar.outbox_event` table, the whole event as JSON in `payload`
 - **`AggregateType`** — enum identifying the source aggregate
 
 ### Event Flow
 
 ```txt
-Command Method (Aggregate Root)
-  └── Returns List<SchaffbarEvent>
-        └── Service saves to OutboxEventRepository
-              └── outbox_event table (transactional outbox pattern)
-                    └── Polled/published by external process
+Command method of the aggregate root (or of(…) + the created event of the EventFactory)
+  └── returns List<SchaffbarEvent>
+        └── the service calls OutboxEventStore.save(events) – in the command's transaction
+              └── outbox_event table – the change log; no relay reads it yet
 ```
 
 ### Event Creation Pattern
 
 ```txt
 EventFactory.someEvent(aggregate)
-  ├── PayloadMapper.MAPPER.toSomePayload(aggregate)   // MapStruct mapping
-  ├── payload.validate()                                // Bean Validation
-  └── SchaffbarEvent.<aggregateType>Event(type, id, payload)  // Envelope creation
+  ├── PayloadMapper.MAPPER.toSomePayload(aggregate)           // MapStruct mapping
+  ├── payload.validate()                                      // Bean Validation
+  └── SchaffbarEvent.<aggregateType>Event(type, id, payload)  // envelope
 ```
 
 ### Complete Event List
@@ -226,7 +250,7 @@ EventFactory.someEvent(aggregate)
 | Tool              | `TOOL_CREATED`, `TOOL_UPDATED`, `TOOL_WLAN_RELAIS_SET`, `TOOL_WLAN_RELAIS_CLEARED`, `TOOL_RFID_READER_ASSIGNED`, `TOOL_RFID_READER_CLEARED`, `TOOL_INSTRUCTORS_ADDED`, `TOOL_INSTRUCTORS_REMOVED`, `TOOL_DELETED` |
 | ToolUsage         | `TOOL_USAGE_STARTED`, `TOOL_USAGE_STOPPED`                                                                                                                                                                        |
 | ToolCertification | `TOOL_CERTIFICATION_CREATED`, `TOOL_CERTIFICATION_PAUSED`, `TOOL_CERTIFICATION_REACTIVATED`, `TOOL_CERTIFICATION_REVOKED`, `TOOL_CERTIFICATION_DELETED`                                                           |
-| RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_DELETED`                                                                                                                                               |
+| RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_TYPE_CHANGED`, `RFID_READER_DELETED`                                                                                                                   |
 | RfidTag           | `RFID_TAG_CREATED`, `RFID_TAG_DELETED`                                                                                                                                                                            |
 | RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                      |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |

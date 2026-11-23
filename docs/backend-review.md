@@ -546,14 +546,33 @@ noch die `given()`-Schritte am Gerät, `ws5` und die Namen unten. Skill `backend
 
 ### ArchUnit
 
-- [ ] `aggregatesDoNotExposeUuids` übersieht `Set<UUID>` (`Tool.getInstructorIds`) → `mentions(…)`.
-- [ ] Eine Read Facade pro Controller, die nach ihm benannt ist.
-- [ ] `controllersKnowOnlyUseCasesAndReadFacades` verbietet nur Domain-Services → positiv: keine anderen Beans.
-- [ ] Code-Regeln der `CLAUDE.md` gelten für alle Beans, ArchUnit prüft sie nur für Domain-Services
+Kleine Punkte erledigt 23.11.2026, 661 Backend-Tests grün; jede neue oder geänderte Regel einmal gegen einen
+absichtlichen Verstoß geprüft (`Set<UUID>`-Getter in `Tool`, `OutboxEventStore` und eine fremde Read Facade in einem
+Controller, ein `@Command` aus einer Read Facade). Die großen Punkte am selben Tag, 663 Tests grün; Gegenprobe für jede
+neue Regel (Controller ohne `@Validated`, nicht finales Feld, `String`- und ungeprüfter Parameter, `UUID` als
+`@PathVariable`, `UUID` in einer View der Read Facade, `saveAll` und `OutboxEventStore.save` im Lambda einer `@Query`,
+Stubs in `@BeforeEach` und in einem Helfer).
+
+- [x] `aggregatesDoNotExposeUuids` übersieht `Set<UUID>` (`Tool.getInstructorIds`) → `mentions(…)` – 23.11.2026 (der
+  Getter ist seit dem Schritt `tool` weg; die Regel findet jetzt auch einen neuen).
+- [x] Eine Read Facade pro Controller, die nach ihm benannt ist – 23.11.2026: `controllersUseTheReadFacadeNamedAfterThem`
+  (genau eine, `XController` → `XReadFacade`) und `readFacadesServeOnlyTheirController` (nur ihr Controller nutzt
+  sie); keine Verstöße.
+- [x] `controllersKnowOnlyUseCasesAndReadFacades` verbietet nur Domain-Services → positiv: keine anderen Beans –
+  23.11.2026: keine Klasse mit `@Component` (auch meta-annotiert) außer Use Cases und Read Facades; keine Verstöße.
+- [x] Code-Regeln der `CLAUDE.md` gelten für alle Beans, ArchUnit prüft sie nur für Domain-Services
   (`serviceFieldsArePrivateFinal`, `servicesTakeCommandsOrValueObjects`, `serviceParametersAreValidated`); Views der Read
   Facades außerhalb der View-Regeln; Controller `@Validated`, `@PathVariable` / `@RequestParam` als Value Object; keine
-  Schreibzugriffe in `@Query`.
-- [ ] `WRITE_TRANSACTION` mit Resten aus dem Rollout (`ArchitectureSupport:66-69, 108-116`).
+  Schreibzugriffe in `@Query`. – 23.11.2026: neue
+  `BeanArchitectureTest` für Services, Use Cases, Read Facades und Controller (öffentlich + `@Validated`, Felder
+  `private final`, keine `UUID` / `String` in öffentlichen Methoden, Parameter mit `@NotNull` / `@NotEmpty` /
+  `@NotBlank` außer `@RequestParam(required = false)`, `@PathVariable` / `@RequestParam` nie `UUID` / `String`); die drei
+  Service-Regeln aus `DomainArchitectureTest` sind darin aufgegangen. Die View-Regeln gelten auch für `read_facade/`
+  (außer „MapStruct-Mapper“). `QueryCommandArchitectureTest.queriesWriteNothing`: kein `@Command`, kein Entity-Befehl,
+  kein `save` / `delete`, kein `OutboxEventStore` aus einer `@Query` – auch im Lambda. Einziger Fund: die drei
+  Device-Bodies ohne `@NotNull` (im Schritt `web/device` mit `@Valid` entfernt) – `@NotNull` wieder da.
+- [x] `WRITE_TRANSACTION` mit Resten aus dem Rollout (`ArchitectureSupport:66-69, 108-116`) – 23.11.2026: nur noch
+  `@Command`, `isReadOnlyTransaction` gelöscht.
 - [x] `useCasesAreNamedAfterTheirAggregate` prüft nur das Präfix (nach der Entscheidung zu E3) – 23.11.2026 entschieden:
   Regel entfernt (samt `ArchitectureSupport.aggregateNames`), die Namensregel steht deutlich im Skill `aggregate`
   („Service“, Checkliste), E3 ergänzt.
@@ -562,16 +581,23 @@ noch die `given()`-Schritte am Gerät, `ws5` und die Namen unten. Skill `backend
   `deleteAllById`, `deleteAllByIdInBatch`, `existsById` ohne Value Object). Keine Verstöße im Code; gegen einen
   absichtlichen Verstoß in `RfidTagService` geprüft (beide Aufrufe gemeldet, die Überladung `existsById(RfidTagId)`
   nicht). Skill `aggregate` („Repository“, Checkliste), E30 ergänzt.
-- [ ] `TestArchitectureTest` findet keine Stubs in `@BeforeEach` und in Helfern, die nicht `given…` heißen.
-- [ ] Zeilen über 160 Zeichen: `ArchitectureSupport:101`, `DomainArchitectureTest:385, 442`.
+- [x] `TestArchitectureTest` findet keine Stubs in `@BeforeEach` und in Helfern, die nicht `given…` heißen – 23.11.2026:
+  ein Stub nur noch in einer Methode `given…`; keine Funde.
+- [x] Zeilen über 160 Zeichen: `ArchitectureSupport:101`, `DomainArchitectureTest:385, 442` – 23.11.2026 umgebrochen.
 
 ### Übersichten
 
-- [ ] `core-pos/docs/ddd-overview.md` / `ddd-uebersicht.md`: §4 `ToolCreate` („optional RFID reader validation“) stimmt
+Erledigt 23.11.2026: beide Übersichten neu geschrieben, mit demselben Aufbau, gegen den Code geprüft – darüber hinaus
+veraltet waren `of(…)` mit `*WithEvents` (gibt es nicht mehr), „der Service prüft andere Aggregate“, „der Controller ruft
+Service oder Use Case“, `IpAddress` fehlte, das Inhaltsverzeichnis passte nicht zu §5. §4 nennt jetzt alle 34 Use Cases
+(18 mit zweitem Aggregat in der Tabelle mit ihren Regeln, 16 nur mit ihrem eigenen), §5 alle 9 Read Facades. Die
+Übersicht verweist für die Regeln auf `CLAUDE.md`, die Skills und die READMEs – bei einer Abweichung gelten diese.
+
+- [x] `core-pos/docs/ddd-overview.md` / `ddd-uebersicht.md`: §4 `ToolCreate` („optional RFID reader validation“) stimmt
   nicht; es fehlen `ToolUsageToggle`, `ToolDelete`, `CustomerDelete`, `RfidReaderDelete`, `ToolAdd/RemoveInstructors`;
   Einleitung „Use Cases orchestrieren“ ist älter als E2; §5 ohne `DeviceReadFacade`; `RFID_READER_TYPE_CHANGED` fehlt
   (`:229` / `:230`).
-- [ ] Outbox: „reliable event publishing for downstream consumers“ → heute Änderungsprotokoll, kein Relay
+- [x] Outbox: „reliable event publishing for downstream consumers“ → heute Änderungsprotokoll, kein Relay
   (Entscheidung oben).
 
 ## 5. Fehler im Verhalten (zum Schluss)
@@ -580,8 +606,8 @@ noch die `given()`-Schritte am Gerät, `ws5` und die Namen unten. Skill `backend
   Leser nur `ResourceNotFoundException` (`DeviceController:87-96`), `/card` im ersten `try` nur RNF/BRV (`:124-131`) – ein
   leerer Tag, eine kaputte MAC oder ein Datenbankfehler gehen an Springs Standard-500 vorbei an `DeviceMessages`.
   `@Valid` an den Device-Requests prüft nichts (keine Constraints). Mit Akzeptanztest „kaputte MAC“ – erledigt
-  23.11.2026 im Schritt `web/device`: jeder Fehler gibt „Unerwarteter Fehler“ in der Antwort des Endpunkts, `@Valid` /
-  `@NotNull` am Body entfernt; Tests `…_brokenMacAddress_…` (`UnconfiguredReaderAcceptanceTest`, alle drei Endpunkte) und
+  23.11.2026 im Schritt `web/device`: jeder Fehler gibt „Unerwarteter Fehler“ in der Antwort des Endpunkts, `@Valid`
+  am Body entfernt (`@NotNull` bleibt, Regel für alle Beans); Tests `…_brokenMacAddress_…` (`UnconfiguredReaderAcceptanceTest`, alle drei Endpunkte) und
   `…_blankTag_…` (`RfidTagRegisterAcceptanceTest`, `GateKeeperInAcceptanceTest`).
 - [ ] ✔ **Uhrzeit am Gerät hängt an der Zeitzone der JVM** (`DeviceApiModel:84, 174, 189, 192`); Image und Compose
   setzen kein `TZ` – auf dem Server prüfen, feste Zone `Europe/Berlin`; betrifft auch `LocalDate.now()` der

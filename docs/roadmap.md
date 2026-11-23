@@ -152,7 +152,8 @@ Entscheidung 13.11.2026.
 6. [ ] **Backend-Review** (22.11.2026) gegen `CLAUDE.md`, die Skills `aggregate` / `backend-testing` und die
    Entscheidungen – die Liste mit allen Funden und der Reihenfolge in `backend-review.md`: zuerst die Entscheidungen,
    dann die Regeldokumente, dann pro Aggregat Code, Tests und README, dann Übergreifendes, die Fehler im Verhalten zum
-   Schluss (noch kein Betrieb). Stand 22.11.2026: Entscheidungen (E29–E34) und Regeldokumente erledigt.
+   Schluss (noch kein Betrieb). Stand 23.11.2026: Abschnitte 1–4 erledigt (Entscheidungen, Regeldokumente, alle
+   Aggregate, Übergreifendes), aus Abschnitt 5 alles bis auf die Zeitzone am Gerät.
 
 Danach A2 mit den Skills – vielleicht als erster Versuch der Pipeline (P).
 

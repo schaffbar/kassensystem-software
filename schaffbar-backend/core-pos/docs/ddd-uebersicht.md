@@ -1,12 +1,16 @@
 # Schaffbar - Dokumentation
 
+Ein Überblick über das Backend core-pos für alle, die neu darin sind. Die Regeln selbst – wie ein Aggregat, ein Use
+Case oder ein Test geschrieben wird – stehen in `schaffbar-backend/CLAUDE.md` und in den Skills `aggregate` und
+`backend-testing`; die Regeln jedes Aggregats in seiner `README.md`. Weicht diese Übersicht davon ab, gilt dort.
+
 ## Inhaltsverzeichnis
 
 1. [Domänenübersicht](#1-domänenübersicht)
 2. [Aggregat-Strukturmuster](#2-aggregat-strukturmuster)
 3. [Aggregat-Katalog](#3-aggregat-katalog)
-4. [Anwendungsfälle (Application Services)](#4-anwendungsfälle-application-services)
-5. [Lesemodelle (Query Services)](#5-lesemodelle-query-services)
+4. [Use Cases](#4-use-cases)
+5. [Read Facades](#5-read-facades)
 6. [Wertobjekte (Value Objects)](#6-wertobjekte-value-objects)
 7. [Domänenereignisse (Domain Events)](#7-domänenereignisse-domain-events)
 
@@ -14,180 +18,198 @@
 
 ## 1. Domänenübersicht
 
-Das **Schaffbar Core-POS**-System verwaltet eine **Werkstatt**, in der Kunden eintreten, Werkzeuge nutzen und nach
-Zeitaufwand abgerechnet werden können. Die Kerndomäne umfasst:
+Das **Schaffbar Core-POS**-System verwaltet eine **Werkstatt**, in der Personen einchecken, Werkzeuge nutzen und nach
+Zeit abgerechnet werden. Die Kerndomäne umfasst:
 
-- **Kundenverwaltung** — Personendaten, Kontaktinformationen, Adressen
-- **RFID-Infrastruktur** — Lesegeräte, Chips und deren Zuordnung zu Kunden
-- **Werkzeugverwaltung** — Werkstattwerkzeuge mit optionaler WLAN-Relais-Steuerung (Shelly) und RFID-Lesegerät-Kopplung
-- **Werkzeugnutzungsverfolgung** — erfasst welcher Kunde welches Werkzeug nutzt, für Abrechnung und Sicherheit
-- **Einweisungsverwaltung** — Zertifizierungen pro Kunde und Werkzeug, die den Zugang zu Maschinen regeln (ACTIVE/PAUSED/REVOKED-Lebenszyklus)
-- **Werkstattzugangsverfolgung** — Sitzungen (Abrechnungseinheiten) und Nutzungen (einzelne Ein-/Austritts-Zeitslots)
-- **Werkstatt-Dashboard** — ein Lesemodell, das aktuell aktive Nutzer anzeigt
+- **Personenverwaltung** (`Customer`) — Personendaten, Kontakt, Adresse, Altersgruppe
+- **RFID-Infrastruktur** — Lesegeräte, Tags und ihre Zuweisung an Personen
+- **Werkzeugverwaltung** — Werkzeuge mit Schaltbox (RFID-Lesegerät), WLAN-Relais (Shelly) und Einweisern
+- **Einweisungen** — pro Person und Werkzeug, regeln den Zugang zu den Maschinen (Lebenszyklus
+  ACTIVE/PAUSED/REVOKED)
+- **Werkstattzugang** — Sitzungen (was abgerechnet wird, `OPEN` → `PAID`) und Werkstattbesuche (ein Aufenthalt vom
+  Türwächter am Eingang bis zum Türwächter am Ausgang)
+- **Werkzeugnutzung** — welche Person welches Werkzeug nutzt, für Abrechnung und Sicherheit
+- **Geräte** — die RFID-Lesegeräte an der Theke, an den Türen und an den Werkzeugen sprechen mit `/device/*`
+- **Übersicht (Dashboard)** — wer gerade in der Werkstatt ist und welche Werkzeuge laufen
 
 ### Bounded Context
 
-Alle Aggregate befinden sich in einem einzigen Bounded Context: **Core-POS**. Die Koordination zwischen Aggregaten
-erfolgt über **Anwendungsfälle** (Application-Level Services im Paket `use_case`), die Aufrufe über mehrere
-Domänendienste hinweg orchestrieren.
+Alle Aggregate liegen in einem Bounded Context: **Core-POS**. Ein Aggregat ändert nur sich selbst; sein Service kennt
+nur sein eigenes Repository und die Outbox. **Jede Änderung ist ein Use Case** in `use_case/` – eine Klasse pro
+Aktion, auch für ein einfaches Anlegen, Ändern oder Löschen, damit jeder Controller gleich aussieht. Ein Use Case
+prüft, was ein zweites Aggregat braucht (es existiert, eine Regel über Aggregate hinweg), und ruft dann den oder die
+Service-Befehle auf. **Jede Abfrage läuft über die Read Facade** ihres Controllers in `read_facade/`. Controller rufen
+nie einen Service auf.
 
 ### Ereignisgesteuerte Architektur
 
-Jede Zustandsänderung erzeugt **`SchaffbarEvent`**-Instanzen, die in einer **transaktionalen Outbox** (`outbox_event`
--Tabelle) innerhalb derselben Transaktion persistiert werden. Dies ermöglicht eine zuverlässige Ereignisveröffentlichung
-für nachgelagerte Konsumenten.
+Jede Datenbankänderung erzeugt **`SchaffbarEvent`**-Instanzen – ein Anlegen, ein Ändern, ein Löschen, das Schreiben
+einer inneren Entity. Sie werden in der **transaktionalen Outbox** (Tabelle `outbox_event`) in der Transaktion der
+Änderung gespeichert – oder gar nicht. Heute ist die Outbox das **Änderungsprotokoll** des Systems: noch kein Prozess
+liest oder veröffentlicht sie. Die Spalten `processed`, `processed_at` und `owner` sind für ein späteres Relay
+vorbereitet und bleiben leer.
 
 ---
 
 ## 2. Aggregat-Strukturmuster
 
-Jedes Aggregat in diesem Projekt folgt einer einheitlichen internen Struktur. Dieser Abschnitt dokumentiert das Muster,
-damit jedes Modul leicht verständlich und erweiterbar ist.
+Jedes Aggregat ist ein Ordner in `domain/` mit denselben Bausteinen (Skill `aggregate`, „Folder“):
 
 ```txt
-<aggregat_name>/
+domain/<aggregat>/
 │
-├── <Aggregat>.java               # Aggregat-Root (Entität)
-├── <Aggregat>Commands.java       # Command-Records (Eingabe-DTOs)
-├── <Aggregat>Service.java        # Domänen-/Anwendungsdienst
-├── <Aggregat>Repository.java     # Spring Data JPA Repository
-├── <Aggregat>Views.java          # MapStruct-basierte schreibgeschützte Projektionen (View-Records)
-├── <Aggregat>EventFactory.java   # Statische Fabrik zur Erstellung von SchaffbarEvents
-├── <Aggregat>PayloadMapper.java  # MapStruct-Mapper: Entität → Event-Payload
-├── <Status/Typ-Enums>.java       # Status- oder Typ-Enumerationen (falls vorhanden)
-├── <Wertobjekte>.java            # Eingebettete Wertobjekte (falls vorhanden, z.B. CustomerAddress)
+├── <Aggregate>.java              # Aggregate Root (@Entity)
+├── <Aggregate>Commands.java      # Command-Records (optional)
+├── <Aggregate>EventFactory.java  # erzeugt die Domänenereignisse
+├── <Aggregate>PayloadMapper.java # Entity → Event-Payload (MapStruct)
+├── <Aggregate>Repository.java    # Spring-Data-Repository, package-private
+├── <Aggregate>Service.java       # Abfragen und Befehle des Aggregats
+├── <Aggregate>Views.java         # View-Records + Entity → View (MapStruct)
+├── <Inner>.java + <Inner>Repository.java  # innere Entity mit Repository (optional, RfidTagAssignmentHistory)
+├── <Enum>.java                   # Enums des Aggregats (RfidReaderType, AgeGroup) – public
+├── <Part>.java                   # @Embeddable-Teil der Entity (CustomerAddress) – package-private
+├── README.md                     # Attribute, Regeln, Ereignisse
 │
-└── web/
-    ├── <Aggregat>Controller.java    # REST-Controller
-    └── <Aggregat>ApiModel.java      # API-Anfrage-/Antwortmodelle
+└── web/                          # nur, wenn das Portal es aufruft
+    ├── <Aggregate>Controller.java   # REST-Controller
+    └── <Aggregate>ApiModel.java     # Response- und Request-Records, MapStruct-Mapping
 ```
 
-### Komponentenverantwortlichkeiten
+### Verantwortlichkeiten der Komponenten
 
-| Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                                   |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Aggregat-Root**         | Kapselt Zustand und Invarianten. Alle Mutationen erfolgen über Command-Methoden, die `List<SchaffbarEvent>` zurückgeben. Statische `of(...)`-Fabrik für die Erstellung gibt ein `*WithEvents`-Record zurück, das die Entität und ihre Erstellungsereignisse enthält. |
-| **Commands**              | Unveränderliche Java-`record`-Typen mit Bean-Validation-Annotationen. Gruppiert in einem `*Commands`-Interface.                                                                                                                                                      |
-| **Service**               | Validiert Existenz, erzwingt Eindeutigkeitsconstraints (aggregatübergreifende Prüfungen), delegiert an das Aggregat-Root, persistiert Entität und Outbox-Events in einer einzigen `@Transactional`-Grenze.                                                           |
-| **Repository**            | Spring Data `JpaRepository` mit benutzerdefinierten Abfragemethoden. Paket-privat.                                                                                                                                                                                   |
-| **Views**                 | Schreibgeschützte `record`-Projektionen, gemappt via MapStruct. Stellt eine Singleton-`MAPPER`-Instanz bereit.                                                                                                                                                       |
-| **EventFactory**          | Erstellt `SchaffbarEvent` für jeden Ereignistyp, indem die Entität über den `PayloadMapper` auf ein Payload gemappt, das Payload validiert und eingepackt wird.                                                                                                      |
-| **PayloadMapper**         | MapStruct-Interface, das vom Aggregat-Root-Entität auf spezifische Event-Payload-Records mappt.                                                                                                                                                                      |
-| **Controller / ApiModel** | REST-Schicht — mappt HTTP-Anfragen auf Commands und ruft Service oder Anwendungsfall auf.                                                                                                                                                                            |
+| Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                            |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Aggregate Root**        | Kapselt Zustand und Invarianten. Entsteht über ein statisches `of(…)`; jede Zustandsänderung ist eine Befehlsmethode, die `List<SchaffbarEvent>` zurückgibt. Außerhalb des Ordners sieht niemand die Entity.                                                  |
+| **Commands**              | Unveränderliche `record`-Typen mit Bean Validation, gruppiert in einem `*Commands`-Interface.                                                                                                                                                                 |
+| **Service**               | Lädt die Entity (sonst `404`), prüft die Regeln, die andere Zeilen des Aggregats brauchen (Eindeutigkeit), ruft den Befehl der Entity auf und speichert ihre Ereignisse über `OutboxEventStore`. Jede öffentliche Methode ist `@Query` oder `@Command` (E21). |
+| **Repository**            | Spring Data `JpaRepository`, package-private; jede Methode mit einem rohen Wert hat eine Überladung mit dem Value Object.                                                                                                                                     |
+| **Views**                 | Schreibgeschützte `record`-Projektionen, mit MapStruct abgebildet (`MAPPER`) – das, was die Außenwelt statt der Entity bekommt.                                                                                                                               |
+| **EventFactory**          | Erzeugt das `SchaffbarEvent` jedes Ereignistyps: bildet die Entity auf ihre Payload ab (`PayloadMapper`), validiert die Payload, verpackt sie.                                                                                                                |
+| **PayloadMapper**         | MapStruct-Interface von der Entity zu den Payload-Records der Ereignisse.                                                                                                                                                                                     |
+| **Controller / ApiModel** | REST-Schicht: ein Befehl ruft einen Use Case auf, eine Abfrage die Read Facade des Controllers.                                                                                                                                                               |
 
-### Interne Struktur des Aggregat-Roots
-
-Jedes Aggregat-Root folgt demselben Code-Layout:
+### Interne Struktur des Aggregate Root
 
 ```java
-class Aggregat {
+class Aggregate {
 
-    // --- Felder (JPA @Id, Domänenattribute, @Version) ---
+    // Felder: JPA @Id (rohe UUID), Attribute, Referenzen als rohe Ids, @Version Instant updatedAt
 
-    // --- Statischer Konstruktor ---
-    // static <WithEvents> of(<CreateCommand>) { ... }
+    // --- static constructor ---
+    // static Aggregate of(<CreateCommand>) { ... }   – der Service speichert sie und baut das Created-Event
 
-    // --- Abfragen ---
-    // getId() gibt typisiertes Wertobjekt zurück
-    // weitere abgeleitete Abfragemethoden
+    // --- query ---
+    // getId() und die Getter der Referenzen geben Value Objects zurück
+    // abgeleitete Abfragen: is…, has…, get…
 
-    // --- Kommandos ---
+    // --- command ---
     // List<SchaffbarEvent> update(...) { ... }
-    // List<SchaffbarEvent> <domänenAktion>(...) { ... }
+    // List<SchaffbarEvent> <fachlicheAktion>(...) { ... }
 
-    // --- Hilfsmethoden ---
-    // record <WithEvents>(<Aggregat>, List<SchaffbarEvent>) {}
+    // --- helper ---
 }
 ```
 
 **Wichtige Konventionen:**
 
-- **Keine öffentlichen Setter** — Zustandsänderungen nur über benannte Command-Methoden
-- **Jede Command-Methode gibt `List<SchaffbarEvent>` zurück** — der Aufrufer (Service) persistiert sie in die Outbox
-- **Statische Fabrik `of(...)`** gibt ein `*WithEvents`-Record zurück (Entität + Ereignisse)
+- **Keine öffentlichen Setter** — Zustandsänderungen nur über benannte Befehlsmethoden
+- **Jede Befehlsmethode gibt `List<SchaffbarEvent>` zurück** — der Service speichert sie in der Outbox
+- **`of(…)` gibt die neue Entity zurück** — der Service speichert sie und erzeugt das Created-Event mit der EventFactory
 - **`@Version`-Feld** (`Instant updatedAt`) für optimistisches Locking
-- **IDs werden intern als Rohtypen gespeichert** (`UUID`, `String`), aber über Getter-Methoden als **Wertobjekte**
-  exponiert
+- **Ids intern als rohe Typen** (`UUID`, `String`) gespeichert, nach außen über die Getter als **Value Objects**
 
 ---
 
 ## 3. Aggregat-Katalog
 
-Die detaillierte Dokumentation jedes Aggregats (Attribute, Kommandos, Geschäftsregeln, Domänenereignisse) befindet sich
-in einer `README.md` innerhalb des jeweiligen Pakets. So bleibt die Dokumentation nah am Code, den sie beschreibt.
+Die ausführliche Dokumentation jedes Aggregats (Attribute, Befehle, Geschäftsregeln, Domänenereignisse) liegt in einer
+`README.md` in seinem Paket – nah am Code, den sie beschreibt.
 
-| #   | Aggregat                                | Paket                                              | Identität                    | README                                                                                                       |
-|-----|-----------------------------------------|----------------------------------------------------|------------------------------|--------------------------------------------------------------------------------------------------------------|
-| 3.1 | Customer (Kunde)                        | `de.schaffbar.core_pos.domain.customer`            | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                       |
-| 3.2 | Tool (Werkzeug)                         | `de.schaffbar.core_pos.domain.tool`                | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                               |
-| 3.3 | RfidReader (RFID-Lesegerät)             | `de.schaffbar.core_pos.domain.rfid_reader`         | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                 |
-| 3.4 | RfidTag (RFID-Chip)                     | `de.schaffbar.core_pos.domain.rfid_tag`            | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                       |
-| 3.5 | RfidTagAssignment (RFID-Chip-Zuordnung) | `de.schaffbar.core_pos.domain.rfid_tag_assignment` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md) |
-| 3.6 | WorkshopSession (Werkstatt-Sitzung)     | `de.schaffbar.core_pos.domain.workshop_session`    | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)       |
-| 3.7 | WorkshopUsage (Werkstatt-Nutzung)       | `de.schaffbar.core_pos.domain.workshop_usage`      | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)           |
-| 3.8 | ToolUsage (Werkzeugnutzung)             | `de.schaffbar.core_pos.domain.tool_usage`          | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                   |
-| 3.9 | ToolCertification (Werkzeug-Einweisung) | `de.schaffbar.core_pos.domain.tool_certification`  | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)   |
-
----
-
-## 4. Anwendungsfälle (Application Services)
-
-Anwendungsfälle befinden sich im Paket `use_case` und **orchestrieren Operationen über mehrere Aggregate hinweg**. Sie
-sind der einzige Ort, an dem aggregatübergreifende Koordination stattfindet.
-
-Die Tabelle zeigt die wichtigsten – die vollständige Liste ist das Paket `use_case/` (eine Klasse pro Aktion, z. B.
-`CustomerDelete`, `RfidReaderDelete`, `ToolClearRfidReader`).
-
-| Anwendungsfall                     | Beschreibung                                                                                                                                                                                                                       | Beteiligte Aggregate                                |
-|------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| `WorkshopUsageStart`               | Kunde betritt die Werkstatt. Erstellt eine Sitzung falls keine existiert, dann erstellt einen Nutzungseintrag.                                                                                                                     | WorkshopSession, WorkshopUsage                      |
-| `WorkshopUsageStop`                | Kunde verlässt die Werkstatt. Stoppt alle aktiven Werkzeugnutzungen, dann erfasst Austrittszeit.                                                                                                                                   | WorkshopSession, WorkshopUsage, ToolUsage           |
-| `WorkshopSessionClose`             | Schließt die Werkstatt-Sitzung eines Kunden (als PAID markieren) mit den endgültigen Summen. Abgelehnt, solange ein Werkstattbesuch oder eine Werkzeugnutzung läuft.                                                               | Customer, WorkshopSession, WorkshopUsage, ToolUsage |
-| `ToolUsageStart`                   | Startet die Werkzeugnutzung für einen Kunden. Nimmt die Sitzung des laufenden Werkstattbesuchs (Kunde muss in der Werkstatt sein). Bei ROTEN Werkzeugen wird aktive Einweisung geprüft; bei GELBEN ist Einweisung nur ein Hinweis. | ToolUsage, Tool, WorkshopUsage, ToolCertification   |
-| `ToolUsageStop`                    | Stoppt die Werkzeugnutzung für einen Kunden an einem bestimmten Werkzeug.                                                                                                                                                          | ToolUsage                                           |
-| `ToolCertificationCreate`          | Erstellt Einweisungen für mehrere Kunden nach einer Schulung – alle oder keine (TC-4); Einweiser des Werkzeugs werden abgelehnt (TC-5).                                                                                            | ToolCertification                                   |
-| `ToolCertificationPause`           | Pausiert die Einweisung eines Kunden.                                                                                                                                                                                              | ToolCertification                                   |
-| `ToolCertificationReactivate`      | Reaktiviert eine pausierte Einweisung.                                                                                                                                                                                             | ToolCertification                                   |
-| `ToolCertificationRevoke`          | Entzieht eine Einweisung endgültig.                                                                                                                                                                                                | ToolCertification                                   |
-| `ToolCertificationDelete`          | Löscht eine irrtümlich erstellte Einweisung.                                                                                                                                                                                       | ToolCertification                                   |
-| `RfidTagAssignmentRequest`         | Startet den RFID-Chip-Zuordnungsprozess für einen Kunden.                                                                                                                                                                          | Customer, RfidTagAssignment                         |
-| `RfidTagAssignmentAssignRfidTag`   | Vervollständigt die RFID-Chip-Zuordnung durch Verknüpfung des Chips mit der ausstehenden Zuordnung.                                                                                                                                | RfidTag, RfidTagAssignment                          |
-| `RfidTagAssignmentUnassignRfidTag` | Entfernt den RFID-Chip vom Kunden, verschiebt den Datensatz in die Historie.                                                                                                                                                       | Customer, RfidTagAssignment                         |
-| `ToolCreate`                       | Erstellt ein Werkzeug mit optionaler RFID-Lesegerät-Validierung (muss SWITCH_BOX sein).                                                                                                                                            | RfidReader, Tool                                    |
-| `ToolAssignRfidReader`             | Ordnet ein RFID-Lesegerät einem Werkzeug zu (Lesegerät muss SWITCH_BOX sein).                                                                                                                                                      | RfidReader, Tool                                    |
-| `RfidReaderChangeType`             | Ändert den Typ eines RFID-Lesegeräts. Wenn aktueller Typ SWITCH_BOX und Werkzeug zugeordnet → Fehler.                                                                                                                              | RfidReader, Tool                                    |
-| `RfidTagDelete`                    | Löscht einen RFID-Tag – abgelehnt, solange er einer Person zugewiesen ist.                                                                                                                                                         | RfidTag, RfidTagAssignment                          |
+| #   | Aggregat                        | Paket                                              | Identität                    | README                                                                                                       |
+|-----|---------------------------------|----------------------------------------------------|------------------------------|--------------------------------------------------------------------------------------------------------------|
+| 3.1 | Customer (Person)               | `de.schaffbar.core_pos.domain.customer`            | `CustomerId` (UUID)          | [customer/README.md](../src/main/java/de/schaffbar/core_pos/domain/customer/README.md)                       |
+| 3.2 | Tool (Werkzeug)                 | `de.schaffbar.core_pos.domain.tool`                | `ToolId` (UUID)              | [tool/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool/README.md)                               |
+| 3.3 | RfidReader (RFID-Lesegerät)     | `de.schaffbar.core_pos.domain.rfid_reader`         | `RfidReaderId` (UUID)        | [rfid_reader/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_reader/README.md)                 |
+| 3.4 | RfidTag (RFID-Tag)              | `de.schaffbar.core_pos.domain.rfid_tag`            | `RfidTagId` (String)         | [rfid_tag/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag/README.md)                       |
+| 3.5 | RfidTagAssignment (Zuweisung)   | `de.schaffbar.core_pos.domain.rfid_tag_assignment` | `RfidTagAssignmentId` (UUID) | [rfid_tag_assignment/README.md](../src/main/java/de/schaffbar/core_pos/domain/rfid_tag_assignment/README.md) |
+| 3.6 | WorkshopSession (Sitzung)       | `de.schaffbar.core_pos.domain.workshop_session`    | `WorkshopSessionId` (UUID)   | [workshop_session/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_session/README.md)       |
+| 3.7 | WorkshopUsage (Werkstattbesuch) | `de.schaffbar.core_pos.domain.workshop_usage`      | `WorkshopUsageId` (UUID)     | [workshop_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/workshop_usage/README.md)           |
+| 3.8 | ToolUsage (Werkzeugnutzung)     | `de.schaffbar.core_pos.domain.tool_usage`          | `ToolUsageId` (UUID)         | [tool_usage/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_usage/README.md)                   |
+| 3.9 | ToolCertification (Einweisung)  | `de.schaffbar.core_pos.domain.tool_certification`  | `ToolCertificationId` (UUID) | [tool_certification/README.md](../src/main/java/de/schaffbar/core_pos/domain/tool_certification/README.md)   |
 
 ---
 
-## 5. Lesemodelle (Read Facades)
+## 4. Use Cases
 
-Jeder Controller liest über seine Read Facade in `read_facade/` (E17). Die der Übersicht (`web/dashboard/`)
-kombiniert mehrere Aggregate:
+Eine Klasse pro Aktion in `use_case/`, benannt `<Aggregat><Befehl der Entity>`: das Präfix ist das Aggregat, dessen
+Zustand sich ändert, die Aktion der Befehl seiner Entity (E3, E20 – Skill `aggregate`, „Service“). Die Regel-Ids sind
+die der READMEs der Aggregate.
 
-| Read Facade                   | Endpunkt                               | Beschreibung                                                                                      |
-|-------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------|
-| `DashboardReadFacade`         | `GET /dashboard/active-users`          | Laufende `WorkshopUsage`-Einträge mit ihrem `Customer` – wer in der Werkstatt ist, am längsten zuerst |
-| `DashboardReadFacade`         | `GET /dashboard/active-tools`          | Laufende `ToolUsage`-Einträge mit `Tool` und `Customer` – welches Werkzeug läuft und wer es nutzt    |
+**Mit einem zweiten Aggregat** – der Use Case liest oder ändert mehr als sein eigenes Aggregat:
+
+| Use Case                           | Liest außerdem / ändert                                            | Was er prüft und tut                                                                                                                                                                                                                                                                 |
+|------------------------------------|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CustomerDelete`                   | WorkshopSession; ändert RfidTagAssignment, ToolCertification, Tool | keine offene Sitzung (C-5); gibt den Tag frei – ein zugewiesener wird gelöst, eine wartende Anfrage abgebrochen (C-4) –, löscht die Einweisungen der Person und nimmt sie als Einweiser heraus (C-9); bezahlte Sitzungen, Nutzungen und von ihr gegebene Einweisungen bleiben (C-11) |
+| `RfidReaderChangeType`             | Tool                                                               | eine Schaltbox mit Werkzeug behält ihren Typ (R-3)                                                                                                                                                                                                                                   |
+| `RfidReaderDelete`                 | Tool                                                               | ein Lesegerät an einem Werkzeug wird nicht gelöscht (R-5)                                                                                                                                                                                                                            |
+| `RfidTagAssignmentRequest`         | Customer                                                           | die Person existiert, dann wartet die Anfrage auf einen Tag                                                                                                                                                                                                                          |
+| `RfidTagAssignmentAssignRfidTag`   | RfidTag                                                            | der Tag ist registriert, dann wird er der wartenden Anfrage zugewiesen (das Lesegerät an der Theke)                                                                                                                                                                                  |
+| `RfidTagAssignmentUnassignRfidTag` | Customer                                                           | die Person existiert, dann wird ihr Tag gelöst (Eintrag in der Historie)                                                                                                                                                                                                             |
+| `RfidTagDelete`                    | RfidTagAssignment                                                  | ein zugewiesener Tag wird nicht gelöscht (RT-3)                                                                                                                                                                                                                                      |
+| `ToolAddInstructors`               | Customer                                                           | die Einweiser existieren als Personen (T-22)                                                                                                                                                                                                                                         |
+| `ToolRemoveInstructors`            | Customer                                                           | die Einweiser existieren als Personen (T-22)                                                                                                                                                                                                                                         |
+| `ToolAssignRfidReader`             | RfidReader                                                         | das Lesegerät existiert und ist eine Schaltbox (T-9)                                                                                                                                                                                                                                 |
+| `ToolClearRfidReader`              | ToolUsage                                                          | nicht, während das Werkzeug läuft – die Nutzung ließe sich an der Schaltbox nicht mehr beenden (T-14)                                                                                                                                                                                |
+| `ToolDelete`                       | ToolUsage; ändert ToolCertification                                | nicht, während das Werkzeug läuft (T-17); seine Einweisungen werden mit gelöscht                                                                                                                                                                                                     |
+| `ToolCertificationCreate`          | Tool, Customer                                                     | alle Personen existieren – alle oder keine (TC-4); wer einweist, ist Einweiser des Werkzeugs (TC-8); Einweiser des Werkzeugs werden nicht eingewiesen (TC-5)                                                                                                                         |
+| `ToolUsageStart`                   | Customer, Tool, ToolCertification, WorkshopUsage                   | ein `RED`-Werkzeug braucht eine aktive Einweisung, `YELLOW` empfiehlt sie nur (TU-10); die Person ist in der Werkstatt, die Nutzung gehört zur Sitzung des laufenden Besuchs (TU-2)                                                                                                  |
+| `ToolUsageToggle`                  | – (ruft `ToolUsageStart` oder `ToolUsageStop`)                     | die eine Aktion der Schaltbox: schaltet das Werkzeug aus, wenn die Person es nutzt, sonst ein (TU-11)                                                                                                                                                                                |
+| `WorkshopSessionClose`             | Customer, WorkshopUsage, ToolUsage                                 | die offene Sitzung der Person (WS-4); kein Besuch und keine Werkzeugnutzung läuft (WS-5); schließt sie mit den Summen beider                                                                                                                                                         |
+| `WorkshopUsageStart`               | Customer; ändert WorkshopSession                                   | der erste Check-in startet die Sitzung, jeder weitere tritt ihr bei (WU-4)                                                                                                                                                                                                           |
+| `WorkshopUsageStop`                | Customer, WorkshopSession; ändert ToolUsage                        | eine offene Sitzung – „nie eingecheckt“ getrennt von „schon ausgecheckt“ (WU-9, WU-2); die laufenden Werkzeuge werden ausgeschaltet (WU-5, TU-4)                                                                                                                                     |
+
+**Nur das eigene Aggregat** – sie reichen an den Service weiter, der die Regeln des Aggregats prüft: `CustomerCreate`,
+`CustomerUpdate`, `CustomerChangeContact`, `CustomerChangeAddress`, `RfidReaderCreate`, `RfidReaderUpdate`,
+`RfidTagCreate`, `ToolCreate`, `ToolUpdate`, `ToolSetWlanRelais`, `ToolClearWlanRelais`, `ToolCertificationPause`,
+`ToolCertificationReactivate`, `ToolCertificationRevoke`, `ToolCertificationDelete`, `ToolUsageStop`.
+
+---
+
+## 5. Read Facades
+
+Jeder Controller liest über die eine Read Facade in `read_facade/`, die nach ihm benannt ist (E17); eine Read Facade
+liest nur. Die, die mehrere Aggregate verbinden, haben eigene Views (`DashboardViews`, `DeviceViews`,
+`OpenWorkshopSessionViews`):
+
+| Read Facade                   | Liest                                                                                             | Wofür                                                                                                                                                                                                 |
+|-------------------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DashboardReadFacade`         | WorkshopUsage, ToolUsage, Tool, Customer                                                          | `GET /dashboard/active-users`: die laufenden Werkstattbesuche mit ihrer Person, die längste zuerst; `GET /dashboard/active-tools`: die laufenden Werkzeugnutzungen mit Werkzeug und Person            |
+| `DeviceReadFacade`            | RfidReader, RfidTag, RfidTagAssignment, Customer, Tool, ToolUsage, WorkshopSession, WorkshopUsage | `/device/*`: das Lesegerät über seine MAC-Adresse, die Person eines Tags (Tag → Zuweisung → Person), das Werkzeug einer Schaltbox, ob ein Werkzeug läuft, der Aufenthalt nach Check-in oder Check-out |
+| `WorkshopSessionReadFacade`   | WorkshopSession, WorkshopUsage, ToolUsage, Tool, Customer                                         | `GET /workshop-sessions/{customerId}/open`: die offene Sitzung mit ihren Besuchen und einer Zusammenfassung pro Werkzeug, mit den Summen                                                              |
+| `RfidTagAssignmentReadFacade` | RfidTagAssignment, Customer                                                                       | die Zuweisungen (die Person muss existieren) und ihre Historie                                                                                                                                        |
+| die übrigen                   | ihr Aggregat                                                                                      | `CustomerReadFacade`, `RfidReaderReadFacade`, `RfidTagReadFacade`, `ToolReadFacade`, `ToolCertificationReadFacade`                                                                                    |
 
 ---
 
 ## 6. Wertobjekte (Value Objects)
 
-Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
+Alle Wertobjekte liegen in `de.schaffbar.core_pos.shared.id`. Sie prüfen sich beim Erzeugen; die Ids haben
+`random()`, die Werte, die von einem Gerät kommen (`MacAddress`, `RfidTagId`, `IpAddress`), nicht – das System erfindet
+nie einen.
 
-| Wertobjekt            | Umschließt | Verwendet für                     |
-|-----------------------|------------|-----------------------------------|
-| `CustomerId`          | `UUID`     | Kundenidentität                   |
-| `ToolId`              | `UUID`     | Werkzeugidentität                 |
-| `ToolUsageId`         | `UUID`     | Werkzeugnutzungsidentität         |
-| `ToolCertificationId` | `UUID`     | Werkzeug-Einweisungsidentität     |
-| `RfidReaderId`        | `UUID`     | RFID-Lesegerät-Identität          |
-| `RfidTagId`           | `String`   | RFID-Chip-Identität (Hardware-ID) |
-| `RfidTagAssignmentId` | `UUID`     | RFID-Chip-Zuordnungsidentität     |
-| `WorkshopSessionId`   | `UUID`     | Werkstatt-Sitzungsidentität       |
-| `WorkshopUsageId`     | `UUID`     | Werkstatt-Nutzungsidentität       |
-| `MacAddress`          | `String`   | RFID-Lesegerät-MAC-Adresse        |
+| Wertobjekt            | Umschließt | Verwendet für                                       |
+|-----------------------|------------|-----------------------------------------------------|
+| `CustomerId`          | `UUID`     | Identität einer Person                              |
+| `ToolId`              | `UUID`     | Identität eines Werkzeugs                           |
+| `ToolUsageId`         | `UUID`     | Identität einer Werkzeugnutzung                     |
+| `ToolCertificationId` | `UUID`     | Identität einer Einweisung                          |
+| `RfidReaderId`        | `UUID`     | Identität eines RFID-Lesegeräts                     |
+| `RfidTagId`           | `String`   | Identität eines RFID-Tags (Hardware-Id, `04A31F9C`) |
+| `RfidTagAssignmentId` | `UUID`     | Identität einer Zuweisung                           |
+| `WorkshopSessionId`   | `UUID`     | Identität einer Sitzung                             |
+| `WorkshopUsageId`     | `UUID`     | Identität eines Werkstattbesuchs                    |
+| `MacAddress`          | `String`   | MAC-Adresse eines Lesegeräts (`34:CD:B0:D3:A9:30`)  |
+| `IpAddress`           | `String`   | IPv4-Adresse des WLAN-Relais eines Werkzeugs        |
 
 ---
 
@@ -195,28 +217,31 @@ Alle Wertobjekte befinden sich in `de.schaffbar.core_pos.shared.id`:
 
 ### Ereignis-Infrastruktur
 
-- **`SchaffbarEvent`** — Hülle mit `id`, `type`, `version`, `aggregateType`, `aggregateId`, `timestamp`, `payload` (JSON), `owner`
-- **`OutboxEvent`** — JPA-Entität, persistiert in der `schaffbar.outbox_event`-Tabelle innerhalb derselben Transaktion
-- **`EventPayload`** — Marker-Interface mit Validierungsunterstützung
-- **`AggregateType`** — Enumeration, die das Quell-Aggregat identifiziert
+- **`SchaffbarEvent`** — unveränderlicher Umschlag mit `id`, `type`, `version`, `aggregateType`, `aggregateId`,
+  `timestamp`, `payload` (JSON) und `owner` (noch nicht gesetzt); entsteht nur über seine statischen Factories, die
+  die EventFactory jedes Aggregats aufruft
+- **`EventPayload`** — das Interface aller Payload-Records, mit `validate()` (Bean Validation)
+- **`OutboxEventStore`** — speichert die Ereignisse eines Befehls (`Propagation.MANDATORY`: außerhalb der Transaktion
+  des Befehls schlägt es fehl, ein Ereignis wird also nie ohne seine Änderung gespeichert)
+- **`OutboxEvent`** — JPA-Entity der Tabelle `schaffbar.outbox_event`, das ganze Ereignis als JSON in `payload`
+- **`AggregateType`** — Enum, das das auslösende Aggregat bezeichnet
 
 ### Ereignisfluss
 
 ```txt
-Command-Methode (Aggregat-Root)
-  └── Gibt List<SchaffbarEvent> zurück
-        └── Service speichert in OutboxEventRepository
-              └── outbox_event-Tabelle (Transaktionale-Outbox-Muster)
-                    └── Wird von externem Prozess abgeholt/veröffentlicht
+Befehlsmethode des Aggregate Root (oder of(…) + das Created-Event der EventFactory)
+  └── gibt List<SchaffbarEvent> zurück
+        └── der Service ruft OutboxEventStore.save(events) auf – in der Transaktion des Befehls
+              └── Tabelle outbox_event – das Änderungsprotokoll; noch kein Relay liest sie
 ```
 
-### Muster zur Ereigniserstellung
+### Muster zur Ereigniserzeugung
 
 ```txt
-EventFactory.einEreignis(aggregat)
-  ├── PayloadMapper.MAPPER.zuPayload(aggregat)         // MapStruct-Mapping
-  ├── payload.validate()                                 // Bean Validation
-  └── SchaffbarEvent.<aggregatTyp>Event(typ, id, payload)  // Hüllen-Erstellung
+EventFactory.someEvent(aggregate)
+  ├── PayloadMapper.MAPPER.toSomePayload(aggregate)           // MapStruct-Abbildung
+  ├── payload.validate()                                      // Bean Validation
+  └── SchaffbarEvent.<aggregateType>Event(type, id, payload)  // Umschlag
 ```
 
 ### Vollständige Ereignisliste
@@ -227,7 +252,7 @@ EventFactory.einEreignis(aggregat)
 | Tool              | `TOOL_CREATED`, `TOOL_UPDATED`, `TOOL_WLAN_RELAIS_SET`, `TOOL_WLAN_RELAIS_CLEARED`, `TOOL_RFID_READER_ASSIGNED`, `TOOL_RFID_READER_CLEARED`, `TOOL_INSTRUCTORS_ADDED`, `TOOL_INSTRUCTORS_REMOVED`, `TOOL_DELETED` |
 | ToolUsage         | `TOOL_USAGE_STARTED`, `TOOL_USAGE_STOPPED`                                                                                                                                                                        |
 | ToolCertification | `TOOL_CERTIFICATION_CREATED`, `TOOL_CERTIFICATION_PAUSED`, `TOOL_CERTIFICATION_REACTIVATED`, `TOOL_CERTIFICATION_REVOKED`, `TOOL_CERTIFICATION_DELETED`                                                           |
-| RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_DELETED`                                                                                                                                               |
+| RfidReader        | `RFID_READER_CREATED`, `RFID_READER_UPDATED`, `RFID_READER_TYPE_CHANGED`, `RFID_READER_DELETED`                                                                                                                   |
 | RfidTag           | `RFID_TAG_CREATED`, `RFID_TAG_DELETED`                                                                                                                                                                            |
 | RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                      |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |
