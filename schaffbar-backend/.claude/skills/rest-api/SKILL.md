@@ -101,7 +101,7 @@ public class RfidReaderController {
   | change the aggregate's own fields | `PUT /{id}` with body | `PUT /customers/{customerId}` |
   | set a part | `PUT /{id}/<part>` with body, or the reference in the path | `PUT /customers/{customerId}/contact`, `PUT /tools/{toolId}/rfid-reader/{rfidReaderId}` |
   | an action without values | `PUT /{id}/<verb>`, no body | `PUT /workshop-sessions/{customerId}/close`, `…/pause` |
-  | change one field with a rule of its own | `PATCH /{id}/<field>` with body | `PATCH /rfid-readers/{rfidReaderId}/type` |
+  | change one field with a rule of its own | `PATCH /{id}/<field>` with body – the one `PATCH`, it stays (decided 23.11.2026) | `PATCH /rfid-readers/{rfidReaderId}/type` |
   | add entries to a list | `POST /{id}/<list>` with body | `POST /tools/{toolId}/instructors` |
   | remove entries, clear a part | `DELETE /{id}/<list>` with body, `DELETE /{id}/<part>` | `DELETE /tools/{toolId}/instructors`, `DELETE /tools/{toolId}/wlan-relais` |
   | delete | `DELETE /{id}` | `DELETE /rfid-readers/{rfidReaderId}` |
@@ -248,7 +248,8 @@ A change of an endpoint or an `*ApiModel` is a change of the portal too – in t
 - the portal's `shared/api/<resource>/` (zod schema, `…ApiModel`, `…Request`, API service) and its feature (portal
   skills `api`, `feature`);
 - a new error code: its translation (`shared.errors.<CODE>`, `de.json` and `en.json`);
-- the request in the Bruno collection (`core-pos/api/<aggregate>/`) for manual testing;
+- the request in the Bruno collection (`core-pos/api/<folder>/`, one folder per controller, also `dashboard/` and
+  `device/`) for manual testing – every endpoint has one;
 - a gap of `docs/backend-features.md` that is closed is marked there.
 
 Backend and portal are deployed together; an agent does not deploy – it says that both need it.
