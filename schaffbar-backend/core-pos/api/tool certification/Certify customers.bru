@@ -1,0 +1,23 @@
+meta {
+  name: Certify customers
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{domain_url}}/api/v1/tool-certifications/batch
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customerIds": ["788779c4-bd97-450d-b655-e4814caa2e73"],
+    "toolId": "61252c3a-0e71-4b5d-8068-038fcd7dff1d",
+    "certifiedBy": "46417d27-ff9a-4cc8-a765-8ac55fc8b793"
+  }
+}

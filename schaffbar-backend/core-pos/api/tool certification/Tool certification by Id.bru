@@ -1,0 +1,19 @@
+meta {
+  name: Tool certification by Id
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{domain_url}}/api/v1/tool-certifications/:toolCertificationId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  toolCertificationId: 3b6f1c2e-5d4a-4e8b-9f10-2a7c6d8e9b01
+}
+
+headers {
+  Accept: application/json
+}

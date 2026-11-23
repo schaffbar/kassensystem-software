@@ -1,0 +1,25 @@
+meta {
+  name: Card
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{domain_url}}/device/card
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    //"DEVUSECASE": "GO"
+    //"DEVUSECASE": "S"
+    "DEVUSECASE": "GI",
+    "MACADDR": "34:CD:B0:D3:A9:30",
+    "RFID": "04A31F9C"
+  }
+}

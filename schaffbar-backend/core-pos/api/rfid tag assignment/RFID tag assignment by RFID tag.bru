@@ -1,0 +1,15 @@
+meta {
+  name: RFID tag assignment by RFID tag
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{domain_url}}/api/v1/rfid-tag-assignments?rfidTagId=04A31F9C
+  body: none
+  auth: inherit
+}
+
+params:query {
+  rfidTagId: 04A31F9C
+}

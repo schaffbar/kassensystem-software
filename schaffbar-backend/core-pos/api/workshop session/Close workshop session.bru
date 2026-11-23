@@ -1,0 +1,15 @@
+meta {
+  name: Close workshop session
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{domain_url}}/api/v1/workshop-sessions/:customerId/close
+  body: none
+  auth: inherit
+}
+
+params:path {
+  customerId: 788779c4-bd97-450d-b655-e4814caa2e73
+}

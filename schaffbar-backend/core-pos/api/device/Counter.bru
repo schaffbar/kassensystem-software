@@ -1,0 +1,22 @@
+meta {
+  name: Counter
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{domain_url}}/device/counter
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "MACADDR": "34:CD:B0:D3:A9:30",
+    "RFID": "04A31F9C"
+  }
+}
