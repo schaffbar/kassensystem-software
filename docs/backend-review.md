@@ -631,3 +631,14 @@ Service oder Use Case“, `IpAddress` fehlte, das Inhaltsverzeichnis passte nich
   erledigt 23.11.2026 im Schritt `shared/`: `IllegalStateException`, `null` bleibt `IllegalArgumentException`.
 - [x] **`SchaffbarEvent`**: `@NotBlank` auf `UUID` würde bei einer Prüfung mit `UnexpectedTypeException` scheitern (siehe
   `shared/`) – erledigt 23.11.2026: die Constraints sind mit `implements ValidationSupport` entfallen.
+
+## Nachträge (23.11.2026)
+
+Nach dem Review aufgefallen, nicht in der Liste oben:
+
+- [x] Value Objects ohne `@Valid` in Views (die „bekannte Abweichung“ im Skill `aggregate`): 13 Felder in
+  `ToolCertificationView`, `ToolUsageView`, `WorkshopSessionView`, `WorkshopUsageView` – ergänzt. Neue ArchUnit-Regeln
+  `valueObjectsInCommandsAreValidated` und `valueObjectsInViewsAreValidated`; die Commands waren schon richtig,
+  gegen ein absichtlich entferntes `@Valid` geprüft. Im Skill steht jetzt keine bekannte Abweichung mehr.
+- [x] `DateOfBirthValidatorTest`: Methodennamen nach `<method>_<situation>_<result>` (`isValid_lastDayOfLastYear_isAccepted`, …).
+- Bleibt: das TODO „maybe JSONB“ an `OutboxEvent` – eine Idee, kein Fund.
