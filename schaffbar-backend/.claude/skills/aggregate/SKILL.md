@@ -608,7 +608,9 @@ Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 ## Tests that enforce it
 
 Most of these rules are checked by the ArchUnit tests in `core-pos/src/test/java/de/schaffbar/core_pos/architecture/`
-(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …) – part of `mvn -q test`.
+(`DomainArchitectureTest`, `DependencyArchitectureTest`, `ValueObjectArchitectureTest`, …; the rules for every bean –
+fields, parameters, `@Validated` – in `BeanArchitectureTest`) – part of `mvn -q test`. The view rules hold for the
+views of an aggregate and of a read facade alike.
 Every rule is strict (no `freeze(…)`): a violation is fixed, never excepted to make a build pass. A rule in this skill and its ArchUnit rule change together.
 
 ## Checklist

@@ -113,7 +113,8 @@ void createRfidReader_rejectsAUsedMacAddress() {
   takes what it needs as parameters and returns what the test needs next. No `when(…)` in the test itself – also no
   `doThrow(…)`: a rejection a controller or use case test needs is `given<Action>RejectedWith(…, RuntimeException
   rejection)` – `givenCloseRejectedWith(customerId, new NoOpenWorkshopSessionException(customerId))`, one method for
-  all rejections of that call. `TestArchitectureTest` fails on any Mockito stub in a `@Test` method.
+  all rejections of that call. `TestArchitectureTest` fails on any Mockito stub outside a method named `given…` – in a
+  test, in `@BeforeEach` or in another helper.
 - **A verification that says what happened (or did not) is an `expect…` method**: every interaction (`verify(…)`,
   `never()`, `InOrder` – also when it is one line), and every check that appears in more than one test:
   `expectSavedEvent(type, id)`, `expectSavedEvents(type, usages)` (one event per entity, in order),
@@ -469,7 +470,7 @@ service's check is not enough.
 `architecture/*ArchitectureTest` (ArchUnit, `ImportOption.DoNotIncludeTests`): one class per topic
 (`DomainArchitectureTest`, `DependencyArchitectureTest`, `QueryCommandArchitectureTest`, `ValueObjectArchitectureTest`,
 …), shared predicates and conditions in `ArchitectureSupport`. `TestArchitectureTest` checks the test code itself
-(`ImportOption.OnlyIncludeTests`): no Mockito stub directly in a test method.
+(`ImportOption.OnlyIncludeTests`): a Mockito stub only in a `given…` method.
 
 - A rule is a `static final ArchRule` field with `@ArchTest`, named as the rule in words
   (`valuesFromDevicesAreNeverInvented`), with `.because(…)` where the reason is not obvious.

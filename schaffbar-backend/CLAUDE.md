@@ -155,7 +155,9 @@ core_pos/
 - Ids are value objects (`CustomerId`, `ToolId`, … in `shared/id/`) in signatures and views; entities store the raw
   `UUID` / `String`.
 - Spring beans: `@Service` / `@RestController` + `@Validated` + `@RequiredArgsConstructor`, dependencies as
-  `private final @NonNull` fields; public methods validate their parameters (`@NotNull @Valid CustomerId customerId`).
+  `private final @NonNull` fields; public methods take no `UUID` or `String` and validate their parameters
+  (`@NotNull @Valid CustomerId customerId`) – also a controller's request body; only an optional filter
+  (`@RequestParam(required = false)`) may be `null` (ArchUnit `BeanArchitectureTest`).
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
 - `Optional` only as a return type ("maybe nothing there") – never as a parameter or a field. A value that can be
   missing is passed as a nullable parameter, with a comment what `null` means.
@@ -166,7 +168,9 @@ core_pos/
   (exceptions, `SchaffbarEvent`).
 - **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`, E21): they
   bring the transaction (`@Query` = `@Transactional(readOnly = true)`, `@Command` = `@Transactional`), so these
-  classes never use `@Transactional` themselves. Spring Data's `@Query` belongs only to repositories. The one
+  classes never use `@Transactional` themselves. A `@Query` writes nothing – no `@Command`, no entity command, no
+  `save` / `delete` of a repository, no `OutboxEventStore`, also not in a lambda (ArchUnit `queriesWriteNothing`); in a
+  read-only transaction the change would not be written. Spring Data's `@Query` belongs only to repositories. The one
   `@Transactional` is `OutboxEventStore.save` with `Propagation.MANDATORY`: outside a command's transaction it fails,
   so an event is never saved without its change.
 - Comments only for what the code can't say (why, a non-obvious rule); no JavaDoc that repeats a name or signature.
@@ -232,7 +236,8 @@ Skill `backend-testing` has all rules; the short form:
 - A rejection is checked with its exception, its `code` and that nothing happened. Mockito runs strict – stub per test.
 - A format rule (Bean Validation): a controller test `…_is400` per constraint and endpoint (E33). Controller tests run
   with Boot's Jackson configuration (`Json.messageConverter()`) and compare dates with their value (E34).
-- Every test has `// given` / `// when` / `// then`; stubs live in `given…` (ArchUnit `TestArchitectureTest`),
+- Every test has `// given` / `// when` / `// then`; stubs live only in `given…` methods – not in the test, not in
+  `@BeforeEach`, not in another helper (ArchUnit `TestArchitectureTest`),
   verifications in `expect…` methods. Follow the skill, not the test next to it.
   Each test creates its own data (no fields): commands from `builder/CommandBuilder`, views from `builder/ViewBuilder`,
   values random (`RandomValues`, `XyzId.random()`) unless the value is the subject of the test.
