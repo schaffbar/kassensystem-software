@@ -287,7 +287,9 @@ public interface RfidReaderCommands {
 - **Every field is validated:** a value object `@NotNull @Valid` (optional: only `@Valid`), a required string
   `@NotBlank`, other required fields `@NotNull`, formats `@Size`, `@Email`, `@Pattern`. A field without annotation is
   optional. The service validates the command with `@NotNull @Valid`. The request body of the API model carries the
-  same constraints, so the controller answers `400` before the use case is called.
+  same constraints, so the controller answers `400` before the use case is called. The same holds for the fields of a
+  view (ArchUnit `valueObjectsInCommandsAreValidated`, `valueObjectsInViewsAreValidated`; a list carries it on the
+  element: `Set<@NotNull @Valid CustomerId>`).
 - A change of several entries at once takes a list, not one call per entry:
   `@NotEmpty List<@NotNull @Valid CustomerId> customerIds` (`addInstructors`, `removeInstructors`).
 
@@ -597,11 +599,8 @@ Besides the folder, a new aggregate touches `shared/`, the migrations and the do
 
 ## Not everywhere yet
 
-The rules above are the target. Some code predates them and is fixed aggregate by aggregate (roadmap K4) – **follow
-this skill, not the code next to you.** Known deviations:
-
-- Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
-  `ToolViews`, …).
+The rules above are the target – **follow this skill, not the code next to you.** Known deviations: none since the
+backend review (23.11.2026). A deviation found later is fixed in its step, or listed here until it is.
 
 Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 
