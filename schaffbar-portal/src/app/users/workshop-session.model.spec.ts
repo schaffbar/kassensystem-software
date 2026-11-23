@@ -39,7 +39,7 @@ describe('workshop-session.model', () => {
     const toolRunning: WorkshopSession = {
       ...checkedOut,
       toolUsageSummaries: [
-        { toolId: 'tool-1', toolName: 'Bandsäge', active: true, totalDurationInMinutes: 0, totalUnits: 0, usages: [] },
+        { toolId: 'tool-1', toolName: 'Bandsäge', running: true, totalDurationInMinutes: 0, totalUnits: 0, usages: [] },
       ],
     };
 

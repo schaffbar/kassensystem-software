@@ -99,7 +99,7 @@ describe('UserDetailStore', () => {
     );
   const expectUser = () => expectGet(`${api}/customers/user-1`);
   const expectAssignment = () => expectGet(`${api}/rfid-tag-assignments`, ['customerId', 'user-1']);
-  const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/active`);
+  const expectSession = () => expectGet(`${api}/workshop-sessions/user-1/open`);
   const expectCertifications = () => expectGet(`${api}/tool-certifications`, ['customerId', 'user-1']);
   const expectTools = () => expectGet(`${api}/tools`);
   const expectUsers = () => expectGet(`${api}/customers`);
@@ -168,7 +168,7 @@ describe('UserDetailStore', () => {
   });
 
   it('should not close the session while a tool is running', async () => {
-    const running = workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ active: true })] });
+    const running = workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ running: true })] });
 
     await loadUser({ session: running });
 

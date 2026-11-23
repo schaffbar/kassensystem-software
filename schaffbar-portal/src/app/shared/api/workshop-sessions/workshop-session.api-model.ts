@@ -21,7 +21,7 @@ export const toolUsageDetailSchema = z.object({
 export const toolUsageSummarySchema = z.object({
   toolId: z.string(),
   toolName: z.string().nullable(),
-  active: z.boolean(),
+  running: z.boolean(),
   totalDurationInMinutes: z.number(),
   totalUnits: z.number(),
   usages: z.array(toolUsageDetailSchema),

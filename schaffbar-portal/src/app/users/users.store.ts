@@ -50,7 +50,7 @@ export const UsersStore = signalStore(
     },
     // a user with an open session is not deleted – the session still has to be closed and paid
     canDeleteUser(userId: string): Observable<boolean> {
-      return store._workshopSessionsApi.getActiveWorkshopSession(userId).pipe(map((session) => !session));
+      return store._workshopSessionsApi.getOpenWorkshopSession(userId).pipe(map((session) => !session));
     },
     createUser: mutation<CreateUserCommand>({
       request: (command) => store._customersApi.createCustomer(toCreateCustomerRequest(command)),

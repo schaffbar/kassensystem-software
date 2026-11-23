@@ -65,7 +65,7 @@ export const UserDetailStore = signalStore(
       _router: inject(Router),
       _userResource: customersApi.customerResource(store.userId),
       _assignmentResource: rfidTagAssignmentsApi.currentRfidTagAssignmentResource(store.userId),
-      _openSessionResource: workshopSessionsApi.activeWorkshopSessionResource(store.userId),
+      _openSessionResource: workshopSessionsApi.openWorkshopSessionResource(store.userId),
       _certificationsResource: toolCertificationsApi.toolCertificationsByCustomerResource(store.userId),
       // names and areas of the tools, names of the instructors
       _toolsResource: inject(ToolsApiService).toolsResource(),

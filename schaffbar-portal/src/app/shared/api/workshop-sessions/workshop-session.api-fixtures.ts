@@ -16,7 +16,7 @@ export function toolUsageSummaryFixture(overrides: Partial<ToolUsageSummaryApiMo
   return {
     toolId: 'tool-1',
     toolName: 'Bandsäge',
-    active: false,
+    running: false,
     totalDurationInMinutes: 31,
     totalUnits: 6,
     usages: [

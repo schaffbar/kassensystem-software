@@ -23,7 +23,7 @@ export interface WorkshopUsage {
 export interface ToolUsageSummary {
   toolId: string;
   toolName: string | null; // null if the tool has been deleted
-  active: boolean;
+  running: boolean;
   totalDurationInMinutes: number;
   totalUnits: number;
   usages: ToolUsage[];
@@ -50,7 +50,7 @@ export function canCloseWorkshopSession(session: WorkshopSession): boolean {
 export function hasRunningUsage(session: WorkshopSession): boolean {
   return (
     session.workshopUsages.some((usage) => usage.exitTime === null) ||
-    session.toolUsageSummaries.some((summary) => summary.active)
+    session.toolUsageSummaries.some((summary) => summary.running)
   );
 }
 

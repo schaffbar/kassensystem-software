@@ -31,7 +31,7 @@ describe('toWorkshopSession', () => {
         {
           toolId: 'tool-1',
           toolName: 'Bandsäge',
-          active: false,
+          running: false,
           totalDurationInMinutes: 31,
           totalUnits: 6,
           usages: [
@@ -55,7 +55,7 @@ describe('toWorkshopSession', () => {
         toolUsageSummaries: [
           toolUsageSummaryFixture({
             toolName: null,
-            active: true,
+            running: true,
             usages: [
               { id: 'u', startTime: '2026-10-31T10:05:00Z', endTime: null, durationInMinutes: null, unitsUsed: null },
             ],
@@ -65,7 +65,7 @@ describe('toWorkshopSession', () => {
     );
 
     expect(session.workshopUsages[0]).toMatchObject({ exitTime: null, durationInMinutes: null, unitsUsed: null });
-    expect(session.toolUsageSummaries[0]).toMatchObject({ toolName: null, active: true });
+    expect(session.toolUsageSummaries[0]).toMatchObject({ toolName: null, running: true });
     expect(session.toolUsageSummaries[0].usages[0].endTime).toBeNull();
   });
 });

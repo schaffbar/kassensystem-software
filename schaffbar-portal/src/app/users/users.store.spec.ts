@@ -97,18 +97,18 @@ describe('UsersStore', () => {
   });
 
   describe('canDeleteUser', () => {
-    const expectActiveSession = (): TestRequest => httpMock.expectOne(`${apiUrl}/workshop-sessions/user-1/active`);
+    const expectOpenSession = (): TestRequest => httpMock.expectOne(`${apiUrl}/workshop-sessions/user-1/open`);
 
     it('should not allow it with an open session', async () => {
       const canDelete = firstValueFrom(store.canDeleteUser('user-1'));
-      expectActiveSession().flush(workshopSessionFixture());
+      expectOpenSession().flush(workshopSessionFixture());
 
       expect(await canDelete).toBe(false);
     });
 
     it('should allow it without an open session', async () => {
       const canDelete = firstValueFrom(store.canDeleteUser('user-1'));
-      expectActiveSession().flush(null);
+      expectOpenSession().flush(null);
 
       expect(await canDelete).toBe(true);
     });

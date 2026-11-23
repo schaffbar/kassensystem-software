@@ -70,7 +70,7 @@ describe('UserDetailComponent', () => {
       {
         toolId: 'tool-1',
         toolName: 'Bandsäge',
-        active: false,
+        running: false,
         totalDurationInMinutes: 26,
         totalUnits: 1,
         usages: [

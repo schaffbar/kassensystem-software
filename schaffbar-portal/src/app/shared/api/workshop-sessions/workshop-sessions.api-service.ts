@@ -16,22 +16,22 @@ export class WorkshopSessionsApiService {
   // --------------------------------------------------------------------------
   // queries
 
-  activeWorkshopSessionResource(
+  openWorkshopSessionResource(
     customerId: () => string | null,
   ): HttpResourceRef<WorkshopSessionApiModel | null | undefined> {
     return httpResource(
       () => {
         const id = customerId();
-        return id ? `${WORKSHOP_SESSIONS_API_URL}/${id}/active` : undefined;
+        return id ? `${WORKSHOP_SESSIONS_API_URL}/${id}/open` : undefined;
       },
-      { parse: parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/active') },
+      { parse: parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/open') },
     );
   }
 
-  getActiveWorkshopSession(customerId: string): Observable<WorkshopSessionApiModel | null> {
+  getOpenWorkshopSession(customerId: string): Observable<WorkshopSessionApiModel | null> {
     return this.http
-      .get<unknown>(`${WORKSHOP_SESSIONS_API_URL}/${customerId}/active`)
-      .pipe(map(parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/active')));
+      .get<unknown>(`${WORKSHOP_SESSIONS_API_URL}/${customerId}/open`)
+      .pipe(map(parseWith(workshopSessionSchema.nullable(), 'GET /workshop-sessions/{customerId}/open')));
   }
 
   // --------------------------------------------------------------------------

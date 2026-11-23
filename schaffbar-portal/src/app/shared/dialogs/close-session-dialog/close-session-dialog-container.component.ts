@@ -26,7 +26,7 @@ export class CloseSessionDialogContainerComponent {
   readonly customerId = input.required<string>();
   readonly userName = input.required<string>();
 
-  private readonly sessionResource = inject(WorkshopSessionsApiService).activeWorkshopSessionResource(this.customerId);
+  private readonly sessionResource = inject(WorkshopSessionsApiService).openWorkshopSessionResource(this.customerId);
 
   protected readonly isLoading = computed(() => this.sessionResource.isLoading());
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
@@ -73,7 +73,7 @@ function toCloseSessionToolViewModel(summary: ToolUsageSummaryApiModel): CloseSe
     toolId: summary.toolId,
     name: summary.toolName,
     startTime: earliest(startTimes) ?? new Date(),
-    endTime: summary.active || endTimes.includes(null) ? null : latest(toDates(endTimes)),
+    endTime: summary.running || endTimes.includes(null) ? null : latest(toDates(endTimes)),
     minutes: summary.totalDurationInMinutes,
     units: summary.totalUnits,
   };
@@ -85,7 +85,7 @@ function toCloseSessionToolViewModel(summary: ToolUsageSummaryApiModel): CloseSe
 function hasRunningUsage(session: WorkshopSessionApiModel): boolean {
   return (
     session.workshopUsages.some((usage) => usage.exitTime === null) ||
-    session.toolUsageSummaries.some((summary) => summary.active)
+    session.toolUsageSummaries.some((summary) => summary.running)
   );
 }
 

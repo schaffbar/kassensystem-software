@@ -20,7 +20,7 @@ import { CloseSessionDialogContainerComponent } from './close-session-dialog-con
 import { CloseSessionDialogModalComponent } from './close-session-dialog-modal.component';
 
 describe('CloseSessionDialogContainerComponent', () => {
-  const sessionUrl = `${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/active`;
+  const sessionUrl = `${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/open`;
 
   let fixture: ComponentFixture<CloseSessionDialogContainerComponent>;
   let httpMock: HttpTestingController;

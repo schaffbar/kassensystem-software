@@ -39,7 +39,7 @@ function toToolUsageSummary(apiModel: ToolUsageSummaryApiModel): ToolUsageSummar
   return {
     toolId: apiModel.toolId,
     toolName: apiModel.toolName,
-    active: apiModel.active,
+    running: apiModel.running,
     totalDurationInMinutes: apiModel.totalDurationInMinutes,
     totalUnits: apiModel.totalUnits,
     usages: apiModel.usages.map(toToolUsage),

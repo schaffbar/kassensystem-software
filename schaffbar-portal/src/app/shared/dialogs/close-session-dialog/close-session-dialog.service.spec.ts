@@ -42,7 +42,7 @@ describe('CloseSessionDialogService', () => {
     const [dialogRef] = TestBed.inject(MatDialog).openDialogs;
     expect(dialogRef.componentInstance).toBeInstanceOf(CloseSessionDialogContainerComponent);
     expect(dialogRef.componentInstance.userName()).toBe('Max Mustermann');
-    httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/active`).flush(null);
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/v1/workshop-sessions/user-1/open`).flush(null);
   });
 
   it('should emit true when the dialog is confirmed', async () => {

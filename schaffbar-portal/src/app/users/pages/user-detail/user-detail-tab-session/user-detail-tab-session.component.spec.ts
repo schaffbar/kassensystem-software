@@ -37,7 +37,7 @@ describe('UserDetailTabSessionComponent', () => {
       {
         toolId: 'tool-1',
         toolName: 'Kreissäge',
-        active: true,
+        running: true,
         totalDurationInMinutes: 29,
         totalUnits: 3,
         usages: [
@@ -49,7 +49,7 @@ describe('UserDetailTabSessionComponent', () => {
       {
         toolId: 'tool-2',
         toolName: 'Bandsäge',
-        active: false,
+        running: false,
         totalDurationInMinutes: 14,
         totalUnits: 1,
         usages: [toolUsage('b-1', at(18, 20), at(18, 34))],
