@@ -204,7 +204,7 @@ errors.
 
 - Name: `<entity>Resource` / `<entities>Resource` / `<entities>By<Filter>Resource` with the full entity name
   (`toolCertificationsByToolResource`, not `certificationsByToolResource`); a state from the backend path goes in
-  front (`GET /workshop-sessions/{customerId}/active` → `activeWorkshopSessionResource`).
+  front (`GET /workshop-sessions/{customerId}/open` → `openWorkshopSessionResource`).
 - Return type spelled out: `HttpResourceRef<XApiModel | undefined>` (`undefined` = not loaded yet / no request).
 - **Every resource validates**: `{ parse: parseWith(schema, 'GET /path/{param}') }`. The endpoint label uses the
   Spring path syntax of the controller. A list is `parseWith(z.array(xSchema), …)`.
@@ -283,7 +283,7 @@ Store spec (`HttpTestingController`):
 
 Fixtures: when several specs need the same complex API model (a session with usages), the resource folder gets
 `<x>.api-fixtures.ts` with complete, valid objects and overrides:
-`workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ active: true })] })`. Simple models are
+`workshopSessionFixture({ toolUsageSummaries: [toolUsageSummaryFixture({ running: true })] })`. Simple models are
 written inline in the spec.
 
 Component specs use feature models (`createdAt: new Date(…)`) and never API models.

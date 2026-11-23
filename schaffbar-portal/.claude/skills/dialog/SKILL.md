@@ -150,7 +150,7 @@ export class CloseSessionDialogContainerComponent {
 
   readonly customerId = input.required<string>();
 
-  private readonly sessionResource = inject(WorkshopSessionsApiService).activeWorkshopSessionResource(this.customerId);
+  private readonly sessionResource = inject(WorkshopSessionsApiService).openWorkshopSessionResource(this.customerId);
 
   protected readonly isLoading = computed(() => this.sessionResource.isLoading());
   protected readonly hasLoadError = computed(() => !!this.sessionResource.error());
@@ -198,7 +198,7 @@ Rules:
 - Gets **only ids**, as `input.required()` – never whole entities (they could be outdated, which is why the dialog
   loads in the first place).
 - Loads with the `httpResource` of the API service (see skill `api`) and passes the input signal itself
-  as the getter: `activeWorkshopSessionResource(this.customerId)`. The container holds the resource directly, **no store** –
+  as the getter: `openWorkshopSessionResource(this.customerId)`. The container holds the resource directly, **no store** –
   it is a single resource that lives exactly as long as the dialog. It loads on every open, so the data is current.
 - The resource holds the **API model**; the container maps it straight to the view model with a pure, unexported
   function after the class (`to<Name>ViewModel`, see CLAUDE.md "Code"). There is no feature model in
