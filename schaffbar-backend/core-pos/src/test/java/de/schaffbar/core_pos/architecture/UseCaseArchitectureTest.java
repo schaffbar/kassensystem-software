@@ -2,6 +2,8 @@ package de.schaffbar.core_pos.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.READ_FACADE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.cqrs.Command;
+import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 
 @AnalyzeClasses(packages = ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class UseCaseArchitectureTest {
@@ -38,5 +41,13 @@ class UseCaseArchitectureTest {
             .and().haveName("process") //
             .should().beAnnotatedWith(Command.class) //
             .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)");
+
+    @ArchTest
+    static final ArchRule useCasesChangeThroughServices = noClasses() //
+            .that().resideInAPackage(USE_CASE) //
+            .should().dependOnClassesThat().resideInAPackage(READ_FACADE) //
+            .orShould().dependOnClassesThat().areAssignableTo(OutboxEventStore.class) //
+            .because("a use case reads and changes through the services – the read facade belongs to its controller, "
+                    + "the events to the service of the aggregate");
 
 }
