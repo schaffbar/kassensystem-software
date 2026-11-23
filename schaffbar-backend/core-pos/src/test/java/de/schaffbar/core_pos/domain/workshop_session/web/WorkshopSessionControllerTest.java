@@ -1,8 +1,7 @@
 package de.schaffbar.core_pos.domain.workshop_session.web;
 
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
-import static de.schaffbar.core_pos.builder.ViewBuilder.runningToolUsageView;
-import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionWithUsagesView;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,15 +29,16 @@ import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUs
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSessionView;
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.ToolUsageSummaryView;
 import de.schaffbar.core_pos.read_facade.WorkshopSessionReadFacade;
-import de.schaffbar.core_pos.shared.billing.BillingTotal;
-import de.schaffbar.core_pos.shared.exception.ActiveToolUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
+import de.schaffbar.core_pos.shared.exception.RunningToolUsageExistsForSessionException;
+import de.schaffbar.core_pos.shared.exception.RunningWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
+import de.schaffbar.core_pos.support.Json;
 import de.schaffbar.core_pos.use_case.WorkshopSessionClose;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +61,7 @@ class WorkshopSessionControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -85,23 +85,24 @@ class WorkshopSessionControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.id").value(session.id().getValue().toString())) //
                 .andExpect(jsonPath("$.customerId").value(session.customerId().getValue().toString())) //
-                .andExpect(jsonPath("$.startTime").exists()) //
+                .andExpect(jsonPath("$.startTime").value(session.startTime().toString())) //
                 .andExpect(jsonPath("$.closeTime").doesNotExist()) //
-                .andExpect(jsonPath("$.status").value("OPEN")) //
-                .andExpect(jsonPath("$.totalWorkshopDurationInMinutes").value(61)) //
-                .andExpect(jsonPath("$.totalWorkshopUnits").value(11)) //
+                .andExpect(jsonPath("$.status").value(session.status().name())) //
+                .andExpect(jsonPath("$.totalWorkshopDurationInMinutes").value(open.workshopTotal().minutes())) //
+                .andExpect(jsonPath("$.totalWorkshopUnits").value(open.workshopTotal().units())) //
                 .andExpect(jsonPath("$.workshopUsages.length()").value(1)) //
                 .andExpect(jsonPath("$.workshopUsages[0].id").value(workshopUsage.id().getValue().toString())) //
-                .andExpect(jsonPath("$.workshopUsages[0].entryTime").exists()) //
+                .andExpect(jsonPath("$.workshopUsages[0].entryTime").value(workshopUsage.entryTime().toString())) //
                 .andExpect(jsonPath("$.workshopUsages[0].exitTime").doesNotExist()) //
                 .andExpect(jsonPath("$.toolUsageSummaries.length()").value(1)) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].toolId").value(summary.toolId().getValue().toString())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].toolName").value(summary.toolName())) //
-                .andExpect(jsonPath("$.toolUsageSummaries[0].active").value(true)) //
-                .andExpect(jsonPath("$.toolUsageSummaries[0].totalDurationInMinutes").value(7)) //
-                .andExpect(jsonPath("$.toolUsageSummaries[0].totalUnits").value(2)) //
+                .andExpect(jsonPath("$.toolUsageSummaries[0].active").value(summary.active())) //
+                .andExpect(jsonPath("$.toolUsageSummaries[0].totalDurationInMinutes").value(summary.total().minutes())) //
+                .andExpect(jsonPath("$.toolUsageSummaries[0].totalUnits").value(summary.total().units())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].usages[0].id").value(toolUsage.id().getValue().toString())) //
-                .andExpect(jsonPath("$.toolUsageSummaries[0].usages[0].startTime").exists());
+                .andExpect(jsonPath("$.toolUsageSummaries[0].usages[0].startTime").value(toolUsage.startTime().toString())) //
+                .andExpect(jsonPath("$.toolUsageSummaries[0].usages[0].endTime").value(toolUsage.endTime().toString()));
     }
 
     @Test
@@ -126,14 +127,14 @@ class WorkshopSessionControllerTest {
         ResultActions result = getOpenWorkshopSession(unknown);
 
         // then
-        result.andExpect(status().isNotFound());
+        expectNotFound(result);
     }
 
     // ------------------------------------------------------------------------
     // closeWorkshopSession
 
     @Test
-    void closeWorkshopSession_passesTheCustomerAndIs200() throws Exception {
+    void closeWorkshopSession_passesTheCustomerAndIs204() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
 
@@ -141,22 +142,37 @@ class WorkshopSessionControllerTest {
         ResultActions result = closeWorkshopSession(customerId);
 
         // then
-        result.andExpect(status().isOk());
-        verify(this.workshopSessionClose).process(customerId);
+        result.andExpect(status().isNoContent());
+        expectClosed(customerId);
     }
 
+    // WS-5 – the one the API can get: checking out first stops the tools, so a running tool comes only with a running visit
     @Test
-    void closeWorkshopSession_withARunningToolUsage_is409WithTheCode() throws Exception {
+    void closeWorkshopSession_whileThePersonIsInTheWorkshop_is409WithTheCode() throws Exception {
         // given
         CustomerId customerId = CustomerId.random();
-        givenCloseRejectedWith(customerId, new ActiveToolUsageExistsForSessionException(WorkshopSessionId.random()));
+        givenCloseRejectedWith(customerId, new RunningWorkshopUsageExistsForSessionException(WorkshopSessionId.random()));
 
         // when
         ResultActions result = closeWorkshopSession(customerId);
 
         // then
         result.andExpect(status().isConflict()) //
-                .andExpect(jsonPath("$.code").value(ActiveToolUsageExistsForSessionException.CODE));
+                .andExpect(jsonPath("$.code").value(RunningWorkshopUsageExistsForSessionException.CODE));
+    }
+
+    @Test
+    void closeWorkshopSession_withARunningToolUsage_is409WithTheCode() throws Exception {
+        // given
+        CustomerId customerId = CustomerId.random();
+        givenCloseRejectedWith(customerId, new RunningToolUsageExistsForSessionException(WorkshopSessionId.random()));
+
+        // when
+        ResultActions result = closeWorkshopSession(customerId);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(RunningToolUsageExistsForSessionException.CODE));
     }
 
     @Test
@@ -173,24 +189,25 @@ class WorkshopSessionControllerTest {
                 .andExpect(jsonPath("$.code").value(NoOpenWorkshopSessionException.CODE));
     }
 
+    @Test
+    void closeWorkshopSession_unknownCustomer_is404() throws Exception {
+        // given
+        CustomerId unknown = CustomerId.random();
+        givenCloseRejectedWith(unknown, ResourceNotFoundException.customer(unknown));
+
+        // when
+        ResultActions result = closeWorkshopSession(unknown);
+
+        // then
+        expectNotFound(result);
+    }
+
     // ------------------------------------------------------------------------
     // given
 
     private OpenWorkshopSessionView givenOpenSession() {
         WorkshopSessionView session = openWorkshopSessionView().build();
-        ToolId toolId = ToolId.random();
-        OpenWorkshopSessionView open = OpenWorkshopSessionView.builder() //
-                .session(session) //
-                .workshopUsages(List.of(runningWorkshopUsageView().workshopSessionId(session.id()).build())) //
-                .workshopTotal(new BillingTotal(61, 11)) //
-                .toolUsageSummaries(List.of(ToolUsageSummaryView.builder() //
-                        .toolId(toolId) //
-                        .toolName("Kreissäge") //
-                        .active(true) //
-                        .total(new BillingTotal(7, 2)) //
-                        .usages(List.of(runningToolUsageView(toolId).build())) //
-                        .build())) //
-                .build();
+        OpenWorkshopSessionView open = openWorkshopSessionWithUsagesView(session).build();
         when(this.workshopSessionReadFacade.getOpenWorkshopSession(session.customerId())).thenReturn(Optional.of(open));
 
         return open;
@@ -223,6 +240,19 @@ class WorkshopSessionControllerTest {
 
     private ResultActions closeWorkshopSession(CustomerId customerId) throws Exception {
         return this.mockMvc.perform(put("/api/v1/workshop-sessions/{customerId}/close", customerId.getValue()));
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(Resource.CUSTOMER.name()));
+    }
+
+    private void expectClosed(CustomerId customerId) {
+        verify(this.workshopSessionClose).process(customerId);
     }
 
 }

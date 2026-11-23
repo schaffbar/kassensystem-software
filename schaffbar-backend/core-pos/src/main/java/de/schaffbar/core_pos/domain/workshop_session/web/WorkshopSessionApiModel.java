@@ -53,9 +53,6 @@ public interface WorkshopSessionApiModel extends ValueObjectMapper {
     ToolUsageDetailApiDto toToolUsageDetailApiDto(ToolUsageView toolUsage);
 
     // ------------------------------------------------------------------------
-    // mapping request body to command
-
-    // ------------------------------------------------------------------------
     // response
 
     record WorkshopSessionApiDto( //
@@ -94,8 +91,5 @@ public interface WorkshopSessionApiModel extends ValueObjectMapper {
             @Positive Long durationInMinutes, //
             @Positive Long unitsUsed //
     ) {}
-
-    // ------------------------------------------------------------------------
-    // request body
 
 }

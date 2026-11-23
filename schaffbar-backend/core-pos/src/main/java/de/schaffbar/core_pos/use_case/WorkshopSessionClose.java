@@ -9,15 +9,16 @@ import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageService;
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.cqrs.Command;
-import de.schaffbar.core_pos.shared.exception.ActiveToolUsageExistsForSessionException;
-import de.schaffbar.core_pos.shared.exception.ActiveWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.RunningToolUsageExistsForSessionException;
+import de.schaffbar.core_pos.shared.exception.RunningWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -39,6 +40,7 @@ public class WorkshopSessionClose {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
 
+        // WS-4 – the session is found by its state, the service closes it by its id (E29)
         WorkshopSessionId workshopSessionId = this.workshopSessionService.getOpenWorkshopSession(customerId) //
                 .map(WorkshopSessionView::id) //
                 .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));
@@ -49,7 +51,7 @@ public class WorkshopSessionClose {
         BillingTotal workshopTotal = this.workshopUsageService.getBillingTotal(workshopSessionId);
         BillingTotal toolTotal = this.toolUsageService.getBillingTotal(workshopSessionId);
 
-        this.workshopSessionService.closeWorkshopSession(customerId, workshopTotal, toolTotal);
+        this.workshopSessionService.closeWorkshopSession(new CloseWorkshopSessionCommand(workshopSessionId, workshopTotal, toolTotal));
     }
 
     // ------------------------------------------------------------------------
@@ -58,14 +60,14 @@ public class WorkshopSessionClose {
     // WS-5 – checked before the tools: checking out stops them too (WU-5), so it is the one thing left to do
     private void ensureNoWorkshopUsageRunning(WorkshopSessionId workshopSessionId) {
         if (this.workshopUsageService.hasRunningWorkshopUsage(workshopSessionId)) {
-            throw new ActiveWorkshopUsageExistsForSessionException(workshopSessionId);
+            throw new RunningWorkshopUsageExistsForSessionException(workshopSessionId);
         }
     }
 
     // WS-5
     private void ensureNoToolUsageRunning(WorkshopSessionId workshopSessionId) {
         if (this.toolUsageService.hasRunningToolUsage(workshopSessionId)) {
-            throw new ActiveToolUsageExistsForSessionException(workshopSessionId);
+            throw new RunningToolUsageExistsForSessionException(workshopSessionId);
         }
     }
 

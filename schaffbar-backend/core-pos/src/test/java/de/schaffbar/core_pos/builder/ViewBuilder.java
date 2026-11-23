@@ -4,6 +4,7 @@ import static de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import lombok.AccessLevel;
@@ -37,7 +38,12 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView.WorkshopUsageViewBuilder;
+import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSessionView;
+import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSessionView.OpenWorkshopSessionViewBuilder;
+import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.ToolUsageSummaryView;
+import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.ToolUsageSummaryView.ToolUsageSummaryViewBuilder;
 import de.schaffbar.core_pos.shared.billing.BillableDuration;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
@@ -213,6 +219,27 @@ public class ViewBuilder {
                 .startTime(startTime) //
                 .endTime(endTime) //
                 .billableDuration(BillableDuration.between(startTime, endTime));
+    }
+
+    // ------------------------------------------------------------------------
+    // open workshop session (read facade)
+
+    // the open session with a running visit and one tool – totals fixed, the test compares against them
+    public static OpenWorkshopSessionViewBuilder openWorkshopSessionWithUsagesView(WorkshopSessionView session) {
+        return OpenWorkshopSessionView.builder() //
+                .session(session) //
+                .workshopUsages(List.of(runningWorkshopUsageView().workshopSessionId(session.id()).build())) //
+                .workshopTotal(new BillingTotal(61, 11)) //
+                .toolUsageSummaries(List.of(toolUsageSummaryView(ToolId.random()).build()));
+    }
+
+    public static ToolUsageSummaryViewBuilder toolUsageSummaryView(ToolId toolId) {
+        return ToolUsageSummaryView.builder() //
+                .toolId(toolId) //
+                .toolName(RandomValues.toolName()) //
+                .active(false) //
+                .total(new BillingTotal(7, 2)) //
+                .usages(List.of(finishedToolUsageView(toolId).build()));
     }
 
 }

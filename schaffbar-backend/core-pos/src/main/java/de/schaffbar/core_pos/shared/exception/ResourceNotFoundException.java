@@ -12,6 +12,7 @@ import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -50,6 +51,10 @@ public class ResourceNotFoundException extends RuntimeException {
 
     public static ResourceNotFoundException rfidTag(RfidTagId id) {
         return new ResourceNotFoundException(Resource.RFID_TAG, id.getValue());
+    }
+
+    public static ResourceNotFoundException workshopSession(WorkshopSessionId id) {
+        return new ResourceNotFoundException(Resource.WORKSHOP_SESSION, id.getValue().toString());
     }
 
     public static ResourceNotFoundException toolCertification(ToolCertificationId id) {

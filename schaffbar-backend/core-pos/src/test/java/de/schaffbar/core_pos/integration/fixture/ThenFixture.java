@@ -211,6 +211,14 @@ public final class ThenFixture {
         return Json.read(result, "$.id");
     }
 
+    // an open session other than the one before – the next visit after billing starts a new one
+    public String expectNewWorkshopSession(CustomerId customerId, String previousSessionId) {
+        String sessionId = expectOpenWorkshopSession(customerId);
+        assertThat(sessionId).isNotEqualTo(previousSessionId);
+
+        return sessionId;
+    }
+
     // without an open session the body is empty
     public void expectNoOpenWorkshopSession(CustomerId customerId) {
         MvcTestResult result = this.api.getOpenWorkshopSession(customerId);

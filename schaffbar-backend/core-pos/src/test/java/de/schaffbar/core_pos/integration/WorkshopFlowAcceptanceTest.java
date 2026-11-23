@@ -2,7 +2,6 @@ package de.schaffbar.core_pos.integration;
 
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.GATE_KEEPER_IN;
 import static de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType.GATE_KEEPER_OUT;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +69,7 @@ class WorkshopFlowAcceptanceTest {
         this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), gateKeeperIn);
 
         // then – a new session
-        String secondSessionId = this.fixture.then().expectOpenWorkshopSession(customerId);
-        assertThat(secondSessionId).isNotEqualTo(firstSessionId);
+        this.fixture.then().expectNewWorkshopSession(customerId, firstSessionId);
     }
 
 }

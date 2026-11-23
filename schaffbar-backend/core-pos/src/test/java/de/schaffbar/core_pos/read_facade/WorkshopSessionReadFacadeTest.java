@@ -38,6 +38,7 @@ import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSe
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.ToolUsageSummaryView;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -139,7 +140,7 @@ class WorkshopSessionReadFacadeTest {
 
         // then
         assertThat(result).isEmpty();
-        verifyNoInteractions(this.workshopUsageService, this.toolUsageService);
+        expectNoUsagesLookedUp();
     }
 
     @Test
@@ -151,8 +152,10 @@ class WorkshopSessionReadFacadeTest {
         Throwable thrown = catchThrowable(() -> this.workshopSessionReadFacade.getOpenWorkshopSession(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.workshopSessionService);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNoSessionLookedUp();
     }
 
     // ------------------------------------------------------------------------
@@ -203,6 +206,17 @@ class WorkshopSessionReadFacadeTest {
         when(this.toolService.getTool(deleted)).thenReturn(Optional.empty());
 
         return deleted;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private void expectNoUsagesLookedUp() {
+        verifyNoInteractions(this.workshopUsageService, this.toolUsageService);
+    }
+
+    private void expectNoSessionLookedUp() {
+        verifyNoInteractions(this.workshopSessionService);
     }
 
 }

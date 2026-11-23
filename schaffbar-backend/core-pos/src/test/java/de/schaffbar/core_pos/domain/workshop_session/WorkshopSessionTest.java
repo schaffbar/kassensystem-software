@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.workshop_session;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.closeWorkshopSessionCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
@@ -44,55 +46,54 @@ class WorkshopSessionTest {
     void close_storesTheFinalTotalsAndReturnsTheEvent() {
         // given
         WorkshopSession session = givenOpenSession();
-        BillingTotal workshopTotal = new BillingTotal(31, 6);
-        BillingTotal toolTotal = new BillingTotal(7, 2);
+        CloseWorkshopSessionCommand command = closeWorkshopSessionCommand(session.getId()).build();
 
         // when
-        List<SchaffbarEvent> events = session.close(workshopTotal, toolTotal);
+        List<SchaffbarEvent> events = session.close(command);
 
         // then
         assertThat(session.getStatus()).isEqualTo(WorkshopSessionStatus.PAID);
         assertThat(session.getCloseTime()).isAfterOrEqualTo(session.getStartTime());
-        assertThat(session.getWorkshopTotal()).isEqualTo(workshopTotal);
-        assertThat(session.getToolTotal()).isEqualTo(toolTotal);
+        assertThat(session.getWorkshopTotal()).isEqualTo(command.workshopTotal());
+        assertThat(session.getToolTotal()).isEqualTo(command.toolTotal());
 
-        assertThat(events).hasSize(1);
-        SchaffbarEvent event = events.getFirst();
-        assertThat(event.getType()).isEqualTo(EventType.WORKSHOP_SESSION_CLOSED);
-        assertThat(event.getAggregateId()).isEqualTo(session.getId().getValue().toString());
-
-        WorkshopSessionClosedPayload payload = event.deserializeAndValidatePayload(WorkshopSessionClosedPayload.class);
+        WorkshopSessionClosedPayload payload = expectSingleEvent(events, EventType.WORKSHOP_SESSION_CLOSED, session) //
+                .deserializeAndValidatePayload(WorkshopSessionClosedPayload.class);
         assertThat(payload.id()).isEqualTo(session.getId());
         assertThat(payload.customerId()).isEqualTo(session.getCustomerId());
         assertThat(payload.startTime()).isEqualTo(session.getStartTime());
         assertThat(payload.closeTime()).isEqualTo(session.getCloseTime());
-        assertThat(payload.workshopTotal()).isEqualTo(workshopTotal);
-        assertThat(payload.toolTotal()).isEqualTo(toolTotal);
+        assertThat(payload.workshopTotal()).isEqualTo(command.workshopTotal());
+        assertThat(payload.toolTotal()).isEqualTo(command.toolTotal());
     }
 
     @Test
     void close_withoutUsages_storesZeroTotals() {
         // given
         WorkshopSession session = givenOpenSession();
+        CloseWorkshopSessionCommand command = closeWorkshopSessionCommand(session.getId()) //
+                .workshopTotal(BillingTotal.ZERO) //
+                .toolTotal(BillingTotal.ZERO) //
+                .build();
 
         // when
-        session.close(BillingTotal.ZERO, BillingTotal.ZERO);
+        session.close(command);
 
         // then – zero, not null: the session was billed, there was just nothing to bill
         assertThat(session.getWorkshopTotal()).isEqualTo(BillingTotal.ZERO);
         assertThat(session.getToolTotal()).isEqualTo(BillingTotal.ZERO);
     }
 
+    // a guard against a bug – WorkshopSessionClose finds only an open session (WS-4)
     @Test
     void close_rejectsAClosedSession() {
         // given
-        WorkshopSession session = givenOpenSession();
-        BillingTotal workshopTotal = new BillingTotal(31, 6);
-        session.close(workshopTotal, BillingTotal.ZERO);
+        WorkshopSession session = givenClosedSession();
         Instant closeTime = session.getCloseTime();
+        BillingTotal workshopTotal = session.getWorkshopTotal();
 
         // when
-        Throwable thrown = catchThrowable(() -> session.close(new BillingTotal(60, 10), BillingTotal.ZERO));
+        Throwable thrown = catchThrowable(() -> session.close(closeWorkshopSessionCommand(session.getId()).build()));
 
         // then
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
@@ -105,6 +106,25 @@ class WorkshopSessionTest {
 
     private WorkshopSession givenOpenSession() {
         return WorkshopSession.of(CustomerId.random());
+    }
+
+    private WorkshopSession givenClosedSession() {
+        WorkshopSession session = givenOpenSession();
+        session.close(closeWorkshopSessionCommand(session.getId()).build());
+
+        return session;
+    }
+
+    // ------------------------------------------------------------------------
+    // then
+
+    private SchaffbarEvent expectSingleEvent(List<SchaffbarEvent> events, EventType type, WorkshopSession session) {
+        assertThat(events).hasSize(1);
+        SchaffbarEvent event = events.getFirst();
+        assertThat(event.getType()).isEqualTo(type);
+        assertThat(event.getAggregateId()).isEqualTo(session.getId().getValue().toString());
+
+        return event;
     }
 
 }

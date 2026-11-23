@@ -11,13 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
-import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.cqrs.Command;
 import de.schaffbar.core_pos.shared.cqrs.Query;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
-import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -59,15 +59,16 @@ public class WorkshopSessionService {
     }
 
     @Command
-    public void closeWorkshopSession(@NotNull @Valid CustomerId customerId, @NotNull BillingTotal workshopTotal, @NotNull BillingTotal toolTotal) {
-        WorkshopSession workshopSession = this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
-                .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));
+    public void closeWorkshopSession(@NotNull @Valid CloseWorkshopSessionCommand command) {
+        WorkshopSession workshopSession = this.workshopSessionRepository.findById(command.id().getValue()) //
+                .orElseThrow(() -> ResourceNotFoundException.workshopSession(command.id()));
 
-        List<SchaffbarEvent> events = workshopSession.close(workshopTotal, toolTotal);
+        List<SchaffbarEvent> events = workshopSession.close(command);
 
         this.outboxEventStore.save(events);
 
-        log.info("Closed workshop session for customer {} (workshop {}, tools {}) and published events {}", customerId, workshopTotal, toolTotal, events);
+        log.info("Closed workshop session with id {} (workshop {}, tools {}) and published events {}", command.id(), command.workshopTotal(),
+                command.toolTotal(), events);
     }
 
     // ------------------------------------------------------------------------
@@ -75,12 +76,9 @@ public class WorkshopSessionService {
 
     // WS-1 – WorkshopUsageStart starts a session only without an open one, so an open one here is a bug
     private void ensureNoOpenWorkshopSession(CustomerId customerId) {
-        this.workshopSessionRepository.findOpenWorkshopSession(customerId) //
-                .ifPresent(this::throwHasAlreadyOpenWorkshopSession);
-    }
-
-    private void throwHasAlreadyOpenWorkshopSession(WorkshopSession session) {
-        throw new IllegalStateException("Customer [id: " + session.getCustomerId().getValue() + "] already has an open workshop session");
+        if (this.workshopSessionRepository.findOpenWorkshopSession(customerId).isPresent()) {
+            throw new IllegalStateException("Customer [id: " + customerId.getValue() + "] already has an open workshop session");
+        }
     }
 
 }

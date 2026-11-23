@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.closeWorkshopSessionCommand;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,10 +25,11 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionService;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
-import de.schaffbar.core_pos.shared.exception.ActiveToolUsageExistsForSessionException;
-import de.schaffbar.core_pos.shared.exception.ActiveWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
+import de.schaffbar.core_pos.shared.exception.RunningToolUsageExistsForSessionException;
+import de.schaffbar.core_pos.shared.exception.RunningWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +62,7 @@ class WorkshopSessionCloseTest {
         this.workshopSessionClose.process(open.customerId());
 
         // then
-        verify(this.workshopSessionService).closeWorkshopSession(open.customerId(), workshopTotal, toolTotal);
+        expectClosed(open, workshopTotal, toolTotal);
     }
 
     @Test
@@ -73,8 +75,8 @@ class WorkshopSessionCloseTest {
 
         // then
         assertThat(thrown) //
-                .isInstanceOf(ActiveWorkshopUsageExistsForSessionException.class) //
-                .hasFieldOrPropertyWithValue("code", ActiveWorkshopUsageExistsForSessionException.CODE);
+                .isInstanceOf(RunningWorkshopUsageExistsForSessionException.class) //
+                .hasFieldOrPropertyWithValue("code", RunningWorkshopUsageExistsForSessionException.CODE);
         verifyNoInteractions(this.toolUsageService);
         expectNotClosed();
     }
@@ -89,8 +91,8 @@ class WorkshopSessionCloseTest {
 
         // then
         assertThat(thrown) //
-                .isInstanceOf(ActiveToolUsageExistsForSessionException.class) //
-                .hasFieldOrPropertyWithValue("code", ActiveToolUsageExistsForSessionException.CODE);
+                .isInstanceOf(RunningToolUsageExistsForSessionException.class) //
+                .hasFieldOrPropertyWithValue("code", RunningToolUsageExistsForSessionException.CODE);
         expectNotClosed();
     }
 
@@ -118,8 +120,10 @@ class WorkshopSessionCloseTest {
         Throwable thrown = catchThrowable(() -> this.workshopSessionClose.process(unknown));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
-        verifyNoInteractions(this.workshopSessionService);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNoSessionLookedUp();
     }
 
     // ------------------------------------------------------------------------
@@ -184,8 +188,19 @@ class WorkshopSessionCloseTest {
     // ------------------------------------------------------------------------
     // then
 
+    private void expectClosed(WorkshopSessionView open, BillingTotal workshopTotal, BillingTotal toolTotal) {
+        verify(this.workshopSessionService).closeWorkshopSession(closeWorkshopSessionCommand(open.id()) //
+                .workshopTotal(workshopTotal) //
+                .toolTotal(toolTotal) //
+                .build());
+    }
+
     private void expectNotClosed() {
-        verify(this.workshopSessionService, never()).closeWorkshopSession(any(), any(), any());
+        verify(this.workshopSessionService, never()).closeWorkshopSession(any());
+    }
+
+    private void expectNoSessionLookedUp() {
+        verifyNoInteractions(this.workshopSessionService);
     }
 
 }

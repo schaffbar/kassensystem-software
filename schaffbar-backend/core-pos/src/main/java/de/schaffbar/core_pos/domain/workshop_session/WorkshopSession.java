@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
 import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -93,17 +94,18 @@ class WorkshopSession {
     // ------------------------------------------------------------------------
     // command
 
-    public List<SchaffbarEvent> close(BillingTotal workshopTotal, BillingTotal toolTotal) {
+    public List<SchaffbarEvent> close(CloseWorkshopSessionCommand command) {
+        // WorkshopSessionClose finds only an open session (WS-4)
         if (this.status != WorkshopSessionStatus.OPEN) {
             throw new IllegalStateException("Workshop session [id: " + this.id + "] is already closed");
         }
 
-        this.closeTime = Instant.now();
-        this.status = WorkshopSessionStatus.PAID;
-        this.workshopMinutes = workshopTotal.minutes();
-        this.workshopUnits = workshopTotal.units();
-        this.toolMinutes = toolTotal.minutes();
-        this.toolUnits = toolTotal.units();
+        setCloseTime(Instant.now());
+        setStatus(WorkshopSessionStatus.PAID);
+        setWorkshopMinutes(command.workshopTotal().minutes());
+        setWorkshopUnits(command.workshopTotal().units());
+        setToolMinutes(command.toolTotal().minutes());
+        setToolUnits(command.toolTotal().units());
 
         return List.of(WorkshopSessionEventFactory.workshopSessionClosed(this));
     }

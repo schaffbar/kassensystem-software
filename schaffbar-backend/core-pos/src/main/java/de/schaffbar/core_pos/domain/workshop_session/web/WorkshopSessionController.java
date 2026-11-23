@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.workshop_session.web;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class WorkshopSessionController {
 
     // TODO: REST - remove customerId and active from path, use query parameter instead
     @GetMapping(value = "{customerId}/active", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<WorkshopSessionApiDto> getOpenWorkshopSession(@PathVariable @NotNull CustomerId customerId) {
+    public ResponseEntity<WorkshopSessionApiDto> getOpenWorkshopSession(@PathVariable @NotNull @Valid CustomerId customerId) {
         // without an open session the body is empty
         WorkshopSessionApiDto result = this.workshopSessionReadFacade.getOpenWorkshopSession(customerId) //
                 .map(WorkshopSessionApiModel.MAPPER::toWorkshopSessionApiDto) //
@@ -46,10 +47,10 @@ public class WorkshopSessionController {
 
     // TODO: REST - customerId does not fit in RESTful design here, change to sessionId?
     @PutMapping(value = "/{customerId}/close")
-    public ResponseEntity<Void> closeWorkshopSession(@PathVariable @NotNull CustomerId customerId) {
+    public ResponseEntity<Void> closeWorkshopSession(@PathVariable @NotNull @Valid CustomerId customerId) {
         this.workshopSessionClose.process(customerId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

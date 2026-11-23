@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
-import de.schaffbar.core_pos.shared.exception.ActiveWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.RunningWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 
@@ -74,7 +74,7 @@ class WorkshopSessionAcceptanceTest {
         MvcTestResult result = this.fixture.api().closeWorkshopSession(customerId);
 
         // then
-        this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, ActiveWorkshopUsageExistsForSessionException.CODE);
+        this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, RunningWorkshopUsageExistsForSessionException.CODE);
         this.fixture.then().expectOpenWorkshopSession(customerId);
 
         // when

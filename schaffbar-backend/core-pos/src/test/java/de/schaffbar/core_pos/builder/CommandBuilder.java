@@ -31,6 +31,9 @@ import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand.CreateToolCertificationCommandBuilder;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand;
 import de.schaffbar.core_pos.domain.tool_usage.ToolUsageCommands.StartToolUsageCommand.StartToolUsageCommandBuilder;
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand.CloseWorkshopSessionCommandBuilder;
+import de.schaffbar.core_pos.shared.billing.BillingTotal;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
@@ -170,6 +173,20 @@ public class CommandBuilder {
                 .customerId(CustomerId.random()) //
                 .toolId(ToolId.random()) //
                 .workshopSessionId(WorkshopSessionId.random());
+    }
+
+    // ------------------------------------------------------------------------
+    // workshop session
+
+    public static CloseWorkshopSessionCommandBuilder closeWorkshopSessionCommand() {
+        return closeWorkshopSessionCommand(WorkshopSessionId.random());
+    }
+
+    public static CloseWorkshopSessionCommandBuilder closeWorkshopSessionCommand(WorkshopSessionId id) {
+        return CloseWorkshopSessionCommand.builder() //
+                .id(id) //
+                .workshopTotal(new BillingTotal(31, 6)) //
+                .toolTotal(new BillingTotal(7, 2));
     }
 
 }

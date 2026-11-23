@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.workshop_session;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.closeWorkshopSessionCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,12 +20,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import de.schaffbar.core_pos.shared.billing.BillingTotal;
+import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionCommands.CloseWorkshopSessionCommand;
 import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.WorkshopSessionEventPayload.WorkshopSessionStartedPayload;
-import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 
@@ -55,61 +57,59 @@ class WorkshopSessionServiceTest {
         WorkshopSessionId workshopSessionId = this.workshopSessionService.startWorkshopSession(customerId);
 
         // then
-        verify(this.workshopSessionRepository).save(any());
-        WorkshopSessionStartedPayload payload = expectSavedEvent(EventType.WORKSHOP_SESSION_STARTED) //
+        expectSaved();
+        WorkshopSessionStartedPayload payload = expectSavedEvent(EventType.WORKSHOP_SESSION_STARTED, workshopSessionId) //
                 .deserializeAndValidatePayload(WorkshopSessionStartedPayload.class);
         assertThat(payload.id()).isEqualTo(workshopSessionId);
         assertThat(payload.customerId()).isEqualTo(customerId);
         assertThat(payload.startTime()).isNotNull();
     }
 
+    // a guard against a bug – WorkshopUsageStart starts a session only without an open one (WS-1)
     @Test
     void startWorkshopSession_rejectsACustomerWithAnOpenSession() {
         // given
-        WorkshopSession open = givenOpenSession();
+        WorkshopSession open = givenOpenSessionOfTheCustomer();
 
         // when
         Throwable thrown = catchThrowable(() -> this.workshopSessionService.startWorkshopSession(open.getCustomerId()));
 
         // then
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
-        verify(this.workshopSessionRepository, never()).save(any());
-        expectNoEvent();
+        expectNothingSaved();
     }
 
     // ------------------------------------------------------------------------
     // closeWorkshopSession
 
     @Test
-    void closeWorkshopSession_closesTheOpenSessionAndSavesTheEvent() {
+    void closeWorkshopSession_closesTheSessionAndSavesTheEvent() {
         // given
         WorkshopSession open = givenOpenSession();
-        BillingTotal workshopTotal = new BillingTotal(31, 6);
-        BillingTotal toolTotal = new BillingTotal(7, 2);
+        CloseWorkshopSessionCommand command = closeWorkshopSessionCommand(open.getId()).build();
 
         // when
-        this.workshopSessionService.closeWorkshopSession(open.getCustomerId(), workshopTotal, toolTotal);
+        this.workshopSessionService.closeWorkshopSession(command);
 
         // then
         assertThat(open.getStatus()).isEqualTo(WorkshopSessionStatus.PAID);
-        assertThat(open.getWorkshopTotal()).isEqualTo(workshopTotal);
-        assertThat(open.getToolTotal()).isEqualTo(toolTotal);
-        SchaffbarEvent event = expectSavedEvent(EventType.WORKSHOP_SESSION_CLOSED);
-        assertThat(event.getAggregateId()).isEqualTo(open.getId().getValue().toString());
+        assertThat(open.getWorkshopTotal()).isEqualTo(command.workshopTotal());
+        assertThat(open.getToolTotal()).isEqualTo(command.toolTotal());
+        expectSavedEvent(EventType.WORKSHOP_SESSION_CLOSED, open.getId());
     }
 
     @Test
-    void closeWorkshopSession_rejectsACustomerWithoutOpenSession() {
+    void closeWorkshopSession_rejectsAnUnknownSession() {
         // given
-        CustomerId customerId = givenCustomerWithoutOpenSession();
+        WorkshopSessionId unknown = givenUnknownSession();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.workshopSessionService.closeWorkshopSession(customerId, BillingTotal.ZERO, BillingTotal.ZERO));
+        Throwable thrown = catchThrowable(() -> this.workshopSessionService.closeWorkshopSession(closeWorkshopSessionCommand(unknown).build()));
 
         // then
         assertThat(thrown) //
-                .isInstanceOf(NoOpenWorkshopSessionException.class) //
-                .hasFieldOrPropertyWithValue("code", NoOpenWorkshopSessionException.CODE);
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.WORKSHOP_SESSION);
         expectNoEvent();
     }
 
@@ -118,9 +118,23 @@ class WorkshopSessionServiceTest {
 
     private WorkshopSession givenOpenSession() {
         WorkshopSession open = WorkshopSession.of(CustomerId.random());
+        when(this.workshopSessionRepository.findById(open.getId().getValue())).thenReturn(Optional.of(open));
+
+        return open;
+    }
+
+    private WorkshopSession givenOpenSessionOfTheCustomer() {
+        WorkshopSession open = WorkshopSession.of(CustomerId.random());
         when(this.workshopSessionRepository.findOpenWorkshopSession(open.getCustomerId())).thenReturn(Optional.of(open));
 
         return open;
+    }
+
+    private WorkshopSessionId givenUnknownSession() {
+        WorkshopSessionId unknown = WorkshopSessionId.random();
+        when(this.workshopSessionRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
+
+        return unknown;
     }
 
     private CustomerId givenCustomerWithoutOpenSession() {
@@ -133,11 +147,23 @@ class WorkshopSessionServiceTest {
     // ------------------------------------------------------------------------
     // then
 
-    private SchaffbarEvent expectSavedEvent(EventType type) {
+    private void expectSaved() {
+        verify(this.workshopSessionRepository).save(any());
+    }
+
+    private void expectNothingSaved() {
+        verify(this.workshopSessionRepository, never()).save(any());
+        expectNoEvent();
+    }
+
+    private SchaffbarEvent expectSavedEvent(EventType type, WorkshopSessionId workshopSessionId) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
-                .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+                .satisfies(event -> {
+                    assertThat(event.getType()).isEqualTo(type);
+                    assertThat(event.getAggregateId()).isEqualTo(workshopSessionId.getValue().toString());
+                });
 
         return this.events.getValue().getFirst();
     }
