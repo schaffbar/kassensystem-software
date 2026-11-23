@@ -3,7 +3,6 @@ package de.schaffbar.core_pos.web.device;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import lombok.AccessLevel;
@@ -13,6 +12,7 @@ import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
 import de.schaffbar.core_pos.domain.tool.WlanRelaisType;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
 
 public interface DeviceApiModel {
 
@@ -81,7 +81,7 @@ public interface DeviceApiModel {
         }
 
         private static InitResponseBuilder withCurrentTime() {
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(WorkshopTime.ZONE);
 
             return InitResponse.builder() //
                     .STARTHTTP("") //
@@ -172,7 +172,7 @@ public interface DeviceApiModel {
     ) {
 
         public static DeviceCardResponse enterOk(String customerName, long totalUnits, Instant lastEntryTime) {
-            LocalTime time = lastEntryTime.atZone(ZoneId.systemDefault()).toLocalTime();
+            LocalTime time = lastEntryTime.atZone(WorkshopTime.ZONE).toLocalTime();
             String entryTime = time.format(DateTimeFormatter.ofPattern("HH:mm"));
 
             return DeviceCardResponse.builder() //
@@ -187,10 +187,10 @@ public interface DeviceApiModel {
         }
 
         public static DeviceCardResponse leaveOk(String customerName, long totalUnits, Instant lastEntryTime, Instant lastExitTime) {
-            LocalTime entryTime = lastEntryTime.atZone(ZoneId.systemDefault()).toLocalTime();
+            LocalTime entryTime = lastEntryTime.atZone(WorkshopTime.ZONE).toLocalTime();
             String entryTimeString = entryTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-            LocalTime exitTime = lastExitTime.atZone(ZoneId.systemDefault()).toLocalTime();
+            LocalTime exitTime = lastExitTime.atZone(WorkshopTime.ZONE).toLocalTime();
             String exitTimeString = exitTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
             return DeviceCardResponse.builder() //

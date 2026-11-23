@@ -20,7 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -49,6 +48,7 @@ import de.schaffbar.core_pos.shared.exception.CustomerHasOpenWorkshopSessionExce
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
 import de.schaffbar.core_pos.shared.util.StringToCustomerIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
 import de.schaffbar.core_pos.support.Json;
@@ -414,7 +414,7 @@ class CustomerControllerTest {
                 arguments(named("blank country (C-3)", createCustomerCommand().country(" ").build())), //
                 arguments(named("invalid email (C-6)", createCustomerCommand().email("erika.example.org").build())), //
                 arguments(named("postal code of four characters (C-7)", createCustomerCommand().postalCode("1234").build())), //
-                arguments(named("born this year (C-8)", createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build())));
+                arguments(named("born this year (C-8)", createCustomerCommand().dateOfBirth(WorkshopTime.today().withDayOfYear(1)).build())));
     }
 
     static Stream<Arguments> invalidUpdateCustomerCommands() {
@@ -422,8 +422,8 @@ class CustomerControllerTest {
                 arguments(named("blank first name (C-1)", updateCustomerCommand().firstName(" ").build())), //
                 arguments(named("blank last name (C-1)", updateCustomerCommand().lastName(" ").build())), //
                 arguments(named("no date of birth (C-2)", updateCustomerCommand().dateOfBirth(null).build())), //
-                arguments(named("born this year (C-8)", updateCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build())), //
-                arguments(named("born more than 100 years ago (C-8)", updateCustomerCommand().dateOfBirth(LocalDate.now().minusYears(101)).build())));
+                arguments(named("born this year (C-8)", updateCustomerCommand().dateOfBirth(WorkshopTime.today().withDayOfYear(1)).build())), //
+                arguments(named("born more than 100 years ago (C-8)", updateCustomerCommand().dateOfBirth(WorkshopTime.today().minusYears(101)).build())));
     }
 
     static Stream<Arguments> invalidChangeCustomerContactCommands() {

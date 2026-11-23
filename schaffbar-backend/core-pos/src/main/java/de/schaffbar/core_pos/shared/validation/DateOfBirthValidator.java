@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
+
 public class DateOfBirthValidator implements ConstraintValidator<DateOfBirth, LocalDate> {
 
     private static final int MAX_AGE_IN_YEARS = 100;
@@ -17,7 +19,7 @@ public class DateOfBirthValidator implements ConstraintValidator<DateOfBirth, Lo
             return true;
         }
 
-        int currentYear = LocalDate.now().getYear();
+        int currentYear = WorkshopTime.today().getYear();
         int year = dateOfBirth.getYear();
 
         return year >= currentYear - MAX_AGE_IN_YEARS && year < currentYear;

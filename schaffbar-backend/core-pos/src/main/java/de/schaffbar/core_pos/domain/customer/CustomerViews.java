@@ -14,8 +14,9 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.validation.annotation.Validated;
 
 import de.schaffbar.core_pos.shared.id.CustomerId;
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR, imports = LocalDate.class)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR, imports = WorkshopTime.class)
 public interface CustomerViews {
 
     CustomerViews MAPPER = Mappers.getMapper(CustomerViews.class);
@@ -23,7 +24,7 @@ public interface CustomerViews {
     // ------------------------------------------------------------------------
     // mapper
 
-    @Mapping(target = "ageGroup", expression = "java(customer.getAgeGroupOn(LocalDate.now()))")
+    @Mapping(target = "ageGroup", expression = "java(customer.getAgeGroupOn(WorkshopTime.today()))")
     CustomerView toCustomerView(Customer customer);
 
     // ------------------------------------------------------------------------

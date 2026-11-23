@@ -20,6 +20,7 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolId;
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
 
 // one test per rule of domain/customer/README.md; each ends without a waiting RFID tag request (TA-3)
 @IntegrationTest
@@ -129,11 +130,11 @@ class CustomerAcceptanceTest {
 
     @Test
     void c8_theDateOfBirthLiesWithinTheLast100YearsAndBeforeTheCurrentYear() {
-        LocalDate thirtyYearsAgo = LocalDate.now().minusYears(30).withDayOfYear(31);
+        LocalDate thirtyYearsAgo = WorkshopTime.today().minusYears(30).withDayOfYear(31);
 
         // when
-        MvcTestResult bornThisYear = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(LocalDate.now().withDayOfYear(1)).build());
-        MvcTestResult tooOld = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(LocalDate.now().minusYears(101)).build());
+        MvcTestResult bornThisYear = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(WorkshopTime.today().withDayOfYear(1)).build());
+        MvcTestResult tooOld = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(WorkshopTime.today().minusYears(101)).build());
         MvcTestResult bornThirtyYearsAgo = this.fixture.api().createCustomer(createCustomerCommand().dateOfBirth(thirtyYearsAgo).build());
 
         // then

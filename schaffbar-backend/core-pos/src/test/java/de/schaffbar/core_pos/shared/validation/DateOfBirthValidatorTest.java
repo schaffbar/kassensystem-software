@@ -3,16 +3,17 @@ package de.schaffbar.core_pos.shared.validation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.Year;
 
 import org.junit.jupiter.api.Test;
+
+import de.schaffbar.core_pos.shared.time.WorkshopTime;
 
 class DateOfBirthValidatorTest {
 
     @Test
     void acceptsTheLastDayOfLastYear() {
         // given
-        int currentYear = Year.now().getValue();
+        int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 1, 12, 31);
 
         // when
@@ -25,7 +26,7 @@ class DateOfBirthValidatorTest {
     @Test
     void rejectsTheFirstDayOfTheCurrentYear() {
         // given
-        int currentYear = Year.now().getValue();
+        int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear, 1, 1);
 
         // when
@@ -38,7 +39,7 @@ class DateOfBirthValidatorTest {
     @Test
     void acceptsTheFirstDayOfTheYear100YearsAgo() {
         // given
-        int currentYear = Year.now().getValue();
+        int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 100, 1, 1);
 
         // when
@@ -51,7 +52,7 @@ class DateOfBirthValidatorTest {
     @Test
     void rejectsTheLastDayOfTheYear101YearsAgo() {
         // given
-        int currentYear = Year.now().getValue();
+        int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 101, 12, 31);
 
         // when
