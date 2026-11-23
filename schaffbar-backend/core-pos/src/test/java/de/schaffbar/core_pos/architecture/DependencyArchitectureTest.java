@@ -1,5 +1,9 @@
 package de.schaffbar.core_pos.architecture;
 
+import static com.tngtech.archunit.base.DescribedPredicate.and;
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
+import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.metaAnnotatedWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
@@ -10,10 +14,13 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB_OUTSIDE_AGGREGATES;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventRepository;
@@ -57,7 +64,11 @@ class DependencyArchitectureTest {
     @ArchTest
     static final ArchRule controllersKnowOnlyUseCasesAndReadFacades = noClasses() //
             .that().areAnnotatedWith(RestController.class) //
-            .should().dependOnClassesThat(DOMAIN_SERVICE) //
+            .should().dependOnClassesThat(and( //
+                    metaAnnotatedWith(Component.class).forSubtype(), //
+                    // @RestController itself is meta-annotated with @Component
+                    DescribedPredicate.<JavaClass>describe("no annotation", javaClass -> !javaClass.isAnnotation()), //
+                    not(resideInAnyPackage(USE_CASE, READ_FACADE))).as("are beans other than use cases and read facades")) //
             .because("changes go through use cases, queries through the controller's read facade (E2, E17)");
 
     // ------------------------------------------------------------------------

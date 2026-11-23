@@ -7,14 +7,21 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.READ_FACADE
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WRITE_TRANSACTION;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondition;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.Dependency;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.schaffbar.core_pos.shared.cqrs.Query;
 
@@ -50,5 +57,46 @@ class ReadFacadeArchitectureTest {
             .should().callMethodWhere(DescribedPredicate.describe("a @Command", //
                     call -> call.getTarget().resolveMember().map(WRITE_TRANSACTION::test).orElse(false))) //
             .orShould().dependOnClassesThat().resideInAPackage(USE_CASE);
+
+    @ArchTest
+    static final ArchRule controllersUseTheReadFacadeNamedAfterThem = classes() //
+            .that().areAnnotatedWith(RestController.class) //
+            .should(classCondition("use exactly one read facade, named after the controller (XController → XReadFacade)", //
+                    controller -> readFacadesUsedBy(controller).equals(Set.of(readFacadeNameOf(controller))))) //
+            .because("one read facade per controller, named after it (CLAUDE.md, \"Read facades\")");
+
+    @ArchTest
+    static final ArchRule readFacadesServeOnlyTheirController = classes() //
+            .that().resideInAPackage(READ_FACADE) //
+            .and().haveSimpleNameEndingWith("ReadFacade") //
+            .should(classCondition("be used only by the controller it is named after (XReadFacade → XController)", //
+                    readFacade -> usersOf(readFacade).equals(Set.of(controllerNameOf(readFacade)))));
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static Set<String> readFacadesUsedBy(JavaClass controller) {
+        return controller.getDirectDependenciesFromSelf().stream() //
+                .map(Dependency::getTargetClass) //
+                .filter(target -> target.getPackageName().endsWith(".read_facade") && target.getSimpleName().endsWith("ReadFacade")) //
+                .map(JavaClass::getSimpleName) //
+                .collect(Collectors.toSet());
+    }
+
+    private static Set<String> usersOf(JavaClass readFacade) {
+        return readFacade.getDirectDependenciesToSelf().stream() //
+                .map(Dependency::getOriginClass) //
+                .filter(origin -> !origin.getName().startsWith(readFacade.getName())) //
+                .map(JavaClass::getSimpleName) //
+                .collect(Collectors.toSet());
+    }
+
+    private static String readFacadeNameOf(JavaClass controller) {
+        return controller.getSimpleName().replaceFirst("Controller$", "ReadFacade");
+    }
+
+    private static String controllerNameOf(JavaClass readFacade) {
+        return readFacade.getSimpleName().replaceFirst("ReadFacade$", "Controller");
+    }
 
 }

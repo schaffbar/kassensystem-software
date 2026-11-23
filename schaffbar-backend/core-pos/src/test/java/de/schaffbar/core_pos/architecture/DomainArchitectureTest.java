@@ -14,6 +14,7 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_TAKING_UUID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.RETURNS_EVENTS;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.UUID_CLASS;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WEB;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.WRITE_TRANSACTION;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondition;
@@ -129,7 +130,8 @@ class DomainArchitectureTest {
     static final ArchRule aggregatesDoNotExposeUuids = methods() //
             .that().areDeclaredInClassesThat(AGGREGATE) //
             .and().arePublic() //
-            .should(methodCondition("return something other than UUID", method -> !isUuid(method.getRawReturnType())));
+            .should(methodCondition("return no UUID – also not inside Optional, List or Set", //
+                    method -> !mentions(method.getReturnType(), UUID_CLASS)));
 
     // ------------------------------------------------------------------------
     // inner entity
@@ -390,8 +392,12 @@ class DomainArchitectureTest {
     // helper
 
     private static boolean isAggregatePackageMember(JavaClass javaClass) {
-        return AGGREGATE.test(javaClass) || INNER_ENTITY.test(javaClass) || javaClass.isAnnotatedWith(Embeddable.class) || javaClass.isEnum() || BUILDING_BLOCKS.stream().anyMatch(
-                javaClass.getSimpleName()::endsWith) || isGeneratedByMapStruct(javaClass);
+        return AGGREGATE.test(javaClass) //
+                || INNER_ENTITY.test(javaClass) //
+                || javaClass.isAnnotatedWith(Embeddable.class) //
+                || javaClass.isEnum() //
+                || BUILDING_BLOCKS.stream().anyMatch(javaClass.getSimpleName()::endsWith) //
+                || isGeneratedByMapStruct(javaClass);
     }
 
     private static boolean isGeneratedByMapStruct(JavaClass javaClass) {
@@ -446,9 +452,9 @@ class DomainArchitectureTest {
 
     private static boolean isValueObjectVariant(JavaMethod variant, JavaMethod method) {
         return variant != method //
-                && variant.getName().equals(
-                method.getName()) && variant.getRawParameterTypes().size() == method.getRawParameterTypes().size() && variant.getRawParameterTypes().stream().noneMatch(
-                ArchitectureSupport::isUuid);
+                && variant.getName().equals(method.getName()) //
+                && variant.getRawParameterTypes().size() == method.getRawParameterTypes().size() //
+                && variant.getRawParameterTypes().stream().noneMatch(ArchitectureSupport::isUuid);
     }
 
 }
