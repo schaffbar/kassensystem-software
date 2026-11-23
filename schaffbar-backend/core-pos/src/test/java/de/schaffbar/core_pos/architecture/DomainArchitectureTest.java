@@ -33,6 +33,7 @@ import java.util.UUID;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaEnumConstant;
+import com.tngtech.archunit.core.domain.JavaField;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -43,6 +44,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.Valid;
 import org.mapstruct.Mapper;
 import org.springframework.validation.annotation.Validated;
 
@@ -60,6 +62,9 @@ class DomainArchitectureTest {
             "Commands", "Service", "Repository", "Views", "EventFactory", "PayloadMapper");
 
     private static final Set<String> OBJECT_METHODS = Set.of("toString", "equals", "hashCode");
+
+    private static final DescribedPredicate<JavaField> VALUE_OBJECT_FIELD = DescribedPredicate.describe("are value objects", //
+            field -> isValueObject(field.getRawType()));
 
     // ------------------------------------------------------------------------
     // aggregate package
@@ -214,6 +219,14 @@ class DomainArchitectureTest {
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("Command") //
             .should().notHaveRawType(UUID.class);
 
+    @ArchTest
+    static final ArchRule valueObjectsInCommandsAreValidated = fields() //
+            .that().areDeclaredInClassesThat().resideInAPackage(DOMAIN) //
+            .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("Command") //
+            .and(VALUE_OBJECT_FIELD) //
+            .should().beAnnotatedWith(Valid.class) //
+            .because("every field is validated: a value object @NotNull @Valid, an optional one only @Valid");
+
     // ------------------------------------------------------------------------
     // event factory
 
@@ -351,6 +364,14 @@ class DomainArchitectureTest {
             .that().areDeclaredInClassesThat().resideInAnyPackage(DOMAIN, READ_FACADE) //
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("View") //
             .should().notHaveRawType(UUID.class);
+
+    @ArchTest
+    static final ArchRule valueObjectsInViewsAreValidated = fields() //
+            .that().areDeclaredInClassesThat().resideInAnyPackage(DOMAIN, READ_FACADE) //
+            .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("View") //
+            .and(VALUE_OBJECT_FIELD) //
+            .should().beAnnotatedWith(Valid.class) //
+            .because("every field is validated: a value object @NotNull @Valid, an optional one only @Valid");
 
     @ArchTest
     static final ArchRule viewsMapTheAggregateWithMapStruct = classes() //

@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.tool_certification;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.mapstruct.Mapper;
@@ -29,12 +30,12 @@ public interface ToolCertificationViews {
     @Builder
     @Validated
     record ToolCertificationView( //
-            @NotNull ToolCertificationId id, //
-            @NotNull CustomerId customerId, //
-            @NotNull ToolId toolId, //
+            @NotNull @Valid ToolCertificationId id, //
+            @NotNull @Valid CustomerId customerId, //
+            @NotNull @Valid ToolId toolId, //
             @NotNull ToolCertificationStatus status, //
             @NotNull Instant certifiedAt, //
-            CustomerId certifiedBy //
+            @Valid CustomerId certifiedBy //
     ) {}
 
 }

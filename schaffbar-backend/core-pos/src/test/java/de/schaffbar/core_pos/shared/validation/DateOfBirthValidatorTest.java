@@ -11,7 +11,7 @@ import de.schaffbar.core_pos.shared.time.WorkshopTime;
 class DateOfBirthValidatorTest {
 
     @Test
-    void acceptsTheLastDayOfLastYear() {
+    void isValid_lastDayOfLastYear_isAccepted() {
         // given
         int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 1, 12, 31);
@@ -24,7 +24,7 @@ class DateOfBirthValidatorTest {
     }
 
     @Test
-    void rejectsTheFirstDayOfTheCurrentYear() {
+    void isValid_firstDayOfThisYear_isRejected() {
         // given
         int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear, 1, 1);
@@ -37,7 +37,7 @@ class DateOfBirthValidatorTest {
     }
 
     @Test
-    void acceptsTheFirstDayOfTheYear100YearsAgo() {
+    void isValid_firstDayOf100YearsAgo_isAccepted() {
         // given
         int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 100, 1, 1);
@@ -50,7 +50,7 @@ class DateOfBirthValidatorTest {
     }
 
     @Test
-    void rejectsTheLastDayOfTheYear101YearsAgo() {
+    void isValid_lastDayOf101YearsAgo_isRejected() {
         // given
         int currentYear = WorkshopTime.today().getYear();
         LocalDate dateOfBirth = LocalDate.of(currentYear - 101, 12, 31);
@@ -62,8 +62,9 @@ class DateOfBirthValidatorTest {
         assertThat(valid).isFalse();
     }
 
+    // a missing date is for @NotNull to reject, not for this constraint
     @Test
-    void acceptsNullBecauseNotNullChecksThat() {
+    void isValid_null_isAccepted() {
         // when
         boolean valid = isValid(null);
 

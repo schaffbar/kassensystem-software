@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.workshop_usage;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Builder;
@@ -31,9 +32,9 @@ public interface WorkshopUsageViews {
     @Builder
     @Validated
     record WorkshopUsageView( //
-            @NotNull WorkshopUsageId id, //
-            @NotNull CustomerId customerId, //
-            @NotNull WorkshopSessionId workshopSessionId, //
+            @NotNull @Valid WorkshopUsageId id, //
+            @NotNull @Valid CustomerId customerId, //
+            @NotNull @Valid WorkshopSessionId workshopSessionId, //
             @NotNull @PastOrPresent Instant entryTime, //
             @PastOrPresent Instant exitTime, //
             BillableDuration billableDuration // null while the usage is running

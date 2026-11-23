@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.domain.workshop_session;
 
 import java.time.Instant;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Builder;
@@ -29,8 +30,8 @@ public interface WorkshopSessionViews {
     @Builder
     @Validated
     record WorkshopSessionView( //
-            @NotNull WorkshopSessionId id, //
-            @NotNull CustomerId customerId, //
+            @NotNull @Valid WorkshopSessionId id, //
+            @NotNull @Valid CustomerId customerId, //
             @NotNull @PastOrPresent Instant startTime, //
             @PastOrPresent Instant closeTime, //
             @NotNull WorkshopSessionStatus status //
