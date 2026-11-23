@@ -2,6 +2,7 @@ package de.schaffbar.core_pos.web.device;
 
 import static java.util.Objects.isNull;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class DeviceController {
     // command
 
     @PostMapping(value = "/init", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InitResponse> init(@RequestBody InitRequestBody requestBody) {
+    public ResponseEntity<InitResponse> init(@RequestBody @NotNull InitRequestBody requestBody) {
         log.info("Init RFID reader. Received mac address: {}", requestBody.MACADDR());
 
         try {
@@ -77,7 +78,7 @@ public class DeviceController {
     }
 
     @PostMapping(value = "/counter", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CounterResponse> counter(@RequestBody RfidTagRequestBody requestBody) {
+    public ResponseEntity<CounterResponse> counter(@RequestBody @NotNull RfidTagRequestBody requestBody) {
         RfidReaderView rfidReader;
 
         try {
@@ -114,7 +115,7 @@ public class DeviceController {
     }
 
     @PostMapping(value = "/card", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DeviceCardResponse> card(@RequestBody DeviceCardRequestBody requestBody) {
+    public ResponseEntity<DeviceCardResponse> card(@RequestBody @NotNull DeviceCardRequestBody requestBody) {
         String devUseCase = requestBody.DEVUSECASE();
         RfidReaderView rfidReader;
         CustomerView customer;

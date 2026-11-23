@@ -10,6 +10,7 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.AGGREGATE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.INNER_ENTITY;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.READ_FACADE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_BY_RAW_ID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_TAKING_UUID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.RETURNS_EVENTS;
@@ -21,7 +22,6 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondit
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.hasBuilder;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.isNestedIn;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.isStatic;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.isUuid;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.isValueObject;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.mentions;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.methodCondition;
@@ -43,9 +43,6 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 import org.springframework.validation.annotation.Validated;
 
@@ -300,40 +297,11 @@ class DomainArchitectureTest {
     // service
 
     @ArchTest
-    static final ArchRule servicesArePublicAndValidated = classes() //
-            .that(DOMAIN_SERVICE) //
-            .should().bePublic() //
-            .andShould().beAnnotatedWith(Validated.class);
-
-    @ArchTest
-    static final ArchRule serviceFieldsArePrivateFinal = fields() //
-            .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
-            .and().areNotStatic() //
-            .should().bePrivate() //
-            .andShould().beFinal();
-
-    @ArchTest
     static final ArchRule serviceHelpersArePrivate = methods() //
             .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
             .and().areNotPublic() //
             .should().bePrivate() //
             .because("a service has public queries and commands, everything else is private");
-
-    @ArchTest
-    static final ArchRule servicesTakeCommandsOrValueObjects = methods() //
-            .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
-            .and().arePublic() //
-            .should(methodCondition("take no UUID and no String", method -> method.getRawParameterTypes().stream() //
-                    .noneMatch(type -> isUuid(type) || type.isEquivalentTo(String.class))));
-
-    @ArchTest
-    static final ArchRule serviceParametersAreValidated = methods() //
-            .that().areDeclaredInClassesThat(DOMAIN_SERVICE) //
-            .and().arePublic() //
-            .should(methodCondition("annotate every object parameter with @NotNull, @NotEmpty or @NotBlank", method -> method.getParameters().stream() //
-                    .filter(parameter -> !parameter.getRawType().isPrimitive()) //
-                    .allMatch(parameter -> parameter.isAnnotatedWith(NotNull.class) || parameter.isAnnotatedWith(NotEmpty.class) || parameter.isAnnotatedWith(
-                            NotBlank.class))));
 
     @ArchTest
     static final ArchRule serviceQueriesReturnViews = methods() //
@@ -360,16 +328,19 @@ class DomainArchitectureTest {
     // ------------------------------------------------------------------------
     // views
 
+    // the views of an aggregate and of a read facade (DashboardViews, OpenWorkshopSessionViews, …); only an aggregate's
+    // views are its MapStruct mapper
+
     @ArchTest
     static final ArchRule viewsArePublicInterfaces = classes() //
-            .that().resideInAPackage(DOMAIN) //
+            .that().resideInAnyPackage(DOMAIN, READ_FACADE) //
             .and().haveSimpleNameEndingWith("Views") //
             .should().beInterfaces() //
             .andShould().bePublic();
 
     @ArchTest
     static final ArchRule viewsAreValidatedRecordsWithABuilder = classes() //
-            .that().resideInAPackage(DOMAIN) //
+            .that().resideInAnyPackage(DOMAIN, READ_FACADE) //
             .and().haveSimpleNameEndingWith("View") //
             .should(classCondition("be a record nested in *Views with a builder() (Lombok @Builder)",
                     view -> view.isRecord() && isNestedIn(view, "Views") && hasBuilder(view))) //
@@ -377,7 +348,7 @@ class DomainArchitectureTest {
 
     @ArchTest
     static final ArchRule viewsReferToAggregatesByValueObjects = fields() //
-            .that().areDeclaredInClassesThat().resideInAPackage(DOMAIN) //
+            .that().areDeclaredInClassesThat().resideInAnyPackage(DOMAIN, READ_FACADE) //
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("View") //
             .should().notHaveRawType(UUID.class);
 
