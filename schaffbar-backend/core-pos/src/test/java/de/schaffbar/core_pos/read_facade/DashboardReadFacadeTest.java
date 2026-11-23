@@ -6,6 +6,7 @@ import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -55,27 +56,30 @@ class DashboardReadFacadeTest {
     @Test
     void getActiveWorkshopUsers_showsEverybodyCheckedInTheLongestThereFirst() {
         // given
-        CustomerView anna = givenCustomer("Anna");
-        CustomerView ben = givenCustomer("Ben");
+        CustomerView latest = givenCustomer();
+        CustomerView longest = givenCustomer();
         Instant now = Instant.now();
-        WorkshopUsageView annaSinceTen = runningWorkshopUsageView().customerId(anna.id()).entryTime(now.minusSeconds(600)).build();
-        WorkshopUsageView benSinceAnHour = runningWorkshopUsageView().customerId(ben.id()).entryTime(now.minusSeconds(3600)).build();
-        givenActiveWorkshopUsages(annaSinceTen, benSinceAnHour);
+        WorkshopUsageView tenMinutes = runningWorkshopUsageView().customerId(latest.id()).entryTime(now.minusSeconds(600)).build();
+        WorkshopUsageView anHour = runningWorkshopUsageView().customerId(longest.id()).entryTime(now.minusSeconds(3600)).build();
+        givenRunningWorkshopUsages(tenMinutes, anHour);
 
         // when
         List<ActiveWorkshopUserView> users = this.dashboardReadFacade.getActiveWorkshopUsers();
 
         // then
-        assertThat(users).containsExactly( //
-                new ActiveWorkshopUserView(ben.id(), "Ben", ben.lastName(), benSinceAnHour.entryTime()), //
-                new ActiveWorkshopUserView(anna.id(), "Anna", anna.lastName(), annaSinceTen.entryTime()));
+        assertThat(users) //
+                .extracting(ActiveWorkshopUserView::customerId, ActiveWorkshopUserView::firstName, ActiveWorkshopUserView::lastName,
+                        ActiveWorkshopUserView::entryTime) //
+                .containsExactly( //
+                        tuple(longest.id(), longest.firstName(), longest.lastName(), anHour.entryTime()), //
+                        tuple(latest.id(), latest.firstName(), latest.lastName(), tenMinutes.entryTime()));
     }
 
     @Test
     void getActiveWorkshopUsers_withoutTheCustomerOfAUsage_isABug() {
         // given
         WorkshopUsageView usage = runningWorkshopUsageView().build();
-        givenActiveWorkshopUsages(usage);
+        givenRunningWorkshopUsages(usage);
         givenNoCustomer(usage.customerId());
 
         // when
@@ -91,67 +95,74 @@ class DashboardReadFacadeTest {
     @Test
     void getActiveToolUsages_showsEveryRunningToolWithThePersonUsingIt() {
         // given
-        ToolView saw = givenTool("Kreissäge");
-        CustomerView anna = givenCustomer("Anna");
-        ToolUsageView usage = runningToolUsageView(saw.id()).customerId(anna.id()).build();
-        givenActiveToolUsages(usage);
+        ToolView tool = givenTool();
+        CustomerView customer = givenCustomer();
+        ToolUsageView usage = runningToolUsageView(tool.id()).customerId(customer.id()).build();
+        givenRunningToolUsages(usage);
 
         // when
         List<ActiveToolUsageView> toolUsages = this.dashboardReadFacade.getActiveToolUsages();
 
         // then
-        assertThat(toolUsages).containsExactly(new ActiveToolUsageView(saw.id(), "Kreissäge", anna.id(), "Anna", anna.lastName()));
+        assertThat(toolUsages) //
+                .extracting(ActiveToolUsageView::toolId, ActiveToolUsageView::toolName, ActiveToolUsageView::customerId, ActiveToolUsageView::firstName,
+                        ActiveToolUsageView::lastName) //
+                .containsExactly(tuple(tool.id(), tool.name(), customer.id(), customer.firstName(), customer.lastName()));
     }
 
     @Test
     void getActiveToolUsages_withoutTheToolOfAUsage_isABug() {
         // given
         ToolUsageView usage = runningToolUsageView(ToolId.random()).build();
-        givenActiveToolUsages(usage);
+        givenRunningToolUsages(usage);
         givenNoTool(usage.toolId());
 
         // when
         Throwable thrown = catchThrowable(() -> this.dashboardReadFacade.getActiveToolUsages());
 
         // then
-        assertThat(thrown).isInstanceOf(IllegalStateException.class);
+        assertThat(thrown) //
+                .isInstanceOf(IllegalStateException.class) //
+                .hasMessageContaining(usage.toolId().getValue().toString());
     }
 
     @Test
     void getActiveToolUsages_withoutTheCustomerOfAUsage_isABug() {
         // given
-        ToolView saw = givenTool("Kreissäge");
-        ToolUsageView usage = runningToolUsageView(saw.id()).build();
-        givenActiveToolUsages(usage);
+        ToolView tool = givenTool();
+        ToolUsageView usage = runningToolUsageView(tool.id()).build();
+        givenRunningToolUsages(usage);
         givenNoCustomer(usage.customerId());
 
         // when
         Throwable thrown = catchThrowable(() -> this.dashboardReadFacade.getActiveToolUsages());
 
         // then
-        assertThat(thrown).isInstanceOf(IllegalStateException.class);
+        assertThat(thrown) //
+                .isInstanceOf(IllegalStateException.class) //
+                .hasMessageContaining(usage.customerId().getValue().toString());
     }
 
     // ------------------------------------------------------------------------
     // given
 
-    private void givenActiveWorkshopUsages(WorkshopUsageView... usages) {
+    private void givenRunningWorkshopUsages(WorkshopUsageView... usages) {
         when(this.workshopUsageService.getRunningWorkshopUsages()).thenReturn(List.of(usages));
     }
 
-    private void givenActiveToolUsages(ToolUsageView... usages) {
+    private void givenRunningToolUsages(ToolUsageView... usages) {
         when(this.toolUsageService.getRunningToolUsages()).thenReturn(List.of(usages));
     }
 
-    private CustomerView givenCustomer(String firstName) {
-        CustomerView customer = customerView().firstName(firstName).build();
+    private CustomerView givenCustomer() {
+        CustomerView customer = customerView().build();
         when(this.customerService.getCustomer(customer.id())).thenReturn(Optional.of(customer));
 
         return customer;
     }
 
-    private ToolView givenTool(String name) {
-        ToolView tool = toolView().name(name).build();
+    private ToolView givenTool() {
+        ToolView tool = toolView().build();
         when(this.toolService.getTool(tool.id())).thenReturn(Optional.of(tool));
 
         return tool;

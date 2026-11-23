@@ -1,11 +1,12 @@
 package de.schaffbar.core_pos.web.dashboard;
 
+import static de.schaffbar.core_pos.builder.ViewBuilder.activeToolUsageView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.activeWorkshopUserView;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +21,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import de.schaffbar.core_pos.read_facade.DashboardReadFacade;
 import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveToolUsageView;
 import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveWorkshopUserView;
-import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.ToolId;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
+import de.schaffbar.core_pos.support.Json;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardControllerTest {
@@ -37,6 +37,7 @@ class DashboardControllerTest {
         DashboardController controller = new DashboardController(this.dashboardReadFacade);
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -47,7 +48,7 @@ class DashboardControllerTest {
     @Test
     void getActiveWorkshopUsers_returnsThePeopleInTheWorkshop() throws Exception {
         // given
-        ActiveWorkshopUserView user = new ActiveWorkshopUserView(CustomerId.random(), "Anna", "Becker", Instant.parse("2026-11-21T09:15:00Z"));
+        ActiveWorkshopUserView user = activeWorkshopUserView().build();
         givenActiveWorkshopUsers(user);
 
         // when
@@ -57,9 +58,9 @@ class DashboardControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].customerId").value(user.customerId().getValue().toString())) //
-                .andExpect(jsonPath("$[0].firstName").value("Anna")) //
-                .andExpect(jsonPath("$[0].lastName").value("Becker")) //
-                .andExpect(jsonPath("$[0].entryTime").exists());
+                .andExpect(jsonPath("$[0].firstName").value(user.firstName())) //
+                .andExpect(jsonPath("$[0].lastName").value(user.lastName())) //
+                .andExpect(jsonPath("$[0].entryTime").value(user.entryTime().toString()));
     }
 
     @Test
@@ -81,7 +82,7 @@ class DashboardControllerTest {
     @Test
     void getActiveToolUsages_returnsTheRunningToolsWithThePersonUsingThem() throws Exception {
         // given
-        ActiveToolUsageView toolUsage = new ActiveToolUsageView(ToolId.random(), "Kreissäge", CustomerId.random(), "Anna", "Becker");
+        ActiveToolUsageView toolUsage = activeToolUsageView().build();
         givenActiveToolUsages(toolUsage);
 
         // when
@@ -91,10 +92,10 @@ class DashboardControllerTest {
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].toolId").value(toolUsage.toolId().getValue().toString())) //
-                .andExpect(jsonPath("$[0].toolName").value("Kreissäge")) //
+                .andExpect(jsonPath("$[0].toolName").value(toolUsage.toolName())) //
                 .andExpect(jsonPath("$[0].customerId").value(toolUsage.customerId().getValue().toString())) //
-                .andExpect(jsonPath("$[0].firstName").value("Anna")) //
-                .andExpect(jsonPath("$[0].lastName").value("Becker"));
+                .andExpect(jsonPath("$[0].firstName").value(toolUsage.firstName())) //
+                .andExpect(jsonPath("$[0].lastName").value(toolUsage.lastName()));
     }
 
     @Test

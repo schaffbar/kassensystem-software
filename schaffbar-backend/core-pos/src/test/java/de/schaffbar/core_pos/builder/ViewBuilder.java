@@ -38,6 +38,10 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionStatus;
 import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.WorkshopSessionView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView.WorkshopUsageViewBuilder;
+import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveToolUsageView;
+import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveToolUsageView.ActiveToolUsageViewBuilder;
+import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveWorkshopUserView;
+import de.schaffbar.core_pos.read_facade.DashboardViews.ActiveWorkshopUserView.ActiveWorkshopUserViewBuilder;
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSessionView;
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.OpenWorkshopSessionView.OpenWorkshopSessionViewBuilder;
 import de.schaffbar.core_pos.read_facade.OpenWorkshopSessionViews.ToolUsageSummaryView;
@@ -254,6 +258,26 @@ public class ViewBuilder {
                 .running(false) //
                 .total(new BillingTotal(7, 2)) //
                 .usages(List.of(finishedToolUsageView(toolId).build()));
+    }
+
+    // ------------------------------------------------------------------------
+    // dashboard (read facade)
+
+    public static ActiveWorkshopUserViewBuilder activeWorkshopUserView() {
+        return ActiveWorkshopUserView.builder() //
+                .customerId(CustomerId.random()) //
+                .firstName("Erika") //
+                .lastName("Mustermann") //
+                .entryTime(Instant.now().minusSeconds(3600));
+    }
+
+    public static ActiveToolUsageViewBuilder activeToolUsageView() {
+        return ActiveToolUsageView.builder() //
+                .toolId(ToolId.random()) //
+                .toolName(RandomValues.toolName()) //
+                .customerId(CustomerId.random()) //
+                .firstName("Erika") //
+                .lastName("Mustermann");
     }
 
 }
