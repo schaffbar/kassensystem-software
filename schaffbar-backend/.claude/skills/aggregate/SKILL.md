@@ -556,7 +556,7 @@ Besides the folder, a new aggregate touches `shared/`, the migrations and the do
 1. **Id** in `shared/id/`: `<Aggregate>Id` like `ToolId` (section "Value objects"), plus its name in
    `ValueObjectAssert.ValueObjectName`.
 2. **Converter** in `shared/util/`: `StringTo<ValueObject>Converter implements Converter<String, …>` (`@Component`) for
-   every value object used as `@PathVariable` or `@RequestParam` – ids and others (`MacAddress`, `IpAddress`).
+   every value object used as `@PathVariable` or `@RequestParam` – ids and others (`MacAddress`).
 3. **Events** in `shared/event/`: a value in `AggregateType`, the event types in `EventType`, the payload interface
    `<Aggregate>EventPayload` in `payload/`, and the factory method `SchaffbarEvent.<aggregate>Event(EventType,
    <Aggregate>Id, <Aggregate>EventPayload)`.
