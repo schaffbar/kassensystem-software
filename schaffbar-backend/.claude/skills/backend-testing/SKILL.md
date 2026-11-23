@@ -409,10 +409,10 @@ class RfidReaderAcceptanceTest {
 
 | Class | Role |
 | --- | --- |
-| `SchaffbarFixture` | the test bean (`@TestComponent`): `given()`, `api()`, `then()` |
+| `SchaffbarFixture` | the test bean (`@TestComponent`): `given()`, `api()`, `then()`; `fullNameOf(customerId)` for the name in an expected device answer, `endWaitingRfidTagAssignment()` |
 | `SchaffbarApi` | one method per endpoint the tests call, returning `MvcTestResult`; the only place that builds requests (URLs, JSON bodies) – `GivenFixture` and `ThenFixture` read the responses |
-| `GivenFixture` | builds the starting state through the API, asserts each step and returns the created ids |
-| `ThenFixture` | expectations: `expectSuccess`, `expectProblem(result, status, code)`, the state afterwards – read through the API |
+| `GivenFixture` | builds the starting state through the API, asserts each step and returns the created ids – a device step by its answer (`ICON`, `STATE`), since a device always gets `200` |
+| `ThenFixture` | expectations only (`expect…`): `expectSuccess`, `expectProblem(result, status, code)`, the state afterwards – read through the API |
 | `Scenario` | the input values of one test, random by default (`Scenario.randomValues().macAddress(…).build()` to fix one) |
 
 - **The trigger is `api()`** and returns the result unchecked – the test decides what to expect. `given()` fails
@@ -423,6 +423,9 @@ class RfidReaderAcceptanceTest {
   lower case MAC of R-1).
 - **`then()` reads through the API**, never through repositories – the acceptance test proves what the portal would
   see.
+- **Sections by aggregate** – a method goes into the section of the aggregate whose state it creates or checks, not of
+  the endpoint it reads: `customerInTheWorkshop` under `// workshop usages`, `expectToolRunning` under
+  `// tool usages`, although both go through the customer or the open session.
 - A new aggregate in the fixture: a section `// <aggregate>` in `SchaffbarApi`, `GivenFixture` and `ThenFixture`,
   its values in `Scenario` (random ones from `RandomValues`). Given methods are named after the state they create
   (`switchBox`, `toolWithSwitchBox`) and take the values they need (`switchBox(MacAddress)`), then methods `expect…`.
