@@ -159,7 +159,7 @@ core_pos/
 - `Optional` only as a return type ("maybe nothing there") – never as a parameter or a field. A value that can be
   missing is passed as a nullable parameter, with a comment what `null` means.
 - A state without an end is *open* for a session and *running* for a workshop or tool usage – never *active* (E6,
-  skill `aggregate`).
+  skill `aggregate`); only the dashboard keeps `active-users` / `active-tools` (23.11.2026).
 - `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`;
   `// static constructor` above the one `of(…)` of a class, `// static factories` above several named ones
   (exceptions, `SchaffbarEvent`).

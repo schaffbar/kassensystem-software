@@ -102,8 +102,8 @@ private void ensureToolNotInUseByAnotherCustomer(ToolId toolId, CustomerId custo
 
 // TU-1
 private void ensureMaxSimultaneousUsagesNotExceeded(CustomerId customerId) {
-    long activeCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
-    if (activeCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
+    long runningCount = this.toolUsageRepository.countByCustomerIdAndEndTimeIsNull(customerId);
+    if (runningCount >= MAX_SIMULTANEOUS_TOOL_USAGES) {
         throw new MaxToolUsageExceededException(customerId, MAX_SIMULTANEOUS_TOOL_USAGES);
     }
 }
@@ -230,7 +230,9 @@ class RfidReader {
 - **A state without an end is named as in the glossary (E6):** a session is *open* (`OPEN`), a workshop or tool usage
   is *running* (no `exitTime` / `endTime`) – in methods, exceptions and their codes, views, fields and API paths:
   `getOpenWorkshopSession`, `hasRunningToolUsage`, `RunningToolUsageExistsForSessionException`; never `active`. A
-  certification's status `ACTIVE` is not such a state – it stays.
+  certification's status `ACTIVE` is not such a state – it stays. The one exception, decided 23.11.2026: the
+  dashboard keeps its names (`/dashboard/active-users`, `/dashboard/active-tools`, `Active…View` / `…ApiDto`,
+  `getActive…`) – they name what the dashboard shows, not a usage.
 - Null checks with `nonNull(…)` / `isNull(…)` (static import from `java.util.Objects`), not `!= null` / `== null`.
 - Sections `// static constructor`, `// query`, `// command`, `// helper`.
 
@@ -587,9 +589,6 @@ this skill, not the code next to you.** Known deviations:
 
 - Value objects without `@Valid` in commands and views (`@NotNull CustomerId customerId` in `WorkshopUsageViews`,
   `ToolViews`, …).
-- From the backend review (`docs/backend-review.md`, section 3), fixed in the step of each aggregate: `Active…` instead
-  of `Running…` (E6); entity guards without the comment who checks (E29, done in `rfid_tag_assignment`);
-  `WorkshopUsage.exit()` instead of `stop()` (E20).
 
 Every ArchUnit rule is strict – the freeze store is gone (22.11.2026).
 
