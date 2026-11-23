@@ -1,7 +1,6 @@
 package de.schaffbar.core_pos.shared.event;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,18 +10,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Value;
 
 import de.schaffbar.core_pos.shared.event.payload.CustomerEventPayload;
 import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload;
@@ -43,45 +35,35 @@ import de.schaffbar.core_pos.shared.id.ToolUsageId;
 import de.schaffbar.core_pos.shared.id.WorkshopSessionId;
 import de.schaffbar.core_pos.shared.id.WorkshopUsageId;
 
-@Data
-@Setter(AccessLevel.PRIVATE)
+@Value
 @Builder(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonInclude(Include.NON_NULL)
-@EqualsAndHashCode(callSuper = false)
-public class SchaffbarEvent implements ValidationSupport {
+public class SchaffbarEvent {
 
     private static final ObjectMapper objectMapper = new ObjectMapper() //
             .registerModule(new JavaTimeModule()) //
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @NotBlank
-    private UUID id;
+    UUID id;
 
-    @NotNull
-    private EventType type;
+    EventType type;
 
-    @NotNull
-    private EventVersion version;
+    EventVersion version;
 
-    @NotNull
-    private AggregateType aggregateType;
+    AggregateType aggregateType;
 
-    @NotBlank
-    private String aggregateId;
+    String aggregateId;
 
-    @NotNull
-    //    @JsonFormat(pattern = Instants.ISO_INSTANT_FORMAT, timezone = Instants.TIMEZONE)
-    private Instant timestamp;
+    Instant timestamp;
 
-    @NotNull
-    private JsonNode payload;
+    JsonNode payload;
 
-    private String owner;
+    // not set yet – prepared for an outbox relay
+    String owner;
 
     // ------------------------------------------------------------------------
-    // static factory methods
+    // static factories
 
     public static SchaffbarEvent customerEvent(EventType eventType, CustomerId customerId, CustomerEventPayload payload) {
         return builderWithDefaultsAndNow(eventType) //
@@ -163,15 +145,15 @@ public class SchaffbarEvent implements ValidationSupport {
             return objectMapper.writeValueAsString(this);
         }
         catch (JsonProcessingException e) {
-            throw new ValidationException("Unable to serialize afsEvent", e);
+            throw new ValidationException("Unable to serialize the event", e);
         }
     }
 
-    public <T> T deserializeAndValidatePayload(Class<T> classOfT) {
+    public <T extends EventPayload> T deserializeAndValidatePayload(Class<T> payloadType) {
         try {
-            T deserialized = objectMapper.treeToValue(this.payload, classOfT);
-            validatePayload(deserialized);
-            return deserialized;
+            T payload = objectMapper.treeToValue(this.payload, payloadType);
+            payload.validate();
+            return payload;
         }
         catch (JsonProcessingException | IllegalArgumentException | ValidationException e) {
             throw new ValidationException("Unable to de-serialize payload", e);
@@ -195,23 +177,6 @@ public class SchaffbarEvent implements ValidationSupport {
 
     private static JsonNode toJsonNode(EventPayload payload) {
         return objectMapper.valueToTree(payload);
-    }
-
-    private static JsonNode toJsonNode(String payload) {
-        try {
-            return objectMapper.readTree(payload);
-        }
-        catch (JsonProcessingException e) {
-            throw new ValidationException("Unable to de-serialize payload", e);
-        }
-    }
-
-    // TODO: use method defined in ValidationSupport interface instead of duplicating here
-    private <T> void validatePayload(T deserialized) {
-        Set<ConstraintViolation<T>> violations = Validation.buildDefaultValidatorFactory().getValidator().validate(deserialized);
-        if (!violations.isEmpty()) {
-            throw new ValidationException(violations.toString());
-        }
     }
 
     public enum EventVersion {

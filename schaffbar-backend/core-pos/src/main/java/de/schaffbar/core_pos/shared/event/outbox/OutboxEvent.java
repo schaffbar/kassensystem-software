@@ -62,7 +62,7 @@ public class OutboxEvent {
     private Instant processedAt;
 
     // ------------------------------------------------------------------------
-    // static factory method
+    // static constructor
 
     public static OutboxEvent of(SchaffbarEvent event) {
         OutboxEvent outboxEvent = new OutboxEvent();
@@ -72,19 +72,11 @@ public class OutboxEvent {
         outboxEvent.setAggregateType(event.getAggregateType());
         outboxEvent.setAggregateId(event.getAggregateId());
         outboxEvent.setCreatedAt(event.getTimestamp());
-        outboxEvent.setPayload(event.serialize()); // TODO: whole event as JSON, not just payload ???
+        outboxEvent.setPayload(event.serialize());
         outboxEvent.setOwner(event.getOwner());
         outboxEvent.setProcessed(false);
 
         return outboxEvent;
-    }
-
-    // ------------------------------------------------------------------------
-    // command
-
-    public void markAsProcessed() {
-        this.processed = true;
-        this.processedAt = Instant.now();
     }
 
 }

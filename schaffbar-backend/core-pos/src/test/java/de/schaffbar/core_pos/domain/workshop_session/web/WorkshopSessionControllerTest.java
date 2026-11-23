@@ -247,7 +247,7 @@ class WorkshopSessionControllerTest {
 
     private void expectNotFound(ResultActions result) throws Exception {
         result.andExpect(status().isNotFound()) //
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.code").value(ResourceNotFoundException.CODE)) //
                 .andExpect(jsonPath("$.resource").value(Resource.CUSTOMER.name()));
     }
 

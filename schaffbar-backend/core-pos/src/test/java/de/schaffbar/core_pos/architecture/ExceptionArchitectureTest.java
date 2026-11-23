@@ -33,10 +33,11 @@ class ExceptionArchitectureTest {
             .because("the kind decides the HTTP status in ApiExceptionHandler (E8)");
 
     @ArchTest
-    static final ArchRule businessRuleViolationsDeclareTheirCode = classes() //
-            .that().areAssignableTo(BusinessRuleViolationException.class) //
+    static final ArchRule exceptionsDeclareTheirCode = classes() //
+            .that().resideInAPackage("..shared.exception..") //
+            .and().areTopLevelClasses() //
+            .and().haveSimpleNameEndingWith("Exception") //
             .and().doNotHaveModifier(JavaModifier.ABSTRACT) //
-            .and().resideInAPackage("..shared.exception..") //
             .should(classCondition("declare public static final String CODE", exception -> exception.tryGetField("CODE") //
                     .map(field -> field.getModifiers().containsAll(Set.of(JavaModifier.PUBLIC, JavaModifier.STATIC, JavaModifier.FINAL))
                             && field.getRawType().isEquivalentTo(String.class)) //

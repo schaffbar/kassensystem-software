@@ -9,17 +9,20 @@ import org.junit.jupiter.api.Test;
 
 class BillingTotalTest {
 
+    // ------------------------------------------------------------------------
+    // of
+
     @Test
-    void isZeroWithoutUsages() {
+    void of_noUsages_isZero() {
         // when
-        BillingTotal actual = BillingTotal.of(List.of());
+        BillingTotal billingTotal = BillingTotal.of(List.of());
 
         // then
-        assertThat(actual).isEqualTo(BillingTotal.ZERO);
+        assertThat(billingTotal).isEqualTo(BillingTotal.ZERO);
     }
 
     @Test
-    void sumsTheRoundedValuesOfEachUsage() {
+    void of_sumsTheRoundedValuesOfEachUsage() {
         // given – 7 min (2 units) + 31 min (6 units)
         List<BillableDuration> durations = List.of( //
                 BillableDuration.of(Duration.ofMinutes(6).plusSeconds(1)), //
@@ -27,35 +30,38 @@ class BillingTotalTest {
         );
 
         // when
-        BillingTotal actual = BillingTotal.of(durations);
+        BillingTotal billingTotal = BillingTotal.of(durations);
 
         // then
-        assertThat(actual).isEqualTo(new BillingTotal(38, 8));
+        assertThat(billingTotal).isEqualTo(new BillingTotal(38, 8));
     }
 
     @Test
-    void roundsEveryUsageOnItsOwn() {
+    void of_roundsEveryUsageOnItsOwn() {
         // given – 3 × 1 s: each counts as 1 min and 1 unit; rounding the summed up 3 s once would give 1 min and 1 unit
         BillableDuration oneSecond = BillableDuration.of(Duration.ofSeconds(1));
 
         // when
-        BillingTotal actual = BillingTotal.of(List.of(oneSecond, oneSecond, oneSecond));
+        BillingTotal billingTotal = BillingTotal.of(List.of(oneSecond, oneSecond, oneSecond));
 
         // then
-        assertThat(actual).isEqualTo(new BillingTotal(3, 3));
+        assertThat(billingTotal).isEqualTo(new BillingTotal(3, 3));
     }
 
+    // ------------------------------------------------------------------------
+    // plus
+
     @Test
-    void addsTwoTotals() {
+    void plus_addsMinutesAndUnits() {
         // given
-        BillingTotal billingTotal1 = new BillingTotal(10, 2);
-        BillingTotal billingTotal2 = new BillingTotal(5, 1);
+        BillingTotal first = new BillingTotal(10, 2);
+        BillingTotal second = new BillingTotal(5, 1);
 
         // when
-        BillingTotal actual = billingTotal1.plus(billingTotal2);
+        BillingTotal sum = first.plus(second);
 
         // then
-        assertThat(actual).isEqualTo(new BillingTotal(15, 3));
+        assertThat(sum).isEqualTo(new BillingTotal(15, 3));
     }
 
 }

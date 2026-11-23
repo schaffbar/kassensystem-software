@@ -71,19 +71,6 @@ public enum EventType {
     // workshop usage
 
     WORKSHOP_USAGE_ENTERED, //
-    WORKSHOP_USAGE_LEFT; //
-
-    // ------------------------------------------------------------------------
-    // static factory methods
-
-    public static EventType toEnum(String eventTypeName) {
-        for (EventType eventType : EventType.values()) {
-            if (eventType.toString().equalsIgnoreCase(eventTypeName)) {
-                return eventType;
-            }
-        }
-
-        throw new UnsupportedEventTypeException("No matching enum value for name[" + eventTypeName + "]");
-    }
+    WORKSHOP_USAGE_LEFT
 
 }

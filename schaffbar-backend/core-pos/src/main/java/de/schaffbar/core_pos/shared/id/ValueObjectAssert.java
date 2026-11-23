@@ -13,8 +13,6 @@ public class ValueObjectAssert {
 
     static final String BLANK_ERROR_MESSAGE = "The value of %s must not be blank";
 
-    static final String POSITIVE_ERROR_MESSAGE = "The value of %s must be positive";
-
     public static void notNull(Object value, ValueObjectName valueObjectName) {
         if (isNull(value)) {
             throw new IllegalArgumentException(notNullMessage(valueObjectName));
@@ -27,18 +25,6 @@ public class ValueObjectAssert {
         }
     }
 
-    public static void positive(long value, ValueObjectName valueObjectName) {
-        if (value <= 0) {
-            throw new IllegalArgumentException(positiveMessage(valueObjectName));
-        }
-    }
-
-    public static void positive(int value, ValueObjectName valueObjectName) {
-        if (value <= 0) {
-            throw new IllegalArgumentException(positiveMessage(valueObjectName));
-        }
-    }
-
     // ------------------------------------------------------------------------
     // helper
 
@@ -48,10 +34,6 @@ public class ValueObjectAssert {
 
     static String notBlankMessage(ValueObjectName valueObjectName) {
         return String.format(BLANK_ERROR_MESSAGE, valueObjectName.getValue());
-    }
-
-    static String positiveMessage(ValueObjectName valueObjectName) {
-        return String.format(POSITIVE_ERROR_MESSAGE, valueObjectName.getValue());
     }
 
     // ------------------------------------------------------------------------

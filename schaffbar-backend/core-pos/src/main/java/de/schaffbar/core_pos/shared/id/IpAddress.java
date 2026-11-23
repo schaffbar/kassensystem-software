@@ -1,5 +1,8 @@
 package de.schaffbar.core_pos.shared.id;
 
+import java.util.Arrays;
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Value;
@@ -8,6 +11,9 @@ import de.schaffbar.core_pos.shared.id.ValueObjectAssert.ValueObjectName;
 
 @Value(staticConstructor = "of")
 public class IpAddress implements ValueObject<IpAddress> {
+
+    // ASCII digits only, no sign and no leading zero – Integer.parseInt alone accepts "+1" and "-0"
+    private static final Pattern OCTET = Pattern.compile("0|[1-9][0-9]{0,2}");
 
     @JsonValue
     String value;
@@ -24,28 +30,9 @@ public class IpAddress implements ValueObject<IpAddress> {
     // ------------------------------------------------------------------------
     // helper
 
-    private static boolean isValidIpv4(String ip) {
-        String[] parts = ip.split("\\.", -1);
-        if (parts.length != 4) {
-            return false;
-        }
-
-        for (String part : parts) {
-            try {
-                int value = Integer.parseInt(part);
-                if (value < 0 || value > 255) {
-                    return false;
-                }
-                if (part.length() > 1 && part.startsWith("0")) {
-                    return false;
-                }
-            }
-            catch (NumberFormatException e) {
-                return false;
-            }
-        }
-
-        return true;
+    private static boolean isValidIpv4(String ipAddress) {
+        String[] octets = ipAddress.split("\\.", -1);
+        return octets.length == 4 && Arrays.stream(octets).allMatch(octet -> OCTET.matcher(octet).matches() && Integer.parseInt(octet) <= 255);
     }
 
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.domain.rfid_reader.RfidReaderType;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.IpAddress;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -84,7 +85,7 @@ public final class ThenFixture {
     }
 
     public void expectNoCustomer(CustomerId customerId) {
-        expectProblem(this.api.getCustomer(customerId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        expectProblem(this.api.getCustomer(customerId), HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     // ------------------------------------------------------------------------
@@ -98,7 +99,7 @@ public final class ThenFixture {
     }
 
     public void expectNoRfidReader(RfidReaderId rfidReaderId) {
-        expectProblem(this.api.getRfidReader(rfidReaderId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        expectProblem(this.api.getRfidReader(rfidReaderId), HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     public void expectRfidReaderCount(MacAddress macAddress, int count) {
@@ -116,7 +117,7 @@ public final class ThenFixture {
     }
 
     public void expectNoRfidTag(RfidTagId rfidTagId) {
-        expectProblem(this.api.getRfidTag(rfidTagId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        expectProblem(this.api.getRfidTag(rfidTagId), HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     // ------------------------------------------------------------------------
@@ -165,7 +166,7 @@ public final class ThenFixture {
     }
 
     public void expectNoTool(ToolId toolId) {
-        expectProblem(this.api.getTool(toolId), HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        expectProblem(this.api.getTool(toolId), HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     public void expectSwitchBox(ToolId toolId, RfidReaderId rfidReaderId) {

@@ -22,8 +22,12 @@ public class BillableDuration {
     Duration duration;
 
     private BillableDuration(Duration duration) {
-        if (isNull(duration) || duration.isNegative()) {
-            throw new IllegalArgumentException("Billable duration must not be null or negative: " + duration);
+        if (isNull(duration)) {
+            throw new IllegalArgumentException("Billable duration must not be null");
+        }
+        // the times come from the stored usage, not from a request: an end before the start is broken data
+        if (duration.isNegative()) {
+            throw new IllegalStateException("Billable duration must not be negative: " + duration);
         }
         this.duration = duration;
     }

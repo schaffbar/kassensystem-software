@@ -12,6 +12,7 @@ import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.InvalidRfidReaderTypeForToolException;
 import de.schaffbar.core_pos.shared.exception.IpAddressAlreadyUsedException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderAlreadyAssignedToToolException;
 import de.schaffbar.core_pos.shared.exception.ToolInUseException;
 import de.schaffbar.core_pos.shared.exception.ToolNameAlreadyUsedException;
@@ -178,8 +179,8 @@ class ToolAcceptanceTest {
         MvcTestResult removed = this.fixture.api().removeInstructor(toolId, unknown);
 
         // then
-        this.fixture.then().expectProblem(added, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
-        this.fixture.then().expectProblem(removed, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(added, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
+        this.fixture.then().expectProblem(removed, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
         this.fixture.then().expectInstructors(toolId);
 
         // when

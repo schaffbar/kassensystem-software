@@ -27,7 +27,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail handleResourceNotFound(ResourceNotFoundException exception) {
         log.info(exception.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-        problem.setProperty(CODE, "RESOURCE_NOT_FOUND");
+        problem.setProperty(CODE, ResourceNotFoundException.CODE);
         problem.setProperty("resource", exception.getResource());
         return problem;
     }

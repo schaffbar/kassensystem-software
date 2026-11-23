@@ -12,6 +12,7 @@ import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.NoOpenWorkshopSessionException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RunningWorkshopUsageExistsForSessionException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
@@ -28,7 +29,7 @@ class WorkshopSessionAcceptanceTest {
         MvcTestResult result = this.fixture.api().closeWorkshopSession(CustomerId.random());
 
         // then
-        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     @Test

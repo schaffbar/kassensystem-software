@@ -12,6 +12,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class BillableDurationTest {
 
+    // ------------------------------------------------------------------------
+    // getMinutes
+
     @ParameterizedTest(name = "{0} s -> {1} min")
     @CsvSource({ //
             "0,    0", //
@@ -24,16 +27,31 @@ class BillableDurationTest {
             "361,  7", //
             "3600, 60", //
     })
-    void roundsUpToFullMinutes(long seconds, long expectedMinutes) {
+    void getMinutes_roundsUpToFullMinutes(long seconds, long expectedMinutes) {
         // given
-        Duration duration = Duration.ofSeconds(seconds);
+        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(seconds));
 
         // when
-        BillableDuration billableDuration = BillableDuration.of(duration);
+        long minutes = billableDuration.getMinutes();
 
         // then
-        assertThat(billableDuration.getMinutes()).isEqualTo(expectedMinutes);
+        assertThat(minutes).isEqualTo(expectedMinutes);
     }
+
+    @Test
+    void getMinutes_fractionOfASecond_isIgnored() {
+        // given
+        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(60, 999_999_999));
+
+        // when
+        long minutes = billableDuration.getMinutes();
+
+        // then
+        assertThat(minutes).isEqualTo(1);
+    }
+
+    // ------------------------------------------------------------------------
+    // getUnits
 
     @ParameterizedTest(name = "{0} s -> {1} units")
     @CsvSource({ //
@@ -46,57 +64,52 @@ class BillableDurationTest {
             "721,  3", //
             "3600, 10", // 1 h
     })
-    void countsOneUnitPerStartedSixMinutes(long seconds, long expectedUnits) {
+    void getUnits_countsOneUnitPerStartedSixMinutes(long seconds, long expectedUnits) {
         // given
-        Duration duration = Duration.ofSeconds(seconds);
+        BillableDuration billableDuration = BillableDuration.of(Duration.ofSeconds(seconds));
 
         // when
-        BillableDuration billableDuration = BillableDuration.of(duration);
+        long units = billableDuration.getUnits();
 
         // then
-        assertThat(billableDuration.getUnits()).isEqualTo(expectedUnits);
+        assertThat(units).isEqualTo(expectedUnits);
     }
 
-    @Test
-    void ignoresFractionsOfASecond() {
-        // given
-        Duration duration = Duration.ofSeconds(60, 999_999_999);
-
-        // when
-        BillableDuration billableDuration = BillableDuration.of(duration);
-
-        // then
-        assertThat(billableDuration.getMinutes()).isEqualTo(1);
-    }
+    // ------------------------------------------------------------------------
+    // between
 
     @Test
-    void truncatesStartAndEndToFullSecondsBetweenTwoInstants() {
+    void between_truncatesStartAndEndToFullSeconds() {
         // given
         Instant start = Instant.parse("2026-10-30T10:00:00.900Z");
         Instant end = Instant.parse("2026-10-30T10:01:00.100Z");
 
         // when
-        BillableDuration duration = BillableDuration.between(start, end);
+        BillableDuration billableDuration = BillableDuration.between(start, end);
 
         // then
-        assertThat(duration.getDuration()).isEqualTo(Duration.ofSeconds(60));
-        assertThat(duration.getMinutes()).isEqualTo(1);
+        assertThat(billableDuration.getDuration()).isEqualTo(Duration.ofSeconds(60));
+        assertThat(billableDuration.getMinutes()).isEqualTo(1);
     }
 
     @Test
-    void rejectsNegativeDuration() {
+    void between_endBeforeStart_isRejectedAsBrokenData() {
         // given
-        Duration negative = Duration.ofSeconds(-1);
+        Instant start = Instant.parse("2026-10-30T10:01:00Z");
+        Instant end = Instant.parse("2026-10-30T10:00:00Z");
 
         // when
-        Throwable thrown = catchThrowable(() -> BillableDuration.of(negative));
+        Throwable thrown = catchThrowable(() -> BillableDuration.between(start, end));
 
         // then
-        assertThat(thrown).isInstanceOf(IllegalArgumentException.class);
+        assertThat(thrown).isInstanceOf(IllegalStateException.class);
     }
 
+    // ------------------------------------------------------------------------
+    // of
+
     @Test
-    void rejectsNull() {
+    void of_null_isRejected() {
         // when
         Throwable thrown = catchThrowable(() -> BillableDuration.of(null));
 

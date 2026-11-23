@@ -14,6 +14,7 @@ import de.schaffbar.core_pos.shared.exception.CertificationAlreadyExistsExceptio
 import de.schaffbar.core_pos.shared.exception.CertificationPermanentlyRevokedException;
 import de.schaffbar.core_pos.shared.exception.CustomerIsInstructorException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -70,10 +71,10 @@ class ToolCertificationAcceptanceTest {
         MvcTestResult deleted = this.fixture.api().deleteToolCertification(customerId, otherTool);
 
         // then
-        this.fixture.then().expectProblem(paused, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
-        this.fixture.then().expectProblem(reactivated, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
-        this.fixture.then().expectProblem(revoked, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
-        this.fixture.then().expectProblem(deleted, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(paused, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
+        this.fixture.then().expectProblem(reactivated, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
+        this.fixture.then().expectProblem(revoked, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
+        this.fixture.then().expectProblem(deleted, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
         this.fixture.then().expectCertifiedCustomers(toolId, customerId);
     }
 

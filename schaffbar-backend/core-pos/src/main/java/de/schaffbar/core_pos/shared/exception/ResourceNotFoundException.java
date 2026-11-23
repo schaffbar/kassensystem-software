@@ -21,6 +21,8 @@ public class ResourceNotFoundException extends RuntimeException {
 
     private static final String MESSAGE = "Resource %s [id: %s] does not exist!";
 
+    public static final String CODE = "RESOURCE_NOT_FOUND";
+
     @Getter
     private final Resource resource;
 
@@ -78,12 +80,10 @@ public class ResourceNotFoundException extends RuntimeException {
 
         CUSTOMER("customer"), //
         TOOL("tool"), //
-        TOOL_USAGE("tool usage"), //
         TOOL_CERTIFICATION("tool certification"), //
         RFID_READER("RFID reader"), //
         RFID_TAG("RFID tag"), //
-        WORKSHOP_SESSION("Workshop session"), //
-        WORKSHOP_USAGE("Workshop usage");
+        WORKSHOP_SESSION("workshop session");
 
         private final String value;
 

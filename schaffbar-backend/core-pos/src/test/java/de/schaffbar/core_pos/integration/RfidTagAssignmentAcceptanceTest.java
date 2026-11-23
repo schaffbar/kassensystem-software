@@ -11,6 +11,7 @@ import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.CustomerHasRfidTagAssignmentException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignedException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyAssignedException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAssignmentAlreadyWaitingException;
 import de.schaffbar.core_pos.shared.id.CustomerId;
@@ -155,7 +156,7 @@ class RfidTagAssignmentAcceptanceTest {
         MvcTestResult result = this.fixture.api().requestRfidTagAssignment(unknown, RfidTagAssignmentType.FIXED);
 
         // then
-        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
     @Test
@@ -167,7 +168,7 @@ class RfidTagAssignmentAcceptanceTest {
         MvcTestResult result = this.fixture.api().assignRfidTag(unregistered);
 
         // then
-        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
 
 }
