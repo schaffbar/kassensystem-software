@@ -110,8 +110,8 @@ core_pos/
 ### Read facades (until their skill)
 
 - One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
-  `DashboardReadFacade`): `@Service` `@Validated` `@RequiredArgsConstructor`,
-  `@Query` on every public method.
+  `DashboardReadFacade`) and used only by it: `@Service` `@Validated` `@RequiredArgsConstructor`, `@Query` on every
+  public method (ArchUnit `ReadFacadeArchitectureTest`).
 - Public methods are queries (`get…`, `is…` / `has…` for a yes/no answer) and return views – of one aggregate, or a
   view of its own that combines several, in a `<What it shows>Views` next to the facade (`DashboardViews`,
   `DeviceViews`, `OpenWorkshopSessionViews` – not `WorkshopSessionViews`, the aggregate's name). It reads services (any
@@ -124,7 +124,8 @@ core_pos/
 - `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
   `/api/v1/<aggregate in kebab case, plural>` (`/api/v1/rfid-readers`); a controller of no aggregate is
   `web/<object>/<Object>Controller`, path `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands
-  call a use case, queries its read facade – never a service. A new `web/<object>/` controller of the portal is added
+  call a use case, queries its read facade – no other bean (ArchUnit `controllersKnowOnlyUseCasesAndReadFacades`: no
+  service, no `OutboxEventStore`, no converter). A new `web/<object>/` controller of the portal is added
   to `basePackages` of `ApiExceptionHandler`.
 - **One controller per aggregate** – an inner entity gets a sub-path of it (`GET /rfid-tag-assignments/history`) and
   a query in its read facade, no controller of its own (E16).

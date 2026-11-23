@@ -215,7 +215,8 @@ class RfidReader {
 - **`getId()` and every getter of a reference or of a value with a value object return the value object**, never
   `UUID` or `String`: `getCustomerId()` → `CustomerId.of(this.customerId)`, `getMacAddress()`, `getIpAddress()`; an
   optional one returns `null` when unset (`getCertifiedBy()`, `getIpAddress()`). The own id is always `getId()`, never
-  `get<Aggregate>Id()`. Payload mapper and views then take the value object from the getter without a conversion.
+  `get<Aggregate>Id()`. Payload mapper and views then take the value object from the getter without a conversion. No
+  public method returns a `UUID`, also not inside a collection (`Set<UUID>` – ArchUnit `aggregatesDoNotExposeUuids`).
 - **Further public methods are queries or commands.** A query starts with `get`, `is` or `has` and may take parameters
   (`isInstructor(CustomerId)`, `getBillableDurationUntil(Instant)`). A command changes the state through the private
   setters and returns the events of the change as `List<SchaffbarEvent>`, created by the EventFactory. A command first
