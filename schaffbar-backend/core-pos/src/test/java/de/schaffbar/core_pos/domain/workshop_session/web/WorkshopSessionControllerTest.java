@@ -97,7 +97,7 @@ class WorkshopSessionControllerTest {
                 .andExpect(jsonPath("$.toolUsageSummaries.length()").value(1)) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].toolId").value(summary.toolId().getValue().toString())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].toolName").value(summary.toolName())) //
-                .andExpect(jsonPath("$.toolUsageSummaries[0].active").value(summary.active())) //
+                .andExpect(jsonPath("$.toolUsageSummaries[0].running").value(summary.running())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].totalDurationInMinutes").value(summary.total().minutes())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].totalUnits").value(summary.total().units())) //
                 .andExpect(jsonPath("$.toolUsageSummaries[0].usages[0].id").value(toolUsage.id().getValue().toString())) //
@@ -235,7 +235,7 @@ class WorkshopSessionControllerTest {
     // when
 
     private ResultActions getOpenWorkshopSession(CustomerId customerId) throws Exception {
-        return this.mockMvc.perform(get("/api/v1/workshop-sessions/{customerId}/active", customerId.getValue()));
+        return this.mockMvc.perform(get("/api/v1/workshop-sessions/{customerId}/open", customerId.getValue()));
     }
 
     private ResultActions closeWorkshopSession(CustomerId customerId) throws Exception {

@@ -31,8 +31,8 @@ public class WorkshopSessionController {
     // ------------------------------------------------------------------------
     // query
 
-    // TODO: REST - remove customerId and active from path, use query parameter instead
-    @GetMapping(value = "{customerId}/active", produces = MediaType.APPLICATION_JSON_VALUE)
+    // the counter knows the person, not the session: the open session of the person (E29)
+    @GetMapping(value = "/{customerId}/open", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<WorkshopSessionApiDto> getOpenWorkshopSession(@PathVariable @NotNull @Valid CustomerId customerId) {
         // without an open session the body is empty
         WorkshopSessionApiDto result = this.workshopSessionReadFacade.getOpenWorkshopSession(customerId) //
@@ -45,7 +45,7 @@ public class WorkshopSessionController {
     // ------------------------------------------------------------------------
     // command
 
-    // TODO: REST - customerId does not fit in RESTful design here, change to sessionId?
+    // closes the open session of the person – like the query, by the person the counter knows
     @PutMapping(value = "/{customerId}/close")
     public ResponseEntity<Void> closeWorkshopSession(@PathVariable @NotNull @Valid CustomerId customerId) {
         this.workshopSessionClose.process(customerId);

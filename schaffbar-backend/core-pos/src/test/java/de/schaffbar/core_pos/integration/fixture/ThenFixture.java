@@ -251,7 +251,7 @@ public final class ThenFixture {
 
     public void expectToolRunning(CustomerId customerId, ToolId toolId) {
         assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
-                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].active".formatted(toolId.getValue())) //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].running".formatted(toolId.getValue())) //
                 .asArray() //
                 .containsExactly(true);
     }
@@ -265,14 +265,14 @@ public final class ThenFixture {
         }
 
         assertThat(result).bodyJson() //
-                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s' && @.active == true)]".formatted(toolId.getValue())) //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s' && @.running == true)]".formatted(toolId.getValue())) //
                 .asArray() //
                 .isEmpty();
     }
 
     public void expectToolStopped(CustomerId customerId, ToolId toolId) {
         assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
-                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].active".formatted(toolId.getValue())) //
+                .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].running".formatted(toolId.getValue())) //
                 .asArray() //
                 .containsExactly(false);
     }

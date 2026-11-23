@@ -104,7 +104,7 @@ class WorkshopSessionReadFacadeTest {
 
         // then
         assertThat(result.orElseThrow().toolUsageSummaries()) //
-                .extracting(ToolUsageSummaryView::toolId, ToolUsageSummaryView::toolName, ToolUsageSummaryView::active, ToolUsageSummaryView::total,
+                .extracting(ToolUsageSummaryView::toolId, ToolUsageSummaryView::toolName, ToolUsageSummaryView::running, ToolUsageSummaryView::total,
                         ToolUsageSummaryView::usages) //
                 .containsExactly( //
                         tuple(drill.id(), drill.name(), false, drillTotal, List.of(drillUsage)), //

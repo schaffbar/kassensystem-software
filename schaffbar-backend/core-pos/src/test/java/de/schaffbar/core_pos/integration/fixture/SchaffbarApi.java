@@ -267,7 +267,7 @@ public final class SchaffbarApi {
     // workshop sessions
 
     public MvcTestResult getOpenWorkshopSession(CustomerId customerId) {
-        return this.mvc.get().uri("/api/v1/workshop-sessions/{customerId}/active", customerId.getValue()).exchange();
+        return this.mvc.get().uri("/api/v1/workshop-sessions/{customerId}/open", customerId.getValue()).exchange();
     }
 
     public MvcTestResult closeWorkshopSession(CustomerId customerId) {

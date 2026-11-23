@@ -30,7 +30,7 @@ public interface OpenWorkshopSessionViews {
     record ToolUsageSummaryView( //
             @Valid @NotNull ToolId toolId, //
             String toolName, // null when the tool was deleted
-            boolean active, //
+            boolean running, //
             @Valid @NotNull BillingTotal total, //
             @NotNull List<@Valid @NotNull ToolUsageView> usages //
     ) {}

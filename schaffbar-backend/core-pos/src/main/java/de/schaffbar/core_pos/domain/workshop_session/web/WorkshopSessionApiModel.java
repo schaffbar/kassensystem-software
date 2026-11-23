@@ -78,7 +78,7 @@ public interface WorkshopSessionApiModel extends ValueObjectMapper {
     record ToolUsageSummaryApiDto( //
             @NotBlank String toolId, //
             String toolName, //
-            boolean active, //
+            boolean running, //
             @PositiveOrZero long totalDurationInMinutes, //
             @PositiveOrZero long totalUnits, //
             @NotNull List<ToolUsageDetailApiDto> usages //

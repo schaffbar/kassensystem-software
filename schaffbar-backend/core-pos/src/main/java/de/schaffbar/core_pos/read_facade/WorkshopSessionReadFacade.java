@@ -87,7 +87,7 @@ public class WorkshopSessionReadFacade {
         return ToolUsageSummaryView.builder() //
                 .toolId(toolId) //
                 .toolName(this.toolService.getTool(toolId).map(ToolView::name).orElse(null)) //
-                .active(usages.stream().anyMatch(usage -> isNull(usage.endTime()))) //
+                .running(usages.stream().anyMatch(usage -> isNull(usage.endTime()))) //
                 .total(total) //
                 .usages(usages) //
                 .build();

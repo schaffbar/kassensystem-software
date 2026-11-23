@@ -237,7 +237,7 @@ public class ViewBuilder {
         return ToolUsageSummaryView.builder() //
                 .toolId(toolId) //
                 .toolName(RandomValues.toolName()) //
-                .active(false) //
+                .running(false) //
                 .total(new BillingTotal(7, 2)) //
                 .usages(List.of(finishedToolUsageView(toolId).build()));
     }
