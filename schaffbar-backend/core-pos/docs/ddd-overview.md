@@ -231,13 +231,3 @@ EventFactory.someEvent(aggregate)
 | RfidTagAssignment | `RFID_TAG_ASSIGNMENT_REQUESTED`, `RFID_TAG_ASSIGNMENT_CANCELLED`, `RFID_TAG_ASSIGNED`, `RFID_TAG_UNASSIGNED`                                                                                                      |
 | WorkshopSession   | `WORKSHOP_SESSION_STARTED`, `WORKSHOP_SESSION_CLOSED`                                                                                                                                                             |
 | WorkshopUsage     | `WORKSHOP_USAGE_ENTERED`, `WORKSHOP_USAGE_LEFT`                                                                                                                                                                   |
-
----
-
-## Appendix: Known TODOs and Open Design Questions
-
-| Location                      | Description                                                                          |
-|-------------------------------|--------------------------------------------------------------------------------------|
-| `WorkshopUsage`               | Consider renaming to `WorkshopSlot` or `UsageSlot`                                   |
-| `*Service.saveOutboxEvents()` | DRY — method is duplicated in all services, extract to base class or utility         |
-| `EventType`                   | Consider renaming `WORKSHOP_USAGE_ENTERED` / `LEFT` to `WORKSHOP_ENTERED` / `EXITED` |

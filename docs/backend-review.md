@@ -418,16 +418,26 @@ Nebenbei: in vier Use-Case-Tests von `tool` fehlte die Abschnittszeile `// then`
 
 ### `workshop_session`
 
-- [ ] E6: `ActiveToolUsageExistsForSessionException` und `ActiveWorkshopUsageExistsForSessionException` → `Running…`,
+Teil (a) erledigt 23.11.2026 (alle Punkte unten), 631 Backend-Tests und `npm run check` grün:
+`CloseWorkshopSessionCommand` (Entscheidung 9) – der Service lädt über die Id, WS-4 prüft nur der Use Case, die
+Absicherung in `close()` mit Kommentar; `close()` über die Setter; `Running…ExistsForSessionException` mit den Codes
+`RUNNING_…_EXISTS_FOR_SESSION` (Übersetzungen im Portal umbenannt); `PUT …/close` antwortet `204` (das Portal erwartet
+`void`); `@Valid` an den Pfadvariablen; README WS-2, WS-4, Befehle, Satz zu WS-6. `ViewBuilder` neu
+`openWorkshopSessionWithUsagesView`, `toolUsageSummaryView`; `ThenFixture.expectNewWorkshopSession`.
+
+- [ ] Teil (b), E6 an der API mit Portal: `GET /workshop-sessions/{customerId}/active` → `…/open` (dazu die zwei TODOs
+  „REST“ im Controller), Feld `active` in `ToolUsageSummaryApiDto` / `ToolUsageSummaryView` → `running`.
+
+- [x] E6: `ActiveToolUsageExistsForSessionException` und `ActiveWorkshopUsageExistsForSessionException` → `Running…`,
   mit ihren Codes und den Übersetzungen im Portal (`shared.errors.…`).
-- [ ] ✔ `WorkshopSession.close()` (`:101-106`) setzt die Felder direkt statt über die Setter.
-- [ ] ✔ `WorkshopSessionController:35, 49`: `@PathVariable` ohne `@Valid`; `:52` `close` antwortet `200` statt `204`.
-- [ ] `WorkshopSessionService:82`: `throwHasAlreadyOpenWorkshopSession` → `throw<Exception>`-Muster.
-- [ ] `closeWorkshopSession` nach der Entscheidung: `CloseWorkshopSessionCommand`, Laden über die Id – damit entfällt
+- [x] ✔ `WorkshopSession.close()` (`:101-106`) setzt die Felder direkt statt über die Setter.
+- [x] ✔ `WorkshopSessionController:35, 49`: `@PathVariable` ohne `@Valid`; `:52` `close` antwortet `200` statt `204`.
+- [x] `WorkshopSessionService:82`: `throwHasAlreadyOpenWorkshopSession` → `throw<Exception>`-Muster.
+- [x] `closeWorkshopSession` nach der Entscheidung: `CloseWorkshopSessionCommand`, Laden über die Id – damit entfällt
   das doppelte Laden und Prüfen (`WorkshopSessionClose:42-44`, `WorkshopSessionService:63-64`); README WS-4 → Use Case,
   WS-2 → Absicherung in der Entity.
-- [ ] `WorkshopSessionApiModel:55-57, 98-100`: leere Abschnitte.
-- [ ] Tests:
+- [x] `WorkshopSessionApiModel:55-57, 98-100`: leere Abschnitte.
+- [x] Tests:
   - `WorkshopSessionServiceTest:136` `expectSavedEvent` ohne Id (`:98` inline).
   - `WorkshopSessionTest:59-62` inline.
   - Controller: `:121` 404 ohne Code; `:182, 186` `OpenWorkshopSessionView.builder()`, `ToolUsageSummaryView.builder()`
