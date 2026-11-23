@@ -27,6 +27,18 @@ final class DeviceMessages {
 
     static final String UNEXPECTED = "Unerwarteter Fehler";
 
+    static final String UNKNOWN_RFID_READER = "RFID Reader nicht erkannt";
+
+    static final String RFID_READER_WITHOUT_TYPE = "Lesegerät ohne Typ";
+
+    static final String WRONG_RFID_READER = "Falsches Lesegerät";
+
+    static final String UNKNOWN_RFID_TAG = "RFID Tag nicht erkannt";
+
+    static final String NO_TOOL = "Kein Werkzeug";
+
+    static final String NO_WLAN_RELAIS = "Kein WLAN-Relais";
+
     // every code a use case behind /device/card and /device/counter can throw – the tests in integration/device/ show each text
     static final Map<String, String> BY_CODE = Map.ofEntries( //
             entry(NoCustomerAssignedException.CODE, "Kein Kunde für RFID Tag"), //
@@ -43,16 +55,7 @@ final class DeviceMessages {
     static String of(RuntimeException e) {
         return switch (e) {
             case BusinessRuleViolationException violation -> BY_CODE.getOrDefault(violation.getCode(), UNEXPECTED);
-            case ResourceNotFoundException notFound -> notFound(notFound.getResource());
-            default -> UNEXPECTED;
-        };
-    }
-
-    private static String notFound(Resource resource) {
-        return switch (resource) {
-            case RFID_READER -> "RFID Reader nicht erkannt";
-            case RFID_TAG -> "RFID Tag nicht erkannt";
-            case CUSTOMER -> "Kunde nicht erkannt";
+            case ResourceNotFoundException notFound when notFound.getResource() == Resource.RFID_TAG -> UNKNOWN_RFID_TAG;
             default -> UNEXPECTED;
         };
     }

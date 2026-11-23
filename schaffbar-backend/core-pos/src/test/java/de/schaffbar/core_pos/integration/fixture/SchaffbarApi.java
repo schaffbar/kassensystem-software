@@ -278,31 +278,44 @@ public final class SchaffbarApi {
     // devices
 
     public MvcTestResult initDevice(MacAddress macAddress) {
+        return initDevice(macAddress.getValue());
+    }
+
+    // a String where a test sends what a device should never send (a broken MAC address)
+    public MvcTestResult initDevice(String macAddress) {
         return this.mvc.post().uri("/device/init") //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("""
                         { "MACADDR": "%s" }
-                        """.formatted(macAddress.getValue())) //
+                        """.formatted(macAddress)) //
                 .exchange();
     }
 
     // the readers at the counter: register a new tag, assign it to the waiting person or show its owner
     public MvcTestResult holdRfidTagToCounterReader(RfidTagId rfidTagId, MacAddress macAddress) {
+        return holdRfidTagToCounterReader(rfidTagId.getValue(), macAddress.getValue());
+    }
+
+    public MvcTestResult holdRfidTagToCounterReader(String rfidTagId, String macAddress) {
         return this.mvc.post().uri("/device/counter") //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("""
                         { "MACADDR": "%s", "RFID": "%s" }
-                        """.formatted(macAddress.getValue(), rfidTagId.getValue())) //
+                        """.formatted(macAddress, rfidTagId)) //
                 .exchange();
     }
 
     // a device always answers 200 – what happened is in the body and in the data
     public MvcTestResult holdRfidTagToReader(RfidTagId rfidTagId, MacAddress macAddress) {
+        return holdRfidTagToReader(rfidTagId.getValue(), macAddress.getValue());
+    }
+
+    public MvcTestResult holdRfidTagToReader(String rfidTagId, String macAddress) {
         return this.mvc.post().uri("/device/card") //
                 .contentType(MediaType.APPLICATION_JSON) //
                 .content("""
                         { "DEVUSECASE": "test", "MACADDR": "%s", "RFID": "%s" }
-                        """.formatted(macAddress.getValue(), rfidTagId.getValue())) //
+                        """.formatted(macAddress, rfidTagId)) //
                 .exchange();
     }
 

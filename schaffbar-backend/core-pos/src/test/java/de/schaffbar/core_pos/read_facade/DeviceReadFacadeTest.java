@@ -1,8 +1,8 @@
 package de.schaffbar.core_pos.read_facade;
 
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
+import static de.schaffbar.core_pos.builder.ViewBuilder.finishedWorkshopUsageView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.openWorkshopSessionView;
-import static de.schaffbar.core_pos.builder.ViewBuilder.rfidReaderView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagAssignmentView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.rfidTagView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.runningWorkshopUsageView;
@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,12 +32,10 @@ import de.schaffbar.core_pos.domain.workshop_session.WorkshopSessionViews.Worksh
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageService;
 import de.schaffbar.core_pos.domain.workshop_usage.WorkshopUsageViews.WorkshopUsageView;
 import de.schaffbar.core_pos.read_facade.DeviceViews.WorkshopStayView;
-import de.schaffbar.core_pos.shared.billing.BillableDuration;
 import de.schaffbar.core_pos.shared.exception.NoCustomerAssignedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidTagAssignmentId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 
@@ -71,48 +68,6 @@ class DeviceReadFacadeTest {
 
     @InjectMocks
     private DeviceReadFacade deviceReadFacade;
-
-    // ------------------------------------------------------------------------
-    // isRfidReaderRegistered
-
-    @Test
-    void isRfidReaderRegistered_knownMacAddress_isTrue() {
-        // given
-        MacAddress macAddress = givenRegisteredReader();
-
-        // when
-        boolean registered = this.deviceReadFacade.isRfidReaderRegistered(macAddress);
-
-        // then
-        assertThat(registered).isTrue();
-    }
-
-    @Test
-    void isRfidReaderRegistered_unknownMacAddress_isFalse() {
-        // given
-        MacAddress unknown = givenUnknownReader();
-
-        // when
-        boolean registered = this.deviceReadFacade.isRfidReaderRegistered(unknown);
-
-        // then
-        assertThat(registered).isFalse();
-    }
-
-    // ------------------------------------------------------------------------
-    // getRfidReader
-
-    @Test
-    void getRfidReader_unknownMacAddress_isNotFound() {
-        // given
-        MacAddress unknown = givenUnknownReader();
-
-        // when
-        Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getRfidReader(unknown));
-
-        // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class).hasFieldOrPropertyWithValue("resource", Resource.RFID_READER);
-    }
 
     // ------------------------------------------------------------------------
     // getCustomer
@@ -158,6 +113,23 @@ class DeviceReadFacadeTest {
                 .hasFieldOrPropertyWithValue("code", NoCustomerAssignedException.CODE);
     }
 
+    @Test
+    void getCustomer_assignedCustomerDoesNotExist_isBrokenData() {
+        // given
+        RfidTagId rfidTagId = givenRegisteredTag();
+        CustomerId deleted = givenNoCustomer();
+        givenAssignment(rfidTagId, deleted);
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getCustomer(rfidTagId));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(IllegalStateException.class) //
+                .hasMessageContaining(rfidTagId.getValue()) //
+                .hasMessageContaining(deleted.getValue().toString());
+    }
+
     // ------------------------------------------------------------------------
     // isRfidTagAssigned
 
@@ -194,14 +166,8 @@ class DeviceReadFacadeTest {
     void getWorkshopStay_countsTheFinishedStaysAndShowsTheLastOne() {
         // given – checked in, out and in again
         WorkshopSessionView session = givenOpenSession();
-        Instant firstEntry = Instant.now().minusSeconds(3600);
-        Instant firstExit = firstEntry.plusSeconds(1500);
-        WorkshopUsageView finished = runningWorkshopUsageView() //
-                .entryTime(firstEntry) //
-                .exitTime(firstExit) //
-                .billableDuration(BillableDuration.between(firstEntry, firstExit)) //
-                .build();
-        WorkshopUsageView running = runningWorkshopUsageView().entryTime(Instant.now().minusSeconds(60)).build();
+        WorkshopUsageView finished = finishedWorkshopUsageView().workshopSessionId(session.id()).build();
+        WorkshopUsageView running = runningWorkshopUsageView().workshopSessionId(session.id()).build();
         givenWorkshopUsages(session, finished, running);
 
         // when
@@ -225,28 +191,36 @@ class DeviceReadFacadeTest {
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
     }
 
+    @Test
+    void getWorkshopStay_sessionWithoutVisit_isABug() {
+        // given – a check-in starts the session together with its first visit
+        WorkshopSessionView session = givenOpenSession();
+        givenWorkshopUsages(session);
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.deviceReadFacade.getWorkshopStay(session.customerId()));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(IllegalStateException.class) //
+                .hasMessageContaining(session.id().getValue().toString());
+    }
+
     // ------------------------------------------------------------------------
     // given
-
-    private MacAddress givenRegisteredReader() {
-        MacAddress macAddress = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(macAddress)).thenReturn(Optional.of(rfidReaderView().macAddress(macAddress).build()));
-
-        return macAddress;
-    }
-
-    private MacAddress givenUnknownReader() {
-        MacAddress unknown = RandomValues.macAddress();
-        when(this.rfidReaderService.getRfidReader(unknown)).thenReturn(Optional.empty());
-
-        return unknown;
-    }
 
     private CustomerView givenCustomer() {
         CustomerView customer = customerView().build();
         when(this.customerService.getCustomer(customer.id())).thenReturn(Optional.of(customer));
 
         return customer;
+    }
+
+    private CustomerId givenNoCustomer() {
+        CustomerId customerId = CustomerId.random();
+        when(this.customerService.getCustomer(customerId)).thenReturn(Optional.empty());
+
+        return customerId;
     }
 
     private RfidTagId givenUnregisteredTag() {

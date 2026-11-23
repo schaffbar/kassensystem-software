@@ -37,15 +37,15 @@
 
 ## Business Rules / Invariants
 
-| #   | Rule                                                                                                                         | Enforced in                                                                                                       |
-|-----|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| R-1 | `macAddress` must be unique across all RFID readers                                                                          | `RfidReaderService.createRfidReader()` (`MacAddressAlreadyUsedException`, `409`), DB unique constraint            |
-| R-2 | `macAddress` must not be blank                                                                                               | `MacAddress` value object, Bean Validation                                                                        |
-| R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it                             | `RfidReaderChangeType` use case                                                                                   |
-| R-5 | An RFID reader that is assigned to a tool cannot be deleted                                                                  | `RfidReaderDelete` use case                                                                                       |
-| R-7 | `macAddress` has the format `34:CD:B0:D3:A9:30` (six hex pairs, colons); lower case is stored upper case                     | `MacAddress` value object (`400`)                                                                                 |
-| R-8 | A switch box starts only with a tool assigned to it; holding a tag to it without a tool is refused                           | `DeviceController` – `/device/init` answers `STATE: ERROR` "Kein Werkzeug", `/device/card` "Kein Werkzeug"        |
-| R-9 | An unknown reader registers itself at its first start – without a type, so it does not start until it gets one in the portal | `DeviceController` – `/device/init` creates it via `RfidReaderCreate` and answers `STATE: ERROR` "Nicht Gefunden" |
+| #   | Rule                                                                                                                         | Enforced in                                                                                                           |
+|-----|------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| R-1 | `macAddress` must be unique across all RFID readers                                                                          | `RfidReaderService.createRfidReader()` (`MacAddressAlreadyUsedException`, `409`), DB unique constraint                |
+| R-2 | `macAddress` must not be blank                                                                                               | `MacAddress` value object, Bean Validation                                                                            |
+| R-3 | The type of an RFID reader of type `SWITCH_BOX` cannot be changed while a tool is assigned to it                             | `RfidReaderChangeType` use case                                                                                       |
+| R-5 | An RFID reader that is assigned to a tool cannot be deleted                                                                  | `RfidReaderDelete` use case                                                                                           |
+| R-7 | `macAddress` has the format `34:CD:B0:D3:A9:30` (six hex pairs, colons); lower case is stored upper case                     | `MacAddress` value object (`400`)                                                                                     |
+| R-8 | A switch box starts only with a tool assigned to it; holding a tag to it without a tool is refused                           | `DeviceController` – `/device/init` answers `STATE: ERROR` "Kein Werkzeug", `/device/card` "Kein Werkzeug"            |
+| R-9 | An unknown reader registers itself at its first start – without a type, so it does not start until it gets one in the portal | `DeviceController` – `/device/init` creates it via `RfidReaderCreate` and answers `STATE: ERROR` "Lesegerät ohne Typ" |
 
 ## Open Rules
 

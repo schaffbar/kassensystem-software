@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import de.schaffbar.core_pos.shared.id.CustomerId;
-import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
@@ -44,11 +43,6 @@ public class ResourceNotFoundException extends RuntimeException {
 
     public static ResourceNotFoundException rfidReader(RfidReaderId id) {
         return new ResourceNotFoundException(Resource.RFID_READER, id.getValue().toString());
-    }
-
-    // TODO: Consider using a more specific exception for RFID reader MAC address not found
-    public static ResourceNotFoundException rfidReader(MacAddress macAddress) {
-        return new ResourceNotFoundException(Resource.RFID_READER, macAddress.getValue());
     }
 
     public static ResourceNotFoundException rfidTag(RfidTagId id) {

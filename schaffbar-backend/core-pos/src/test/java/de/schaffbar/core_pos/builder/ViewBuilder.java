@@ -195,6 +195,20 @@ public class ViewBuilder {
                 .entryTime(Instant.now().minusSeconds(3600));
     }
 
+    // ended before runningWorkshopUsageView() starts – a session with both shows the running one as the last visit
+    public static WorkshopUsageViewBuilder finishedWorkshopUsageView() {
+        Instant entryTime = Instant.now().minusSeconds(7200);
+        Instant exitTime = entryTime.plusSeconds(1500);
+
+        return WorkshopUsageView.builder() //
+                .id(WorkshopUsageId.random()) //
+                .customerId(CustomerId.random()) //
+                .workshopSessionId(WorkshopSessionId.random()) //
+                .entryTime(entryTime) //
+                .exitTime(exitTime) //
+                .billableDuration(BillableDuration.between(entryTime, exitTime));
+    }
+
     // ------------------------------------------------------------------------
     // tool usage
 

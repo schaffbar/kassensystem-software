@@ -96,6 +96,28 @@ class RfidTagRegisterAcceptanceTest {
                 """);
     }
 
+    @Test
+    void counter_blankTag_answersUnexpectedError() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        this.fixture.given().rfidReader(scenario.macAddress(), RFID_TAG_REGISTER);
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToCounterReader("", scenario.macAddress().getValue());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "A",
+                    "STATE": "END",
+                    "ERROR": "Unerwarteter Fehler",
+                    "ICON": null,
+                    "CUSTOMERNAME": "Error"
+                }
+                """);
+    }
+
     // ------------------------------------------------------------------------
     // card
 

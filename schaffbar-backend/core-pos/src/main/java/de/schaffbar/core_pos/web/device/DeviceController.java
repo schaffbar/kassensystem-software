@@ -2,8 +2,6 @@ package de.schaffbar.core_pos.web.device;
 
 import static java.util.Objects.isNull;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,19 +57,15 @@ public class DeviceController {
 
     private final @NonNull DeviceReadFacade deviceReadFacade;
 
+    // ------------------------------------------------------------------------
+    // command
 
     @PostMapping(value = "/init", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InitResponse> init(@RequestBody @NotNull @Valid InitRequestBody requestBody) {
+    public ResponseEntity<InitResponse> init(@RequestBody InitRequestBody requestBody) {
         log.info("Init RFID reader. Received mac address: {}", requestBody.MACADDR());
 
         try {
-            RfidReaderView rfidReader = getOrRegisterRfidReader(MacAddress.of(requestBody.MACADDR()));
-
-            InitResponse response = switch (rfidReader.type()) {
-                case SWITCH_BOX -> startSwitchBox(rfidReader);
-                case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER, GATE_KEEPER_IN, GATE_KEEPER_OUT -> InitResponse.start(rfidReader.type());
-                case null -> InitResponse.errorWithoutType("Nicht Gefunden");
-            };
+            InitResponse response = initRfidReader(MacAddress.of(requestBody.MACADDR()));
 
             log.info("RFID reader init response: {}", response);
             return ResponseEntity.ok(response);
@@ -83,24 +77,28 @@ public class DeviceController {
     }
 
     @PostMapping(value = "/counter", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CounterResponse> counter(@RequestBody @NotNull @Valid RfidTagRequestBody requestBody) {
-        RfidTagId rfidTagId = RfidTagId.of(requestBody.RFID());
+    public ResponseEntity<CounterResponse> counter(@RequestBody RfidTagRequestBody requestBody) {
         RfidReaderView rfidReader;
 
         try {
-            rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR()));
+            rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR())).orElse(null);
         }
-        catch (ResourceNotFoundException e) {
-            log.error("Not recognized at the counter: {}", e.getMessage());
-            return ResponseEntity.ok(CounterResponse.unexpectedRfidReaderType(DeviceMessages.of(e)));
+        catch (RuntimeException e) {
+            log.error("Unexpected error at RFID reader [mac address: {}]", requestBody.MACADDR(), e);
+            return ResponseEntity.ok(CounterResponse.errorWithoutUseCase(DeviceMessages.UNEXPECTED));
+        }
+
+        if (isNull(rfidReader)) {
+            log.info("Refused unknown RFID reader [mac address: {}]", requestBody.MACADDR());
+            return ResponseEntity.ok(CounterResponse.errorWithoutUseCase(DeviceMessages.UNKNOWN_RFID_READER));
         }
 
         try {
             CounterResponse response = switch (rfidReader.type()) {
-                case RFID_TAG_REGISTER -> registerRfidTag(rfidTagId);
-                case RFID_TAG_ASSIGNER -> assignRfidTagOrShowOwner(rfidTagId);
-                case GATE_KEEPER_IN, GATE_KEEPER_OUT, SWITCH_BOX -> CounterResponse.unexpectedRfidReaderType("Falsches Lesegerät");
-                case null -> CounterResponse.unexpectedRfidReaderType("Lesegerät ohne Typ");
+                case RFID_TAG_REGISTER -> registerRfidTag(RfidTagId.of(requestBody.RFID()));
+                case RFID_TAG_ASSIGNER -> assignRfidTagOrShowOwner(RfidTagId.of(requestBody.RFID()));
+                case GATE_KEEPER_IN, GATE_KEEPER_OUT, SWITCH_BOX -> CounterResponse.errorWithoutUseCase(DeviceMessages.WRONG_RFID_READER);
+                case null -> CounterResponse.errorWithoutUseCase(DeviceMessages.RFID_READER_WITHOUT_TYPE);
             };
 
             return ResponseEntity.ok(response);
@@ -116,18 +114,27 @@ public class DeviceController {
     }
 
     @PostMapping(value = "/card", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DeviceCardResponse> card(@RequestBody @NotNull @Valid DeviceCardRequestBody requestBody) {
+    public ResponseEntity<DeviceCardResponse> card(@RequestBody DeviceCardRequestBody requestBody) {
         String devUseCase = requestBody.DEVUSECASE();
         RfidReaderView rfidReader;
         CustomerView customer;
 
         try {
-            rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR()));
+            rfidReader = this.deviceReadFacade.getRfidReader(MacAddress.of(requestBody.MACADDR())).orElse(null);
+            if (isNull(rfidReader)) {
+                log.info("Refused unknown RFID reader [mac address: {}]", requestBody.MACADDR());
+                return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.UNKNOWN_RFID_READER, devUseCase));
+            }
+
             customer = this.deviceReadFacade.getCustomer(RfidTagId.of(requestBody.RFID()));
         }
         catch (ResourceNotFoundException | BusinessRuleViolationException e) {
-            log.error("Not recognized at the reader: {}", e.getMessage());
+            log.info("Not recognized at RFID reader [mac address: {}]: {}", requestBody.MACADDR(), e.getMessage());
             return ResponseEntity.ok(DeviceCardResponse.errorNoUserRecognized(DeviceMessages.of(e), devUseCase));
+        }
+        catch (RuntimeException e) {
+            log.error("Unexpected error at RFID reader [mac address: {}]", requestBody.MACADDR(), e);
+            return ResponseEntity.ok(DeviceCardResponse.errorUnexpected(DeviceMessages.UNEXPECTED, devUseCase));
         }
 
         try {
@@ -135,8 +142,8 @@ public class DeviceController {
                 case GATE_KEEPER_IN -> checkIn(customer);
                 case GATE_KEEPER_OUT -> checkOut(customer);
                 case SWITCH_BOX -> switchTool(customer, rfidReader, devUseCase);
-                case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER -> DeviceCardResponse.errorUnexpected("Falsches Lesegerät", devUseCase);
-                case null -> DeviceCardResponse.errorUnexpected("Lesegerät ohne Typ", devUseCase);
+                case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER -> DeviceCardResponse.errorUnexpected(DeviceMessages.WRONG_RFID_READER, devUseCase);
+                case null -> DeviceCardResponse.errorUnexpected(DeviceMessages.RFID_READER_WITHOUT_TYPE, devUseCase);
             };
 
             return ResponseEntity.ok(response);
@@ -154,24 +161,30 @@ public class DeviceController {
     // ------------------------------------------------------------------------
     // helper
 
-    // R-9 – an unknown reader registers itself, without type, until it gets one in the portal
-    private RfidReaderView getOrRegisterRfidReader(MacAddress macAddress) {
-        if (!this.deviceReadFacade.isRfidReaderRegistered(macAddress)) {
+    private InitResponse initRfidReader(MacAddress macAddress) {
+        RfidReaderView rfidReader = this.deviceReadFacade.getRfidReader(macAddress).orElse(null);
+        if (isNull(rfidReader)) {
+            // R-9 – an unknown reader registers itself, without type, until it gets one in the portal
             this.rfidReaderCreate.process(macAddress);
+            return InitResponse.errorWithoutType(DeviceMessages.RFID_READER_WITHOUT_TYPE);
         }
 
-        return this.deviceReadFacade.getRfidReader(macAddress);
+        return switch (rfidReader.type()) {
+            case SWITCH_BOX -> startSwitchBox(rfidReader);
+            case RFID_TAG_REGISTER, RFID_TAG_ASSIGNER, GATE_KEEPER_IN, GATE_KEEPER_OUT -> InitResponse.start(rfidReader.type());
+            case null -> InitResponse.errorWithoutType(DeviceMessages.RFID_READER_WITHOUT_TYPE);
+        };
     }
 
     // a switch box only starts with a tool (R-8) that has a WLAN relais (T-23)
     private InitResponse startSwitchBox(RfidReaderView switchBox) {
         ToolView tool = this.deviceReadFacade.getTool(switchBox.id()).orElse(null);
         if (isNull(tool)) {
-            return InitResponse.error(RfidReaderType.SWITCH_BOX, "Kein Werkzeug");
+            return InitResponse.error(RfidReaderType.SWITCH_BOX, DeviceMessages.NO_TOOL);
         }
         // the API sets type and IP address together (T-5), old data may have only one of them
         if (isNull(tool.wlanRelaisType()) || isNull(tool.ipAddress())) {
-            return InitResponse.error(RfidReaderType.SWITCH_BOX, "Kein WLAN-Relais");
+            return InitResponse.error(RfidReaderType.SWITCH_BOX, DeviceMessages.NO_WLAN_RELAIS);
         }
 
         return InitResponse.startSwitchBox(tool.ipAddress(), tool.wlanRelaisType());
@@ -197,30 +210,30 @@ public class DeviceController {
         this.workshopUsageStart.process(customer.id());
 
         WorkshopStayView stay = this.deviceReadFacade.getWorkshopStay(customer.id());
-        return DeviceCardResponse.enterOk(RfidReaderType.GATE_KEEPER_IN, customer.getFullName(), stay.finishedUnits(), stay.entryTime());
+        return DeviceCardResponse.enterOk(customer.getFullName(), stay.finishedUnits(), stay.entryTime());
     }
 
     private DeviceCardResponse checkOut(CustomerView customer) {
         this.workshopUsageStop.process(customer.id());
 
         WorkshopStayView stay = this.deviceReadFacade.getWorkshopStay(customer.id());
-        return DeviceCardResponse.leaveOk(RfidReaderType.GATE_KEEPER_OUT, customer.getFullName(), stay.finishedUnits(), stay.entryTime(),
-                stay.exitTime());
+        return DeviceCardResponse.leaveOk(customer.getFullName(), stay.finishedUnits(), stay.entryTime(), stay.exitTime());
     }
 
     private DeviceCardResponse switchTool(CustomerView customer, RfidReaderView switchBox, String devUseCase) {
         ToolView tool = this.deviceReadFacade.getTool(switchBox.id()).orElse(null);
         if (isNull(tool)) {
             // R-8 – the tool was taken from the switch box after it started
-            log.error("No tool assigned to switch box [id: {}]", switchBox.id());
-            return DeviceCardResponse.errorNoAccess("Kein Werkzeug", customer.getFullName(), devUseCase);
+            log.info("Refused at switch box [id: {}]: no tool assigned", switchBox.id());
+            return DeviceCardResponse.errorNoAccess(DeviceMessages.NO_TOOL, customer.getFullName(), devUseCase);
         }
 
         this.toolUsageToggle.process(customer.id(), tool.id());
 
+        // a use case returns no result – the state after the toggle says whether it switched the tool on or off
         return this.deviceReadFacade.isToolInUse(customer.id(), tool.id()) //
-                ? DeviceCardResponse.startToolUsage(RfidReaderType.SWITCH_BOX, customer.getFullName(), tool.name()) //
-                : DeviceCardResponse.stopToolUsage(RfidReaderType.SWITCH_BOX, customer.getFullName(), tool.name());
+                ? DeviceCardResponse.startToolUsage(customer.getFullName(), tool.name()) //
+                : DeviceCardResponse.stopToolUsage(customer.getFullName(), tool.name());
     }
 
 }

@@ -30,7 +30,7 @@ class UnconfiguredReaderAcceptanceTest {
                     "STATE": "ERROR",
                     "DEVNAME": "ERROR",
                     "DEVUSECASE": "ERROR",
-                    "ERROR": "Nicht Gefunden",
+                    "ERROR": "Lesegerät ohne Typ",
                     "STARTHTTP": "",
                     "DEVIP": "",
                     "SWITCHON": "",
@@ -99,7 +99,7 @@ class UnconfiguredReaderAcceptanceTest {
                     "STATE": "ERROR",
                     "DEVNAME": "ERROR",
                     "DEVUSECASE": "ERROR",
-                    "ERROR": "Nicht Gefunden",
+                    "ERROR": "Lesegerät ohne Typ",
                     "STARTHTTP": "",
                     "DEVIP": "",
                     "SWITCHON": "",
@@ -150,6 +150,78 @@ class UnconfiguredReaderAcceptanceTest {
                     "DEVUSECASE": "test",
                     "STATE": "END",
                     "ERROR": "Lesegerät ohne Typ",
+                    "ICON": "NOREG",
+                    "CUSTOMERNAME": null,
+                    "UNITS": "0"
+                }
+                """);
+    }
+
+    // ------------------------------------------------------------------------
+    // broken request – the device gets its answer, never Spring's error page
+
+    @Test
+    void init_brokenMacAddress_answersUnexpectedError() {
+        // given – dashes instead of colons (R-7)
+        String brokenMacAddress = "34-CD-B0-D3-A9-30";
+
+        // when
+        MvcTestResult result = this.fixture.api().initDevice(brokenMacAddress);
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "STATE": "ERROR",
+                    "DEVNAME": "ERROR",
+                    "DEVUSECASE": "ERROR",
+                    "ERROR": "Unerwarteter Fehler",
+                    "STARTHTTP": "",
+                    "DEVIP": "",
+                    "SWITCHON": "",
+                    "SWITCHOFF": "",
+                    "TERMINAL": ""
+                }
+                """);
+    }
+
+    @Test
+    void counter_brokenMacAddress_answersUnexpectedError() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given – dashes instead of colons (R-7)
+        String brokenMacAddress = "34-CD-B0-D3-A9-30";
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToCounterReader(scenario.rfidTagId().getValue(), brokenMacAddress);
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "",
+                    "STATE": "END",
+                    "ERROR": "Unerwarteter Fehler",
+                    "ICON": null,
+                    "CUSTOMERNAME": "Error"
+                }
+                """);
+    }
+
+    @Test
+    void card_brokenMacAddress_answersUnexpectedError() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given – dashes instead of colons (R-7)
+        String brokenMacAddress = "34-CD-B0-D3-A9-30";
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId().getValue(), brokenMacAddress);
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "test",
+                    "STATE": "END",
+                    "ERROR": "Unerwarteter Fehler",
                     "ICON": "NOREG",
                     "CUSTOMERNAME": null,
                     "UNITS": "0"

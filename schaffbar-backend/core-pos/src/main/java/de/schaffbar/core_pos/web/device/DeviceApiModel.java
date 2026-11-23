@@ -148,7 +148,8 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static CounterResponse unexpectedRfidReaderType(String message) {
+        // a reader that is unknown, has no type or does not belong to the counter
+        public static CounterResponse errorWithoutUseCase(String message) {
             return CounterResponse.builder() //
                     .DEVUSECASE("") //
                     .STATE("END") //
@@ -170,12 +171,12 @@ public interface DeviceApiModel {
             String UNITS  //
     ) {
 
-        public static DeviceCardResponse enterOk(RfidReaderType type, String customerName, long totalUnits, Instant lastEntryTime) {
+        public static DeviceCardResponse enterOk(String customerName, long totalUnits, Instant lastEntryTime) {
             LocalTime time = lastEntryTime.atZone(ZoneId.systemDefault()).toLocalTime();
             String entryTime = time.format(DateTimeFormatter.ofPattern("HH:mm"));
 
             return DeviceCardResponse.builder() //
-                    .DEVUSECASE(type.getKey()) //
+                    .DEVUSECASE(RfidReaderType.GATE_KEEPER_IN.getKey()) //
                     .ICON("HI") //
                     .ERROR("") //
                     .STATE("END") //
@@ -185,7 +186,7 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static DeviceCardResponse leaveOk(RfidReaderType type, String customerName, long totalUnits, Instant lastEntryTime, Instant lastExitTime) {
+        public static DeviceCardResponse leaveOk(String customerName, long totalUnits, Instant lastEntryTime, Instant lastExitTime) {
             LocalTime entryTime = lastEntryTime.atZone(ZoneId.systemDefault()).toLocalTime();
             String entryTimeString = entryTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
@@ -193,7 +194,7 @@ public interface DeviceApiModel {
             String exitTimeString = exitTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
             return DeviceCardResponse.builder() //
-                    .DEVUSECASE(type.getKey()) //
+                    .DEVUSECASE(RfidReaderType.GATE_KEEPER_OUT.getKey()) //
                     .ICON("BYE") //
                     .ERROR("") //
                     .STATE("END") //
@@ -203,9 +204,9 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static DeviceCardResponse startToolUsage(RfidReaderType type, String customerName, String toolName) {
+        public static DeviceCardResponse startToolUsage(String customerName, String toolName) {
             return DeviceCardResponse.builder() //
-                    .DEVUSECASE(type.getKey()) //
+                    .DEVUSECASE(RfidReaderType.SWITCH_BOX.getKey()) //
                     .ICON("") //
                     .ERROR("") //
                     .STATE("WORKING") //
@@ -215,9 +216,9 @@ public interface DeviceApiModel {
                     .build();
         }
 
-        public static DeviceCardResponse stopToolUsage(RfidReaderType type, String customerName, String toolName) {
+        public static DeviceCardResponse stopToolUsage(String customerName, String toolName) {
             return DeviceCardResponse.builder() //
-                    .DEVUSECASE(type.getKey()) //
+                    .DEVUSECASE(RfidReaderType.SWITCH_BOX.getKey()) //
                     .ICON("BYE") //
                     .ERROR("") //
                     .STATE("END") //
@@ -263,18 +264,15 @@ public interface DeviceApiModel {
     // ------------------------------------------------------------------------
     // request body
 
-    @Builder(access = AccessLevel.PRIVATE)
     record InitRequestBody( //
             String MACADDR //
     ) {}
 
-    @Builder(access = AccessLevel.PRIVATE)
     record RfidTagRequestBody( //
             String MACADDR, //
             String RFID //
     ) {}
 
-    @Builder(access = AccessLevel.PRIVATE)
     record DeviceCardRequestBody( //
             String DEVUSECASE, //
             String MACADDR, //

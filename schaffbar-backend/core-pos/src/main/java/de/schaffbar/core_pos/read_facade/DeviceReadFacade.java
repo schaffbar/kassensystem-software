@@ -60,14 +60,8 @@ public class DeviceReadFacade {
     private final @NonNull WorkshopUsageService workshopUsageService;
 
     @Query
-    public boolean isRfidReaderRegistered(@NotNull @Valid MacAddress macAddress) {
-        return this.rfidReaderService.getRfidReader(macAddress).isPresent();
-    }
-
-    @Query
-    public RfidReaderView getRfidReader(@NotNull @Valid MacAddress macAddress) {
-        return this.rfidReaderService.getRfidReader(macAddress) //
-                .orElseThrow(() -> ResourceNotFoundException.rfidReader(macAddress));
+    public Optional<RfidReaderView> getRfidReader(@NotNull @Valid MacAddress macAddress) {
+        return this.rfidReaderService.getRfidReader(macAddress);
     }
 
     // the person a tag held to a reader belongs to
@@ -80,8 +74,10 @@ public class DeviceReadFacade {
                 .map(RfidTagAssignmentView::customerId) //
                 .orElseThrow(() -> new NoCustomerAssignedException(rfidTagId));
 
+        // deleting a customer frees the tag (C-4) – an assignment without its customer is broken data
         return this.customerService.getCustomer(customerId) //
-                .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
+                .orElseThrow(() -> new IllegalStateException(
+                        "RFID tag [id: " + rfidTagId.getValue() + "] is assigned to customer [id: " + customerId.getValue() + "], who does not exist"));
     }
 
     @Query

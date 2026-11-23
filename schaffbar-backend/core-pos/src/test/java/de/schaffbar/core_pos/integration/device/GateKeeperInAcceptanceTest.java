@@ -189,6 +189,29 @@ class GateKeeperInAcceptanceTest {
                 """);
     }
 
+    @Test
+    void card_blankTag_answersUnexpectedError() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        this.fixture.given().rfidReader(scenario.macAddress(), GATE_KEEPER_IN);
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader("", scenario.macAddress().getValue());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "test",
+                    "STATE": "END",
+                    "ERROR": "Unerwarteter Fehler",
+                    "ICON": "NOREG",
+                    "CUSTOMERNAME": null,
+                    "UNITS": "0"
+                }
+                """);
+    }
+
     // ------------------------------------------------------------------------
     // counter
 
