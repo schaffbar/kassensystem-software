@@ -367,13 +367,21 @@ für pause, reactivate, revoke, delete bei anderem Werkzeug), neu `card_redToolW
 
 ### `tool_usage`
 
-- [ ] E6 nach der Entscheidung (`ToolUsageService:55, 62, 68, 82`, `ToolUsageRepository:28`, Meldung von
+Erledigt 23.11.2026 (alle Punkte unten), 628 Tests grün. E6 im Aggregat: `getRunningToolUsage(s)`,
+`hasRunningToolUsage`, Meldungen, `ViewBuilder.runningToolUsageView`; die öffentlichen Namen des Dashboards
+(`getActiveToolUsages`, Pfade, `Active…View`/`…ApiDto`) bleiben für Abschnitt 4, `ActiveToolUsageExistsForSessionException`
+mit ihrem Code für `workshop_session` (beide mit Portal). `getDuration()` und TU-7 gelöscht; `ensureStopped` mit WS-5;
+Absicherung in `ToolUsage.stop()` mit Kommentar (E29). Gerätetests: An/Aus getrennt, nach jeder Ablehnung „Werkzeug
+läuft nicht“ (`ThenFixture.expectToolNotRunningFor`), Regel-Ids als Kommentar, neu RED mit Einweisung; README sagt,
+wo TU-3, TU-8, TU-12 bewiesen sind.
+
+- [x] E6 nach der Entscheidung (`ToolUsageService:55, 62, 68, 82`, `ToolUsageRepository:28`, Meldung von
   `ToolNotInUseByCustomerException`).
-- [ ] `ToolUsage.getDuration()` (`:92-98`) nur von Tests genutzt, README TU-7 – löschen.
-- [ ] `ToolUsage.java:121-122`: leerer Abschnitt `// helper`.
-- [ ] Guard in `getFinalBillableDuration` (`ToolUsageService:86, 163`) → `ensure…` mit Kommentar, wer vorher prüft
+- [x] `ToolUsage.getDuration()` (`:92-98`) nur von Tests genutzt, README TU-7 – löschen.
+- [x] `ToolUsage.java:121-122`: leerer Abschnitt `// helper`.
+- [x] Guard in `getFinalBillableDuration` (`ToolUsageService:86, 163`) → `ensure…` mit Kommentar, wer vorher prüft
   (`WorkshopSessionClose`).
-- [ ] Tests:
+- [x] Tests:
   - `ToolUsageServiceTest:302` `expectSavedEvent` ohne Id; `:126-144` Payload ohne id; fehlt: `getBillingTotalUntil`.
   - `ToolUsageTest:57-60`: Event-Prüfung inline statt `expectSingleEvent`.
   - `ToolUsageStartTest`: `new StartToolUsageCommand` (`:66, 81`), Verifikation doppelt; `:129, 142` ohne `resource`.
@@ -384,15 +392,23 @@ für pause, reactivate, revoke, delete bei anderem Werkzeug), neu `card_redToolW
 
 ### `workshop_usage`
 
-- [ ] E6 nach der Entscheidung (`WorkshopUsageService:44, 60, 66`, `WorkshopUsageRepository:21`).
-- [ ] `WorkshopUsage.exit()` → `stop()` (Entscheidung oben), mit Tests und Kommentar an der Absicherung (E29).
-- [ ] TODO `WorkshopSlot` (`WorkshopUsage.java:35`, README `:7`) und `EventType:73` widersprechen der Entscheidung, nicht
+Erledigt 23.11.2026 (alle Punkte unten), 629 Backend-Tests und `npm run check` grün. E6: `getRunningWorkshopUsage(s)`,
+`hasRunningWorkshopUsage`, `NoRunningWorkshopUsageFoundException` mit Code `NO_RUNNING_WORKSHOP_USAGE_FOUND` (Übersetzung
+im Portal umbenannt), `ViewBuilder.runningWorkshopUsageView`; `exit()` → `stop()`; README neu WU-9 (Auschecken braucht
+eine offene Sitzung), WU-8 korrigiert, WU-3 gelöscht; die veralteten TODOs auch aus dem Anhang von `ddd-overview.md` /
+`ddd-uebersicht.md` entfernt (der ganze Anhang war erledigt). Gerätetests: Prüfungen in `ThenFixture`
+(`expectEntryTimeShown`, `expectEntryAndExitTimeShown`, `expectVisits`), Namen mit Situation, Regel-Ids als Kommentar.
+Nebenbei: in vier Use-Case-Tests von `tool` fehlte die Abschnittszeile `// then` – ergänzt.
+
+- [x] E6 nach der Entscheidung (`WorkshopUsageService:44, 60, 66`, `WorkshopUsageRepository:21`).
+- [x] `WorkshopUsage.exit()` → `stop()` (Entscheidung oben), mit Tests und Kommentar an der Absicherung (E29).
+- [x] TODO `WorkshopSlot` (`WorkshopUsage.java:35`, README `:7`) und `EventType:73` widersprechen der Entscheidung, nicht
   umzubenennen – entfernen.
-- [ ] `WorkshopUsage.getDuration()` (`:82-88`) nur von Tests genutzt, README WU-3 – löschen.
-- [ ] Guard in `getFinalBillableDuration` (`WorkshopUsageService:70, 121`) → `ensure…`.
-- [ ] README: Regel „Auschecken ohne offene Sitzung“ fehlt (`WorkshopUsageStop:47-51`); WU-8 sagt `STATE: ERROR`, das
+- [x] `WorkshopUsage.getDuration()` (`:82-88`) nur von Tests genutzt, README WU-3 – löschen.
+- [x] Guard in `getFinalBillableDuration` (`WorkshopUsageService:70, 121`) → `ensure…`.
+- [x] README: Regel „Auschecken ohne offene Sitzung“ fehlt (`WorkshopUsageStop:47-51`); WU-8 sagt `STATE: ERROR`, das
   Gerät bekommt `STATE: END` mit Text in `ERROR`.
-- [ ] Tests:
+- [x] Tests:
   - `WorkshopUsageServiceTest:208` `expectSavedEvent` ohne Id (`:155` umgeht es inline); `:108-123` Payload ohne id.
   - `WorkshopUsageTest:57-60` inline.
   - `WorkshopUsageStartTest:56-58, 70-71`, `WorkshopUsageStopTest:55-57` inline; `:83` / `:84` ohne `resource`.
@@ -402,6 +418,8 @@ für pause, reactivate, revoke, delete bei anderem Werkzeug), neu `card_redToolW
 
 ### `workshop_session`
 
+- [ ] E6: `ActiveToolUsageExistsForSessionException` und `ActiveWorkshopUsageExistsForSessionException` → `Running…`,
+  mit ihren Codes und den Übersetzungen im Portal (`shared.errors.…`).
 - [ ] ✔ `WorkshopSession.close()` (`:101-106`) setzt die Felder direkt statt über die Setter.
 - [ ] ✔ `WorkshopSessionController:35, 49`: `@PathVariable` ohne `@Valid`; `:52` `close` antwortet `200` statt `204`.
 - [ ] `WorkshopSessionService:82`: `throwHasAlreadyOpenWorkshopSession` → `throw<Exception>`-Muster.
