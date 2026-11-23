@@ -145,7 +145,9 @@ core_pos/
   what the device shows (`/device/card` checks in and returns the stay); request and response fields carry the
   firmware's names as `String` (`RFID`, `MACADDR`), converted to value objects in the controller; responses are
   `*Response` records, not `…ApiDto`; a refusal is a `200` with a text from `DeviceMessages`, not a `ProblemDetail` –
-  so `web/device/` is not in `ApiExceptionHandler`. Its logic still lives in use cases and the `DeviceReadFacade`.
+  so `web/device/` is not in `ApiExceptionHandler`; an unexpected error or a broken request (a MAC address the value
+  object rejects) gets the same answer with `DeviceMessages.UNEXPECTED`, never Spring's `500`. Its logic still lives
+  in use cases and the `DeviceReadFacade`.
 
 ## Code
 
