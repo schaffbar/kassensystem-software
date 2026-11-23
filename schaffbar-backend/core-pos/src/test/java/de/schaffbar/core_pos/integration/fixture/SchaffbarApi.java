@@ -3,7 +3,7 @@ package de.schaffbar.core_pos.integration.fixture;
 import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
 
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -239,7 +239,9 @@ public final class SchaffbarApi {
     public MvcTestResult certifyCustomers(List<CustomerId> customerIds, ToolId toolId, CustomerId certifiedBy) {
         return this.mvc.post().uri("/api/v1/tool-certifications/batch") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(Json.write(Map.of("customerIds", customerIds, "toolId", toolId, "certifiedBy", certifiedBy))) //
+                .content("""
+                        { "customerIds": [%s], "toolId": "%s", "certifiedBy": "%s" }
+                        """.formatted(quoted(customerIds), toolId.getValue(), certifiedBy.getValue())) //
                 .exchange();
     }
 
@@ -317,6 +319,15 @@ public final class SchaffbarApi {
                         { "DEVUSECASE": "test", "MACADDR": "%s", "RFID": "%s" }
                         """.formatted(macAddress, rfidTagId)) //
                 .exchange();
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static String quoted(List<CustomerId> customerIds) {
+        return customerIds.stream() //
+                .map(customerId -> "\"" + customerId.getValue() + "\"") //
+                .collect(Collectors.joining(", "));
     }
 
 }

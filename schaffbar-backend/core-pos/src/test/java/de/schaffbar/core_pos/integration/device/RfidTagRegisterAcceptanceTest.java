@@ -20,7 +20,7 @@ class RfidTagRegisterAcceptanceTest {
     // init
 
     @Test
-    void init_startsWithoutRelay() {
+    void init_registeredReader_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -122,7 +122,7 @@ class RfidTagRegisterAcceptanceTest {
     // card
 
     @Test
-    void card_isTheWrongReader() {
+    void card_anyTag_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given

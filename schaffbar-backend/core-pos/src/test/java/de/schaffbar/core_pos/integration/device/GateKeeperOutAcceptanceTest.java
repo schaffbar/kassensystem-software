@@ -26,7 +26,7 @@ class GateKeeperOutAcceptanceTest {
     // init
 
     @Test
-    void init_registeredGateKeeper_startsWithoutRelay() {
+    void init_registeredReader_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -74,7 +74,7 @@ class GateKeeperOutAcceptanceTest {
                     "ICON": "BYE",
                     "CUSTOMERNAME": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
 
         this.fixture.then().expectEntryAndExitTimeShown(result);
         this.fixture.then().expectCheckedOut(customerId);
@@ -106,7 +106,7 @@ class GateKeeperOutAcceptanceTest {
                     "ICON": "BYE",
                     "CUSTOMERNAME": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
 
         this.fixture.then().expectToolStopped(customerId, toolId);
         this.fixture.then().expectCheckedOut(customerId);
@@ -135,7 +135,7 @@ class GateKeeperOutAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
     }
 
     // WU-2
@@ -161,7 +161,7 @@ class GateKeeperOutAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
     }
 
     @Test

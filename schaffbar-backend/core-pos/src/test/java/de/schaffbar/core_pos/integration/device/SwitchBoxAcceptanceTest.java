@@ -161,7 +161,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERSTARTSTOP": "%s",
                     "UNITS": ""
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+                """.formatted(this.fixture.fullNameOf(customerId), scenario.toolName()));
         this.fixture.then().expectToolRunning(customerId, toolId);
     }
 
@@ -190,7 +190,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERSTARTSTOP": "%s",
                     "UNITS": ""
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+                """.formatted(this.fixture.fullNameOf(customerId), scenario.toolName()));
         this.fixture.then().expectToolStopped(customerId, toolId);
     }
 
@@ -220,7 +220,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERSTARTSTOP": "%s",
                     "UNITS": ""
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.toolName()));
+                """.formatted(this.fixture.fullNameOf(customerId), scenario.toolName()));
         this.fixture.then().expectToolRunning(customerId, toolId);
     }
 
@@ -248,7 +248,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
@@ -275,7 +275,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
@@ -304,7 +304,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
@@ -341,7 +341,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
@@ -372,7 +372,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectToolNotRunningFor(customerId, toolId);
     }
 
@@ -397,7 +397,7 @@ class SwitchBoxAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
     }
 
     @Test
@@ -451,7 +451,7 @@ class SwitchBoxAcceptanceTest {
     // counter
 
     @Test
-    void counter_isTheWrongReader() {
+    void counter_anyTag_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given

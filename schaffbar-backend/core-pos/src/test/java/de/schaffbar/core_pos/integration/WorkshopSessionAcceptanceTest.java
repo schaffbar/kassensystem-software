@@ -80,6 +80,7 @@ class WorkshopSessionAcceptanceTest {
 
         // when
         this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), gateKeeperOut);
+        this.fixture.then().expectCheckedOut(customerId);
         result = this.fixture.api().closeWorkshopSession(customerId);
 
         // then

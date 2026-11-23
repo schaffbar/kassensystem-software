@@ -2,9 +2,12 @@ package de.schaffbar.core_pos.integration.fixture;
 
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import de.schaffbar.core_pos.builder.RandomValues;
+import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.support.Json;
 
 @TestComponent
 public class SchaffbarFixture {
@@ -31,6 +34,16 @@ public class SchaffbarFixture {
 
     public ThenFixture then() {
         return this.then;
+    }
+
+    // ------------------------------------------------------------------------
+    // values
+
+    // the name a device shows – the expected answer of a device contains it
+    public String fullNameOf(CustomerId customerId) {
+        MvcTestResult customer = this.api.getCustomer(customerId);
+
+        return Json.read(customer, "$.firstName") + " " + Json.read(customer, "$.lastName");
     }
 
     // ------------------------------------------------------------------------

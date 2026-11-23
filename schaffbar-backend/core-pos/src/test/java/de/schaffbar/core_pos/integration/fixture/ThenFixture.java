@@ -62,13 +62,6 @@ public final class ThenFixture {
         assertThat(Json.read(result, "$.UNITS")).matches("\\d+");
     }
 
-    // the name a device shows
-    public String fullNameOf(CustomerId customerId) {
-        MvcTestResult customer = this.api.getCustomer(customerId);
-
-        return Json.read(customer, "$.firstName") + " " + Json.read(customer, "$.lastName");
-    }
-
     // ------------------------------------------------------------------------
     // customers
 
@@ -201,6 +194,19 @@ public final class ThenFixture {
     }
 
     // ------------------------------------------------------------------------
+    // tool certifications
+
+    public void expectCertifiedCustomers(ToolId toolId, CustomerId... customerIds) {
+        MvcTestResult result = this.api.getToolCertifications(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$[*].customerId") //
+                .asArray() //
+                .containsExactlyInAnyOrder(values(customerIds));
+    }
+
+    // ------------------------------------------------------------------------
     // workshop sessions
 
     // returns the id of the session, to tell it from a later one
@@ -228,6 +234,9 @@ public final class ThenFixture {
         assertThat(result).hasBodyTextEqualTo("");
     }
 
+    // ------------------------------------------------------------------------
+    // workshop usages
+
     // the visits of the open session, checked out or not
     public void expectVisits(CustomerId customerId, int count) {
         assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
@@ -249,6 +258,9 @@ public final class ThenFixture {
                 .asArray() //
                 .isEmpty();
     }
+
+    // ------------------------------------------------------------------------
+    // tool usages
 
     public void expectToolRunning(CustomerId customerId, ToolId toolId) {
         assertThat(this.api.getOpenWorkshopSession(customerId)).bodyJson() //
@@ -276,19 +288,6 @@ public final class ThenFixture {
                 .extractingPath("$.toolUsageSummaries[?(@.toolId == '%s')].running".formatted(toolId.getValue())) //
                 .asArray() //
                 .containsExactly(false);
-    }
-
-    // ------------------------------------------------------------------------
-    // tool certifications
-
-    public void expectCertifiedCustomers(ToolId toolId, CustomerId... customerIds) {
-        MvcTestResult result = this.api.getToolCertifications(toolId);
-
-        assertThat(result).hasStatus(HttpStatus.OK);
-        assertThat(result).bodyJson() //
-                .extractingPath("$[*].customerId") //
-                .asArray() //
-                .containsExactlyInAnyOrder(values(customerIds));
     }
 
     // ------------------------------------------------------------------------

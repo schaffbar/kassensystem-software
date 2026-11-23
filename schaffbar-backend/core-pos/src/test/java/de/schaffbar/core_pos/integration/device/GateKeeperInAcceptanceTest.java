@@ -24,7 +24,7 @@ class GateKeeperInAcceptanceTest {
     // init
 
     @Test
-    void init_registeredGateKeeper_startsWithoutRelay() {
+    void init_registeredReader_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -74,7 +74,7 @@ class GateKeeperInAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
 
         this.fixture.then().expectEntryTimeShown(result);
         this.fixture.then().expectOpenWorkshopSession(customerId);
@@ -108,7 +108,7 @@ class GateKeeperInAcceptanceTest {
                     "ICON": "HI",
                     "CUSTOMERNAME": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
 
         this.fixture.then().expectEntryTimeShown(result);
         this.fixture.then().expectVisits(customerId, 2);
@@ -138,7 +138,7 @@ class GateKeeperInAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "UNITS": "0"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId)));
+                """.formatted(this.fixture.fullNameOf(customerId)));
         this.fixture.then().expectVisits(customerId, 1);
     }
 

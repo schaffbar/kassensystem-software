@@ -71,6 +71,9 @@ public final class GivenFixture {
         return CustomerId.of(createdId(result));
     }
 
+    // ------------------------------------------------------------------------
+    // RFID tag assignments
+
     public CustomerId customerWaitingForRfidTag() {
         CustomerId customerId = customer();
 
@@ -90,31 +93,6 @@ public final class GivenFixture {
     public void rfidTagAssignedToTheWaitingCustomer(RfidTagId rfidTagId) {
         MvcTestResult assigned = this.api.assignRfidTag(rfidTagId);
         assertThat(assigned).hasStatus(HttpStatus.NO_CONTENT);
-    }
-
-    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperIn) {
-        CustomerId customerId = customerWithRfidTag(rfidTagId);
-
-        MvcTestResult checkedIn = this.api.holdRfidTagToReader(rfidTagId, gateKeeperIn);
-        assertThat(checkedIn).hasStatus(HttpStatus.OK);
-
-        MvcTestResult session = this.api.getOpenWorkshopSession(customerId);
-        assertThat(session).bodyJson().extractingPath("$.status").isEqualTo("OPEN");
-
-        return customerId;
-    }
-
-    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId) {
-        MacAddress gateKeeperIn = RandomValues.macAddress();
-        rfidReader(gateKeeperIn, RfidReaderType.GATE_KEEPER_IN);
-        rfidTag(rfidTagId);
-
-        return customerInTheWorkshop(rfidTagId, gateKeeperIn);
-    }
-
-    public void customerLeftTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperOut) {
-        MvcTestResult checkedOut = this.api.holdRfidTagToReader(rfidTagId, gateKeeperOut);
-        assertThat(checkedOut).hasStatus2xxSuccessful();
     }
 
     // ------------------------------------------------------------------------
@@ -174,6 +152,9 @@ public final class GivenFixture {
         return instructorId;
     }
 
+    // ------------------------------------------------------------------------
+    // tool certifications
+
     public void toolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
         MvcTestResult result = this.api.certifyCustomer(customerId, toolId, certifiedBy);
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
@@ -188,6 +169,37 @@ public final class GivenFixture {
         toolCertification(customerId, toolId, certifiedBy);
         assertThat(this.api.revokeToolCertification(customerId, toolId)).hasStatus(HttpStatus.NO_CONTENT);
     }
+
+    // ------------------------------------------------------------------------
+    // workshop usages
+
+    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperIn) {
+        CustomerId customerId = customerWithRfidTag(rfidTagId);
+
+        // a device always answers 200 – the icon tells whether the gate let the person in
+        MvcTestResult checkedIn = this.api.holdRfidTagToReader(rfidTagId, gateKeeperIn);
+        assertThat(checkedIn).hasStatus(HttpStatus.OK);
+        assertThat(checkedIn).bodyJson().extractingPath("$.ICON").isEqualTo("HI");
+
+        return customerId;
+    }
+
+    public CustomerId customerInTheWorkshop(RfidTagId rfidTagId) {
+        MacAddress gateKeeperIn = RandomValues.macAddress();
+        rfidReader(gateKeeperIn, RfidReaderType.GATE_KEEPER_IN);
+        rfidTag(rfidTagId);
+
+        return customerInTheWorkshop(rfidTagId, gateKeeperIn);
+    }
+
+    public void customerLeftTheWorkshop(RfidTagId rfidTagId, MacAddress gateKeeperOut) {
+        MvcTestResult checkedOut = this.api.holdRfidTagToReader(rfidTagId, gateKeeperOut);
+        assertThat(checkedOut).hasStatus(HttpStatus.OK);
+        assertThat(checkedOut).bodyJson().extractingPath("$.ICON").isEqualTo("BYE");
+    }
+
+    // ------------------------------------------------------------------------
+    // tool usages
 
     // the person is in the workshop and holds their tag to the switch box of the tool
     public void toolUsage(RfidTagId rfidTagId, MacAddress switchBox) {

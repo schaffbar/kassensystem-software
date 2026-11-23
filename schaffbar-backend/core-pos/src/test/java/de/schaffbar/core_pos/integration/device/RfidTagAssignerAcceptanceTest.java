@@ -21,7 +21,7 @@ class RfidTagAssignerAcceptanceTest {
     // init
 
     @Test
-    void init_startsWithoutRelay() {
+    void init_registeredReader_startsWithoutRelay() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
@@ -71,7 +71,7 @@ class RfidTagAssignerAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "RFID": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.rfidTagId().getValue()));
+                """.formatted(this.fixture.fullNameOf(customerId), scenario.rfidTagId().getValue()));
 
         this.fixture.then().expectRfidTagAssigned(customerId, scenario.rfidTagId());
     }
@@ -98,7 +98,7 @@ class RfidTagAssignerAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "RFID": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(customerId), scenario.rfidTagId().getValue()));
+                """.formatted(this.fixture.fullNameOf(customerId), scenario.rfidTagId().getValue()));
     }
 
     @Test
@@ -124,7 +124,7 @@ class RfidTagAssignerAcceptanceTest {
                     "CUSTOMERNAME": "%s",
                     "RFID": "%s"
                 }
-                """.formatted(this.fixture.then().fullNameOf(owner), scenario.rfidTagId().getValue()));
+                """.formatted(this.fixture.fullNameOf(owner), scenario.rfidTagId().getValue()));
 
         this.fixture.then().expectRfidTagAssigned(owner, scenario.rfidTagId());
         this.fixture.then().expectWaitingForRfidTag(waitingCustomer);
@@ -209,7 +209,7 @@ class RfidTagAssignerAcceptanceTest {
     // card
 
     @Test
-    void card_isTheWrongReader() {
+    void card_anyTag_isTheWrongReader() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given
