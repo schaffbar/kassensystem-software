@@ -6,6 +6,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPac
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -15,7 +16,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.domain.JavaModifier;
-import com.tngtech.archunit.core.domain.JavaPackage;
 import com.tngtech.archunit.core.domain.JavaParameterizedType;
 import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.lang.ArchCondition;
@@ -74,6 +74,14 @@ final class ArchitectureSupport {
     static final DescribedPredicate<JavaMethodCall> REPOSITORY_METHOD_TAKING_UUID = DescribedPredicate.describe("a repository method taking a UUID", //
             call -> call.getTargetOwner().getSimpleName().endsWith("Repository") && call.getTarget().getRawParameterTypes().stream().anyMatch(
                     ArchitectureSupport::isUuid));
+
+    // the inherited Spring Data methods that take the raw id – its type parameter is erased to Object, so
+    // REPOSITORY_METHOD_TAKING_UUID does not see them; a value object overload of the repository is fine
+    static final DescribedPredicate<JavaMethodCall> REPOSITORY_METHOD_BY_RAW_ID = DescribedPredicate.describe(
+            "deleteById, deleteAllById, deleteAllByIdInBatch or existsById with the raw id", //
+            call -> call.getTargetOwner().getSimpleName().endsWith("Repository") //
+                    && Set.of("deleteById", "deleteAllById", "deleteAllByIdInBatch", "existsById").contains(call.getName()) //
+                    && call.getTarget().getRawParameterTypes().stream().noneMatch(ArchitectureSupport::isValueObject));
 
     private ArchitectureSupport() {
     }
@@ -141,16 +149,6 @@ final class ArchitectureSupport {
         }
         return type instanceof JavaParameterizedType parameterized && parameterized.getActualTypeArguments().stream().anyMatch(
                 argument -> mentions(argument, predicate));
-    }
-
-    static Stream<String> aggregateNames(JavaClass anyClass) {
-        JavaPackage root = anyClass.getPackage();
-        while (!root.getName().equals(ROOT)) {
-            root = root.getParent().orElseThrow();
-        }
-        return root.getPackage("domain").getClassesInPackageTree().stream() //
-                .filter(AGGREGATE) //
-                .map(JavaClass::getSimpleName);
     }
 
     // ------------------------------------------------------------------------

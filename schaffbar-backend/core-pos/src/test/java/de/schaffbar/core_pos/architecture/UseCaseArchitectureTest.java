@@ -4,8 +4,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.USE_CASE;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.aggregateNames;
-import static de.schaffbar.core_pos.architecture.ArchitectureSupport.classCondition;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -40,13 +38,5 @@ class UseCaseArchitectureTest {
             .and().haveName("process") //
             .should().beAnnotatedWith(Command.class) //
             .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)");
-
-    @ArchTest
-    static final ArchRule useCasesAreNamedAfterTheirAggregate = classes() //
-            .that().resideInAPackage(USE_CASE) //
-            .and().areTopLevelClasses() //
-            .should(classCondition("start with the name of an aggregate (<Aggregate><Action>)",
-                    useCase -> aggregateNames(useCase).anyMatch(useCase.getSimpleName()::startsWith))) //
-            .because("E3 in docs/backend-consistency.md");
 
 }

@@ -10,6 +10,7 @@ import static de.schaffbar.core_pos.architecture.ArchitectureSupport.AGGREGATE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.DOMAIN_SERVICE;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.INNER_ENTITY;
+import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_BY_RAW_ID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.REPOSITORY_METHOD_TAKING_UUID;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.RETURNS_EVENTS;
 import static de.schaffbar.core_pos.architecture.ArchitectureSupport.ROOT;
@@ -285,6 +286,13 @@ class DomainArchitectureTest {
             .that(DOMAIN_SERVICE) //
             .should().callMethodWhere(REPOSITORY_METHOD_TAKING_UUID) //
             .because("the service works with CustomerId, ToolId, … – the raw UUID stays in the repository");
+
+    @ArchTest
+    static final ArchRule nothingDeletesOrChecksByARawId = noClasses() //
+            .that().haveSimpleNameNotEndingWith("Repository") //
+            .should().callMethodWhere(REPOSITORY_METHOD_BY_RAW_ID) //
+            .because("a delete loads the entity and calls delete(entity) – 404 for an unknown id, @Version checked (E30); "
+                    + "an existence check takes the value object");
 
     // ------------------------------------------------------------------------
     // service
