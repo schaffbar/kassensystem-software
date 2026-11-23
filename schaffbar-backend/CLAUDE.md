@@ -31,9 +31,12 @@ before working on its topic.
 | --------------------------------------------------------------------------------------------------------------- | ----------------- |
 | an aggregate in `domain/<aggregate>/`: entity, commands, events, repository, service, views, where a rule lives | `aggregate`       |
 | tests: which level proves what, naming, service / use case / controller tests, integration fixture, ArchUnit    | `backend-testing` |
-| a use case in `use_case/` or a read facade in `read_facade/`: name, shape, order of checks, views of their own    | `use-case`        |
+| a use case in `use_case/` or a read facade in `read_facade/`: name, shape, order of checks, views of their own  | `use-case`        |
+| an endpoint: controller, API model, status and error codes, the contract with the portal, the device endpoints  | `rest-api`        |
 
-Skills for error handling and the REST API follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
+The skill `business-rule` (repo root, one rule from the README to the portal) follows (roadmap K5). A skill holds
+every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same
+step.
 
 ## Architecture
 
@@ -89,7 +92,7 @@ core_pos/
   `IllegalStateException` (→ `500`, E8).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`
   – never edit an applied one. `ddl-auto: validate`: entity and migration must match.
-- **The API is a contract with the portal.** A field's nullability is its Bean Validation (`@NotNull`, `@NotBlank`)
+- **The API is a contract with the portal** (skill `rest-api`). A field's nullability is its Bean Validation (`@NotNull`, `@NotBlank`)
   – the portal's zod schemas mirror it (skill `api` of the portal). A changed `*ApiModel` or endpoint needs the
   portal's `shared/api` changed too, and a gap from `../docs/backend-features.md` that is closed is marked there.
 
@@ -102,36 +105,16 @@ core_pos/
 - A query is a method of the controller's read facade in `read_facade/` (one per controller, named after it), `@Query`
   only, returning views – a view of its own over several aggregates in `<What it shows>Views`.
 
-### Controller and API model (until the skill `rest-api`)
+### Controller and API model (skill `rest-api`)
 
-- `domain/<aggregate>/web/<Aggregate>Controller`: `@RestController` `@Validated` `@RequiredArgsConstructor`, path
-  `/api/v1/<aggregate in kebab case, plural>` (`/api/v1/rfid-readers`); a controller of no aggregate is
-  `web/<object>/<Object>Controller`, path `/api/v1/<object>` (`DashboardController`, `/api/v1/dashboard`). Commands
-  call a use case, queries its read facade – no other bean (ArchUnit `controllersKnowOnlyUseCasesAndReadFacades`: no
-  service, no `OutboxEventStore`, no converter). A new `web/<object>/` controller of the portal is added
-  to `basePackages` of `ApiExceptionHandler`.
-- **One controller per aggregate** – an inner entity gets a sub-path of it (`GET /rfid-tag-assignments/history`) and
-  a query in its read facade, no controller of its own (E16).
-- **An endpoint is a query or a command**, never both (no "get or create").
-- **A create answers `201` with `Location`** pointing to the `GET /{id}` of the new resource; without such a `GET`
-  (found by something else like the assignment by its customer, or several created like `/batch`) it answers `204`
-  (E32). Other commands answer `204`.
-- `@PathVariable` and `@RequestParam` are value objects (`@PathVariable RfidReaderId rfidReaderId`), never `UUID` or
-  `String` converted by hand – each needs its `StringTo<ValueObject>Converter` in `shared/util/`. An optional filter is
-  `@RequestParam(required = false)` with a `nonNull(…)` check.
-- `<Aggregate>ApiModel`: a MapStruct `@Mapper` extending `ValueObjectMapper` with the response records (`…ApiDto`) and
-  request records (`…RequestBody`). Responses carry no value object and no `UUID`: ids and values are `String`
-  (`@Mapping(target = "id", source = "id.value")`; a `Set<CustomerId>` maps with `ValueObjectMapper.toValue`), enums
-  their enum type, dates `Instant` / `LocalDate` (ArchUnit `ValueObjectArchitectureTest`);
-  request bodies take value objects (their `@JsonCreator` reads them) and enums. Sections `// mapping view to
-  response`, `// mapping request body to command`, `// response`, `// request body`.
-- **`web/device/` is the firmware's contract** (E4) and differs on purpose: an endpoint may change and answer with
-  what the device shows (`/device/card` checks in and returns the stay); request and response fields carry the
-  firmware's names as `String` (`RFID`, `MACADDR`), converted to value objects in the controller; responses are
-  `*Response` records, not `…ApiDto`; a refusal is a `200` with a text from `DeviceMessages`, not a `ProblemDetail` –
-  so `web/device/` is not in `ApiExceptionHandler`; an unexpected error or a broken request (a MAC address the value
-  object rejects) gets the same answer with `DeviceMessages.UNEXPECTED`, never Spring's `500`. Its logic still lives
-  in use cases and the `DeviceReadFacade`.
+- A controller per aggregate in `domain/<aggregate>/web/` (`/api/v1/<aggregates>`), or `web/<object>/` for one of no
+  aggregate; it calls its use cases and its read facade, nothing else. An endpoint is a query or a command; a create
+  answers `201` with `Location` or `204` (E32), other commands `204`; path variables and parameters are value objects.
+- The `*ApiModel` is a MapStruct mapper with `…ApiDto` responses (ids as `String`, nullability by annotation – the
+  portal mirrors it) and `…RequestBody` requests (value objects, the command's constraints).
+- Errors: `404` / `409` with a `code` the portal translates (a new code needs its translation in the same change),
+  `400` for formats, `500` for bugs – `ApiExceptionHandler`. `web/device/` is the firmware's contract: always `200`,
+  texts from `DeviceMessages`.
 
 ## Code
 
