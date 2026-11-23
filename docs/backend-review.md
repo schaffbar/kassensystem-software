@@ -524,15 +524,25 @@ der Text „Lesegerät ohne Typ“ an `/init` zweimal, die Zuweisung ohne Person
 
 ### Integrationstests und Fixture
 
-- [ ] Gerätaufrufe mit `hasStatus(OK)` / `expectSuccess` können nie scheitern: `GivenFixture:99, 117`
+Erledigt 23.11.2026 (alle Punkte unten), 659 Backend-Tests grün. Ein Teil war schon in den Schritten der Aggregate
+erledigt (die Akzeptanztests prüfen nach dem Gerät den Zustand, die meisten Gerätetests waren umbenannt); offen waren
+noch die `given()`-Schritte am Gerät, `ws5` und die Namen unten. Skill `backend-testing`: Rollen von
+`SchaffbarFixture` / `GivenFixture` / `ThenFixture` und „Abschnitte nach Aggregaten“ ergänzt.
+
+- [x] Gerätaufrufe mit `hasStatus(OK)` / `expectSuccess` können nie scheitern: `GivenFixture:99, 117`
   (`customerLeftTheWorkshop`), `CustomerAcceptanceTest:95`, `ToolAcceptanceTest:140`, `GateKeeperOutAcceptanceTest:146` –
-  den Zustand prüfen (`ICON`, kein Besuch läuft), `given().toolSwitchedOff(…)`.
-- [ ] Abschnitte nach Aggregaten: `GivenFixture` „customers“ (`:64-118`) und „tools“ (`:120-187`), `ThenFixture`
-  „workshop sessions“ (`:191-237`) enthalten andere Aggregate; `fullNameOf` ist kein `expect…`.
-- [ ] `SchaffbarApi:233` `certifyCustomers` schreibt `Json.write(Map.of(…))` → Textblock.
-- [ ] Device-Tests nach `<endpoint>_<situation>_<answer>`: `card_checksInAndGreetsWithTheEntryTime`,
+  den Zustand prüfen (`ICON`, kein Besuch läuft), `given().toolSwitchedOff(…)` – `customerInTheWorkshop` prüft
+  `ICON: HI`, `customerLeftTheWorkshop` `ICON: BYE`; `WorkshopSessionAcceptanceTest.ws5` prüft den Check-out vor dem
+  Abrechnen. Kein `toolSwitchedOff`: die erlaubte Seite läuft über `api()` und `then()` (Skill), wie in `t14_t17`.
+- [x] Abschnitte nach Aggregaten: `GivenFixture` „customers“ (`:64-118`) und „tools“ (`:120-187`), `ThenFixture`
+  „workshop sessions“ (`:191-237`) enthalten andere Aggregate; `fullNameOf` ist kein `expect…` – neue Abschnitte
+  „RFID tag assignments“, „tool certifications“, „workshop usages“, „tool usages“; `fullNameOf` liegt jetzt in
+  `SchaffbarFixture` (`this.fixture.fullNameOf(…)`).
+- [x] `SchaffbarApi:233` `certifyCustomers` schreibt `Json.write(Map.of(…))` → Textblock (mit `quoted(customerIds)`).
+- [x] Device-Tests nach `<endpoint>_<situation>_<answer>`: `card_checksInAndGreetsWithTheEntryTime`,
   `card_checksOutWithEntryAndExitTime`, `card_switchesTheRunningToolsOff`, `counter_isTheWrongReader` (3×),
-  `card_isTheWrongReader` (2×), `init_startsWithoutRelay` (4×).
+  `card_isTheWrongReader` (2×), `init_startsWithoutRelay` (4×) – jetzt `counter_anyTag_isTheWrongReader`,
+  `card_anyTag_isTheWrongReader`, `init_registeredReader_startsWithoutRelay` (alle vier Leser mit festem Typ).
 
 ### ArchUnit
 
@@ -544,7 +554,14 @@ der Text „Lesegerät ohne Typ“ an `/init` zweimal, die Zuweisung ohne Person
   Facades außerhalb der View-Regeln; Controller `@Validated`, `@PathVariable` / `@RequestParam` als Value Object; keine
   Schreibzugriffe in `@Query`.
 - [ ] `WRITE_TRANSACTION` mit Resten aus dem Rollout (`ArchitectureSupport:66-69, 108-116`).
-- [ ] `useCasesAreNamedAfterTheirAggregate` prüft nur das Präfix (nach der Entscheidung zu E3).
+- [x] `useCasesAreNamedAfterTheirAggregate` prüft nur das Präfix (nach der Entscheidung zu E3) – 23.11.2026 entschieden:
+  Regel entfernt (samt `ArchitectureSupport.aggregateNames`), die Namensregel steht deutlich im Skill `aggregate`
+  („Service“, Checkliste), E3 ergänzt.
+- [x] E30 (Entscheidung oben): Regel gegen `deleteById` / rohes `existsById` – 23.11.2026 neu
+  `DomainArchitectureTest.nothingDeletesOrChecksByARawId` (alle Klassen außer Repositories; `deleteById`,
+  `deleteAllById`, `deleteAllByIdInBatch`, `existsById` ohne Value Object). Keine Verstöße im Code; gegen einen
+  absichtlichen Verstoß in `RfidTagService` geprüft (beide Aufrufe gemeldet, die Überladung `existsById(RfidTagId)`
+  nicht). Skill `aggregate` („Repository“, Checkliste), E30 ergänzt.
 - [ ] `TestArchitectureTest` findet keine Stubs in `@BeforeEach` und in Helfern, die nicht `given…` heißen.
 - [ ] Zeilen über 160 Zeichen: `ArchitectureSupport:101`, `DomainArchitectureTest:385, 442`.
 
