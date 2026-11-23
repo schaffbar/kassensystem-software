@@ -75,7 +75,7 @@ Ein erledigter Punkt bekommt sein Häkchen und das Datum.
   lädt über die Id (sonst 404), WS-4 prüft nur der Use Case (er findet die Sitzung über ihren Zustand, E29); die
   Absicherung in `WorkshopSession.close()` bekommt `// WorkshopSessionClose finds only an open session (WS-4)`.
   Schritt `workshop_session`; API und Portal unverändert.
-- [x] **Altersgruppe** – 22.11.2026: in die Domäne. `domain/customer/AgeGroup` (öffentliches Enum),
+- [x] **Altersgruppe** – 22.11.2026: in die Domäne (umgesetzt 22.11.2026). `domain/customer/AgeGroup` (öffentliches Enum),
   `Customer.getAgeGroupOn(LocalDate day)` (Entity-Test an den Grenzen 16 und 18), `CustomerView.ageGroup` aus
   `CustomerViews` mit `LocalDate.now()`; `CustomerApiModel` übernimmt nur das Feld (`:35,51-63` und das innere Enum
   fallen weg); README C-12. JSON und Portal unverändert; Zeitzone von `LocalDate.now()` mit Abschnitt 5.
@@ -247,7 +247,9 @@ und `ddd-uebersicht.md` mit den neuen Namen.
 Teil (b) erledigt 22.11.2026, 570 Backend-Tests und `npm run check` grün: `GET /rfid-tag-assignments?customerId=&rfidTagId=`
 (E5, Portal `rfid-tag-assignments.api-service.ts`, Bruno, Skill `api`), `GET /rfid-tag-assignments/history` im
 `RfidTagAssignmentController` (E16) – `RfidTagAssignmentHistoryController` und seine Read Facade gelöscht; mit beiden
-Filtern gilt der Tag (Controller-Test).
+Filtern gilt der Tag (Controller-Test). Im Browser geprüft (neu deployter Backend, ohne Schreiben): Detailseite mit Tag,
+ohne Tag und mit simulierter wartender Anfrage (Desktop und Handy), Liste der Benutzer und der RFID-Tags; die Anfrage
+trägt `customerId`, keine Konsolenfehler.
 
 - [x] Entscheidungen oben: Zustandsregeln (E29: Kommentare an den Absicherungen, README TA-4/5/10), E3 (Use Cases
   umbenannt), Namen (`cancelRfidTagAssignment`), Payload-Typ (E31).
@@ -281,13 +283,20 @@ Filtern gilt der Tag (Controller-Test).
 
 ### `customer`
 
-- [ ] Altersgruppe nach der Entscheidung (oben); die Methode steht heute unter `// mapping request body to command`.
-- [ ] `CustomerApiModel` erbt nicht von `ValueObjectMapper` (`:27`).
-- [ ] README: Löschen fehlt bei den Befehlen; `CustomerAddress` heißt „Value Object“ (`:22`).
-- [ ] `CustomerViews.java:39`: `CustomerAddressView` ohne `@Valid`.
-- [ ] `CustomerId.random()` mit `new …` statt `….of(UUID.randomUUID())` (`RfidReaderId` erledigt 22.11.2026).
-- [ ] `CustomerDelete:25-29`: JavaDoc statt Regel-Ids (`// C-4`, `// C-9`, C-11).
-- [ ] Tests:
+Erledigt 22.11.2026 (alle Punkte unten), 594 Tests grün. Dazu: `AgeGroup` in `domain/customer/`,
+`Customer.getAgeGroupOn(day)` mit Entity-Test an den Grenzen 16 und 18 (Gegenprobe), `CustomerView.ageGroup`, README
+C-12; `@Valid` an Id und Adresse der View; Controller-Test mit Konverter, allen Feldern des Portals und je einem
+`400` pro Formatregel und Endpunkt (parametrisiert, ein Fall pro Regel); `CustomerDeleteTest` prüft jetzt auch
+„Einweisungen vor der Person“; c4 beide Fälle mit der erlaubten Seite über `api()`, c5 prüft das Auschecken über den
+Zustand statt `expectSuccess` am Gerät.
+
+- [x] Altersgruppe nach der Entscheidung (oben); die Methode steht heute unter `// mapping request body to command`.
+- [x] `CustomerApiModel` erbt nicht von `ValueObjectMapper` (`:27`).
+- [x] README: Löschen fehlt bei den Befehlen; `CustomerAddress` heißt „Value Object“ (`:22`).
+- [x] `CustomerViews.java:39`: `CustomerAddressView` ohne `@Valid`.
+- [x] `CustomerId.random()` mit `new …` statt `….of(UUID.randomUUID())` (`RfidReaderId` erledigt 22.11.2026).
+- [x] `CustomerDelete:25-29`: JavaDoc statt Regel-Ids (`// C-4`, `// C-9`, C-11).
+- [x] Tests:
   - `CustomerServiceTest:55-73`: Created-Payload nur die Adresse; `:171` Deleted-Payload.
   - Controller: Erfolg prüft wenige Felder (`:105-109, 124-127`); fehlt: 404 für update, contact, address, delete; 400
     für C-1, C-2, C-3 beim Anlegen, C-8 beim Ändern.
@@ -298,13 +307,19 @@ Filtern gilt der Tag (Controller-Test).
 
 ### `tool`
 
-- [ ] `ToolViews.java:42`: `instructors` ohne `@NotNull` (die API hat es).
-- [ ] `Tool.java:53-54`: `name` ohne `@Column(unique = true)` (V4).
-- [ ] README: Attribute ohne `instructorIds`; Befehle ohne assign/clear Lesegerät, clear WLAN-Relais,
+Erledigt 23.11.2026 (alle Punkte unten), 612 Tests grün. Dazu aus Abschnitt 5: `instructorIds` mit
+`@Getter(AccessLevel.NONE)`, `findByIpAddress` als Liste mit „höchstens eine“. Controller-Test mit Konverter, allen
+Feldern, je einem `400` pro Formatregel (parametrisiert), allen 404/409; neu t22 (mit `SchaffbarApi.removeInstructor`),
+t3 und t9 mit der erlaubten Seite, t14_t17 prüft den Zustand statt `expectSuccess` am Gerät; `WlanRelaisTypeTest`
+prüft die genauen URLs je Relais (T-6).
+
+- [x] `ToolViews.java:42`: `instructors` ohne `@NotNull` (die API hat es).
+- [x] `Tool.java:53-54`: `name` ohne `@Column(unique = true)` (V4).
+- [x] README: Attribute ohne `instructorIds`; Befehle ohne assign/clear Lesegerät, clear WLAN-Relais,
   add/remove Einweiser, löschen.
-- [ ] `ToolAssignRfidReader:34-36`: T-9 inline statt `ensureIsSwitchBox` mit `// T-9`.
+- [x] `ToolAssignRfidReader:34-36`: T-9 inline statt `ensureIsSwitchBox` mit `// T-9`.
 - [x] Namen der Service-Befehle: passen nach E20 (geändert 22.11.2026) – nichts zu tun.
-- [ ] Tests:
+- [x] Tests:
   - `ToolServiceTest`: feste Namen „Kreissäge“/„Bandsäge“ (`:84-85, 135-136`); Aufbau inline statt `given…`
     (`:232, 277, 326, 384, 405, 433`); `:450` Deleted-Payload; fehlt: T-15 zweite Hälfte (eigener Name plus anderer in
     anderer Schreibweise).
@@ -318,16 +333,24 @@ Filtern gilt der Tag (Controller-Test).
   - `WlanRelaisTypeTest:12`: Name passt zu keiner Methode, der Test baut die URL selbst.
   - Akzeptanz: t9 nur abgelehnt (`:102`); t3_t8 (`:55`) zeigt nicht T-3s erlaubte Seite; t22 fehlt; `expectSuccess` auf
     Gerät (`:140`); `RandomValues` `:36, 61, 84, 122`.
-  - Technisch: `findByNameIgnoreCase`, `findByInstructorIdsContaining`.
+  - Technisch: `findByNameIgnoreCase`, `findByInstructorIdsContaining` – nach dem Skill nicht nötig, t2_t15 und c9_c11
+    laufen durch.
 
 ### `tool_certification`
 
-- [ ] README: Payloads von PAUSED / REACTIVATED / REVOKED tragen id, customerId, toolId, status (`:68-70`); historische
+Erledigt 23.11.2026 (alle Punkte unten), 624 Tests grün. Dazu aus Abschnitt 5: `ToolCertificationCreate` prüft zuerst,
+dass alle Personen existieren, dann TC-8, TC-5 (Gegenprobe); README TC-4 nennt die Reihenfolge. Ohne Filter antwortet
+`GET /tool-certifications` jetzt mit einem `ProblemDetail` (`IllegalArgumentException`). Akzeptanz: tc1, tc4, tc5 mit
+der erlaubten Seite, tc2 mit Kommentar (keine erlaubte Seite), neu tc8 und `tc1_aChangeFindsTheCertification…` (404
+für pause, reactivate, revoke, delete bei anderem Werkzeug), neu `card_redToolWithPausedCertification_isRefused`;
+`SchaffbarApi` mit pause, reactivate, delete, `GivenFixture` mit pausierter und entzogener Einweisung.
+
+- [x] README: Payloads von PAUSED / REACTIVATED / REVOKED tragen id, customerId, toolId, status (`:68-70`); historische
   Notiz zu `WithEvents` (`:23-25`) entfernen.
-- [ ] `ToolCertificationApiModel:48`: `// request` → `// request body`.
-- [ ] `ToolCertificationController:93`: `@RequestBody` ohne `@NotNull`; `:81` ohne Filter ein nacktes `badRequest()` ohne
+- [x] `ToolCertificationApiModel:48`: `// request` → `// request body`.
+- [x] `ToolCertificationController:93`: `@RequestBody` ohne `@NotNull`; `:81` ohne Filter ein nacktes `badRequest()` ohne
   `ProblemDetail`.
-- [ ] Tests:
+- [x] Tests:
   - `ToolCertificationServiceTest:437` `expectSavedEvent` ohne Id; `:103-120` Payload ohne id; `:293, 325, 353`
     Deleted-Payload (`TOOL_CERTIFICATION_DELETED` trägt customerId, toolId); wiederholt `never().save` `:136, 153`,
     `deleteAll` `:334, 362`, `never().deleteAll` `:348, 376`; `:427` `createCommandFor` im Abschnitt `// given`.
@@ -483,12 +506,12 @@ Filtern gilt der Tag (Controller-Test).
   Altersgruppe (Entscheidung oben).
 - [ ] ✔ **`IpAddress` nimmt `+1.+2.+3.+4` und `-0.-0.-0.-0`** (`Integer.parseInt` erlaubt ein Vorzeichen,
   `IpAddress:35`) – nur Ziffern zulassen; dazu `IpAddressTest`.
-- [ ] ✔ **`Tool` gibt `Set<UUID> instructorIds` veränderbar heraus** (Klassen-`@Getter`, `Tool.java:42, 73-76`) – Änderung
-  ohne Event möglich; `@Getter(AccessLevel.NONE)` am Feld.
-- [ ] **`ToolCertificationCreate` prüft TC-8 vor der Existenz der Personen** (`:43-46, 63-70`): unbekannte Person plus
-  Nicht-Einweiser gibt 409 statt 404.
-- [ ] **`ToolRepository.findByIpAddress`** (`:19`) liefert `Optional` auf eine Spalte ohne Unique-Constraint – Liste und
-  „höchstens eine“ im `default`.
+- [x] ✔ **`Tool` gibt `Set<UUID> instructorIds` veränderbar heraus** (Klassen-`@Getter`, `Tool.java:42, 73-76`) – Änderung
+  ohne Event möglich; `@Getter(AccessLevel.NONE)` am Feld – erledigt 23.11.2026 im Schritt `tool`.
+- [x] **`ToolCertificationCreate` prüft TC-8 vor der Existenz der Personen** (`:43-46, 63-70`): unbekannte Person plus
+  Nicht-Einweiser gibt 409 statt 404 – erledigt 23.11.2026 im Schritt `tool_certification`.
+- [x] **`ToolRepository.findByIpAddress`** (`:19`) liefert `Optional` auf eine Spalte ohne Unique-Constraint – Liste und
+  „höchstens eine“ im `default` – erledigt 23.11.2026 im Schritt `tool`.
 - [ ] **`BillableDuration`** (`:25-26`): negative Dauer (kaputte Daten) als `IllegalArgumentException` → 400 statt 500.
 - [ ] **`SchaffbarEvent`**: `@NotBlank` auf `UUID` würde bei einer Prüfung mit `UnexpectedTypeException` scheitern (siehe
   `shared/`).
