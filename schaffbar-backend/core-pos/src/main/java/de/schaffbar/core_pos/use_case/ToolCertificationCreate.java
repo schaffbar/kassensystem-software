@@ -42,8 +42,9 @@ public class ToolCertificationCreate {
     ) {
         ToolView tool = this.toolService.getTool(toolId) //
                 .orElseThrow(() -> ResourceNotFoundException.tool(toolId));
+        customerIds.forEach(this::ensureCustomerExists);
         ensureIsInstructor(tool, certifiedBy);
-        customerIds.forEach(customerId -> ensureCanBeCertified(tool, customerId));
+        customerIds.forEach(customerId -> ensureIsNoInstructor(tool, customerId));
 
         customerIds.forEach(customerId -> this.toolCertificationService
                 .createToolCertification(new CreateToolCertificationCommand(customerId, toolId, certifiedBy)));
@@ -59,11 +60,14 @@ public class ToolCertificationCreate {
         }
     }
 
-    // instructors need no certification for their own tool (TC-5)
-    private void ensureCanBeCertified(ToolView tool, CustomerId customerId) {
+    // a referenced aggregate exists – all entries of the batch before any rule (TC-4)
+    private void ensureCustomerExists(CustomerId customerId) {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
+    }
 
+    // instructors need no certification for their own tool (TC-5)
+    private void ensureIsNoInstructor(ToolView tool, CustomerId customerId) {
         if (tool.instructors().contains(customerId)) {
             throw new CustomerIsInstructorException(customerId, tool.id());
         }

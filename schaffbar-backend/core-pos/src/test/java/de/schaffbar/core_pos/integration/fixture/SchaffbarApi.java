@@ -243,8 +243,23 @@ public final class SchaffbarApi {
                 .exchange();
     }
 
+    public MvcTestResult pauseToolCertification(CustomerId customerId, ToolId toolId) {
+        return this.mvc.put().uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/pause", customerId.getValue(),
+                toolId.getValue()).exchange();
+    }
+
+    public MvcTestResult reactivateToolCertification(CustomerId customerId, ToolId toolId) {
+        return this.mvc.put().uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/reactivate", customerId.getValue(),
+                toolId.getValue()).exchange();
+    }
+
     public MvcTestResult revokeToolCertification(CustomerId customerId, ToolId toolId) {
         return this.mvc.put().uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}/revoke", customerId.getValue(),
+                toolId.getValue()).exchange();
+    }
+
+    public MvcTestResult deleteToolCertification(CustomerId customerId, ToolId toolId) {
+        return this.mvc.delete().uri("/api/v1/tool-certifications/customers/{customerId}/tools/{toolId}", customerId.getValue(),
                 toolId.getValue()).exchange();
     }
 

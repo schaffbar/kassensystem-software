@@ -1,6 +1,8 @@
 package de.schaffbar.core_pos.domain.tool_certification.web;
 
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolCertificationView;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -16,10 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -30,11 +37,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationStatus;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationViews.ToolCertificationView;
-import de.schaffbar.core_pos.domain.tool_certification.web.ToolCertificationApiModel.BatchCertifyRequestBody;
 import de.schaffbar.core_pos.read_facade.ToolCertificationReadFacade;
+import de.schaffbar.core_pos.shared.exception.CertificationAlreadyExistsException;
+import de.schaffbar.core_pos.shared.exception.CertificationPermanentlyRevokedException;
 import de.schaffbar.core_pos.shared.exception.CustomerIsInstructorException;
+import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
 import de.schaffbar.core_pos.shared.exception.InvalidCertificationStateTransitionException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolCertificationId;
 import de.schaffbar.core_pos.shared.id.ToolId;
@@ -84,6 +94,7 @@ class ToolCertificationControllerTest {
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
+                .setMessageConverters(Json.messageConverter()) //
                 .setControllerAdvice(new ApiExceptionHandler()) //
                 .build();
     }
@@ -97,13 +108,17 @@ class ToolCertificationControllerTest {
         ToolCertificationView certification = givenCertificationsOfTheCustomer();
 
         // when
-        ResultActions result = getToolCertifications("customerId", certification.customerId().getValue().toString());
+        ResultActions result = getToolCertifications(certification.customerId());
 
         // then
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
                 .andExpect(jsonPath("$[0].id").value(certification.id().getValue().toString())) //
-                .andExpect(jsonPath("$[0].customerId").value(certification.customerId().getValue().toString()));
+                .andExpect(jsonPath("$[0].customerId").value(certification.customerId().getValue().toString())) //
+                .andExpect(jsonPath("$[0].toolId").value(certification.toolId().getValue().toString())) //
+                .andExpect(jsonPath("$[0].status").value(certification.status().name())) //
+                .andExpect(jsonPath("$[0].certifiedAt").value(certification.certifiedAt().toString())) //
+                .andExpect(jsonPath("$[0].certifiedBy").value(certification.certifiedBy().getValue().toString()));
     }
 
     @Test
@@ -112,23 +127,50 @@ class ToolCertificationControllerTest {
         ToolCertificationView certification = givenCertificationsOfTheTool();
 
         // when
-        ResultActions result = getToolCertifications("toolId", certification.toolId().getValue().toString());
+        ResultActions result = getToolCertifications(certification.toolId());
 
         // then
         result.andExpect(status().isOk()) //
                 .andExpect(jsonPath("$.length()").value(1)) //
-                .andExpect(jsonPath("$[0].id").value(certification.id().getValue().toString())) //
-                .andExpect(jsonPath("$[0].toolId").value(certification.toolId().getValue().toString()));
+                .andExpect(jsonPath("$[0].id").value(certification.id().getValue().toString()));
+    }
+
+    @Test
+    void getToolCertifications_ofACustomerWithoutCertifications_returnsAnEmptyList() throws Exception {
+        // given
+        CustomerId customerId = givenNoCertificationsOf(CustomerId.random());
+
+        // when
+        ResultActions result = getToolCertifications(customerId);
+
+        // then
+        result.andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void getToolCertifications_withBothFilters_filtersByTheCustomer() throws Exception {
+        // given
+        ToolCertificationView certification = givenCertificationsOfTheCustomer();
+
+        // when
+        ResultActions result = getToolCertifications(certification.customerId(), ToolId.random());
+
+        // then
+        result.andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.length()").value(1)) //
+                .andExpect(jsonPath("$[0].id").value(certification.id().getValue().toString()));
     }
 
     @Test
     void getToolCertifications_withoutFilter_is400() throws Exception {
         // when
-        ResultActions result = getToolCertificationsWithoutFilter();
+        ResultActions result = getToolCertifications();
 
         // then
-        result.andExpect(status().isBadRequest());
-        verifyNoInteractions(this.toolCertificationReadFacade);
+        result.andExpect(status().isBadRequest()) //
+                .andExpect(jsonPath("$.status").value(400));
+        expectNothingRead();
     }
 
     // ------------------------------------------------------------------------
@@ -148,7 +190,7 @@ class ToolCertificationControllerTest {
                 .andExpect(jsonPath("$.customerId").value(certification.customerId().getValue().toString())) //
                 .andExpect(jsonPath("$.toolId").value(certification.toolId().getValue().toString())) //
                 .andExpect(jsonPath("$.status").value(certification.status().name())) //
-                .andExpect(jsonPath("$.certifiedAt").exists()) //
+                .andExpect(jsonPath("$.certifiedAt").value(certification.certifiedAt().toString())) //
                 .andExpect(jsonPath("$.certifiedBy").value(certification.certifiedBy().getValue().toString()));
     }
 
@@ -161,7 +203,7 @@ class ToolCertificationControllerTest {
         ResultActions result = getToolCertification(unknown);
 
         // then
-        result.andExpect(status().isNotFound());
+        expectNotFound(result, Resource.TOOL_CERTIFICATION);
     }
 
     // ------------------------------------------------------------------------
@@ -170,42 +212,58 @@ class ToolCertificationControllerTest {
     @Test
     void createToolCertifications_passesTheIdsAndIs204() throws Exception {
         // given
-        BatchCertifyRequestBody body = new BatchCertifyRequestBody(List.of(CustomerId.random(), CustomerId.random()), ToolId.random(), CustomerId.random());
+        List<CustomerId> customerIds = List.of(CustomerId.random(), CustomerId.random());
+        ToolId toolId = ToolId.random();
+        CustomerId certifiedBy = CustomerId.random();
 
         // when
-        ResultActions result = createToolCertifications(body);
+        ResultActions result = createToolCertifications(customerIds, toolId, certifiedBy);
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolCertificationCreate).process(body.customerIds(), body.toolId(), body.certifiedBy());
-    }
-
-    @Test
-    void createToolCertifications_withAnInstructorOfTheTool_is409WithTheCode() throws Exception {
-        // given
-        CustomerId instructorId = CustomerId.random();
-        BatchCertifyRequestBody body = new BatchCertifyRequestBody(List.of(instructorId), ToolId.random(), CustomerId.random());
-        givenCreateRejectedWith(body, new CustomerIsInstructorException(instructorId, body.toolId()));
-
-        // when
-        ResultActions result = createToolCertifications(body);
-
-        // then
-        result.andExpect(status().isConflict()) //
-                .andExpect(jsonPath("$.code").value(CustomerIsInstructorException.CODE));
+        expectCreated(customerIds, toolId, certifiedBy);
     }
 
     @Test
     void createToolCertifications_withoutCustomers_is400() throws Exception {
-        // given
-        String body = "{\"customerIds\":[],\"toolId\":\"" + ToolId.random().getValue() + "\",\"certifiedBy\":\"" + CustomerId.random().getValue() + "\"}";
-
         // when
-        ResultActions result = createToolCertifications(body);
+        ResultActions result = createToolCertifications(List.of(), ToolId.random(), CustomerId.random());
 
         // then
         result.andExpect(status().isBadRequest());
-        verify(this.toolCertificationCreate, never()).process(any(), any(), any());
+        expectNothingCreated();
+    }
+
+    @ParameterizedTest
+    @MethodSource("rejectionsOfTheBatch")
+    void createToolCertifications_rejectedByARule_is409WithTheCode(RuntimeException rejection, String code) throws Exception {
+        // given
+        List<CustomerId> customerIds = List.of(CustomerId.random());
+        ToolId toolId = ToolId.random();
+        CustomerId certifiedBy = CustomerId.random();
+        givenCreateRejectedWith(customerIds, toolId, certifiedBy, rejection);
+
+        // when
+        ResultActions result = createToolCertifications(customerIds, toolId, certifiedBy);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(code));
+    }
+
+    @Test
+    void createToolCertifications_ofAnUnknownCustomer_is404() throws Exception {
+        // given
+        CustomerId unknown = CustomerId.random();
+        ToolId toolId = ToolId.random();
+        CustomerId certifiedBy = CustomerId.random();
+        givenCreateRejectedWith(List.of(unknown), toolId, certifiedBy, ResourceNotFoundException.customer(unknown));
+
+        // when
+        ResultActions result = createToolCertifications(List.of(unknown), toolId, certifiedBy);
+
+        // then
+        expectNotFound(result, Resource.CUSTOMER);
     }
 
     // ------------------------------------------------------------------------
@@ -222,7 +280,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolCertificationPause).process(customerId, toolId);
+        expectPaused(customerId, toolId);
     }
 
     @Test
@@ -236,7 +294,7 @@ class ToolCertificationControllerTest {
         ResultActions result = pauseToolCertification(customerId, toolId);
 
         // then
-        result.andExpect(status().isNotFound());
+        expectNotFound(result, Resource.TOOL_CERTIFICATION);
     }
 
     @Test
@@ -267,7 +325,21 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolCertificationReactivate).process(customerId, toolId);
+        expectReactivated(customerId, toolId);
+    }
+
+    @Test
+    void reactivateToolCertification_unknownCertification_is404() throws Exception {
+        // given
+        CustomerId customerId = CustomerId.random();
+        ToolId toolId = ToolId.random();
+        givenReactivateRejectedWith(customerId, toolId, ResourceNotFoundException.toolCertification(customerId, toolId));
+
+        // when
+        ResultActions result = reactivateToolCertification(customerId, toolId);
+
+        // then
+        expectNotFound(result, Resource.TOOL_CERTIFICATION);
     }
 
     @Test
@@ -298,7 +370,21 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolCertificationRevoke).process(customerId, toolId);
+        expectRevoked(customerId, toolId);
+    }
+
+    @Test
+    void revokeToolCertification_unknownCertification_is404() throws Exception {
+        // given
+        CustomerId customerId = CustomerId.random();
+        ToolId toolId = ToolId.random();
+        givenRevokeRejectedWith(customerId, toolId, ResourceNotFoundException.toolCertification(customerId, toolId));
+
+        // when
+        ResultActions result = revokeToolCertification(customerId, toolId);
+
+        // then
+        expectNotFound(result, Resource.TOOL_CERTIFICATION);
     }
 
     @Test
@@ -329,7 +415,7 @@ class ToolCertificationControllerTest {
 
         // then
         result.andExpect(status().isNoContent());
-        verify(this.toolCertificationDelete).process(customerId, toolId);
+        expectDeleted(customerId, toolId);
     }
 
     @Test
@@ -343,7 +429,7 @@ class ToolCertificationControllerTest {
         ResultActions result = deleteToolCertification(customerId, toolId);
 
         // then
-        result.andExpect(status().isNotFound());
+        expectNotFound(result, Resource.TOOL_CERTIFICATION);
     }
 
     // ------------------------------------------------------------------------
@@ -377,8 +463,14 @@ class ToolCertificationControllerTest {
         return certification;
     }
 
-    private void givenCreateRejectedWith(BatchCertifyRequestBody body, RuntimeException rejection) {
-        doThrow(rejection).when(this.toolCertificationCreate).process(body.customerIds(), body.toolId(), body.certifiedBy());
+    private CustomerId givenNoCertificationsOf(CustomerId customerId) {
+        when(this.toolCertificationReadFacade.getToolCertifications(customerId)).thenReturn(List.of());
+
+        return customerId;
+    }
+
+    private void givenCreateRejectedWith(List<CustomerId> customerIds, ToolId toolId, CustomerId certifiedBy, RuntimeException rejection) {
+        doThrow(rejection).when(this.toolCertificationCreate).process(customerIds, toolId, certifiedBy);
     }
 
     private void givenPauseRejectedWith(CustomerId customerId, ToolId toolId, RuntimeException rejection) {
@@ -397,6 +489,21 @@ class ToolCertificationControllerTest {
         doThrow(rejection).when(this.toolCertificationDelete).process(customerId, toolId);
     }
 
+    // TC-8, TC-5, TC-1, TC-2 – each rule of the batch with its code
+    static Stream<Arguments> rejectionsOfTheBatch() {
+        CustomerId customerId = CustomerId.random();
+        ToolId toolId = ToolId.random();
+        return Stream.of( //
+                arguments(named("certifier is no instructor (TC-8)", new CustomerNotInstructorException(customerId, toolId)),
+                        CustomerNotInstructorException.CODE), //
+                arguments(named("customer is an instructor (TC-5)", new CustomerIsInstructorException(customerId, toolId)),
+                        CustomerIsInstructorException.CODE), //
+                arguments(named("certification exists (TC-1)", new CertificationAlreadyExistsException(customerId, toolId)),
+                        CertificationAlreadyExistsException.CODE), //
+                arguments(named("certification revoked (TC-2)", new CertificationPermanentlyRevokedException(customerId, toolId)),
+                        CertificationPermanentlyRevokedException.CODE));
+    }
+
     // ------------------------------------------------------------------------
     // when
 
@@ -404,22 +511,33 @@ class ToolCertificationControllerTest {
         return this.mockMvc.perform(get("/api/v1/tool-certifications/" + toolCertificationId.getValue()));
     }
 
-    private ResultActions getToolCertifications(String filter, String id) throws Exception {
-        return this.mockMvc.perform(get("/api/v1/tool-certifications").param(filter, id));
-    }
-
-    private ResultActions getToolCertificationsWithoutFilter() throws Exception {
+    private ResultActions getToolCertifications() throws Exception {
         return this.mockMvc.perform(get("/api/v1/tool-certifications"));
     }
 
-    private ResultActions createToolCertifications(BatchCertifyRequestBody body) throws Exception {
-        return createToolCertifications(Json.write(body));
+    private ResultActions getToolCertifications(CustomerId customerId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/tool-certifications").param("customerId", customerId.getValue().toString()));
     }
 
-    private ResultActions createToolCertifications(String body) throws Exception {
+    private ResultActions getToolCertifications(ToolId toolId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/tool-certifications").param("toolId", toolId.getValue().toString()));
+    }
+
+    private ResultActions getToolCertifications(CustomerId customerId, ToolId toolId) throws Exception {
+        return this.mockMvc.perform(get("/api/v1/tool-certifications") //
+                .param("customerId", customerId.getValue().toString()) //
+                .param("toolId", toolId.getValue().toString()));
+    }
+
+    private ResultActions createToolCertifications(List<CustomerId> customerIds, ToolId toolId, CustomerId certifiedBy) throws Exception {
+        String customers = customerIds.stream() //
+                .map(customerId -> "\"" + customerId.getValue() + "\"") //
+                .collect(Collectors.joining(","));
         return this.mockMvc.perform(post("/api/v1/tool-certifications/batch") //
                 .contentType(MediaType.APPLICATION_JSON) //
-                .content(body));
+                .content("""
+                        { "customerIds": [%s], "toolId": "%s", "certifiedBy": "%s" }
+                        """.formatted(customers, toolId.getValue(), certifiedBy.getValue())));
     }
 
     private ResultActions pauseToolCertification(CustomerId customerId, ToolId toolId) throws Exception {
@@ -441,9 +559,43 @@ class ToolCertificationControllerTest {
     // ------------------------------------------------------------------------
     // then
 
+    private void expectNotFound(ResultActions result, Resource resource) throws Exception {
+        result.andExpect(status().isNotFound()) //
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND")) //
+                .andExpect(jsonPath("$.resource").value(resource.name()));
+    }
+
     private void expectInvalidTransition(ResultActions result) throws Exception {
         result.andExpect(status().isConflict()) //
                 .andExpect(jsonPath("$.code").value(InvalidCertificationStateTransitionException.CODE));
+    }
+
+    private void expectNothingRead() {
+        verifyNoInteractions(this.toolCertificationReadFacade);
+    }
+
+    private void expectCreated(List<CustomerId> customerIds, ToolId toolId, CustomerId certifiedBy) {
+        verify(this.toolCertificationCreate).process(customerIds, toolId, certifiedBy);
+    }
+
+    private void expectNothingCreated() {
+        verify(this.toolCertificationCreate, never()).process(any(), any(), any());
+    }
+
+    private void expectPaused(CustomerId customerId, ToolId toolId) {
+        verify(this.toolCertificationPause).process(customerId, toolId);
+    }
+
+    private void expectReactivated(CustomerId customerId, ToolId toolId) {
+        verify(this.toolCertificationReactivate).process(customerId, toolId);
+    }
+
+    private void expectRevoked(CustomerId customerId, ToolId toolId) {
+        verify(this.toolCertificationRevoke).process(customerId, toolId);
+    }
+
+    private void expectDeleted(CustomerId customerId, ToolId toolId) {
+        verify(this.toolCertificationDelete).process(customerId, toolId);
     }
 
     // ------------------------------------------------------------------------

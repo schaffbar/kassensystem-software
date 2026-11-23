@@ -154,8 +154,12 @@ public class ViewBuilder {
     // tool certification
 
     public static ToolCertificationViewBuilder toolCertificationView() {
+        return toolCertificationView(ToolCertificationId.random());
+    }
+
+    public static ToolCertificationViewBuilder toolCertificationView(ToolCertificationId id) {
         return ToolCertificationView.builder() //
-                .id(ToolCertificationId.random()) //
+                .id(id) //
                 .customerId(CustomerId.random()) //
                 .toolId(ToolId.random()) //
                 .status(ToolCertificationStatus.ACTIVE) //

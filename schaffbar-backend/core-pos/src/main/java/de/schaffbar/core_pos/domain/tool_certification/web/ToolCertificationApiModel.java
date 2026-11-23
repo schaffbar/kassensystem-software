@@ -45,7 +45,7 @@ public interface ToolCertificationApiModel extends ValueObjectMapper {
     ) {}
 
     // ------------------------------------------------------------------------
-    // request
+    // request body
 
     record BatchCertifyRequestBody( //
             @NotEmpty List<@NotNull @Valid CustomerId> customerIds, //

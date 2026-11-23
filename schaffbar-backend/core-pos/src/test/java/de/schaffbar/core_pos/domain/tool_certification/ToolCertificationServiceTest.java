@@ -32,6 +32,7 @@ import de.schaffbar.core_pos.shared.event.EventType;
 import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationCreatedPayload;
+import de.schaffbar.core_pos.shared.event.payload.ToolCertificationEventPayload.ToolCertificationDeletedPayload;
 import de.schaffbar.core_pos.shared.exception.CertificationAlreadyExistsException;
 import de.schaffbar.core_pos.shared.exception.CertificationPermanentlyRevokedException;
 import de.schaffbar.core_pos.shared.exception.InvalidCertificationStateTransitionException;
@@ -50,6 +51,9 @@ class ToolCertificationServiceTest {
 
     @Captor
     private ArgumentCaptor<List<SchaffbarEvent>> events;
+
+    @Captor
+    private ArgumentCaptor<ToolCertification> savedCertification;
 
     @InjectMocks
     private ToolCertificationService toolCertificationService;
@@ -109,9 +113,10 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.createToolCertification(command);
 
         // then
-        verify(this.toolCertificationRepository).save(any());
-        ToolCertificationCreatedPayload payload = expectSavedEvent(EventType.TOOL_CERTIFICATION_CREATED) //
+        ToolCertification certification = expectSavedCertification();
+        ToolCertificationCreatedPayload payload = expectSavedEvent(EventType.TOOL_CERTIFICATION_CREATED, certification) //
                 .deserializeAndValidatePayload(ToolCertificationCreatedPayload.class);
+        assertThat(payload.id()).isEqualTo(certification.getId());
         assertThat(payload.customerId()).isEqualTo(command.customerId());
         assertThat(payload.toolId()).isEqualTo(command.toolId());
         assertThat(payload.certifiedBy()).isEqualTo(command.certifiedBy());
@@ -133,8 +138,7 @@ class ToolCertificationServiceTest {
         assertThat(thrown) //
                 .isInstanceOf(CertificationAlreadyExistsException.class) //
                 .hasFieldOrPropertyWithValue("code", CertificationAlreadyExistsException.CODE);
-        verify(this.toolCertificationRepository, never()).save(any());
-        expectNoEvent();
+        expectNothingSaved();
     }
 
     @Test
@@ -150,8 +154,7 @@ class ToolCertificationServiceTest {
         assertThat(thrown) //
                 .isInstanceOf(CertificationPermanentlyRevokedException.class) //
                 .hasFieldOrPropertyWithValue("code", CertificationPermanentlyRevokedException.CODE);
-        verify(this.toolCertificationRepository, never()).save(any());
-        expectNoEvent();
+        expectNothingSaved();
     }
 
     // ------------------------------------------------------------------------
@@ -298,8 +301,8 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.deleteToolCertification(certification.getCustomerId(), certification.getToolId());
 
         // then
-        verify(this.toolCertificationRepository).delete(certification);
-        expectSavedEvents(EventType.TOOL_CERTIFICATION_DELETED, List.of(certification));
+        expectDeleted(certification);
+        expectDeletedEventsOf(List.of(certification));
     }
 
     @Test
@@ -314,8 +317,7 @@ class ToolCertificationServiceTest {
 
         // then
         expectNotFound(thrown);
-        verify(this.toolCertificationRepository, never()).delete(any());
-        expectNoEvent();
+        expectNothingDeleted();
     }
 
     // ------------------------------------------------------------------------
@@ -331,8 +333,8 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.deleteToolCertifications(toolId);
 
         // then
-        verify(this.toolCertificationRepository).deleteAll(certifications);
-        expectSavedEvents(EventType.TOOL_CERTIFICATION_DELETED, certifications);
+        expectAllDeleted(certifications);
+        expectDeletedEventsOf(certifications);
     }
 
     @Test
@@ -345,8 +347,7 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.deleteToolCertifications(toolId);
 
         // then
-        verify(this.toolCertificationRepository, never()).deleteAll(any());
-        expectNoEvent();
+        expectNothingDeleted();
     }
 
     @Test
@@ -359,8 +360,8 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.deleteToolCertifications(customerId);
 
         // then
-        verify(this.toolCertificationRepository).deleteAll(certifications);
-        expectSavedEvents(EventType.TOOL_CERTIFICATION_DELETED, certifications);
+        expectAllDeleted(certifications);
+        expectDeletedEventsOf(certifications);
     }
 
     @Test
@@ -373,8 +374,7 @@ class ToolCertificationServiceTest {
         this.toolCertificationService.deleteToolCertifications(customerId);
 
         // then
-        verify(this.toolCertificationRepository, never()).deleteAll(any());
-        expectNoEvent();
+        expectNothingDeleted();
     }
 
     // ------------------------------------------------------------------------
@@ -424,23 +424,57 @@ class ToolCertificationServiceTest {
         when(this.toolCertificationRepository.findByCustomerId(customerId)).thenReturn(List.of());
     }
 
-    private static CreateToolCertificationCommand createCommandFor(ToolCertification existing) {
-        return createToolCertificationCommand() //
-                .customerId(existing.getCustomerId()) //
-                .toolId(existing.getToolId()) //
-                .build();
-    }
-
     // ------------------------------------------------------------------------
     // then
 
-    private SchaffbarEvent expectSavedEvent(EventType type) {
+    private ToolCertification expectSavedCertification() {
+        verify(this.toolCertificationRepository).save(this.savedCertification.capture());
+
+        return this.savedCertification.getValue();
+    }
+
+    private void expectNothingSaved() {
+        verify(this.toolCertificationRepository, never()).save(any());
+        expectNoEvent();
+    }
+
+    private SchaffbarEvent expectSavedEvent(EventType type, ToolCertification certification) {
         verify(this.outboxEventStore).save(this.events.capture());
         assertThat(this.events.getValue()) //
                 .singleElement() //
-                .satisfies(event -> assertThat(event.getType()).isEqualTo(type));
+                .satisfies(event -> {
+                    assertThat(event.getType()).isEqualTo(type);
+                    assertThat(event.getAggregateId()).isEqualTo(certification.getId().getValue().toString());
+                });
 
         return this.events.getValue().getFirst();
+    }
+
+    private void expectDeleted(ToolCertification certification) {
+        verify(this.toolCertificationRepository).delete(certification);
+    }
+
+    private void expectAllDeleted(List<ToolCertification> certifications) {
+        verify(this.toolCertificationRepository).deleteAll(certifications);
+    }
+
+    private void expectNothingDeleted() {
+        verify(this.toolCertificationRepository, never()).delete(any());
+        verify(this.toolCertificationRepository, never()).deleteAll(any());
+        expectNoEvent();
+    }
+
+    // the service builds the deleted events itself – one per certification, with its id, customer and tool
+    private void expectDeletedEventsOf(List<ToolCertification> certifications) {
+        expectSavedEvents(EventType.TOOL_CERTIFICATION_DELETED, certifications);
+        List<ToolCertificationDeletedPayload> payloads = this.events.getValue().stream() //
+                .map(event -> event.deserializeAndValidatePayload(ToolCertificationDeletedPayload.class)) //
+                .toList();
+        assertThat(payloads) //
+                .extracting(ToolCertificationDeletedPayload::id, ToolCertificationDeletedPayload::customerId, ToolCertificationDeletedPayload::toolId) //
+                .containsExactlyElementsOf(certifications.stream() //
+                        .map(certification -> tuple(certification.getId(), certification.getCustomerId(), certification.getToolId())) //
+                        .toList());
     }
 
     private void expectSavedEvents(EventType type, List<ToolCertification> certifications) {
@@ -470,6 +504,16 @@ class ToolCertificationServiceTest {
 
     private void expectNoEvent() {
         verifyNoInteractions(this.outboxEventStore);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static CreateToolCertificationCommand createCommandFor(ToolCertification existing) {
+        return createToolCertificationCommand() //
+                .customerId(existing.getCustomerId()) //
+                .toolId(existing.getToolId()) //
+                .build();
     }
 
 }

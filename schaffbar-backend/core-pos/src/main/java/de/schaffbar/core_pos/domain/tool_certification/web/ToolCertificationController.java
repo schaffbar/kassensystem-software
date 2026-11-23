@@ -78,7 +78,7 @@ public class ToolCertificationController {
             toolCertifications = this.toolCertificationReadFacade.getToolCertifications(toolId);
         }
         else {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("Filter customerId or toolId is required");
         }
 
         return ResponseEntity.ok(toolCertifications.stream() //
@@ -90,7 +90,7 @@ public class ToolCertificationController {
     // command
 
     @PostMapping(value = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> createToolCertifications(@RequestBody @Valid BatchCertifyRequestBody requestBody) {
+    public ResponseEntity<Void> createToolCertifications(@RequestBody @NotNull @Valid BatchCertifyRequestBody requestBody) {
         this.toolCertificationCreate.process(requestBody.customerIds(), requestBody.toolId(), requestBody.certifiedBy());
 
         return ResponseEntity.noContent().build();

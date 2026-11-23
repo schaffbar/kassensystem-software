@@ -17,6 +17,7 @@ import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
+import de.schaffbar.core_pos.shared.id.ToolId;
 
 @IntegrationTest
 class SwitchBoxAcceptanceTest {
@@ -213,6 +214,34 @@ class SwitchBoxAcceptanceTest {
         RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
         this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.RED);
         CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+
+        // when
+        MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());
+
+        // then
+        this.fixture.then().expectDeviceAnswer(result, """
+                {
+                    "DEVUSECASE": "test",
+                    "STATE": "END",
+                    "ERROR": "Keine Einweisung",
+                    "ICON": "STOP",
+                    "CUSTOMERNAME": "%s",
+                    "UNITS": "0"
+                }
+                """.formatted(this.fixture.then().fullNameOf(customerId)));
+    }
+
+    // TU-10 – a paused certification counts like none
+    @Test
+    void card_redToolWithPausedCertification_isRefused() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        RfidReaderId switchBox = this.fixture.given().switchBox(scenario.macAddress());
+        ToolId toolId = this.fixture.given().toolWithSwitchBox(scenario.toolName(), switchBox, CertificationRequirement.RED);
+        CustomerId customerId = this.fixture.given().customerInTheWorkshop(scenario.rfidTagId());
+        CustomerId instructorId = this.fixture.given().instructor(toolId);
+        this.fixture.given().pausedToolCertification(customerId, toolId, instructorId);
 
         // when
         MvcTestResult result = this.fixture.api().holdRfidTagToReader(scenario.rfidTagId(), scenario.macAddress());

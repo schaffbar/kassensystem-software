@@ -179,6 +179,16 @@ public final class GivenFixture {
         assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
     }
 
+    public void pausedToolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
+        toolCertification(customerId, toolId, certifiedBy);
+        assertThat(this.api.pauseToolCertification(customerId, toolId)).hasStatus(HttpStatus.NO_CONTENT);
+    }
+
+    public void revokedToolCertification(CustomerId customerId, ToolId toolId, CustomerId certifiedBy) {
+        toolCertification(customerId, toolId, certifiedBy);
+        assertThat(this.api.revokeToolCertification(customerId, toolId)).hasStatus(HttpStatus.NO_CONTENT);
+    }
+
     // the person is in the workshop and holds their tag to the switch box of the tool
     public void toolUsage(RfidTagId rfidTagId, MacAddress switchBox) {
         MvcTestResult result = this.api.holdRfidTagToReader(rfidTagId, switchBox);

@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.use_case;
 
+import static de.schaffbar.core_pos.builder.CommandBuilder.createToolCertificationCommand;
 import static de.schaffbar.core_pos.builder.ViewBuilder.customerView;
 import static de.schaffbar.core_pos.builder.ViewBuilder.toolView;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,11 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import de.schaffbar.core_pos.domain.customer.CustomerService;
 import de.schaffbar.core_pos.domain.tool.ToolService;
 import de.schaffbar.core_pos.domain.tool.ToolViews.ToolView;
-import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationCommands.CreateToolCertificationCommand;
 import de.schaffbar.core_pos.domain.tool_certification.ToolCertificationService;
 import de.schaffbar.core_pos.shared.exception.CustomerIsInstructorException;
 import de.schaffbar.core_pos.shared.exception.CustomerNotInstructorException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -57,9 +58,7 @@ class ToolCertificationCreateTest {
         this.toolCertificationCreate.process(List.of(customerId, otherCustomerId), tool.id(), instructorId);
 
         // then
-        InOrder order = inOrder(this.toolCertificationService);
-        order.verify(this.toolCertificationService).createToolCertification(new CreateToolCertificationCommand(customerId, tool.id(), instructorId));
-        order.verify(this.toolCertificationService).createToolCertification(new CreateToolCertificationCommand(otherCustomerId, tool.id(), instructorId));
+        expectCertifiedInOrder(tool.id(), instructorId, customerId, otherCustomerId);
     }
 
     @Test
@@ -71,7 +70,9 @@ class ToolCertificationCreateTest {
         Throwable thrown = catchThrowable(() -> this.toolCertificationCreate.process(List.of(CustomerId.random()), unknown, CustomerId.random()));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.TOOL);
         expectNothingCreated();
     }
 
@@ -79,9 +80,10 @@ class ToolCertificationCreateTest {
     void rejectsACertifierWhoIsNoInstructorOfTheTool() {
         // given
         ToolView tool = givenToolWithInstructors(CustomerId.random());
+        CustomerId customerId = givenCustomer();
 
         // when
-        Throwable thrown = catchThrowable(() -> this.toolCertificationCreate.process(List.of(CustomerId.random()), tool.id(), CustomerId.random()));
+        Throwable thrown = catchThrowable(() -> this.toolCertificationCreate.process(List.of(customerId), tool.id(), CustomerId.random()));
 
         // then
         assertThat(thrown) //
@@ -102,7 +104,27 @@ class ToolCertificationCreateTest {
         Throwable thrown = catchThrowable(() -> this.toolCertificationCreate.process(List.of(customerId, unknown), tool.id(), instructorId));
 
         // then
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
+        expectNothingCreated();
+    }
+
+    // the customers of the batch are looked up before any rule – an unknown one is a 404, also from a certifier who is no
+    // instructor
+    @Test
+    void rejectsAnUnknownCustomerBeforeTheCertifier() {
+        // given
+        ToolView tool = givenToolWithInstructors(CustomerId.random());
+        CustomerId unknown = givenUnknownCustomer();
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.toolCertificationCreate.process(List.of(unknown), tool.id(), CustomerId.random()));
+
+        // then
+        assertThat(thrown) //
+                .isInstanceOf(ResourceNotFoundException.class) //
+                .hasFieldOrPropertyWithValue("resource", Resource.CUSTOMER);
         expectNothingCreated();
     }
 
@@ -157,6 +179,17 @@ class ToolCertificationCreateTest {
 
     // ------------------------------------------------------------------------
     // then
+
+    private void expectCertifiedInOrder(ToolId toolId, CustomerId certifiedBy, CustomerId... customerIds) {
+        InOrder order = inOrder(this.toolCertificationService);
+        for (CustomerId customerId : customerIds) {
+            order.verify(this.toolCertificationService).createToolCertification(createToolCertificationCommand() //
+                    .customerId(customerId) //
+                    .toolId(toolId) //
+                    .certifiedBy(certifiedBy) //
+                    .build());
+        }
+    }
 
     private void expectNothingCreated() {
         verifyNoInteractions(this.toolCertificationService);
