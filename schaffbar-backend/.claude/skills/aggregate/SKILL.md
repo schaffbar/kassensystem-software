@@ -9,8 +9,9 @@ An aggregate is a folder in `core-pos/src/main/java/de/schaffbar/core_pos/domain
 `rfid_reader`, … It owns its table, its state changes and its events. Nothing outside the folder sees the entity:
 others get **views** from the service, and changes come in as **commands** or value objects.
 
-Everything that needs a second aggregate is a **use case** in `use_case/`; the REST controller and its API model live in
-`domain/<aggregate>/web/`. Project rules, commands and the Definition of Done: `schaffbar-backend/CLAUDE.md`.
+Everything that needs a second aggregate is a **use case** in `use_case/` (skill `use-case`); the REST controller and
+its API model live in `domain/<aggregate>/web/`. Project rules, commands and the Definition of Done:
+`schaffbar-backend/CLAUDE.md`.
 
 Reference implementation: `domain/rfid_reader/` – small, complete, and the pilot of the backend consistency work
 (`docs/backend-consistency.md`).
@@ -454,17 +455,8 @@ public class RfidReaderService {
   transaction.
 - **Commands** are `@Command` and return `void` – only a create returns the new id. **A service command is the
   entity's command; where the entity leaves out the aggregate's name, it stands after the verb** (E20). The use case
-  is named `<Aggregate><EntityCommand>` (E3, `schaffbar-backend/CLAUDE.md`):
-  - **The prefix is the aggregate whose state changes** – the one whose service command the use case calls. When
-    several change, it is the one the action is about (`WorkshopUsageStart` also starts a session). It is not the
-    aggregate the action starts from: requesting a tag for a customer changes the assignment, so it is
-    `RfidTagAssignmentRequest`, not `CustomerRequestRfidTagAssignment`. Two aggregates with the same start are told
-    apart by the whole name – `ToolUsageStart` belongs to `ToolUsage`, not `Tool`.
-  - **The action is the entity's command** without the aggregate's name (table below); a use case that only chooses
-    between two others is named after what it does (`ToolUsageToggle` → `ToolUsageStart` or `ToolUsageStop`).
-  - **No ArchUnit rule checks the name** (decided 23.11.2026: a check of the prefix alone let the wrong aggregate
-    through, a full check needs a list of exceptions) – a new or renamed use case is checked against these two
-    points when it is written and in the review.
+  is named `<Aggregate><EntityCommand>` – the prefix is the aggregate whose state changes (E3; the rules and the
+  reasons in skill `use-case`, "Name"):
 
   | Entity command | Service command | Use case |
   | --- | --- | --- |
@@ -625,8 +617,7 @@ Every rule is strict (no `freeze(…)`): a violation is fixed, never excepted to
       bug says who checks before.
 - [ ] Each check an `ensure…` with its rule id; `throw` in a `throw…` helper, never inside a lambda.
 - [ ] Names: service command = entity command (+ aggregate where the entity leaves it out); use case
-      `<Aggregate><EntityCommand>` with the aggregate whose state changes (no ArchUnit rule – check it by hand); open /
-      running, never active.
+      `<Aggregate><EntityCommand>` (skill `use-case`); open / running, never active.
 - [ ] Delete: load the entity, `delete(entity)`, the deleted event – no `deleteById` (ArchUnit).
 - [ ] New event: EventType, payload (enums as enum, values as value objects, no entity or embeddable inside), mapper,
       factory, README.

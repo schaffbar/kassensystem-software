@@ -15,6 +15,7 @@ row, so a rule whose check reads the database also gets an acceptance test.
 | Entity | state changes, calculations, the events of a command | nothing | `domain/tool_usage/ToolUsageTest` |
 | Service | rules of one aggregate that need its repository; the events land in the outbox | Mockito for repository and `OutboxEventStore`, real entity and EventFactory | `domain/rfid_reader/RfidReaderServiceTest` |
 | Use case | the paths through one action: allowed, each rejection, order of side effects | Mockito for the services | `use_case/RfidReaderDeleteTest` |
+| Read facade | a view combined from several aggregates (fields, order), each precondition of a query | Mockito for the services | `read_facade/DashboardReadFacadeTest` |
 | Controller | HTTP: paths, status, JSON, value object conversion, problem codes | standalone MockMvc, mocked use cases and read facade | `domain/rfid_reader/web/RfidReaderControllerTest` |
 | Integration – acceptance | a rule or a flow as the portal sees it, through all layers and the database | `@IntegrationTest` (Spring context, Testcontainers) | `integration/RfidReaderAcceptanceTest` |
 | Integration – technical | what only the database shows: repository queries, migrations, transaction and outbox | `@IntegrationTest` | `domain/workshop_usage/WorkshopUsageRepositoryIntegrationTest` |
@@ -37,6 +38,8 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
 - **A new use case** gets its use case test (every path) and, if it has a rule, the acceptance test above. A use case
   that only forwards to one service (`RfidReaderCreate`, `RfidTagCreate`) has one path and needs no test of its own –
   the service and controller tests cover it.
+- **A read facade query that combines, filters or has a precondition** gets a read facade test; one that only
+  forwards to one service has none – the controller test covers it (skill `use-case`).
 - **Every endpoint** has controller tests – at least its success (status, the JSON fields the portal reads), and the
   problem code of each rejection. A new endpoint or a changed `*ApiModel` gets them in the same step.
 - **The device endpoints** (`/device/init`, `/counter`, `/card`) are tested in `integration/device/` instead – one
@@ -292,6 +295,17 @@ Mockito for the services; one test per path – see `use_case/RfidReaderChangeTy
   `verify(this.rfidReaderService).changeRfidReaderType(command)`);
 - each rejection: exception and code, and the change does **not** happen (`expectTypeNotChanged()` → `never()`);
 - the order of side effects where it matters (`InOrder`: first clean up, then delete).
+
+## Read facade
+
+Mockito for the services, like a use case test – see `read_facade/DashboardReadFacadeTest`, `DeviceReadFacadeTest`:
+
+- the services' views come from `ViewBuilder` in `given…` methods (`givenRunningWorkshopUsages(…)`,
+  `givenCustomer()`); the view of the read facade is checked against them field by field – `extracting(…)` with
+  `tuple(…)`, never an expected `new …View(…)`;
+- the order where the query promises one (`getActiveWorkshopUsers`: the longest there first);
+- each precondition: the exception, its `code` or `resource`, for broken data the `IllegalStateException` with the ids
+  in its message.
 
 ## Controller
 

@@ -31,8 +31,9 @@ before working on its topic.
 | --------------------------------------------------------------------------------------------------------------- | ----------------- |
 | an aggregate in `domain/<aggregate>/`: entity, commands, events, repository, service, views, where a rule lives | `aggregate`       |
 | tests: which level proves what, naming, service / use case / controller tests, integration fixture, ArchUnit    | `backend-testing` |
+| a use case in `use_case/` or a read facade in `read_facade/`: name, shape, order of checks, views of their own    | `use-case`        |
 
-Skills for use cases, error handling and the REST API follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
+Skills for error handling and the REST API follow (roadmap K5). A skill holds every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same step.
 
 ## Architecture
 
@@ -92,33 +93,14 @@ core_pos/
   – the portal's zod schemas mirror it (skill `api` of the portal). A changed `*ApiModel` or endpoint needs the
   portal's `shared/api` changed too, and a gap from `../docs/backend-features.md` that is closed is marked there.
 
-### Use cases (until the skill `use-case`)
+### Use cases and read facades (skill `use-case`)
 
-- One class per action in `use_case/`, named `<Aggregate><EntityCommand>` (`RfidReaderChangeType`,
-  `ToolAddInstructors`, `RfidTagAssignmentAssignRfidTag`) – also for a plain create, update or delete
-  (`ToolCreate`, `ToolDelete`), so every controller looks the same. **The aggregate is the one whose state changes**;
-  when several change, the one the action is about (`WorkshopUsageStart` also starts a session). The action is the
-  entity's command (E3, E20 – table in skill `aggregate`, "Service").
-- `@Service` `@Validated` `@RequiredArgsConstructor`, one public method `process(…)` annotated `@Command`; it returns
-  `void` or the id of what it created (`ToolCreate` → `ToolId`). Only the section `// helper`.
-- A use case may call other use cases when it chooses between whole actions with their rules (`ToolUsageToggle` →
-  `ToolUsageStart` or `ToolUsageStop`).
-- Checks that a referenced aggregate exists
-  (`customerService.getCustomer(id).orElseThrow(() -> ResourceNotFoundException.customer(id))`) – for a list all
-  entries before the change –, then the rules with a second aggregate, then the service call(s). A batch is all or
-  nothing (E11).
-
-### Read facades (until their skill)
-
-- One class per controller in `read_facade/`, named after it (`RfidReaderReadFacade`, `WorkshopSessionReadFacade`,
-  `DashboardReadFacade`) and used only by it: `@Service` `@Validated` `@RequiredArgsConstructor`, `@Query` on every
-  public method (ArchUnit `ReadFacadeArchitectureTest`).
-- Public methods are queries (`get…`, `is…` / `has…` for a yes/no answer) and return views – of one aggregate, or a
-  view of its own that combines several, in a `<What it shows>Views` next to the facade (`DashboardViews`,
-  `DeviceViews`, `OpenWorkshopSessionViews` – not `WorkshopSessionViews`, the aggregate's name). It reads services (any
-  number) and never changes anything. A query with a precondition throws its exception
-  (`DeviceReadFacade.getCustomer(rfidTagId)`: unknown tag → `ResourceNotFoundException`, no assignment →
-  `NoCustomerAssignedException`). Only the section `// helper`.
+- A change is a use case in `use_case/`, `<Aggregate><EntityCommand>` with the aggregate whose state changes – also
+  when it only forwards; one `process(…)` with `@Command`, returning `void` or the new id. In it: existence first
+  (a list: all entries), then the rules with a second aggregate (`ensure…`), then the service call(s); a batch is all
+  or nothing (E11).
+- A query is a method of the controller's read facade in `read_facade/` (one per controller, named after it), `@Query`
+  only, returning views – a view of its own over several aggregates in `<What it shows>Views`.
 
 ### Controller and API model (until the skill `rest-api`)
 
