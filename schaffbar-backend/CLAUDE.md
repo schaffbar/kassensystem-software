@@ -57,6 +57,7 @@ core_pos/
     exception/          rule exceptions, `ResourceNotFoundException`
     id/                 value objects (`CustomerId`, `MacAddress`, `IpAddress`, …)
     billing/            `BillableDuration`, `BillingTotal`
+    time/               `WorkshopTime` – the zone of the workshop (`Europe/Berlin`), `today()`
     validation/         own Bean Validation constraints (`@DateOfBirth`, `@PostalCode`, `@ToolDescription`)
     util/               `StringTo<ValueObject>Converter` for path variables and request parameters
     web/                `ApiExceptionHandler`
@@ -154,6 +155,10 @@ core_pos/
 
 - Ids are value objects (`CustomerId`, `ToolId`, … in `shared/id/`) in signatures and views; entities store the raw
   `UUID` / `String`.
+- A point in time is an `Instant` (UTC). A day or a time of the workshop – today for the age group, the time a device
+  shows – is that of `WorkshopTime.ZONE` (`Europe/Berlin`): `WorkshopTime.today()`, `LocalDateTime.now(WorkshopTime.ZONE)`,
+  `instant.atZone(WorkshopTime.ZONE)`. Never the zone of the JVM (`LocalDate.now()`, `ZoneId.systemDefault()` – ArchUnit
+  `TimeArchitectureTest`), also not in tests that compare with it.
 - Spring beans: `@Service` / `@RestController` + `@Validated` + `@RequiredArgsConstructor`, dependencies as
   `private final @NonNull` fields; public methods take no `UUID` or `String` and validate their parameters
   (`@NotNull @Valid CustomerId customerId`) – also a controller's request body; only an optional filter
