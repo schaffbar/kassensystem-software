@@ -269,12 +269,11 @@ class DomainArchitectureTest {
             .andShould().notBePublic();
 
     @ArchTest
+    // every MapStruct mapper – views, payloads and the API models
     static final ArchRule mappersFailOnUnmappedTargets = classes() //
-            .that().resideInAPackage(DOMAIN) //
-            .and().resideOutsideOfPackage(WEB) //
-            .and().areAnnotatedWith(Mapper.class) //
+            .that().areAnnotatedWith(Mapper.class) //
             .should(classCondition("be a @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)", DomainArchitectureTest::failsOnUnmappedTargets)) //
-            .because("a new field of the aggregate must not get lost in a view or an event");
+            .because("a new field must not get lost in a view, an event or a response");
 
     // ------------------------------------------------------------------------
     // repository
