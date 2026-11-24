@@ -15,7 +15,7 @@
 
 ## Commands
 
-No command records – both changes take only the id (E1):
+No command records – both changes take only the id:
 
 | Change | Input                                | Use case        |
 |--------|--------------------------------------|-----------------|

@@ -3,7 +3,7 @@
 **Aggregate Root:** `RfidTagAssignment`
 
 **Inner entity:** `RfidTagAssignmentHistory` – one entry per finished assignment, written by the unassignment; read
-through `GET /api/v1/rfid-tag-assignments/history` (a sub-path of the aggregate, E16)
+through `GET /api/v1/rfid-tag-assignments/history` (a sub-path of the aggregate)
 
 **Identity:** `RfidTagAssignmentId` (UUID)
 
@@ -38,7 +38,7 @@ through `GET /api/v1/rfid-tag-assignments/history` (a sub-path of the aggregate,
 
 ## Commands
 
-No command records – each change takes one or two values (E1):
+No command records – each change takes one or two values:
 
 | Operation          | Service command            | Input                      | Use case                           |
 |--------------------|----------------------------|----------------------------|------------------------------------|
@@ -54,8 +54,8 @@ No command records – each change takes one or two values (E1):
 | TA-1  | A customer can have at most one RFID tag assignment (waiting or assigned)                                                        | `RfidTagAssignmentService.requestRfidTagAssignment()` (`CustomerHasRfidTagAssignmentException`, `409`), unique `customerId`                                              |
 | TA-2  | An RFID tag can be assigned to at most one customer                                                                              | `RfidTagAssignmentService.assignRfidTag()` (`RfidTagAlreadyAssignedException`, `409`), unique `rfidTagId`                                                                |
 | TA-3  | Only one request (`WAITING_FOR_ASSIGNMENT`) may wait at a time – in the whole workshop                                           | `RfidTagAssignmentService.requestRfidTagAssignment()` (`RfidTagAssignmentAlreadyWaitingException`, `409`)                                                                |
-| TA-4  | A tag is assigned only to the waiting request; without one the tag is rejected                                                   | `RfidTagAssignmentService.assignRfidTag()` finds the waiting request (`NoRfidTagAssignmentWaitingException`, `409`); the entity guards against a bug (E29)               |
-| TA-5  | Only an `ASSIGNED` assignment can be unassigned                                                                                  | `RfidTagAssignmentService.unassignRfidTag()` finds the assigned one (`NoRfidTagAssignedException`, `409`); the entity guards against a bug (E29)                         |
+| TA-4  | A tag is assigned only to the waiting request; without one the tag is rejected                                                   | `RfidTagAssignmentService.assignRfidTag()` finds the waiting request (`NoRfidTagAssignmentWaitingException`, `409`); the entity guards against a bug                     |
+| TA-5  | Only an `ASSIGNED` assignment can be unassigned                                                                                  | `RfidTagAssignmentService.unassignRfidTag()` finds the assigned one (`NoRfidTagAssignedException`, `409`); the entity guards against a bug                               |
 | TA-6  | Unassigning deletes the assignment and writes its history entry – one change, one event                                          | `RfidTagAssignmentService.unassignRfidTag()`; `RFID_TAG_UNASSIGNED` carries the history entry                                                                            |
 | TA-7  | Customer must exist before requesting assignment                                                                                 | `RfidTagAssignmentRequest` use case (`404`)                                                                                                                              |
 | TA-8  | RFID tag must exist before it can be assigned                                                                                    | `RfidTagAssignmentAssignRfidTag` use case (`404`)                                                                                                                        |

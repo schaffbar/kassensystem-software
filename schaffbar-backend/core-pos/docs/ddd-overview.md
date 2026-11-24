@@ -75,16 +75,16 @@ domain/<aggregate>/
 
 ### Component Responsibilities
 
-| Component                 | Responsibility                                                                                                                                                                                                                  |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Aggregate Root**        | Encapsulates state and invariants. Created by a static `of(…)`; every state change is a command method that returns `List<SchaffbarEvent>`. Nothing outside the folder sees the entity.                                         |
-| **Commands**              | Immutable `record` types with Bean Validation, grouped in a `*Commands` interface.                                                                                                                                              |
-| **Service**               | Loads the entity (or `404`), checks the rules that need other rows of the aggregate (uniqueness), calls the entity's command and saves its events with `OutboxEventStore`. Every public method is `@Query` or `@Command` (E21). |
-| **Repository**            | Spring Data `JpaRepository`, package-private; every method taking a raw value has an overload taking the value object.                                                                                                          |
-| **Views**                 | Read-only `record` projections, mapped with MapStruct (`MAPPER`) – what the outside world gets instead of the entity.                                                                                                           |
-| **EventFactory**          | Creates the `SchaffbarEvent` of each event type: maps the entity to its payload (`PayloadMapper`), validates the payload, wraps it.                                                                                             |
-| **PayloadMapper**         | MapStruct interface from the entity to the event payload records.                                                                                                                                                               |
-| **Controller / ApiModel** | REST layer: a command calls a use case, a query the controller's read facade.                                                                                                                                                   |
+| Component                 | Responsibility                                                                                                                                                                                                            |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Aggregate Root**        | Encapsulates state and invariants. Created by a static `of(…)`; every state change is a command method that returns `List<SchaffbarEvent>`. Nothing outside the folder sees the entity.                                   |
+| **Commands**              | Immutable `record` types with Bean Validation, grouped in a `*Commands` interface.                                                                                                                                        |
+| **Service**               | Loads the entity (or `404`), checks the rules that need other rows of the aggregate (uniqueness), calls the entity's command and saves its events with `OutboxEventStore`. Every public method is `@Query` or `@Command`. |
+| **Repository**            | Spring Data `JpaRepository`, package-private; every method taking a raw value has an overload taking the value object.                                                                                                    |
+| **Views**                 | Read-only `record` projections, mapped with MapStruct (`MAPPER`) – what the outside world gets instead of the entity.                                                                                                     |
+| **EventFactory**          | Creates the `SchaffbarEvent` of each event type: maps the entity to its payload (`PayloadMapper`), validates the payload, wraps it.                                                                                       |
+| **PayloadMapper**         | MapStruct interface from the entity to the event payload records.                                                                                                                                                         |
+| **Controller / ApiModel** | REST layer: a command calls a use case, a query the controller's read facade.                                                                                                                                             |
 
 ### Aggregate Root Internal Structure
 
@@ -140,7 +140,7 @@ inside its package. This keeps the documentation close to the code it describes.
 ## 4. Use Cases
 
 One class per action in `use_case/`, named `<Aggregate><EntityCommand>`: the prefix is the aggregate whose state
-changes, the action is the command of its entity (E3, E20 – skill `aggregate`, "Service"). The rule ids are those of
+changes, the action is the command of its entity (skill `aggregate`, "Service"). The rule ids are those of
 the aggregate READMEs.
 
 **With a second aggregate** – the use case reads or changes more than its own aggregate:
@@ -175,7 +175,7 @@ the aggregate READMEs.
 
 ## 5. Read Facades
 
-Every controller reads through the one read facade named after it in `read_facade/` (E17); a read facade only reads.
+Every controller reads through the one read facade named after it in `read_facade/`; a read facade only reads.
 Those that combine several aggregates have views of their own (`DashboardViews`, `DeviceViews`,
 `OpenWorkshopSessionViews`):
 

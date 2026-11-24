@@ -6,23 +6,24 @@
 ## Important
 
 - [Backend] Is it problem when we delete RFID reader during operation (exmaple Switch Box)
-- [Backend] RFID-Tag löschen nur ohne Zuweisung: `RfidTagService.deleteRfidTag` prüft das nicht (TODO im Code), und `rfid_tag_assignment.rfid_tag_id` hat keinen Fremdschlüssel. Ein zugewiesener Tag lässt sich löschen, die Zuweisung zeigt danach auf einen Tag, den es nicht mehr gibt (Person bekommt keinen neuen Tag, bis die Zuweisung aufgehoben ist; wird der Tag neu registriert, gehört er wieder der alten Person). Ablehnen mit `409` – das Portal bietet „Tag löschen“ für zugewiesene Tags schon nicht mehr an
 
 - [Feature] WaitingForAssignment auch im Portal stoppen
 - [Backend] Scheduler to clean up WaitingForAssignment
-- [Backend] Genauer definieren was erlaubt ist in WaitingForAssignment und was in Assigned status
 
 - [PostgreSql] init.sql Add NOT NULL constraints to customer
 - [Backend] close all tool sessions when restarting server/backend
+
+## Fields
+
+Tool.createdAt and updatedAt - add
+ToolCertification.certifiedBy - mandatory
 
 ## UX / UI
 
 ## Fehlerbehandlung / Problems API
 
-- [Backend] Problems API: `@ControllerAdvice` mit `ProblemDetail` (RFC 9457). Fachliche Exceptions kommen heute als `500` ohne lesbare Meldung an (z. B. `RfidReaderHasToolAssignedException`, `ToolNameAlreadyUsedException`) sollten `409`/`400` mit verständlichem `detail` liefern
-- [Frontend] handle API errors – teilweise erledigt: Fehler-Interceptor zeigt eine Snackbar mit allgemeiner Meldung (laden / speichern / Server nicht erreichbar). Mit Problems API stattdessen `detail` aus dem `ProblemDetail` anzeigen
-- [Frontend] Action feedback - Snackbar? – Fehler erledigt (Interceptor); Erfolgsmeldungen noch offen
-- [Frontend] Mit Problems API werden reine Vorab-Prüfungen im Frontend optional, z. B. `getToolsByRfidReader` vor dem Typwechsel eines RFID-Readers (das Backend prüft das bereits in `RfidReaderChangeType`)
+- [Frontend] Erfolgsmeldungen nach dem Speichern (Snackbar) – Fehler zeigt der Interceptor schon
+- [Frontend] Reine Vorab-Prüfungen sind optional, seit das Backend jede Regel mit Code ablehnt, z. B. `getToolsByRfidReader` vor dem Typwechsel eines RFID-Readers – behalten, wo sie den Button vorher erklären
 
 ## Maintenance
 
@@ -39,10 +40,6 @@
 
 - [Backend] Validate HTTP response before sending back
 - [Backend] HTTP response - missing values as null or NON_NULL option -> adapt ApiModels in portal
-- [Backend] Facade vs Use Case and move all mutations to use cases
-- [Backend] Arch unit
-- [Backend] Test infrastructure + Unit tests
-- [Frontend] Test infrastructure
 
 ## Feature
 
@@ -68,8 +65,3 @@ Der gesamte Ausdruck http://**IP-Adresse**/relay/0 ist eine URL (Uniform Resourc
 - http:// = Das Schema / Protokoll
 - IP-Adresse = Der Host (oder die Domain)
 - /relay/0 = Der Path (Pfad)
-
-## Fields
-
-Tool.createdAt and updatedAt - add
-ToolCertification.certifiedBy - mandatory

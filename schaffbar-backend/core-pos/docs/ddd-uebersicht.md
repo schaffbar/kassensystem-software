@@ -77,16 +77,16 @@ domain/<aggregat>/
 
 ### Verantwortlichkeiten der Komponenten
 
-| Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                            |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Aggregate Root**        | Kapselt Zustand und Invarianten. Entsteht über ein statisches `of(…)`; jede Zustandsänderung ist eine Befehlsmethode, die `List<SchaffbarEvent>` zurückgibt. Außerhalb des Ordners sieht niemand die Entity.                                                  |
-| **Commands**              | Unveränderliche `record`-Typen mit Bean Validation, gruppiert in einem `*Commands`-Interface.                                                                                                                                                                 |
-| **Service**               | Lädt die Entity (sonst `404`), prüft die Regeln, die andere Zeilen des Aggregats brauchen (Eindeutigkeit), ruft den Befehl der Entity auf und speichert ihre Ereignisse über `OutboxEventStore`. Jede öffentliche Methode ist `@Query` oder `@Command` (E21). |
-| **Repository**            | Spring Data `JpaRepository`, package-private; jede Methode mit einem rohen Wert hat eine Überladung mit dem Value Object.                                                                                                                                     |
-| **Views**                 | Schreibgeschützte `record`-Projektionen, mit MapStruct abgebildet (`MAPPER`) – das, was die Außenwelt statt der Entity bekommt.                                                                                                                               |
-| **EventFactory**          | Erzeugt das `SchaffbarEvent` jedes Ereignistyps: bildet die Entity auf ihre Payload ab (`PayloadMapper`), validiert die Payload, verpackt sie.                                                                                                                |
-| **PayloadMapper**         | MapStruct-Interface von der Entity zu den Payload-Records der Ereignisse.                                                                                                                                                                                     |
-| **Controller / ApiModel** | REST-Schicht: ein Befehl ruft einen Use Case auf, eine Abfrage die Read Facade des Controllers.                                                                                                                                                               |
+| Komponente                | Verantwortlichkeit                                                                                                                                                                                                                                      |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Aggregate Root**        | Kapselt Zustand und Invarianten. Entsteht über ein statisches `of(…)`; jede Zustandsänderung ist eine Befehlsmethode, die `List<SchaffbarEvent>` zurückgibt. Außerhalb des Ordners sieht niemand die Entity.                                            |
+| **Commands**              | Unveränderliche `record`-Typen mit Bean Validation, gruppiert in einem `*Commands`-Interface.                                                                                                                                                           |
+| **Service**               | Lädt die Entity (sonst `404`), prüft die Regeln, die andere Zeilen des Aggregats brauchen (Eindeutigkeit), ruft den Befehl der Entity auf und speichert ihre Ereignisse über `OutboxEventStore`. Jede öffentliche Methode ist `@Query` oder `@Command`. |
+| **Repository**            | Spring Data `JpaRepository`, package-private; jede Methode mit einem rohen Wert hat eine Überladung mit dem Value Object.                                                                                                                               |
+| **Views**                 | Schreibgeschützte `record`-Projektionen, mit MapStruct abgebildet (`MAPPER`) – das, was die Außenwelt statt der Entity bekommt.                                                                                                                         |
+| **EventFactory**          | Erzeugt das `SchaffbarEvent` jedes Ereignistyps: bildet die Entity auf ihre Payload ab (`PayloadMapper`), validiert die Payload, verpackt sie.                                                                                                          |
+| **PayloadMapper**         | MapStruct-Interface von der Entity zu den Payload-Records der Ereignisse.                                                                                                                                                                               |
+| **Controller / ApiModel** | REST-Schicht: ein Befehl ruft einen Use Case auf, eine Abfrage die Read Facade des Controllers.                                                                                                                                                         |
 
 ### Interne Struktur des Aggregate Root
 
@@ -142,7 +142,7 @@ Die ausführliche Dokumentation jedes Aggregats (Attribute, Befehle, Geschäftsr
 ## 4. Use Cases
 
 Eine Klasse pro Aktion in `use_case/`, benannt `<Aggregat><Befehl der Entity>`: das Präfix ist das Aggregat, dessen
-Zustand sich ändert, die Aktion der Befehl seiner Entity (E3, E20 – Skill `aggregate`, „Service“). Die Regel-Ids sind
+Zustand sich ändert, die Aktion der Befehl seiner Entity (Skill `aggregate`, „Service“). Die Regel-Ids sind
 die der READMEs der Aggregate.
 
 **Mit einem zweiten Aggregat** – der Use Case liest oder ändert mehr als sein eigenes Aggregat:
@@ -177,7 +177,7 @@ die der READMEs der Aggregate.
 
 ## 5. Read Facades
 
-Jeder Controller liest über die eine Read Facade in `read_facade/`, die nach ihm benannt ist (E17); eine Read Facade
+Jeder Controller liest über die eine Read Facade in `read_facade/`, die nach ihm benannt ist; eine Read Facade
 liest nur. Die, die mehrere Aggregate verbinden, haben eigene Views (`DashboardViews`, `DeviceViews`,
 `OpenWorkshopSessionViews`):
 
