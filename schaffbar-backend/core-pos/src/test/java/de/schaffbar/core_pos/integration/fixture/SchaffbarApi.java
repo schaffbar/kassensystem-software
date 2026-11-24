@@ -1,6 +1,7 @@
 package de.schaffbar.core_pos.integration.fixture;
 
 import static de.schaffbar.core_pos.builder.CommandBuilder.createCustomerCommand;
+import static java.util.Objects.nonNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +53,16 @@ public final class SchaffbarApi {
                 .content("""
                         { "macAddress": "%s" }
                         """.formatted(macAddress)) //
+                .exchange();
+    }
+
+    // name null: the field left empty in the portal – the reader has no name
+    public MvcTestResult updateRfidReader(RfidReaderId rfidReaderId, String name) {
+        return this.mvc.put().uri("/api/v1/rfid-readers/{rfidReaderId}", rfidReaderId.getValue()) //
+                .contentType(MediaType.APPLICATION_JSON) //
+                .content("""
+                        { "name": %s, "socketName": null }
+                        """.formatted(quotedOrNull(name))) //
                 .exchange();
     }
 
@@ -323,6 +334,10 @@ public final class SchaffbarApi {
 
     // ------------------------------------------------------------------------
     // helper
+
+    private static String quotedOrNull(String value) {
+        return nonNull(value) ? "\"" + value + "\"" : "null";
+    }
 
     private static String quoted(List<CustomerId> customerIds) {
         return customerIds.stream() //

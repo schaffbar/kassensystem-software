@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
+import de.schaffbar.core_pos.builder.RandomValues;
 import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
+import de.schaffbar.core_pos.shared.exception.RfidReaderNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.id.ToolId;
 
@@ -95,6 +97,53 @@ class RfidReaderAcceptanceTest {
         // then
         this.fixture.then().expectSuccess(result);
         this.fixture.then().expectNoRfidReader(switchBox);
+    }
+
+    @Test
+    void r6_readerNamesAreUniqueWithoutRegardToCase() {
+        Scenario scenario = Scenario.randomValues().build();
+        String otherName = RandomValues.rfidReaderName();
+
+        // given
+        RfidReaderId rfidReaderId = this.fixture.given().rfidReader(scenario.macAddress(), scenario.rfidReaderName());
+        RfidReaderId otherReader = this.fixture.given().rfidReader(RandomValues.macAddress(), otherName);
+
+        // when
+        MvcTestResult result = this.fixture.api().updateRfidReader(otherReader, scenario.rfidReaderName().toUpperCase());
+
+        // then
+        this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, RfidReaderNameAlreadyUsedException.CODE);
+        this.fixture.then().expectRfidReader(otherReader, otherName);
+
+        // when – a space at the end makes another name, nothing is trimmed
+        result = this.fixture.api().updateRfidReader(otherReader, scenario.rfidReaderName() + " ");
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectRfidReader(otherReader, scenario.rfidReaderName() + " ");
+
+        // when – the reader itself may change the case of its name
+        result = this.fixture.api().updateRfidReader(rfidReaderId, scenario.rfidReaderName().toUpperCase());
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectRfidReader(rfidReaderId, scenario.rfidReaderName().toUpperCase());
+    }
+
+    @Test
+    void r6_readersWithoutANameAreNotCompared() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given – a new reader has no name (R-9)
+        this.fixture.given().rfidReader(RandomValues.macAddress());
+        RfidReaderId rfidReaderId = this.fixture.given().rfidReader(scenario.macAddress(), scenario.rfidReaderName());
+
+        // when
+        MvcTestResult result = this.fixture.api().updateRfidReader(rfidReaderId, null);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectRfidReaderWithoutName(rfidReaderId);
     }
 
 }

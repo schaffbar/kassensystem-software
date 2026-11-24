@@ -40,6 +40,7 @@ import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
 import de.schaffbar.core_pos.shared.exception.RfidReaderHasToolAssignedException;
+import de.schaffbar.core_pos.shared.exception.RfidReaderNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 import de.schaffbar.core_pos.shared.util.StringToMacAddressConverter;
@@ -259,6 +260,20 @@ class RfidReaderControllerTest {
 
         // then
         expectRfidReaderNotFound(result);
+    }
+
+    @Test
+    void updateRfidReader_withTheNameOfAnotherReader_is409WithTheCode() throws Exception {
+        // given
+        UpdateRfidReaderCommand command = updateRfidReaderCommand().build();
+        givenUpdateRejectedWith(command, new RfidReaderNameAlreadyUsedException(command.name(), RfidReaderId.random()));
+
+        // when
+        ResultActions result = updateRfidReader(command);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(RfidReaderNameAlreadyUsedException.CODE));
     }
 
     // ------------------------------------------------------------------------

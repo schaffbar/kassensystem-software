@@ -28,6 +28,10 @@ public class RandomValues {
         return RfidTagId.of(HexFormat.of().withUpperCase().formatHex(bytes));
     }
 
+    public static String rfidReaderName() {
+        return "Lesegerät " + UUID.randomUUID();
+    }
+
     public static String toolName() {
         return "Werkzeug " + UUID.randomUUID();
     }

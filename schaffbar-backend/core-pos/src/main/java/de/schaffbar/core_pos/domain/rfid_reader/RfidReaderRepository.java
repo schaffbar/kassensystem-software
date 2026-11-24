@@ -1,5 +1,6 @@
 package de.schaffbar.core_pos.domain.rfid_reader;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,5 +17,7 @@ interface RfidReaderRepository extends JpaRepository<RfidReader, UUID> {
     default Optional<RfidReader> findByMacAddress(MacAddress macAddress) {
         return findByMacAddress(macAddress.getValue());
     }
+
+    List<RfidReader> findByNameIgnoreCase(String name);
 
 }

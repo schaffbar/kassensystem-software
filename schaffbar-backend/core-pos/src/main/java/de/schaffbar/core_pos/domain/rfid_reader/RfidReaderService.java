@@ -1,5 +1,8 @@
 package de.schaffbar.core_pos.domain.rfid_reader;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +23,7 @@ import de.schaffbar.core_pos.shared.event.SchaffbarEvent;
 import de.schaffbar.core_pos.shared.event.outbox.OutboxEventStore;
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
+import de.schaffbar.core_pos.shared.exception.RfidReaderNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
@@ -75,9 +79,13 @@ public class RfidReaderService {
 
     @Command
     public void updateRfidReader(@NotNull @Valid UpdateRfidReaderCommand command) {
-        List<SchaffbarEvent> events = this.rfidReaderRepository.findById(command.id().getValue()) //
-                .map(rfidReader -> rfidReader.update(command)) //
+        RfidReader rfidReader = this.rfidReaderRepository.findById(command.id().getValue()) //
                 .orElseThrow(() -> ResourceNotFoundException.rfidReader(command.id()));
+        if (nonNull(command.name())) {
+            ensureNameUnused(command.name(), command.id());
+        }
+
+        List<SchaffbarEvent> events = rfidReader.update(command);
 
         this.outboxEventStore.save(events);
 
@@ -117,8 +125,20 @@ public class RfidReaderService {
                 .ifPresent(existing -> throwMacAddressAlreadyUsedException(macAddress, existing));
     }
 
+    // R-6 – ignoring case; rfidReaderId is the reader that keeps its name, also in another case
+    private void ensureNameUnused(String name, RfidReaderId rfidReaderId) {
+        this.rfidReaderRepository.findByNameIgnoreCase(name).stream() //
+                .filter(existing -> isFalse(existing.getId().sameValueAs(rfidReaderId))) //
+                .findFirst() //
+                .ifPresent(existing -> throwRfidReaderNameAlreadyUsedException(name, existing));
+    }
+
     private void throwMacAddressAlreadyUsedException(MacAddress macAddress, RfidReader existingRfidReader) {
         throw new MacAddressAlreadyUsedException(macAddress, existingRfidReader.getId());
+    }
+
+    private void throwRfidReaderNameAlreadyUsedException(String name, RfidReader existingRfidReader) {
+        throw new RfidReaderNameAlreadyUsedException(name, existingRfidReader.getId());
     }
 
 }

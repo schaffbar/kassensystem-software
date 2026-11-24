@@ -11,6 +11,7 @@ import de.schaffbar.core_pos.shared.id.RfidTagId;
 @Builder
 public record Scenario( //
         MacAddress macAddress, //
+        String rfidReaderName, //
         RfidTagId rfidTagId, //
         String toolName, //
         IpAddress ipAddress //
@@ -19,6 +20,7 @@ public record Scenario( //
     public static ScenarioBuilder randomValues() {
         return Scenario.builder() //
                 .macAddress(RandomValues.macAddress()) //
+                .rfidReaderName(RandomValues.rfidReaderName()) //
                 .rfidTagId(RandomValues.rfidTagId()) //
                 .toolName(RandomValues.toolName()) //
                 .ipAddress(RandomValues.ipAddress());

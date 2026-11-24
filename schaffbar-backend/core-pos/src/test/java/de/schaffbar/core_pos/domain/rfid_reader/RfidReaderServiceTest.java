@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -32,6 +34,7 @@ import de.schaffbar.core_pos.shared.event.payload.RfidReaderEventPayload.RfidRea
 import de.schaffbar.core_pos.shared.exception.MacAddressAlreadyUsedException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException.Resource;
+import de.schaffbar.core_pos.shared.exception.RfidReaderNameAlreadyUsedException;
 import de.schaffbar.core_pos.shared.id.MacAddress;
 import de.schaffbar.core_pos.shared.id.RfidReaderId;
 
@@ -94,6 +97,7 @@ class RfidReaderServiceTest {
         // given
         RfidReader rfidReader = givenReader();
         UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).build();
+        givenReadersNamed(command.name());
 
         // when
         this.rfidReaderService.updateRfidReader(command);
@@ -102,6 +106,54 @@ class RfidReaderServiceTest {
         assertThat(rfidReader.getName()).isEqualTo(command.name());
         assertThat(rfidReader.getSocketName()).isEqualTo(command.socketName());
         expectSavedEvent(EventType.RFID_READER_UPDATED, rfidReader.getId());
+    }
+
+    @Test
+    void updateRfidReader_keepsItsOwnNameInAnotherCase() {
+        // given
+        RfidReader rfidReader = givenReaderNamed("Theke");
+        UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).name("THEKE").build();
+        givenReadersNamed(command.name(), rfidReader);
+
+        // when
+        this.rfidReaderService.updateRfidReader(command);
+
+        // then
+        assertThat(rfidReader.getName()).isEqualTo(command.name());
+        expectSavedEvent(EventType.RFID_READER_UPDATED, rfidReader.getId());
+    }
+
+    @Test
+    void updateRfidReader_withoutName_isNotComparedWithOtherReaders() {
+        // given
+        RfidReader rfidReader = givenReaderNamed("Theke");
+        UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).name(null).build();
+
+        // when
+        this.rfidReaderService.updateRfidReader(command);
+
+        // then
+        assertThat(rfidReader.getName()).isNull();
+        expectSavedEvent(EventType.RFID_READER_UPDATED, rfidReader.getId());
+        expectNoNameLookup();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Theke", "THEKE"})
+    void updateRfidReader_rejectsTheNameOfAnotherReader(String name) {
+        // given
+        RfidReader rfidReader = givenReader();
+        RfidReader other = readerNamed("Theke");
+        UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).name(name).build();
+        givenReadersNamed(command.name(), other);
+
+        // when
+        Throwable thrown = catchThrowable(() -> this.rfidReaderService.updateRfidReader(command));
+
+        // then
+        expectNameAlreadyUsedBy(thrown, other);
+        assertThat(rfidReader.getName()).isNull();
+        expectNoEvent();
     }
 
     @Test
@@ -191,6 +243,17 @@ class RfidReaderServiceTest {
         return rfidReader;
     }
 
+    private RfidReader givenReaderNamed(String name) {
+        RfidReader rfidReader = readerNamed(name);
+        when(this.rfidReaderRepository.findById(rfidReader.getId().getValue())).thenReturn(Optional.of(rfidReader));
+
+        return rfidReader;
+    }
+
+    private void givenReadersNamed(String name, RfidReader... rfidReaders) {
+        when(this.rfidReaderRepository.findByNameIgnoreCase(name)).thenReturn(List.of(rfidReaders));
+    }
+
     private RfidReaderId givenUnknownReader() {
         RfidReaderId unknown = RfidReaderId.random();
         when(this.rfidReaderRepository.findById(unknown.getValue())).thenReturn(Optional.empty());
@@ -231,6 +294,17 @@ class RfidReaderServiceTest {
                 .hasFieldOrPropertyWithValue("resource", Resource.RFID_READER);
     }
 
+    private void expectNameAlreadyUsedBy(Throwable thrown, RfidReader other) {
+        assertThat(thrown) //
+                .isInstanceOf(RfidReaderNameAlreadyUsedException.class) //
+                .hasFieldOrPropertyWithValue("code", RfidReaderNameAlreadyUsedException.CODE) //
+                .hasMessageContaining(other.getId().getValue().toString());
+    }
+
+    private void expectNoNameLookup() {
+        verify(this.rfidReaderRepository, never()).findByNameIgnoreCase(any());
+    }
+
     private void expectDeleted(RfidReader rfidReader) {
         verify(this.rfidReaderRepository).delete(rfidReader);
     }
@@ -246,6 +320,16 @@ class RfidReaderServiceTest {
 
     private void expectNoEvent() {
         verifyNoInteractions(this.outboxEventStore);
+    }
+
+    // ------------------------------------------------------------------------
+    // helper
+
+    private static RfidReader readerNamed(String name) {
+        RfidReader rfidReader = RfidReader.of(RandomValues.macAddress());
+        rfidReader.update(updateRfidReaderCommand(rfidReader.getId()).name(name).build());
+
+        return rfidReader;
     }
 
 }

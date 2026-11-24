@@ -47,6 +47,15 @@ public final class GivenFixture {
         return rfidReaderId;
     }
 
+    public RfidReaderId rfidReader(MacAddress macAddress, String name) {
+        RfidReaderId rfidReaderId = rfidReader(macAddress);
+
+        MvcTestResult result = this.api.updateRfidReader(rfidReaderId, name);
+        assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+        return rfidReaderId;
+    }
+
     public RfidReaderId switchBox(MacAddress macAddress) {
         return rfidReader(macAddress, RfidReaderType.SWITCH_BOX);
     }

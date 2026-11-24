@@ -91,6 +91,20 @@ public final class ThenFixture {
         assertThat(result).bodyJson().extractingPath("$.type").isEqualTo(type.name());
     }
 
+    public void expectRfidReader(RfidReaderId rfidReaderId, String name) {
+        MvcTestResult result = this.api.getRfidReader(rfidReaderId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.name").isEqualTo(name);
+    }
+
+    public void expectRfidReaderWithoutName(RfidReaderId rfidReaderId) {
+        MvcTestResult result = this.api.getRfidReader(rfidReaderId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson().extractingPath("$.name").isNull();
+    }
+
     public void expectNoRfidReader(RfidReaderId rfidReaderId) {
         expectProblem(this.api.getRfidReader(rfidReaderId), HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
     }
