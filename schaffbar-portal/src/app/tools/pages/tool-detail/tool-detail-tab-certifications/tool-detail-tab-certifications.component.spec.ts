@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
@@ -98,6 +98,17 @@ describe('ToolDetailTabCertificationsComponent', () => {
         certifiedAt: new Date('2025-09-04T10:00:00Z'),
       },
       expect.objectContaining({ userName: null, certifierName: null }),
+    ]);
+  });
+
+  // TC-9: certifiedBy keeps the id of an instructor who was deleted
+  it('should show no instructor name when the instructor was deleted', async () => {
+    const toolCertifications = storeMock['toolCertifications'] as WritableSignal<ToolCertification[]>;
+    toolCertifications.set([{ ...certifications[0], certifiedBy: 'deleted-instructor' }]);
+    await fixture.whenStable();
+
+    expect(certificationsComponent().certifications()).toEqual([
+      expect.objectContaining({ userName: 'Mia Fischer', certifierName: null }),
     ]);
   });
 
