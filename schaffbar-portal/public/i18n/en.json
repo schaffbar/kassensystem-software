@@ -14,6 +14,7 @@
       "RESOURCE_NOT_FOUND": "The entry does not exist (anymore).",
       "RFID_READER_HAS_TOOL_ASSIGNED": "The RFID reader is assigned to a tool as its switch box – disconnect the switch box from the tool first.",
       "MAC_ADDRESS_ALREADY_USED": "The MAC address already belongs to another RFID reader.",
+      "RFID_READER_NAME_ALREADY_USED": "Another RFID reader already has this name – choose a different name.",
       "RFID_TAG_ALREADY_REGISTERED": "The RFID tag is already registered.",
       "RFID_TAG_ASSIGNED_TO_CUSTOMER": "The RFID tag is assigned to a person – remove the assignment first.",
       "CUSTOMER_HAS_RFID_TAG_ASSIGNMENT": "The person already has an RFID tag or is waiting for one.",
@@ -800,6 +801,7 @@
           "type": "change it in the \"Device Type\" section"
         },
         "errors": {
+          "nameExists": "Another device already has this name",
           "socketNameFormat": "Invalid character – allowed are a–z, 0–9 and \"-\""
         }
       }

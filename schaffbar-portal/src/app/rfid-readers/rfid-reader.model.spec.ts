@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import { RfidReaderType } from '../shared/models/rfid-reader-type';
-import { canDeleteRfidReader, isUnassigned, rfidReaderGroup, RfidReaderListItem } from './rfid-reader.model';
+import {
+  canDeleteRfidReader,
+  isRfidReaderNameUsed,
+  isUnassigned,
+  RfidReader,
+  rfidReaderGroup,
+  RfidReaderListItem,
+} from './rfid-reader.model';
 
 describe('rfidReaderGroup', () => {
   it('should put readers without type into the new ones', () => {
@@ -56,5 +63,38 @@ describe('canDeleteRfidReader', () => {
   it('should allow it only without an assigned tool', () => {
     expect(canDeleteRfidReader(switchBox)).toBe(true);
     expect(canDeleteRfidReader({ ...switchBox, assignedTool: { id: 'tool-1', name: 'Bandsäge' } })).toBe(false);
+  });
+});
+
+describe('isRfidReaderNameUsed', () => {
+  const rfidReaders: Pick<RfidReader, 'id' | 'name'>[] = [
+    { id: 'reader-1', name: 'Theke' },
+    { id: 'reader-2', name: 'Switch Bandsäge' },
+    { id: 'reader-3', name: null },
+    { id: 'reader-4', name: null },
+  ];
+
+  it('should find the name of another reader, also in another case', () => {
+    expect(isRfidReaderNameUsed('Theke', 'reader-2', rfidReaders)).toBe(true);
+    expect(isRfidReaderNameUsed('SWITCH BANDSÄGE', 'reader-1', rfidReaders)).toBe(true);
+  });
+
+  it('should let the reader keep its own name or change only its case', () => {
+    expect(isRfidReaderNameUsed('Theke', 'reader-1', rfidReaders)).toBe(false);
+    expect(isRfidReaderNameUsed('THEKE', 'reader-1', rfidReaders)).toBe(false);
+  });
+
+  it('should allow a free name', () => {
+    expect(isRfidReaderNameUsed('Werkstatt Eingang', 'reader-3', rfidReaders)).toBe(false);
+  });
+
+  it('should count spaces at the edges, like the backend', () => {
+    expect(isRfidReaderNameUsed('Theke ', 'reader-2', rfidReaders)).toBe(false);
+    expect(isRfidReaderNameUsed(' ', 'reader-2', [...rfidReaders, { id: 'reader-5', name: ' ' }])).toBe(true);
+  });
+
+  it('should not compare a reader without a name', () => {
+    expect(isRfidReaderNameUsed(null, 'reader-3', rfidReaders)).toBe(false);
+    expect(isRfidReaderNameUsed('', 'reader-3', rfidReaders)).toBe(false);
   });
 });

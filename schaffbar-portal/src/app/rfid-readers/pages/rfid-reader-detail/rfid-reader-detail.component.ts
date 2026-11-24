@@ -34,6 +34,7 @@ import {
   DeleteRfidReaderCommand,
   UpdateRfidReaderCommand,
 } from '../../rfid-reader.model';
+import { RfidReadersStore } from '../../rfid-readers.store';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
 @Component({
@@ -61,6 +62,7 @@ import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 })
 export class RfidReaderDetailComponent {
   protected readonly detailsStore = inject(RfidReaderDetailStore);
+  private readonly rfidReadersStore = inject(RfidReadersStore);
   private readonly dialog = inject(MatDialog);
   private readonly confirmDeleteDialog = inject(ConfirmDeleteDialogService);
   private readonly snackBar = inject(MatSnackBar);
@@ -75,6 +77,7 @@ export class RfidReaderDetailComponent {
 
   constructor() {
     this.detailsStore.setRfidReaderId(this.id);
+    this.rfidReadersStore.reloadRfidReaders();
   }
 
   // --------------------------------------------------------------------------
@@ -82,6 +85,7 @@ export class RfidReaderDetailComponent {
 
   protected reloadRfidReader(): void {
     this.detailsStore.reloadRfidReader();
+    this.rfidReadersStore.reloadRfidReaders();
   }
 
   protected editRfidReader(): void {
@@ -95,7 +99,7 @@ export class RfidReaderDetailComponent {
     >(UpdateRfidReaderFormComponent, {
       ...FORM_DIALOG_CONFIG,
       minWidth: DIALOG_WIDTH.medium,
-      data: { rfidReader },
+      data: { rfidReader, existingRfidReaders: this.rfidReadersStore.rfidReaders },
     });
 
     dialogRef.afterClosed().subscribe((command) => {

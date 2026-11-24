@@ -41,6 +41,25 @@ export function canDeleteRfidReader(rfidReader: RfidReaderListItem): boolean {
 }
 
 // ----------------------------------------------------------------------------
+// update
+
+// R-6: the team tells the readers apart by their name. Compared like the backend: ignoring case, but not trimmed –
+// "Theke " is another name than "Theke". Without a name (null, an empty field) nothing is compared: new readers
+// register themselves without one. The reader itself may keep its name or change only its case.
+export function isRfidReaderNameUsed(
+  name: string | null,
+  rfidReaderId: string,
+  rfidReaders: Pick<RfidReader, 'id' | 'name'>[],
+): boolean {
+  if (!name) return false;
+
+  const comparedName = name.toLowerCase();
+  return rfidReaders.some(
+    (rfidReader) => rfidReader.id !== rfidReaderId && rfidReader.name?.toLowerCase() === comparedName,
+  );
+}
+
+// ----------------------------------------------------------------------------
 // commands
 
 export interface UpdateRfidReaderCommand {

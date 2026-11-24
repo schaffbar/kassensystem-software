@@ -1,6 +1,6 @@
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -11,7 +11,12 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
-import { UpdateRfidReaderFormComponent, UpdateRfidReaderViewModel } from './update-rfid-reader-form.component';
+import {
+  ExistingRfidReaderViewModel,
+  UpdateRfidReaderDialogData,
+  UpdateRfidReaderFormComponent,
+  UpdateRfidReaderViewModel,
+} from './update-rfid-reader-form.component';
 
 describe('UpdateRfidReaderFormComponent', () => {
   const rfidReader: UpdateRfidReaderViewModel = {
@@ -25,16 +30,23 @@ describe('UpdateRfidReaderFormComponent', () => {
   let fixture: ComponentFixture<UpdateRfidReaderFormComponent>;
   let loader: HarnessLoader;
   let dialogRef: { close: Mock };
+  let existingRfidReaders: WritableSignal<ExistingRfidReaderViewModel[]>;
 
   async function setUp(data: UpdateRfidReaderViewModel): Promise<void> {
     dialogRef = { close: vi.fn() };
+    existingRfidReaders = signal([
+      { id: 'reader-1', name: data.name },
+      { id: 'reader-2', name: 'Theke' },
+      { id: 'reader-3', name: null },
+    ]);
+    const dialogData: UpdateRfidReaderDialogData = { rfidReader: data, existingRfidReaders };
 
     await TestBed.configureTestingModule({
       imports: [UpdateRfidReaderFormComponent],
       providers: [
         provideZonelessChangeDetection(),
         provideTranslateService(),
-        { provide: MAT_DIALOG_DATA, useValue: { rfidReader: data } },
+        { provide: MAT_DIALOG_DATA, useValue: dialogData },
         { provide: MatDialogRef, useValue: dialogRef },
       ],
     }).compileComponents();
@@ -53,6 +65,11 @@ describe('UpdateRfidReaderFormComponent', () => {
     await fixture.whenStable();
   }
 
+  async function leave(id: string): Promise<void> {
+    await (await input(id)).blur();
+    await fixture.whenStable();
+  }
+
   async function save(): Promise<void> {
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
     await fixture.whenStable();
@@ -60,6 +77,10 @@ describe('UpdateRfidReaderFormComponent', () => {
 
   function query(selector: string): HTMLElement | null {
     return fixture.nativeElement.querySelector(selector);
+  }
+
+  async function errors(id: string): Promise<string[]> {
+    return (await loader.getHarness(MatFormFieldHarness.with({ selector: `:has(#${id})` }))).getTextErrors();
   }
 
   describe('reader with name and socket name', () => {
@@ -117,8 +138,7 @@ describe('UpdateRfidReaderFormComponent', () => {
       await save();
 
       expect(dialogRef.close).not.toHaveBeenCalled();
-      const field = await loader.getHarness(MatFormFieldHarness.with({ selector: ':has(#socketName)' }));
-      expect(await field.getTextErrors()).toEqual(['rfidReaders.dialogs.updateRfidReader.errors.socketNameFormat']);
+      expect(await errors('socketName')).toEqual(['rfidReaders.dialogs.updateRfidReader.errors.socketNameFormat']);
     });
 
     it('should keep an unchanged socket name in an older format', async () => {
@@ -133,6 +153,59 @@ describe('UpdateRfidReaderFormComponent', () => {
         name: 'Kreissäge',
         socketName: 'Socket 43',
       });
+    });
+
+    it('should reject the name of another reader, also in another case', async () => {
+      await setValue('name', 'THEKE');
+
+      await save();
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+      expect(await errors('name')).toEqual(['rfidReaders.dialogs.updateRfidReader.errors.nameExists']);
+    });
+
+    it('should show the error at the name as soon as the field is left', async () => {
+      await setValue('name', 'Theke');
+      expect(await errors('name')).toEqual([]);
+
+      await leave('name');
+
+      expect(await errors('name')).toEqual(['rfidReaders.dialogs.updateRfidReader.errors.nameExists']);
+    });
+
+    it('should keep its own name in another case', async () => {
+      await setValue('name', 'TOR AUSGANG');
+
+      await save();
+
+      expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
+        rfidReaderId: 'reader-1',
+        name: 'TOR AUSGANG',
+        socketName: 'gate-out',
+      });
+    });
+
+    it('should save a name that differs only by a space at the end, untrimmed', async () => {
+      await setValue('name', 'Theke ');
+
+      await save();
+
+      expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
+        rfidReaderId: 'reader-1',
+        name: 'Theke ',
+        socketName: 'gate-out',
+      });
+    });
+
+    it('should follow the list of readers while the dialog is open', async () => {
+      await setValue('name', 'Werkstatt Eingang');
+      await leave('name');
+      expect(await errors('name')).toEqual([]);
+
+      existingRfidReaders.set([...existingRfidReaders(), { id: 'reader-4', name: 'Werkstatt Eingang' }]);
+      await fixture.whenStable();
+
+      expect(await errors('name')).toEqual(['rfidReaders.dialogs.updateRfidReader.errors.nameExists']);
     });
 
     it('should warn only when the socket name was changed to a valid one', async () => {
@@ -157,14 +230,24 @@ describe('UpdateRfidReaderFormComponent', () => {
       );
     });
 
+    it('should accept an empty name next to other readers without one', async () => {
+      await save();
+
+      expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
+        rfidReaderId: 'reader-1',
+        name: undefined,
+        socketName: undefined,
+      });
+    });
+
     it('should accept an empty socket name and leave it unchanged', async () => {
-      await setValue('name', 'Theke');
+      await setValue('name', 'Werkstatt Eingang');
 
       await save();
 
       expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith({
         rfidReaderId: 'reader-1',
-        name: 'Theke',
+        name: 'Werkstatt Eingang',
         socketName: undefined,
       });
     });

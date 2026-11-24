@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { form, FormField, FormRoot, submit, validate } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { FormDialogHeaderComponent } from '../../../shared/dialogs/form-dialog-h
 import { RfidReaderType } from '../../../shared/models/rfid-reader-type';
 import { RfidReaderTypeKeyPipe } from '../../rfid-reader-type-key.pipe';
 import { UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { validateUniqueRfidReaderName } from '../../rfid-reader.validators';
 
 export interface UpdateRfidReaderViewModel {
   id: string;
@@ -22,8 +23,15 @@ export interface UpdateRfidReaderViewModel {
   type: RfidReaderType | null;
 }
 
+// all readers – for the unique name check
+export interface ExistingRfidReaderViewModel {
+  id: string;
+  name: string | null;
+}
+
 export interface UpdateRfidReaderDialogData {
   rfidReader: UpdateRfidReaderViewModel;
+  existingRfidReaders: Signal<ExistingRfidReaderViewModel[]>;
 }
 
 interface UpdateRfidReaderFormModel {
@@ -58,6 +66,7 @@ export class UpdateRfidReaderFormComponent {
   private readonly model = signal<UpdateRfidReaderFormModel>(toUpdateRfidReaderFormModel(this.data.rfidReader));
 
   protected readonly rfidReaderForm = form(this.model, (schema) => {
+    validateUniqueRfidReaderName(schema.name, this.data.rfidReader.id, this.data.existingRfidReaders);
     // only a changed socket name is checked – existing readers may have older names, e.g. "Socket 43"
     validate(schema.socketName, ({ value }) => {
       const socketName = value();

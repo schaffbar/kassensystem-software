@@ -17,6 +17,7 @@ import { RfidReaderDetailInfoComponent } from '../../components/rfid-reader-deta
 import { RfidReaderDetailTypeComponent } from '../../components/rfid-reader-detail-type/rfid-reader-detail-type.component';
 import { UpdateRfidReaderFormComponent } from '../../components/update-rfid-reader-form/update-rfid-reader-form.component';
 import { ChangeRfidReaderTypeCommand, RfidReaderListItem, UpdateRfidReaderCommand } from '../../rfid-reader.model';
+import { RfidReadersStore } from '../../rfid-readers.store';
 import { RfidReaderDetailComponent } from './rfid-reader-detail.component';
 import { RfidReaderDetailStore } from './rfid-reader-detail.store';
 
@@ -43,6 +44,10 @@ describe('RfidReaderDetailComponent', () => {
     changeRfidReaderType: Mock;
     deleteRfidReader: Mock;
   };
+  let rfidReadersStoreMock: {
+    rfidReaders: WritableSignal<RfidReaderListItem[]>;
+    reloadRfidReaders: Mock;
+  };
   let openDialog: Mock;
   let openSnackBar: Mock;
   let openConfirmDelete: Mock;
@@ -59,6 +64,10 @@ describe('RfidReaderDetailComponent', () => {
       changeRfidReaderType: vi.fn(),
       deleteRfidReader: vi.fn(),
     };
+    rfidReadersStoreMock = {
+      rfidReaders: signal([rfidReader, { ...rfidReader, id: 'reader-2', name: 'Theke' }]),
+      reloadRfidReaders: vi.fn(),
+    };
     openDialog = vi.fn();
     openSnackBar = vi.fn();
     openConfirmDelete = vi.fn();
@@ -72,6 +81,7 @@ describe('RfidReaderDetailComponent', () => {
         { provide: MatDialog, useValue: { open: openDialog } },
         { provide: MatSnackBar, useValue: { open: openSnackBar } },
         { provide: ConfirmDeleteDialogService, useValue: { open: openConfirmDelete } },
+        { provide: RfidReadersStore, useValue: rfidReadersStoreMock },
       ],
     })
       .overrideComponent(RfidReaderDetailComponent, {
@@ -94,8 +104,16 @@ describe('RfidReaderDetailComponent', () => {
     return fixture.debugElement.query(By.directive(component)).componentInstance;
   }
 
-  it('should load the reader of the route', () => {
+  it('should load the reader of the route and all readers for the name check', () => {
     expect(storeMock.setRfidReaderId).toHaveBeenCalledOnce();
+    expect(rfidReadersStoreMock.reloadRfidReaders).toHaveBeenCalledOnce();
+  });
+
+  it('should reload the reader and the list', () => {
+    query('schbar-page-header button[matIconButton]')?.click();
+
+    expect(storeMock.reloadRfidReader).toHaveBeenCalledOnce();
+    expect(rfidReadersStoreMock.reloadRfidReaders).toHaveBeenCalledTimes(2);
   });
 
   it('should show the name as title with type and MAC address and link back to the list', () => {
@@ -123,14 +141,17 @@ describe('RfidReaderDetailComponent', () => {
   describe('edit', () => {
     const command: UpdateRfidReaderCommand = { rfidReaderId: 'reader-1', name: 'Neu', socketName: 'neu' };
 
-    it('should open the form from the info card and update the reader', () => {
+    it('should open the form from the info card with all readers and update the reader', () => {
       openDialog.mockReturnValue({ afterClosed: () => of(command) });
 
       child(RfidReaderDetailInfoComponent).editRequested.emit();
 
       expect(openDialog).toHaveBeenCalledExactlyOnceWith(
         UpdateRfidReaderFormComponent,
-        expect.objectContaining({ ...FORM_DIALOG_CONFIG, data: { rfidReader } }),
+        expect.objectContaining({
+          ...FORM_DIALOG_CONFIG,
+          data: { rfidReader, existingRfidReaders: rfidReadersStoreMock.rfidReaders },
+        }),
       );
       expect(storeMock.updateRfidReader).toHaveBeenCalledExactlyOnceWith(command);
     });
