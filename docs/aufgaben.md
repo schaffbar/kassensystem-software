@@ -13,8 +13,7 @@ Wie gearbeitet wird (nie committen, Prüfungen, Browser ohne Schreibzugriffe): d
 1. [Nach dem nächsten Deploy prüfen](#nach-dem-nächsten-deploy-prüfen) – sobald Backend und Portal auf dem Server
    laufen.
 2. [Agenten-Pipeline](#agenten-pipeline): der Pilot.
-3. [Regeln, die nur das Portal prüft](#regeln-die-nur-das-portal-prüft) – die eindeutigen Namen der Lesegeräte (R-6)
-   sind der Pilot der Pipeline.
+3. [Regeln, die nur das Portal prüft](#regeln-die-nur-das-portal-prüft) – das Format des Socket-Namens (R-4).
 4. [Portal ohne Backend](#portal-ohne-backend).
 5. [Backend-Funktionen für das Portal](#backend-funktionen-für-das-portal) – vorher das
    [fachlich zu Klärende](#fachlich-zu-klären).
@@ -93,7 +92,6 @@ bis zur Erklärung im Portal; danach steht sie unter „Business Rules / Invaria
 
 | Regel | Was | Hinweis |
 | --- | --- | --- |
-| R-6 | Namen der Lesegeräte sind eindeutig – heute prüft es auch das Portal nicht | Pilot der Pipeline; `RfidReaderUpdate`, danach die Prüfung im Dialog „Lesegerät bearbeiten“ |
 | R-4 | Socket-Name nur `a–z`, `0–9`, `-` | nur bei einer Änderung prüfen – bestehende Namen wie „Socket 43“ bleiben gültig (wie im Portal) |
 
 ## Portal ohne Backend

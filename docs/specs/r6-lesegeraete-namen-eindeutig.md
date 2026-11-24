@@ -17,7 +17,7 @@ Rolle Spec als Kopie dieser Vorlage – docs/specs/<kurzname>.md, Kurzname auf D
   Agenten-Pipeline (Stufe 1); Artboard „RFID-Lesegeräte – Dialog: Bearbeiten“ des Prototyps
   (`project/ReaderEditDialog.dc.html`)
 - **Branch:** –
-- **Stand:** Backend fertig
+- **Stand:** Portal fertig
 
 ## 1. Spec
 
@@ -316,6 +316,105 @@ Wie in der Spec, ohne Abweichung. Was das Portal braucht:
   (welche Anfrage mit welcher Antwort simuliert wird).
 - Abweichungen vom Vertrag, nicht gemacht, offene Fragen.
 -->
+
+### Geändert
+
+Pfade ab `schaffbar-portal/`:
+
+- **API-Schicht** unverändert (`src/app/shared/api/rfid-readers/`): `GET /api/v1/rfid-readers` und
+  `PUT /api/v1/rfid-readers/{rfidReaderId}` in `RfidReaderController` und `RfidReaderApiModel.java` nachgesehen – keine
+  neue Form, `name` bleibt `nullable`.
+- **Regel** `src/app/rfid-readers/rfid-reader.model.ts`, neuer Abschnitt `// update`:
+  `isRfidReaderNameUsed(name, rfidReaderId, rfidReaders)` mit `R-6` im Kommentar – ohne Groß-/Kleinschreibung
+  (`toLowerCase()`), ohne Trimmen, das eigene Lesegerät ausgenommen; ohne Namen (`null`, leeres Feld) wird nicht
+  verglichen, Lesegeräte ohne Namen in der Liste auch nicht.
+- **Validator** neu `src/app/rfid-readers/rfid-reader.validators.ts`: `validateUniqueRfidReaderName(path, rfidReaderId,
+  rfidReaders)` nach dem Vorbild `validateUniqueToolName` – ruft die Regel des Modells, Fehler
+  `{ kind: 'nameExists', message: 'rfidReaders.dialogs.updateRfidReader.errors.nameExists' }`; die Liste wird im
+  Validator gelesen, mit einem Signal folgt die Prüfung der Liste.
+- **Dialog „Lesegerät bearbeiten“** `src/app/rfid-readers/components/update-rfid-reader-form/`: neue Dialogdaten
+  `existingRfidReaders: Signal<ExistingRfidReaderViewModel[]>` (`{ id, name }`), der Validator am Feld Name. Das
+  Template ist unverändert: der Fehler steht in `schbar-field-error` unter dem Feld wie der des Socket-Namens – sobald
+  das Feld berührt (verlassen) ist, spätestens beim Speichern; ein ungültiges Formular schließt den Dialog nicht, es
+  geht kein `PUT` hinaus.
+- **Detailseite** `src/app/rfid-readers/pages/rfid-reader-detail/rfid-reader-detail.component.ts`: injiziert
+  `RfidReadersStore` und gibt dessen Signal `rfidReaders` als `existingRfidReaders` in die Dialogdaten (wie
+  `existingTools` aus `ToolsStore`); lädt die Liste beim Öffnen der Seite und mit „Neu laden“ neu, wie die
+  Werkzeug-Detailseite ihren `ToolsStore`. Die Seite lädt damit zusätzlich `GET /api/v1/rfid-readers` und
+  `GET /api/v1/tools` (der Store lädt beide).
+- **Übersetzungen** `public/i18n/de.json` und `en.json`: `shared.errors.RFID_READER_NAME_ALREADY_USED` mit dem Text
+  des Vertrags, `rfidReaders.dialogs.updateRfidReader.errors.nameExists` – de „Ein anderes Gerät heißt bereits so“,
+  en "Another device already has this name".
+- **Doku:** `docs/entscheidungen.md` und `docs/aufgaben.md` (unten). Die README des Aggregats nicht angefasst – R-6
+  steht dort seit dem Backend unter „Business Rules / Invariants“ mit dem Teil des Portals; „Enforced only in the
+  portal“ betrifft R-6 nicht mehr.
+
+### Entscheidungen
+
+- `docs/entscheidungen.md`, „Portal: RFID-Lesegeräte“, beide vom 24.11.2026:
+  - **Name optional** – das Feld darf leer bleiben, anders als im Prototyp (Frage 3 (a));
+  - **Namensvergleich ohne Trimmen** – ohne Groß-/Kleinschreibung, Leerzeichen am Rand zählen mit, anders als im
+    Prototyp (Frage 1 (a)).
+- `docs/aufgaben.md`: die Zeile R-6 in „Regeln, die nur das Portal prüft“ gelöscht; Punkt 3 der „Reihenfolge“ nennt
+  jetzt das Format des Socket-Namens (R-4). Stufe 1 der „Agenten-Pipeline“ bleibt.
+- Gebaut nach den Skills, nicht in `entscheidungen.md`: die Regel ist eine Funktion des Modells (Skill `feature`,
+  „Business rules“), der Validator in `rfid-reader.validators.ts` ruft sie nur auf – die Spec nannte den Validator,
+  die Rolle verlangt die Regel im Modell.
+
+### Tests
+
+- `src/app/rfid-readers/rfid-reader.model.spec.ts`, `isRfidReaderNameUsed`: der Name eines anderen Lesegeräts, auch
+  in anderer Schreibweise („SWITCH BANDSÄGE“); der eigene Name und seine Schreibweise; ein freier Name; Leerzeichen am
+  Rand zählen („Theke “ frei, „ “ gegen „ “ belegt); ohne Namen (`null`, `''`) kein Vergleich.
+- `src/app/rfid-readers/rfid-reader.validators.spec.ts` (neu): Fehler mit `kind` und Text des Dialogs; frei und leer
+  ohne Fehler; die Prüfung folgt dem Signal der Liste.
+- `.../update-rfid-reader-form.component.spec.ts`: abgelehnt – der Name eines anderen Lesegeräts in Großbuchstaben
+  (Dialog bleibt offen, Fehler am Feld); der Fehler schon nach dem Verlassen des Feldes; erlaubt – der eigene Name in
+  Großbuchstaben, „Theke “ (ungetrimmt im Command), ein leerer Name neben Lesegeräten ohne Namen; der Fehler erscheint,
+  wenn die Liste sich bei offenem Dialog ändert.
+- `.../rfid-reader-detail.component.spec.ts`: Dialogdaten mit `existingRfidReaders` = das Signal des
+  `RfidReadersStore`; die Liste wird beim Öffnen und mit „Neu laden“ geladen.
+- Gegenprobe (danach zurückgesetzt): ohne den Validator im Dialog scheitern drei Dialog-Tests (abgelehnt, nach dem
+  Verlassen, folgt der Liste).
+- `npm run check`: Lint, Prettier, Typen der Specs, **570 Tests in 111 Dateien, alle grün**, Build – bestanden.
+
+### Für die Abnahme
+
+Detailseite eines Lesegeräts `/rfid-readers/<id>` mit Namen (lokal z. B. „Werkstatt Eingang“), Dialog „Lesegerät
+bearbeiten“ – geöffnet über „Bearbeiten“ im Kopf, „Bearbeiten …“ im ⋯-Menü oder die Karte mit den Angaben. Desktop
+und Handy. Schreibzugriffe abfangen (Skill `verify-ui`); die Liste der Lesegeräte kommt echt aus `GET`.
+
+1. **Fehler am Feld:** im Feld Name „theke“ (Name eines anderen Geräts, andere Schreibweise) eintippen, mit Tab
+   verlassen → unter dem Feld rot „Ein anderes Gerät heißt bereits so“ statt des Hinweises. „Änderungen speichern“ →
+   der Dialog bleibt offen, kein `PUT` im Netzwerk. Langer Text auf dem Handy: bricht der Fehler um?
+2. **Erlaubt, ohne Fehler:** der eigene Name in anderer Schreibweise („WERKSTATT EINGANG“), „Theke “ mit Leerzeichen
+   am Ende, ein leeres Feld. Speichern schickt ein `PUT` – mit `route.fulfill({ status: 204, body: '' })`
+   beantworten, damit nichts in die Datenbank geht; der Dialog schließt.
+3. **Ablehnung des Backends (Liste veraltet):** einen freien Namen eingeben, das `PUT` auf
+   `/api/v1/rfid-readers/<id>` mit `route.fulfill({ status: 409, contentType: 'application/problem+json', body:
+   JSON.stringify({ type: 'about:blank', title: 'Conflict', status: 409, detail: "RFID reader name 'X' is already
+   used by RFID reader [id: …]", code: 'RFID_READER_NAME_ALREADY_USED' }) })` beantworten → Snackbar „Ein anderes
+   Lesegerät heißt schon so – einen anderen Namen wählen.“; der Dialog ist schon zu, die Seite zeigt weiter den alten
+   Namen.
+4. **Lesegerät ohne Namen** (Liste mit `route.fetch()` holen und ein Gerät mit `name: null` ergänzen, oder ein neues
+   Gerät ohne Typ, falls vorhanden): Dialog mit leerem Feld, Speichern ohne Fehler.
+5. Optional: die Seite lädt jetzt zusätzlich `GET /api/v1/rfid-readers` und `GET /api/v1/tools` – beim Öffnen und mit
+   „Neu laden“; keine sichtbare Änderung erwartet.
+
+### Abweichungen, nicht gemacht, offene Fragen
+
+- **Abweichungen vom Vertrag:** keine.
+- **Über die Spec hinaus:** die Detailseite lädt die Liste der Lesegeräte beim Öffnen und mit „Neu laden“ neu (Vorbild
+  Werkzeug-Detailseite) – sonst prüfte der Dialog gegen den Stand der letzten Listenansicht. Schlägt dieses Laden
+  fehl, zeigt der Fehler-Interceptor „Die Daten konnten nicht geladen werden.“, und der Dialog prüft gegen eine leere
+  Liste – dann bleibt das `409` des Backends die Erklärung.
+- **Nicht gemacht** (laut Spec nicht dabei): der Name als Pflichtfeld, Trimmen, „Bearbeiten …“ im ⋯-Menü der Liste,
+  „Änderungen speichern“ erst nach einer Änderung und der Zähler.
+- **Nicht geprüft:** der Browser (Rolle Verify); ob `toLowerCase()` im Portal und `upper()` in PostgreSQL bei
+  Sonderzeichen außer den Umlauten (etwa „ß“) gleich vergleichen – siehe Bericht Backend; weicht es ab, erklärt das
+  `409` den Fall.
+- Das Backend und seine Datenbank nicht angefasst, nichts in `schaffbar-backend/` geändert.
+- **Offene Fragen:** keine.
 
 ## 4. Abnahme im Browser
 

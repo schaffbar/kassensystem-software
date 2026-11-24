@@ -153,6 +153,12 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   gesperrt bleibt er bei einer Schaltbox mit Werkzeug.
 - **Geräte ohne Typ** (08.11.2026): eigener Abschnitt „Neue Geräte – Typ festlegen“ (nicht im Prototyp); der Filter
   „Nicht zugeordnet“ zählt sie mit, nicht nur Schaltboxen ohne Werkzeug.
+- **Name optional** (24.11.2026): im Dialog „Lesegerät bearbeiten“ darf der Name leer bleiben – anders als im Prototyp
+  („Bitte einen Namen eingeben“); ein leeres Feld schickt keinen Namen. Neue Lesegeräte melden sich ohne Namen an
+  (R-9), und R-6 vergleicht nur Lesegeräte mit Namen; ein Pflichtname wäre eine eigene Regel in Backend und Portal.
+- **Namensvergleich ohne Trimmen** (24.11.2026): der Fehler „Ein anderes Gerät heißt bereits so“ am Namen vergleicht
+  wie das Backend (R-6) ohne Groß-/Kleinschreibung, Leerzeichen am Rand zählen mit – „Theke “ ist ein anderer Name als
+  „Theke“, ein Name nur aus Leerzeichen wird verglichen. Der Prototyp trimmt; gleich wie bei den Werkzeugnamen (T-15).
 
 ## Portal: RFID-Tags
 
