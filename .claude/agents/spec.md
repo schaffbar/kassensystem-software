@@ -20,7 +20,9 @@ calls you again with Piotr's answers – then you work them into the existing sp
 
 ## Read first
 
-You run in the repo root. Skills of the backend are not offered to you as skills – read every skill as a file:
+All paths are relative to the repo root (`git rev-parse --show-toplevel`) – you start in the folder of the main
+session, which may be `schaffbar-portal/`. Skills of the backend are not offered to you as skills there – read every
+skill as a file:
 
 - `CLAUDE.md`, `schaffbar-backend/CLAUDE.md`, `schaffbar-portal/CLAUDE.md`;
 - `docs/aufgaben.md` (where the task comes from) and `docs/entscheidungen.md` – a decision recorded there is

@@ -1,4 +1,4 @@
-# <Aufgabe in einem Satz>
+# {Aufgabe in einem Satz}
 
 <!--
 Übergabedatei der Agenten-Pipeline (docs/aufgaben.md, „Agenten-Pipeline“): eine Datei pro Aufgabe, angelegt von der
@@ -13,9 +13,9 @@ Rolle Spec als Kopie dieser Vorlage – docs/specs/<kurzname>.md, Kurzname auf D
 - Die Kommentare dieser Vorlage dürfen stehen bleiben.
 -->
 
-**Quelle:** <Issue, Abschnitt in docs/aufgaben.md, Artboard des Prototyps>
-**Branch:** <name>
-**Stand:** Spec – wartet auf Freigabe | freigegeben | Backend fertig | Portal fertig | abgenommen | Review fertig
+- **Quelle:** {Issue, Abschnitt in docs/aufgaben.md, Artboard des Prototyps}
+- **Branch:** {Name}
+- **Stand:** Spec – wartet auf Freigabe | freigegeben | Backend fertig | Portal fertig | abgenommen | Review fertig
 
 ## 1. Spec
 
@@ -50,7 +50,7 @@ ausdrücklich nicht dazugehört. -->
 <!-- Jede Frage mit den Möglichkeiten und einer Empfehlung; Piotr antwortet darunter. Ohne beantwortete Fragen keine
 Freigabe. -->
 
-- [ ] <Frage> – Möglichkeiten: … – Empfehlung: …
+- [ ] {Frage} – Möglichkeiten: … – Empfehlung: …
   Antwort:
 
 ### Freigabe
@@ -73,6 +73,8 @@ Freigabe. -->
 - Geändert: API-Schicht, Feature, Seiten und Dialoge, Übersetzungen de/en.
 - Entscheidungen, die in docs/entscheidungen.md eingetragen wurden.
 - Specs, Ergebnis von `npm run check`.
+- Für die Abnahme: welche Seiten, Zustände und Dialoge im Browser anzusehen sind und wie jeder Zustand entsteht
+  (welche Anfrage mit welcher Antwort simuliert wird).
 - Abweichungen vom Vertrag, nicht gemacht, offene Fragen.
 -->
 
