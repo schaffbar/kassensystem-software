@@ -31,7 +31,7 @@ public class WorkshopSessionController {
     // ------------------------------------------------------------------------
     // query
 
-    // the counter knows the person, not the session: the open session of the person (E29)
+    // the counter knows the person, not the session: the open session of the person
     @GetMapping(value = "/{customerId}/open", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<WorkshopSessionApiDto> getOpenWorkshopSession(@PathVariable @NotNull @Valid CustomerId customerId) {
         // without an open session the body is empty

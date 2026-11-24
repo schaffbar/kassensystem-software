@@ -40,7 +40,7 @@ public class WorkshopSessionClose {
         this.customerService.getCustomer(customerId) //
                 .orElseThrow(() -> ResourceNotFoundException.customer(customerId));
 
-        // WS-4 – the session is found by its state, the service closes it by its id (E29)
+        // WS-4 – the session is found by its state, the service closes it by its id
         WorkshopSessionId workshopSessionId = this.workshopSessionService.getOpenWorkshopSession(customerId) //
                 .map(WorkshopSessionView::id) //
                 .orElseThrow(() -> new NoOpenWorkshopSessionException(customerId));

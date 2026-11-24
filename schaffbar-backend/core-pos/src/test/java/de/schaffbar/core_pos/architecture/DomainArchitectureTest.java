@@ -302,7 +302,7 @@ class DomainArchitectureTest {
     static final ArchRule nothingDeletesOrChecksByARawId = noClasses() //
             .that().haveSimpleNameNotEndingWith("Repository") //
             .should().callMethodWhere(REPOSITORY_METHOD_BY_RAW_ID) //
-            .because("a delete loads the entity and calls delete(entity) – 404 for an unknown id, @Version checked (E30); "
+            .because("a delete loads the entity and calls delete(entity) – 404 for an unknown id, @Version checked; "
                     + "an existence check takes the value object");
 
     // ------------------------------------------------------------------------

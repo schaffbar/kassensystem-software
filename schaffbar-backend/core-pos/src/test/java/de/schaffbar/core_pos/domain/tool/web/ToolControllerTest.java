@@ -747,7 +747,7 @@ class ToolControllerTest {
         doThrow(rejection).when(this.toolDelete).process(toolId);
     }
 
-    // T-1, T-10 and the length of the description – each format rule of the request body once (E33)
+    // T-1, T-10 and the length of the description – each format rule of the request body once
     static Stream<Arguments> invalidCreateToolCommands() {
         return Stream.of( //
                 arguments(named("blank name (T-1)", createToolCommand().name(" ").build())), //

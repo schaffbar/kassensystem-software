@@ -70,7 +70,7 @@ public class RfidTagAssignmentController {
                 .toList());
     }
 
-    // the inner entity RfidTagAssignmentHistory – a sub-path of its aggregate (E16)
+    // the inner entity RfidTagAssignmentHistory – a sub-path of its aggregate
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RfidTagAssignmentHistoryApiDto>> getRfidTagAssignmentHistory() {
         return ResponseEntity.ok(this.rfidTagAssignmentReadFacade.getRfidTagAssignmentHistory().stream() //

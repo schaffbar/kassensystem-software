@@ -21,7 +21,7 @@ class ExceptionArchitectureTest {
 
     @ArchTest
     static final ArchRule noGenericExceptions = GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS //
-            .because("a violated rule has its own exception, a bug is an IllegalStateException (E8)");
+            .because("a violated rule has its own exception, a bug is an IllegalStateException");
 
     @ArchTest
     static final ArchRule exceptionsHaveAKind = classes() //
@@ -30,7 +30,7 @@ class ExceptionArchitectureTest {
             .and().haveSimpleNameEndingWith("Exception") //
             .should().beAssignableTo(ResourceNotFoundException.class) //
             .orShould().beAssignableTo(BusinessRuleViolationException.class) //
-            .because("the kind decides the HTTP status in ApiExceptionHandler (E8)");
+            .because("the kind decides the HTTP status in ApiExceptionHandler");
 
     @ArchTest
     static final ArchRule exceptionsDeclareTheirCode = classes() //

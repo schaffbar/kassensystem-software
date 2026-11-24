@@ -49,7 +49,7 @@ class ReadFacadeArchitectureTest {
             .and().areDeclaredInClassesThat().haveSimpleNameEndingWith("ReadFacade") //
             .and().arePublic() //
             .should().beAnnotatedWith(Query.class) //
-            .because("a read facade answers the queries of one controller – changes go through use cases (E17)");
+            .because("a read facade answers the queries of one controller – changes go through use cases");
 
     @ArchTest
     static final ArchRule readFacadesCallNoCommands = noClasses() //

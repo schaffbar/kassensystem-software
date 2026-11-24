@@ -69,7 +69,7 @@ class DependencyArchitectureTest {
                     // @RestController itself is meta-annotated with @Component
                     DescribedPredicate.<JavaClass>describe("no annotation", javaClass -> !javaClass.isAnnotation()), //
                     not(resideInAnyPackage(USE_CASE, READ_FACADE))).as("are beans other than use cases and read facades")) //
-            .because("changes go through use cases, queries through the controller's read facade (E2, E17)");
+            .because("changes go through use cases, queries through the controller's read facade");
 
     // ------------------------------------------------------------------------
     // events

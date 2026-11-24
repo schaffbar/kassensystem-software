@@ -41,14 +41,14 @@ class QueryCommandArchitectureTest {
             .and().arePublic() //
             .should(methodCondition("be annotated with either @Query or @Command",
                     method -> method.isAnnotatedWith(Query.class) ^ method.isAnnotatedWith(Command.class))) //
-            .because("the annotation says whether a method reads or writes and brings its transaction (E21)");
+            .because("the annotation says whether a method reads or writes and brings its transaction");
 
     @ArchTest
     static final ArchRule methodsHaveNoTransactionalOfTheirOwn = methods() //
             .that().areDeclaredInClassesThat(SERVICES_USE_CASES_AND_READ_FACADES) //
             .should().notBeAnnotatedWith(Transactional.class) //
             .andShould().notBeAnnotatedWith(jakarta.transaction.Transactional.class) //
-            .because("the transaction comes with @Query or @Command – one place to change it (E21)");
+            .because("the transaction comes with @Query or @Command – one place to change it");
 
     @ArchTest
     static final ArchRule classesHaveNoTransactionalOfTheirOwn = classes() //
@@ -66,7 +66,7 @@ class QueryCommandArchitectureTest {
             .that().areAnnotatedWith(Query.class) //
             .should(methodCondition("call no @Command, no entity command, no save or delete of a repository and no OutboxEventStore", //
                     method -> method.getMethodCallsFromSelf().stream().noneMatch(QueryCommandArchitectureTest::isWrite))) //
-            .because("@Query is a read-only transaction – a change in it is not written (E21)");
+            .because("@Query is a read-only transaction – a change in it is not written");
 
     @ArchTest
     static final ArchRule queriesAndCommandsOnlyInServicesUseCasesAndReadFacades = methods() //

@@ -166,7 +166,7 @@ class RfidTagAssignmentTest {
         return event;
     }
 
-    // a guard against a bug – the service finds the assignment in the state the command needs (E29)
+    // a guard against a bug – the service finds the assignment in the state the command needs
     private void expectRejected(Throwable thrown, RfidTagAssignment assignment, RfidTagAssignmentStatus unchangedStatus) {
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
         assertThat(assignment.getStatus()).isEqualTo(unchangedStatus);

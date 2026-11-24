@@ -40,7 +40,7 @@ class UseCaseArchitectureTest {
             .that().areDeclaredInClassesThat().resideInAPackage(USE_CASE) //
             .and().haveName("process") //
             .should().beAnnotatedWith(Command.class) //
-            .because("the use case is the transaction of the change (E21 in docs/backend-consistency.md)");
+            .because("the use case is the transaction of the change");
 
     @ArchTest
     static final ArchRule useCasesChangeThroughServices = noClasses() //

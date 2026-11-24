@@ -402,7 +402,7 @@ class CustomerControllerTest {
         doThrow(rejection).when(this.customerDelete).process(customerId);
     }
 
-    // C-1, C-2, C-3, C-6, C-7, C-8 – each format rule of the request body once (E33)
+    // C-1, C-2, C-3, C-6, C-7, C-8 – each format rule of the request body once
     static Stream<Arguments> invalidCreateCustomerCommands() {
         return Stream.of( //
                 arguments(named("blank first name (C-1)", createCustomerCommand().firstName(" ").build())), //
