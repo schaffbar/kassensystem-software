@@ -27,7 +27,8 @@ Project rules: `CLAUDE.md` (glossary, languages, git), `schaffbar-backend/CLAUDE
 
 ## 1. The contract – decided before any code
 
-Backend and portal are built against the same decisions. They are written down first (in the spec of the task) and
+Backend and portal are built against the same decisions. They are written down first – in the spec of the task,
+section "Vertrag" of `docs/specs/<name>.md` (template `docs/specs/vorlage.md`) – and
 **every open point is a question for Piotr – never guessed**; the important decisions of the project were exactly
 these (`docs/entscheidungen.md`). The examples show the kind of answer – they are not the decisions for R-6.
 

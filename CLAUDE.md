@@ -12,7 +12,7 @@ Staff run it at the counter with the portal.
 | `schaffbar-backend/core-pos/` | the backend – Spring Boot 3.5, Java 25, PostgreSQL with Flyway; one aggregate per folder in `domain/` with a `README.md` of its rules, use cases in `use_case/`; Bruno collection in `api/`, DDD overview in `docs/`; `CLAUDE.md` and skills in `schaffbar-backend/` |
 | `infrastructure/` | `docker-compose.yml` and the database init |
 | `.claude/skills/` | skills across backend and portal: `business-rule` (one rule from the README to the portal) |
-| `docs/` | `aufgaben.md` (open tasks in their order, what the portal still needs from the backend), `entscheidungen.md` (decisions with their date, backend and portal), setup notes (`playwright-wsl.md`, …) |
+| `docs/` | `aufgaben.md` (open tasks in their order, what the portal still needs from the backend), `entscheidungen.md` (decisions with their date, backend and portal), `specs/` (the handover file of a task in the agent pipeline, from `specs/vorlage.md`, deleted after the merge), setup notes (`playwright-wsl.md`, …) |
 | `TODO.md` | loose tasks and ideas of the maintainer |
 | `deployment.md` | deployment on the workshop server |
 

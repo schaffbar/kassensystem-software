@@ -54,6 +54,11 @@ Sub-Agenten starten – die Hauptsitzung (später die Action) ruft die Rollen na
 Backend, weil es dessen Code und API-Form übernimmt; beide arbeiten gegen den Vertrag aus der Spec, das Portal liest
 dazu den Bericht des Backends.
 
+Übergabe: eine Datei pro Aufgabe, `docs/specs/<kurzname>.md` nach der Vorlage
+[`docs/specs/vorlage.md`](specs/vorlage.md). Die Spec legt sie an, jede Rolle schreibt ihren eigenen Abschnitt (Spec,
+Bericht Backend, Bericht Portal, Abnahme im Browser, Review); sie liegt auf dem Branch der Aufgabe und wird nach dem
+Merge gelöscht.
+
 Haltepunkte für Piotr: nach der Spec (Fragen beantworten, freigeben) und vor dem Merge. Die wertvollsten Momente im
 Redesign waren Entscheidungen (Banner trotz WS-5, Leihtag-Filter, Löschkonzept) – die darf kein Agent allein treffen.
 Übergaben nur über Dateien, Issue und PR, nicht über den Chat-Verlauf.
@@ -70,7 +75,7 @@ Für jede Rolle:
 Stufen:
 
 1. [ ] Rollen als Subagents beschreiben (`spec.md`, `implement-backend.md`, `implement-portal.md`, `verify.md`,
-   `review.md`) und die Form der Übergabedateien festlegen (Spec, Bericht des Backends). Der Skill `business-rule`
+   `review.md`). Die Übergabedatei steht (`docs/specs/vorlage.md`); der Skill `business-rule`
    (`.claude/skills/business-rule/`) ist das gemeinsame Rezept der Rollen für eine Regel.
 2. [ ] Pilot: lokal an R-6 (Namen der Lesegeräte eindeutig) – betrifft Backend (`RfidReaderUpdate`, Exception, Tests)
    und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe.

@@ -16,6 +16,9 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   keinen eigenen Regel-Agenten. Ein Sub-Agent kann keinen Sub-Agenten starten – die Hauptsitzung ruft die Rollen auf.
 - **Backend und Portal getrennt** (23.11.2026): je eine Rolle für Backend und Portal – eigene Skills, Prüfungen und
   Ordner, kleinerer Kontext; dafür eine Übergabe mehr, die der Pilot prüfen soll.
+- **Übergabe in einer Datei pro Aufgabe** (24.11.2026): `docs/specs/<kurzname>.md` nach `docs/specs/vorlage.md`, jede
+  Rolle schreibt ihren eigenen Abschnitt – alles zu einer Aufgabe an einem Ort, im PR sichtbar; nach dem Merge
+  gelöscht, die Geschichte steht in git und im PR.
 - **Entscheidungen trifft Piotr** (23.11.2026): ein Agent stellt offene Punkte als Frage, statt zu raten – die
   wertvollsten Momente im Redesign waren Entscheidungen (Banner trotz WS-5, Leihtag-Filter, Löschkonzept).
 
