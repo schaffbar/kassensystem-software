@@ -126,7 +126,7 @@ class RfidReaderServiceTest {
     @Test
     void updateRfidReader_withoutName_isNotComparedWithOtherReaders() {
         // given
-        RfidReader rfidReader = givenReaderNamed("Theke");
+        RfidReader rfidReader = givenReaderNamed(RandomValues.rfidReaderName());
         UpdateRfidReaderCommand command = updateRfidReaderCommand(rfidReader.getId()).name(null).build();
 
         // when
