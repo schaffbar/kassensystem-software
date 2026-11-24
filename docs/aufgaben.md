@@ -12,7 +12,7 @@ Wie gearbeitet wird (nie committen, Prüfungen, Browser ohne Schreibzugriffe): d
 
 1. [Nach dem nächsten Deploy prüfen](#nach-dem-nächsten-deploy-prüfen) – sobald Backend und Portal auf dem Server
    laufen.
-2. [Agenten-Pipeline](#agenten-pipeline): die Rollen beschreiben, dann der Pilot.
+2. [Agenten-Pipeline](#agenten-pipeline): der Pilot.
 3. [Regeln, die nur das Portal prüft](#regeln-die-nur-das-portal-prüft) – die eindeutigen Namen der Lesegeräte (R-6)
    sind der Pilot der Pipeline.
 4. [Portal ohne Backend](#portal-ohne-backend).
@@ -39,7 +39,8 @@ Ziel: Für ein Issue, das Piotr annimmt (z. B. per Label), läuft der Weg von de
 Agenten. Skills sind das Wissen („wie macht man X hier“), Agenten die Rollen mit Auftrag, Werkzeugen und Rechten –
 mehrere Rollen nutzen dieselben Skills.
 
-Rollen (Subagents in `.claude/agents/*.md` im Repo-Root), bewusst wenige – jede Übergabe verliert Wissen:
+Rollen (Subagents in `.claude/agents/` im Repo-Root: `spec`, `implement-backend`, `implement-portal`, `verify`,
+`review`), bewusst wenige – jede Übergabe verliert Wissen:
 
 | Rolle | Macht | Lädt | Ergebnis |
 | --- | --- | --- | --- |
@@ -74,17 +75,16 @@ Für jede Rolle:
 
 Stufen:
 
-1. [ ] Rollen als Subagents beschreiben (`spec.md`, `implement-backend.md`, `implement-portal.md`, `verify.md`,
-   `review.md`). Die Übergabedatei steht (`docs/specs/vorlage.md`); der Skill `business-rule`
-   (`.claude/skills/business-rule/`) ist das gemeinsame Rezept der Rollen für eine Regel.
-2. [ ] Pilot: lokal an R-6 (Namen der Lesegeräte eindeutig) – betrifft Backend (`RfidReaderUpdate`, Exception, Tests)
-   und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe.
-3. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
+1. [ ] Pilot: lokal an R-6 (Namen der Lesegeräte eindeutig) – betrifft Backend (`RfidReaderUpdate`, Exception, Tests)
+   und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe. Dabei klären: ob die
+   Rollen gefunden werden, wenn die Hauptsitzung in `schaffbar-portal/` läuft, und wie das Werkzeug `Artifact` der
+   Rolle Spec ohne claude.ai (später in der GitHub Action) behandelt wird.
+2. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
    Piotr (Ausnahme zu „nie committen“ in `CLAUDE.md`, nur für die Pipeline).
-4. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
-5. [ ] CI mit Backend und Testdaten (Docker Compose mit Seed) – Verify braucht ein laufendes Backend; lokal läuft es
+3. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
+4. [ ] CI mit Backend und Testdaten (Docker Compose mit Seed) – Verify braucht ein laufendes Backend; lokal läuft es
    gegen die echte Datenbank mit abgefangenen Schreibzugriffen, in CI geht das nicht.
-6. [ ] GitHub: Claude Code Action, ausgelöst durch ein Label am Issue; Ergebnisse als Kommentare und PR.
+5. [ ] GitHub: Claude Code Action, ausgelöst durch ein Label am Issue; Ergebnisse als Kommentare und PR.
 
 ## Regeln, die nur das Portal prüft
 
