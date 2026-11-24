@@ -78,6 +78,10 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   behält eine Absicherung mit `IllegalStateException`.
 - **Zwei gleichzeitige Anfragen** (22.11.2026): partielle Unique-Indizes für WU-1, WS-1 und TU-9; die zweite Anfrage
   scheitert mit `500` bzw. einem allgemeinen Fehler am Gerät – sollte kaum vorkommen.
+- **Namen der Lesegeräte ohne Unique-Index** (24.11.2026): R-6 prüft nur `RfidReaderService.updateRfidReader()`, die
+  Datenbank nicht – anders als `tool_name_unique` bei den Werkzeugen (T-2). Zwei Personen, die im selben Augenblick
+  denselben Namen speichern, kämen beide durch – hingenommen: kein Gerät setzt einen Namen, und der Deploy hängt nicht
+  an Dubletten, die auf dem Server niemand geprüft hat.
 - **Formatregeln an den Commands** (13.11.2026): Bean Validation an den Commands, sie gilt für Portal und Geräte
   gleich; Regeln mit Zustand oder zweitem Aggregat im Service oder Use Case.
 - **Einweisen: alle oder keiner** (13.11.2026): `ToolCertificationCreate` weist alle Personen ein oder niemanden.
