@@ -44,8 +44,8 @@ public class CustomerDelete {
 
         ensureNoOpenWorkshopSession(customerId);
 
-        // C-4, C-9 – what only belongs to the customer goes with them; paid sessions, usages and the certifications
-        // they gave to others stay (C-11)
+        // C-4, C-9 – what only belongs to the customer goes with them; paid sessions and usages stay (C-11),
+        // so do the certifications they gave to others (C-13)
         releaseRfidTag(customerId);
         this.toolCertificationService.deleteToolCertifications(customerId);
         removeAsInstructor(customerId);

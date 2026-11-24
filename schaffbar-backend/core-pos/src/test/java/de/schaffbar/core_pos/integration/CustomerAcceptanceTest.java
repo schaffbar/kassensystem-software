@@ -144,7 +144,7 @@ class CustomerAcceptanceTest {
     }
 
     @Test
-    void c9_c11_deletingACustomerDeletesTheirCertificationsAndInstructorRoleButKeepsTheCertificationsTheyGave() {
+    void c9_deletingACustomerDeletesTheirCertificationsAndInstructorRole() {
         Scenario scenario = Scenario.randomValues().build();
 
         // given – the customer is certified for one tool and instructs another (TC-5)
@@ -154,8 +154,6 @@ class CustomerAcceptanceTest {
         CustomerId otherInstructor = this.fixture.given().instructor(instructedTool);
         CustomerId customerId = this.fixture.given().instructor(instructedTool);
         this.fixture.given().toolCertification(customerId, certifiedTool, instructorOfTheCertifiedTool);
-        CustomerId certifiedByTheCustomer = this.fixture.given().customer();
-        this.fixture.given().toolCertification(certifiedByTheCustomer, instructedTool, customerId);
 
         // when
         MvcTestResult result = this.fixture.api().deleteCustomer(customerId);
@@ -164,7 +162,26 @@ class CustomerAcceptanceTest {
         this.fixture.then().expectSuccess(result);
         this.fixture.then().expectCertifiedCustomers(certifiedTool);
         this.fixture.then().expectInstructors(instructedTool, otherInstructor);
-        this.fixture.then().expectCertifiedCustomers(instructedTool, certifiedByTheCustomer);
+    }
+
+    @Test
+    void c13_tc9_theCertificationsADeletedInstructorGaveStayAndKeepTheirId() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        ToolId toolId = this.fixture.given().tool(scenario.toolName());
+        CustomerId instructor = this.fixture.given().instructor(toolId);
+        CustomerId certifiedCustomer = this.fixture.given().customer();
+        this.fixture.given().toolCertification(certifiedCustomer, toolId, instructor);
+
+        // when
+        MvcTestResult result = this.fixture.api().deleteCustomer(instructor);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectNoCustomer(instructor);
+        this.fixture.then().expectCertifiedCustomers(toolId, certifiedCustomer);
+        this.fixture.then().expectCertifiedBy(toolId, certifiedCustomer, instructor);
     }
 
 }

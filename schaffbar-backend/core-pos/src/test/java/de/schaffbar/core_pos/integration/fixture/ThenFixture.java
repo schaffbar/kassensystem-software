@@ -206,6 +206,16 @@ public final class ThenFixture {
                 .containsExactlyInAnyOrder(values(customerIds));
     }
 
+    public void expectCertifiedBy(ToolId toolId, CustomerId customerId, CustomerId certifiedBy) {
+        MvcTestResult result = this.api.getToolCertifications(toolId);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$[?(@.customerId == '%s')].certifiedBy".formatted(customerId.getValue())) //
+                .asArray() //
+                .containsExactly(certifiedBy.getValue().toString());
+    }
+
     // ------------------------------------------------------------------------
     // workshop sessions
 

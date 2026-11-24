@@ -84,6 +84,9 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   Anfrage abgebrochen; die eigenen Einweisungen und die Rolle als Einweiser werden gelöscht; bezahlte Sitzungen,
   Nutzungen und die Tag-Historie bleiben (customer-README C-4, C-5, C-9, C-11). Die Tabellen sind bewusst nicht per
   Fremdschlüssel verknüpft (C-11).
+- **Einweisungen eines gelöschten Einweisers** (24.11.2026): die Einweisungen, die die Person anderen gegeben hat,
+  bleiben gültig; `certifiedBy` behält ihre Id und wird nicht geleert – kein Schreiben in fremde Einweisungen, kein
+  zusätzliches Event; das Portal zeigt als Einweiser „–“ (C-13, TC-9).
 - **Kaputte Daten am Gerät** (22.11.2026): eine Zuweisung, deren Person es nicht gibt, ist eine
   `IllegalStateException` – „Unerwarteter Fehler“ am Gerät, ein Fehler im Log.
 

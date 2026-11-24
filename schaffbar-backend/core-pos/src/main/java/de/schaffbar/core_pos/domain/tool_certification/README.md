@@ -6,15 +6,15 @@
 
 ## Attributes
 
-| Field         | Type                      | Constraints |
-|---------------|---------------------------|-------------|
-| `id`          | `UUID`                    | PK          |
-| `customerId`  | `UUID`                    | `@NotNull`  |
-| `toolId`      | `UUID`                    | `@NotNull`  |
-| `certifiedBy` | `UUID`                    | optional    |
-| `status`      | `ToolCertificationStatus` | `@NotNull`  |
-| `certifiedAt` | `Instant`                 | `@NotNull`  |
-| `updatedAt`   | `Instant`                 | `@Version`  |
+| Field         | Type                      | Constraints                                  |
+|---------------|---------------------------|----------------------------------------------|
+| `id`          | `UUID`                    | PK                                           |
+| `customerId`  | `UUID`                    | `@NotNull`                                   |
+| `toolId`      | `UUID`                    | `@NotNull`                                   |
+| `certifiedBy` | `UUID`                    | optional; can name a deleted customer (TC-9) |
+| `status`      | `ToolCertificationStatus` | `@NotNull`                                   |
+| `certifiedAt` | `Instant`                 | `@NotNull`                                   |
+| `updatedAt`   | `Instant`                 | `@Version`                                   |
 
 **Status Enum:** `ToolCertificationStatus` — `ACTIVE`, `PAUSED`, `REVOKED`
 
@@ -32,14 +32,15 @@
 
 ## Business Rules / Invariants
 
-| #    | Rule                                                                                                 | Enforced in                                                                                                                                       |
-|------|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| TC-1 | A customer can have at most one certification per tool (unique constraint on `customer_id, tool_id`) | DB unique constraint + `ToolCertificationService.createToolCertification()` — `CertificationAlreadyExistsException` (409)                         |
-| TC-2 | REVOKED is a terminal state — the customer can never be re-certified for that tool                   | `ToolCertificationService.createToolCertification()` — `CertificationPermanentlyRevokedException` (409)                                           |
-| TC-3 | Only valid state transitions: ACTIVE→PAUSED, PAUSED→ACTIVE, ACTIVE/PAUSED→REVOKED                    | `ToolCertification.pause()`, `reactivate()`, `revoke()` — `InvalidCertificationStateTransitionException` (409)                                    |
-| TC-4 | A batch certifies all customers or nobody — the first rejection answers for the whole batch          | `ToolCertificationCreate` — one transaction; `204`, or the first rejection: unknown tool or customer (`404`), then TC-8, TC-5, TC-1, TC-2 (`409`) |
-| TC-5 | Instructors of a tool are not certified for it – they need no certification                          | `ToolCertificationCreate` — `CustomerIsInstructorException` (409)                                                                                 |
-| TC-8 | Only an instructor of the tool certifies customers for it                                            | `ToolCertificationCreate` — `CustomerNotInstructorException` (409)                                                                                |
+| #    | Rule                                                                                                                                                     | Enforced in                                                                                                                                       |
+|------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| TC-1 | A customer can have at most one certification per tool (unique constraint on `customer_id, tool_id`)                                                     | DB unique constraint + `ToolCertificationService.createToolCertification()` — `CertificationAlreadyExistsException` (409)                         |
+| TC-2 | REVOKED is a terminal state — the customer can never be re-certified for that tool                                                                       | `ToolCertificationService.createToolCertification()` — `CertificationPermanentlyRevokedException` (409)                                           |
+| TC-3 | Only valid state transitions: ACTIVE→PAUSED, PAUSED→ACTIVE, ACTIVE/PAUSED→REVOKED                                                                        | `ToolCertification.pause()`, `reactivate()`, `revoke()` — `InvalidCertificationStateTransitionException` (409)                                    |
+| TC-4 | A batch certifies all customers or nobody — the first rejection answers for the whole batch                                                              | `ToolCertificationCreate` — one transaction; `204`, or the first rejection: unknown tool or customer (`404`), then TC-8, TC-5, TC-1, TC-2 (`409`) |
+| TC-5 | Instructors of a tool are not certified for it – they need no certification                                                                              | `ToolCertificationCreate` — `CustomerIsInstructorException` (409)                                                                                 |
+| TC-8 | Only an instructor of the tool certifies customers for it                                                                                                | `ToolCertificationCreate` — `CustomerNotInstructorException` (409)                                                                                |
+| TC-9 | `certifiedBy` can name a customer who was deleted – the certification stays valid; whoever shows its instructor finds no customer (the portal shows „–“) | `CustomerDelete` use case leaves the certifications the customer gave unchanged (C-13)                                                            |
 
 A certification that does not exist answers `404` (`ResourceNotFoundException.toolCertification(customerId, toolId)`)
 when it is paused, reactivated, revoked or deleted.

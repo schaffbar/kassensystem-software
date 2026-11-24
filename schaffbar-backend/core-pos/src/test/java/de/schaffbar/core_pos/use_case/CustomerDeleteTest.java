@@ -11,6 +11,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -117,6 +118,20 @@ class CustomerDeleteTest {
     }
 
     @Test
+    void keepsTheCertificationsTheCustomerGave() {
+        // given
+        CustomerId customerId = givenCustomerWithoutOpenSession();
+        givenNoRfidTagAssignment(customerId);
+        givenToolsOfInstructor(customerId);
+
+        // when
+        this.customerDelete.process(customerId);
+
+        // then
+        expectOnlyTheirOwnCertificationsDeleted(customerId);
+    }
+
+    @Test
     void rejectsACustomerWithAnOpenSession() {
         // given
         CustomerId customerId = givenCustomerWithOpenSession();
@@ -198,6 +213,12 @@ class CustomerDeleteTest {
         InOrder order = inOrder(this.toolCertificationService, this.customerService);
         order.verify(this.toolCertificationService).deleteToolCertifications(customerId);
         order.verify(this.customerService).deleteCustomer(customerId);
+    }
+
+    // C-13 – the certifications the customer gave to others are not touched, their certifiedBy stays
+    private void expectOnlyTheirOwnCertificationsDeleted(CustomerId customerId) {
+        verify(this.toolCertificationService).deleteToolCertifications(customerId);
+        verifyNoMoreInteractions(this.toolCertificationService);
     }
 
     private void expectRfidTagUnassignedBeforeTheCustomerIsDeleted(CustomerId customerId) {
