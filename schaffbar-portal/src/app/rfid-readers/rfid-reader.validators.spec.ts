@@ -41,6 +41,7 @@ describe('validateUniqueRfidReaderName', () => {
 
   it('should follow the list of readers', () => {
     const errors = nameErrors('Theke');
+    expect(errors()).toEqual([expect.objectContaining({ kind: 'nameExists' })]);
 
     rfidReaders.set([{ id: 'reader-1', name: 'Werkstatt Eingang' }]);
 
