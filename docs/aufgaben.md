@@ -78,6 +78,22 @@ Stufen:
    und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe. Dabei klären: ob die
    Rollen gefunden werden, wenn die Hauptsitzung in `schaffbar-portal/` läuft, und wie das Werkzeug `Artifact` der
    Rolle Spec ohne claude.ai (später in der GitHub Action) behandelt wird.
+   Durchlauf 24.–25.11.2026 (`docs/specs/r6-lesegeraete-namen-eindeutig.md`) – was er gezeigt hat:
+   - Die fünf Rollen liefen nacheinander durch, die Übergabe nur über die Spec-Datei hat getragen. Je Rolle 1–10 min
+     und etwa 140–240 k Tokens.
+   - Nachbesserungen zwischen den Rollen (Freigabe in Piotrs Namen, Dublette gestrichen, Reihenfolge der Parameter,
+     Entscheidung zum Befund der Abnahme, die zwei „sollte“ des Reviews) hat die Hauptsitzung gemacht und in der Spec
+     vermerkt. Offen: wer das in der Action macht – die Hauptsitzung oder die Rolle, erneut aufgerufen.
+   - Review hat die Abschnitte 2–4 vor dem Code gelesen. Die Rolle `review` sollte erst Abschnitt 1, dann den Code
+     und die Berichte zuletzt lesen. Review ließ keine Tests laufen – festlegen, ob es `mvn -q test` und
+     `npm run check` selbst laufen lässt.
+   - Verify fand einen älteren Fehler außerhalb der Aufgabe (Dialoge auf dem Handy) – Piotr entschied: eigene Aufgabe.
+   - Piotr hat zwischen den Rollen committet; Review bekam deshalb Commit-Bereich und Arbeitsbaum. Mit Stufe 2
+     (eigener Branch) wird das ein Diff gegen `main`.
+   - `Artifact`: mit claude.ai in der Sitzung las die Rolle Spec die Artboards (`list` mit `scope: files`, `read` mit
+     `path`); in der Action ohne claude.ai geht das nicht – offen für Stufe 5.
+   - Noch nicht geprüft: die Rollen, wenn die Hauptsitzung in `schaffbar-portal/` läuft (der Pilot lief im
+     Repo-Root).
 2. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
    Piotr (Ausnahme zu „nie committen“ in `CLAUDE.md`, nur für die Pipeline).
 3. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
@@ -98,6 +114,7 @@ bis zur Erklärung im Portal; danach steht sie unter „Business Rules / Invaria
 
 | Aufgabe | Notiz |
 | --- | --- |
+| Dialoge auf dem Handy | Formulardialoge sind auf dem Handy abgeschnitten: `minWidth: DIALOG_WIDTH.medium` (600 px) ragt bei 390 px links und rechts je 105 px über den Bildschirm – „Lesegerät bearbeiten“, „Werkzeug bearbeiten“ und wohl alle mit `DIALOG_WIDTH`; in `shared/dialogs/dialog-constants.ts` und im Skill `dialog` lösen, alle Dialoge auf dem Handy prüfen. Gefunden bei der Abnahme von R-6 (24.11.2026) |
 | Erfolgsmeldungen | Snackbar nach dem Speichern („Bandsäge gespeichert“); Fehler zeigt der Interceptor schon |
 | Bestätigungsdialoge | Titel als Frage, Folgen erklären, beim Löschen Häkchen „nicht rückgängig“ oder den Namen eintippen (Prototyp `UserDeleteDialog`), ein gesperrter Zustand bietet den nächsten Schritt an |
 | Dunkel-Modus | Tokens sind mit `light-dark()` vorbereitet, der Umschalter fehlt; alle Seiten prüfen |

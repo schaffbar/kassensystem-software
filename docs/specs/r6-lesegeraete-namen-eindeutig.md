@@ -17,7 +17,7 @@ Rolle Spec als Kopie dieser Vorlage – docs/specs/<kurzname>.md, Kurzname auf D
   Agenten-Pipeline (Stufe 1); Artboard „RFID-Lesegeräte – Dialog: Bearbeiten“ des Prototyps
   (`project/ReaderEditDialog.dc.html`)
 - **Branch:** –
-- **Stand:** Portal fertig
+- **Stand:** Review fertig
 
 ## 1. Spec
 
@@ -421,7 +421,160 @@ und Handy. Schreibzugriffe abfangen (Skill `verify-ui`); die Liste der Lesegerä
 <!-- Seiten, Zustände (auch simulierte Antworten), Desktop und Handy; was gefunden wurde. Nichts in die Datenbank
 geschrieben (Skill verify-ui); Screenshots liegen nicht im Repo. -->
 
+Abgenommen am 24.11.2026 gegen das lokale Backend (`127.0.0.1:5000`) und `ng serve` auf `localhost:4200`, Stand
+`df576ee` (Arbeitsbaum sauber, Liste der Lesegeräte als letzter Parameter schon drin). In jedem Playwright-Aufruf
+`unrouteAll`, dann jede Anfrage außer `GET` abgebrochen oder im Test beantwortet; mitgeschrieben, was hinausging – kein
+`PUT` erreichte das Backend. Danach `GET /api/v1/rfid-readers`: dieselben sechs Namen wie vorher.
+
+Screenshots: `/tmp/claude-1000/-home-piotr-source-schaffbar-kassensystem-software/56429df8-74f7-49c5-9247-bbfe1e5e3631/scratchpad/shots/`
+(unten nur der Dateiname).
+
+### Angesehen
+
+Detailseite `/rfid-readers/01e44ebd-…` („Werkstatt Eingang“), Dialog „Lesegerät bearbeiten“; Desktop 1440 × 1000 und
+Handy 390 × 844.
+
+| Zustand | Wie entstanden | Desktop | Handy |
+| --- | --- | --- | --- |
+| Seite und Dialog geöffnet – über „Bearbeiten“ im Kopf, „Bearbeiten …“ im ⋯-Menü und „Bearbeiten“ in der Karte | echte `GET` | `00-detail-desktop.png`, `01-dialog-open-desktop.png` | `10-detail-phone.png`, `11-dialog-open-phone.png` |
+| 1. Fehler am Feld: „theke“, mit Tab verlassen → rot „Ein anderes Gerät heißt bereits so“ statt des Hinweises (vorher, beim Tippen, kein Fehler); „Änderungen speichern“ → Dialog bleibt offen, kein `PUT` | echte Liste | `02-name-exists-desktop.png`, `02-name-exists-desktop-clip.png` | `12-name-exists-phone.png`, `13-name-exists-after-save-phone.png` |
+| 1b. „SWITCH BANDSÄGE“ (Umlaut, Großbuchstaben) ohne Verlassen, Enter im Feld → Fehler erscheint beim Speichern, Dialog offen, Fokus bleibt im Feld, kein `PUT` | echte Liste, über das ⋯-Menü geöffnet | `03-enter-umlaut-desktop.png` | – |
+| 2. Erlaubt ohne Fehler: „WERKSTATT EINGANG“, „Theke “ (Leerzeichen am Ende), leeres Feld → Dialog schließt; `PUT`-Body `{"name":"WERKSTATT EINGANG",…}`, `{"name":"Theke ",…}` (ungetrimmt), `{"name":null,…}`; danach lädt die Seite das Lesegerät neu | `PUT` mit `route.fulfill({ status: 204 })` | `04-allowed-*-desktop.png`, `05-after-save-*-desktop.png` | nur „WERKSTATT EINGANG“: `15-allowed-own-upper-phone.png` |
+| 3. Ablehnung des Backends: „Lager“ → Dialog zu, Snackbar „Ein anderes Lesegerät heißt schon so – einen anderen Namen wählen.“, Seite zeigt weiter „Werkstatt Eingang“; auf dem Handy bricht die Snackbar in zwei Zeilen um, 374 px breit | `PUT` mit `409`, `application/problem+json`, `code: RFID_READER_NAME_ALREADY_USED` | `06-409-desktop.png` | `16-409-phone.png` |
+| 4. Lesegerät ohne Namen: Titel und Dialog-Untertitel zeigen die MAC-Adresse, Name „–“ in der Karte; Dialog mit leerem Feld, Verlassen ohne Fehler, Speichern schickt `name: null`, Dialog schließt | `GET`-Antworten mit `route.fetch()` geändert: „Werkstatt Eingang“ mit `name: null` in Liste und Detail, dazu ein Gerät ohne Typ und Namen in der Liste; `PUT` mit `204` | `07-no-name-page-desktop.png`, `07-no-name-dialog-desktop.png` | `17-no-name-page-phone.png`, `18-no-name-dialog-phone.png` |
+| 5. Laden der Liste: beim Öffnen und mit „Neu laden“ je `GET /rfid-readers`, `GET /tools`, `GET /rfid-readers/<id>`, `GET /tools?rfidReaderId=<id>`; keine sichtbare Änderung | echte `GET` | – (Netzwerk) | – |
+| Liste lädt nicht: Snackbar „Die Daten konnten nicht geladen werden.“, Seite sonst vollständig; „theke“ ergibt dann keinen Fehler am Feld (leere Liste, wie im Bericht Portal beschrieben) | `GET /api/v1/rfid-readers` mit `500` | `08-list-load-fails-desktop.png` | – |
+
+- Texte durchweg Deutsch, keine Übersetzungsschlüssel auf dem Bildschirm.
+- Kein seitliches Scrollen der Seite auf dem Handy (`scrollWidth` = 390, auch mit offenem Dialog).
+- Konsole: keine Angular- oder zod-Fehler; nur die Netzwerkzeilen des Browsers zu den simulierten `409` und `500`.
+- Auf dem Desktop passt der Dialog ohne Scrollen (`mat-dialog-content` 368 von 368 px).
+
+### Befunde
+
+1. **muss** – Detailseite, Dialog „Lesegerät bearbeiten“, alle Zustände, Handy 390: der Dialog ist 600 px breit und
+   ragt links und rechts je 105 px über den Bildschirm (`boundingBox` x = −105, Breite 600; ebenso mit
+   Handy-Emulation `isMobile`, dort nicht scrollbar). Der Fehler am Feld ist abgeschnitten („… Gerät heißt bereits so“,
+   der Anfang fehlt), ebenso Titel, Untertitel, Hinweise, die Werte und „Änderungen speichern“. Erwartet: Skill
+   `verify-ui` („a dialog that is cut off“, „Nothing scrolls sideways on the phone“), Skill `design` („Phone“), der
+   Umfang der Spec („im Browser der Fehler am Feld … Desktop und Handy“). Ursache: `minWidth: DIALOG_WIDTH.medium`
+   (`600px`) in `rfid-reader-detail.component.ts` – **älter als diese Aufgabe** (stand schon vor `3b28db9` da) und nicht
+   nur hier: „Werkzeug bearbeiten“ auf der Werkzeug-Detailseite ist auf dem Handy genauso 600 px breit
+   (`90-tool-edit-dialog-phone.png`); der Skill `dialog` schreibt `minWidth: DIALOG_WIDTH.…` vor. Ob das in dieser
+   Aufgabe oder als eigene Aufgabe für alle Dialoge behoben wird, entscheidet Piotr. Gegenprobe nur im Browser (Stil
+   des Overlays per `evaluate` auf `min-width: 0; width: calc(100vw - 32px)` gesetzt, kein Code geändert): dann passt
+   der Dialog (358 px), der Fehler steht in einer Zeile (310 px breit), die Buttons stehen untereinander –
+   `19-name-exists-phone-fitted-simulated.png`.
+   Screenshots: `12-name-exists-phone.png`, `14-name-exists-phone-mobile-emulation.png`, `15-allowed-own-upper-phone.png`,
+   `18-no-name-dialog-phone.png`.
+   **Entscheidung (Piotr, 24.11.2026):** nicht Teil von R-6 – eigene Aufgabe „Dialoge auf dem Handy“ in
+   `docs/aufgaben.md`, „Portal ohne Backend“; R-6 gilt damit als abgenommen.
+
+Sonst keine Befunde: Verhalten und Texte wie im Vertrag („Verhalten im Portal“, „Fehlertext de/en“); Name optional,
+kein Trimmen – wie in `docs/entscheidungen.md` festgehalten, daher kein Befund gegen den Prototyp.
+
+### Nicht geprüft
+
+- Ein echtes Speichern und ein echtes `409` des Backends – beides nur simuliert (nichts in die Datenbank).
+- Die Liste ändert sich bei offenem Dialog (der Fehler folgt dem Signal) – die Seite fragt die Liste nicht selbst
+  neu ab, im Browser nicht herbeizuführen; nur in den Specs des Portals.
+- Ein Name nur aus Leerzeichen und „ß“ gegen `upper()` in PostgreSQL – nicht im Browser.
+- Auf dem Handy: „Theke “ und das leere Feld (nur „WERKSTATT EINGANG“), das ⋯-Menü und die Karte als Weg zum Dialog,
+  Enter im Feld, der Ladefehler der Liste.
+- Ob der Fehler auf dem Handy umbricht, sobald der Dialog passt – nur mit der Gegenprobe im Browser (oben), nicht mit
+  einer Änderung im Code.
+- Englische Oberfläche, Dark Mode, Tablet-Größe.
+- Die Daten auf dem Server der Werkstatt.
+
 ## 5. Review
 
 <!-- Befunde gegen CLAUDE.md und die Skills: Datei und Zeile, verletzte Regel, muss / sollte, Stand (offen, behoben).
 Ohne die Begründung des Autors gelesen. -->
+
+Geprüft am 24.11.2026: der ganze Change `git diff 2658ce5` – die Commits `01af736`, `ccec909`, `3b28db9`, `df576ee`
+und der Arbeitsbaum (`docs/aufgaben.md`, diese Spec); jede geänderte und neue Datei ganz gelesen, gegen den Vertrag,
+`CLAUDE.md`, `schaffbar-backend/CLAUDE.md`, `schaffbar-portal/CLAUDE.md`, die Skills `business-rule`, `aggregate`,
+`backend-testing`, `rest-api`, `use-case`, `feature`, `component`, `dialog`, `testing` und `docs/entscheidungen.md`.
+Kein Test und kein Check gelaufen – kein Befund hängt daran.
+
+### Befunde
+
+Keiner der Schwere **muss**.
+
+1. **sollte** – `schaffbar-portal/src/app/rfid-readers/rfid-reader.validators.spec.ts:42–48` („should follow the list
+   of readers“). Regel: `schaffbar-portal/CLAUDE.md`, „Definition of done“ 1 (Specs für neues Verhalten), Skill
+   `business-rule`, „3. Portal“ Schritt 5 – ein Test, der auch ohne das geprüfte Verhalten grün bliebe. Der Test liest
+   `errors()` erst nach `rfidReaders.set(…)`; die Fehler werden aber erst beim ersten Lesen berechnet. Ein Validator,
+   der die Liste nur einmal oder `untracked` liest, folgte der Liste nicht und bestünde den Test trotzdem. Bewiesen ist
+   das Verhalten nur im Dialog-Spec (`update-rfid-reader-form.component.spec.ts:200–209`, liest vor und nach der
+   Änderung), daher nur „sollte“. Änderung: `errors()` vor dem Wechsel der Liste einmal lesen und den Fehler `nameExists`
+   erwarten, danach `[]`. Stand: behoben (Hauptsitzung, 25.11.2026) – Gegenprobe: liest der Validator die Liste
+   `untracked`, schlägt der Test fehl.
+
+2. **sollte** – `schaffbar-backend/core-pos/src/test/java/de/schaffbar/core_pos/domain/rfid_reader/RfidReaderServiceTest.java:129`
+   (`updateRfidReader_withoutName_isNotComparedWithOtherReaders`). Regel: `schaffbar-backend/CLAUDE.md`, „Tests“
+   („values random … unless the value is the subject of the test“), Skill `backend-testing`, „Test data“. Der Test
+   braucht nur irgendeinen Namen, den er leert. „Theke“ ist hier nicht Gegenstand des Tests, anders als in
+   `…_keepsItsOwnNameInAnotherCase` und `…_rejectsTheNameOfAnotherReader`, wo die Schreibweise geprüft wird. Änderung:
+   `givenReaderNamed(RandomValues.rfidReaderName())`. Stand: behoben (Hauptsitzung, 25.11.2026).
+
+Nach der Behebung (25.11.2026, Hauptsitzung): `mvn -q test` 682 Tests in 86 Klassen, `npm run check` 570 Tests in
+111 Dateien – alles grün.
+
+### Ohne Befund geprüft
+
+- **Vertrag**, Zeile für Zeile:
+  - Id und Satz von R-6 in der README wörtlich.
+  - Bedingung: `findByNameIgnoreCase` ohne Trimmen, das eigene Lesegerät per Id ausgenommen, `null` nicht verglichen
+    (`RfidReaderService.java:84–86`, `128–134`).
+  - Geprüft bei jedem `PUT` mit Namen, nach dem Laden (`404` zuerst).
+  - Keine Migration, kein Index, kein README-Satz zu Dubletten.
+  - `RfidReaderNameAlreadyUsedException`: Code, `409`, Message wie im Vertrag.
+  - Texte de/en beider Schlüssel wörtlich wie im Vertrag.
+  - Keine API-Änderung: `shared/api` und Bruno unverändert, ebenso `RfidReaderUpdate`, Controller, `DeviceMessages`.
+  - Portal: Vergleich mit `toLowerCase()` ohne Trimmen, Lesegeräte ohne Namen ausgenommen. Der Fehler erscheint am
+    Feld wie beim Socket-Namen, das Signal von `RfidReadersStore.rfidReaders` geht in die Dialogdaten, der Name bleibt
+    optional.
+  - Nichts außerhalb von „Umfang“ geändert. Das Neuladen der Liste auf der Detailseite folgt dem genannten Vorbild der
+    Werkzeug-Detailseite (`tool-detail.component.ts:74–84`). Die neue Zeile „Dialoge auf dem Handy“ in
+    `docs/aufgaben.md` ist Piotrs Entscheidung aus Abschnitt 4.
+- **Regeln Backend:**
+  - Ort der Regel (Service-Command, eigene Zeilen des Aggregats).
+  - `ensure…` mit `// R-6`, `throw` im `throw…`-Helper.
+  - `List` statt `Optional` ohne Unique-Spalte.
+  - Exception nach Skill `aggregate`.
+  - Importgruppen, `this.`, Abschnitte, Zeilenlänge.
+- **Regeln Portal:**
+  - Die Regel ist eine reine Funktion im Modell (`isRfidReaderNameUsed`) mit Grund und Id. Der Validator in
+    `rfid-reader.validators.ts` ruft sie nur auf.
+  - Dialogdaten als Signal mit eigenem `ExistingRfidReaderViewModel` (Skill `component`, „ViewModel“).
+  - Die Seite nimmt die Liste aus dem Store der eigenen Feature.
+  - Übersetzungen in beiden Sprachen, Schlüssel nach Ort.
+- **Tests:**
+  - Service: erlaubt (freier Name, eigener Name in anderer Schreibweise, ohne Namen ohne Abfrage); abgelehnt mit
+    Exception, `code`, Id des anderen Lesegeräts, Lesegerät unverändert, kein Event.
+  - Controller: `409` mit Code.
+  - `r6_readerNamesAreUniqueWithoutRegardToCase` und `r6_readersWithoutANameAreNotCompared` über `api()` und `then()`,
+    beide Seiten, Werte aus `Scenario` und `RandomValues`.
+  - Fixture in den Abschnitten „RFID readers“, Stubs nur in `given…`.
+  - Portal: Modell-, Validator-, Dialog- und Seiten-Specs. Der Dialog-Spec beweist das Abweisen, den Fehler nach dem
+    Verlassen und das Folgen der Liste. Der Seiten-Spec prüft, dass genau das Store-Signal übergeben wird.
+- **Doku:**
+  - README: R-6 aus „Planned“ nach „Business Rules / Invariants“, Attribut `name` ergänzt.
+  - `docs/entscheidungen.md`: drei Einträge mit Datum in den passenden Abschnitten.
+  - `docs/aufgaben.md`: Zeile R-6 gelöscht, „Reihenfolge“ Punkt 3 angepasst, Stufe 1 der Pipeline wie verlangt stehen
+    gelassen.
+  - DDD-Übersichten: zu Recht unverändert, kein Use Case, kein Event.
+- **Berichte:**
+  - `RfidReaderServiceTest` hat 12 Testläufe (gezählt).
+  - Das Portal hat 111 Spec-Dateien (gezählt).
+  - „Template unverändert“, „API-Schicht unverändert“ und `minWidth` älter als `3b28db9` (`git show 2658ce5`) stimmen.
+  - Die übrigen Aussagen zu Änderungen und Tests decken sich mit dem Code.
+
+### Nicht geprüft
+
+- `mvn -q test` und `npm run check` nicht gelaufen. Die Gesamtzahlen (683 bzw. 682 Backend-Tests, 570 Portal-Tests)
+  sind nicht nachgezählt, die Gegenproben der Berichte nicht wiederholt.
+- Kein Browser (Abschnitt 4), keine Daten des Servers.
+- Ob `toLowerCase()` im Portal und `upper()` in PostgreSQL bei seltenen Zeichen (ẞ, griechisches Schluss-Sigma) gleich
+  vergleichen – laut Vertrag erklärt dann der `409`.
