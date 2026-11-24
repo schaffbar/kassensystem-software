@@ -12,7 +12,7 @@ Staff run it at the counter with the portal.
 | `schaffbar-backend/core-pos/` | the backend – Spring Boot 3.5, Java 25, PostgreSQL with Flyway; one aggregate per folder in `domain/` with a `README.md` of its rules, use cases in `use_case/`; Bruno collection in `api/`, DDD overview in `docs/`; `CLAUDE.md` and skills in `schaffbar-backend/` |
 | `infrastructure/` | `docker-compose.yml` and the database init |
 | `.claude/skills/` | skills across backend and portal: `business-rule` (one rule from the README to the portal) |
-| `docs/` | `ui-redesign.md` (design and every portal decision with its date), `backend-features.md` (what the portal still needs from the backend), `roadmap.md` (open tasks), setup notes (`playwright-wsl.md`, …) |
+| `docs/` | `aufgaben.md` (open tasks in their order, what the portal still needs from the backend), `entscheidungen.md` (decisions with their date, backend and portal), setup notes (`playwright-wsl.md`, …) |
 | `TODO.md` | loose tasks and ideas of the maintainer |
 | `deployment.md` | deployment on the workshop server |
 
@@ -57,5 +57,7 @@ The UI speaks German, the code English – and not always word for word.
 
 ## Open tasks
 
-- The open tasks after the UI redesign, their order and how to work on them: `docs/roadmap.md`. Mark a task as done
-  there (date and commit) when it is finished.
+- The open tasks and their order: `docs/aufgaben.md`. A finished task is deleted there – git keeps the history; a
+  decision made on the way goes into `docs/entscheidungen.md` with its date.
+- Tasks have no numbers or abbreviations – they are named by what they are about. Rule ids (`R-6`, `TA-3`) stay: they
+  live in the aggregate READMEs and the test names.

@@ -6,9 +6,10 @@ description: The design system of schaffbar-portal (Angular 22, Angular Material
 # Design system and page layout in schaffbar-portal
 
 The design comes from the prototype (artifact <https://claude.ai/artifact/MUj2FTVMMR2MEUWdbJ5vEM>, one artboard
-`project/<Page>.dc.html` per page and dialog) and is described in [`docs/ui-redesign.md`](../../../../docs/ui-redesign.md)
-(colors, type, UX principles, every decision with its date). This skill is the Angular side: which token, which
-building block, which layout.
+`project/<Page>.dc.html` per page and dialog), derived from the website schaffbar-bb.de: dark navy, the neon green of
+the logo, blue / amber / orange accents. This skill is the design and its Angular side: principles, which token, which
+building block, which layout. Where the portal deviates from the prototype on purpose, it is recorded in
+[`docs/entscheidungen.md`](../../../../docs/entscheidungen.md) – read it before "fixing" a page towards the prototype.
 
 Reference pages:
 
@@ -18,16 +19,44 @@ Reference pages:
 - detail without tabs, one column: [rfid-reader-detail/](../../../src/app/rfid-readers/pages/rfid-reader-detail/)
 - overview: [dashboard/](../../../src/app/dashboard/pages/dashboard/)
 
+## The prototype
+
+- The canvas has **one row per feature**: the overview or list first, then its dialogs, then the detail page and its
+  dialogs; a note at the end of the row lists the main changes.
+- **Play** (blue icon on an artboard) makes it clickable: navigation, tabs, filters, search, ⋯ menus and dialogs.
+- **Tweaks** on an artboard: `dark` (dark mode), `offline` (reader details), dialog variants (`action`, `blocked`,
+  `inUse`, `state`).
+- Names, numbers and ids are example data; `[BETRAG]` or `[Beschreibung …]` mark missing content. The artboards were
+  never tested against real data – the data the backend delivers decides (below, step 3).
+
+## UX principles
+
+1. **Exceptions first** – problems (reader without type, not checked out) are shown actively, not hidden in a table.
+2. **Live instead of a refresh button** where a page stays open.
+3. **Status = icon + text**, never a colored dot alone (red/green color blindness).
+4. **The whole row is clickable** to the detail page; actions in the ⋯ menu.
+5. **Never a red delete button in every row** – dangerous actions are bundled (⋯ menu, danger zone).
+6. **A dialog's title is a question, its button names the action** ("Einweisung entziehen", not "OK").
+7. **Explain the consequences first** ("Danach kann Anna Becker nicht mehr einchecken").
+8. **Explain a blocked action** instead of disabling it silently, and offer the next step ("Zur offenen Sitzung").
+9. **Focus on "Abbrechen"** for dangerous actions; for far-reaching ones also a checkbox or typing the name.
+10. **Validation live** at the field plus a summary on submit ("Bitte 2 Felder prüfen"); optional fields say
+    "(optional)" instead of a star on the required ones.
+11. **Count unsaved changes**; "Speichern" is enabled only after a change.
+12. **Accessibility:** real `<button>` / `<a>` / `<label>`, dialogs with their role, `aria-expanded` on menus, a visible
+    focus ring, touch targets of at least 44 × 44 px (tablet at the counter).
+
 ## Building a page from the prototype
 
-1. **Read the artboard first** – the page's `.dc.html` and the artboards of its dialogs, not only the text in
-   `ui-redesign.md`. Take sizes, colors, texts and order from it; never copy its inline-style HTML.
+1. **Read the artboard first** – the page's `.dc.html` and the artboards of its dialogs, not only the row's note.
+   Take sizes, colors, texts and order from it; never copy its inline-style HTML.
 2. Map every part to a building block or global class below. A part without one: a dumb component in the feature
    (skill `component`), styled with tokens.
 3. **Check the data.** What the backend does not deliver yet is left out, not faked. Collect the gaps and ask before
    building when the prototype contradicts the backend (e.g. "close the session" while the backend forbids it).
-4. Record every decision with its date in the page's entry in `docs/ui-redesign.md` ("Phase 1"), backend gaps in
-   [`docs/backend-features.md`](../../../../docs/backend-features.md), rules the portal checks for the backend in the
+4. Record every decision with its date in [`docs/entscheidungen.md`](../../../../docs/entscheidungen.md) (section of
+   the feature), backend gaps in [`docs/aufgaben.md`](../../../../docs/aufgaben.md) ("Backend-Funktionen für das
+   Portal"), rules the portal checks for the backend in the
    aggregate's `README.md` ("Enforced only in the portal").
 5. Look at it in the browser on desktop and phone (skill `verify-ui`).
 
@@ -51,7 +80,32 @@ Defined on `:root` in [`src/styles.scss`](../../../src/styles.scss) with `light-
 
 A softer shade of a token: `color-mix(in srgb, var(--accent) 18%, transparent)`, not an `rgb()` value.
 
-Radii: 8 icon button, 10 button / input / small tile, 12–14 card, 16 dialog, `999px` badge and chip.
+Contrast (WCAG AA, at least 4.5:1) – the reason behind the token rules:
+
+| Combination | Contrast | Rule |
+| --- | --- | --- |
+| neon green on white | 2.0:1 | never as text – only as a surface |
+| navy on neon green | 9.4:1 | the main button |
+| dark green (`--accent-text`) on white | 6.4:1 | green as text |
+| neon green on navy | 8.4:1 | green as text in dark mode |
+| `--info` on its `-soft` background | 5.3:1 | badge "In Benutzung" |
+| `--text-3` on white | 5.4:1 | the lightest gray (labels, meta) |
+
+Type: **Inter**, **JetBrains Mono** for ids, MAC, IP and socket names (class `mono`).
+
+| Style | Size / weight | Use |
+| --- | --- | --- |
+| page title | 28 / 700 | `h1` |
+| dialog title | 20 / 700 | dialogs |
+| card heading | 16–17 / 700 | `h2` in a card |
+| body | 14 / 400 | text, table cells |
+| label | 13 / 500–600 | form labels, meta |
+| table head | 12 / 600, upper case | `th` |
+| key figure | 34 / 700, `tabular-nums` | stat tiles, durations |
+
+Sizes: spacing on a 4 px grid (4, 8, 12, 16, 20, 24, 32). Radii: 8 icon button, 10 button / input / small tile, 12–14
+card, 16 dialog, `999px` badge and chip. Layout: a navy sidebar with the groups *Betrieb* and *Hardware*, a light
+content area.
 
 ## Material
 

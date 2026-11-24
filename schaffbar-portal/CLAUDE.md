@@ -147,8 +147,8 @@ before working on its topic.
 1. The change follows the rules above and its skills; specs for new or changed behaviour (skill `testing`).
 2. `npm run check` passes.
 3. A UI change is looked at on desktop and phone without writing to the database (skill `verify-ui`).
-4. Decisions with their date in `../docs/ui-redesign.md`; a rule the portal checks for the backend in the aggregate's
-   `README.md` ("Enforced only in the portal"); backend gaps in `../docs/backend-features.md`; a finished task ticked
-   off in `../docs/roadmap.md`.
+4. Decisions with their date in `../docs/entscheidungen.md`; a rule the portal checks for the backend in the
+   aggregate's `README.md` ("Enforced only in the portal"); backend gaps in `../docs/aufgaben.md`; a finished task
+   deleted there.
 5. Nothing committed (`../CLAUDE.md`).
 6. The report says what was checked and what was not.

@@ -13,8 +13,8 @@ Everything that needs a second aggregate is a **use case** in `use_case/` (skill
 its API model live in `domain/<aggregate>/web/`. Project rules, commands and the Definition of Done:
 `schaffbar-backend/CLAUDE.md`.
 
-Reference implementation: `domain/rfid_reader/` – small, complete, and the pilot of the backend consistency work
-(`docs/backend-consistency.md`).
+Reference implementation: `domain/rfid_reader/` – small, complete, and the pilot of the backend consistency work.
+Why the rules are as they are, with their date: `docs/entscheidungen.md` (German).
 
 ## Folder
 
@@ -127,8 +127,7 @@ private void throwToolAlreadyInUseByAnotherCustomerException(ToolUsage existing)
   a helper with a verb of its own (`releaseRfidTag`).
 - Loading stays inline: `orElseThrow(() -> ResourceNotFoundException.tool(toolId))` or a `findOrThrow` helper – it
   returns what the command works with. An aggregate found by its state throws the rule's exception instead
-  (`findByCustomerIdAndExitTimeIsNull(customerId).orElseThrow(() -> new NoRunningWorkshopUsageFoundException(customerId))`,
-  E29 in `docs/backend-consistency.md`).
+  (`findByCustomerIdAndExitTimeIsNull(customerId).orElseThrow(() -> new NoRunningWorkshopUsageFoundException(customerId))`).
 - A guard against a bug (the caller already checked) is an `ensure…` too, throws `IllegalStateException` and says
   in its comment who checks before (`ensureNoOpenWorkshopSession` in `WorkshopSessionService`). The same in an
   entity's command whose aggregate was found by its state – the guard stays, the comment says who found it:
@@ -229,7 +228,7 @@ class RfidReader {
   names it, and opposite changes are named as a pair (`tool.assignRfidReader()` / `clearRfidReader()`,
   `assignment.assignRfidTag()` / `unassignRfidTag()`). Never `certification.pauseCertification()`. The service command
   and the use case take their names from it (section "Service").
-- **A state without an end is named as in the glossary (E6):** a session is *open* (`OPEN`), a workshop or tool usage
+- **A state without an end is named as in the glossary:** a session is *open* (`OPEN`), a workshop or tool usage
   is *running* (no `exitTime` / `endTime`) – in methods, exceptions and their codes, views, fields and API paths:
   `getOpenWorkshopSession`, `hasRunningToolUsage`, `RunningToolUsageExistsForSessionException`; never `active`. A
   certification's status `ACTIVE` is not such a state – it stays. The one exception, decided 23.11.2026: the
@@ -242,13 +241,13 @@ class RfidReader {
 
 The aggregate root is the entity **named after its package** (`rfid_tag_assignment` → `RfidTagAssignment`). Another
 entity in the package is an **inner entity**: it belongs to the aggregate and changes only together with it –
-`RfidTagAssignmentHistory`, the entry an unassignment leaves behind (E16 in `docs/backend-consistency.md`).
+`RfidTagAssignmentHistory`, the entry an unassignment leaves behind.
 
 - Package-private like the root, created by a **package-private** `static of(…)` that the service calls, private
   setters; it has its own package-private `<Inner>Repository`, but **no service, views, commands, event factory or
   payload mapper** of its own – the aggregate's building blocks cover it (its view is a record in `<Aggregate>Views`).
   Also on the web side: no controller or read facade of its own – a sub-path of the aggregate's controller
-  (`GET /rfid-tag-assignments/history`) with a query in the aggregate's read facade (E16).
+  (`GET /rfid-tag-assignments/history`) with a query in the aggregate's read facade.
 - **Its change is a change of the aggregate:** the service writes it in the same command, and the aggregate's event
   describes it. `unassignRfidTag` finds the customer's assignment in the state `ASSIGNED` (or throws
   `NoRfidTagAssignedException`), only then creates the history entry with `RfidTagAssignmentHistory.of(assignment)`,
@@ -256,8 +255,8 @@ entity in the package is an **inner entity**: it belongs to the aggregate and ch
   `RFID_TAG_UNASSIGNED` carries the whole history entry. One change, one event – never a second event for the inner
   entity.
 - **The inner entity is created after the aggregate's state is checked** – it is built from that state
-  (`of(assignment)` reads the tag), so the service creates it only after it found the aggregate in the right state
-  (E29); the guard in the root's command then protects against a bug.
+  (`of(assignment)` reads the tag), so the service creates it only after it found the aggregate in the right state;
+  the guard in the root's command then protects against a bug.
 - Its id stays inside (`UUID`, no value object) – nobody outside refers to it.
 - Use it only when the rows exist because of the aggregate and are never changed alone. Something with its own
   lifecycle is an aggregate.
@@ -332,7 +331,7 @@ final class RfidReaderEventFactory {
 2. Payload record in `shared/event/payload/<Aggregate>EventPayload` – nested in the interface, implements it, fields
    validated like a command. Payloads contain **enums and values**: an enum as the enum, never its `String` (the
    stored JSON is the same); a value as its value object (`MacAddress`, `IpAddress`, the ids), also a value record
-   from `shared/` (`BillingTotal`) – E31. Never an entity or an `@Embeddable`: a part of the entity gets its own record
+   from `shared/` (`BillingTotal`). Never an entity or an `@Embeddable`: a part of the entity gets its own record
    in the payload interface (`CustomerAddressPayload`, with `@Valid` on the field), so a change of the entity does not
    change the format of the stored events.
 3. Method in the PayloadMapper (when mapped from the entity).
@@ -391,7 +390,7 @@ interface ToolRepository extends JpaRepository<Tool, UUID> {
   a value object overload too (`default boolean existsById(RfidTagId id)`). ArchUnit checks both:
   `servicesUseTheValueObjectVariants` for a method taking a `UUID`, `nothingDeletesOrChecksByARawId` for the
   inherited `deleteById`, `deleteAllById`, `deleteAllByIdInBatch` and `existsById` (their id is erased to `Object`) –
-  outside the repository only the value object overload is allowed (E30).
+  outside the repository only the value object overload is allowed.
 - **`Optional` straight from Spring Data only on a unique column** (the id, a unique constraint, a partial unique
   index like V9). A query that should find at most one row on a column without such a constraint returns a `List` and
   checks "at most one" in the default method (`findByRfidReaderId` above); more than one is broken data →
@@ -454,8 +453,8 @@ public class RfidReaderService {
   `Optional` or `List`. They map with `<Aggregate>Views.MAPPER`. Called from a use case they join its writing
   transaction.
 - **Commands** are `@Command` and return `void` – only a create returns the new id. **A service command is the
-  entity's command; where the entity leaves out the aggregate's name, it stands after the verb** (E20). The use case
-  is named `<Aggregate><EntityCommand>` – the prefix is the aggregate whose state changes (E3; the rules and the
+  entity's command; where the entity leaves out the aggregate's name, it stands after the verb**. The use case
+  is named `<Aggregate><EntityCommand>` – the prefix is the aggregate whose state changes (the rules and the
   reasons in skill `use-case`, "Name"):
 
   | Entity command | Service command | Use case |
@@ -467,11 +466,11 @@ public class RfidReaderService {
 
   The flow:
   - load the entity, or throw `ResourceNotFoundException.<aggregate>(id)` – or, found by its state, the rule's
-    exception (E29);
+    exception;
   - check the rules that need other rows of the aggregate (uniqueness) – one `ensure…` each ("How a check is
     written");
   - call the entity's command (or `of(…)` + `save` + the created event from the EventFactory; for delete: the loaded
-    entity to `delete(entity)` + the deleted event – never a view and `deleteById`, E30);
+    entity to `delete(entity)` + the deleted event – never a view and `deleteById`);
   - save the events with `this.outboxEventStore.save(events)` – in the same transaction, or not at all. **Every
     database change produces an event** – a create, an update, a delete, the write of an inner entity; a command that
     changes rows without an event is a bug;

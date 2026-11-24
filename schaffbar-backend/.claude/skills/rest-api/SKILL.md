@@ -10,7 +10,7 @@ Two kinds of clients call the backend, each with its own contract:
 | Client | Controllers | Contract | Errors |
 | --- | --- | --- | --- |
 | the portal (staff at the counter) | `domain/<aggregate>/web/<Aggregate>Controller`, `web/<object>/<Object>Controller`, path `/api/v1/…` | JSON as the `…ApiDto` / `…RequestBody` records; the portal's zod schemas mirror them (portal skill `api`) | `ProblemDetail` (RFC 9457) with a stable `code` the portal translates |
-| the devices (RFID readers, switch boxes) | `web/device/DeviceController`, path `/device/…` | the firmware's field names, unchanged since the firmware cannot change with the backend (E4) | always `200`, the text for the display in the body |
+| the devices (RFID readers, switch boxes) | `web/device/DeviceController`, path `/device/…` | the firmware's field names, unchanged since the firmware cannot change with the backend | always `200`, the text for the display in the body |
 
 A controller only translates between HTTP and the application: a change goes to a use case, a query to its read
 facade (skill `use-case`) – never a service, no logic of its own beyond choosing which call to make.
@@ -75,7 +75,7 @@ public class RfidReaderController {
 
 - **One controller per aggregate**, `domain/<aggregate>/web/<Aggregate>Controller`, path `/api/v1/<aggregate in kebab
   case, plural>` (`/api/v1/rfid-readers`, `/api/v1/tool-certifications`). An inner entity gets a sub-path of its
-  aggregate and a query in the same read facade – no controller of its own (E16: `GET /rfid-tag-assignments/history`).
+  aggregate and a query in the same read facade – no controller of its own (`GET /rfid-tag-assignments/history`).
 - A controller of **no aggregate** is `web/<object>/<Object>Controller`, path `/api/v1/<object>`
   (`DashboardController`, `/api/v1/dashboard`). A new one that the portal calls is added to `basePackages` of
   `ApiExceptionHandler`, else its errors become Spring's default answers.
@@ -91,7 +91,7 @@ public class RfidReaderController {
   below).
 - **Queries:** `GET /` (the list, with optional filters), `GET /{id}`, `GET /{id}/<part>` or `GET /<sub-resource>`
   (`/history`). A state of an aggregate that the portal knows by another id is a path of its own:
-  `GET /workshop-sessions/{customerId}/open` – the counter knows the person, not the session (E29).
+  `GET /workshop-sessions/{customerId}/open` – the counter knows the person, not the session.
 - **Commands:**
 
   | Change | Method and path | Example |
@@ -108,7 +108,7 @@ public class RfidReaderController {
 
 - An aggregate addressed by two references instead of an id has both in the path:
   `PUT /tool-certifications/customers/{customerId}/tools/{toolId}/pause`.
-- **Query parameters in camelCase** (`?customerId=`, `?rfidTagId=`, E5), path segments in kebab case.
+- **Query parameters in camelCase** (`?customerId=`, `?rfidTagId=`), path segments in kebab case.
 
 ### Parameters
 
@@ -127,7 +127,7 @@ public class RfidReaderController {
 | Answer | When |
 | --- | --- |
 | `200` with body | a query; a list may be empty (`[]`); a state that may not exist answers `200` with an empty body (`getOpenWorkshopSession`, a comment says so) |
-| `201` with `Location` | a create whose new resource has a `GET /{id}` – `Location` points there (E32) |
+| `201` with `Location` | a create whose new resource has a `GET /{id}` – `Location` points there |
 | `204` | every other command; a create without such a `GET` (found by something else: `POST /rfid-tag-assignments`; several: `/batch`) |
 | `404` | the resource of the path does not exist: the read facade's `Optional` → `orElseThrow(() -> ResourceNotFoundException.<resource>(id))` in the controller, or a use case that does not find a referenced aggregate |
 | `409` | a rule – thrown by the use case, the service or the entity |
@@ -204,7 +204,7 @@ rule lives". This is what the portal gets:
 | an id or reference that does not exist | `ResourceNotFoundException.<resource>(id)` | `404`, `code: RESOURCE_NOT_FOUND`, `resource` (`RFID_READER`) |
 | a violated rule | a subclass of `BusinessRuleViolationException` (`RfidReaderHasToolAssignedException.delete(id)`) | `409`, its `code` (`RFID_READER_HAS_TOOL_ASSIGNED`) |
 | a format | Bean Validation, a value object (`IllegalArgumentException`), Spring (unreadable body, wrong parameter) | `400`, no `code` |
-| a bug, broken data | `IllegalStateException` with the ids (E8) | `500`, `detail: "Unexpected error"` |
+| a bug, broken data | `IllegalStateException` with the ids | `500`, `detail: "Unexpected error"` |
 
 - **`shared/web/ApiExceptionHandler`** (`@RestControllerAdvice` for `domain` and `web.dashboard`, extends Spring's
   `ResponseEntityExceptionHandler`, which answers Spring's own `400`s) turns them into `ProblemDetail`
@@ -221,7 +221,7 @@ rule lives". This is what the portal gets:
 ## Device endpoints (`web/device/`)
 
 `/device/init`, `/device/counter`, `/device/card` – the firmware of the readers calls them; the firmware cannot be
-changed together with the backend, so **the fields and answers are a contract** (E4):
+changed together with the backend, so **the fields and answers are a contract**:
 
 - **The firmware's names**, as `String`: requests `InitRequestBody(MACADDR)`, `RfidTagRequestBody(MACADDR, RFID)`,
   `DeviceCardRequestBody(DEVUSECASE, MACADDR, RFID)`; responses `InitResponse`, `CounterResponse`,
@@ -250,7 +250,7 @@ A change of an endpoint or an `*ApiModel` is a change of the portal too – in t
 - a new error code: its translation (`shared.errors.<CODE>`, `de.json` and `en.json`);
 - the request in the Bruno collection (`core-pos/api/<folder>/`, one folder per controller, also `dashboard/` and
   `device/`) for manual testing – every endpoint has one;
-- a gap of `docs/backend-features.md` that is closed is marked there.
+- a gap of `docs/aufgaben.md` ("Backend-Funktionen für das Portal") that is closed is deleted there.
 
 Backend and portal are deployed together; an agent does not deploy – it says that both need it.
 
@@ -260,9 +260,9 @@ The details are in skill `backend-testing` ("Controller", "Integration tests"); 
 
 - **A controller test for every endpoint** (`domain/<aggregate>/web/<Aggregate>ControllerTest`, standalone MockMvc
   with the converters, `Json.messageConverter()` and `ApiExceptionHandler`): the success with status and every JSON
-  field the portal reads (dates compared with their value, E34), a filter with and without a match, `404` with
+  field the portal reads (dates compared with their value), a filter with and without a match, `404` with
   `ResourceNotFoundException.CODE` and `resource`, `400` for an invalid value object and per constraint of the body
-  (`<endpoint>_with<WhatIsWrong>_is400`, E33), and the code of each rejection the use case can throw.
+  (`<endpoint>_with<WhatIsWrong>_is400`), and the code of each rejection the use case can throw.
 - **The device endpoints** are tested in `integration/device/` – one class per reader type, the whole answer compared
   field by field; a changed answer changes these tests in the same step.
 - `shared/web/ApiExceptionHandlerTest` proves the mapping of each kind, with the literal `RESOURCE_NOT_FOUND` as the
@@ -296,5 +296,5 @@ translation – they are in this skill and in the review.
       with value objects and the command's constraints; mapping in MapStruct.
 - [ ] New error code: translation in the portal (`de.json`, `en.json`); reachable from a device: `DeviceMessages`.
 - [ ] Device endpoint: firmware names, always `200`, texts from `DeviceMessages`, device tests changed with it.
-- [ ] Portal `shared/api` and feature, Bruno, `docs/backend-features.md` in the same step; controller tests;
+- [ ] Portal `shared/api` and feature, Bruno, `docs/aufgaben.md` in the same step; controller tests;
       `mvn -q test` passes.

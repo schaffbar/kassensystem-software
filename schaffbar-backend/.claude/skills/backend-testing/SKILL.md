@@ -5,7 +5,7 @@ description: How the core-pos backend (Spring Boot, JUnit 5, Mockito, AssertJ, T
 
 # Tests in core-pos
 
-**Each rule is tested on the lowest level that proves it completely** (E22 in `docs/backend-consistency.md`). A
+**Each rule is tested on the lowest level that proves it completely**. A
 level higher up proves what the lower one cannot see: a mock cannot know whether the repository query finds the right
 row, so a rule whose check reads the database also gets an acceptance test.
 
@@ -30,7 +30,7 @@ All source paths below are relative to `core-pos/src/test/java/de/schaffbar/core
 - **A rule whose check reads the database** – a second aggregate, a uniqueness, a lookup by something other than the
   id – also gets an **acceptance test**: `r<number>_…` in `integration/<Aggregate>AcceptanceTest`. A rule that lives
   completely in a value object or the entity (R-2, R-7 of `rfid_reader`) does not.
-- **A format rule** (Bean Validation, E33): the own logic of a constraint in a unit test of its validator
+- **A format rule** (Bean Validation): the own logic of a constraint in a unit test of its validator
   (`shared/validation/DateOfBirthValidatorTest`) – a constraint composed of others (`@PostalCode`, `@ToolDescription`)
   has none; per constraint and endpoint whose request body carries it a controller test
   `<endpoint>_with<WhatIsWrong>_is400`; nothing on the command in the service (the same annotations, and a Mockito
@@ -272,7 +272,7 @@ class RfidReaderServiceTest {
   aggregate id) and every rejection (unknown id → `ResourceNotFoundException`, a rule → its exception), each without
   an outbox call – also a rule the entity enforces (a state transition): the entity test proves the rule, the service
   test that the exception passes through, the state stays and nothing reaches the outbox. A rule the service checks
-  because it finds the aggregate by its state (E29: no running visit, no waiting request) is proven here.
+  because it finds the aggregate by its state (no running visit, no waiting request) is proven here.
 - **The payload of every event the service builds itself** – the created and the deleted event – is checked here:
   `expectSavedEvent(…)` returns the event, the test reads `deserializeAndValidatePayload(XyzCreatedPayload.class)` and
   checks the fields. The payload of an event the entity's command returns is checked in the entity test, not again.
@@ -328,11 +328,11 @@ this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
 as timestamps – what Boot configures, as long as `application.yml` sets no `spring.jackson.*`. A setting there is
 added to `Json` in the same change.
 
-Every endpoint has at least its success test. Per endpoint: the status (`200`, `201` with `Location`, `204` – E32), the
+Every endpoint has at least its success test. Per endpoint: the status (`200`, `201` with `Location`, `204`), the
 JSON fields the portal reads (`jsonPath`; the portal's zod schema in
 `schaffbar-portal/src/app/shared/api/<resource>/*.api-model.ts` lists them), a filter with and without a match, `404`
 with `ResourceNotFoundException.CODE` and its `resource`, `400` for an invalid value object and for each format rule
-of the request body (E33), and the problem code of each rejection the use case can throw.
+of the request body, and the problem code of each rejection the use case can throw.
 
 - **Dates and times** are compared with the value they come from – `jsonPath("$.createdAt").value(view.createdAt()
   .toString())`, `jsonPath("$.dateOfBirth").value(view.dateOfBirth().toString())`: with `Json.messageConverter()` the
@@ -408,7 +408,7 @@ class RfidReaderAcceptanceTest {
   configuration with the container. Every integration test uses exactly this annotation and nothing else on the
   class – no `@MockitoBean`, no `@TestPropertySource`, no `@DirtiesContext`: Spring caches one context for all of them,
   so **one PostgreSQL container (`postgres:16.3`, like the server) runs for the whole build** and Flyway migrates it
-  once (E24). Something that would change the context is a reason to talk first.
+  once. Something that would change the context is a reason to talk first.
 - The container runs as `schadmin` – the migrations grant rights to it.
 - **No cleanup.** All tests share the database; each test creates its own data with random values (`Scenario`), so
   tests never see each other's data and can run in any order. Never assert on "all readers" – filter by the

@@ -34,7 +34,8 @@ before working on its topic.
 | a use case in `use_case/` or a read facade in `read_facade/`: name, shape, order of checks, views of their own  | `use-case`        |
 | an endpoint: controller, API model, status and error codes, the contract with the portal, the device endpoints  | `rest-api`        |
 
-The skill `business-rule` (repo root, one rule from the README to the portal) follows (roadmap K5). A skill holds
+The skill `business-rule` (repo root, `.claude/skills/business-rule/`) takes one rule from the README to the portal
+and names these skills for each step. A skill holds
 every rule of its topic – also those the ArchUnit tests check; a changed ArchUnit rule changes its skill in the same
 step.
 
@@ -73,7 +74,7 @@ core_pos/
   together with its events. Everything that needs a second aggregate – a check, a cleanup, an orchestration – is a
   **use case** in `use_case/`; services never call each other. **A controller knows only use cases and read
   facades:** every change goes through a use case, every query through the controller's read facade – also when it
-  only forwards to one service (E2, E17 in `../docs/backend-consistency.md`).
+  only forwards to one service.
 - **Every state change produces events.** Command methods of the entity return `List<SchaffbarEvent>`, the service
   saves them to the outbox in the same transaction. A new event: `EventType`, payload record in
   `shared/event/payload/`, method in the `*PayloadMapper` and the `*EventFactory`, row in the README's "Domain Events".
@@ -89,19 +90,19 @@ core_pos/
   `public static final String CODE`, the class name in UPPER_SNAKE_CASE without `Exception`, shared by its variants)
   or is a `ResourceNotFoundException` (→ `404`, `CODE` `RESOURCE_NOT_FOUND` and the `resource`);
   `shared/web/ApiExceptionHandler` turns them into `ProblemDetail`. Impossible states (broken data, a bug) are an
-  `IllegalStateException` (→ `500`, E8).
+  `IllegalStateException` (→ `500`).
 - **Database changes** only through a new Flyway migration `core-pos/src/main/resources/db/migration/V<next>__<what>.sql`
   – never edit an applied one. `ddl-auto: validate`: entity and migration must match.
 - **The API is a contract with the portal** (skill `rest-api`). A field's nullability is its Bean Validation (`@NotNull`, `@NotBlank`)
   – the portal's zod schemas mirror it (skill `api` of the portal). A changed `*ApiModel` or endpoint needs the
-  portal's `shared/api` changed too, and a gap from `../docs/backend-features.md` that is closed is marked there.
+  portal's `shared/api` changed too, and a gap from `../docs/aufgaben.md` that is closed is deleted there.
 
 ### Use cases and read facades (skill `use-case`)
 
 - A change is a use case in `use_case/`, `<Aggregate><EntityCommand>` with the aggregate whose state changes – also
   when it only forwards; one `process(…)` with `@Command`, returning `void` or the new id. In it: existence first
   (a list: all entries), then the rules with a second aggregate (`ensure…`), then the service call(s); a batch is all
-  or nothing (E11).
+  or nothing.
 - A query is a method of the controller's read facade in `read_facade/` (one per controller, named after it), `@Query`
   only, returning views – a view of its own over several aggregates in `<What it shows>Views`.
 
@@ -109,7 +110,7 @@ core_pos/
 
 - A controller per aggregate in `domain/<aggregate>/web/` (`/api/v1/<aggregates>`), or `web/<object>/` for one of no
   aggregate; it calls its use cases and its read facade, nothing else. An endpoint is a query or a command; a create
-  answers `201` with `Location` or `204` (E32), other commands `204`; path variables and parameters are value objects.
+  answers `201` with `Location` or `204`, other commands `204`; path variables and parameters are value objects.
 - The `*ApiModel` is a MapStruct mapper with `…ApiDto` responses (ids as `String`, nullability by annotation – the
   portal mirrors it) and `…RequestBody` requests (value objects, the command's constraints).
 - Errors: `404` / `409` with a `code` the portal translates (a new code needs its translation in the same change),
@@ -131,12 +132,12 @@ core_pos/
 - Commands and views are records (`*Commands`, `*Views` with a MapStruct `MAPPER`); no public setters on entities.
 - `Optional` only as a return type ("maybe nothing there") – never as a parameter or a field. A value that can be
   missing is passed as a nullable parameter, with a comment what `null` means.
-- A state without an end is *open* for a session and *running* for a workshop or tool usage – never *active* (E6,
-  skill `aggregate`); only the dashboard keeps `active-users` / `active-tools` (23.11.2026).
+- A state without an end is *open* for a session and *running* for a workshop or tool usage – never *active* (skill
+  `aggregate`); only the dashboard keeps `active-users` / `active-tools` (23.11.2026).
 - `this.` for fields; section comments `// ------…` (ending at column 79) + `// query` / `// command` / `// helper`;
   `// static constructor` above the one `of(…)` of a class, `// static factories` above several named ones
   (exceptions, `SchaffbarEvent`).
-- **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`, E21): they
+- **Every public method of a service, use case or read facade is `@Query` or `@Command`** (`shared/cqrs/`): they
   bring the transaction (`@Query` = `@Transactional(readOnly = true)`, `@Command` = `@Transactional`), so these
   classes never use `@Transactional` themselves. A `@Query` writes nothing – no `@Command`, no entity command, no
   `save` / `delete` of a repository, no `OutboxEventStore`, also not in a lambda (ArchUnit `queriesWriteNothing`); in a
@@ -204,8 +205,8 @@ Skill `backend-testing` has all rules; the short form:
   random values from `Scenario`, no cleanup. One PostgreSQL container (Testcontainers) for the whole run – `mvn test`
   needs Docker; the real database is never touched.
 - A rejection is checked with its exception, its `code` and that nothing happened. Mockito runs strict – stub per test.
-- A format rule (Bean Validation): a controller test `…_is400` per constraint and endpoint (E33). Controller tests run
-  with Boot's Jackson configuration (`Json.messageConverter()`) and compare dates with their value (E34).
+- A format rule (Bean Validation): a controller test `…_is400` per constraint and endpoint. Controller tests run
+  with Boot's Jackson configuration (`Json.messageConverter()`) and compare dates with their value.
 - Every test has `// given` / `// when` / `// then`; stubs live only in `given…` methods – not in the test, not in
   `@BeforeEach`, not in another helper (ArchUnit `TestArchitectureTest`),
   verifications in `expect…` methods. Follow the skill, not the test next to it.
@@ -220,7 +221,8 @@ Skill `backend-testing` has all rules; the short form:
    `mvn -q test` passes.
 2. The aggregate README updated (rules moved, new events); `core-pos/docs/ddd-overview.md` (and `ddd-uebersicht.md`)
    when a use case, event or aggregate is added.
-3. Portal impact named: API change → portal `shared/api`; rule the portal checked so far → it may drop its
-   pre-check later (only with the Problems API).
-4. A finished task ticked off in `../docs/roadmap.md`; nothing committed (`../CLAUDE.md`).
+3. Portal impact named: API change → portal `shared/api`; rule the portal checked so far → it may drop a pure
+   pre-check (skill `business-rule`).
+4. A finished task deleted from `../docs/aufgaben.md`, a decision with its date in `../docs/entscheidungen.md`;
+   nothing committed (`../CLAUDE.md`).
 5. The report says what was tested, what needs a restart or a migration, and what was not checked.

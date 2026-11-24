@@ -46,7 +46,7 @@ Look up the endpoint in the backend
 (`../schaffbar-backend/core-pos/src/main/java/de/schaffbar/core_pos/domain/<feature>/web/`):
 
 - `*Controller.java`: path, HTTP method, path variables, query parameter names (camelCase like the Java parameter,
-  `customerId` – E5), response status (201 with only a `Location` header = no body).
+  `customerId`), response status (201 with only a `Location` header = no body).
 - `*ApiModel.java`: the response record `…ApiDto` (→ schema) and the request record `…RequestBody` (→ `…Request`).
   Check every field's nullability: without `@NotNull` / `@NotBlank` (or a primitive type) the field can be `null` –
   Jackson always writes `null` fields, so they are **`.nullable()`, never `.optional()`**.

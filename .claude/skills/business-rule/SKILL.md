@@ -1,6 +1,6 @@
 ---
 name: business-rule
-description: How a business rule of SchaffBar goes through backend and portal - what is decided before any code (the contract between backend and portal, rule id and text, where it lives, when it is checked, exception and code, error text, portal behaviour, devices), then the README row, the backend check, its exception and tests, the translation and the explanation in the portal, the docs and the check in the browser; also how a rule is changed or removed, and how a rule enforced only in the portal moves to the backend. Use when adding, changing or removing a business rule, when writing the spec of a rule, when a task of A2 ("enforced only in the portal") is worked on, or when reviewing a change that touches a rule.
+description: How a business rule of SchaffBar goes through backend and portal - what is decided before any code (the contract between backend and portal, rule id and text, where it lives, when it is checked, exception and code, error text, portal behaviour, devices), then the README row, the backend check, its exception and tests, the translation and the explanation in the portal, the docs and the check in the browser; also how a rule is changed or removed, and how a rule enforced only in the portal moves to the backend. Use when adding, changing or removing a business rule, when writing the spec of a rule, when a rule "enforced only in the portal" moves to the backend, or when reviewing a change that touches a rule.
 ---
 
 # A business rule from the README to the portal
@@ -29,7 +29,7 @@ Project rules: `CLAUDE.md` (glossary, languages, git), `schaffbar-backend/CLAUDE
 
 Backend and portal are built against the same decisions. They are written down first (in the spec of the task) and
 **every open point is a question for Piotr – never guessed**; the important decisions of the project were exactly
-these (`docs/roadmap.md`, P). The examples show the kind of answer – they are not the decisions for R-6.
+these (`docs/entscheidungen.md`). The examples show the kind of answer – they are not the decisions for R-6.
 
 | Decision | What to write down | Example (R-6, reader names unique) |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ In this order, with the skills of the backend; run from `schaffbar-backend/core-
    controller test of each endpoint that can hit it expects `409` with the code. A device can hit it: the code in
    `DeviceMessages.BY_CODE` and a device test in `integration/device/` (skill `rest-api`).
 6. **Format rule only** (one field, no other rows): a Bean Validation annotation or an own constraint on command and
-   request body, the controller test `…_with<WhatIsWrong>_is400` (E33) – no exception, no code.
+   request body, the controller test `…_with<WhatIsWrong>_is400` – no exception, no code.
 7. `mvn -q test` passes.
 
 ## 3. Portal
@@ -86,7 +86,7 @@ In this order, with the skills of the portal; run from `schaffbar-portal/`.
    When the portal cannot know it before (another person's data, a race), the error of the backend is the explanation.
 4. **A rule that was enforced only in the portal** keeps its check in the portal where it explains before the action –
    the backend is now the guarantee, the portal the early hint. A pure pre-check that only duplicates the backend's
-   answer may go (roadmap A1).
+   answer may go.
 5. **Specs** for the changed model, store and component (skill `testing`); `npm run check` passes.
 6. **In the browser** (skill `verify-ui`): the explanation before the action, and the error message – the `409` with
    the code simulated with `route.fulfill`, nothing written to the database; desktop and phone.
@@ -95,9 +95,10 @@ In this order, with the skills of the portal; run from `schaffbar-portal/`.
 
 - The aggregate `README.md` – the rule row (backend, step 1); a rule the portal checks for the backend stays in
   "Enforced only in the portal" until the backend enforces it.
-- `docs/ui-redesign.md` – a decision about the portal behaviour, with its date.
-- `docs/backend-features.md` – a gap that is closed.
-- `docs/roadmap.md` – the task ticked off with its date (A2: the row of the rule).
+- `docs/entscheidungen.md` – a decision of the contract that is not obvious from the code (the portal behaviour, an
+  exception to a rule), with its date.
+- `docs/aufgaben.md` – the finished task deleted: the row of the rule in "Regeln, die nur das Portal prüft", a closed
+  gap in "Backend-Funktionen für das Portal".
 
 ## Changing or removing a rule
 
@@ -106,7 +107,7 @@ The same places, from the README on:
 - **Changed condition** – the README row, the check, its tests; the code stays when the rule is the same rule, and
   the portal's text is checked whether it still fits.
 - **Renamed code** – the exception's `CODE`, the translations (`shared.errors.<NEW>`, the old key removed), the
-  device text if any, every test that names it – in one change (E6 renamed `ACTIVE_…` to `RUNNING_…` like this).
+  device text if any, every test that names it – in one change (the codes `ACTIVE_…` became `RUNNING_…` like this).
 - **Removed rule** – the row, the check, the exception (if nothing else throws it), the translation and the portal's
   explanation; the id is not given to another rule.
 - **A field that came with the rule** and changes or goes – controller, `…ApiModel`, the Bruno request and the
@@ -122,4 +123,4 @@ The same places, from the README on:
       tests expect the code, device text and test if a device can hit it; `mvn -q test`.
 - [ ] Portal: translation de/en, explanation before the action from the feature model or store, specs,
       `npm run check`, checked in the browser.
-- [ ] `ui-redesign.md`, `backend-features.md`, `roadmap.md` as far as they are touched.
+- [ ] `docs/entscheidungen.md` and `docs/aufgaben.md` as far as they are touched.

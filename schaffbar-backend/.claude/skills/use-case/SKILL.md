@@ -15,7 +15,7 @@ controller ── a change ──▶ use_case/<Aggregate><EntityCommand>.process
 ```
 
 - **A controller knows only use cases and its read facade** – every change goes through a use case, every query
-  through the read facade, also when either only forwards to one service (E2, E17 in `docs/backend-consistency.md`);
+  through the read facade, also when either only forwards to one service;
   so every controller looks the same.
 - **Both call services, never the other way round**, and a service never calls another service
   (skill `aggregate`). Neither sees an entity: services give them views, they give services commands and value objects.
@@ -31,8 +31,8 @@ Reference implementations:
 | --- | --- |
 | a use case that only forwards | `use_case/RfidReaderCreate` |
 | a rule with a second aggregate | `use_case/RfidReaderChangeType` |
-| an aggregate found by its state (E29), two rules, the command built from other aggregates | `use_case/WorkshopSessionClose` |
-| a batch – all or nobody (E11) | `use_case/ToolCertificationCreate` |
+| an aggregate found by its state, two rules, the command built from other aggregates | `use_case/WorkshopSessionClose` |
+| a batch – all or nobody | `use_case/ToolCertificationCreate` |
 | a rejection, then the cleanup of several aggregates in one transaction | `use_case/CustomerDelete` |
 | choosing between two use cases | `use_case/ToolUsageToggle` |
 | a read facade that only forwards | `read_facade/RfidReaderReadFacade` |
@@ -81,7 +81,7 @@ public class RfidReaderChangeType {
 
 ### Name
 
-`<Aggregate><EntityCommand>` (E3, E20):
+`<Aggregate><EntityCommand>`:
 
 - **The prefix is the aggregate whose state changes** – the one whose service command the use case calls. When
   several change, it is the one the action is about: `WorkshopUsageStart` also starts a session, `CustomerDelete`
@@ -119,7 +119,7 @@ public class RfidReaderChangeType {
    rule**: a batch with an unknown customer answers `404`, not the `409` of a rule that one of the others breaks
    (TC-4 in `ToolCertificationCreate`). What it loads it keeps as a view – the rules and the command need it.
    - **An aggregate found by its state** ("the open session of the customer", "the running visit") is found by a
-     query in that state, and `orElseThrow` throws the rule's exception (E29) – then the service command gets its
+     query in that state, and `orElseThrow` throws the rule's exception – then the service command gets its
      id: `getOpenWorkshopSession(customerId).map(WorkshopSessionView::id).orElseThrow(() -> new
      NoOpenWorkshopSessionException(customerId))` in `WorkshopSessionClose`, with the rule id in a comment.
 2. **The rules with a second aggregate** – one `ensure…(…)` each, with the rule id above it and the `throw` in a
@@ -131,7 +131,7 @@ public class RfidReaderChangeType {
    (`CustomerDelete`: free the tag, delete the certifications, remove the instructor, then delete the customer); a
    helper that acts is named with a verb of its own (`releaseRfidTag`), not `ensure…`.
 
-- **A batch is all or nothing** (E11): every entry is checked before the first change, and one exception rolls the
+- **A batch is all or nothing**: every entry is checked before the first change, and one exception rolls the
   whole transaction back – `ToolCertificationCreate` certifies all customers or none.
 - **A use case that only forwards** (`RfidReaderCreate`, `ToolUpdate`) is written anyway – one class per change, so
   every controller looks the same. It has one path and no test of its own.
