@@ -5,11 +5,16 @@
 
 ## Important
 
-- [Backend] Is it problem when we delete RFID reader during operation (exmaple Switch Box)
+- [Backend] put bruno collection to backend
+- [Backend] Enter and leave time as LocalDateTime instead of Instant?
+- [Backend] Transactional annotation in all services
+- [Backend] jakarta.transaction.Transactional vs org.springframework.transaction.annotation.Transactional
 
+- [Backend] Is it problem when we delete RFID reader during operation (exmaple Switch Box)
 - [Feature] WaitingForAssignment auch im Portal stoppen
 - [Backend] Scheduler to clean up WaitingForAssignment
 
+- [Backend] Beim Löschen immer überprüfen ob Entity nicht irgendwo referenziert wird
 - [PostgreSql] init.sql Add NOT NULL constraints to customer
 - [Backend] close all tool sessions when restarting server/backend
 
@@ -27,17 +32,12 @@ ToolCertification.certifiedBy - mandatory
 
 ## Maintenance
 
-- [Backend] put bruno collection to backend
 - [Backend] Migrate to Spring Boot 4
 - [Backend] fix/implement/remove TODOs
 
-- [Backend] Enter and leave time as LocalDateTime instead of Instant?
-- [Backend] Beim Löschen immer überprüfen ob Entity nicht irgendwo referenziert wird
-- [Backend] Transactional annotation in all services
-- [Backend] jakarta.transaction.Transactional vs org.springframework.transaction.annotation.Transactional
-
 ## Architecture
 
+- ADR instead of entscheidung.md
 - [Backend] Validate HTTP response before sending back
 - [Backend] HTTP response - missing values as null or NON_NULL option -> adapt ApiModels in portal
 
