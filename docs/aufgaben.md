@@ -65,9 +65,8 @@ Redesign waren Entscheidungen (Banner trotz WS-5, Leihtag-Filter, Löschkonzept)
 
 Für jede Rolle:
 
-- Sie läuft im Repo-Root. Aus `schaffbar-portal/` heraus werden die Skills des Root und des Portals angeboten, die
-  des Backends (`schaffbar-backend/.claude/skills/`) nicht – eine Rolle liest jeden Skill über seinen Pfad ab dem
-  Repo-Root (Tabelle im Skill `business-rule`).
+- Sie läuft im Repo-Root. Die Skills in `schaffbar-backend/` und `schaffbar-portal/` werden ihr nicht von Anfang an
+  angeboten – eine Rolle liest jeden Skill über seinen Pfad ab dem Repo-Root (Tabelle im Skill `business-rule`).
 - Grenzen: kein Commit, kein Push; das laufende Backend nicht starten, neu starten oder migrieren, nichts in seine
   Datenbank schreiben (lesende `GET` erlaubt); der Browser nur nach Skill `verify-ui`; offene Punkte als Frage, nie
   geraten.
