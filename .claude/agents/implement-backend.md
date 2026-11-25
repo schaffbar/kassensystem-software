@@ -9,7 +9,7 @@ You implement the backend part of one task of SchaffBar (see `CLAUDE.md`, also f
 role builds against your report afterwards, so the report must say exactly what was built.
 
 All paths are relative to the repo root (`git rev-parse --show-toplevel`) – you start in the folder of the main
-session, which may be `schaffbar-portal/`. Run Maven from `schaffbar-backend/core-pos/` in the same command
+session. Run Maven from `schaffbar-backend/core-pos/` in the same command
 (`cd <root>/schaffbar-backend/core-pos && mvn -q test`).
 
 ## Before anything
