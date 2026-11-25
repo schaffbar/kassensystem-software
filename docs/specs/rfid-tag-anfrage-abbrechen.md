@@ -18,7 +18,7 @@ Rolle Spec als Kopie dieser Vorlage – docs/specs/<kurzname>.md, Kurzname auf D
   keine neue Regel (TA-10 gibt es); Artboard „RFID-Tag zuweisen“ des Prototyps (`project/RfidAssignDialog.dc.html`),
   dazu `project/UserDetail.dc.html` und `project/RfidTags.dc.html`
 - **Branch:** main (Pilot, lokal)
-- **Stand:** Portal fertig
+- **Stand:** Review fertig
 
 ## 1. Spec
 
@@ -468,12 +468,191 @@ geänderten Form-Specs ab (`update-rfid-reader-form`, `new-user-form`, `user-lis
 Rechner stark ausgelastet war (Load ~39 bei 4 Kernen); allein liefen sie grün, und der Lauf bei normaler Last war
 vollständig grün.
 
+### Nachbesserung nach dem Review
+
+Zu den Befunden 1 und 2 aus Abschnitt 5 (Pfade ab `schaffbar-portal/`):
+
+- **Befund 1** – `src/app/users/pages/user-detail/user-detail-dialogs.service.spec.ts` folgt jetzt der Ausnahme im
+  Skill `testing`, „Dialogs“ (Entscheidung Piotr, 25.11.2026): der Test, der nur die Bindings zählte
+  (`toHaveLength(7)`), ist weg, ebenso `assignRfidTag()` im Test „should open nothing before the user is loaded“ des
+  Blocks mit dem gemockten `MatDialog` (die übrigen drei Dialoge bleiben dort). Der Block „RFID tag dialog“ mit echtem
+  `MatDialog` prüft jedes Binding über seinen Namen: als Formulardialog geöffnet (`open` mit
+  `AssignRfidTagDialogComponent` und `FORM_DIALOG_CONFIG`, per `vi.spyOn` auf den echten `MatDialog`); `userId` und
+  `userName` aus der Person des Stores; `rfidTagAssignment` folgt dem Store (`null` → wartend → `null`);
+  `assignmentRequested` ruft `store.assignRfidTag` mit dem Command, `requestPending` folgt
+  `assignRfidTag.isPending`; `rfidTagAssignmentCancelled` ruft `store.cancelRfidTagAssignment`, `cancelPending` folgt
+  `cancelRfidTagAssignment.isPending`; ohne geladene Person öffnet sich kein Dialog (`openDialogs` leer). Die Datei hat
+  13 Tests (vorher 10).
+- **Befund 2** – `src/app/users/components/assign-rfid-tag-dialog/assign-rfid-tag-dialog.component.ts`: der
+  Klassenkommentar steht wieder im Wortlaut von c7ed232; was neu war, ist ein Zeilenkommentar an `step` („after a
+  cancel the page reloads the assignment, it comes back `null` and the dialog is at the choice again“).
+
+Kein Verhalten geändert, nichts Sichtbares – für die Abnahme nichts Neues. `docs/entscheidungen.md` unverändert (die
+Entscheidung zum Testmuster steht im Skill).
+
+**`npm run check`** (25.11.2026, 22:42): grün – Lint ohne Befund, Prettier sauber, Typen der Specs sauber, **584 Tests
+in 111 Dateien bestanden**, Build fertig.
+
+**Offene Fragen:** keine.
+
 ## 4. Abnahme im Browser
 
 <!-- Seiten, Zustände (auch simulierte Antworten), Desktop und Handy; was gefunden wurde. Nichts in die Datenbank
 geschrieben (Skill verify-ui); Screenshots liegen nicht im Repo. -->
 
+Abgenommen am 25.11.2026 mit dem Dev-Server (`ng serve`, Stand `main` mit „[frontend] cancel rfid tag assignment“)
+gegen das laufende lokale Backend (ohne den neuen Endpunkt, nicht neu gestartet). Profil von Erika Musterfrau
+(`334e50c6-…`, in der Datenbank ohne Zuweisung), Tab „Übersicht“. In jedem Playwright-Aufruf zuerst `unrouteAll`, dann
+jede Anfrage außer `GET` abgefangen: `PUT …/{customerId}/cancel` und `POST /rfid-tag-assignments` mit `route.fulfill`
+beantwortet, alles andere abgebrochen (kein Abbruch kam vor); `GET …/rfid-tag-assignments?customerId=` mit eigenem JSON
+(besteht das zod-Schema). Die Zuweisungen in der Datenbank danach per `GET` geprüft: unverändert. Screenshots in
+`/tmp/claude-1000/-home-piotr-source-schaffbar-kassensystem-software/2b181c82-b220-46a2-ae53-74a6a3233689/scratchpad/`
+(unten nur Dateinamen).
+
+**Angesehen:**
+
+1. **Karte „Wartet auf Tag“** (`GET` → eine Zuweisung `WAITING_FOR_ASSIGNMENT`, Leihtag, `rfidTagId`/`assignmentDate`
+   `null`), Desktop 1440 und Handy 390: Sanduhr, „Wartet auf Tag“, „Leihtag · an das Lesegerät an der Theke halten“,
+   Buttons „Zuweisung anzeigen“ und „Zuweisung abbrechen“, beide umrandet (`mdc-button--outlined`, Text dunkel, Rahmen
+   grau, kein `danger-button`); Badge „Wartet auf Tag“ im Kopf neben dem Titel. Handy: Buttons untereinander (y 718 /
+   766), kein seitliches Scrollen (`scrollWidth` 390). – wie erwartet. (`1-karte-wartet-desktop.png`,
+   `…-desktop-detail.png`, `1-karte-wartet-phone.png`, `…-phone-detail.png`)
+2. **Abbruch auf der Karte, Erfolg** (`PUT …/cancel` → `204`, danach `GET` → `[]`), Desktop: keine Rückfrage (kein
+   Dialog offen), der `PUT` ging an `/rfid-tag-assignments/334e50c6-…/cancel` (Body `{}`), danach genau ein `GET`;
+   Karte „Kein RFID-Tag zugewiesen.“ mit „RFID-Tag zuweisen …“, Badge weg, ⋯-Menü: „Bearbeiten“, „RFID-Tag zuweisen …“,
+   „Benutzer löschen …“; keine Snackbar. – wie erwartet. (`2-karte-abgebrochen-desktop.png`, `2-menue-desktop.png`)
+3. **Dialog, Schritt „Tag auflegen“** (wie 1, Art „Fest“, dann „Zuweisung anzeigen“), Desktop und Handy: Fußzeile
+   mittig „Zuweisung abbrechen“, „Schließen“, beide umrandet, nicht rot; Inhalt scrollt nicht (`scrollHeight` =
+   `clientHeight` 268). „Schließen“ schließt den Dialog, die Karte zeigt weiter „Wartet auf Tag“ (kein `PUT`). Dazu
+   **„Tag wird angefordert …“** (`POST` verzögert mit `204` beantwortet), Desktop: nur „Schließen“; nach der Antwort
+   „Leihtag an das Lesegerät an der Theke halten“ mit beiden Buttons. – wie erwartet.
+   (`3-dialog-wartet-desktop.png`, `…-desktop-detail.png`, `3-dialog-wartet-phone.png`,
+   `3b-dialog-wird-angefordert-desktop.png`)
+4. **Abbruch im Dialog, Erfolg** (`PUT` → `204`, 2,5 s verzögert, danach `GET` → `[]`), Desktop und Handy: während
+   der `PUT` läuft, ist „Zuweisung abbrechen“ gesperrt (`disabled`, grau), „Schließen“ nicht; danach bleibt der Dialog
+   offen und zeigt „Art wählen“ mit „Leihtag“ vorausgewählt (vorher wartete „Fest“); keine Snackbar; nach dem
+   Schließen zeigt die Karte „Kein RFID-Tag zugewiesen.“. – wie erwartet. (`4-dialog-abbruch-laeuft-desktop.png`,
+   `4-dialog-art-waehlen-desktop.png`, `4-dialog-art-waehlen-phone.png`)
+5. **Abbruch scheitert, Tag gerade zugewiesen** (`PUT` → `409` `application/problem+json` mit
+   `code: NO_RFID_TAG_ASSIGNMENT_WAITING`, danach `GET` → `ASSIGNED`, `rfidTagId` `04A31F9C`), im Dialog und auf der
+   Karte, je Desktop und Handy: Snackbar „Keine Anfrage wartet mehr auf einen Tag – vielleicht wurde der Tag gerade
+   zugewiesen oder die Anfrage schon abgebrochen.“; der `GET` folgt 15–20 ms nach dem `409` – der Dialog steht 70–85 ms
+   nach dem Klick auf „Fertig“ („Tag zugewiesen“, „04A3 1F9C gehört jetzt Erika Musterfrau (Leihtag).“), nicht erst
+   nach dem Abfragen nach 3 s; die Karte zeigt `04A3 1F9C`, „Leihtag · zugewiesen am 25.11.2026“, „Tag entfernen …“,
+   der Kopf „Leihtag · 04A3 1F9C“. Snackbar auf dem Handy umbrochen, ganz sichtbar. – wie erwartet.
+   (`5-dialog-409-zugewiesen-desktop.png`, `…-phone.png`, `5-karte-409-zugewiesen.png`, `…-phone.png`,
+   `5-karte-nach-409-desktop.png`, `…-phone.png`)
+6. **Abbruch scheitert, schon abgebrochen** (`409` wie 5, `GET` → `[]`), Dialog Desktop und Handy, Karte Desktop:
+   derselbe Text; der Dialog bleibt offen und zeigt „Art wählen“, die Karte „Kein RFID-Tag zugewiesen.“. – wie
+   erwartet. (`6-dialog-409-schon-abgebrochen.png`, `…-phone.png`, `6-karte-409-schon-abgebrochen.png`)
+7. **Text TA-3** (ohne Zuweisung, „RFID-Tag zuweisen …“, „Weiter – Tag auflegen“; `POST` → `409`
+   `RFID_TAG_ASSIGNMENT_ALREADY_WAITING`), Desktop und Handy: Snackbar „Eine andere Person wartet noch auf ihren Tag –
+   zuerst deren Tag an das Lesegerät an der Theke halten oder ihre Anfrage abbrechen (Seite RFID-Tags zeigt, wer
+   wartet).“, der Dialog zeigt „Art wählen“. – wie erwartet. (`7-ta3-409-desktop.png`, `7-ta3-409-phone.png`)
+8. **Englisch, Stichprobe** (das Portal hat keinen Sprachwechsel – `lang: 'de'` fest; simuliert, indem
+   `/i18n/de.json` mit dem Inhalt von `en.json` beantwortet wurde), Desktop: Karte „Waiting for tag“, „Show
+   assignment“, „Cancel assignment“; Dialog „Cancel assignment“, „Close“; Snackbar des `409` „No request is waiting for
+   a tag any more – the tag may just have been assigned or the request cancelled.“ (`8-en-karte.png`,
+   `8-en-dialog.png`)
+
+Konsole: in allen Zuständen nur die erwarteten Einträge „Failed to load resource … 409“ der simulierten Antworten;
+kein zod-Fehler, kein Angular-Fehler. Auf dem Bildschirm nur deutsche Texte, keine Übersetzungsschlüssel.
+
+**Befunde:**
+
+- In der Aufgabe: keine.
+- Hinweis, kein Befund: auf dem Desktop (1440) stehen die zwei Buttons der Karte „Wartet auf Tag“ ebenfalls
+  untereinander – die linke Spalte ist zu schmal für beide nebeneinander (Inhalt 386 px, Buttons 192 + 203 px). Der
+  Vertrag nennt das Umbrechen nur fürs Handy, verbietet es auf dem Desktop aber nicht; sieht ordentlich aus
+  (`1-karte-wartet-desktop.png`).
+- Außerhalb der Aufgabe, schon bekannt: auf dem Handy (390) ist der Dialog „RFID-Tag zuweisen“ 600 px breit
+  (`minWidth: DIALOG_WIDTH.medium`) und ragt links und rechts je 105 px über den Bildschirm – Titel, Schrittleiste und
+  im Schritt „Art wählen“ die Radio-Karten und „Weiter – Tag auflegen“ sind abgeschnitten. Die neue Fußzeile des
+  Schritts „Tag auflegen“ liegt zufällig ganz im Sichtbaren (x 31–359). Steht schon als Aufgabe „Dialoge auf dem Handy“
+  in `docs/aufgaben.md` (gefunden bei R-6, 24.11.2026); kein neuer Eintrag. (`3-dialog-wartet-phone.png`,
+  `4-dialog-art-waehlen-phone.png`, `7-ta3-409-phone.png`)
+
+**Nicht geprüft:**
+
+- Der echte Endpunkt: das laufende Backend kennt `PUT …/{customerId}/cancel` erst nach einem Neustart, und die
+  Abnahme schreibt nichts in die Datenbank – Antworten (`204`, `409`) nur simuliert.
+- Ob „Zuweisung abbrechen“ auf der Karte während des laufenden Abbruchs gesperrt ist – laut Bericht Portal nicht (der
+  Vertrag verlangt es nur im Dialog); nicht im Browser angesehen.
+- `404` (unbekannte Person) und `400` – das Portal schickt immer die Id der angezeigten Person; die Antworten zeigt der
+  Interceptor ohne eigenen Text (nicht im Vertrag für das Portal).
+- Die Karte nach dem Abbruch (Zustand 2) und die Karte bei „schon abgebrochen“ (6) nur auf dem Desktop; Englisch nur
+  auf dem Desktop; kein Dunkelmodus.
+- Die Seite RFID-Tags (Banner „Wartet auf Tag“) – laut Spec unverändert.
+
 ## 5. Review
 
 <!-- Befunde gegen CLAUDE.md und die Skills: Datei und Zeile, verletzte Regel, muss / sollte, Stand (offen, behoben).
 Ohne die Begründung des Autors gelesen. -->
+
+Geprüft am 25.11.2026: `git diff ccdf3b9` (Commits 8892589, 06deaed, 8f9f0a2 und Arbeitsbaum), alle geänderten und
+neuen Dateien ganz gelesen. Gelesen in dieser Reihenfolge: Abschnitt 1 der Spec, dann der Code, dann die Regeln
+(`CLAUDE.md`, `schaffbar-backend/CLAUDE.md`, `schaffbar-portal/CLAUDE.md`, Skills `backend-testing`, `rest-api`,
+Backend-Regeln zu Use Cases, Portal-Skills `api`, `testing`, `dialog`, `feature`, `component`), erst danach die
+Abschnitte 2–4. Keine Tests laufen lassen – kein Befund hängt davon ab.
+
+**Befunde:**
+
+1. **sollte** – `schaffbar-portal/src/app/users/pages/user-detail/user-detail-dialogs.service.spec.ts:163–227`
+   (dazu Zeile 109). Skill `testing`, „Dialogs“: „A page or page service that opens dialogs: mock `MatDialog`“. Der
+   neue Block öffnet den Dialog-Service der Seite mit dem echten `MatDialog` – das Muster, das der Skill `dialog`
+   („Testing“ → „Service“) für den Service eines geteilten Dialogs vorsieht. In der Datei stehen jetzt beide Muster für
+   denselben Dialog; der Test mit dem Mock zählt nur die Bindings (`toHaveLength(7)`) und prüft keinen Namen. Zu ändern:
+   Piotr entscheidet, welches Muster für einen Seiten-Service gilt, der einen Dialog mit `bindings` öffnet, und der Skill
+   `testing` nennt es (Zeile 264). Danach folgt die Spec einem Muster – bleibt der echte Block, fällt der Test, der nur
+   zählt, weg. Stand: behoben (Rolle Portal, erneut aufgerufen, 25.11.2026 – „Nachbesserung nach dem Review“ in
+   Abschnitt 3).
+   Entscheidung Piotr (im Chat, 25.11.2026): der echte `MatDialog` gilt für einen Seiten-Service, der einen Dialog mit
+   `bindings` öffnet. Die Hauptsitzung hat dazu im Skill `testing` („Dialogs“) die Ausnahme unter „A page or page
+   service that opens dialogs“ ergänzt (keine Rolle besitzt die Skills); die Spec-Datei zieht die Rolle Portal nach.
+2. **sollte** – `schaffbar-portal/src/app/users/components/assign-rfid-tag-dialog/assign-rfid-tag-dialog.component.ts:33–39`.
+   `schaffbar-portal/CLAUDE.md`, „Code“: „No class comments“. Die Änderung erweitert den JSDoc über der Klasse (er
+   stammt aus c7ed232) um das Binding des Abbruchs und seine Folge. Zu ändern: was neu ist („nach einem Abbruch ist die
+   neu geladene Zuweisung `null`, der Dialog steht wieder bei ‚Art wählen‘“), wird ein Zeilenkommentar an `step` und
+   kommt nicht in den Klassenkommentar. Stand: behoben (Rolle Portal, erneut aufgerufen, 25.11.2026 – Klassenkommentar
+   wieder wie in c7ed232, der neue Satz als Zeilenkommentar an `step`).
+
+**muss: 0, sollte: 2.**
+
+**Ohne Befund angesehen:**
+
+- Vertrag Backend: `PUT /{customerId}/cancel` ohne Body und ohne `consumes`, `@PathVariable @NotNull @Valid CustomerId`,
+  `204`. Der Use Case `RfidTagAssignmentCancel` (`@Command`, prüft erst die Person – `404` –, dann den Service) ist
+  nach `<Aggregat><Befehl>` benannt; Service, Exception und `DeviceMessages` sind unverändert. Der Handler steht im
+  Abschnitt `// command` und folgt dem Muster von `WorkshopSessionController.closeWorkshopSession`.
+- Backend-Tests: der Use-Case-Test hat beide Pfade (Ablehnung mit `resource` und `verifyNoInteractions`). Die
+  Controller-Tests decken `204`, `409` mit Code, `404` mit Code und `resource` sowie `400` (Use Case nicht aufgerufen)
+  ab – alle Anfragen gehen über Methoden im Abschnitt `// when`, Stubs liegen nur in `given…`. Abnahme: `ta10_` für
+  beide Seiten, beide scheitern ohne den Endpunkt; die wartende Anfrage wird mit `// cleanup` und
+  `endWaitingRfidTagAssignment()` beendet. `SchaffbarApi`/`ThenFixture` stehen im Abschnitt des Aggregats.
+- Doku: TA-10 „Enforced in“ und die Tabelle „Commands“ im README (der Rest der Tabelle wurde nur neu ausgerichtet).
+  `ddd-overview.md`/`ddd-uebersicht.md`, Bruno (`seq: 8`, `body: none`, wie „Close workshop session“).
+  `entscheidungen.md`: beide Einträge mit Datum und allen Punkten aus dem Umfang. `aufgaben.md`: Zeile gelöscht,
+  Punkt 2 gekürzt.
+- Portal: API-Methode mit `{}` als Body – Skill `api`, „Without payload pass `{}`“, wie `closeWorkshopSession`. Keine
+  Spec für den API-Service, gegen „mit Spec“ im Umfang; das entspricht dem Skill `api` („No spec for the API service –
+  it is tested through the store spec“) und ist kein Befund. Command unter `// commands`. Mutation mit `onSuccess` und
+  `onError`; der Store-Test mit `409` würde ohne `onError` scheitern. Dialog: Button nur mit Zuweisung, gesperrt bei
+  `cancelPending`, umrandet, daneben „Schließen“. Karte: zweiter umrandeter Button ohne Rückfrage, Output als Event
+  benannt, Methode als Verb. Tab gibt den Command an den Store weiter. Übersetzungen de/en mit denselben Schlüsseln
+  und dem Wortlaut des Vertrags (beide JSON-Dateien geladen und geprüft).
+- Dialog-Test „should go back to the choice once the request is cancelled“ würde auch ohne die Änderung bestehen – laut
+  Vertrag ergibt sich dieses Verhalten aus dem Store, ohne Code im Dialog. Der Test sichert eine Zeile des Vertrags
+  (wartend → `null`) ab, die vorher nicht getestet war. Kein Befund.
+
+**Berichte gegen den Code:**
+
+- Bericht Backend: die Tests stimmen mit dem Code überein (8 neu: 2 Use Case, 4 Controller, 2 Abnahme). Der Satz zu
+  „`/unassign` angleichen … nicht eingetragen“ stimmt nicht mehr: die Zeile steht in `docs/aufgaben.md`, hinzugefügt im
+  Commit 8f9f0a2 „[docs]“. Das passt zu „Nicht dabei“ und ist kein Befund gegen den Code – nur ein Hinweis, falls die
+  Zeile nicht von Piotr stammt.
+- Bericht Portal: die Tests und die Abweichungen (Body `{}`, Karte nicht gesperrt – `exhaustMap` der Mutation) stimmen
+  mit dem Code überein. Die Zahl „581 Tests“ nicht nachgezählt.
+
+**Nicht geprüft:** `mvn -q test` und `npm run check` nicht laufen lassen (Testzahlen der Berichte nicht nachgezählt).
+Der echte Endpunkt nicht gegen das laufende Backend geprüft, kein Browser. Der Handy-Fehler des Dialogs
+(`DIALOG_WIDTH.medium`) gehört zur Aufgabe „Dialoge auf dem Handy“ und ist hier nicht bewertet.

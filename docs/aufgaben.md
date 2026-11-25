@@ -76,7 +76,7 @@ Stufen:
 1. [ ] Pilot: lokal an R-6 (Namen der Lesegeräte eindeutig) – betrifft Backend (`RfidReaderUpdate`, Exception, Tests)
    und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe. Dabei klären: wie das
    Werkzeug `Artifact` der Rolle Spec ohne claude.ai (später in der GitHub Action) behandelt wird.
-   Durchlauf 24.–25.11.2026 (`docs/specs/r6-lesegeraete-namen-eindeutig.md`) – was er gezeigt hat:
+   Durchlauf 1, 24.–25.11.2026 (`docs/specs/r6-lesegeraete-namen-eindeutig.md`) – was er gezeigt hat:
    - Die fünf Rollen liefen nacheinander durch, die Übergabe nur über die Spec-Datei hat getragen. Je Rolle 1–10 min
      und etwa 140–240 k Tokens.
    - Nachbesserungen zwischen den Rollen (Freigabe in Piotrs Namen, Dublette gestrichen, Reihenfolge der Parameter,
@@ -90,6 +90,46 @@ Stufen:
      (eigener Branch) wird das ein Diff gegen `main`.
    - `Artifact`: mit claude.ai in der Sitzung las die Rolle Spec die Artboards (`list` mit `scope: files`, `read` mit
      `path`); in der Action ohne claude.ai geht das nicht – offen für Stufe 5.
+
+   Durchlauf 2, 25.11.2026, an einer Funktion statt einer Regel: „Anfrage abbrechen“ der RFID-Tag-Zuweisung
+   (`docs/specs/rfid-tag-anfrage-abbrechen.md`) – im Vergleich zum ersten:
+   - Review las diesmal erst Abschnitt 1, dann den Code (`git diff ccdf3b9` und `git status`), dann `CLAUDE.md` und
+     die Skills und erst danach die Berichte 2–4, die es gegen den Code verglich. Die Änderung vom 25.11.2026 wirkt;
+     die Rolle sollte die Reihenfolge diesmal auch nennen. Tests ließ sie wieder nicht laufen („kein Befund hängt davon
+     ab“) – die Frage aus Durchlauf 1 bleibt offen.
+   - Nachbesserungen über die Rollen trugen. Spec wurde für Piotrs Antworten mit ihrem Verlauf fortgesetzt (1:19 min).
+     Die zwei „sollte“ des Reviews (Portal) behob die Rolle Portal, neu aufgerufen nur mit der Spec-Datei und den
+     Befunden: sie ergänzte Abschnitt 3 um „Nachbesserung nach dem Review“, ohne ihn neu zu schreiben, in 3 min mit 52 k
+     Tokens – ein Drittel eines vollen Durchlaufs. Damit ist die Frage aus Durchlauf 1 beantwortet: die Rolle, erneut
+     aufgerufen. Bei der Hauptsitzung blieb, was keiner Rolle gehört: der Stand „freigegeben“ (die Freigabe trug Piotr
+     selbst ein), die Zeile „`/unassign` angleichen“ in dieser Datei, der Stand der Befunde in Abschnitt 5 – und eine
+     Skill-Änderung: Befund 1 (Testmuster für einen Seiten-Service mit `bindings`) war eine Lücke im Skill `testing`,
+     Piotr entschied, die Hauptsitzung ergänzte den Skill. Ein Review-Befund kann also Piotrs Entscheidung brauchen.
+   - Dauer und Tokens (`subagent_tokens` der Abschlussmeldung; bei einer fortgesetzten Rolle zählt der Wert die ganze
+     Rolle):
+
+     | Rolle | Dauer | Tokens | Tool-Aufrufe |
+     | --- | --- | --- | --- |
+     | spec | 6:01 min, Antworten einarbeiten 1:19 min | 222 k, danach 243 k | 39 + 23 |
+     | implement-backend | 4:35 min | 172 k | 42 |
+     | implement-portal | ≈ 16 min bis zum Absturz von WSL, Fortsetzung 1:31 min | 173 k | 111 + 7 |
+     | verify | 7:45 min | 129 k | 43 |
+     | review | 3:32 min | 167 k | 30 |
+     | implement-portal, Nachbesserung | 3:08 min | 52 k | 10 |
+
+   - Rolle und Spec widersprachen sich: laut Rolle löscht bei einer Aufgabe mit Portal-Teil das Portal die erledigte
+     Zeile in dieser Datei, die Spec wies es dem Backend zu – das Backend folgte der Spec, das Portal löschte richtig
+     nicht noch einmal. Ebenso verlangte die Spec eine Spec-Datei für den API-Service, die der Skill `api` ausschließt –
+     das Portal folgte dem Skill. Die Rolle Spec sollte solche Zuweisungen aus den Rollen und Skills übernehmen, nicht
+     neu festlegen.
+   - WSL stürzte während der Rolle Portal ab. Fortgesetzt mit ihrem Verlauf, fehlte nur `npm run check` und der Stand –
+     Code und Bericht lagen schon in Dateien. Unter hoher Last (≈ 39 bei 4 Kernen) brach `npm run check` zweimal mit
+     Zeitüberschreitungen in fremden Specs ab; daher die 16 min.
+   - Der Bericht Backend war beim Review in einem Satz überholt („`/unassign` angleichen“ nicht eingetragen – die
+     Hauptsitzung hatte es danach eingetragen); Review hat es bemerkt und als Hinweis vermerkt.
+   - Verify ließ den Dev-Server auf Port 4200 laufen – festlegen, ob die Rolle ihn am Ende beendet.
+   - Die drei Fragen der Spec hatten je eine Empfehlung, Piotr nahm alle an. Die Rolle Spec fand dazu drei
+     Kleinigkeiten außerhalb der Aufgabe (u. a. 2 s statt 3 s in einer Entscheidung) und listete sie unter „Nicht dabei“.
 2. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
    Piotr (Ausnahme zu „nie committen“ in `CLAUDE.md`, nur für die Pipeline).
 3. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
