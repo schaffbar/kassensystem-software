@@ -11,6 +11,7 @@ import de.schaffbar.core_pos.integration.fixture.Scenario;
 import de.schaffbar.core_pos.integration.fixture.SchaffbarFixture;
 import de.schaffbar.core_pos.shared.exception.CustomerHasRfidTagAssignmentException;
 import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignedException;
+import de.schaffbar.core_pos.shared.exception.NoRfidTagAssignmentWaitingException;
 import de.schaffbar.core_pos.shared.exception.ResourceNotFoundException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAlreadyAssignedException;
 import de.schaffbar.core_pos.shared.exception.RfidTagAssignmentAlreadyWaitingException;
@@ -169,6 +170,53 @@ class RfidTagAssignmentAcceptanceTest {
 
         // then
         this.fixture.then().expectProblem(result, HttpStatus.NOT_FOUND, ResourceNotFoundException.CODE);
+    }
+
+    @Test
+    void ta10_aWaitingRequestIsCancelledWithoutHistory() {
+        // given
+        CustomerId waitingCustomer = this.fixture.given().customerWaitingForRfidTag();
+
+        // when
+        MvcTestResult result = this.fixture.api().cancelRfidTagAssignment(waitingCustomer);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectNoRfidTagAssignment(waitingCustomer);
+        this.fixture.then().expectNoHistoryEntry(waitingCustomer);
+
+        // when – a second time: the request is already gone
+        result = this.fixture.api().cancelRfidTagAssignment(waitingCustomer);
+
+        // then
+        this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, NoRfidTagAssignmentWaitingException.CODE);
+
+        // when – no request waits any more (TA-3)
+        CustomerId otherCustomer = this.fixture.given().customer();
+        result = this.fixture.api().requestRfidTagAssignment(otherCustomer, RfidTagAssignmentType.FIXED);
+
+        // then
+        this.fixture.then().expectSuccess(result);
+        this.fixture.then().expectWaitingForRfidTag(otherCustomer);
+
+        // cleanup
+        this.fixture.endWaitingRfidTagAssignment();
+    }
+
+    @Test
+    void ta10_anAssignedTagIsNotCancelled() {
+        Scenario scenario = Scenario.randomValues().build();
+
+        // given
+        RfidTagId rfidTagId = this.fixture.given().rfidTag(scenario.rfidTagId());
+        CustomerId customerId = this.fixture.given().customerWithRfidTag(rfidTagId);
+
+        // when
+        MvcTestResult result = this.fixture.api().cancelRfidTagAssignment(customerId);
+
+        // then
+        this.fixture.then().expectProblem(result, HttpStatus.CONFLICT, NoRfidTagAssignmentWaitingException.CODE);
+        this.fixture.then().expectRfidTagAssigned(customerId, rfidTagId);
     }
 
 }

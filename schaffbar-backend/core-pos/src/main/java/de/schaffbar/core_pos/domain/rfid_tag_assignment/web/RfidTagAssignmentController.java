@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,7 @@ import de.schaffbar.core_pos.read_facade.RfidTagAssignmentReadFacade;
 import de.schaffbar.core_pos.shared.id.CustomerId;
 import de.schaffbar.core_pos.shared.id.RfidTagId;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentAssignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentCancel;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentRequest;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentUnassignRfidTag;
 
@@ -45,6 +47,8 @@ public class RfidTagAssignmentController {
     private final @NonNull RfidTagAssignmentAssignRfidTag rfidTagAssignmentAssignRfidTag;
 
     private final @NonNull RfidTagAssignmentUnassignRfidTag rfidTagAssignmentUnassignRfidTag;
+
+    private final @NonNull RfidTagAssignmentCancel rfidTagAssignmentCancel;
 
     // ------------------------------------------------------------------------
     // query
@@ -98,6 +102,14 @@ public class RfidTagAssignmentController {
     @PutMapping(value = "/unassign", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> unassignRfidTag(@RequestBody @NotNull @Valid UnassignRfidTagRequestBody requestBody) {
         this.rfidTagAssignmentUnassignRfidTag.process(requestBody.customerId());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // cancels the waiting request of the person (TA-10) – by the person the counter knows, like GET ?customerId=
+    @PutMapping(value = "/{customerId}/cancel")
+    public ResponseEntity<Void> cancelRfidTagAssignment(@PathVariable @NotNull @Valid CustomerId customerId) {
+        this.rfidTagAssignmentCancel.process(customerId);
 
         return ResponseEntity.noContent().build();
     }

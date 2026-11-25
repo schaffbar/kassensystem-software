@@ -162,6 +162,16 @@ public final class ThenFixture {
                 .containsExactly(rfidTagId.getValue());
     }
 
+    public void expectNoHistoryEntry(CustomerId customerId) {
+        MvcTestResult result = this.api.getRfidTagAssignmentHistory();
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(result).bodyJson() //
+                .extractingPath("$[?(@.customerId == '%s')]".formatted(customerId.getValue())) //
+                .asArray() //
+                .isEmpty();
+    }
+
     // ------------------------------------------------------------------------
     // tools
 

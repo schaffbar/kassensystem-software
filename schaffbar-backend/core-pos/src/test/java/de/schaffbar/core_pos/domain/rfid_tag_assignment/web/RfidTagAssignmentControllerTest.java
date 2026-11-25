@@ -46,6 +46,7 @@ import de.schaffbar.core_pos.shared.util.StringToRfidTagIdConverter;
 import de.schaffbar.core_pos.shared.web.ApiExceptionHandler;
 import de.schaffbar.core_pos.support.Json;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentAssignRfidTag;
+import de.schaffbar.core_pos.use_case.RfidTagAssignmentCancel;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentRequest;
 import de.schaffbar.core_pos.use_case.RfidTagAssignmentUnassignRfidTag;
 
@@ -64,6 +65,9 @@ class RfidTagAssignmentControllerTest {
     @Mock
     private RfidTagAssignmentUnassignRfidTag rfidTagAssignmentUnassignRfidTag;
 
+    @Mock
+    private RfidTagAssignmentCancel rfidTagAssignmentCancel;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -73,7 +77,7 @@ class RfidTagAssignmentControllerTest {
         conversionService.addConverter(new StringToRfidTagIdConverter());
 
         RfidTagAssignmentController controller = new RfidTagAssignmentController(this.rfidTagAssignmentReadFacade, this.rfidTagAssignmentRequest,
-                this.rfidTagAssignmentAssignRfidTag, this.rfidTagAssignmentUnassignRfidTag);
+                this.rfidTagAssignmentAssignRfidTag, this.rfidTagAssignmentUnassignRfidTag, this.rfidTagAssignmentCancel);
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller) //
                 .setConversionService(conversionService) //
@@ -375,6 +379,59 @@ class RfidTagAssignmentControllerTest {
     }
 
     // ------------------------------------------------------------------------
+    // cancelRfidTagAssignment
+
+    @Test
+    void cancelRfidTagAssignment_is204() throws Exception {
+        // given
+        CustomerId customerId = CustomerId.random();
+
+        // when
+        ResultActions result = cancelRfidTagAssignment(customerId);
+
+        // then
+        result.andExpect(status().isNoContent());
+        expectCancelled(customerId);
+    }
+
+    @Test
+    void cancelRfidTagAssignment_withoutWaitingRequest_is409WithTheCode() throws Exception {
+        // given
+        CustomerId customerId = CustomerId.random();
+        givenCancelRejectedWith(customerId, NoRfidTagAssignmentWaitingException.forCustomer(customerId));
+
+        // when
+        ResultActions result = cancelRfidTagAssignment(customerId);
+
+        // then
+        result.andExpect(status().isConflict()) //
+                .andExpect(jsonPath("$.code").value(NoRfidTagAssignmentWaitingException.CODE));
+    }
+
+    @Test
+    void cancelRfidTagAssignment_ofAnUnknownCustomer_is404() throws Exception {
+        // given
+        CustomerId unknown = CustomerId.random();
+        givenCancelRejectedWith(unknown, ResourceNotFoundException.customer(unknown));
+
+        // when
+        ResultActions result = cancelRfidTagAssignment(unknown);
+
+        // then
+        expectNotFound(result, Resource.CUSTOMER);
+    }
+
+    @Test
+    void cancelRfidTagAssignment_withInvalidCustomerId_is400() throws Exception {
+        // when
+        ResultActions result = cancelRfidTagAssignment("not-a-uuid");
+
+        // then
+        result.andExpect(status().isBadRequest());
+        expectNothingCancelled();
+    }
+
+    // ------------------------------------------------------------------------
     // given
 
     private void givenAssignments(RfidTagAssignmentView... assignments) {
@@ -432,6 +489,10 @@ class RfidTagAssignmentControllerTest {
         doThrow(rejection).when(this.rfidTagAssignmentUnassignRfidTag).process(customerId);
     }
 
+    private void givenCancelRejectedWith(CustomerId customerId, RuntimeException rejection) {
+        doThrow(rejection).when(this.rfidTagAssignmentCancel).process(customerId);
+    }
+
     // ------------------------------------------------------------------------
     // when
 
@@ -479,6 +540,14 @@ class RfidTagAssignmentControllerTest {
                 .content("{\"customerId\":\"" + customerId.getValue() + "\"}"));
     }
 
+    private ResultActions cancelRfidTagAssignment(CustomerId customerId) throws Exception {
+        return cancelRfidTagAssignment(customerId.getValue().toString());
+    }
+
+    private ResultActions cancelRfidTagAssignment(String customerId) throws Exception {
+        return this.mockMvc.perform(put("/api/v1/rfid-tag-assignments/" + customerId + "/cancel"));
+    }
+
     // ------------------------------------------------------------------------
     // then
 
@@ -502,6 +571,14 @@ class RfidTagAssignmentControllerTest {
 
     private void expectUnassigned(CustomerId customerId) {
         verify(this.rfidTagAssignmentUnassignRfidTag).process(customerId);
+    }
+
+    private void expectCancelled(CustomerId customerId) {
+        verify(this.rfidTagAssignmentCancel).process(customerId);
+    }
+
+    private void expectNothingCancelled() {
+        verify(this.rfidTagAssignmentCancel, never()).process(any());
     }
 
 }

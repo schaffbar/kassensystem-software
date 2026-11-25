@@ -137,6 +137,10 @@ public final class SchaffbarApi {
                 .exchange();
     }
 
+    public MvcTestResult cancelRfidTagAssignment(CustomerId customerId) {
+        return this.mvc.put().uri("/api/v1/rfid-tag-assignments/{customerId}/cancel", customerId.getValue()).exchange();
+    }
+
     // ------------------------------------------------------------------------
     // customers
 

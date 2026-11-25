@@ -1,0 +1,15 @@
+meta {
+  name: Cancel RFID tag assignment
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{domain_url}}/api/v1/rfid-tag-assignments/:customerId/cancel
+  body: none
+  auth: inherit
+}
+
+params:path {
+  customerId: 788779c4-bd97-450d-b655-e4814caa2e73
+}
