@@ -3,40 +3,45 @@ import { TestBed } from '@angular/core/testing';
 
 import { MatDialog } from '@angular/material/dialog';
 
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { CloseSessionDialogService } from '../../../shared/dialogs/close-session-dialog/close-session-dialog.service';
 import { ConfirmDeleteDialogService } from '../../../shared/dialogs/confirm-delete-dialog/confirm-delete-dialog.service';
 import { FORM_DIALOG_CONFIG } from '../../../shared/dialogs/dialog-constants';
 import { AgeGroup } from '../../../shared/models/age-group';
+import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignment-status';
+import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { AssignRfidTagDialogComponent } from '../../components/assign-rfid-tag-dialog/assign-rfid-tag-dialog.component';
 import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
+import { RfidTagAssignment } from '../../rfid-tag-assignment.model';
 import { UpdateUserCommand, User } from '../../user.model';
 import { UserDetailDialogsService } from './user-detail-dialogs.service';
 import { UserDetailStore } from './user-detail.store';
 
-describe('UserDetailDialogsService', () => {
-  const user: User = {
-    id: 'user-1',
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    dateOfBirth: new Date(1990, 0, 31),
-    ageGroup: AgeGroup.Adult,
-    clubMember: false,
-    email: 'max@example.org',
-    phone: null,
-    address: { addressLine1: 'Hauptstraße 1', addressLine2: null, postalCode: '12345', city: 'Berlin', country: 'D' },
-    createdAt: new Date(2026, 0, 1),
-    updatedAt: new Date(2026, 0, 1),
-  };
+const user: User = {
+  id: 'user-1',
+  firstName: 'Max',
+  lastName: 'Mustermann',
+  dateOfBirth: new Date(1990, 0, 31),
+  ageGroup: AgeGroup.Adult,
+  clubMember: false,
+  email: 'max@example.org',
+  phone: null,
+  address: { addressLine1: 'Hauptstraße 1', addressLine2: null, postalCode: '12345', city: 'Berlin', country: 'D' },
+  createdAt: new Date(2026, 0, 1),
+  updatedAt: new Date(2026, 0, 1),
+};
 
+describe('UserDetailDialogsService', () => {
   let service: UserDetailDialogsService;
   let storeMock: {
     user: WritableSignal<User | null>;
     rfidTagAssignment: WritableSignal<null>;
     updateUser: Mock;
     assignRfidTag: Mock & { isPending: WritableSignal<boolean> };
+    cancelRfidTagAssignment: Mock & { isPending: WritableSignal<boolean> };
     closeWorkshopSession: Mock;
     reloadOpenSession: Mock;
     deleteUser: Mock;
@@ -51,6 +56,7 @@ describe('UserDetailDialogsService', () => {
       rfidTagAssignment: signal(null),
       updateUser: vi.fn(),
       assignRfidTag: Object.assign(vi.fn(), { isPending: signal(false) }),
+      cancelRfidTagAssignment: Object.assign(vi.fn(), { isPending: signal(false) }),
       closeWorkshopSession: vi.fn(),
       reloadOpenSession: vi.fn(),
       deleteUser: vi.fn(),
@@ -100,7 +106,7 @@ describe('UserDetailDialogsService', () => {
       AssignRfidTagDialogComponent,
       expect.objectContaining({ ...FORM_DIALOG_CONFIG, bindings: expect.any(Array) }),
     );
-    expect(openDialog.mock.calls[0][1].bindings).toHaveLength(5);
+    expect(openDialog.mock.calls[0][1].bindings).toHaveLength(7);
   });
 
   it('should close the session after confirmation', () => {
@@ -151,5 +157,71 @@ describe('UserDetailDialogsService', () => {
     expect(openDialog).not.toHaveBeenCalled();
     expect(openCloseSession).not.toHaveBeenCalled();
     expect(openConfirmDelete).not.toHaveBeenCalled();
+  });
+});
+
+// the bindings by name – with the real MatDialog, so a renamed input or output fails here
+describe('UserDetailDialogsService – RFID tag dialog', () => {
+  let storeMock: {
+    user: WritableSignal<User | null>;
+    rfidTagAssignment: WritableSignal<RfidTagAssignment | null>;
+    assignRfidTag: Mock & { isPending: WritableSignal<boolean> };
+    cancelRfidTagAssignment: Mock & { isPending: WritableSignal<boolean> };
+  };
+
+  beforeEach(() => {
+    storeMock = {
+      user: signal<User | null>(user),
+      rfidTagAssignment: signal<RfidTagAssignment | null>({
+        id: 'a-1',
+        customerId: 'user-1',
+        rfidTagId: null,
+        assignmentType: RfidTagAssignmentType.Temporary,
+        status: RfidTagAssignmentStatus.WaitingForAssignment,
+        assignmentDate: null,
+      }),
+      assignRfidTag: Object.assign(vi.fn(), { isPending: signal(false) }),
+      cancelRfidTagAssignment: Object.assign(vi.fn(), { isPending: signal(false) }),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslateService(),
+        UserDetailDialogsService,
+        { provide: UserDetailStore, useValue: storeMock },
+        { provide: CloseSessionDialogService, useValue: { open: vi.fn() } },
+        { provide: ConfirmDeleteDialogService, useValue: { open: vi.fn() } },
+      ],
+    });
+  });
+
+  afterEach(() => TestBed.inject(MatDialog).closeAll());
+
+  function openDialog(): AssignRfidTagDialogComponent {
+    TestBed.inject(UserDetailDialogsService).assignRfidTag();
+    TestBed.tick();
+    return TestBed.inject(MatDialog).openDialogs[0].componentInstance;
+  }
+
+  it('should cancel the waiting request in the store and pass the pending cancel to the dialog', () => {
+    const dialog = openDialog();
+    expect(dialog.cancelPending()).toBe(false);
+
+    dialog.rfidTagAssignmentCancelled.emit({ userId: 'user-1' });
+    storeMock.cancelRfidTagAssignment.isPending.set(true);
+    TestBed.tick();
+
+    expect(storeMock.cancelRfidTagAssignment).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+    expect(dialog.cancelPending()).toBe(true);
+  });
+
+  it('should follow the assignment of the store', () => {
+    const dialog = openDialog();
+
+    storeMock.rfidTagAssignment.set(null);
+    TestBed.tick();
+
+    expect(dialog.rfidTagAssignment()).toBeNull();
   });
 });

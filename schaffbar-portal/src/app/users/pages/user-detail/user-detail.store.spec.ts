@@ -278,6 +278,41 @@ describe('UserDetailStore', () => {
     expect(store.rfidTagAssignment()).toBeNull();
   });
 
+  it('should cancel the waiting request without a body and only reload the assignment', async () => {
+    const waiting = { ...assignment, status: RfidTagAssignmentStatus.WaitingForAssignment, rfidTagId: null };
+    await loadUser({ assignments: [waiting] });
+
+    store.cancelRfidTagAssignment({ userId: 'user-1' });
+    trigger();
+    const cancel = expectPut('/rfid-tag-assignments/user-1/cancel');
+    expect(cancel.request.body).toEqual({});
+    cancel.flush(null);
+    trigger();
+
+    expectAssignment().flush([]);
+    await settle();
+    expect(store.rfidTagAssignment()).toBeNull();
+    expect(store.isWaitingForRfidTag()).toBe(false);
+  });
+
+  it('should reload the assignment when cancelling fails – the tag may just have been assigned', async () => {
+    const waiting = { ...assignment, status: RfidTagAssignmentStatus.WaitingForAssignment, rfidTagId: null };
+    await loadUser({ assignments: [waiting] });
+
+    store.cancelRfidTagAssignment({ userId: 'user-1' });
+    trigger();
+    expectPut('/rfid-tag-assignments/user-1/cancel').flush(
+      { code: 'NO_RFID_TAG_ASSIGNMENT_WAITING' },
+      { status: 409, statusText: 'Conflict' },
+    );
+    trigger();
+
+    expectAssignment().flush([assignment]);
+    await settle();
+    expect(store.rfidTagAssignment()).toEqual(toRfidTagAssignment(assignment));
+    expect(store.cancelRfidTagAssignment.isPending()).toBe(false);
+  });
+
   it('should only reload the open session after closing it', async () => {
     await loadUser();
 

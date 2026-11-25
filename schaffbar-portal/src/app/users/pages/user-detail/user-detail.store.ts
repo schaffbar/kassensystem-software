@@ -17,7 +17,12 @@ import {
   toRfidTagAssignment,
   toUnassignRfidTagRequest,
 } from '../../rfid-tag-assignment.mapper';
-import { AssignRfidTagCommand, isWaitingForRfidTag, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
+import {
+  AssignRfidTagCommand,
+  CancelRfidTagAssignmentCommand,
+  isWaitingForRfidTag,
+  UnassignRfidTagCommand,
+} from '../../rfid-tag-assignment.model';
 import { toToolCertification } from '../../tool-certification.mapper';
 import {
   DeleteToolCertificationCommand,
@@ -170,6 +175,13 @@ export const UserDetailStore = signalStore(
     unassignRfidTag: mutation<UnassignRfidTagCommand>({
       request: (command) => store._rfidTagAssignmentsApi.unassignRfidTag(toUnassignRfidTagRequest(command)),
       onSuccess: () => store._assignmentResource.reload(),
+    }),
+    cancelRfidTagAssignment: mutation<CancelRfidTagAssignmentCommand>({
+      request: (command) => store._rfidTagAssignmentsApi.cancelRfidTagAssignment(command.userId),
+      onSuccess: () => store._assignmentResource.reload(),
+      // the request is gone or the tag was just assigned (409) – show that now instead of a cancel that fails again
+      // until the next poll
+      onError: () => store._assignmentResource.reload(),
     }),
   })),
   // mutations of the open session – reload the session on success

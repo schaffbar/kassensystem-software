@@ -18,9 +18,9 @@
       "RFID_TAG_ALREADY_REGISTERED": "Der RFID-Tag ist schon registriert.",
       "RFID_TAG_ASSIGNED_TO_CUSTOMER": "Der RFID-Tag ist einer Person zugewiesen – zuerst die Zuweisung aufheben.",
       "CUSTOMER_HAS_RFID_TAG_ASSIGNMENT": "Die Person hat schon einen RFID-Tag oder wartet auf einen.",
-      "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Eine andere Person wartet noch auf ihren Tag – zuerst deren Tag an das Lesegerät an der Theke halten.",
+      "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Eine andere Person wartet noch auf ihren Tag – zuerst deren Tag an das Lesegerät an der Theke halten oder ihre Anfrage abbrechen (Seite RFID-Tags zeigt, wer wartet).",
       "RFID_TAG_ALREADY_ASSIGNED": "Der RFID-Tag ist schon einer anderen Person zugewiesen.",
-      "NO_RFID_TAG_ASSIGNMENT_WAITING": "Niemand wartet auf einen Tag.",
+      "NO_RFID_TAG_ASSIGNMENT_WAITING": "Keine Anfrage wartet mehr auf einen Tag – vielleicht wurde der Tag gerade zugewiesen oder die Anfrage schon abgebrochen.",
       "NO_RFID_TAG_ASSIGNED": "Der Person ist kein RFID-Tag zugewiesen.",
       "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "Die Person hat noch eine offene Sitzung – zuerst die Sitzung beenden und abrechnen.",
       "TOOL_NAME_ALREADY_USED": "Ein Werkzeug mit diesem Namen gibt es schon.",
@@ -286,7 +286,8 @@
         "waiting": {
           "title": "{{type}} an das Lesegerät an der Theke halten",
           "requesting": "Tag wird angefordert …",
-          "message": "Sobald der Tag erkannt wird, ist er {{name}} zugewiesen. Der Dialog kann geschlossen werden – die Anfrage bleibt bestehen."
+          "message": "Sobald der Tag erkannt wird, ist er {{name}} zugewiesen. Der Dialog kann geschlossen werden – die Anfrage bleibt bestehen.",
+          "cancel": "Zuweisung abbrechen"
         },
         "done": {
           "title": "Tag zugewiesen",
@@ -347,6 +348,7 @@
           "assignedOn": "zugewiesen am {{date}}",
           "holdToReader": "an das Lesegerät an der Theke halten",
           "showAssignment": "Zuweisung anzeigen",
+          "cancelAssignment": "Zuweisung abbrechen",
           "none": "Kein RFID-Tag zugewiesen.",
           "assign": "RFID-Tag zuweisen …",
           "unassign": "Tag entfernen …"

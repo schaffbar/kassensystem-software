@@ -124,4 +124,54 @@ describe('AssignRfidTagDialogComponent', () => {
 
     expect(currentStep()).toBe('users.dialogs.assignRfidTag.steps.choose');
   });
+
+  describe('cancel', () => {
+    const cancelButton = () =>
+      loader.getHarnessOrNull(MatButtonHarness.with({ text: 'users.dialogs.assignRfidTag.waiting.cancel' }));
+
+    async function actionTexts(): Promise<string[]> {
+      const buttons = await loader.getAllHarnesses(MatButtonHarness.with({ ancestor: 'mat-dialog-actions' }));
+      return Promise.all(buttons.map((button) => button.getText()));
+    }
+
+    it('should offer to cancel a waiting request next to closing the dialog', async () => {
+      await setAssignment(waiting);
+
+      expect(await actionTexts()).toEqual(['users.dialogs.assignRfidTag.waiting.cancel', 'shared.actions.close']);
+    });
+
+    it('should cancel the waiting request without asking first', async () => {
+      const rfidTagAssignmentCancelled = vi.fn();
+      fixture.componentInstance.rfidTagAssignmentCancelled.subscribe(rfidTagAssignmentCancelled);
+      await setAssignment(waiting);
+
+      await (await cancelButton())!.click();
+
+      expect(rfidTagAssignmentCancelled).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+    });
+
+    it('should not offer to cancel while the tag is being requested – nothing waits yet', async () => {
+      await setAssignment(null, true);
+
+      expect(await cancelButton()).toBeNull();
+      expect(await actionTexts()).toEqual(['shared.actions.close']);
+    });
+
+    it('should block the cancel button while cancelling', async () => {
+      await setAssignment(waiting);
+
+      fixture.componentRef.setInput('cancelPending', true);
+      await fixture.whenStable();
+
+      expect(await (await cancelButton())!.isDisabled()).toBe(true);
+    });
+
+    it('should go back to the choice once the request is cancelled', async () => {
+      await setAssignment(waiting);
+
+      await setAssignment(null);
+
+      expect(currentStep()).toBe('users.dialogs.assignRfidTag.steps.choose');
+    });
+  });
 });

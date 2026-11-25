@@ -13,7 +13,7 @@ import { RfidTagAssignmentStatus } from '../../../shared/models/rfid-tag-assignm
 import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignment-type';
 import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
-import { AssignRfidTagCommand } from '../../rfid-tag-assignment.model';
+import { AssignRfidTagCommand, CancelRfidTagAssignmentCommand } from '../../rfid-tag-assignment.model';
 
 export interface AssignRfidTagDialogViewModel {
   assignmentType: RfidTagAssignmentType;
@@ -32,8 +32,10 @@ const STEPS: Step[] = ['choose', 'wait', 'done'];
 
 /**
  * Requests a tag and follows the request until the tag has been held to the reader at the counter. The page passes
- * the assignment of its store (reloaded every few seconds while waiting) and the pending state of the request with
- * `inputBinding`, and executes the command from `assignmentRequested` with `outputBinding`.
+ * the assignment of its store (reloaded every few seconds while waiting) and the pending states of the request and
+ * the cancel with `inputBinding`, and executes the commands from `assignmentRequested` and
+ * `rfidTagAssignmentCancelled` with `outputBinding` – after a cancel the reloaded assignment is `null` and the dialog
+ * is back at the choice.
  */
 @Component({
   selector: 'schbar-assign-rfid-tag-dialog',
@@ -59,8 +61,10 @@ export class AssignRfidTagDialogComponent {
   // null = no tag and none requested
   readonly rfidTagAssignment = input.required<AssignRfidTagDialogViewModel | null>();
   readonly requestPending = input(false);
+  readonly cancelPending = input(false);
 
   readonly assignmentRequested = output<AssignRfidTagCommand>();
+  readonly rfidTagAssignmentCancelled = output<CancelRfidTagAssignmentCommand>();
 
   protected readonly assignmentTypes = [RfidTagAssignmentType.Temporary, RfidTagAssignmentType.Fixed].map((type) => ({
     type,
@@ -89,5 +93,10 @@ export class AssignRfidTagDialogComponent {
       const command: AssignRfidTagCommand = { userId: this.userId(), assignmentType: this.model().assignmentType };
       this.assignmentRequested.emit(command);
     });
+  }
+
+  protected cancelRfidTagAssignment(): void {
+    const command: CancelRfidTagAssignmentCommand = { userId: this.userId() };
+    this.rfidTagAssignmentCancelled.emit(command);
   }
 }

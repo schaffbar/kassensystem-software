@@ -21,6 +21,16 @@ describe('UserRfidTagCardComponent', () => {
       assignmentDate: new Date(2025, 1, 3),
     },
   };
+  const waiting: UserRfidTagCardViewModel = {
+    userId: 'user-1',
+    userName: 'Max Mustermann',
+    assignment: {
+      assignmentType: RfidTagAssignmentType.Fixed,
+      status: RfidTagAssignmentStatus.WaitingForAssignment,
+      rfidTagId: null,
+      assignmentDate: null,
+    },
+  };
 
   let fixture: ComponentFixture<UserRfidTagCardComponent>;
   let openConfirm: Mock;
@@ -79,10 +89,7 @@ describe('UserRfidTagCardComponent', () => {
   });
 
   it('should show a waiting request and open it again', async () => {
-    await render({
-      ...assigned,
-      assignment: { ...assigned.assignment!, status: RfidTagAssignmentStatus.WaitingForAssignment, rfidTagId: null },
-    });
+    await render(waiting);
     const assignmentRequested = vi.fn();
     fixture.componentInstance.assignmentRequested.subscribe(assignmentRequested);
 
@@ -90,6 +97,22 @@ describe('UserRfidTagCardComponent', () => {
     clickButton();
 
     expect(assignmentRequested).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cancel a waiting request without asking first', async () => {
+    await render(waiting);
+    const rfidTagAssignmentCancelled = vi.fn();
+    fixture.componentInstance.rfidTagAssignmentCancelled.subscribe(rfidTagAssignmentCancelled);
+    const buttons: HTMLButtonElement[] = [...fixture.nativeElement.querySelectorAll('.actions button')];
+
+    expect(buttons.map((button) => button.textContent!.trim())).toEqual([
+      'users.pages.userDetails.rfidTag.showAssignment',
+      'users.pages.userDetails.rfidTag.cancelAssignment',
+    ]);
+    buttons[1].click();
+
+    expect(openConfirm).not.toHaveBeenCalled();
+    expect(rfidTagAssignmentCancelled).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
   });
 
   it('should offer to assign a tag when there is none', async () => {

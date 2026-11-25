@@ -6,7 +6,8 @@
         <schbar-user-rfid-tag-card
           [userRfidTagCard]="card"
           (assignmentRequested)="assignRfidTag()"
-          (rfidTagUnassigned)="unassignRfidTag($event)" />
+          (rfidTagUnassigned)="unassignRfidTag($event)"
+          (rfidTagAssignmentCancelled)="cancelRfidTagAssignment($event)" />
       }
     </div>
 

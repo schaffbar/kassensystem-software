@@ -12,7 +12,7 @@ import { RfidTagAssignmentType } from '../../../shared/models/rfid-tag-assignmen
 import { OrDashPipe } from '../../../shared/pipes/or-dash.pipe';
 import { RfidTagIdPipe } from '../../../shared/pipes/rfid-tag-id.pipe';
 import { RfidTagAssignmentTypeKeyPipe } from '../../rfid-tag-assignment-type-key.pipe';
-import { UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
+import { CancelRfidTagAssignmentCommand, UnassignRfidTagCommand } from '../../rfid-tag-assignment.model';
 
 export interface UserRfidTagCardViewModel {
   userId: string;
@@ -50,6 +50,7 @@ export class UserRfidTagCardComponent {
   // opens the dialog that requests a tag – or shows the request that waits for the tag
   readonly assignmentRequested = output<void>();
   readonly rfidTagUnassigned = output<UnassignRfidTagCommand>();
+  readonly rfidTagAssignmentCancelled = output<CancelRfidTagAssignmentCommand>();
 
   protected readonly RfidTagAssignmentStatus = RfidTagAssignmentStatus;
 
@@ -72,5 +73,11 @@ export class UserRfidTagCardComponent {
           this.rfidTagUnassigned.emit(command);
         }
       });
+  }
+
+  // without confirmation, unlike unassigning: nothing is lost that two clicks don't request again
+  protected cancelRfidTagAssignment(): void {
+    const command: CancelRfidTagAssignmentCommand = { userId: this.userRfidTagCard().userId };
+    this.rfidTagAssignmentCancelled.emit(command);
   }
 }

@@ -69,6 +69,7 @@ describe('UserDetailTabOverviewComponent', () => {
     userNames: WritableSignal<Map<string, string>>;
     canDeleteUser: WritableSignal<boolean>;
     unassignRfidTag: Mock;
+    cancelRfidTagAssignment: Mock;
     pauseToolCertification: Mock;
     reactivateToolCertification: Mock;
     revokeToolCertification: Mock;
@@ -85,6 +86,7 @@ describe('UserDetailTabOverviewComponent', () => {
       userNames: signal(new Map([['instructor-1', 'Paula Richter']])),
       canDeleteUser: signal(true),
       unassignRfidTag: vi.fn(),
+      cancelRfidTagAssignment: vi.fn(),
       pauseToolCertification: vi.fn(),
       reactivateToolCertification: vi.fn(),
       revokeToolCertification: vi.fn(),
@@ -141,6 +143,12 @@ describe('UserDetailTabOverviewComponent', () => {
 
     expect(dialogsMock.assignRfidTag).toHaveBeenCalledTimes(1);
     expect(storeMock.unassignRfidTag).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
+  });
+
+  it('should cancel the waiting request of the tag card', () => {
+    child(UserRfidTagCardComponent).rfidTagAssignmentCancelled.emit({ userId: 'user-1' });
+
+    expect(storeMock.cancelRfidTagAssignment).toHaveBeenCalledExactlyOnceWith({ userId: 'user-1' });
   });
 
   it('should join tool and instructor into the certification rows and execute their commands', () => {

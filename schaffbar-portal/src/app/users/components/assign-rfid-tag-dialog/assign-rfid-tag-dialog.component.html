@@ -66,6 +66,12 @@
       </div>
     </mat-dialog-content>
     <mat-dialog-actions align="center">
+      <!-- only a waiting request can be cancelled – while it is being requested there is nothing to cancel yet -->
+      @if (assignment) {
+        <button matButton="outlined" type="button" [disabled]="cancelPending()" (click)="cancelRfidTagAssignment()">
+          {{ 'users.dialogs.assignRfidTag.waiting.cancel' | translate }}
+        </button>
+      }
       <button matButton="outlined" type="button" [mat-dialog-close]="undefined">
         {{ 'shared.actions.close' | translate }}
       </button>

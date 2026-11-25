@@ -52,4 +52,8 @@ export class RfidTagAssignmentsApiService {
   unassignRfidTag(request: UnassignRfidTagRequest): Observable<void> {
     return this.http.put<void>(`${RFID_TAG_ASSIGNMENTS_API_URL}/unassign`, request);
   }
+
+  cancelRfidTagAssignment(customerId: string): Observable<void> {
+    return this.http.put<void>(`${RFID_TAG_ASSIGNMENTS_API_URL}/${customerId}/cancel`, {});
+  }
 }

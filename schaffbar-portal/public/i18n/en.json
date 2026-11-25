@@ -18,9 +18,9 @@
       "RFID_TAG_ALREADY_REGISTERED": "The RFID tag is already registered.",
       "RFID_TAG_ASSIGNED_TO_CUSTOMER": "The RFID tag is assigned to a person – remove the assignment first.",
       "CUSTOMER_HAS_RFID_TAG_ASSIGNMENT": "The person already has an RFID tag or is waiting for one.",
-      "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Another person is still waiting for their tag – hold their tag to the reader at the counter first.",
+      "RFID_TAG_ASSIGNMENT_ALREADY_WAITING": "Another person is still waiting for their tag – hold their tag to the reader at the counter first, or cancel their request (the RFID tags page shows who is waiting).",
       "RFID_TAG_ALREADY_ASSIGNED": "The RFID tag is already assigned to another person.",
-      "NO_RFID_TAG_ASSIGNMENT_WAITING": "Nobody is waiting for a tag.",
+      "NO_RFID_TAG_ASSIGNMENT_WAITING": "No request is waiting for a tag any more – the tag may just have been assigned or the request cancelled.",
       "NO_RFID_TAG_ASSIGNED": "No RFID tag is assigned to the person.",
       "CUSTOMER_HAS_OPEN_WORKSHOP_SESSION": "The person still has an open session – end and bill the session first.",
       "TOOL_NAME_ALREADY_USED": "A tool with this name already exists.",
@@ -286,7 +286,8 @@
         "waiting": {
           "title": "Hold the {{type}} to the reader at the counter",
           "requesting": "Requesting tag …",
-          "message": "As soon as the tag is recognized, it is assigned to {{name}}. The dialog can be closed – the request stays active."
+          "message": "As soon as the tag is recognized, it is assigned to {{name}}. The dialog can be closed – the request stays active.",
+          "cancel": "Cancel assignment"
         },
         "done": {
           "title": "Tag assigned",
@@ -347,6 +348,7 @@
           "assignedOn": "assigned on {{date}}",
           "holdToReader": "hold it to the reader at the counter",
           "showAssignment": "Show assignment",
+          "cancelAssignment": "Cancel assignment",
           "none": "No RFID tag assigned.",
           "assign": "Assign RFID tag …",
           "unassign": "Remove tag …"

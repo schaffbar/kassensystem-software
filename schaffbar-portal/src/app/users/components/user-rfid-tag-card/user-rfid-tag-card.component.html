@@ -41,6 +41,9 @@
         <button matButton="outlined" type="button" (click)="assignmentRequested.emit()">
           {{ 'users.pages.userDetails.rfidTag.showAssignment' | translate }}
         </button>
+        <button matButton="outlined" type="button" (click)="cancelRfidTagAssignment()">
+          {{ 'users.pages.userDetails.rfidTag.cancelAssignment' | translate }}
+        </button>
       </div>
     }
     @default never;

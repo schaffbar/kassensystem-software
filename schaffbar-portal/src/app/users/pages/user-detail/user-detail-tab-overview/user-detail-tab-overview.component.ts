@@ -11,7 +11,11 @@ import {
   UserRfidTagCardViewModel,
 } from '../../../components/user-rfid-tag-card/user-rfid-tag-card.component';
 import { UserToolCertificationsComponent } from '../../../components/user-tool-certifications/user-tool-certifications.component';
-import { RfidTagAssignment, UnassignRfidTagCommand } from '../../../rfid-tag-assignment.model';
+import {
+  CancelRfidTagAssignmentCommand,
+  RfidTagAssignment,
+  UnassignRfidTagCommand,
+} from '../../../rfid-tag-assignment.model';
 import {
   DeleteToolCertificationCommand,
   PauseToolCertificationCommand,
@@ -69,6 +73,10 @@ export class UserDetailTabOverviewComponent {
 
   protected unassignRfidTag(command: UnassignRfidTagCommand): void {
     this.detailsStore.unassignRfidTag(command);
+  }
+
+  protected cancelRfidTagAssignment(command: CancelRfidTagAssignmentCommand): void {
+    this.detailsStore.cancelRfidTagAssignment(command);
   }
 
   protected pauseToolCertification(command: PauseToolCertificationCommand): void {

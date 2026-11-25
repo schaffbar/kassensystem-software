@@ -10,7 +10,7 @@ import {
   UpdateUserDialogData,
   UpdateUserFormComponent,
 } from '../../components/update-user-form/update-user-form.component';
-import { AssignRfidTagCommand } from '../../rfid-tag-assignment.model';
+import { AssignRfidTagCommand, CancelRfidTagAssignmentCommand } from '../../rfid-tag-assignment.model';
 import { DeleteUserCommand, UpdateUserCommand } from '../../user.model';
 import { CloseWorkshopSessionCommand } from '../../workshop-session.model';
 import { UserDetailStore } from './user-detail.store';
@@ -57,7 +57,11 @@ export class UserDetailDialogsService {
         inputBinding('userName', () => `${user.firstName} ${user.lastName}`),
         inputBinding('rfidTagAssignment', this.store.rfidTagAssignment),
         inputBinding('requestPending', this.store.assignRfidTag.isPending),
+        inputBinding('cancelPending', this.store.cancelRfidTagAssignment.isPending),
         outputBinding<AssignRfidTagCommand>('assignmentRequested', (command) => this.store.assignRfidTag(command)),
+        outputBinding<CancelRfidTagAssignmentCommand>('rfidTagAssignmentCancelled', (command) =>
+          this.store.cancelRfidTagAssignment(command),
+        ),
       ],
     });
   }

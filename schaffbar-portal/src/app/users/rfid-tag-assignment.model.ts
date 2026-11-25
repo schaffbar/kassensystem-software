@@ -26,3 +26,7 @@ export interface AssignRfidTagCommand {
 export interface UnassignRfidTagCommand {
   userId: string;
 }
+
+export interface CancelRfidTagAssignmentCommand {
+  userId: string;
+}
