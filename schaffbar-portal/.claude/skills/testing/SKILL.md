@@ -263,6 +263,12 @@ await (await loader.getHarness(MatButtonHarness.with({ text: 'shared.actions.sav
   (`openDialogs[0].close(true)`); `TestBed.inject(MatDialog).closeAll()` in `afterEach`.
 - A page or page service that opens dialogs: mock `MatDialog` (`{ open: vi.fn() }` returning
   `{ afterClosed: () => of(command) }`) and the dialog services.
+- Exception – a page service that opens a dialog with `bindings` (`inputBinding` / `outputBinding`): the names of the
+  bindings are the contract between page and dialog, and a mocked `open` only sees opaque binding objects. Use the
+  real `MatDialog` for that dialog, in its own `describe` with the store mocked by signals: open it through the
+  service, `TestBed.tick()`, take `openDialogs[0].componentInstance`, then check that each bound input follows the
+  store signal and each output calls the store method; `TestBed.inject(MatDialog).closeAll()` in `afterEach`. No
+  test that only counts the bindings. The other dialogs of the same service stay with the mocked `MatDialog`.
 
 ## Pitfalls
 
