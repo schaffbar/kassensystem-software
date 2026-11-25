@@ -75,25 +75,22 @@ Für jede Rolle:
 Stufen:
 
 1. [ ] Pilot: lokal an R-6 (Namen der Lesegeräte eindeutig) – betrifft Backend (`RfidReaderUpdate`, Exception, Tests)
-   und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe. Dabei klären: ob die
-   Rollen gefunden werden, wenn die Hauptsitzung in `schaffbar-portal/` läuft, und wie das Werkzeug `Artifact` der
-   Rolle Spec ohne claude.ai (später in der GitHub Action) behandelt wird.
+   und Portal (Übersetzung, Prüfung im Dialog „Lesegerät bearbeiten“), prüft also die Übergabe. Dabei klären: wie das
+   Werkzeug `Artifact` der Rolle Spec ohne claude.ai (später in der GitHub Action) behandelt wird.
    Durchlauf 24.–25.11.2026 (`docs/specs/r6-lesegeraete-namen-eindeutig.md`) – was er gezeigt hat:
    - Die fünf Rollen liefen nacheinander durch, die Übergabe nur über die Spec-Datei hat getragen. Je Rolle 1–10 min
      und etwa 140–240 k Tokens.
    - Nachbesserungen zwischen den Rollen (Freigabe in Piotrs Namen, Dublette gestrichen, Reihenfolge der Parameter,
      Entscheidung zum Befund der Abnahme, die zwei „sollte“ des Reviews) hat die Hauptsitzung gemacht und in der Spec
      vermerkt. Offen: wer das in der Action macht – die Hauptsitzung oder die Rolle, erneut aufgerufen.
-   - Review hat die Abschnitte 2–4 vor dem Code gelesen. Die Rolle `review` sollte erst Abschnitt 1, dann den Code
-     und die Berichte zuletzt lesen. Review ließ keine Tests laufen – festlegen, ob es `mvn -q test` und
-     `npm run check` selbst laufen lässt.
+   - Review hat die Abschnitte 2–4 vor dem Code gelesen, obwohl die Rolle erst Abschnitt 1 verlangt – vermutlich,
+     weil sie die Spec-Datei in einem Zug gelesen hat. Seit 25.11.2026 liest sie zuerst nur bis „2. Bericht Backend“.
+     Review ließ keine Tests laufen – festlegen, ob es `mvn -q test` und `npm run check` selbst laufen lässt.
    - Verify fand einen älteren Fehler außerhalb der Aufgabe (Dialoge auf dem Handy) – Piotr entschied: eigene Aufgabe.
    - Piotr hat zwischen den Rollen committet; Review bekam deshalb Commit-Bereich und Arbeitsbaum. Mit Stufe 2
      (eigener Branch) wird das ein Diff gegen `main`.
    - `Artifact`: mit claude.ai in der Sitzung las die Rolle Spec die Artboards (`list` mit `scope: files`, `read` mit
      `path`); in der Action ohne claude.ai geht das nicht – offen für Stufe 5.
-   - Noch nicht geprüft: die Rollen, wenn die Hauptsitzung in `schaffbar-portal/` läuft (der Pilot lief im
-     Repo-Root).
 2. [ ] Git-Regel für die Pipeline: ein Agent arbeitet auf seinem eigenen Branch und öffnet einen PR, `main` bleibt bei
    Piotr (Ausnahme zu „nie committen“ in `CLAUDE.md`, nur für die Pipeline).
 3. [ ] Rechte: Prüfbefehle ohne Rückfrage in `.claude/settings.json`, Push und Merge nicht.
