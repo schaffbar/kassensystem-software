@@ -121,6 +121,10 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   Geräte-Schnittstellen umgebaut werden (Vorschlag: `ToolUsageToggle(customerId, switchBoxId)` mit
   `NoToolAssignedToSwitchBoxException`).
 - **Bruno** (22.11.2026): jeder Endpunkt hat einen Request in `core-pos/api/`, ein Ordner pro Controller.
+- **Abbrechen einer Tag-Anfrage** (25.11.2026): `PUT /rfid-tag-assignments/{customerId}/cancel` ohne Body – die Person
+  im Pfad nach dem Skill `rest-api` („an action without values“), wie `PUT /workshop-sessions/{customerId}/close`; die
+  Theke kennt die Person, nicht die Anfrage. `PUT /rfid-tag-assignments/unassign` mit der Person im Body weicht davon ab
+  und bleibt vorerst, bis es in einer eigenen Aufgabe angeglichen wird (Backend, Portal und Bruno zusammen).
 
 ## Backend: Tests
 
@@ -196,6 +200,13 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
   statt nach Werkzeug gruppiert.
 - **„RFID-Tag zuweisen“ wartet** (09.11.2026): die Seite fragt die wartende Zuweisung alle 2 Sekunden ab, der Dialog
   springt selbst auf „Tag zugewiesen“; geschlossen bleibt die Anfrage bestehen.
+- **„Zuweisung abbrechen“** (25.11.2026): im Dialog „RFID-Tag zuweisen“ (Schritt „Tag auflegen“) und auf der Karte
+  „RFID-Tag“ im Zustand „Wartet auf Tag“, beide Male umrandet und ohne Rückfrage – verloren geht nichts, was zwei
+  Klicks nicht wieder anfragen; der Dialog bleibt offen und geht zurück auf „Art wählen“. Der Button auf der Karte ist
+  nicht im Prototyp (dort hat die Karte keinen Zustand „Wartet auf Tag“). Im Schritt „Tag auflegen“ stehen „Zuweisung
+  abbrechen“ und „Schließen“ nebeneinander – der Prototyp hat nur „Zuweisung abbrechen“ und schließt über das X; zwei
+  Ausgänge mit verschiedener Folge (Anfrage weg / Anfrage bleibt) sind so beide benannt. Scheitert der Abbruch (der Tag
+  wurde gerade zugewiesen), lädt die Seite die Zuweisung sofort neu und zeigt den aktuellen Stand.
 - **Bearbeiten in einem Dialog** (10.11.2026): Person, Kontakt und Adresse in einem Formular; gespeichert werden nur
   die geänderten Teile – bis zu drei Aufrufe, nicht atomar, bis das Backend einen Endpunkt dafür hat.
 

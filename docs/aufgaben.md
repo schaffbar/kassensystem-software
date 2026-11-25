@@ -133,7 +133,7 @@ oder tun soll und was das Backend dafür braucht. Ein Punkt mit Regel-Id steht a
 Aggregats. Reihenfolge:
 
 1. Online-Status der Lesegeräte (Heartbeat) – davon hängen Übersicht, Lesegeräte und Werkzeug-Hardware ab.
-2. Tag-Anfrage abbrechen und wartende Anfragen aufräumen – eine vergessene Anfrage blockiert alle anderen (TA-3).
+2. Wartende Anfragen aufräumen – eine vergessene Anfrage blockiert alle anderen (TA-3).
 3. Der Rest nach Bedarf.
 
 ### Übersicht
@@ -170,10 +170,10 @@ Aggregats. Reihenfolge:
 
 | Funktion | Beschreibung | Backend |
 | --- | --- | --- |
-| Anfrage abbrechen | „Zuweisung abbrechen“ im Dialog „RFID-Tag zuweisen“ und auf der Karte „Wartet auf Tag“ – wichtig, weil nur eine Anfrage warten darf (TA-3) | nur der Endpunkt: abbrechen kann der Service schon (TA-10) |
 | Wartende Anfragen aufräumen | eine vergessene Anfrage blockiert nicht ewig; Anzeige „noch N min“ | ein Scheduler, der alte Anfragen nach einer Frist abbricht |
 | Tag ersetzen | „Tag ersetzen …“ in einem Schritt – heute erst entfernen, dann neu zuweisen | Endpunkt, der die Zuweisung aufhebt und eine neue Anfrage anlegt |
 | Beim Entfernen deaktivieren | Auswahl „wieder freigeben“ oder „deaktivieren (verloren)“ | TA-9: Option an `PUT /rfid-tag-assignments/unassign`, braucht RT-4 |
+| `/unassign` angleichen | nichts Sichtbares; die API-Schicht im Portal ruft den neuen Pfad ohne Body | `PUT /rfid-tag-assignments/unassign` mit der Person im Body → `PUT /rfid-tag-assignments/{customerId}/unassign` nach dem Skill `rest-api`, wie `…/{customerId}/cancel` (`entscheidungen.md`, „Abbrechen einer Tag-Anfrage“, 25.11.2026); vor oder zusammen mit „Beim Entfernen deaktivieren“ |
 | Zuweisung vom Tag aus | auf der Seite RFID-Tags einem freien Tag eine Person zuweisen, ohne das Lesegerät an der Theke | Endpunkt Tag → Person |
 
 ### Einweisungen
