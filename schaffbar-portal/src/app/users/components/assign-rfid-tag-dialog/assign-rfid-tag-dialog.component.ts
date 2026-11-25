@@ -32,10 +32,8 @@ const STEPS: Step[] = ['choose', 'wait', 'done'];
 
 /**
  * Requests a tag and follows the request until the tag has been held to the reader at the counter. The page passes
- * the assignment of its store (reloaded every few seconds while waiting) and the pending states of the request and
- * the cancel with `inputBinding`, and executes the commands from `assignmentRequested` and
- * `rfidTagAssignmentCancelled` with `outputBinding` – after a cancel the reloaded assignment is `null` and the dialog
- * is back at the choice.
+ * the assignment of its store (reloaded every few seconds while waiting) and the pending state of the request with
+ * `inputBinding`, and executes the command from `assignmentRequested` with `outputBinding`.
  */
 @Component({
   selector: 'schbar-assign-rfid-tag-dialog',
@@ -76,7 +74,8 @@ export class AssignRfidTagDialogComponent {
 
   protected readonly steps = STEPS.map((step) => ({ step, labelKey: `users.dialogs.assignRfidTag.steps.${step}` }));
 
-  // the page opens the dialog only without a tag or with a waiting request – an assigned tag is the result
+  // the page opens the dialog only without a tag or with a waiting request – an assigned tag is the result; after a
+  // cancel the page reloads the assignment, it comes back `null` and the dialog is at the choice again
   protected readonly step = computed<Step>(() => {
     const status = this.rfidTagAssignment()?.status;
     if (status === RfidTagAssignmentStatus.Assigned) return 'done';
