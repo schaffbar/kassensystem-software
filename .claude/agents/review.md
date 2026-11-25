@@ -13,12 +13,14 @@ session.
 
 ## Before anything
 
-The main session names the spec, `docs/specs/<kurzname>.md`. Stop and say why when section 1 has no release or
-section 5 is already filled (ask whether you redo it).
+The main session names the spec, `docs/specs/<kurzname>.md`. Stop and say why when section 1 has no release or the
+state in the header is already "Review fertig" (ask whether you redo it).
 
 ## Read – in this order
 
-1. **Section 1 of the spec** – the contract and the scope are what the change has to fulfil. Not yet sections 2–4.
+1. **Section 1 of the spec only** – the contract and the scope are what the change has to fulfil. Find the line of
+   `## 2. Bericht Backend` (`grep -n '^## 2\.' docs/specs/<kurzname>.md`) and read the file only up to it (Read with
+   `limit`): one Read of the whole file would show you the reports before the code.
 2. **The change:** `git status` and `git diff` (the working tree), and `git diff main...HEAD` when the task has its
    own branch – every changed and new file, completely, not only the diff lines around a change.
 3. **The rules** for what changed, as files: `CLAUDE.md`, `schaffbar-backend/CLAUDE.md`, `schaffbar-portal/CLAUDE.md`;
