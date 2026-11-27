@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +17,8 @@ export interface CloseSessionDialogViewModel {
   startTime: Date;
   workshop: CloseSessionItemViewModel;
   tools: CloseSessionToolViewModel[];
+  // a time of the table lies on another day than the others – every end time is shown with its date
+  spansSeveralDays: boolean;
   hasRunningUsage: boolean;
 }
 
@@ -39,6 +41,7 @@ export interface CloseSessionToolViewModel extends CloseSessionItemViewModel {
   templateUrl: './close-session-dialog-modal.component.html',
   styleUrl: './close-session-dialog-modal.component.scss',
   imports: [
+    DatePipe,
     NgTemplateOutlet,
     MatButtonModule,
     MatDialogModule,
@@ -62,6 +65,8 @@ export class CloseSessionDialogModalComponent {
   readonly confirmed = output<void>();
   readonly cancelled = output<void>();
 
+  // the start always with its date, the end with its date only when the times lie on several days
+  protected readonly endTimeFormat = computed(() => (this.viewModel()?.spansSeveralDays ? 'short' : 'shortTime'));
   protected readonly canClose = computed(() => {
     const viewModel = this.viewModel();
     return !this.isLoading() && !this.hasLoadError() && !!viewModel && !viewModel.hasRunningUsage;

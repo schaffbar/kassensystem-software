@@ -78,9 +78,9 @@
   <tr [class]="rowClass">
     <th scope="row">{{ name }}</th>
     <td class="time">
-      {{ item.startTime | timeWithDay }} –
+      {{ item.startTime | date: 'short' }} –
       @if (item.endTime) {
-        {{ item.endTime | timeWithDay }}
+        {{ item.endTime | date: endTimeFormat() }}
       } @else {
         {{ 'shared.dialogs.closeSession.now' | translate }}
       }

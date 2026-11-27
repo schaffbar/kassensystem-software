@@ -89,7 +89,91 @@ describe('CloseSessionDialogContainerComponent', () => {
           units: 6,
         },
       ],
+      spansSeveralDays: false,
       hasRunningUsage: false,
+    });
+  });
+
+  // the times are a whole day apart or close to noon UTC – the result is the same in every time zone of the test run
+  describe('times on several days', () => {
+    const sameDay = (time: string) => `2026-11-10T${time}:00Z`;
+    const nextDay = (time: string) => `2026-11-11T${time}:00Z`;
+
+    async function spansSeveralDays(data: {
+      entryTime?: string;
+      exitTime?: string | null;
+      tools?: { startTime: string; endTime: string | null }[];
+    }): Promise<boolean | undefined> {
+      await respond(
+        workshopSessionFixture({
+          startTime: data.entryTime ?? sameDay('10:00'),
+          workshopUsages: [
+            workshopUsageFixture({
+              entryTime: data.entryTime ?? sameDay('10:00'),
+              exitTime: data.exitTime === undefined ? sameDay('14:00') : data.exitTime,
+            }),
+          ],
+          toolUsageSummaries: (data.tools ?? [{ startTime: sameDay('10:30'), endTime: sameDay('11:00') }]).map(
+            (tool, index) =>
+              toolUsageSummaryFixture({
+                toolId: `tool-${index + 1}`,
+                running: tool.endTime === null,
+                usages: [
+                  {
+                    id: `tool-usage-${index + 1}`,
+                    startTime: tool.startTime,
+                    endTime: tool.endTime,
+                    durationInMinutes: 30,
+                    unitsUsed: 5,
+                  },
+                ],
+              }),
+          ),
+        }),
+      );
+      return modal().viewModel()?.spansSeveralDays;
+    }
+
+    it('should not when stay and tools are on one day', async () => {
+      expect(await spansSeveralDays({})).toBe(false);
+    });
+
+    it('should not when there are no tools and the stay is on one day', async () => {
+      expect(await spansSeveralDays({ tools: [] })).toBe(false);
+    });
+
+    it('should when the stay ends on another day than it began', async () => {
+      expect(await spansSeveralDays({ exitTime: nextDay('10:00'), tools: [] })).toBe(true);
+    });
+
+    it('should when the stay is on one day and a tool ends on another day', async () => {
+      expect(
+        await spansSeveralDays({
+          exitTime: sameDay('14:00'),
+          tools: [
+            { startTime: sameDay('10:30'), endTime: sameDay('11:00') },
+            { startTime: sameDay('11:00'), endTime: nextDay('11:00') },
+          ],
+        }),
+      ).toBe(true);
+    });
+
+    it('should when a tool is used on another day than the stay', async () => {
+      expect(await spansSeveralDays({ tools: [{ startTime: nextDay('10:30'), endTime: nextDay('11:00') }] })).toBe(
+        true,
+      );
+    });
+
+    it('should not count the end of a running stay or tool', async () => {
+      expect(await spansSeveralDays({ exitTime: null, tools: [{ startTime: sameDay('10:30'), endTime: null }] })).toBe(
+        false,
+      );
+    });
+
+    it('should when a running stay began on another day than a tool was used', async () => {
+      expect(await spansSeveralDays({ exitTime: null, tools: [{ startTime: nextDay('10:30'), endTime: null }] })).toBe(
+        true,
+      );
     });
   });
 

@@ -118,7 +118,8 @@ before working on its topic.
   (`schbar-status-badge`), never color alone.
 - Every detail page that can delete its entity ends its first tab with `schbar-danger-zone` over the full width; a
   rule that forbids deleting is explained there instead of the button.
-- Times of a session use `timeWithDay`, not `date: 'shortTime'`.
+- Times of a session use `timeWithDay`, not `date: 'shortTime'` – except the table of the close-session dialog
+  (start with date, end with date only when the times lie on several days; `../docs/entscheidungen.md`).
 
 ## Dialogs
 

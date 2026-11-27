@@ -196,6 +196,12 @@ Daten), eine aufgehobene wird gelöscht. Offene Aufgaben stehen in [`aufgaben.md
 - **Banner der offenen Sitzung** (09.11.2026, 10.11.2026): „In der Werkstatt seit …“ ab dem ersten Betreten;
   „Sitzung beenden & abrechnen“ ist gesperrt, solange die Person eingecheckt ist oder ein Werkzeug läuft (WS-5), danach
   frei; ohne das laufende Werkzeug aus dem Prototyp.
+- **Zeiten im Dialog „Sitzung beenden & abrechnen“** (26.11.2026): jede Zeile zeigt den Beginn mit Datum, auch wenn er
+  von heute ist. Liegen alle Zeiten der Tabelle (Werkstatt und Werkzeuge) auf einem Tag, steht das Ende nur als Uhrzeit
+  (`10.11.26, 17:50 – 23:08`); liegt eine an einem anderen Tag, steht in allen Zeilen auch das Ende mit Datum
+  (`10.11.26, 18:03 – 11.11.26, 23:56`). Das Ende einer laufenden Nutzung („jetzt“) zählt nicht mit. Statt
+  `timeWithDay`: dort fehlte bei einem Ende von heute das Datum, und ein Besuch über mehrere Tage sah aus wie einer von
+  wenigen Stunden.
 - **Tab „Offene Sitzung“** (11.11.2026): eine Zeitleiste pro Werkstattbesuch, darunter die Werkzeuge nach Startzeit
   statt nach Werkzeug gruppiert.
 - **„RFID-Tag zuweisen“ wartet** (09.11.2026): die Seite fragt die wartende Zuweisung alle 2 Sekunden ab, der Dialog

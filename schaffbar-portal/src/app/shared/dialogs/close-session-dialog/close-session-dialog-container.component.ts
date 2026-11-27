@@ -2,7 +2,7 @@ import { Component, computed, inject, input } from '@angular/core';
 
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { parseISO } from 'date-fns';
+import { isSameDay, parseISO } from 'date-fns';
 
 import {
   ToolUsageSummaryApiModel,
@@ -12,6 +12,7 @@ import { WorkshopSessionsApiService } from '../../api/workshop-sessions/workshop
 import {
   CloseSessionDialogModalComponent,
   CloseSessionDialogViewModel,
+  CloseSessionItemViewModel,
   CloseSessionToolViewModel,
 } from './close-session-dialog-modal.component';
 
@@ -53,15 +54,18 @@ export class CloseSessionDialogContainerComponent {
 function toCloseSessionDialogViewModel(session: WorkshopSessionApiModel): CloseSessionDialogViewModel {
   const entryTimes = session.workshopUsages.map((usage) => parseISO(usage.entryTime));
   const exitTimes = session.workshopUsages.map((usage) => usage.exitTime);
+  const workshop: CloseSessionItemViewModel = {
+    startTime: earliest(entryTimes) ?? parseISO(session.startTime),
+    endTime: exitTimes.includes(null) ? null : latest(toDates(exitTimes)),
+    minutes: session.totalWorkshopDurationInMinutes,
+    units: session.totalWorkshopUnits,
+  };
+  const tools = session.toolUsageSummaries.map(toCloseSessionToolViewModel);
   return {
     startTime: parseISO(session.startTime),
-    workshop: {
-      startTime: earliest(entryTimes) ?? parseISO(session.startTime),
-      endTime: exitTimes.includes(null) ? null : latest(toDates(exitTimes)),
-      minutes: session.totalWorkshopDurationInMinutes,
-      units: session.totalWorkshopUnits,
-    },
-    tools: session.toolUsageSummaries.map(toCloseSessionToolViewModel),
+    workshop,
+    tools,
+    spansSeveralDays: spansSeveralDays([workshop, ...tools]),
     hasRunningUsage: hasRunningUsage(session),
   };
 }
@@ -87,6 +91,12 @@ function hasRunningUsage(session: WorkshopSessionApiModel): boolean {
     session.workshopUsages.some((usage) => usage.exitTime === null) ||
     session.toolUsageSummaries.some((summary) => summary.running)
   );
+}
+
+// the end of a running usage ("now") does not count – the row shows "now" instead of a time
+function spansSeveralDays(items: CloseSessionItemViewModel[]): boolean {
+  const times = items.flatMap((item) => [item.startTime, item.endTime]).filter((time) => time !== null);
+  return times.some((time) => !isSameDay(time, times[0]));
 }
 
 function toDates(times: (string | null)[]): Date[] {
